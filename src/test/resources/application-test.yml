@@ -1,0 +1,37 @@
+server:
+  port: 0  # Random port for tests
+
+spring:
+  application:
+    name: agentic-itinerary-planner-test
+
+google:
+  oauth:
+    client-id: test-client-id
+    client-secret: test-client-secret
+  ai:
+    api-key: test-api-key
+
+firestore:
+  project-id: test-project
+  credentials-path: ""
+  database-id: "(default)"
+
+razorpay:
+  key-id: test-key-id
+  key-secret: test-key-secret
+  webhook-secret: test-webhook-secret
+  environment: test
+
+email:
+  smtp:
+    host: localhost
+    port: 25
+    username: test
+    password: test
+    from: test@example.com
+
+logging:
+  level:
+    root: INFO
+    com.tripplanner: DEBUG
