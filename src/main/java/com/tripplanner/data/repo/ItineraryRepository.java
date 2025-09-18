@@ -35,21 +35,31 @@ public class ItineraryRepository {
      * Save an itinerary to Firestore.
      */
     public Itinerary save(Itinerary itinerary) throws ExecutionException, InterruptedException {
-        logger.debug("Saving itinerary: {}", itinerary.getId());
+        logger.info("=== FIRESTORE SAVE ITINERARY ===");
+        logger.info("Itinerary ID: {}", itinerary.getId());
+        logger.info("User ID: {}", itinerary.getUserId());
+        logger.info("Destination: {}", itinerary.getDestination());
+        logger.info("Status: {}", itinerary.getStatus());
         
         if (itinerary.getId() == null) {
             // Generate ID for new itinerary
-            itinerary.setId(firestore.collection(COLLECTION_NAME).document().getId());
+            String newId = firestore.collection(COLLECTION_NAME).document().getId();
+            itinerary.setId(newId);
+            logger.info("Generated new itinerary ID: {}", newId);
         }
         
         itinerary.updateTimestamp();
+        logger.info("Updated timestamp: {}", itinerary.getUpdatedAt());
         
+        logger.info("Saving to Firestore collection: {}", COLLECTION_NAME);
         firestore.collection(COLLECTION_NAME)
                 .document(itinerary.getId())
                 .set(itinerary)
                 .get();
         
-        logger.debug("Itinerary saved successfully: {}", itinerary.getId());
+        logger.info("=== FIRESTORE SAVE COMPLETED ===");
+        logger.info("Itinerary saved successfully: {}", itinerary.getId());
+        logger.info("===============================");
         return itinerary;
     }
     

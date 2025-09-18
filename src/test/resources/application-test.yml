@@ -35,3 +35,4 @@ logging:
   level:
     root: INFO
     com.tripplanner: DEBUG
+

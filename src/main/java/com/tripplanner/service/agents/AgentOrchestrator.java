@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
  * Orchestrates the execution of multiple agents to generate complete itineraries.
  */
 @Service
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(ItineraryRepository.class)
 public class AgentOrchestrator {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentOrchestrator.class);
@@ -45,7 +46,14 @@ public class AgentOrchestrator {
      */
     @Async
     public CompletableFuture<ItineraryDto> generateItinerary(String itineraryId, CreateItineraryReq request) {
-        logger.info("Starting itinerary generation orchestration for: {}", itineraryId);
+        logger.info("=== AGENT ORCHESTRATION START ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Destination: {}", request.destination());
+        logger.info("Duration: {} days", request.getDurationDays());
+        logger.info("Budget Tier: {}", request.budgetTier());
+        logger.info("Interests: {}", request.interests());
+        logger.info("Language: {}", request.language());
+        logger.info("================================");
         
         try {
             // Update itinerary status to generating
@@ -66,13 +74,24 @@ public class AgentOrchestrator {
                 updateItineraryStatus(itineraryId, "completed");
                 emitOrchestratorEvent(itineraryId, AgentEvent.AgentStatus.succeeded, 100, 
                                    "Itinerary generation completed", "orchestration_complete");
-                logger.info("Itinerary generation completed for: {}", itineraryId);
+                
+                logger.info("=== AGENT ORCHESTRATION COMPLETED ===");
+                logger.info("Itinerary ID: {}", itineraryId);
+                logger.info("Final Status: completed");
+                logger.info("Result: {}", itinerary.id());
+                logger.info("====================================");
+                
                 return itinerary;
             }).exceptionally(throwable -> {
-                logger.error("Itinerary generation failed for: {}", itineraryId, throwable);
                 updateItineraryStatus(itineraryId, "failed");
                 emitOrchestratorEvent(itineraryId, AgentEvent.AgentStatus.failed, 0, 
                                    "Itinerary generation failed: " + throwable.getMessage(), "orchestration_error");
+                
+                logger.error("=== AGENT ORCHESTRATION FAILED ===");
+                logger.error("Itinerary ID: {}", itineraryId);
+                logger.error("Error: {}", throwable.getMessage(), throwable);
+                logger.error("=================================");
+                
                 throw new RuntimeException("Itinerary generation failed", throwable);
             });
             
@@ -231,3 +250,4 @@ public class AgentOrchestrator {
         eventBus.publish(itineraryId, event);
     }
 }
+

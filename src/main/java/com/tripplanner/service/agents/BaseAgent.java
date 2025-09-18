@@ -29,7 +29,13 @@ public abstract class BaseAgent {
      * Execute the agent's task.
      */
     public final <T> T execute(String itineraryId, AgentRequest<T> request) {
-        logger.info("Starting agent execution: {} for itinerary: {}", agentKind, itineraryId);
+        logger.info("=== AGENT EXECUTION START ===");
+        logger.info("Agent Kind: {}", agentKind);
+        logger.info("Agent ID: {}", agentId);
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Request Type: {}", request.getResponseType().getSimpleName());
+        logger.info("Request Data: {}", String.valueOf(request.getData()));
+        logger.info("=============================");
         
         // Emit queued event
         emitEvent(itineraryId, AgentEvent.AgentStatus.queued, 0, "Agent queued for execution", null);
@@ -38,17 +44,29 @@ public abstract class BaseAgent {
             // Emit running event
             emitEvent(itineraryId, AgentEvent.AgentStatus.running, 0, "Agent started", null);
             
+            logger.info("Executing agent-specific logic for: {}", agentKind);
+            
             // Execute the agent-specific logic
             T result = executeInternal(itineraryId, request);
             
             // Emit success event
             emitEvent(itineraryId, AgentEvent.AgentStatus.succeeded, 100, "Agent completed successfully", null);
             
-            logger.info("Agent execution completed: {} for itinerary: {}", agentKind, itineraryId);
+            logger.info("=== AGENT EXECUTION COMPLETED ===");
+            logger.info("Agent Kind: {}", agentKind);
+            logger.info("Itinerary ID: {}", itineraryId);
+            logger.info("Result Type: {}", result != null ? result.getClass().getSimpleName() : "null");
+            logger.info("Result: {}", String.valueOf(result));
+            logger.info("=================================");
+            
             return result;
             
         } catch (Exception e) {
-            logger.error("Agent execution failed: {} for itinerary: {}", agentKind, itineraryId, e);
+            logger.error("=== AGENT EXECUTION FAILED ===");
+            logger.error("Agent Kind: {}", agentKind);
+            logger.error("Itinerary ID: {}", itineraryId);
+            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("==============================");
             
             // Emit failure event
             emitEvent(itineraryId, AgentEvent.AgentStatus.failed, 0, 

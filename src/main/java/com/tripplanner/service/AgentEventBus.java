@@ -25,12 +25,16 @@ public class AgentEventBus {
      * Register an SSE emitter for an itinerary.
      */
     public void register(String itineraryId, SseEmitter emitter) {
-        logger.debug("Registering SSE emitter for itinerary: {}", itineraryId);
+        logger.info("=== SSE EMITTER REGISTRATION ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Emitter: {}", emitter.toString());
         
         emitters.computeIfAbsent(itineraryId, k -> new CopyOnWriteArrayList<>()).add(emitter);
         
-        logger.debug("Total emitters for itinerary {}: {}", 
-                    itineraryId, emitters.get(itineraryId).size());
+        int totalEmitters = emitters.get(itineraryId).size();
+        logger.info("Total emitters for itinerary {}: {}", itineraryId, totalEmitters);
+        logger.info("Total active itineraries: {}", emitters.size());
+        logger.info("===============================");
     }
     
     /**
@@ -58,11 +62,20 @@ public class AgentEventBus {
      * Publish an event to all emitters for an itinerary.
      */
     public void publish(String itineraryId, AgentEvent event) {
-        logger.debug("Publishing event for itinerary: {}, event: {}", itineraryId, event);
+        logger.info("=== PUBLISHING AGENT EVENT ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Agent ID: {}", event.agentId());
+        logger.info("Agent Kind: {}", event.kind());
+        logger.info("Status: {}", event.status());
+        logger.info("Progress: {}", event.progress());
+        logger.info("Message: {}", event.message());
+        logger.info("Step: {}", event.step());
+        logger.info("Timestamp: {}", event.updatedAt());
         
         CopyOnWriteArrayList<SseEmitter> itineraryEmitters = emitters.get(itineraryId);
         if (itineraryEmitters == null || itineraryEmitters.isEmpty()) {
-            logger.debug("No emitters found for itinerary: {}", itineraryId);
+            logger.warn("No emitters found for itinerary: {}", itineraryId);
+            logger.info("==============================");
             return;
         }
         
@@ -93,8 +106,9 @@ public class AgentEventBus {
             }
         }
         
-        logger.debug("Event sent to {} emitters successfully, {} failed for itinerary: {}", 
+        logger.info("Event sent to {} emitters successfully, {} failed for itinerary: {}", 
                     successCount, failureCount, itineraryId);
+        logger.info("==============================");
     }
     
     /**
@@ -200,3 +214,4 @@ public class AgentEventBus {
         logger.info("Closed {} emitters total", totalClosed);
     }
 }
+

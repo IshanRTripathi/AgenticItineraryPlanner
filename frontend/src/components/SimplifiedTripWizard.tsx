@@ -37,7 +37,13 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
   const [isRoundTrip, setIsRoundTrip] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    // Default to next week
+    const today = new Date();
+    const nextWeek = addDays(today, 7);
+    const endDate = addDays(nextWeek, 4); // 5-day trip
+    return { from: nextWeek, to: endDate };
+  });
   const [budget, setBudget] = useState(5000);
   const [currency, setCurrency] = useState('USD');
   

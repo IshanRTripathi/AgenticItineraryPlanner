@@ -25,7 +25,7 @@ import java.util.Map;
  * REST controller for export operations (PDF, Email).
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/v1")
 public class ExportController {
     
     private static final Logger logger = LoggerFactory.getLogger(ExportController.class);
@@ -163,3 +163,4 @@ public class ExportController {
             List<String> requiredFields
     ) {}
 }
+

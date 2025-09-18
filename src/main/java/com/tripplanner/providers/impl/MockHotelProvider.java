@@ -141,3 +141,4 @@ public class MockHotelProvider implements HotelSearchProvider {
         };
     }
 }
+

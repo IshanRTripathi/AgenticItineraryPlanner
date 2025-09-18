@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * REST controller for authentication operations.
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
     
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -108,3 +108,4 @@ public class AuthController {
             String pictureUrl
     ) {}
 }
+

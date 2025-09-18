@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
  * Planner Agent - Main orchestrator for itinerary generation using Gemini.
  */
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(GeminiClient.class)
 public class PlannerAgent extends BaseAgent {
     
     private final GeminiClient geminiClient;
@@ -444,3 +445,4 @@ public class PlannerAgent extends BaseAgent {
         }
     }
 }
+

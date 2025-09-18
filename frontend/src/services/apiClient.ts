@@ -35,6 +35,13 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     
+    console.log('API Request:', {
+      method: options.method || 'GET',
+      url,
+      baseUrl: this.baseUrl,
+      endpoint
+    });
+    
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -47,19 +54,36 @@ class ApiClient {
     const config: RequestInit = {
       ...options,
       headers,
+      mode: 'cors',
+      credentials: 'omit', // Don't send credentials for now
     };
 
     try {
       const response = await fetch(url, config);
       
+      console.log('API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url
+      });
+      
       if (!response.ok) {
-        const errorData: ApiError = await response.json().catch(() => ({
-          code: 'UNKNOWN_ERROR',
-          message: `HTTP ${response.status}: ${response.statusText}`,
-          timestamp: new Date().toISOString(),
-          path: endpoint
-        }));
-        throw new Error(`API Error: ${errorData.message}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        
+        let errorData: ApiError;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = {
+            code: 'UNKNOWN_ERROR',
+            message: `HTTP ${response.status}: ${response.statusText}`,
+            timestamp: new Date().toISOString(),
+            path: endpoint
+          };
+        }
+        
+        throw new Error(`API Error: ${errorData.message} (${response.status})`);
       }
 
       // Handle empty responses (like 204 No Content)
@@ -67,9 +91,16 @@ class ApiClient {
         return {} as T;
       }
 
-      return await response.json();
+      const responseData = await response.json();
+      console.log('API Response Data:', responseData);
+      
+      return responseData;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('API request failed:', {
+        url,
+        error: error.message,
+        stack: error.stack
+      });
       throw error;
     }
   }
@@ -197,6 +228,18 @@ class ApiClient {
 
   async getCurrentUser(): Promise<UserInfo> {
     return this.request<UserInfo>('/auth/me');
+  }
+
+  // Test endpoints
+  async ping(): Promise<any> {
+    return this.request<any>('/ping');
+  }
+
+  async echo(data: any): Promise<any> {
+    return this.request<any>('/echo', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 }
 
@@ -408,3 +451,4 @@ export interface UserInfo {
 // Create and export a singleton instance
 export const apiClient = new ApiClient();
 export default apiClient;
+

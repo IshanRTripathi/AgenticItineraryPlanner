@@ -19,7 +19,7 @@ import java.util.Map;
  * REST controller for booking and payment operations.
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/v1")
 public class BookingController {
     
     private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
@@ -219,3 +219,4 @@ public class BookingController {
             Map<String, Object> meta
     ) {}
 }
+

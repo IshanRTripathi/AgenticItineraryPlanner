@@ -23,6 +23,7 @@ import {
   X
 } from 'lucide-react';
 import { TripData } from '../App';
+import { apiClient } from '../services/apiClient';
 import heroImage1 from 'figma:asset/784212bd1b7f49a82ac20d9447d65decf6e3d3b5.png';
 import heroImage2 from 'figma:asset/bb7fcbdd7b165c123b2c735f821bb96218785648.png';
 import heroImage3 from 'figma:asset/11971755929e79794c06b2057153b16a0abdbf87.png';
@@ -43,6 +44,19 @@ export function LandingPage({
   trips 
 }: LandingPageProps) {
   const [showTripModal, setShowTripModal] = useState(false);
+  const [apiTestResult, setApiTestResult] = useState<string>('');
+
+  const testApiConnection = async () => {
+    try {
+      console.log('Testing API connection...');
+      const result = await apiClient.ping();
+      setApiTestResult(`✓ API Connected: ${result.message}`);
+      console.log('API test successful:', result);
+    } catch (error) {
+      setApiTestResult(`✗ API Error: ${error.message}`);
+      console.error('API test failed:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -160,6 +174,26 @@ export function LandingPage({
             >
               Get started, it's FREE
             </Button>
+            
+            {/* API Test Button for debugging */}
+            <div className="mt-4 space-y-2">
+              <Button 
+                variant="outline" 
+                onClick={testApiConnection}
+                className="text-sm"
+              >
+                Test API Connection
+              </Button>
+              {apiTestResult && (
+                <div className={`text-sm p-2 rounded ${
+                  apiTestResult.includes('✓') 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {apiTestResult}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Feature Icons */}

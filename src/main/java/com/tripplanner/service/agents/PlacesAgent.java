@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
  * Places Agent - Discovers and analyzes places, areas, and local insights.
  */
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(GeminiClient.class)
 public class PlacesAgent extends BaseAgent {
     
     private final GeminiClient geminiClient;
@@ -284,3 +285,4 @@ public class PlacesAgent extends BaseAgent {
         }
     }
 }
+

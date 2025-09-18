@@ -1,8 +1,6 @@
 server:
   port: 8080
   forward-headers-strategy: framework
-  servlet:
-    context-path: /api/v1
 
 spring:
   application:
@@ -30,11 +28,9 @@ spring:
 
 security:
   cors:
-    allowed-origins: 
-      - ${FRONTEND_URL:http://localhost:3000}
-      - ${PRODUCTION_FRONTEND_URL:https://your-frontend.example.com}
-    allowed-methods: [GET, POST, PUT, DELETE, OPTIONS]
-    allowed-headers: ["*"]
+    allowed-origins: ${FRONTEND_URL:http://localhost:3000},${PRODUCTION_FRONTEND_URL:https://your-frontend.example.com}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: "*"
     allow-credentials: true
   csrf:
     enabled: true
@@ -44,7 +40,7 @@ google:
     client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
     client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:}
   ai:
-    api-key: ${GEMINI_API_KEY:}
+    api-key: ${GEMINI_API_KEY:AIzaSyCmIwxSsiWnElgNy63Pm2Ub4KWKi1oNIr8}
     model: ${GEMINI_MODEL:gemini-1.5-pro}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:8192}
@@ -111,12 +107,19 @@ management:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
-    com.tripplanner: ${APP_LOG_LEVEL:DEBUG}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
+    com.tripplanner: ${APP_LOG_LEVEL:INFO}
+    com.tripplanner.api: INFO
+    com.tripplanner.service: INFO
+    com.tripplanner.data: INFO
+    com.tripplanner.security: INFO
+    com.tripplanner.service.agents: INFO
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.springframework.web: DEBUG
     com.google.cloud: ${GCP_LOG_LEVEL:INFO}
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: DEBUG
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
   file:
     name: ${LOG_FILE:logs/application.log}
 
@@ -134,3 +137,4 @@ app:
     ttl-minutes: ${CACHE_TTL_MINUTES:60}
   idempotency:
     ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
+

@@ -52,24 +52,36 @@ public class GoogleIdTokenAuthFilter extends OncePerRequestFilter {
                                   HttpServletResponse response, 
                                   FilterChain filterChain) throws ServletException, IOException {
         
+        logger.info("=== GOOGLE ID TOKEN AUTH FILTER ===");
+        logger.info("Request URI: {}", request.getRequestURI());
+        logger.info("Request Method: {}", request.getMethod());
+        logger.info("Content Type: {}", request.getContentType());
+        
         try {
             String token = extractToken(request);
+            logger.info("Token extracted: {}", token != null ? "YES (length: " + token.length() + ")" : "NO");
             
             if (token != null) {
                 GoogleIdToken idToken = verifyToken(token);
                 
                 if (idToken != null) {
                     setAuthentication(idToken);
-                    logger.debug("Successfully authenticated user: {}", idToken.getPayload().getEmail());
+                    logger.info("Successfully authenticated user: {}", idToken.getPayload().getEmail());
                 } else {
                     logger.warn("Invalid Google ID token");
                 }
+            } else {
+                logger.info("No authentication token found, proceeding without authentication");
             }
             
         } catch (Exception e) {
             logger.error("Error processing Google ID token", e);
             // Continue without authentication - let Spring Security handle unauthorized requests
         }
+        
+        logger.info("=== AUTH FILTER COMPLETED ===");
+        logger.info("Proceeding to next filter");
+        logger.info("============================");
         
         filterChain.doFilter(request, response);
     }
@@ -161,10 +173,11 @@ public class GoogleIdTokenAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         
         // Skip filter for public endpoints
-        return path.equals("/auth/google") ||
+        return path.equals("/api/v1/auth/google") ||
                path.startsWith("/actuator/health") ||
                path.startsWith("/actuator/info") ||
                path.endsWith("/public") ||
                path.contains("/payments/razorpay/webhook");
     }
 }
+

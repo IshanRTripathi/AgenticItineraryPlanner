@@ -73,3 +73,4 @@ public record ItineraryDayDto(
         return transportation != null && !transportation.isEmpty();
     }
 }
+

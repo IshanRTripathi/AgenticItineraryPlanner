@@ -253,3 +253,4 @@ public class ProviderConfig {
         public void setConsecutiveFailures(int consecutiveFailures) { this.consecutiveFailures = consecutiveFailures; }
     }
 }
+

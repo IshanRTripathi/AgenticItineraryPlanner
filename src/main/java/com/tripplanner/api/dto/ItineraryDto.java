@@ -116,3 +116,4 @@ public record ItineraryDto(
         return "generating".equals(status);
     }
 }
+

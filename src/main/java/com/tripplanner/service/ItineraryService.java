@@ -41,7 +41,27 @@ public class ItineraryService {
      * Create a new itinerary.
      */
     public ItineraryDto create(CreateItineraryReq request, GoogleUserPrincipal user) {
-        logger.info("Creating itinerary for user: {}", user.getUserId());
+        logger.info("=== CREATE ITINERARY REQUEST ===");
+        logger.info("User ID: {}", user.getUserId());
+        logger.info("User Email: {}", user.getEmail());
+        logger.info("Request Details:");
+        logger.info("  Destination: {}", request.destination());
+        logger.info("  Start Date: {}", request.startDate());
+        logger.info("  End Date: {}", request.endDate());
+        logger.info("  Duration: {} days", request.getDurationDays());
+        logger.info("  Budget Tier: {}", request.budgetTier());
+        logger.info("  Language: {}", request.language());
+        if (request.party() != null) {
+            logger.info("  Party: {} adults, {} children, {} infants, {} rooms", 
+                       request.party().adults(), request.party().children(), 
+                       request.party().infants(), request.party().rooms());
+        }
+        if (request.interests() != null && !request.interests().isEmpty()) {
+            logger.info("  Interests: {}", String.join(", ", request.interests()));
+        }
+        if (request.constraints() != null && !request.constraints().isEmpty()) {
+            logger.info("  Constraints: {}", String.join(", ", request.constraints()));
+        }
         
         try {
             // Create itinerary entity
@@ -91,11 +111,23 @@ public class ItineraryService {
                 }
             });
             
-            logger.info("Itinerary created with ID: {}, orchestration started", finalItinerary.getId());
-            return ItineraryDto.fromEntity(finalItinerary);
+            ItineraryDto result = ItineraryDto.fromEntity(finalItinerary);
+            
+            logger.info("=== CREATE ITINERARY RESPONSE ===");
+            logger.info("Itinerary ID: {}", result.id());
+            logger.info("Status: {}", result.status());
+            logger.info("Created At: {}", result.createdAt());
+            logger.info("Orchestration started: {}", finalItinerary.getId());
+            logger.info("=====================================");
+            
+            return result;
             
         } catch (ExecutionException | InterruptedException e) {
-            logger.error("Failed to create itinerary", e);
+            logger.error("=== CREATE ITINERARY FAILED ===");
+            logger.error("User: {}", user.getUserId());
+            logger.error("Destination: {}", request.destination());
+            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("===================================");
             throw new RuntimeException("Failed to create itinerary", e);
         }
     }
@@ -104,7 +136,10 @@ public class ItineraryService {
      * Get an itinerary by ID.
      */
     public ItineraryDto get(String id, GoogleUserPrincipal user) {
-        logger.debug("Getting itinerary: {} for user: {}", id, user.getUserId());
+        logger.info("=== GET ITINERARY REQUEST ===");
+        logger.info("Itinerary ID: {}", id);
+        logger.info("User ID: {}", user.getUserId());
+        logger.info("User Email: {}", user.getEmail());
         
         try {
             Itinerary itinerary = itineraryRepository.findById(id)
@@ -115,10 +150,23 @@ public class ItineraryService {
                 throw new RuntimeException("Access denied to itinerary: " + id);
             }
             
-            return ItineraryDto.fromEntity(itinerary);
+            ItineraryDto result = ItineraryDto.fromEntity(itinerary);
+            
+            logger.info("=== GET ITINERARY RESPONSE ===");
+            logger.info("Found itinerary: {}", id);
+            logger.info("Status: {}", result.status());
+            logger.info("Destination: {}", result.destination());
+            logger.info("Days count: {}", result.days() != null ? result.days().size() : 0);
+            logger.info("==================================");
+            
+            return result;
             
         } catch (ExecutionException | InterruptedException e) {
-            logger.error("Failed to get itinerary: " + id, e);
+            logger.error("=== GET ITINERARY FAILED ===");
+            logger.error("Itinerary ID: {}", id);
+            logger.error("User: {}", user.getUserId());
+            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("===============================");
             throw new RuntimeException("Failed to get itinerary", e);
         }
     }

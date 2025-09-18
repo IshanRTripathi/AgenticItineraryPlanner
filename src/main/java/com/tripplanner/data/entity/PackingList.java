@@ -226,3 +226,4 @@ public class PackingList {
         public void setPacked(boolean packed) { this.packed = packed; }
     }
 }
+

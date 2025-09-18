@@ -34,25 +34,64 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
   const [startTime] = useState(Date.now());
 
   useEffect(() => {
-    if (!tripData.id) return;
+    if (!tripData.id) {
+      console.error('No trip data ID available for SSE connection');
+      return;
+    }
+
+    console.log('Starting SSE connection for itinerary:', tripData.id);
 
     // Connect to SSE stream for real-time agent updates
     const eventSource = apiClient.createAgentEventStream(tripData.id);
     
+    eventSource.onopen = () => {
+      console.log('SSE connection opened for itinerary:', tripData.id);
+    };
+    
+    // Handle all SSE events
     eventSource.onmessage = (event) => {
+      console.log('SSE message received:', event);
+      handleSSEEvent(event);
+    };
+    
+    // Handle named events (like 'agent-event')
+    eventSource.addEventListener('agent-event', (event) => {
+      console.log('SSE agent-event received:', event);
+      handleSSEEvent(event);
+    });
+    
+    eventSource.addEventListener('connected', (event) => {
+      console.log('SSE connected event:', event.data);
+    });
+    
+    const handleSSEEvent = (event: MessageEvent) => {
       try {
+        console.log('Processing SSE event:', {
+          type: event.type,
+          data: event.data,
+          dataType: typeof event.data
+        });
+        
+        // Handle connection messages
+        if (event.data && typeof event.data === 'string' && event.data.includes('Connected to agent stream')) {
+          console.log('SSE connection confirmed:', event.data);
+          return;
+        }
+        
+        // Parse agent events
         const agentEvent: AgentEvent = JSON.parse(event.data);
+        console.log('Parsed agent event:', agentEvent);
+        console.log('Available agent tasks:', AGENT_TASKS.map(t => t.id));
         
         // Update agent status based on event
         setAgents(prev => prev.map(agent => {
-          const matchingTask = AGENT_TASKS.find(task => 
-            task.id.includes(agentEvent.kind) || agentEvent.kind.includes(task.id)
-          );
-          
-          if (matchingTask?.id === agent.task.id) {
+          // Direct match by agent kind
+          if (agent.task.id === agentEvent.kind) {
             const newStatus = agentEvent.status === 'succeeded' ? 'completed' : 
                              agentEvent.status === 'running' ? 'running' : 
                              agentEvent.status === 'failed' ? 'completed' : 'pending';
+            
+            console.log(`Updating agent ${agent.task.name} from ${agent.status} to ${newStatus}`);
             
             return {
               ...agent,
@@ -74,13 +113,19 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
         const totalProgress = ((completedCount + runningProgress) / AGENT_TASKS.length) * 100;
         setOverallProgress(Math.round(totalProgress));
         
+        console.log(`Progress update: ${completedCount}/${AGENT_TASKS.length} completed, ${Math.round(totalProgress)}% total`);
+        
         // Check if all agents are completed
         if (agentEvent.kind === 'orchestrator' && agentEvent.status === 'succeeded') {
-          setTimeout(() => onComplete(), 1000);
+          console.log('Orchestrator completed, finishing in 1 second...');
+          setTimeout(() => {
+            console.log('Calling onComplete()');
+            onComplete();
+          }, 1000);
         }
         
       } catch (error) {
-        console.error('Error parsing agent event:', error);
+        console.error('Error parsing agent event:', error, 'Raw event data:', event.data);
       }
     };
     
@@ -88,8 +133,13 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
       console.error('SSE connection error:', error);
     };
     
+    eventSource.onclose = () => {
+      console.log('SSE connection closed for itinerary:', tripData.id);
+    };
+    
     // Cleanup on unmount
     return () => {
+      console.log('Cleaning up SSE connection for itinerary:', tripData.id);
       eventSource.close();
     };
   }, [tripData.id, onComplete, agents]);

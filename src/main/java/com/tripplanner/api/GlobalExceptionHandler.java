@@ -31,13 +31,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
         
-        logger.warn("Validation error: {}", ex.getMessage());
+        logger.error("=== VALIDATION ERROR ===");
+        logger.error("Request: {}", request.getDescription(false));
+        logger.error("Error: {}", ex.getMessage());
+        logger.error("Field Errors:");
         
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             fieldErrors.put(fieldName, errorMessage);
+            logger.error("  {}: {}", fieldName, errorMessage);
         });
         
         ErrorResponse errorResponse = new ErrorResponse(
@@ -48,6 +52,11 @@ public class GlobalExceptionHandler {
                 request.getDescription(false),
                 fieldErrors
         );
+        
+        logger.error("=== VALIDATION ERROR RESPONSE ===");
+        logger.error("Status: 400 BAD REQUEST");
+        logger.error("Error Response: {}", errorResponse);
+        logger.error("===============================");
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -217,3 +226,4 @@ public class GlobalExceptionHandler {
             Map<String, String> details
     ) {}
 }
+

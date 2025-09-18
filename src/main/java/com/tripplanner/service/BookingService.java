@@ -33,14 +33,57 @@ public class BookingService {
      * Create Razorpay order.
      */
     public BookingController.RazorpayOrderRes createRazorpayOrder(BookingController.RazorpayOrderReq request, GoogleUserPrincipal user) {
-        return razorpayService.createOrder(request, user);
+        logger.info("=== CREATE RAZORPAY ORDER REQUEST ===");
+        logger.info("User ID: {}", user.getUserId());
+        logger.info("Item Type: {}", request.itemType());
+        logger.info("Itinerary ID: {}", request.itineraryId());
+        logger.info("Amount: {} {}", request.amount(), request.currency());
+        logger.info("Meta: {}", request.meta());
+        
+        try {
+            BookingController.RazorpayOrderRes result = razorpayService.createOrder(request, user);
+            
+            logger.info("=== CREATE RAZORPAY ORDER RESPONSE ===");
+            logger.info("Order ID: {}", result.orderId());
+            logger.info("Amount: {} {}", result.amount(), result.currency());
+            logger.info("Receipt: {}", result.receipt());
+            logger.info("=====================================");
+            
+            return result;
+        } catch (Exception e) {
+            logger.error("=== CREATE RAZORPAY ORDER FAILED ===");
+            logger.error("User: {}", user.getUserId());
+            logger.error("Request: {}", request);
+            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("===================================");
+            throw e;
+        }
     }
     
     /**
      * Handle Razorpay webhook.
      */
     public void handleRazorpayWebhook(HttpServletRequest request, String body) {
-        razorpayService.handleWebhook(request, body);
+        logger.info("=== RAZORPAY WEBHOOK REQUEST ===");
+        logger.info("Request URI: {}", request.getRequestURI());
+        logger.info("Content Type: {}", request.getContentType());
+        logger.info("Content Length: {}", request.getContentLength());
+        logger.info("Headers:");
+        java.util.Collections.list(request.getHeaderNames()).forEach(headerName -> 
+            logger.info("  {}: {}", headerName, request.getHeader(headerName)));
+        logger.info("Body length: {}", body != null ? body.length() : 0);
+        
+        try {
+            razorpayService.handleWebhook(request, body);
+            logger.info("=== RAZORPAY WEBHOOK PROCESSED ===");
+            logger.info("Webhook processed successfully");
+            logger.info("=================================");
+        } catch (Exception e) {
+            logger.error("=== RAZORPAY WEBHOOK FAILED ===");
+            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("==============================");
+            throw e;
+        }
     }
     
     /**

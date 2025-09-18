@@ -55,3 +55,4 @@ public class AuthService {
         logger.info("User logged out: {}", user.getUserId());
     }
 }
+

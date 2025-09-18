@@ -215,3 +215,4 @@ public interface HotelSearchProvider {
         public void setAdditionalInfo(Map<String, Object> additionalInfo) { this.additionalInfo = additionalInfo; }
     }
 }
+

@@ -77,11 +77,11 @@ export default function App() {
         return (
           <SimplifiedTripWizard
             onComplete={(tripData) => {
-              const newTrip = { ...tripData, id: Date.now().toString() };
+              console.log('Trip wizard completed with trip data:', tripData);
               setAppState(prev => ({
                 ...prev,
-                trips: [...prev.trips, newTrip],
-                currentTrip: newTrip
+                trips: [...prev.trips, tripData],
+                currentTrip: tripData
               }));
               navigateToScreen('generating');
             }}

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  * REST controller for agent events via Server-Sent Events (SSE).
  */
 @RestController
-@RequestMapping("/agents")
+@RequestMapping("/api/v1/agents")
 public class AgentController {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentController.class);
@@ -27,10 +27,14 @@ public class AgentController {
      */
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam String itineraryId) {
-        logger.info("Starting SSE stream for itinerary: {}", itineraryId);
+        logger.info("=== SSE STREAM REQUEST ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Request Time: {}", java.time.Instant.now());
+        logger.info("Client requesting SSE connection");
         
         // Create SSE emitter with no timeout (0L means no timeout)
         SseEmitter emitter = new SseEmitter(0L);
+        logger.info("Created SSE emitter: {}", emitter.toString());
         
         // Register emitter with event bus
         agentEventBus.register(itineraryId, emitter);
@@ -56,11 +60,16 @@ public class AgentController {
             emitter.send(SseEmitter.event()
                     .name("connected")
                     .data("Connected to agent stream for itinerary: " + itineraryId));
+            logger.info("Initial SSE connection event sent successfully");
         } catch (Exception e) {
             logger.error("Failed to send initial SSE event", e);
         }
         
-        logger.debug("SSE stream established for itinerary: {}", itineraryId);
+        logger.info("=== SSE STREAM ESTABLISHED ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Emitter registered and ready");
+        logger.info("=============================");
+        
         return emitter;
     }
     
@@ -85,3 +94,4 @@ public class AgentController {
             String message
     ) {}
 }
+

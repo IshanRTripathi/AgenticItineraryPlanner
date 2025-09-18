@@ -44,3 +44,4 @@ public record ActivityDto(
         );
     }
 }
+

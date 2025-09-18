@@ -38,3 +38,4 @@ public record MealDto(
         );
     }
 }
+

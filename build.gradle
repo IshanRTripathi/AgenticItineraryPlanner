@@ -19,8 +19,40 @@ repositories {
 }
 
 dependencies {
+	// Spring Boot starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	// Google Cloud Firestore
+	implementation 'com.google.cloud:google-cloud-firestore:3.14.0'
+	
+	// Google AI SDK (Gemini) - using REST API directly
+	// No additional dependencies needed - using Java 11+ HttpClient
+	
+	// Razorpay Java SDK
+	implementation 'com.razorpay:razorpay-java:1.4.3'
+	
+	// Email support
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	
+	// PDF generation
+	implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+	implementation 'com.openhtmltopdf:openhtmltopdf-slf4j:1.0.10'
+	
+	// JSON processing
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	
+	// JWT for Google ID token verification
+	implementation 'com.auth0:java-jwt:4.4.0'
+	implementation 'com.google.api-client:google-api-client:2.2.0'
+	
+	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'org.testcontainers:junit-jupiter'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

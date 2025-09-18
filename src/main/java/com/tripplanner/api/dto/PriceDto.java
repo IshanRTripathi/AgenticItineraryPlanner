@@ -160,3 +160,4 @@ public record PriceDto(
         return amount >= 0 && currency != null && currency.matches("[A-Z]{3}");
     }
 }
+

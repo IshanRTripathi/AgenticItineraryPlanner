@@ -20,7 +20,7 @@ import java.util.List;
  * REST controller for travel planning tools.
  */
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/v1")
 public class ToolsController {
     
     private static final Logger logger = LoggerFactory.getLogger(ToolsController.class);
@@ -260,3 +260,4 @@ public class ToolsController {
             double total
     ) {}
 }
+

@@ -292,62 +292,47 @@ export interface AgentTask {
 
 export const AGENT_TASKS: AgentTask[] = [
   {
-    id: 'destination-analysis',
-    name: 'Destination Analysis',
-    description: 'Analyzing destination and gathering local insights',
+    id: 'places',
+    name: 'Places Agent',
+    description: 'Discovering city areas, heatmaps, opening hours, crowd windows',
     icon: '🗺️',
     estimatedDuration: 3000
   },
   {
-    id: 'preference-matching',
-    name: 'Preference Matching',
-    description: 'Matching your preferences with available activities',
-    icon: '🎯',
+    id: 'flights',
+    name: 'Flights Agent',
+    description: 'Fares & hold eligibility',
+    icon: '✈️',
     estimatedDuration: 3000
   },
   {
-    id: 'route-optimization',
-    name: 'Route Optimization',
-    description: 'Creating optimal routes between locations',
-    icon: '🛣️',
-    estimatedDuration: 3000,
-    dependencies: ['destination-analysis']
-  },
-  {
-    id: 'accommodation-search',
-    name: 'Accommodation Search',
-    description: 'Finding the best places to stay',
-    icon: '🏨',
-    estimatedDuration: 3000
-  },
-  {
-    id: 'activity-curation',
-    name: 'Activity Curation',
-    description: 'Curating activities based on your interests',
-    icon: '🎭',
-    estimatedDuration: 3000,
-    dependencies: ['preference-matching']
-  },
-  {
-    id: 'dining-recommendations',
-    name: 'Dining Recommendations',
-    description: 'Finding restaurants and local cuisine',
+    id: 'food',
+    name: 'Food Agent',
+    description: 'Ratings, cost, cuisine near heatmap zones',
     icon: '🍽️',
     estimatedDuration: 3000
   },
   {
-    id: 'budget-optimization',
-    name: 'Budget Optimization',
-    description: 'Optimizing costs within your budget',
-    icon: '💰',
+    id: 'pt',
+    name: 'Transit Agent',
+    description: 'Passes, transfers, travel times',
+    icon: '🚇',
     estimatedDuration: 3000
   },
   {
-    id: 'final-assembly',
-    name: 'Final Assembly',
-    description: 'Putting together your perfect itinerary',
-    icon: '✨',
+    id: 'hotels',
+    name: 'Hotels Agent',
+    description: 'Ratings & availability filtered by Places heatmaps',
+    icon: '🏨',
     estimatedDuration: 3000,
-    dependencies: ['route-optimization', 'activity-curation', 'dining-recommendations', 'budget-optimization']
+    dependencies: ['places']
+  },
+  {
+    id: 'planner',
+    name: 'Planner Agent',
+    description: 'Drafts day slots from Places Agent output',
+    icon: '📋',
+    estimatedDuration: 3000,
+    dependencies: ['places']
   }
 ];
