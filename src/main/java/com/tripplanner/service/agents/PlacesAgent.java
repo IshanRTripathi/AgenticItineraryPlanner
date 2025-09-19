@@ -5,13 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.api.dto.AgentEvent;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.GeminiClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
  * Places Agent - Discovers and analyzes places, areas, and local insights.
  */
 @Component
-@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(GeminiClient.class)
+@ConditionalOnBean(GeminiClient.class)
 public class PlacesAgent extends BaseAgent {
     
     private final GeminiClient geminiClient;
@@ -27,23 +28,49 @@ public class PlacesAgent extends BaseAgent {
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
         PlacesRequest placesRequest = (PlacesRequest) request.getData();
         
+        logger.info("=== PLACES AGENT PROCESSING ===");
+        logger.info("Destination: {}", placesRequest.getDestination());
+        logger.info("Duration: {} days", placesRequest.getDuration());
+        logger.info("Interests: {}", (Object) placesRequest.getInterests());
+        logger.info("Budget Tier: {}", placesRequest.getBudgetTier());
+        logger.info("===============================");
+        
         emitProgress(itineraryId, 10, "Analyzing destination", "destination_analysis");
         
         String systemPrompt = buildSystemPrompt();
         String userPrompt = buildUserPrompt(placesRequest);
         String jsonSchema = buildPlacesJsonSchema();
         
+        logger.info("=== PLACES AGENT PROMPTS ===");
+        logger.info("System Prompt Length: {} chars", systemPrompt.length());
+        logger.info("User Prompt: {}", userPrompt);
+        logger.info("JSON Schema Length: {} chars", jsonSchema.length());
+        logger.info("============================");
+        
         emitProgress(itineraryId, 50, "Discovering places and areas", "place_discovery");
         
         String response = geminiClient.generateStructuredContent(userPrompt, jsonSchema, systemPrompt);
+        
+        logger.info("=== PLACES AGENT RESPONSE ===");
+        logger.info("Response Length: {} chars", response.length());
+        logger.info("Response Preview: {}", response.length() > 200 ? response.substring(0, 200) + "..." : response);
+        logger.info("=============================");
         
         emitProgress(itineraryId, 80, "Processing place information", "processing");
         
         try {
             PlacesResponse placesResponse = objectMapper.readValue(response, PlacesResponse.class);
+            
+            logger.info("=== PLACES AGENT RESULT ===");
+            logger.info("Parsed Response Type: {}", placesResponse.getClass().getSimpleName());
+            logger.info("Key Areas Found: {}", placesResponse.getKeyAreas() != null ? placesResponse.getKeyAreas().length : 0);
+            logger.info("Result: {}", placesResponse);
+            logger.info("===========================");
+            
             return (T) placesResponse;
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse Places agent response for itinerary: {}", itineraryId, e);
+            logger.error("Raw response that failed to parse: {}", response);
             throw new RuntimeException("Failed to parse places data: " + e.getMessage(), e);
         }
     }

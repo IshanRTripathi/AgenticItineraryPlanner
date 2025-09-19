@@ -1,7 +1,6 @@
 package com.tripplanner.data.entity;
 
-import com.google.cloud.firestore.annotation.DocumentId;
-import com.google.cloud.firestore.annotation.PropertyName;
+import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,76 +9,82 @@ import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
  * Itinerary entity representing travel itineraries.
- * Stored in Firestore collection: itineraries/{itineraryId}
+ * Stored in H2 database table: itineraries
  */
+@Entity
+@Table(name = "itineraries")
 public class Itinerary {
     
-    @DocumentId
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
     @NotBlank
-    @PropertyName("userId")
+    @Column(name = "user_id", nullable = false)
     private String userId;
     
     @NotBlank
-    @PropertyName("destination")
+    @Column(name = "destination", nullable = false)
     private String destination;
     
     @NotNull
-    @PropertyName("startDate")
+    @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
     
     @NotNull
-    @PropertyName("endDate")
+    @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
     
     @Valid
     @NotNull
-    @PropertyName("party")
+    @Embedded
     private Party party;
     
     @NotBlank
-    @PropertyName("budgetTier")
+    @Column(name = "budget_tier", nullable = false)
     private String budgetTier; // economy, mid-range, luxury
     
     @Size(max = 20)
-    @PropertyName("interests")
+    @ElementCollection
+    @CollectionTable(name = "itinerary_interests", joinColumns = @JoinColumn(name = "itinerary_id"))
+    @Column(name = "interest")
     private List<String> interests;
     
     @Size(max = 10)
-    @PropertyName("constraints")
+    @ElementCollection
+    @CollectionTable(name = "itinerary_constraints", joinColumns = @JoinColumn(name = "itinerary_id"))
+    @Column(name = "constraint_text")
     private List<String> constraints;
     
-    @PropertyName("language")
+    @Column(name = "language", length = 10)
     private String language = "en";
     
-    @PropertyName("summary")
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
     
-    @PropertyName("map")
-    private Map<String, Object> map; // GeoJSON or similar map data
+    @Column(name = "map_data", columnDefinition = "TEXT")
+    private String mapData; // Store as JSON string instead of Map
     
-    @PropertyName("days")
+    @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL)
     private List<ItineraryDay> days;
     
-    @PropertyName("status")
+    @Column(name = "status", length = 50)
     private String status = "draft"; // draft, generating, completed, failed
     
-    @PropertyName("createdAt")
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
     
-    @PropertyName("updatedAt")
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
     
-    @PropertyName("isPublic")
+    @Column(name = "is_public")
     private boolean isPublic = false;
     
-    @PropertyName("shareToken")
+    @Column(name = "share_token", unique = true)
     private String shareToken;
     
     public Itinerary() {
@@ -92,11 +97,11 @@ public class Itinerary {
     }
     
     // Getters and Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
     
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
     
@@ -115,6 +120,7 @@ public class Itinerary {
     public void setDestination(String destination) {
         this.destination = destination;
     }
+    
     
     public LocalDate getStartDate() {
         return startDate;
@@ -180,12 +186,12 @@ public class Itinerary {
         this.summary = summary;
     }
     
-    public Map<String, Object> getMap() {
-        return map;
+    public String getMapData() {
+        return mapData;
     }
     
-    public void setMap(Map<String, Object> map) {
-        this.map = map;
+    public void setMapData(String mapData) {
+        this.mapData = mapData;
     }
     
     public List<ItineraryDay> getDays() {
@@ -262,17 +268,18 @@ public class Itinerary {
     }
     
     // Nested classes
+    @Embeddable
     public static class Party {
-        @PropertyName("adults")
+        @Column(name = "adults")
         private int adults = 1;
         
-        @PropertyName("children")
+        @Column(name = "children")
         private int children = 0;
         
-        @PropertyName("infants")
+        @Column(name = "infants")
         private int infants = 0;
         
-        @PropertyName("rooms")
+        @Column(name = "rooms")
         private int rooms = 1;
         
         public Party() {}
@@ -322,29 +329,39 @@ public class Itinerary {
         }
     }
     
+    @Entity
+    @Table(name = "itinerary_days")
     public static class ItineraryDay {
-        @PropertyName("day")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @ManyToOne
+        @JoinColumn(name = "itinerary_id")
+        private Itinerary itinerary;
+        
+        @Column(name = "day_number")
         private int day;
         
-        @PropertyName("date")
+        @Column(name = "date")
         private LocalDate date;
         
-        @PropertyName("location")
+        @Column(name = "location")
         private String location;
         
-        @PropertyName("activities")
+        @OneToMany(mappedBy = "itineraryDay", cascade = CascadeType.ALL)
         private List<Activity> activities;
         
-        @PropertyName("accommodation")
+        @OneToOne(mappedBy = "itineraryDay", cascade = CascadeType.ALL)
         private Accommodation accommodation;
         
-        @PropertyName("transportation")
+        @OneToMany(mappedBy = "itineraryDay", cascade = CascadeType.ALL)
         private List<Transportation> transportation;
         
-        @PropertyName("meals")
+        @OneToMany(mappedBy = "itineraryDay", cascade = CascadeType.ALL)
         private List<Meal> meals;
         
-        @PropertyName("notes")
+        @Column(name = "notes", columnDefinition = "TEXT")
         private String notes;
         
         public ItineraryDay() {}
@@ -357,6 +374,7 @@ public class Itinerary {
         public void setDay(int day) {
             this.day = day;
         }
+        
         
         public LocalDate getDate() {
             return date;
@@ -415,38 +433,50 @@ public class Itinerary {
         }
     }
     
+    @Entity
+    @Table(name = "activities")
     public static class Activity {
-        @PropertyName("name")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @ManyToOne
+        @JoinColumn(name = "itinerary_day_id")
+        private ItineraryDay itineraryDay;
+        
+        @Column(name = "name")
         private String name;
         
-        @PropertyName("description")
+        @Column(name = "description", columnDefinition = "TEXT")
         private String description;
         
-        @PropertyName("location")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "location_id")
         private Location location;
         
-        @PropertyName("startTime")
+        @Column(name = "start_time")
         private String startTime;
         
-        @PropertyName("endTime")
+        @Column(name = "end_time")
         private String endTime;
         
-        @PropertyName("duration")
-        private String duration;
+        @Column(name = "duration")
+        private int duration; // in minutes
         
-        @PropertyName("category")
+        @Column(name = "category")
         private String category;
         
-        @PropertyName("price")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "price_id")
         private Price price;
         
-        @PropertyName("bookingRequired")
+        @Column(name = "booking_required")
         private boolean bookingRequired = false;
         
-        @PropertyName("bookingUrl")
+        @Column(name = "booking_url")
         private String bookingUrl;
         
-        @PropertyName("tips")
+        @Column(name = "tips", columnDefinition = "TEXT")
         private String tips;
         
         public Activity() {}
@@ -462,8 +492,8 @@ public class Itinerary {
         public void setStartTime(String startTime) { this.startTime = startTime; }
         public String getEndTime() { return endTime; }
         public void setEndTime(String endTime) { this.endTime = endTime; }
-        public String getDuration() { return duration; }
-        public void setDuration(String duration) { this.duration = duration; }
+        public int getDuration() { return duration; }
+        public void setDuration(int duration) { this.duration = duration; }
         public String getCategory() { return category; }
         public void setCategory(String category) { this.category = category; }
         public Price getPrice() { return price; }
@@ -476,32 +506,46 @@ public class Itinerary {
         public void setTips(String tips) { this.tips = tips; }
     }
     
+    @Entity
+    @Table(name = "accommodations")
     public static class Accommodation {
-        @PropertyName("name")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @OneToOne
+        @JoinColumn(name = "itinerary_day_id")
+        private ItineraryDay itineraryDay;
+        
+        @Column(name = "name")
         private String name;
         
-        @PropertyName("type")
+        @Column(name = "type")
         private String type; // hotel, hostel, apartment, etc.
         
-        @PropertyName("location")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "location_id")
         private Location location;
         
-        @PropertyName("checkIn")
+        @Column(name = "check_in")
         private LocalDate checkIn;
         
-        @PropertyName("checkOut")
+        @Column(name = "check_out")
         private LocalDate checkOut;
         
-        @PropertyName("price")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "price_id")
         private Price price;
         
-        @PropertyName("rating")
+        @Column(name = "rating")
         private double rating;
         
-        @PropertyName("amenities")
+        @ElementCollection
+        @CollectionTable(name = "accommodation_amenities", joinColumns = @JoinColumn(name = "accommodation_id"))
+        @Column(name = "amenity")
         private List<String> amenities;
         
-        @PropertyName("bookingUrl")
+        @Column(name = "booking_url")
         private String bookingUrl;
         
         public Accommodation() {}
@@ -513,6 +557,7 @@ public class Itinerary {
         public void setType(String type) { this.type = type; }
         public Location getLocation() { return location; }
         public void setLocation(Location location) { this.location = location; }
+        
         public LocalDate getCheckIn() { return checkIn; }
         public void setCheckIn(LocalDate checkIn) { this.checkIn = checkIn; }
         public LocalDate getCheckOut() { return checkOut; }
@@ -527,35 +572,48 @@ public class Itinerary {
         public void setBookingUrl(String bookingUrl) { this.bookingUrl = bookingUrl; }
     }
     
+    @Entity
+    @Table(name = "transportation")
     public static class Transportation {
-        @PropertyName("mode")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @ManyToOne
+        @JoinColumn(name = "itinerary_day_id")
+        private ItineraryDay itineraryDay;
+        
+        @Column(name = "mode")
         private String mode; // flight, train, bus, car, taxi, walk
         
-        @PropertyName("from")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "from_location_id")
         private Location from;
         
-        @PropertyName("to")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "to_location_id")
         private Location to;
         
-        @PropertyName("departureTime")
+        @Column(name = "departure_time")
         private String departureTime;
         
-        @PropertyName("arrivalTime")
+        @Column(name = "arrival_time")
         private String arrivalTime;
         
-        @PropertyName("duration")
-        private String duration;
+        @Column(name = "duration")
+        private int duration; // in minutes
         
-        @PropertyName("price")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "price_id")
         private Price price;
         
-        @PropertyName("provider")
+        @Column(name = "provider")
         private String provider;
         
-        @PropertyName("bookingUrl")
+        @Column(name = "booking_url")
         private String bookingUrl;
         
-        @PropertyName("notes")
+        @Column(name = "notes", columnDefinition = "TEXT")
         private String notes;
         
         public Transportation() {}
@@ -571,8 +629,8 @@ public class Itinerary {
         public void setDepartureTime(String departureTime) { this.departureTime = departureTime; }
         public String getArrivalTime() { return arrivalTime; }
         public void setArrivalTime(String arrivalTime) { this.arrivalTime = arrivalTime; }
-        public String getDuration() { return duration; }
-        public void setDuration(String duration) { this.duration = duration; }
+        public int getDuration() { return duration; }
+        public void setDuration(int duration) { this.duration = duration; }
         public Price getPrice() { return price; }
         public void setPrice(Price price) { this.price = price; }
         public String getProvider() { return provider; }
@@ -583,29 +641,41 @@ public class Itinerary {
         public void setNotes(String notes) { this.notes = notes; }
     }
     
+    @Entity
+    @Table(name = "meals")
     public static class Meal {
-        @PropertyName("type")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @ManyToOne
+        @JoinColumn(name = "itinerary_day_id")
+        private ItineraryDay itineraryDay;
+        
+        @Column(name = "type")
         private String type; // breakfast, lunch, dinner, snack
         
-        @PropertyName("name")
+        @Column(name = "name")
         private String name;
         
-        @PropertyName("restaurant")
+        @Column(name = "restaurant")
         private String restaurant;
         
-        @PropertyName("location")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "location_id")
         private Location location;
         
-        @PropertyName("time")
+        @Column(name = "time")
         private String time;
         
-        @PropertyName("price")
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "price_id")
         private Price price;
         
-        @PropertyName("cuisine")
+        @Column(name = "cuisine")
         private String cuisine;
         
-        @PropertyName("notes")
+        @Column(name = "notes", columnDefinition = "TEXT")
         private String notes;
         
         public Meal() {}
@@ -629,20 +699,26 @@ public class Itinerary {
         public void setNotes(String notes) { this.notes = notes; }
     }
     
+    @Entity
+    @Table(name = "locations")
     public static class Location {
-        @PropertyName("name")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @Column(name = "name")
         private String name;
         
-        @PropertyName("address")
+        @Column(name = "address")
         private String address;
         
-        @PropertyName("lat")
+        @Column(name = "lat")
         private double lat;
         
-        @PropertyName("lng")
+        @Column(name = "lng")
         private double lng;
         
-        @PropertyName("placeId")
+        @Column(name = "place_id")
         private String placeId;
         
         public Location() {}
@@ -666,14 +742,20 @@ public class Itinerary {
         public void setPlaceId(String placeId) { this.placeId = placeId; }
     }
     
+    @Entity
+    @Table(name = "prices")
     public static class Price {
-        @PropertyName("amount")
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        
+        @Column(name = "amount")
         private double amount;
         
-        @PropertyName("currency")
+        @Column(name = "currency", length = 3)
         private String currency;
         
-        @PropertyName("per")
+        @Column(name = "per_unit", length = 20)
         private String per; // person, group, night, etc.
         
         public Price() {}

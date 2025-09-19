@@ -194,6 +194,36 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * Handle IO exceptions (including SSE disconnects).
+     */
+    @ExceptionHandler(java.io.IOException.class)
+    public ResponseEntity<ErrorResponse> handleIOException(
+            java.io.IOException ex, WebRequest request) {
+        
+        String description = request.getDescription(false);
+        
+        // If this is an SSE (text/event-stream) request, silently handle client disconnects
+        if (description != null && description.contains("/agents/stream")) {
+            logger.debug("SSE client disconnected: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        
+        // For non-SSE IO exceptions, log as warning
+        logger.warn("IO error: {}", ex.getMessage());
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+                "IO_ERROR",
+                "IO error occurred",
+                ex.getMessage(),
+                Instant.now(),
+                description,
+                null
+        );
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+    
+    /**
      * Handle all other exceptions.
      */
     @ExceptionHandler(Exception.class)
@@ -202,12 +232,18 @@ public class GlobalExceptionHandler {
         
         logger.error("Unexpected error: {}", ex.getMessage(), ex);
         
+        // If this is an SSE (text/event-stream) request, return 204 to avoid JSON write with wrong content-type
+        String description = request.getDescription(false);
+        if (description != null && description.contains("/agents/stream")) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        
         ErrorResponse errorResponse = new ErrorResponse(
                 "INTERNAL_ERROR",
                 "Internal server error",
                 "An unexpected error occurred",
                 Instant.now(),
-                request.getDescription(false),
+                description,
                 null
         );
         

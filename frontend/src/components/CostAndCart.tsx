@@ -18,7 +18,7 @@ import {
   Info,
   Percent
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 interface CostAndCartProps {
   tripData: TripData;
@@ -58,22 +58,22 @@ export function CostAndCart({ tripData, onCheckout, onBack }: CostAndCartProps) 
       type: 'flight',
       title: `Flights to ${tripData.destination}`,
       description: 'Round-trip flights for all travelers',
-      basePrice: Math.floor(tripData.budget * 0.4 / tripData.partySize),
-      quantity: tripData.partySize,
+      basePrice: Math.floor(tripData.budget * 0.4 / (tripData.partySize || tripData.travelers.length)),
+      quantity: tripData.partySize || tripData.travelers.length,
       selected: true,
       options: [
         {
           id: 'economy',
           title: 'Economy Class',
           description: 'Standard seating, meals included',
-          price: Math.floor(tripData.budget * 0.4 / tripData.partySize),
+          price: Math.floor(tripData.budget * 0.4 / (tripData.partySize || tripData.travelers.length)),
           selected: true
         },
         {
           id: 'premium',
           title: 'Premium Economy',
           description: 'Extra legroom, priority boarding',
-          price: Math.floor(tripData.budget * 0.6 / tripData.partySize),
+          price: Math.floor(tripData.budget * 0.6 / (tripData.partySize || tripData.travelers.length)),
           selected: false
         }
       ]
@@ -84,7 +84,7 @@ export function CostAndCart({ tripData, onCheckout, onBack }: CostAndCartProps) 
     items.push({
       id: 'hotel-1',
       type: 'hotel',
-      title: `${tripData.stayType} Accommodation`,
+      title: `${tripData.stayType || 'Hotel'} Accommodation`,
       description: `${nights} nights in ${tripData.destination}`,
       basePrice: Math.floor(tripData.budget * 0.3 / nights),
       quantity: nights,
@@ -108,7 +108,7 @@ export function CostAndCart({ tripData, onCheckout, onBack }: CostAndCartProps) 
     });
 
     // Local Transport
-    if (tripData.transport !== 'Walking') {
+    if (tripData.transport && tripData.transport !== 'Walking') {
       items.push({
         id: 'transport-1',
         type: 'transport',
@@ -221,7 +221,7 @@ export function CostAndCart({ tripData, onCheckout, onBack }: CostAndCartProps) 
             
             <Badge variant="outline" className="flex items-center gap-2">
               <Users className="h-3 w-3" />
-              {tripData.partySize} {tripData.partySize === 1 ? 'traveler' : 'travelers'}
+              {tripData.partySize || tripData.travelers.length} {(tripData.partySize || tripData.travelers.length) === 1 ? 'traveler' : 'travelers'}
             </Badge>
           </div>
         </div>
@@ -390,7 +390,7 @@ export function CostAndCart({ tripData, onCheckout, onBack }: CostAndCartProps) 
                   </div>
                   
                   <div className="text-xs text-gray-500">
-                    Per person: ₹{Math.floor(calculateTotal() / tripData.partySize).toLocaleString()}
+                    Per person: ₹{Math.floor(calculateTotal() / (tripData.partySize || tripData.travelers.length)).toLocaleString()}
                   </div>
                 </div>
 

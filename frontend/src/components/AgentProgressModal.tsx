@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from './ui/card';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
@@ -6,6 +6,8 @@ import { CheckCircle2, Loader2, Clock, Zap } from 'lucide-react';
 import { AGENT_TASKS, AgentTask } from '../types/TripData';
 import { TripData } from '../types/TripData';
 import { apiClient, AgentEvent } from '../services/apiClient';
+import { useAppStore } from '../state/hooks';
+import { useItinerary } from '../state/query/hooks';
 
 interface AgentProgressModalProps {
   tripData: TripData;
@@ -21,6 +23,8 @@ interface AgentProgress {
 }
 
 export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalProps) {
+  const { setCurrentTrip } = useAppStore();
+  const { refetch: refetchItinerary } = useItinerary(tripData.id);
   const [agents, setAgents] = useState<AgentProgress[]>(
     AGENT_TASKS.map(task => ({
       task,
@@ -32,6 +36,90 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
   const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
   const [startTime] = useState(Date.now());
+  const [hasCompleted, setHasCompleted] = useState(false);
+  const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSSEEvent = (event: MessageEvent) => {
+    try {
+      console.log('Processing SSE event:', {
+        type: event.type,
+        data: event.data,
+        dataType: typeof event.data
+      });
+      
+      // Handle connection messages
+      if (event.data && typeof event.data === 'string' && event.data.includes('Connected to agent stream')) {
+        console.log('SSE connection confirmed:', event.data);
+        return;
+      }
+      
+      // Parse agent events
+      const agentEvent: AgentEvent = JSON.parse(event.data);
+      console.log('Parsed agent event:', agentEvent);
+      console.log('Available agent tasks:', AGENT_TASKS.map(t => t.id));
+      
+      // Update agent status based on event
+      setAgents(prev => prev.map(agent => {
+        // Direct match by agent kind
+        if (agent.task.id === agentEvent.kind) {
+          const newStatus = agentEvent.status === 'succeeded' ? 'completed' : 
+                           agentEvent.status === 'running' ? 'running' : 
+                           agentEvent.status === 'failed' ? 'completed' : 'pending';
+          
+          console.log(`Updating agent ${agent.task.name} from ${agent.status} to ${newStatus}`);
+          
+          return {
+            ...agent,
+            status: newStatus,
+            progress: agentEvent.progress || agent.progress,
+            startTime: agentEvent.status === 'running' && !agent.startTime ? Date.now() : agent.startTime,
+            endTime: agentEvent.status === 'succeeded' ? Date.now() : agent.endTime
+          };
+        }
+        
+        return agent;
+      }));
+      
+      // Update overall progress
+      setAgents(prev => {
+        const completedCount = prev.filter(a => a.status === 'completed').length;
+        const runningAgent = prev.find(a => a.status === 'running');
+        const runningProgress = runningAgent ? (runningAgent.progress / 100) : 0;
+        
+        const totalProgress = ((completedCount + runningProgress) / AGENT_TASKS.length) * 100;
+        setOverallProgress(Math.round(totalProgress));
+        
+        console.log(`Progress update: ${completedCount}/${AGENT_TASKS.length} completed, ${Math.round(totalProgress)}% total`);
+        
+        return prev;
+      });
+      
+      // Check if planner agent is completed
+      if (agentEvent.kind === 'planner' && agentEvent.status === 'succeeded') {
+        console.log('Planner agent completed, refetching itinerary...');
+        if (!hasCompleted) {
+          setHasCompleted(true);
+          setTimeout(async () => {
+            console.log('Refetching itinerary before completion');
+            try {
+              const result = await refetchItinerary();
+              if (result.data) {
+                const responseData = result.data as TripData;
+                setCurrentTrip(responseData);
+              }
+            } catch (e) {
+              console.warn('Itinerary refetch failed, proceeding anyway', e);
+            }
+            console.log('Calling onComplete()');
+            onComplete();
+          }, 1000);
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error processing SSE event:', error);
+    }
+  };
 
   useEffect(() => {
     if (!tripData.id) {
@@ -40,6 +128,36 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
     }
 
     console.log('Starting SSE connection for itinerary:', tripData.id);
+
+    // Simple completion checker - check every 2 seconds if itinerary is completed
+    const checkCompletion = async () => {
+      if (!hasCompleted) {
+        try {
+          const result = await refetchItinerary();
+          if (result.data) {
+            const responseData = result.data as TripData;
+            console.log('Checking completion status:', responseData.status);
+            if (responseData.status === 'completed' || (responseData.itinerary?.days && responseData.itinerary.days.length > 0)) {
+              console.log('Itinerary is completed, proceeding to next screen');
+              setHasCompleted(true);
+              setCurrentTrip(responseData);
+              onComplete();
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Completion check failed:', e);
+        }
+        
+        // Schedule next check
+        const timeout = setTimeout(checkCompletion, 2000);
+        completionTimeoutRef.current = timeout;
+      }
+    };
+
+    // Start checking after 5 seconds
+    const initialTimeout = setTimeout(checkCompletion, 5000);
+    completionTimeoutRef.current = initialTimeout;
 
     // Connect to SSE stream for real-time agent updates
     const eventSource = apiClient.createAgentEventStream(tripData.id);
@@ -64,85 +182,19 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
       console.log('SSE connected event:', event.data);
     });
     
-    const handleSSEEvent = (event: MessageEvent) => {
-      try {
-        console.log('Processing SSE event:', {
-          type: event.type,
-          data: event.data,
-          dataType: typeof event.data
-        });
-        
-        // Handle connection messages
-        if (event.data && typeof event.data === 'string' && event.data.includes('Connected to agent stream')) {
-          console.log('SSE connection confirmed:', event.data);
-          return;
-        }
-        
-        // Parse agent events
-        const agentEvent: AgentEvent = JSON.parse(event.data);
-        console.log('Parsed agent event:', agentEvent);
-        console.log('Available agent tasks:', AGENT_TASKS.map(t => t.id));
-        
-        // Update agent status based on event
-        setAgents(prev => prev.map(agent => {
-          // Direct match by agent kind
-          if (agent.task.id === agentEvent.kind) {
-            const newStatus = agentEvent.status === 'succeeded' ? 'completed' : 
-                             agentEvent.status === 'running' ? 'running' : 
-                             agentEvent.status === 'failed' ? 'completed' : 'pending';
-            
-            console.log(`Updating agent ${agent.task.name} from ${agent.status} to ${newStatus}`);
-            
-            return {
-              ...agent,
-              status: newStatus,
-              progress: agentEvent.progress || agent.progress,
-              startTime: agentEvent.status === 'running' && !agent.startTime ? Date.now() : agent.startTime,
-              endTime: agentEvent.status === 'succeeded' ? Date.now() : agent.endTime
-            };
-          }
-          
-          return agent;
-        }));
-        
-        // Update overall progress
-        const completedCount = agents.filter(a => a.status === 'completed').length;
-        const runningAgent = agents.find(a => a.status === 'running');
-        const runningProgress = runningAgent ? (runningAgent.progress / 100) : 0;
-        
-        const totalProgress = ((completedCount + runningProgress) / AGENT_TASKS.length) * 100;
-        setOverallProgress(Math.round(totalProgress));
-        
-        console.log(`Progress update: ${completedCount}/${AGENT_TASKS.length} completed, ${Math.round(totalProgress)}% total`);
-        
-        // Check if all agents are completed
-        if (agentEvent.kind === 'orchestrator' && agentEvent.status === 'succeeded') {
-          console.log('Orchestrator completed, finishing in 1 second...');
-          setTimeout(() => {
-            console.log('Calling onComplete()');
-            onComplete();
-          }, 1000);
-        }
-        
-      } catch (error) {
-        console.error('Error parsing agent event:', error, 'Raw event data:', event.data);
-      }
-    };
-    
     eventSource.onerror = (error) => {
       console.error('SSE connection error:', error);
     };
     
-    eventSource.onclose = () => {
-      console.log('SSE connection closed for itinerary:', tripData.id);
-    };
-    
-    // Cleanup on unmount
+    // Cleanup function to close SSE connection
     return () => {
-      console.log('Cleaning up SSE connection for itinerary:', tripData.id);
+      console.log('Closing SSE connection for itinerary:', tripData.id);
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current);
+      }
       eventSource.close();
     };
-  }, [tripData.id, onComplete, agents]);
+  }, [tripData.id, onComplete, refetchItinerary, setCurrentTrip, hasCompleted]);
 
   const formatTime = (ms: number) => {
     return `${(ms / 1000).toFixed(1)}s`;
@@ -159,97 +211,111 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
     }
   };
 
-  const elapsedTime = formatTime(Date.now() - startTime);
-  const completedCount = agents.filter(a => a.status === 'completed').length;
+  const getStatusBadge = (agent: AgentProgress) => {
+    switch (agent.status) {
+      case 'completed':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Completed</Badge>;
+      case 'running':
+        return <Badge variant="default" className="bg-blue-100 text-blue-800">Running</Badge>;
+      default:
+        return <Badge variant="secondary">Pending</Badge>;
+    }
+  };
+
+  const getElapsedTime = () => {
+    return Date.now() - startTime;
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-2xl mx-4 p-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Zap className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-2xl font-semibold mb-2">Creating Your Perfect Itinerary</h2>
-          <p className="text-gray-600">Our AI agents are working together to plan your amazing trip</p>
-        </div>
-
-        {/* Overall Progress */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">Overall Progress</span>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>{completedCount}/{AGENT_TASKS.length} completed</span>
-              <span>{elapsedTime} elapsed</span>
+      <Card className="w-full max-w-2xl mx-4 p-6">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Zap className="w-6 h-6 text-blue-500" />
+              <h2 className="text-2xl font-bold">Creating Your Itinerary</h2>
             </div>
+            <p className="text-gray-600">
+              Our AI agents are working hard to create your perfect trip to {tripData.destination}
+            </p>
           </div>
-          <Progress value={overallProgress} className="h-3" />
-          <div className="text-center mt-1">
-            <span className="text-lg font-semibold text-blue-600">{Math.round(overallProgress)}%</span>
-          </div>
-        </div>
 
-        {/* Agent Status List */}
-        <div className="space-y-3 max-h-80 overflow-y-auto">
-          {agents.map((agent, index) => (
-            <div
-              key={agent.task.id}
-              className={`flex items-center p-4 rounded-lg border transition-all ${
-                agent.status === 'running' 
-                  ? 'bg-blue-50 border-blue-200 shadow-md' 
-                  : agent.status === 'completed'
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-gray-50 border-gray-200'
-              }`}
-            >
-              <div className="flex items-center gap-3 flex-1">
-                <span className="text-2xl">{agent.task.icon}</span>
-                {getAgentIcon(agent)}
+          {/* Overall Progress */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Overall Progress</span>
+              <span>{overallProgress}%</span>
+            </div>
+            <Progress value={overallProgress} className="h-2" />
+          </div>
+
+          {/* Manual Continue Button - Fallback */}
+          {overallProgress >= 90 && !hasCompleted && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800 mb-2">
+                It looks like your itinerary is ready! If the page doesn't automatically continue, click below:
+              </p>
+              <button
+                onClick={() => {
+                  setHasCompleted(true);
+                  onComplete();
+                }}
+                className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+              >
+                Continue to Itinerary
+              </button>
+            </div>
+          )}
+
+          {/* Agent Status List */}
+          <div className="space-y-3">
+            {agents.map((agent, index) => (
+              <div
+                key={agent.task.id}
+                className={`flex items-center gap-4 p-3 rounded-lg border transition-all ${
+                  agent.status === 'running' 
+                    ? 'border-blue-200 bg-blue-50' 
+                    : agent.status === 'completed'
+                    ? 'border-green-200 bg-green-50'
+                    : 'border-gray-200 bg-gray-50'
+                }`}
+              >
+                <div className="flex-shrink-0">
+                  {getAgentIcon(agent)}
+                </div>
                 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{agent.task.name}</h3>
-                    {agent.status === 'running' && (
-                      <Badge variant="secondary" className="animate-pulse">
-                        Running
-                      </Badge>
-                    )}
-                    {agent.status === 'completed' && (
-                      <Badge variant="default" className="bg-green-500">
-                        Done
-                      </Badge>
-                    )}
+                    <h3 className="font-medium text-gray-900">{agent.task.name}</h3>
+                    {getStatusBadge(agent)}
                   </div>
-                  <p className="text-sm text-gray-600">{agent.task.description}</p>
+                  <p className="text-sm text-gray-600 mt-1">{agent.task.description}</p>
                   
                   {agent.status === 'running' && (
                     <div className="mt-2">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Progress</span>
+                        <span>{agent.progress}%</span>
+                      </div>
                       <Progress value={agent.progress} className="h-1" />
                     </div>
                   )}
+                  
+                  {agent.status === 'completed' && agent.endTime && agent.startTime && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Completed in {formatTime(agent.endTime - agent.startTime)}
+                    </p>
+                  )}
                 </div>
-
-                {agent.endTime && agent.startTime && (
-                  <div className="text-xs text-gray-500 ml-2">
-                    {formatTime(agent.endTime - agent.startTime)}
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Trip Info Footer */}
-        <div className="mt-6 pt-6 border-t">
-          <div className="flex justify-between text-sm text-gray-500">
-            <span>
-              {tripData.startLocation.name} → {tripData.endLocation.name}
-            </span>
-            <span>
-              {tripData.travelers.length} traveler{tripData.travelers.length > 1 ? 's' : ''}
-            </span>
-            <span>
-              {tripData.budget.currency} {tripData.budget.total.toLocaleString()}
-            </span>
+          {/* Footer */}
+          <div className="text-center text-sm text-gray-500">
+            <p>Elapsed time: {formatTime(getElapsedTime())}</p>
+            <p className="mt-1">This usually takes 30-60 seconds</p>
           </div>
         </div>
       </Card>

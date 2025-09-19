@@ -5,6 +5,13 @@ server:
 spring:
   application:
     name: agentic-itinerary-planner
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
+      - org.springdoc.core.configuration.SpringDocConfiguration
+      - org.springdoc.webmvc.ui.SwaggerConfig
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
@@ -25,15 +32,30 @@ spring:
             enable: true
           ssl:
             trust: "*"
-
-security:
-  cors:
-    allowed-origins: ${FRONTEND_URL:http://localhost:3000},${PRODUCTION_FRONTEND_URL:https://your-frontend.example.com}
-    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-    allowed-headers: "*"
-    allow-credentials: true
-  csrf:
-    enabled: true
+  # H2 Database Configuration
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+  # Security completely disabled for development
+  security:
+    user:
+      name: disabled
+      password: disabled
+      roles: DISABLED
 
 google:
   oauth:
@@ -44,11 +66,14 @@ google:
     model: ${GEMINI_MODEL:gemini-1.5-pro}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:8192}
+    mock-mode: ${GEMINI_MOCK_MODE:false}
 
+# Firestore (disabled for now)
 firestore:
-  project-id: ${GCP_PROJECT_ID:}
+  project-id: ${GCP_PROJECT_ID:agentic-itinerary-planner-dev}
   credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
   database-id: ${FIRESTORE_DATABASE_ID:(default)}
+  enabled: false
 
 razorpay:
   key-id: ${RAZORPAY_KEY_ID:}
@@ -138,3 +163,10 @@ app:
   idempotency:
     ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
 
+# Swagger/OpenAPI Configuration - using static approach
+# springdoc:
+#   api-docs:
+#     path: /v3/api-docs
+#   swagger-ui:
+#     path: /swagger-ui.html
+#     enabled: true

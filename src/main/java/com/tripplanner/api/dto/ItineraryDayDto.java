@@ -2,6 +2,8 @@ package com.tripplanner.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tripplanner.data.entity.Itinerary;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,17 +11,18 @@ import java.util.List;
 /**
  * DTO for itinerary day information.
  */
+@Data
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ItineraryDayDto(
-        int day,
-        LocalDate date,
-        String location,
-        List<ActivityDto> activities,
-        AccommodationDto accommodation,
-        List<TransportationDto> transportation,
-        List<MealDto> meals,
-        String notes
-) {
+public class ItineraryDayDto {
+    private int day;
+    private LocalDate date;
+    private String location;
+    private List<ActivityDto> activities;
+    private AccommodationDto accommodation;
+    private List<TransportationDto> transportation;
+    private List<MealDto> meals;
+    private String notes;
     
     /**
      * Create DTO from entity.
@@ -29,20 +32,20 @@ public record ItineraryDayDto(
             return null;
         }
         
-        return new ItineraryDayDto(
-                entity.getDay(),
-                entity.getDate(),
-                entity.getLocation(),
-                entity.getActivities() != null ? 
-                        entity.getActivities().stream().map(ActivityDto::fromEntity).toList() : null,
-                entity.getAccommodation() != null ? 
-                        AccommodationDto.fromEntity(entity.getAccommodation()) : null,
-                entity.getTransportation() != null ? 
-                        entity.getTransportation().stream().map(TransportationDto::fromEntity).toList() : null,
-                entity.getMeals() != null ? 
-                        entity.getMeals().stream().map(MealDto::fromEntity).toList() : null,
-                entity.getNotes()
-        );
+        return ItineraryDayDto.builder()
+                .day(entity.getDay())
+                .date(entity.getDate())
+                .location(entity.getLocation())
+                .activities(entity.getActivities() != null ? 
+                        entity.getActivities().stream().map(ActivityDto::fromEntity).toList() : null)
+                .accommodation(entity.getAccommodation() != null ? 
+                        AccommodationDto.fromEntity(entity.getAccommodation()) : null)
+                .transportation(entity.getTransportation() != null ? 
+                        entity.getTransportation().stream().map(TransportationDto::fromEntity).toList() : null)
+                .meals(entity.getMeals() != null ? 
+                        entity.getMeals().stream().map(MealDto::fromEntity).toList() : null)
+                .notes(entity.getNotes())
+                .build();
     }
     
     /**

@@ -18,7 +18,7 @@ import {
   Copy,
   Home
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 interface BookingConfirmationProps {
   tripData: TripData;
@@ -54,10 +54,10 @@ export function BookingConfirmation({ tripData, onShare, onDashboard }: BookingC
     const endDate = new Date(tripData.dates.end);
     
     const event = {
-      title: `Trip to ${tripData.destination}`,
+      title: `Trip to ${tripData.destination || tripData.endLocation?.name || 'Unknown'}`,
       start: startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''),
       end: endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''),
-      description: `Your amazing trip to ${tripData.destination}. Booking ref: ${bookingData.bookingReference}`
+      description: `Your amazing trip to ${tripData.destination || tripData.endLocation?.name || 'Unknown'}. Booking ref: ${bookingData.bookingReference}`
     };
 
     const calendarUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR

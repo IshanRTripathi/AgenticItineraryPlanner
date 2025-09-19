@@ -1,6 +1,5 @@
 package com.tripplanner.api;
 
-import com.tripplanner.security.GoogleUserPrincipal;
 import com.tripplanner.service.ToolsService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,6 +19,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ToolsController {
     
     private static final Logger logger = LoggerFactory.getLogger(ToolsController.class);
@@ -36,13 +35,12 @@ public class ToolsController {
      */
     @PostMapping("/packing-list")
     public ResponseEntity<PackingListRes> generatePackingList(
-            @Valid @RequestBody PackingListReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @Valid @RequestBody PackingListReq request) {
         
         logger.info("Generating packing list for user: {}, destination: {}", 
-                   user.getUserId(), request.destination());
+                   "anonymous", request.destination());
         
-        PackingListRes response = toolsService.generatePackingList(request, user);
+        PackingListRes response = toolsService.generatePackingList(request);
         
         logger.info("Packing list generated with {} items", response.items().size());
         return ResponseEntity.ok(response);
@@ -53,13 +51,12 @@ public class ToolsController {
      */
     @PostMapping("/photo-spots")
     public ResponseEntity<PhotoSpotsRes> getPhotoSpots(
-            @Valid @RequestBody PhotoSpotsReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @Valid @RequestBody PhotoSpotsReq request) {
         
         logger.info("Getting photo spots for user: {}, destination: {}", 
-                   user.getUserId(), request.destination());
+                   "anonymous", request.destination());
         
-        PhotoSpotsRes response = toolsService.getPhotoSpots(request, user);
+        PhotoSpotsRes response = toolsService.getPhotoSpots(request);
         
         logger.info("Found {} photo spots", response.spots().size());
         return ResponseEntity.ok(response);
@@ -70,13 +67,12 @@ public class ToolsController {
      */
     @PostMapping("/must-try-foods")
     public ResponseEntity<MustTryFoodsRes> getMustTryFoods(
-            @Valid @RequestBody MustTryFoodsReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @Valid @RequestBody MustTryFoodsReq request) {
         
         logger.info("Getting must-try foods for user: {}, destination: {}", 
-                   user.getUserId(), request.destination());
+                   "anonymous", request.destination());
         
-        MustTryFoodsRes response = toolsService.getMustTryFoods(request, user);
+        MustTryFoodsRes response = toolsService.getMustTryFoods(request);
         
         logger.info("Found {} must-try foods", response.items().size());
         return ResponseEntity.ok(response);
@@ -87,15 +83,30 @@ public class ToolsController {
      */
     @PostMapping("/cost-estimator")
     public ResponseEntity<CostEstimateRes> generateCostEstimate(
-            @Valid @RequestBody CostEstimateReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @Valid @RequestBody CostEstimateReq request) {
         
         logger.info("Generating cost estimate for user: {}, destination: {}", 
-                   user.getUserId(), request.destination());
+                   "anonymous", request.destination());
         
-        CostEstimateRes response = toolsService.generateCostEstimate(request, user);
+        CostEstimateRes response = toolsService.generateCostEstimate(request);
         
         logger.info("Cost estimate generated: {} {}", response.totals().total(), response.currency());
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Get weather information for a destination.
+     */
+    @GetMapping("/tools/weather")
+    public ResponseEntity<WeatherRes> getWeather(
+            @RequestParam String destination,
+            @RequestParam(required = false) String date) {
+        
+        logger.info("Getting weather for destination: {}, date: {}", destination, date);
+        
+        WeatherRes response = toolsService.getWeather(destination, date);
+        
+        logger.info("Weather retrieved for: {}", destination);
         return ResponseEntity.ok(response);
     }
     
@@ -258,6 +269,20 @@ public class ToolsController {
             double shopping,
             double misc,
             double total
+    ) {}
+    
+    /**
+     * Response DTO for weather information.
+     */
+    public record WeatherRes(
+            String destination,
+            String date,
+            double temperature,
+            String condition,
+            String description,
+            double humidity,
+            double windSpeed,
+            String unit
     ) {}
 }
 

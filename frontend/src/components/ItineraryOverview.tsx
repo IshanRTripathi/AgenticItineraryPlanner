@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -15,9 +15,12 @@ import {
   Users,
   DollarSign,
   Navigation,
-  GitBranch
+  GitBranch,
+  Zap
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
+import { AgentResultsPanel } from './AgentResultsPanel';
+import { useItinerary } from '../state/query/hooks';
 
 interface ItineraryOverviewProps {
   tripData: TripData;
@@ -30,10 +33,49 @@ interface ItineraryOverviewProps {
 
 export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedToCost, onBack, onOpenPlanner }: ItineraryOverviewProps) {
   const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState<{[key: string]: string}>({});
   
-  const itinerary = tripData.itinerary;
+  // Fetch fresh data from API instead of using cached props
+  const { data: freshTripData, isLoading, error } = useItinerary(tripData.id);
   
-  if (!itinerary) {
+  // Use fresh data if available, fallback to props
+  const currentTripData = freshTripData || tripData;
+  const itinerary = currentTripData.itinerary;
+  
+  const handleSelectOption = (type: string, optionId: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [type]: optionId
+    }));
+  };
+  
+  // Show loading state while fetching fresh data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading itinerary...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if API call failed
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="max-w-md mx-auto">
+            <p className="text-red-600 mb-4">Failed to load itinerary data</p>
+            <Button onClick={onBack}>Go Back</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!itinerary || !itinerary.days || itinerary.days.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -41,7 +83,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
             <MapPin className="h-12 w-12 mx-auto mb-4 text-gray-400" />
             <h2 className="text-xl font-medium mb-2">No Itinerary Available</h2>
             <p className="text-gray-600 mb-4">
-              This trip doesn't have a generated itinerary yet. Would you like to create one?
+              This trip doesn't have a generated itinerary yet. The agents are still processing your request.
             </p>
             <div className="flex gap-2 justify-center">
               <Button variant="outline" onClick={onBack}>
@@ -50,7 +92,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
               </Button>
               <Button onClick={onEdit}>
                 <Edit className="h-4 w-4 mr-2" />
-                Generate Itinerary
+                Edit Plan
               </Button>
               {onOpenPlanner && (
                 <Button variant="outline" onClick={onOpenPlanner}>
@@ -91,7 +133,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
     });
   };
 
-  const selectedDayData = itinerary.days.find((day: any) => day.day === selectedDay);
+  const selectedDayData = itinerary?.days?.find((day) => day.dayNumber === selectedDay);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -105,7 +147,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl">{tripData.destination}</h1>
+                <h1 className="text-2xl">{tripData.destination || tripData.endLocation?.name || 'Trip'}</h1>
                 <p className="text-gray-600">
                   {new Date(tripData.dates.start).toLocaleDateString()} - {new Date(tripData.dates.end).toLocaleDateString()}
                 </p>
@@ -137,8 +179,8 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid lg:grid-cols-4 gap-6">
           {/* Map Section */}
           <div className="lg:col-span-1">
             <Card>
@@ -164,7 +206,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                       <span className="text-sm">Walking Time</span>
                       <div className="flex items-center gap-2">
                         <Footprints className="h-4 w-4" />
-                        <span className="text-sm">{selectedDayData.totalWalkingTime} min</span>
+                        <span className="text-sm">{selectedDayData.totalDistance || 0} min</span>
                       </div>
                     </div>
                     
@@ -172,14 +214,14 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                       <span className="text-sm">Total Duration</span>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span className="text-sm">{Math.round(selectedDayData.totalDuration / 60)} hours</span>
+                        <span className="text-sm">{Math.round((selectedDayData.totalDuration || 0) / 60)} hours</span>
                       </div>
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Pace</span>
-                      <Badge variant="outline" className={`${getPaceIndicator(selectedDayData.totalWalkingTime).color} text-white`}>
-                        {getPaceIndicator(selectedDayData.totalWalkingTime).label}
+                      <Badge variant="outline" className={`${getPaceIndicator(selectedDayData.totalDistance || 0).color} text-white`}>
+                        {getPaceIndicator(selectedDayData.totalDistance || 0).label}
                       </Badge>
                     </div>
                   </div>
@@ -197,19 +239,23 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {itinerary.weather.forecast.slice(0, 3).map((day: any, index: number) => (
+                  {itinerary.days?.slice(0, 3).map((day, index: number) => (
                     <div key={index} className="flex items-center justify-between py-2">
                       <span className="text-sm">
                         Day {index + 1}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{Math.round(day.temperature.high)}°C</span>
+                        <span className="text-sm">{Math.round(day.weather?.temperature?.high || 25)}°C</span>
                         <div className="w-6 h-6 bg-yellow-200 rounded-full flex items-center justify-center">
                           ☀️
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )) || (
+                    <div className="text-sm text-gray-500 py-2">
+                      Weather forecast not available
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -221,21 +267,21 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
               <CardHeader>
                 <CardTitle>Daily Itinerary</CardTitle>
                 <CardDescription>
-                  Your personalized {itinerary.totalDays}-day adventure
+                  Your personalized {itinerary?.totalDays || 0}-day adventure
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs value={selectedDay.toString()} onValueChange={(value) => setSelectedDay(parseInt(value))}>
                   <TabsList className="grid w-full grid-cols-4 lg:grid-cols-6">
-                    {itinerary.days.map((day: any) => (
-                      <TabsTrigger key={day.day} value={day.day.toString()}>
-                        Day {day.day}
+                    {itinerary?.days?.map((day) => (
+                      <TabsTrigger key={day.dayNumber} value={day.dayNumber.toString()}>
+                        Day {day.dayNumber}
                       </TabsTrigger>
                     ))}
                   </TabsList>
 
-                  {itinerary.days.map((day: any) => (
-                    <TabsContent key={day.day} value={day.day.toString()} className="mt-6">
+                  {itinerary?.days?.map((day) => (
+                    <TabsContent key={day.dayNumber} value={day.dayNumber.toString()} className="mt-6">
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 mb-4">
                           <Calendar className="h-4 w-4" />
@@ -248,10 +294,10 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                           </span>
                         </div>
 
-                        {day.activities.map((activity: any, index: number) => (
+                        {(day.components || day.activities || []).map((activity, index: number) => (
                           <div key={activity.id} className="relative">
                             {/* Timeline connector */}
-                            {index < day.activities.length - 1 && (
+                            {index < (day.components || day.activities || []).length - 1 && (
                               <div className="absolute left-6 top-12 w-0.5 h-16 bg-gray-200" />
                             )}
                             
@@ -261,7 +307,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                                   {getActivityIcon(activity.type)}
                                 </div>
                                 <span className="text-xs mt-1 font-medium">
-                                  {formatTime(activity.time)}
+                                  {formatTime(activity.timing?.startTime || activity.time || '09:00')}
                                 </span>
                               </div>
                               
@@ -269,14 +315,14 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                                 <Card>
                                   <CardContent className="p-4">
                                     <div className="flex items-start justify-between mb-2">
-                                      <h4 className="font-medium">{activity.title}</h4>
+                                      <h4 className="font-medium">{activity.name}</h4>
                                       <div className="flex gap-1">
                                         <Badge variant="outline" className="text-xs">
-                                          {activity.duration} min
+                                          {activity.timing?.duration || activity.duration || 60} min
                                         </Badge>
-                                        {activity.dietSuitable && tripData.dietaryRestrictions.length > 0 && (
+                                        {activity.details?.accessibility?.wheelchairAccessible && (
                                           <Badge variant="outline" className="text-xs bg-green-50">
-                                            Diet ✓
+                                            Accessible ✓
                                           </Badge>
                                         )}
                                       </div>
@@ -287,8 +333,8 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                                     </p>
                                     
                                     <div className="flex items-center justify-between text-xs text-gray-500">
-                                      <span>📍 {activity.walkingTime} min walk</span>
-                                      <span>🕒 {activity.openingHours}</span>
+                                      <span>📍 {activity.travel?.travelTimeFromPrevious || activity.walkingTime || 0} min walk</span>
+                                      <span>🕒 {activity.details?.openingHours?.monday?.open || activity.openingHours || '09:00'} - {activity.details?.openingHours?.monday?.close || '18:00'}</span>
                                     </div>
                                   </CardContent>
                                 </Card>
@@ -302,6 +348,15 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                 </Tabs>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Agent Results Section */}
+          <div className="lg:col-span-1">
+            <AgentResultsPanel 
+              agentResults={tripData.agentResults}
+              onSelectOption={handleSelectOption}
+              selectedOptions={selectedOptions}
+            />
           </div>
         </div>
       </div>

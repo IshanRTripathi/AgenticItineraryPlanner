@@ -21,7 +21,7 @@ import {
   Link2,
   QrCode
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 interface ShareViewProps {
   tripData: TripData;
@@ -56,7 +56,7 @@ export function ShareView({ tripData, onBack }: ShareViewProps) {
   };
 
   const shareViaWhatsApp = () => {
-    const message = `Check out my upcoming trip to ${tripData.destination}! ${shareLink}`;
+    const message = `Check out my upcoming trip to ${tripData.destination || tripData.endLocation?.name || 'Unknown'}! ${shareLink}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };

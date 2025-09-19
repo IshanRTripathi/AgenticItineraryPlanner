@@ -34,7 +34,7 @@ public record TransportationDto(
                 LocationDto.fromEntity(entity.getTo()),
                 entity.getDepartureTime(),
                 entity.getArrivalTime(),
-                entity.getDuration(),
+                String.valueOf(entity.getDuration()),
                 PriceDto.fromEntity(entity.getPrice()),
                 entity.getProvider(),
                 entity.getBookingUrl(),

@@ -2,7 +2,10 @@
  * API Client for communicating with the backend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+import { DataTransformer } from './dataTransformer';
+import { TripData } from '../types/TripData';
+
+const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export interface ApiError {
   code: string;
@@ -46,10 +49,6 @@ class ApiClient {
       'Content-Type': 'application/json',
       ...options.headers,
     };
-
-    if (this.authToken) {
-      headers.Authorization = `Bearer ${this.authToken}`;
-    }
 
     const config: RequestInit = {
       ...options,
@@ -106,15 +105,17 @@ class ApiClient {
   }
 
   // Itinerary endpoints
-  async createItinerary(data: CreateItineraryRequest): Promise<ItineraryResponse> {
-    return this.request<ItineraryResponse>('/itineraries', {
+  async createItinerary(data: CreateItineraryRequest): Promise<TripData> {
+    const response = await this.request<ItineraryResponse>('/itineraries', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return DataTransformer.transformItineraryResponseToTripData(response);
   }
 
-  async getItinerary(id: string): Promise<ItineraryResponse> {
-    return this.request<ItineraryResponse>(`/itineraries/${id}`);
+  async getItinerary(id: string): Promise<TripData> {
+    const response = await this.request<ItineraryResponse>(`/itineraries/${id}`);
+    return DataTransformer.transformItineraryResponseToTripData(response);
   }
 
   async getPublicItinerary(id: string): Promise<ItineraryResponse> {
@@ -123,6 +124,11 @@ class ApiClient {
 
   async getUserItineraries(page = 0, size = 20): Promise<ItineraryResponse[]> {
     return this.request<ItineraryResponse[]>(`/itineraries?page=${page}&size=${size}`);
+  }
+
+  async getAllItineraries(): Promise<TripData[]> {
+    const responses = await this.request<ItineraryResponse[]>('/itineraries');
+    return responses.map(response => DataTransformer.transformItineraryResponseToTripData(response));
   }
 
   async reviseItinerary(id: string, data: ReviseRequest): Promise<ReviseResponse> {
@@ -231,12 +237,12 @@ class ApiClient {
   }
 
   // Test endpoints
-  async ping(): Promise<any> {
-    return this.request<any>('/ping');
+  async ping(): Promise<unknown> {
+    return this.request<unknown>('/ping');
   }
 
-  async echo(data: any): Promise<any> {
-    return this.request<any>('/echo', {
+  async echo(data: unknown): Promise<unknown> {
+    return this.request<unknown>('/echo', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -276,8 +282,15 @@ export interface ItineraryResponse {
   constraints: string[];
   language: string;
   summary?: string;
-  map?: any;
-  days?: any[];
+  map?: unknown;
+  days?: unknown[];
+  agentResults?: {
+    flights?: unknown[];
+    hotels?: unknown[];
+    restaurants?: unknown[];
+    places?: unknown[];
+    transport?: unknown[];
+  };
   status: string;
   createdAt: string;
   updatedAt: string;

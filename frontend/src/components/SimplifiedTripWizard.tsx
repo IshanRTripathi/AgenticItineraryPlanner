@@ -15,7 +15,9 @@ import { format, addDays } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { TripData, Traveler, TravelPreferences, TripSettings, TripLocation } from '../types/TripData';
 import { apiClient, CreateItineraryRequest } from '../services/apiClient';
-import exampleImage from 'figma:asset/3a9239d730c70fddfaa34557264375013dd112e1.png';
+import { useCreateItinerary } from '../state/query/hooks';
+import { useAppStore } from '../state/hooks';
+// removed unused figma asset import for prototype
 
 interface SimplifiedTripWizardProps {
   onComplete: (tripData: TripData) => void;
@@ -34,24 +36,26 @@ const PREFERENCE_CONTROLS = [
 ];
 
 export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizardProps) {
-  const [startLocation, setStartLocation] = useState('');
-  const [endLocation, setEndLocation] = useState('');
+  const createItineraryMutation = useCreateItinerary();
+  const { addTrip, setCurrentTrip } = useAppStore();
+  const [startLocation, setStartLocation] = useState('New York, NY');
+  const [endLocation, setEndLocation] = useState('Paris, France');
   const [isRoundTrip, setIsRoundTrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    // Default to next week
-    const today = new Date();
-    const nextWeek = addDays(today, 7);
-    const endDate = addDays(nextWeek, 4); // 5-day trip
-    return { from: nextWeek, to: endDate };
+    // Default to Oct 5 to Oct 12 (current year)
+    const year = new Date().getFullYear();
+    const from = new Date(year, 9, 5); // month is 0-indexed
+    const to = new Date(year, 9, 12);
+    return { from, to };
   });
-  const [budget, setBudget] = useState(5000);
+  const [budget, setBudget] = useState(3000);
   const [currency, setCurrency] = useState('USD');
   
   const [travelers, setTravelers] = useState<Traveler[]>([
     {
       id: '1',
-      name: '',
-      email: '',
+      name: 'John Doe',
+      email: 'john@example.com',
       age: 25,
       preferences: {
         dietaryRestrictions: [],
@@ -144,16 +148,16 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
         },
         budgetTier: budget <= 2000 ? 'economy' : budget <= 5000 ? 'mid-range' : 'luxury',
         interests: Object.entries(preferences)
-          .filter(([_, value]) => value > 50)
-          .map(([key, _]) => key),
+          .filter(([_, value]) => (value as number) > 50)
+          .map(([key]) => key as string),
         constraints: Object.entries(settings)
-          .filter(([_, value]) => value)
-          .map(([key, _]) => key),
+          .filter(([_, value]) => value as boolean)
+          .map(([key]) => key as string),
         language: 'en'
       };
 
-      // Call the backend API
-      const response = await apiClient.createItinerary(createRequest);
+      // Call the backend API via mutation
+      const response = await createItineraryMutation.mutateAsync(createRequest);
 
       // Convert API response to TripData format for frontend
       const startLocationData: TripLocation = {
@@ -203,16 +207,29 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
         },
         preferences,
         settings,
-        status: response.status,
+        status: 'planning',
         createdAt: response.createdAt,
         updatedAt: response.updatedAt,
-        isPublic: response.isPublic
+        isPublic: response.isPublic,
+        // Add computed properties expected by components
+        destination: endLocation,
+        partySize: travelers.length,
+        dietaryRestrictions: travelers.flatMap(t => t.preferences?.dietaryRestrictions || []),
+        walkingTolerance: 3, // Default moderate walking
+        pace: 3, // Default moderate pace
+        stayType: 'Hotel',
+        transport: 'Public',
+        themes: Object.entries(preferences)
+          .filter(([_, value]) => (value as number) > 50)
+          .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
       };
 
+      addTrip(tripData);
+      setCurrentTrip(tripData);
       onComplete(tripData);
     } catch (error) {
-      console.error('Failed to create itinerary:', error);
       // Handle error - could show a toast notification
+      // Error logging should be handled by the error boundary or logging service
       alert('Failed to create itinerary. Please try again.');
     }
   };
@@ -489,7 +506,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                 <p><span className="font-medium">Budget:</span> {currency} {budget.toLocaleString()}</p>
                 <p><span className="font-medium">Top Interests:</span> {
                   Object.entries(preferences)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([,a], [,b]) => (b as number) - (a as number))
                     .slice(0, 3)
                     .map(([key]) => key)
                     .join(', ')

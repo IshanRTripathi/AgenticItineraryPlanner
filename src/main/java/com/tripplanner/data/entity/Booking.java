@@ -1,56 +1,57 @@
 package com.tripplanner.data.entity;
 
-import com.google.cloud.firestore.annotation.DocumentId;
-import com.google.cloud.firestore.annotation.PropertyName;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
 
 /**
  * Booking entity representing booking transactions.
- * Stored in Firestore collection: bookings/{bookingId}
+ * Stored in H2 database table: bookings
  */
+@Entity
+@Table(name = "bookings")
 public class Booking {
     
-    @DocumentId
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
     @NotBlank
-    @PropertyName("userId")
+    @Column(name = "userId")
     private String userId;
     
     @NotBlank
-    @PropertyName("itineraryId")
+    @Column(name = "itineraryId")
     private String itineraryId;
     
     @NotNull
-    @PropertyName("item")
+    @Embedded
     private BookingItem item;
     
     @NotNull
-    @PropertyName("price")
+    @Embedded
     private BookingPrice price;
     
-    @PropertyName("razorpay")
+    @Embedded
     private RazorpayDetails razorpay;
     
-    @PropertyName("provider")
+    @Embedded
     private ProviderDetails provider;
     
-    @PropertyName("status")
+    @Column(name = "status")
     private BookingStatus status = BookingStatus.INIT;
     
-    @PropertyName("createdAt")
+    @Column(name = "createdAt")
     private Instant createdAt;
     
-    @PropertyName("updatedAt")
+    @Column(name = "updatedAt")
     private Instant updatedAt;
     
-    @PropertyName("metadata")
-    private Map<String, Object> metadata;
+    @Column(name = "metadata", columnDefinition = "TEXT")
+    private String metadataJson;
     
     public Booking() {
         this.createdAt = Instant.now();
@@ -67,11 +68,11 @@ public class Booking {
     }
     
     // Getters and Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
     
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
     
@@ -147,12 +148,12 @@ public class Booking {
         this.updatedAt = updatedAt;
     }
     
-    public Map<String, Object> getMetadata() {
-        return metadata;
+    public String getMetadataJson() {
+        return metadataJson;
     }
     
-    public void setMetadata(Map<String, Object> metadata) {
-        this.metadata = metadata;
+    public void setMetadataJson(String metadataJson) {
+        this.metadataJson = metadataJson;
     }
     
     @Override
@@ -180,18 +181,19 @@ public class Booking {
     }
     
     // Nested classes
+    @Embeddable
     public static class BookingItem {
-        @PropertyName("type")
+        @Column(name = "item_type")
         private String type; // hotel, flight, activity, transport
         
-        @PropertyName("provider")
+        @Column(name = "item_provider")
         private String provider;
         
-        @PropertyName("token")
+        @Column(name = "item_token")
         private String token; // Provider-specific booking token
         
-        @PropertyName("details")
-        private Map<String, Object> details;
+        @Column(name = "item_details", columnDefinition = "TEXT")
+        private String detailsJson; // Store as JSON string instead of Map
         
         public BookingItem() {}
         
@@ -208,19 +210,20 @@ public class Booking {
         public void setProvider(String provider) { this.provider = provider; }
         public String getToken() { return token; }
         public void setToken(String token) { this.token = token; }
-        public Map<String, Object> getDetails() { return details; }
-        public void setDetails(Map<String, Object> details) { this.details = details; }
+        public String getDetailsJson() { return detailsJson; }
+        public void setDetailsJson(String detailsJson) { this.detailsJson = detailsJson; }
     }
     
+    @Embeddable
     public static class BookingPrice {
-        @PropertyName("amount")
+        @Column(name = "price_amount")
         private double amount;
         
-        @PropertyName("currency")
+        @Column(name = "price_currency")
         private String currency;
         
-        @PropertyName("breakdown")
-        private Map<String, Double> breakdown;
+        @Column(name = "breakdown", columnDefinition = "TEXT")
+        private String breakdownJson;
         
         public BookingPrice() {}
         
@@ -234,36 +237,37 @@ public class Booking {
         public void setAmount(double amount) { this.amount = amount; }
         public String getCurrency() { return currency; }
         public void setCurrency(String currency) { this.currency = currency; }
-        public Map<String, Double> getBreakdown() { return breakdown; }
-        public void setBreakdown(Map<String, Double> breakdown) { this.breakdown = breakdown; }
+        public String getBreakdownJson() { return breakdownJson; }
+        public void setBreakdownJson(String breakdownJson) { this.breakdownJson = breakdownJson; }
     }
     
+    @Embeddable
     public static class RazorpayDetails {
-        @PropertyName("orderId")
+        @Column(name = "orderId")
         private String orderId;
         
-        @PropertyName("paymentId")
+        @Column(name = "paymentId")
         private String paymentId;
         
-        @PropertyName("signature")
+        @Column(name = "signature")
         private String signature;
         
-        @PropertyName("receipt")
+        @Column(name = "receipt")
         private String receipt;
         
-        @PropertyName("amount")
+        @Column(name = "razorpay_amount")
         private long amount; // Amount in paise
         
-        @PropertyName("currency")
+        @Column(name = "razorpay_currency")
         private String currency;
         
-        @PropertyName("status")
+        @Column(name = "razorpay_status")
         private String status;
         
-        @PropertyName("method")
+        @Column(name = "method")
         private String method;
         
-        @PropertyName("createdAt")
+        @Column(name = "razorpay_created_at")
         private Instant createdAt;
         
         public RazorpayDetails() {}
@@ -289,27 +293,28 @@ public class Booking {
         public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     }
     
+    @Embeddable
     public static class ProviderDetails {
-        @PropertyName("confirmationId")
+        @Column(name = "confirmationId")
         private String confirmationId;
         
-        @PropertyName("status")
+        @Column(name = "provider_status")
         private String status;
         
-        @PropertyName("bookingReference")
+        @Column(name = "bookingReference")
         private String bookingReference;
         
-        @PropertyName("voucher")
+        @Column(name = "voucher")
         private String voucher;
         
-        @PropertyName("cancellationPolicy")
+        @Column(name = "cancellationPolicy")
         private String cancellationPolicy;
         
-        @PropertyName("contactInfo")
-        private Map<String, String> contactInfo;
+        @Column(name = "contact_info", columnDefinition = "TEXT")
+        private String contactInfoJson;
         
-        @PropertyName("additionalInfo")
-        private Map<String, Object> additionalInfo;
+        @Column(name = "additional_info", columnDefinition = "TEXT")
+        private String additionalInfoJson;
         
         public ProviderDetails() {}
         
@@ -324,10 +329,10 @@ public class Booking {
         public void setVoucher(String voucher) { this.voucher = voucher; }
         public String getCancellationPolicy() { return cancellationPolicy; }
         public void setCancellationPolicy(String cancellationPolicy) { this.cancellationPolicy = cancellationPolicy; }
-        public Map<String, String> getContactInfo() { return contactInfo; }
-        public void setContactInfo(Map<String, String> contactInfo) { this.contactInfo = contactInfo; }
-        public Map<String, Object> getAdditionalInfo() { return additionalInfo; }
-        public void setAdditionalInfo(Map<String, Object> additionalInfo) { this.additionalInfo = additionalInfo; }
+        public String getContactInfoJson() { return contactInfoJson; }
+        public void setContactInfoJson(String contactInfoJson) { this.contactInfoJson = contactInfoJson; }
+        public String getAdditionalInfoJson() { return additionalInfoJson; }
+        public void setAdditionalInfoJson(String additionalInfoJson) { this.additionalInfoJson = additionalInfoJson; }
     }
     
     public enum BookingStatus {

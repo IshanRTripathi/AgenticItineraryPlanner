@@ -3,7 +3,6 @@ package com.tripplanner.service;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.tripplanner.api.dto.ItineraryDto;
 import com.tripplanner.data.repo.ItineraryRepository;
-import com.tripplanner.security.GoogleUserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +16,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Service for PDF generation.
  */
-@Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(ItineraryRepository.class)
+// @Service
 public class PdfService {
     
     private static final Logger logger = LoggerFactory.getLogger(PdfService.class);
@@ -26,23 +24,21 @@ public class PdfService {
     @Value("${pdf.base-url}")
     private String baseUrl;
     
-    private final ItineraryRepository itineraryRepository;
     private final ItineraryService itineraryService;
     
-    public PdfService(ItineraryRepository itineraryRepository, ItineraryService itineraryService) {
-        this.itineraryRepository = itineraryRepository;
+    public PdfService(ItineraryService itineraryService) {
         this.itineraryService = itineraryService;
     }
     
     /**
      * Generate PDF for itinerary.
      */
-    public byte[] generateItineraryPdf(String itineraryId, GoogleUserPrincipal user) {
-        logger.info("Generating PDF for itinerary: {} for user: {}", itineraryId, user.getUserId());
+    public byte[] generateItineraryPdf(String itineraryId) {
+        logger.info("Generating PDF for itinerary: {} for user: {}", "anonymous");
         
         try {
             // Get itinerary data
-            ItineraryDto itinerary = itineraryService.get(itineraryId, user);
+            ItineraryDto itinerary = itineraryService.get(itineraryId);
             
             // Generate HTML content
             String htmlContent = generateHtmlContent(itinerary);
@@ -75,7 +71,7 @@ public class PdfService {
         html.append("<!DOCTYPE html>");
         html.append("<html><head>");
         html.append("<meta charset='UTF-8'>");
-        html.append("<title>Itinerary - ").append(itinerary.destination()).append("</title>");
+        html.append("<title>Itinerary - ").append(itinerary.getDestination()).append("</title>");
         html.append("<style>");
         html.append(getDefaultStyles());
         html.append("</style>");
@@ -84,34 +80,34 @@ public class PdfService {
         // Header
         html.append("<div class='header'>");
         html.append("<h1>Your Travel Itinerary</h1>");
-        html.append("<h2>").append(itinerary.destination()).append("</h2>");
+        html.append("<h2>").append(itinerary.getDestination()).append("</h2>");
         html.append("<p class='dates'>");
-        html.append(itinerary.startDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+        html.append(itinerary.getStartDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
         html.append(" - ");
-        html.append(itinerary.endDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+        html.append(itinerary.getEndDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
         html.append("</p>");
         html.append("</div>");
         
         // Summary
-        if (itinerary.summary() != null) {
+        if (itinerary.getSummary() != null) {
             html.append("<div class='summary'>");
             html.append("<h3>Trip Summary</h3>");
-            html.append("<p>").append(itinerary.summary()).append("</p>");
+            html.append("<p>").append(itinerary.getSummary()).append("</p>");
             html.append("</div>");
         }
         
         // Days
-        if (itinerary.days() != null) {
+        if (itinerary.getDays() != null) {
             html.append("<div class='days'>");
-            itinerary.days().forEach(day -> {
+            itinerary.getDays().forEach(day -> {
                 html.append("<div class='day'>");
-                html.append("<h3>Day ").append(day.day()).append(" - ").append(day.location()).append("</h3>");
-                html.append("<p class='date'>").append(day.date()).append("</p>");
+                html.append("<h3>Day ").append(day.getDay()).append(" - ").append(day.getLocation()).append("</h3>");
+                html.append("<p class='date'>").append(day.getDate()).append("</p>");
                 
-                if (day.activities() != null) {
+                if (day.getActivities() != null) {
                     html.append("<h4>Activities</h4>");
                     html.append("<ul>");
-                    day.activities().forEach(activity -> {
+                    day.getActivities().forEach(activity -> {
                         html.append("<li>");
                         html.append("<strong>").append(activity.name()).append("</strong>");
                         if (activity.startTime() != null) {

@@ -7,11 +7,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import static java.time.LocalTime.now;
+
 /**
  * REST controller for agent events via Server-Sent Events (SSE).
  */
 @RestController
 @RequestMapping("/api/v1/agents")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AgentController {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentController.class);
@@ -29,7 +32,7 @@ public class AgentController {
     public SseEmitter stream(@RequestParam String itineraryId) {
         logger.info("=== SSE STREAM REQUEST ===");
         logger.info("Itinerary ID: {}", itineraryId);
-        logger.info("Request Time: {}", java.time.Instant.now());
+        logger.info("Request Time: {}", now());
         logger.info("Client requesting SSE connection");
         
         // Create SSE emitter with no timeout (0L means no timeout)
@@ -51,7 +54,8 @@ public class AgentController {
         });
         
         emitter.onError((throwable) -> {
-            logger.error("SSE stream error for itinerary: " + itineraryId, throwable);
+            // Client disconnects often manifest as IOExceptions; treat as normal
+            logger.warn("SSE stream ended for itinerary {} due to: {}", itineraryId, throwable.toString());
             agentEventBus.unregister(itineraryId, emitter);
         });
         
@@ -66,6 +70,58 @@ public class AgentController {
         }
         
         logger.info("=== SSE STREAM ESTABLISHED ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Emitter registered and ready");
+        logger.info("=============================");
+        
+        return emitter;
+    }
+    
+    /**
+     * Stream agent events for an itinerary via SSE (alternative endpoint for frontend compatibility).
+     */
+    @GetMapping(path = "/events/{itineraryId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamEvents(@PathVariable String itineraryId) {
+        logger.info("=== SSE EVENTS REQUEST ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Request Time: {}", now());
+        logger.info("Client requesting SSE events connection");
+        
+        // Create SSE emitter with no timeout (0L means no timeout)
+        SseEmitter emitter = new SseEmitter(0L);
+        logger.info("Created SSE emitter: {}", emitter.toString());
+        
+        // Register emitter with event bus
+        agentEventBus.register(itineraryId, emitter);
+        
+        // Set up cleanup handlers
+        emitter.onCompletion(() -> {
+            logger.debug("SSE events stream completed for itinerary: {}", itineraryId);
+            agentEventBus.unregister(itineraryId, emitter);
+        });
+        
+        emitter.onTimeout(() -> {
+            logger.debug("SSE events stream timed out for itinerary: {}", itineraryId);
+            agentEventBus.unregister(itineraryId, emitter);
+        });
+        
+        emitter.onError((throwable) -> {
+            // Client disconnects often manifest as IOExceptions; treat as normal
+            logger.warn("SSE events stream ended for itinerary {} due to: {}", itineraryId, throwable.toString());
+            agentEventBus.unregister(itineraryId, emitter);
+        });
+        
+        // Send initial connection event
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("connected")
+                    .data("Connected to agent stream for itinerary: " + itineraryId));
+            logger.info("Initial SSE events connection event sent successfully");
+        } catch (Exception e) {
+            logger.error("Failed to send initial SSE events event", e);
+        }
+        
+        logger.info("=== SSE EVENTS STREAM ESTABLISHED ===");
         logger.info("Itinerary ID: {}", itineraryId);
         logger.info("Emitter registered and ready");
         logger.info("=============================");

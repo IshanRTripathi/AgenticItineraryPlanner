@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from './ui/dialog';
 import { Card, CardContent, CardHeader } from './ui/card';
@@ -7,7 +7,7 @@ import { Input } from './ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Progress } from './ui/progress';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
 import { Separator } from './ui/separator';
 import { Checkbox } from './ui/checkbox';
 import { Textarea } from './ui/textarea';
@@ -15,7 +15,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { PhotoSpotsPanel, MustTryFoodsPanel, CostEstimatorPanel } from './stippl/ToolsPanels';
-import { WorkflowBuilderPanel } from './WorkflowBuilderPanel';
+import { WorkflowBuilder } from './WorkflowBuilder';
+import { useItinerary } from '../state/query/hooks';
 import { 
   MapPin, 
   Calendar, 
@@ -55,7 +56,8 @@ import {
   X,
   Check,
   Workflow,
-  Map
+  Map,
+  RotateCcw
 } from 'lucide-react';
 import { TripData, PopularDestination } from '../types/TripData';
 import { getAllDestinations, calculateDistance } from '../data/destinations';
@@ -94,28 +96,45 @@ interface AgentStatus {
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'AUD', 'NZD', 'HKD', 'CHF', 'JPY', 'CNY', 'SGD', 'ZAR'];
 
-const PACKING_CATEGORIES = [
-  {
-    name: 'Clothing',
-    items: ['T-shirts', 'Jeans', 'Underwear', 'Socks', 'Jacket', 'Shoes', 'Sandals'],
-    completed: 7,
-    total: 27
-  },
-  {
-    name: 'Essentials', 
-    items: ['Medical Insurance Card', 'Medicaments', 'Notebook', 'Passport/ID', 'Phone Charger', 'Power Bank', 'Sunglasses'],
-    completed: 0,
-    total: 23
-  },
-  {
-    name: 'Toiletries',
-    items: ['Toothbrush', 'Toothpaste', 'Shampoo', 'Soap', 'Deodorant', 'Sunscreen', 'First Aid Kit'],
-    completed: 0,
-    total: 27
+// Use real packing data from itinerary if available
+const getPackingCategories = (tripData: TripData) => {
+  if (tripData.itinerary?.packingList && tripData.itinerary.packingList.length > 0) {
+    return tripData.itinerary.packingList.map(category => ({
+      name: category.category,
+      items: category.items.map(item => item.name),
+      completed: category.items.filter(item => item.essential).length,
+      total: category.items.length
+    }));
   }
-];
+  
+  // Fallback to basic categories if no data available
+  return [
+    {
+      name: 'Clothing',
+      items: ['T-shirts', 'Jeans', 'Underwear', 'Socks', 'Jacket', 'Shoes', 'Sandals'],
+      completed: 0,
+      total: 7
+    },
+    {
+      name: 'Essentials', 
+      items: ['Medical Insurance Card', 'Medicaments', 'Notebook', 'Passport/ID', 'Phone Charger', 'Power Bank', 'Sunglasses'],
+      completed: 0,
+      total: 7
+    },
+    {
+      name: 'Toiletries',
+      items: ['Toothbrush', 'Toothpaste', 'Shampoo', 'Soap', 'Deodorant', 'Sunscreen', 'First Aid Kit'],
+      completed: 0,
+      total: 7
+    }
+  ];
+};
 
 export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
+  console.log('=== STIPPL PLANNER COMPONENT RENDER ===');
+  console.log('Trip Data Props:', tripData);
+  console.log('=======================================');
+  
   const [activeView, setActiveView] = useState('plan');
   const [activeTab, setActiveTab] = useState('destinations');
   const [currency, setCurrency] = useState('EUR');
@@ -129,39 +148,189 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [showAgentDock, setShowAgentDock] = useState(false);
   const [activePackingCategory, setActivePackingCategory] = useState(0);
   const [newPackingItem, setNewPackingItem] = useState('');
+  const [selectedDiscoverCountry, setSelectedDiscoverCountry] = useState('thailand');
+  const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(50); // Percentage
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef<HTMLDivElement>(null);
 
-  const [destinations, setDestinations] = useState<Destination[]>([
-    {
-      id: '1',
-      name: tripData.endLocation.name,
-      nights: 2,
-      sleeping: false,
-      discover: false,
-      transport: { distance: '130 km', duration: '2h 40m' },
-      notes: '',
-      lat: 13.7563,
-      lng: 100.5018
-    },
-    {
-      id: '2', 
-      name: 'Bank of Thailand Museum',
-      nights: 1,
-      sleeping: false,
-      discover: false,
-      notes: '',
-      lat: 13.7539,
-      lng: 100.5014
+  // Resize handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing || !resizeRef.current) return;
+    
+    const container = resizeRef.current.parentElement;
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+    
+    // Constrain between 20% and 80%
+    const constrainedWidth = Math.min(Math.max(newWidth, 20), 80);
+    setLeftPanelWidth(constrainedWidth);
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     }
-  ]);
 
-  const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([
-    { id: '1', kind: 'planner', status: 'succeeded', progress: 100 },
-    { id: '2', kind: 'places', status: 'running', progress: 65, message: 'Finding attractions...' },
-    { id: '3', kind: 'route', status: 'queued', progress: 0 },
-    { id: '4', kind: 'hotels', status: 'queued', progress: 0 },
-    { id: '5', kind: 'food', status: 'queued', progress: 0 },
-    { id: '6', kind: 'photo', status: 'queued', progress: 0 },
-  ]);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleMouseMove, handleMouseUp]);
+
+  // Fetch fresh data from API instead of using cached props
+  const { data: freshTripData, isLoading, error } = useItinerary(tripData.id);
+  
+  // Use fresh data if available, fallback to props
+  const currentTripData = freshTripData || tripData;
+
+  // Log data fetching status
+  console.log('=== STIPPL PLANNER DATA FETCH ===');
+  console.log('Trip ID:', tripData.id);
+  console.log('Is Loading:', isLoading);
+  console.log('Error:', error);
+  console.log('Fresh Trip Data:', freshTripData);
+  console.log('Current Trip Data:', currentTripData);
+  console.log('Has Itinerary:', !!currentTripData.itinerary);
+  console.log('Days Count:', currentTripData.itinerary?.days?.length || 0);
+  console.log('================================');
+
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+
+  // Update destinations when fresh data arrives
+  useEffect(() => {
+    console.log('=== DESTINATIONS UPDATE EFFECT ===');
+    console.log('Current Trip Data:', currentTripData);
+    console.log('Has Itinerary:', !!currentTripData.itinerary);
+    console.log('Days:', currentTripData.itinerary?.days);
+    console.log('Days Length:', currentTripData.itinerary?.days?.length);
+    
+    if (currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0) {
+      console.log('Processing itinerary days for destinations...');
+      const newDestinations = currentTripData.itinerary.days.map((day, index) => {
+        console.log(`Processing day ${index}:`, day);
+        return {
+          id: day.id || index.toString(),
+          name: day.location,
+          nights: 1,
+          sleeping: !!day.accommodation,
+          discover: day.components && day.components.length > 0,
+          transport: day.components?.find(c => c.type === 'transport') ? {
+            distance: `${day.totalDistance || 0} km`,
+            duration: `${Math.round((day.totalDuration || 0) / 60)}h ${(day.totalDuration || 0) % 60}m`
+          } : undefined,
+          notes: day.notes || '',
+          lat: day.components?.[0]?.location?.coordinates?.lat || 0,
+          lng: day.components?.[0]?.location?.coordinates?.lng || 0
+        };
+      });
+      console.log('New Destinations:', newDestinations);
+      setDestinations(newDestinations);
+    } else {
+      console.log('No itinerary days found, using fallback destination');
+      // Fallback to basic destination
+      const fallbackDestination = {
+        id: '1',
+        name: currentTripData.endLocation?.name || currentTripData.destination || 'Unknown Destination',
+        nights: 2,
+        sleeping: false,
+        discover: false,
+        transport: { distance: '130 km', duration: '2h 40m' },
+        notes: '',
+        lat: 13.7563,
+        lng: 100.5018
+      };
+      console.log('Fallback Destination:', fallbackDestination);
+      setDestinations([fallbackDestination]);
+    }
+    console.log('==================================');
+  }, [currentTripData]);
+
+  // Use real agent progress from trip data if available
+  const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
+
+  // Update agent statuses when fresh data arrives
+  useEffect(() => {
+    console.log('=== AGENT STATUSES UPDATE EFFECT ===');
+    console.log('Current Trip Data Agent Progress:', currentTripData.agentProgress);
+    
+    if (currentTripData.agentProgress) {
+      console.log('Processing agent progress data...');
+      const newAgentStatuses = Object.entries(currentTripData.agentProgress).map(([agentId, progress]) => {
+        console.log(`Processing agent ${agentId}:`, progress);
+        return {
+          id: agentId,
+          kind: agentId as any,
+          status: progress.status as any,
+          progress: progress.progress,
+          message: progress.message
+        };
+      });
+      console.log('New Agent Statuses:', newAgentStatuses);
+      setAgentStatuses(newAgentStatuses);
+    } else {
+      console.log('No agent progress data found, using fallback statuses');
+      // Fallback to basic status if no agent data available
+      const fallbackStatuses = [
+        { id: '1', kind: 'planner', status: 'succeeded', progress: 100 },
+        { id: '2', kind: 'places', status: 'completed', progress: 100 },
+        { id: '3', kind: 'route', status: 'completed', progress: 100 },
+        { id: '4', kind: 'hotels', status: 'completed', progress: 100 },
+        { id: '5', kind: 'food', status: 'completed', progress: 100 },
+        { id: '6', kind: 'photo', status: 'completed', progress: 100 },
+      ];
+      console.log('Fallback Agent Statuses:', fallbackStatuses);
+      setAgentStatuses(fallbackStatuses);
+    }
+    console.log('====================================');
+  }, [currentTripData]);
+
+  // Show loading state while fetching fresh data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading planner...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if API call failed
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="max-w-md mx-auto">
+            <p className="text-red-600 mb-4">Failed to load planner data</p>
+            <Button onClick={onBack}>Go Back</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalNights = destinations.reduce((sum, dest) => sum + dest.nights, 0);
   const maxNights = 10;
@@ -268,10 +437,10 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const renderTopNav = () => (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
       <div className="flex items-center space-x-4">
-        <h1 className="text-xl font-semibold">Your trip to {tripData.endLocation.name}</h1>
+        <h1 className="text-xl font-semibold">Your trip to {currentTripData.endLocation?.name || currentTripData.destination || 'Unknown'}</h1>
         <span className="text-gray-500">
-          {new Date(tripData.dates.start).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })} – {' '}
-          {new Date(tripData.dates.end).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
+          {currentTripData.dates?.start ? new Date(currentTripData.dates.start).toLocaleDateString('en-US', { day: 'numeric', month: 'long' }) : 'TBD'} – {' '}
+          {currentTripData.dates?.end ? new Date(currentTripData.dates.end).toLocaleDateString('en-US', { day: 'numeric', month: 'long' }) : 'TBD'}
         </span>
       </div>
       
@@ -398,9 +567,14 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
                   <SheetContent side="left" className="w-[400px]">
                     <SheetHeader>
                       <SheetTitle>
-                        {destination.name} — Bank of Thailand Museum
-                        <div className="text-sm text-gray-500 font-normal">19 October 2025</div>
+                        {destination.name} — Transportation Details
+                        <div className="text-sm text-gray-500 font-normal">
+                          {currentTripData.dates?.start ? new Date(currentTripData.dates.start).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : 'TBD'}
+                        </div>
                       </SheetTitle>
+                      <SheetDescription>
+                        Plan your transportation and route details for this destination.
+                      </SheetDescription>
                     </SheetHeader>
                     <div className="mt-6">
                       <Tabs value={transportMode} onValueChange={(value) => setTransportMode(value as any)}>
@@ -497,6 +671,13 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   );
 
   const renderPlanView = () => {
+    console.log('=== RENDER PLAN VIEW ===');
+    console.log('Destinations Length:', destinations.length);
+    console.log('Destinations:', destinations);
+    console.log('Current Trip Data Itinerary:', currentTripData.itinerary);
+    console.log('Current Trip Data Days:', currentTripData.itinerary?.days);
+    console.log('========================');
+    
     if (destinations.length === 0) {
       return (
         <div className="p-6 space-y-6">
@@ -524,81 +705,183 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
     }
 
     return (
-      <div className="flex flex-1">
-        <div className="flex-1">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="border-b border-gray-200 px-6">
+      <div className="flex flex-1" ref={resizeRef}>
+        <div style={{ width: `${leftPanelWidth}%` }} className="flex-shrink-0 flex flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+            <div className="border-b border-gray-200 px-6 flex-shrink-0">
               <TabsList className="h-12">
                 <TabsTrigger value="destinations">Destinations</TabsTrigger>
                 <TabsTrigger value="day-by-day">Day by day</TabsTrigger>
               </TabsList>
             </div>
             
-            <TabsContent value="destinations" className="m-0">
-              {renderDestinationsTable()}
-            </TabsContent>
-            
-            <TabsContent value="day-by-day" className="m-0 p-6">
-              <div className="space-y-4">
-                {destinations.map((destination, index) => (
-                  <Card key={destination.id} className="p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold">Day {index + 1} - {destination.name}</h3>
-                      <Badge variant="outline">{destination.nights} nights</Badge>
+            <div className="flex-1 overflow-hidden">
+              <TabsContent value="destinations" className="m-0 h-full overflow-y-auto">
+                {renderDestinationsTable()}
+              </TabsContent>
+              
+              <TabsContent value="day-by-day" className="m-0 h-full overflow-y-auto p-6">
+                <div className="space-y-4">
+                  {currentTripData.itinerary?.days?.map((day, index) => (
+                    <Card key={day.id || index} className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold">Day {day.dayNumber || index + 1} - {day.location || 'Unknown Location'}</h3>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">{day.theme || 'Explore'}</Badge>
+                          <Badge variant="secondary">{day.components?.length || 0} activities</Badge>
+                        </div>
+                      </div>
+                      
+                      {day.components && day.components.length > 0 ? (
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {day.components.map((component, compIndex) => (
+                            <div key={compIndex} className="space-y-2 p-3 border rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {component.type || 'activity'}
+                                </Badge>
+                                <span className="text-sm font-medium">{component.name || 'Unnamed Activity'}</span>
+                              </div>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {component.description || 'No description available'}
+                              </p>
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>
+                                  {component.timing?.startTime || 'TBD'} - {component.timing?.endTime || 'TBD'}
+                                </span>
+                                <span>
+                                  {component.cost?.currency || 'USD'} {component.cost?.pricePerPerson || '0'}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid md:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-gray-600">Morning</h4>
+                            <p className="text-sm text-gray-500">Arrive and check-in</p>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-gray-600">Afternoon</h4>
+                            <p className="text-sm text-gray-500">Explore local attractions</p>
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-gray-600">Evening</h4>
+                            <p className="text-sm text-gray-500">Dinner and rest</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {day.notes && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-blue-800">{day.notes}</p>
+                        </div>
+                      )}
+                    </Card>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No itinerary data available yet.</p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-gray-600">Morning</h4>
-                        <p className="text-sm text-gray-500">Arrive and check-in</p>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-gray-600">Afternoon</h4>
-                        <p className="text-sm text-gray-500">Explore local attractions</p>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-gray-600">Evening</h4>
-                        <p className="text-sm text-gray-500">Dinner and rest</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
+                  )}
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
         
-        <div className="w-1/2 bg-gray-100 relative border-l border-gray-200">
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-              <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p>Interactive Map</p>
-              <p className="text-sm">Showing {destinations.length} destinations</p>
+        {/* Resize Handle */}
+        <div 
+          className={`w-1 bg-gray-300 hover:bg-blue-400 cursor-col-resize flex-shrink-0 relative group ${isResizing ? 'bg-blue-500' : ''}`}
+          onMouseDown={handleMouseDown}
+          title="Drag to resize panels"
+        >
+          <div className="absolute inset-y-0 -left-1 -right-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-3 h-8 bg-blue-400 rounded-sm flex items-center justify-center">
+              <div className="w-0.5 h-4 bg-white rounded"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div style={{ width: `${100 - leftPanelWidth}%` }} className="bg-gray-100 relative border-l border-gray-200 flex-shrink-0 flex flex-col overflow-hidden">
+          <div className="absolute top-4 left-4 z-10">
+            <div className="flex space-x-2">
+              <Button 
+                size="sm" 
+                variant={!showWorkflowBuilder ? "default" : "outline"}
+                onClick={() => setShowWorkflowBuilder(false)}
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                Map
+              </Button>
+              <Button 
+                size="sm" 
+                variant={showWorkflowBuilder ? "default" : "outline"}
+                onClick={() => setShowWorkflowBuilder(true)}
+              >
+                <Workflow className="w-4 h-4 mr-2" />
+                Workflow
+              </Button>
             </div>
           </div>
           
-          <div className="absolute top-4 right-4 space-y-2">
+          <div className="absolute top-4 right-4 space-y-2 z-10">
             <Button size="sm" onClick={onShare}>Share trip</Button>
             <Button size="sm" variant="outline">
               <Video className="w-4 h-4 mr-2" />
               Create movie
             </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => setLeftPanelWidth(50)}
+              title="Reset panel sizes to 50/50"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Reset Layout
+            </Button>
           </div>
           
-          <div className="absolute top-4 left-4">
-            <div className="bg-white rounded-lg p-3 shadow-sm border">
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span className="text-xs">Destinations</span>
+          <div className="flex-1 overflow-hidden">
+            {!showWorkflowBuilder ? (
+              <div className="h-full flex items-center justify-center text-gray-500">
+              <div className="text-center">
+                <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p>Interactive Map</p>
+                <p className="text-sm">Showing {destinations.length} destinations</p>
               </div>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-xs">Attractions</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span className="text-xs">Transport</span>
+              <div className="absolute top-20 left-4">
+                <div className="bg-white rounded-lg p-3 shadow-sm border">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="text-xs">Destinations</span>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="text-xs">Attractions</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <span className="text-xs">Transport</span>
+                  </div>
+                </div>
               </div>
             </div>
+            ) : (
+              <div className="h-full overflow-hidden">
+                <WorkflowBuilder 
+                  tripData={currentTripData}
+                  onSave={(updatedItinerary) => {
+                    console.log('Workflow saved:', updatedItinerary);
+                    // TODO: Implement save functionality
+                  }}
+                  onCancel={() => {
+                    console.log('Workflow cancelled');
+                    setShowWorkflowBuilder(false);
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -606,7 +889,7 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   };
 
   const renderPackingView = () => (
-    <div className="p-6">
+    <div className="p-6 overflow-y-auto h-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Packing list</h2>
         <div className="flex items-center space-x-3">
@@ -625,7 +908,7 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
 
       <div className="grid grid-cols-4 gap-6">
         <div className="space-y-3">
-          {PACKING_CATEGORIES.map((category, index) => (
+          {getPackingCategories(currentTripData).map((category, index) => (
             <Card 
               key={category.name}
               className={`p-4 cursor-pointer transition-colors ${
@@ -643,18 +926,24 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
 
         <div className="col-span-3">
           <Card className="p-4">
-            <h3 className="font-medium mb-4">{PACKING_CATEGORIES[activePackingCategory].name}</h3>
+            <h3 className="font-medium mb-4">{getPackingCategories(currentTripData)[activePackingCategory]?.name || 'Category'}</h3>
             <ScrollArea className="h-64">
               <div className="space-y-2">
-                {PACKING_CATEGORIES[activePackingCategory].items.map((item, index) => (
-                  <div key={item} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox />
-                      <span>{item}</span>
-                    </div>
+                {getPackingCategories(currentTripData)[activePackingCategory]?.items?.length > 0 ? (
+                  getPackingCategories(currentTripData)[activePackingCategory].items.map((item, index) => (
+                    <div key={item} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox />
+                        <span>{item}</span>
+                      </div>
                     <Badge variant="secondary" className="text-xs">1x</Badge>
                   </div>
-                ))}
+                ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No items in this category</p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
             
@@ -676,14 +965,14 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   );
 
   const renderDiscoverView = () => {
-    const [selectedCountry, setSelectedCountry] = useState('thailand');
+    const selectedCountry = selectedDiscoverCountry;
     const destinationsData = getAllDestinations(selectedCountry === 'all' ? undefined : selectedCountry);
     
     return (
-      <div className="flex h-full">
-        <div className="w-1/3 border-r border-gray-200 p-6">
+      <div className="flex h-full overflow-hidden">
+        <div className="w-1/3 border-r border-gray-200 p-6 overflow-y-auto">
           <div className="mb-6">
-            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+            <Select value={selectedCountry} onValueChange={setSelectedDiscoverCountry}>
               <SelectTrigger>
                 <SelectValue placeholder="All countries" />
               </SelectTrigger>
@@ -698,17 +987,17 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
 
           <div className="space-y-6">
             <div>
-              <h3 className="font-medium mb-3">Articles (30)</h3>
+              <h3 className="font-medium mb-3">Travel Articles</h3>
               <div className="space-y-2">
-                <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <p className="text-sm">Best temples in Bangkok</p>
-                </div>
-                <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <p className="text-sm">Ultimate street food guide</p>
-                </div>
-                <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <p className="text-sm">Hidden gems in Thailand</p>
-                </div>
+                {currentTripData.itinerary?.highlights?.map((highlight, index) => (
+                  <div key={index} className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <p className="text-sm">Best {highlight.toLowerCase()} experiences</p>
+                  </div>
+                )) || (
+                  <div className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <p className="text-sm">Local travel guides and tips</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -794,75 +1083,362 @@ export function StipplPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
           </div>
         </div>
 
-        <div className="flex-1 relative">
-          {showMap ? (
-            <div className="h-full bg-gray-100 relative">
-              <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <p>Interactive Map</p>
-                  <p className="text-sm">Showing {destinationsData.length} destinations</p>
-                  <p className="text-sm mt-2">Click destinations to view details</p>
-                </div>
-              </div>
-              
-              <div className="absolute top-4 right-4 space-y-2">
-                <Button 
-                  size="sm" 
-                  variant={showMap ? "outline" : "default"}
-                  onClick={() => setShowMap(!showMap)}
-                >
-                  {showMap ? (
-                    <>
-                      <Workflow className="w-4 h-4 mr-2" />
-                      Workflow
-                    </>
-                  ) : (
-                    <>
-                      <Map className="w-4 h-4 mr-2" />
-                      Map
-                    </>
-                  )}
-                </Button>
-                <Button size="sm" onClick={onShare}>Share trip</Button>
-                <Button size="sm" variant="outline">
-                  <Video className="w-4 h-4 mr-2" />
-                  Create movie
-                </Button>
-              </div>
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Suggested Places in {currentTripData.endLocation?.name || currentTripData.destination}</h2>
+            <p className="text-gray-600">Discover amazing places to visit and add them to your itinerary</p>
+          </div>
 
-              <div className="absolute top-4 left-4">
-                <div className="bg-white rounded-lg p-3 shadow-sm border">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span className="text-xs">Current Destinations</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                id: '1',
+                name: 'Sagrada Familia',
+                type: 'attraction',
+                description: 'Famous basilica designed by Antoni Gaudí, a masterpiece of Catalan modernism.',
+                rating: 4.6,
+                cost: 25,
+                currency: 'EUR',
+                duration: '2-3 hours',
+                image: 'https://images.unsplash.com/photo-1539650116574-75c0c6d73c6e?w=300&h=200&fit=crop',
+                tags: ['architecture', 'religious', 'unesco'],
+                location: 'Eixample, Barcelona'
+              },
+              {
+                id: '2',
+                name: 'Park Güell',
+                type: 'attraction',
+                description: 'Whimsical park with colorful mosaics and unique architecture by Gaudí.',
+                rating: 4.4,
+                cost: 10,
+                currency: 'EUR',
+                duration: '2-4 hours',
+                image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop',
+                tags: ['park', 'architecture', 'nature'],
+                location: 'Gràcia, Barcelona'
+              },
+              {
+                id: '3',
+                name: 'La Boqueria Market',
+                type: 'market',
+                description: 'Vibrant food market with fresh produce, local delicacies, and tapas bars.',
+                rating: 4.3,
+                cost: 15,
+                currency: 'EUR',
+                duration: '1-2 hours',
+                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop',
+                tags: ['food', 'market', 'local'],
+                location: 'Ciutat Vella, Barcelona'
+              },
+              {
+                id: '4',
+                name: 'Gothic Quarter',
+                type: 'neighborhood',
+                description: 'Historic medieval quarter with narrow streets, ancient buildings, and charming squares.',
+                rating: 4.5,
+                cost: 0,
+                currency: 'EUR',
+                duration: '2-3 hours',
+                image: 'https://images.unsplash.com/photo-1555993539-1732b0258235?w=300&h=200&fit=crop',
+                tags: ['historic', 'walking', 'culture'],
+                location: 'Ciutat Vella, Barcelona'
+              },
+              {
+                id: '5',
+                name: 'Casa Batlló',
+                type: 'attraction',
+                description: 'Colorful modernist building by Gaudí with organic shapes and vibrant colors.',
+                rating: 4.4,
+                cost: 35,
+                currency: 'EUR',
+                duration: '1-2 hours',
+                image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop',
+                tags: ['architecture', 'modernist', 'museum'],
+                location: 'Eixample, Barcelona'
+              },
+              {
+                id: '6',
+                name: 'Barceloneta Beach',
+                type: 'beach',
+                description: 'Popular city beach with golden sand, beach bars, and water sports.',
+                rating: 4.2,
+                cost: 0,
+                currency: 'EUR',
+                duration: '2-4 hours',
+                image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&h=200&fit=crop',
+                tags: ['beach', 'relaxation', 'water-sports'],
+                location: 'Barceloneta, Barcelona'
+              }
+            ].map((place) => (
+              <Card key={place.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="relative">
+                  <div className="w-full h-48 bg-gray-200 overflow-hidden">
+                    <img 
+                      src={place.image} 
+                      alt={place.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop';
+                      }}
+                    />
                   </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-xs">Popular Places</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                    <span className="text-xs">Attractions</span>
+                  
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-white/90 text-gray-800">
+                      {place.type}
+                    </Badge>
                   </div>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="h-full">
-              <WorkflowBuilderPanel 
-                dayPlans={[]} 
-                selectedDay={0} 
-                onDaySelect={() => {}} 
-                onComponentUpdate={() => {}}
-                onComponentDelete={() => {}}
-                onComponentAdd={() => {}}
-                onSave={() => {}}
-              />
-            </div>
-          )}
+                
+                <div className="p-4">
+                  <h3 className="font-semibold mb-2">{place.name}</h3>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{place.description}</p>
+                  
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span>{place.rating}</span>
+                      <Clock className="w-4 h-4" />
+                      <span>{place.duration}</span>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {place.currency} {place.cost}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {place.tags.map(tag => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span>{place.location}</span>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Select onValueChange={(dayNumber) => {
+                        console.log(`Adding ${place.name} to Day ${dayNumber}`);
+                        // TODO: Implement add to itinerary functionality
+                      }}>
+                        <SelectTrigger className="flex-1 text-xs">
+                          <SelectValue placeholder="Select day" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {currentTripData.itinerary?.days?.map((day, index) => (
+                            <SelectItem key={index} value={(day.dayNumber || index + 1).toString()}>
+                              Day {day.dayNumber || index + 1}
+                            </SelectItem>
+                          )) || (
+                            <SelectItem value="1">Day 1</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <Button size="sm" variant="outline" className="px-3">
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     );
   };
+
+  const renderBudgetView = () => (
+    <div className="p-6 overflow-y-auto h-full">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Budget & Costs</h2>
+        <div className="flex items-center space-x-3">
+          <Select value={currency} onValueChange={setCurrency}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map(curr => (
+                <SelectItem key={curr} value={curr}>{curr}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4">Total Budget</h3>
+          <div className="text-3xl font-bold text-green-600">
+            {currency} {currentTripData.budget?.total || 1200}
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Estimated total cost</p>
+        </Card>
+        
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4">Accommodation</h3>
+          <div className="text-2xl font-bold">
+            {currency} {Math.round((currentTripData.budget?.total || 1200) * 0.4)}
+          </div>
+          <p className="text-sm text-gray-600 mt-2">40% of total budget</p>
+        </Card>
+        
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4">Activities</h3>
+          <div className="text-2xl font-bold">
+            {currency} {Math.round((currentTripData.budget?.total || 1200) * 0.3)}
+          </div>
+          <p className="text-sm text-gray-600 mt-2">30% of total budget</p>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderCollectionView = () => (
+    <div className="p-6 overflow-y-auto h-full">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Collection</h2>
+        <Button>Add to Collection</Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="p-4">
+          <div className="aspect-video bg-gray-200 rounded-lg mb-4"></div>
+          <h3 className="font-semibold">Saved Places</h3>
+          <p className="text-sm text-gray-600">{currentTripData.itinerary?.days?.length || 0} destinations planned</p>
+        </Card>
+        
+        <Card className="p-4">
+          <div className="aspect-video bg-gray-200 rounded-lg mb-4"></div>
+          <h3 className="font-semibold">Photo Spots</h3>
+          <p className="text-sm text-gray-600">{currentTripData.itinerary?.days?.reduce((total, day) => total + (day.components?.filter(c => c.type === 'attraction' || c.type === 'activity')?.length || 0), 0) || 0} attractions</p>
+        </Card>
+        
+        <Card className="p-4">
+          <div className="aspect-video bg-gray-200 rounded-lg mb-4"></div>
+          <h3 className="font-semibold">Must-Try Foods</h3>
+          <p className="text-sm text-gray-600">{currentTripData.itinerary?.days?.reduce((total, day) => total + (day.components?.filter(c => c.type === 'restaurant')?.length || 0), 0) || 0} meals planned</p>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderDocsView = () => (
+    <div className="p-6 overflow-y-auto h-full">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Documents & Info</h2>
+        <Button>Add Document</Button>
+      </div>
+      
+      <div className="space-y-4">
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Travel Insurance</h3>
+              <p className="text-sm text-gray-600">Policy: {currentTripData.id}-TI</p>
+            </div>
+            <Button variant="outline" size="sm">View</Button>
+          </div>
+        </Card>
+        
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Flight Tickets</h3>
+              <p className="text-sm text-gray-600">Booking: {currentTripData.id}-FL</p>
+            </div>
+            <Button variant="outline" size="sm">View</Button>
+          </div>
+        </Card>
+        
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Hotel Reservations</h3>
+              <p className="text-sm text-gray-600">{currentTripData.itinerary?.days?.length || 0} reservations</p>
+            </div>
+            <Button variant="outline" size="sm">View</Button>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderView = () => (
+    <div className="p-6 overflow-y-auto h-full">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Trip Overview</h2>
+        <div className="flex items-center space-x-3">
+          <Button variant="outline" onClick={onShare}>
+            <Share2 className="w-4 h-4 mr-2" />
+            Share
+          </Button>
+          <Button variant="outline" onClick={onExportPDF}>
+            <FileText className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4">Trip Summary</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Destination:</span>
+              <span className="font-medium">{currentTripData.destination}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Duration:</span>
+              <span className="font-medium">{currentTripData.itinerary?.days?.length || 0} days</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Travelers:</span>
+              <span className="font-medium">{currentTripData.travelers?.length || 1} people</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Budget:</span>
+              <span className="font-medium">{currentTripData.budget?.currency} {currentTripData.budget?.total}</span>
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-6">
+          <h3 className="font-semibold mb-4">Agent Progress</h3>
+          <div className="space-y-3">
+            {agentStatuses.map((agent) => (
+              <div key={agent.id} className="flex items-center justify-between">
+                <span className="text-sm capitalize">{agent.kind}</span>
+                <div className="flex items-center space-x-2">
+                  <Progress value={agent.progress} className="w-20" />
+                  <span className="text-xs text-gray-600">{agent.progress}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+
+  // Main component return
+  return (
+    <div className="h-screen flex flex-col bg-gray-50">
+      {renderTopNav()}
+      <div className="flex flex-1 overflow-hidden">
+        {renderSidebar()}
+        {activeView === 'plan' && renderPlanView()}
+        {activeView === 'packing' && renderPackingView()}
+        {activeView === 'budget' && renderBudgetView()}
+        {activeView === 'collection' && renderCollectionView()}
+        {activeView === 'docs' && renderDocsView()}
+        {activeView === 'view' && renderView()}
+        {activeView === 'discover' && renderDiscoverView()}
+      </div>
+    </div>
+  );
 }

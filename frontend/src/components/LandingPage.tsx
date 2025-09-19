@@ -22,7 +22,7 @@ import {
   Download,
   X
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 import { apiClient } from '../services/apiClient';
 import heroImage1 from 'figma:asset/784212bd1b7f49a82ac20d9447d65decf6e3d3b5.png';
 import heroImage2 from 'figma:asset/bb7fcbdd7b165c123b2c735f821bb96218785648.png';
@@ -58,6 +58,11 @@ export function LandingPage({
     }
   };
 
+  const debugStore = () => {
+    console.log('LocalStorage app-store:', localStorage.getItem('app-store'));
+    console.log('Current trips from props:', trips);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -91,9 +96,14 @@ export function LandingPage({
               </Button>
             </>
           ) : (
-            <Button variant="outline" onClick={onViewTrips} className="rounded-full">
-              My Trips
-            </Button>
+            <>
+              <Button variant="outline" onClick={onViewTrips} className="rounded-full">
+                My Trips
+              </Button>
+              <Button variant="ghost" onClick={debugStore} className="text-xs">
+                Debug Store
+              </Button>
+            </>
           )}
         </div>
       </header>

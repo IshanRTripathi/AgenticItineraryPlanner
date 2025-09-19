@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { useItineraries } from '../state/query/hooks';
 import { 
   ArrowLeft,
   Plus,
@@ -23,7 +24,7 @@ import {
   Clock,
   Star
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 interface TripDashboardProps {
   trips: TripData[];
@@ -37,169 +38,11 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
   const [filterBy, setFilterBy] = useState('all');
   const [sortBy, setSortBy] = useState('date');
 
-  // Mock additional trips for demo
-  const mockTrips: TripData[] = [
-    {
-      id: 'demo-1',
-      destination: 'Tokyo, Japan',
-      dates: { start: '2024-03-15T00:00:00Z', end: '2024-03-22T00:00:00Z' },
-      budget: 150000,
-      partySize: 2,
-      themes: ['Culture', 'Food', 'Technology'],
-      dietaryRestrictions: ['Vegetarian'],
-      walkingTolerance: 4,
-      pace: 3,
-      stayType: 'Hotel',
-      transport: 'Train',
-      itinerary: {
-        totalDays: 7,
-        destination: 'Tokyo, Japan',
-        weather: {
-          forecast: [
-            { temperature: { high: 22, low: 15 }, condition: 'sunny' },
-            { temperature: { high: 24, low: 16 }, condition: 'partly-cloudy' },
-            { temperature: { high: 20, low: 14 }, condition: 'rainy' }
-          ]
-        },
-        days: [
-          {
-            day: 1,
-            date: '2024-03-15',
-            totalWalkingTime: 45,
-            totalDuration: 480,
-            activities: [
-              {
-                id: 'act-1',
-                title: 'Senso-ji Temple',
-                description: 'Visit Tokyo\'s oldest temple in Asakusa district',
-                time: '09:00',
-                duration: 90,
-                type: 'cultural',
-                walkingTime: 0,
-                openingHours: '6:00 AM - 5:00 PM',
-                dietSuitable: true
-              },
-              {
-                id: 'act-2',
-                title: 'Traditional Sushi Experience',
-                description: 'Authentic sushi lunch at Jiro\'s apprentice restaurant',
-                time: '12:30',
-                duration: 120,
-                type: 'food',
-                walkingTime: 15,
-                openingHours: '12:00 PM - 3:00 PM',
-                dietSuitable: false
-              }
-            ]
-          },
-          {
-            day: 2,
-            date: '2024-03-16',
-            totalWalkingTime: 60,
-            totalDuration: 420,
-            activities: [
-              {
-                id: 'act-3',
-                title: 'Meiji Shrine',
-                description: 'Peaceful shrine in the heart of Tokyo',
-                time: '10:00',
-                duration: 90,
-                type: 'cultural',
-                walkingTime: 20,
-                openingHours: '9:00 AM - 4:30 PM',
-                dietSuitable: true
-              }
-            ]
-          }
-        ]
-      },
-      bookingData: {
-        bookingReference: 'BK87654321',
-        status: 'confirmed'
-      }
-    },
-    {
-      id: 'demo-2',
-      destination: 'Paris, France',
-      dates: { start: '2024-01-10T00:00:00Z', end: '2024-01-17T00:00:00Z' },
-      budget: 120000,
-      partySize: 1,
-      themes: ['Heritage', 'Art', 'Photography'],
-      dietaryRestrictions: [],
-      walkingTolerance: 5,
-      pace: 2,
-      stayType: 'Airbnb',
-      transport: 'Walking',
-      itinerary: {
-        totalDays: 7,
-        destination: 'Paris, France',
-        weather: {
-          forecast: [
-            { temperature: { high: 8, low: 3 }, condition: 'cloudy' },
-            { temperature: { high: 10, low: 4 }, condition: 'sunny' },
-            { temperature: { high: 6, low: 1 }, condition: 'rainy' }
-          ]
-        },
-        days: [
-          {
-            day: 1,
-            date: '2024-01-10',
-            totalWalkingTime: 30,
-            totalDuration: 360,
-            activities: [
-              {
-                id: 'act-4',
-                title: 'Louvre Museum',
-                description: 'World\'s largest art museum and historic monument',
-                time: '10:00',
-                duration: 180,
-                type: 'cultural',
-                walkingTime: 0,
-                openingHours: '9:00 AM - 6:00 PM',
-                dietSuitable: true
-              },
-              {
-                id: 'act-5',
-                title: 'Seine River Walk',
-                description: 'Scenic walk along the famous river',
-                time: '15:00',
-                duration: 90,
-                type: 'nature',
-                walkingTime: 30,
-                openingHours: 'All day',
-                dietSuitable: true
-              }
-            ]
-          },
-          {
-            day: 2,
-            date: '2024-01-11',
-            totalWalkingTime: 25,
-            totalDuration: 300,
-            activities: [
-              {
-                id: 'act-6',
-                title: 'Eiffel Tower',
-                description: 'Iconic iron lattice tower and symbol of Paris',
-                time: '11:00',
-                duration: 120,
-                type: 'cultural',
-                walkingTime: 25,
-                openingHours: '9:30 AM - 11:45 PM',
-                dietSuitable: true
-              }
-            ]
-          }
-        ]
-      },
-      bookingData: {
-        bookingReference: 'BK12345678',
-        status: 'completed'
-      }
-    }
-  ];
-
-  const allTrips = [...trips, ...mockTrips];
+  // Fetch fresh data from API instead of using cached props
+  const { data: freshTrips, isLoading, error } = useItineraries();
+  
+  // Use fresh data if available, fallback to props
+  const allTrips = freshTrips || trips;
 
   const upcomingTrips = allTrips.filter(trip => 
     new Date(trip.dates.start) > new Date()
@@ -210,8 +53,10 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
   );
 
   const filteredTrips = allTrips.filter(trip => {
-    const matchesSearch = trip.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         trip.themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()));
+    const destination = trip.destination || trip.endLocation?.name || 'Unknown';
+    const themes = trip.themes || [];
+    const matchesSearch = destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()));
     
     if (filterBy === 'upcoming') return matchesSearch && upcomingTrips.includes(trip);
     if (filterBy === 'past') return matchesSearch && pastTrips.includes(trip);
@@ -223,13 +68,41 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
       return new Date(b.dates.start).getTime() - new Date(a.dates.start).getTime();
     }
     if (sortBy === 'destination') {
-      return a.destination.localeCompare(b.destination);
+      const aDest = a.destination || a.endLocation?.name || 'Unknown';
+      const bDest = b.destination || b.endLocation?.name || 'Unknown';
+      return aDest.localeCompare(bDest);
     }
     if (sortBy === 'budget') {
-      return b.budget - a.budget;
+      return b.budget.total - a.budget.total;
     }
     return 0;
   });
+
+  // Show loading state while fetching fresh data
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading trips...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if API call failed
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="max-w-md mx-auto">
+            <p className="text-red-600 mb-4">Failed to load trips</p>
+            <Button onClick={onBack}>Go Back</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -323,7 +196,10 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                 <MapPin className="h-5 w-5 text-purple-600" />
                 <div>
                   <p className="text-2xl font-semibold">
-                    {new Set(allTrips.map(trip => trip.destination.split(',')[1]?.trim() || trip.destination)).size}
+                    {new Set(allTrips.map(trip => {
+                      const dest = trip.destination || trip.endLocation?.name || 'Unknown';
+                      return dest.split(',')[1]?.trim() || dest;
+                    })).size}
                   </p>
                   <p className="text-sm text-gray-600">Countries Visited</p>
                 </div>
@@ -336,7 +212,7 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-600" />
                 <div>
-                  <p className="text-2xl font-semibold">₹{(allTrips.reduce((sum, trip) => sum + trip.budget, 0) / 100000).toFixed(1)}L</p>
+                  <p className="text-2xl font-semibold">₹{(allTrips.reduce((sum, trip) => sum + trip.budget.total, 0) / 100000).toFixed(1)}L</p>
                   <p className="text-sm text-gray-600">Total Spent</p>
                 </div>
               </div>
@@ -415,7 +291,7 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                           <div className="flex-1">
                             <CardTitle className="flex items-center gap-2 text-lg">
                               <MapPin className="h-4 w-4" />
-                              {trip.destination}
+                              {trip.destination || trip.endLocation?.name || 'Unknown'}
                             </CardTitle>
                             <CardDescription className="flex items-center gap-4 text-sm mt-1">
                               <span className="flex items-center gap-1">
@@ -424,7 +300,7 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                               </span>
                               <span className="flex items-center gap-1">
                                 <Users className="h-3 w-3" />
-                                {trip.partySize}
+                                {trip.partySize || trip.travelers.length}
                               </span>
                             </CardDescription>
                           </div>
@@ -441,21 +317,21 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                       <CardContent>
                         <div className="space-y-3">
                           <div className="flex flex-wrap gap-1">
-                            {trip.themes.slice(0, 3).map((theme) => (
+                            {(trip.themes || []).slice(0, 3).map((theme) => (
                               <Badge key={theme} variant="secondary" className="text-xs">
                                 {theme}
                               </Badge>
                             ))}
-                            {trip.themes.length > 3 && (
+                            {(trip.themes || []).length > 3 && (
                               <Badge variant="secondary" className="text-xs">
-                                +{trip.themes.length - 3}
+                                +{(trip.themes || []).length - 3}
                               </Badge>
                             )}
                           </div>
                           
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Budget</span>
-                            <span className="font-medium">₹{trip.budget.toLocaleString('en-IN')}</span>
+                            <span className="font-medium">₹{trip.budget.total.toLocaleString('en-IN')}</span>
                           </div>
                           
                           {trip.bookingData && (

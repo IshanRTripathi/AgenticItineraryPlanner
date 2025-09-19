@@ -19,7 +19,7 @@ import {
   Clock,
   AlertTriangle
 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 interface CheckoutProps {
   tripData: TripData;
@@ -59,7 +59,7 @@ export function Checkout({ tripData, onSuccess, onBack }: CheckoutProps) {
   const [steps, setSteps] = useState(paymentSteps);
 
   const calculateTotal = () => {
-    return Math.floor(tripData.budget * 0.8); // Mock total
+    return Math.floor((tripData.budget?.total || tripData.budget || 0) * 0.8); // Mock total
   };
 
   const updateFormData = (updates: Partial<typeof formData>) => {

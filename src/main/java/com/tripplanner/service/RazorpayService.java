@@ -7,7 +7,7 @@ import com.razorpay.Utils;
 import com.tripplanner.api.BookingController;
 import com.tripplanner.data.entity.Booking;
 import com.tripplanner.data.repo.BookingRepository;
-import com.tripplanner.security.GoogleUserPrincipal;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public class RazorpayService {
     /**
      * Initialize Razorpay client after properties are injected.
      */
-    @jakarta.annotation.PostConstruct
+    @PostConstruct
     public void initializeClient() throws RazorpayException {
         logger.info("Initializing Razorpay client for environment: {}", environment);
         this.razorpayClient = new RazorpayClient(keyId, keySecret);
@@ -63,8 +63,8 @@ public class RazorpayService {
     /**
      * Create a Razorpay order.
      */
-    public BookingController.RazorpayOrderRes createOrder(BookingController.RazorpayOrderReq request, GoogleUserPrincipal user) {
-        logger.info("Creating Razorpay order for user: {}, amount: {}", user.getUserId(), request.amount());
+    public BookingController.RazorpayOrderRes createOrder(BookingController.RazorpayOrderReq request) {
+        logger.info("Creating Razorpay order, amount: {}", request.amount());
         
         try {
             // Create order with Razorpay
@@ -83,7 +83,7 @@ public class RazorpayService {
             
             // Create booking record
             Booking booking = new Booking();
-            booking.setUserId(user.getUserId());
+            booking.setUserId("anonymous");
             booking.setItineraryId(request.itineraryId());
             
             // Set booking item
@@ -122,7 +122,7 @@ public class RazorpayService {
                     order.get("receipt")
             );
             
-        } catch (RazorpayException | ExecutionException | InterruptedException e) {
+        } catch (RazorpayException e) {
             logger.error("Failed to create Razorpay order", e);
             throw new RuntimeException("Failed to create payment order: " + e.getMessage(), e);
         }

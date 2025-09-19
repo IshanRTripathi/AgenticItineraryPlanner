@@ -244,6 +244,15 @@ export interface TripData {
     };
   };
   
+  // Agent-specific results
+  agentResults?: {
+    flights?: FlightOption[];
+    hotels?: HotelOption[];
+    restaurants?: RestaurantOption[];
+    places?: PlaceOption[];
+    transport?: TransportOption[];
+  };
+  
   // Sharing
   isPublic: boolean;
   shareCode?: string;
@@ -257,6 +266,20 @@ export interface TripData {
     cost: number;
     componentId: string;
   }[];
+  
+  // Additional properties expected by components
+  destination?: string; // Computed from endLocation.name
+  partySize?: number; // Computed from travelers.length
+  dietaryRestrictions?: string[]; // Computed from travelers preferences
+  walkingTolerance?: number; // 1-5 scale
+  pace?: number; // 1-5 scale
+  stayType?: 'Hotel' | 'Airbnb' | 'Hostel' | 'Resort';
+  transport?: 'Walking' | 'Public' | 'Private' | 'Mixed';
+  themes?: string[]; // Computed from preferences
+  bookingData?: {
+    bookingReference: string;
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  };
 }
 
 // Popular destinations data
@@ -292,47 +315,119 @@ export interface AgentTask {
 
 export const AGENT_TASKS: AgentTask[] = [
   {
-    id: 'places',
-    name: 'Places Agent',
-    description: 'Discovering city areas, heatmaps, opening hours, crowd windows',
-    icon: '🗺️',
-    estimatedDuration: 3000
-  },
-  {
-    id: 'flights',
-    name: 'Flights Agent',
-    description: 'Fares & hold eligibility',
-    icon: '✈️',
-    estimatedDuration: 3000
-  },
-  {
-    id: 'food',
-    name: 'Food Agent',
-    description: 'Ratings, cost, cuisine near heatmap zones',
-    icon: '🍽️',
-    estimatedDuration: 3000
-  },
-  {
-    id: 'pt',
-    name: 'Transit Agent',
-    description: 'Passes, transfers, travel times',
-    icon: '🚇',
-    estimatedDuration: 3000
-  },
-  {
-    id: 'hotels',
-    name: 'Hotels Agent',
-    description: 'Ratings & availability filtered by Places heatmaps',
-    icon: '🏨',
-    estimatedDuration: 3000,
-    dependencies: ['places']
-  },
-  {
     id: 'planner',
     name: 'Planner Agent',
-    description: 'Drafts day slots from Places Agent output',
+    description: 'Creating your personalized itinerary with activities, accommodations, and recommendations',
     icon: '📋',
-    estimatedDuration: 3000,
-    dependencies: ['places']
+    estimatedDuration: 3000
   }
 ];
+
+// Agent-specific result types
+export interface FlightOption {
+  id: string;
+  airline: string;
+  flightNumber: string;
+  departure: {
+    airport: string;
+    time: string;
+    terminal?: string;
+  };
+  arrival: {
+    airport: string;
+    time: string;
+    terminal?: string;
+  };
+  duration: string;
+  stops: number;
+  price: number;
+  currency: string;
+  category: 'cost-effective' | 'fastest' | 'optimal';
+  features: string[];
+  bookingUrl?: string;
+  holdAvailable: boolean;
+  baggage: {
+    included: boolean;
+    weight: string;
+  };
+}
+
+export interface HotelOption {
+  id: string;
+  name: string;
+  rating: number;
+  price: number;
+  currency: string;
+  category: 'budget' | 'mid-range' | 'luxury';
+  location: {
+    address: string;
+    coordinates: { lat: number; lng: number };
+    distanceToAttractions: number; // km
+  };
+  amenities: string[];
+  roomType: string;
+  availability: boolean;
+  bookingUrl?: string;
+  images: string[];
+  reviews: {
+    count: number;
+    average: number;
+  };
+}
+
+export interface RestaurantOption {
+  id: string;
+  name: string;
+  cuisine: string;
+  rating: number;
+  priceRange: 'budget' | 'mid-range' | 'upscale';
+  location: {
+    address: string;
+    coordinates: { lat: number; lng: number };
+  };
+  dietaryOptions: string[];
+  openingHours: string;
+  features: string[];
+  category: 'local' | 'dietary-friendly' | 'budget' | 'fine-dining';
+  bookingRequired: boolean;
+  images: string[];
+}
+
+export interface PlaceOption {
+  id: string;
+  name: string;
+  type: 'attraction' | 'landmark' | 'museum' | 'park' | 'viewpoint';
+  rating: number;
+  location: {
+    address: string;
+    coordinates: { lat: number; lng: number };
+  };
+  openingHours: string;
+  entryFee: number;
+  currency: string;
+  crowdLevel: 'low' | 'moderate' | 'high';
+  bestTimeToVisit: string;
+  duration: number; // minutes
+  category: 'must-visit' | 'hidden-gem' | 'time-optimized';
+  features: string[];
+  images: string[];
+}
+
+export interface TransportOption {
+  id: string;
+  type: 'public' | 'private' | 'multi-modal';
+  name: string;
+  cost: number;
+  currency: string;
+  duration: number; // minutes
+  convenience: 'high' | 'medium' | 'low';
+  accessibility: boolean;
+  features: string[];
+  route: {
+    from: string;
+    to: string;
+    stops?: string[];
+  };
+  schedule?: string;
+  bookingRequired: boolean;
+}

@@ -35,7 +35,7 @@ public record ActivityDto(
                 LocationDto.fromEntity(entity.getLocation()),
                 entity.getStartTime(),
                 entity.getEndTime(),
-                entity.getDuration(),
+                String.valueOf(entity.getDuration()),
                 entity.getCategory(),
                 PriceDto.fromEntity(entity.getPrice()),
                 entity.isBookingRequired(),

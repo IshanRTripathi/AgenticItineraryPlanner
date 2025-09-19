@@ -1,0 +1,1567 @@
+openapi: 3.0.3
+info:
+  title: Agentic Itinerary Planner API
+  description: |
+    Comprehensive API for AI-powered travel itinerary planning and management.
+    
+    This API provides endpoints for:
+    - Creating and managing travel itineraries
+    - Real-time agent progress tracking via Server-Sent Events
+    - Travel planning tools (weather, packing lists, photo spots, etc.)
+    - Booking and payment processing
+    - Health monitoring and testing
+    
+    All endpoints support CORS and work without authentication in development mode.
+  version: 1.0.0
+  contact:
+    name: Agentic Itinerary Planner Team
+    email: support@agenticitinerary.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.agenticitinerary.com/api/v1
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check and testing endpoints
+  - name: Itineraries
+    description: Itinerary creation, retrieval, and management
+  - name: Agents
+    description: AI agent progress tracking and events
+  - name: Tools
+    description: Travel planning tools and utilities
+  - name: Bookings
+    description: Booking and payment processing
+  - name: Test
+    description: Testing and debugging endpoints
+
+paths:
+  # Health Endpoints
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Returns the current health status of the API service
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-09-19T15:21:44.259271500Z"
+                  service:
+                    type: string
+                    example: "Agentic Itinerary Planner"
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+  /test:
+    get:
+      tags:
+        - Health
+      summary: Test endpoint
+      description: Simple test endpoint to verify API connectivity
+      responses:
+        '200':
+          description: Test successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Backend is working!"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  # Itinerary Endpoints
+  /itineraries:
+    post:
+      tags:
+        - Itineraries
+      summary: Create a new itinerary
+      description: Creates a new travel itinerary with AI agent processing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItineraryReq'
+            example:
+              destination: "Barcelona, Spain"
+              startDate: "2025-06-01"
+              endDate: "2025-06-04"
+              party:
+                adults: 2
+                children: 1
+                infants: 0
+                rooms: 1
+              budgetTier: "mid-range"
+              interests: ["culture", "architecture", "food"]
+              constraints: ["familyFriendly", "wheelchairAccessible"]
+              language: "en"
+      responses:
+        '200':
+          description: Itinerary created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItineraryDto'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Itineraries
+      summary: Get all itineraries
+      description: Retrieves a list of all itineraries
+      responses:
+        '200':
+          description: List of itineraries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItineraryDto'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /itineraries/{id}:
+    get:
+      tags:
+        - Itineraries
+      summary: Get itinerary by ID
+      description: Retrieves a specific itinerary by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Itinerary ID
+          schema:
+            type: string
+            example: "3"
+      responses:
+        '200':
+          description: Itinerary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItineraryDto'
+        '404':
+          description: Itinerary not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Itineraries
+      summary: Delete itinerary
+      description: Deletes a specific itinerary by its ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Itinerary ID
+          schema:
+            type: string
+            example: "3"
+      responses:
+        '204':
+          description: Itinerary deleted successfully
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Agent Endpoints
+  /agents/stream:
+    get:
+      tags:
+        - Agents
+      summary: Stream agent events (SSE)
+      description: |
+        Establishes a Server-Sent Events connection to receive real-time updates
+        about AI agent progress for itinerary generation.
+      parameters:
+        - name: itineraryId
+          in: query
+          required: true
+          description: Itinerary ID to track
+          schema:
+            type: string
+            example: "3"
+      responses:
+        '200':
+          description: SSE connection established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: connected
+                  data: Connected to agent stream for itinerary: 3
+                  
+                  event: agent-progress
+                  data: {"kind":"planner","status":"running","progress":45,"message":"Generating activities..."}
+
+  /agents/events/{itineraryId}:
+    get:
+      tags:
+        - Agents
+      summary: Stream agent events by ID (SSE)
+      description: |
+        Alternative SSE endpoint for streaming agent events for a specific itinerary.
+        This endpoint provides the same functionality as /agents/stream but uses
+        path parameter instead of query parameter.
+      parameters:
+        - name: itineraryId
+          in: path
+          required: true
+          description: Itinerary ID to track
+          schema:
+            type: string
+            example: "3"
+      responses:
+        '200':
+          description: SSE connection established
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                example: |
+                  event: connected
+                  data: Connected to agent stream for itinerary: 3
+                  
+                  event: agent-progress
+                  data: {"kind":"planner","status":"running","progress":45,"message":"Generating activities..."}
+
+  /agents/{itineraryId}/status:
+    get:
+      tags:
+        - Agents
+      summary: Get agent status
+      description: Get current status of agents for a specific itinerary (polling alternative to SSE)
+      parameters:
+        - name: itineraryId
+          in: path
+          required: true
+          description: Itinerary ID
+          schema:
+            type: string
+            example: "3"
+      responses:
+        '200':
+          description: Agent status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStatusResponse'
+
+  # Tools Endpoints
+  /tools/weather:
+    get:
+      tags:
+        - Tools
+      summary: Get weather information
+      description: Retrieves weather information for a specific destination
+      parameters:
+        - name: destination
+          in: query
+          required: true
+          description: Destination name or location
+          schema:
+            type: string
+            example: "Barcelona"
+        - name: date
+          in: query
+          required: false
+          description: Date for weather forecast (ISO format)
+          schema:
+            type: string
+            format: date
+            example: "2025-06-01"
+      responses:
+        '200':
+          description: Weather information retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherRes'
+              example:
+                destination: "Barcelona"
+                date: "2025-06-01"
+                temperature: 22.5
+                condition: "Sunny"
+                description: "Clear skies with light winds"
+                humidity: 65.0
+                windSpeed: 12.5
+                unit: "Celsius"
+
+  /packing-list:
+    post:
+      tags:
+        - Tools
+      summary: Generate packing list
+      description: Generates a personalized packing list for a trip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackingListReq'
+      responses:
+        '200':
+          description: Packing list generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackingListRes'
+
+  /photo-spots:
+    post:
+      tags:
+        - Tools
+      summary: Get photo spots
+      description: Retrieves recommended photo spots for a destination
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoSpotsReq'
+      responses:
+        '200':
+          description: Photo spots retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoSpotsRes'
+
+  /must-try-foods:
+    post:
+      tags:
+        - Tools
+      summary: Get must-try foods
+      description: Retrieves must-try food recommendations for a destination
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MustTryFoodsReq'
+      responses:
+        '200':
+          description: Must-try foods retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MustTryFoodsRes'
+
+  /cost-estimator:
+    post:
+      tags:
+        - Tools
+      summary: Generate cost estimate
+      description: Generates a cost estimate for a trip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CostEstimateReq'
+      responses:
+        '200':
+          description: Cost estimate generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostEstimateRes'
+
+  # Booking Endpoints
+  /payments/razorpay/order:
+    post:
+      tags:
+        - Bookings
+      summary: Create Razorpay order
+      description: Creates a new Razorpay payment order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RazorpayOrderReq'
+      responses:
+        '200':
+          description: Razorpay order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RazorpayOrderRes'
+
+  /payments/razorpay/webhook:
+    post:
+      tags:
+        - Bookings
+      summary: Razorpay webhook
+      description: Handles Razorpay payment webhook notifications
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Raw webhook payload
+      responses:
+        '200':
+          description: Webhook processed successfully
+
+  /providers/{vertical}/{provider}:book:
+    post:
+      tags:
+        - Bookings
+      summary: Execute provider booking
+      description: Executes booking with a specific provider after payment confirmation
+      parameters:
+        - name: vertical
+          in: path
+          required: true
+          description: Booking vertical (hotels, flights, activities, etc.)
+          schema:
+            type: string
+            example: "hotels"
+        - name: provider
+          in: path
+          required: true
+          description: Provider name
+          schema:
+            type: string
+            example: "booking"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderBookReq'
+      responses:
+        '200':
+          description: Provider booking executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRes'
+
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: Get user bookings
+      description: Retrieves all bookings for the current user
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number (0-based)
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Page size
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Bookings retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingRes'
+
+  /bookings/{bookingId}:
+    get:
+      tags:
+        - Bookings
+      summary: Get booking by ID
+      description: Retrieves a specific booking by its ID
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          description: Booking ID
+          schema:
+            type: string
+            example: "123"
+      responses:
+        '200':
+          description: Booking retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRes'
+
+  /bookings/{bookingId}:cancel:
+    post:
+      tags:
+        - Bookings
+      summary: Cancel booking
+      description: Cancels a specific booking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          description: Booking ID
+          schema:
+            type: string
+            example: "123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelBookingReq'
+      responses:
+        '200':
+          description: Booking canceled successfully
+
+  # Test Endpoints
+  /ping:
+    get:
+      tags:
+        - Test
+      summary: Ping endpoint
+      description: Simple ping endpoint for testing API connectivity
+      responses:
+        '200':
+          description: Ping successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "pong"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  status:
+                    type: string
+                    example: "Backend is working!"
+
+  /echo:
+    post:
+      tags:
+        - Test
+      summary: Echo endpoint
+      description: Echoes back the request payload for testing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Echo successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  echo:
+                    type: object
+                    additionalProperties: true
+                  timestamp:
+                    type: string
+                    format: date-time
+                  message:
+                    type: string
+                    example: "Echo endpoint working"
+
+components:
+  schemas:
+    # Request DTOs
+    CreateItineraryReq:
+      type: object
+      required:
+        - destination
+        - startDate
+        - endDate
+        - party
+        - budgetTier
+      properties:
+        destination:
+          type: string
+          description: Travel destination
+          example: "Barcelona, Spain"
+        startDate:
+          type: string
+          format: date
+          description: Trip start date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          description: Trip end date
+          example: "2025-06-04"
+        party:
+          $ref: '#/components/schemas/PartyDto'
+        budgetTier:
+          type: string
+          description: Budget tier for the trip
+          enum: [economy, mid-range, luxury]
+          example: "mid-range"
+        interests:
+          type: array
+          items:
+            type: string
+          description: List of travel interests
+          example: ["culture", "architecture", "food"]
+        constraints:
+          type: array
+          items:
+            type: string
+          description: List of travel constraints
+          example: ["familyFriendly", "wheelchairAccessible"]
+        language:
+          type: string
+          description: Preferred language
+          default: "en"
+          example: "en"
+
+    PartyDto:
+      type: object
+      required:
+        - adults
+      properties:
+        adults:
+          type: integer
+          minimum: 1
+          description: Number of adults
+          example: 2
+        children:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of children
+          example: 1
+        infants:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Number of infants
+          example: 0
+        rooms:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Number of rooms needed
+          example: 1
+
+    # Response DTOs
+    ItineraryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique itinerary identifier
+          example: "3"
+        destination:
+          type: string
+          description: Travel destination
+          example: "Barcelona, Spain"
+        startDate:
+          type: string
+          format: date
+          description: Trip start date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          description: Trip end date
+          example: "2025-06-04"
+        party:
+          $ref: '#/components/schemas/PartyDto'
+        budgetTier:
+          type: string
+          description: Budget tier for the trip
+          example: "mid-range"
+        interests:
+          type: array
+          items:
+            type: string
+          description: List of travel interests
+          example: ["culture", "architecture", "food"]
+        constraints:
+          type: array
+          items:
+            type: string
+          description: List of travel constraints
+          example: ["familyFriendly", "wheelchairAccessible"]
+        language:
+          type: string
+          description: Preferred language
+          example: "en"
+        summary:
+          type: string
+          description: Trip summary
+          example: "Your personalized itinerary for Barcelona, Spain"
+        map:
+          type: object
+          description: Map data (not implemented yet)
+          nullable: true
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItineraryDayDto'
+          description: Daily itinerary details
+        agentResults:
+          type: object
+          description: AI agent processing results
+          nullable: true
+        status:
+          type: string
+          description: Itinerary status
+          enum: [draft, generating, completed, failed]
+          example: "generating"
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-09-19T15:21:44.259271500Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-09-19T15:21:44.259271500Z"
+        isPublic:
+          type: boolean
+          description: Whether itinerary is public
+          example: false
+        shareToken:
+          type: string
+          description: Share token for public access
+          nullable: true
+
+    ItineraryDayDto:
+      type: object
+      properties:
+        day:
+          type: integer
+          description: Day number in the itinerary
+          example: 1
+        date:
+          type: string
+          format: date
+          description: Date for this day
+          example: "2025-06-01"
+        location:
+          type: string
+          description: Primary location for the day
+          example: "Barcelona, Spain"
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityDto'
+          description: Activities planned for this day
+        accommodation:
+          $ref: '#/components/schemas/AccommodationDto'
+          description: Accommodation for this day
+        transportation:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransportationDto'
+          description: Transportation for this day
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealDto'
+          description: Meals planned for this day
+        notes:
+          type: string
+          description: Additional notes for this day
+
+    ActivityDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Activity name
+          example: "Sagrada Familia Tour"
+        description:
+          type: string
+          description: Activity description
+          example: "Guided tour of Gaudi's masterpiece"
+        location:
+          $ref: '#/components/schemas/LocationDto'
+        startTime:
+          type: string
+          description: Activity start time
+          example: "09:00"
+        endTime:
+          type: string
+          description: Activity end time
+          example: "11:00"
+        duration:
+          type: string
+          description: Activity duration
+          example: "120"
+        category:
+          type: string
+          description: Activity category
+          example: "sightseeing"
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        bookingRequired:
+          type: boolean
+          description: Whether booking is required
+          example: true
+        bookingUrl:
+          type: string
+          description: URL for booking
+          example: "https://example.com/book"
+        tips:
+          type: string
+          description: Tips for this activity
+
+    AccommodationDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Accommodation name
+          example: "Hotel Casa Fuster"
+        type:
+          type: string
+          description: Accommodation type
+          example: "hotel"
+        location:
+          $ref: '#/components/schemas/LocationDto'
+        checkIn:
+          type: string
+          format: date
+          description: Check-in date
+          example: "2025-06-01"
+        checkOut:
+          type: string
+          format: date
+          description: Check-out date
+          example: "2025-06-04"
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        rating:
+          type: number
+          format: double
+          description: Accommodation rating
+          example: 4.5
+        amenities:
+          type: array
+          items:
+            type: string
+          description: List of amenities
+          example: ["wifi", "pool", "gym"]
+        bookingUrl:
+          type: string
+          description: URL for booking
+          example: "https://example.com/book"
+
+    TransportationDto:
+      type: object
+      properties:
+        mode:
+          type: string
+          description: Transportation mode
+          example: "flight"
+        from:
+          $ref: '#/components/schemas/LocationDto'
+        to:
+          $ref: '#/components/schemas/LocationDto'
+        departureTime:
+          type: string
+          description: Departure time
+          example: "14:30"
+        arrivalTime:
+          type: string
+          description: Arrival time
+          example: "16:45"
+        duration:
+          type: string
+          description: Journey duration
+          example: "135"
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        provider:
+          type: string
+          description: Transportation provider
+          example: "Iberia"
+        bookingUrl:
+          type: string
+          description: URL for booking
+          example: "https://example.com/book"
+        notes:
+          type: string
+          description: Additional notes
+
+    MealDto:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Meal type
+          example: "dinner"
+        name:
+          type: string
+          description: Meal name
+          example: "Paella Valenciana"
+        restaurant:
+          type: string
+          description: Restaurant name
+          example: "Restaurante 7 Portes"
+        location:
+          $ref: '#/components/schemas/LocationDto'
+        time:
+          type: string
+          description: Meal time
+          example: "20:00"
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        cuisine:
+          type: string
+          description: Cuisine type
+          example: "Spanish"
+        notes:
+          type: string
+          description: Additional notes
+
+    LocationDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Location name
+          example: "Sagrada Familia"
+        address:
+          type: string
+          description: Full address
+          example: "Carrer de Mallorca, 401, 08013 Barcelona, Spain"
+        lat:
+          type: number
+          format: double
+          description: Latitude coordinate
+          example: 41.4036
+        lng:
+          type: number
+          format: double
+          description: Longitude coordinate
+          example: 2.1744
+        placeId:
+          type: string
+          description: Google Places ID
+          example: "ChIJ5TCOcRaYpBIRCmZHTz37sEQ"
+
+    PriceDto:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          description: Price amount
+          example: 25.50
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: Currency code (ISO 4217)
+          example: "EUR"
+        per:
+          type: string
+          description: Price unit (per person, per night, etc.)
+          example: "person"
+
+    # Agent DTOs
+    AgentStatusResponse:
+      type: object
+      properties:
+        itineraryId:
+          type: string
+          description: Itinerary ID
+          example: "3"
+        status:
+          type: string
+          description: Agent status
+          example: "active"
+        message:
+          type: string
+          description: Status message
+          example: "Processing itinerary..."
+
+    # Tools DTOs
+    WeatherRes:
+      type: object
+      properties:
+        destination:
+          type: string
+          description: Destination name
+          example: "Barcelona"
+        date:
+          type: string
+          description: Date for weather
+          example: "2025-06-01"
+        temperature:
+          type: number
+          format: double
+          description: Temperature
+          example: 22.5
+        condition:
+          type: string
+          description: Weather condition
+          example: "Sunny"
+        description:
+          type: string
+          description: Weather description
+          example: "Clear skies with light winds"
+        humidity:
+          type: number
+          format: double
+          description: Humidity percentage
+          example: 65.0
+        windSpeed:
+          type: number
+          format: double
+          description: Wind speed
+          example: 12.5
+        unit:
+          type: string
+          description: Temperature unit
+          example: "Celsius"
+
+    PackingListReq:
+      type: object
+      required:
+        - destination
+        - climate
+        - season
+        - startDate
+        - endDate
+        - partySize
+      properties:
+        destination:
+          type: string
+          description: Travel destination
+          example: "Barcelona"
+        climate:
+          type: string
+          description: Climate type
+          example: "Mediterranean"
+        season:
+          type: string
+          description: Travel season
+          example: "summer"
+        startDate:
+          type: string
+          format: date
+          description: Trip start date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          description: Trip end date
+          example: "2025-06-04"
+        activities:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+          description: Planned activities
+          example: ["hiking", "swimming", "sightseeing"]
+        partySize:
+          type: integer
+          minimum: 1
+          description: Number of travelers
+          example: 3
+
+    PackingListRes:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PackingItem'
+
+    PackingItem:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Item name
+          example: "Sunscreen"
+        quantity:
+          type: integer
+          description: Recommended quantity
+          example: 2
+        group:
+          type: string
+          description: Item category
+          example: "Health & Safety"
+        essential:
+          type: boolean
+          description: Whether item is essential
+          example: true
+        notes:
+          type: string
+          description: Additional notes
+          example: "SPF 30 or higher"
+
+    PhotoSpotsReq:
+      type: object
+      required:
+        - destination
+      properties:
+        destination:
+          type: string
+          description: Travel destination
+          example: "Barcelona"
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+          description: Photography interests
+          example: ["architecture", "nature", "street"]
+        timeOfDay:
+          type: string
+          description: Preferred time of day
+          example: "golden hour"
+        season:
+          type: string
+          description: Travel season
+          example: "summer"
+
+    PhotoSpotsRes:
+      type: object
+      properties:
+        spots:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhotoSpot'
+
+    PhotoSpot:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Photo spot name
+          example: "Park Güell"
+        lat:
+          type: number
+          format: double
+          description: Latitude
+          example: 41.4145
+        lng:
+          type: number
+          format: double
+          description: Longitude
+          example: 2.1527
+        category:
+          type: string
+          description: Photo category
+          example: "architecture"
+        bestTime:
+          type: string
+          description: Best time to visit
+          example: "early morning"
+        tips:
+          type: string
+          description: Photography tips
+          example: "Bring wide-angle lens"
+        difficulty:
+          type: string
+          description: Access difficulty
+          example: "easy"
+
+    MustTryFoodsReq:
+      type: object
+      required:
+        - destination
+      properties:
+        destination:
+          type: string
+          description: Travel destination
+          example: "Barcelona"
+        dietaryPreferences:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+          description: Dietary preferences
+          example: ["vegetarian", "gluten-free"]
+        budgetTier:
+          type: string
+          description: Budget tier
+          example: "mid-range"
+        cuisineTypes:
+          type: array
+          items:
+            type: string
+          description: Preferred cuisine types
+          example: ["Spanish", "Catalan"]
+
+    MustTryFoodsRes:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MustTryFood'
+
+    MustTryFood:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Food name
+          example: "Paella Valenciana"
+        description:
+          type: string
+          description: Food description
+          example: "Traditional rice dish with seafood"
+        category:
+          type: string
+          description: Food category
+          example: "main course"
+        venues:
+          type: array
+          items:
+            type: string
+          description: Recommended venues
+          example: ["Restaurante 7 Portes", "Can Solé"]
+        priceRange:
+          type: string
+          description: Price range
+          example: "€15-25"
+        tips:
+          type: string
+          description: Tips for trying this food
+          example: "Best enjoyed for lunch"
+
+    CostEstimateReq:
+      type: object
+      required:
+        - destination
+        - startDate
+        - endDate
+        - budgetTier
+        - partySize
+      properties:
+        destination:
+          type: string
+          description: Travel destination
+          example: "Barcelona"
+        startDate:
+          type: string
+          format: date
+          description: Trip start date
+          example: "2025-06-01"
+        endDate:
+          type: string
+          format: date
+          description: Trip end date
+          example: "2025-06-04"
+        budgetTier:
+          type: string
+          description: Budget tier
+          example: "mid-range"
+        partySize:
+          type: integer
+          minimum: 1
+          description: Number of travelers
+          example: 3
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+          description: Travel interests
+          example: ["culture", "food", "sightseeing"]
+
+    CostEstimateRes:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Currency code
+          example: "EUR"
+        totals:
+          $ref: '#/components/schemas/CostBreakdown'
+        perDay:
+          $ref: '#/components/schemas/CostBreakdown'
+        perPerson:
+          $ref: '#/components/schemas/CostBreakdown'
+        confidence:
+          type: string
+          description: Estimate confidence level
+          example: "high"
+        notes:
+          type: string
+          description: Additional notes
+          example: "Prices may vary by season"
+
+    CostBreakdown:
+      type: object
+      properties:
+        transport:
+          type: number
+          format: double
+          description: Transportation costs
+          example: 450.0
+        lodging:
+          type: number
+          format: double
+          description: Accommodation costs
+          example: 600.0
+        food:
+          type: number
+          format: double
+          description: Food and dining costs
+          example: 300.0
+        activities:
+          type: number
+          format: double
+          description: Activity costs
+          example: 200.0
+        shopping:
+          type: number
+          format: double
+          description: Shopping costs
+          example: 150.0
+        misc:
+          type: number
+          format: double
+          description: Miscellaneous costs
+          example: 100.0
+        total:
+          type: number
+          format: double
+          description: Total cost
+          example: 1800.0
+
+    # Booking DTOs
+    RazorpayOrderReq:
+      type: object
+      required:
+        - itemType
+        - itineraryId
+        - amount
+        - currency
+      properties:
+        itemType:
+          type: string
+          description: Type of item being booked
+          example: "hotel"
+        itineraryId:
+          type: string
+          description: Associated itinerary ID
+          example: "3"
+        amount:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Amount in paise (smallest currency unit)
+          example: 250000
+        currency:
+          type: string
+          description: Currency code
+          example: "INR"
+        meta:
+          type: object
+          additionalProperties: true
+          description: Additional metadata
+
+    RazorpayOrderRes:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: Razorpay order ID
+          example: "order_123456789"
+        amount:
+          type: integer
+          format: int64
+          description: Order amount in paise
+          example: 250000
+        currency:
+          type: string
+          description: Currency code
+          example: "INR"
+        receipt:
+          type: string
+          description: Order receipt
+          example: "receipt_123"
+
+    ProviderBookReq:
+      type: object
+      required:
+        - payment
+        - item
+        - itineraryId
+      properties:
+        payment:
+          $ref: '#/components/schemas/PaymentDetails'
+        item:
+          $ref: '#/components/schemas/ItemDetails'
+        itineraryId:
+          type: string
+          description: Associated itinerary ID
+          example: "3"
+
+    PaymentDetails:
+      type: object
+      required:
+        - orderId
+        - paymentId
+        - signature
+      properties:
+        orderId:
+          type: string
+          description: Razorpay order ID
+          example: "order_123456789"
+        paymentId:
+          type: string
+          description: Razorpay payment ID
+          example: "pay_123456789"
+        signature:
+          type: string
+          description: Payment signature
+          example: "signature_123"
+
+    ItemDetails:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Item token
+          example: "item_token_123"
+        details:
+          type: object
+          additionalProperties: true
+          description: Item-specific details
+
+    BookingRes:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          description: Booking ID
+          example: "123"
+        status:
+          type: string
+          description: Booking status
+          example: "confirmed"
+        providerConfirmationId:
+          type: string
+          description: Provider confirmation ID
+          example: "provider_123"
+        itineraryId:
+          type: string
+          description: Associated itinerary ID
+          example: "3"
+        createdAt:
+          type: string
+          format: date-time
+          description: Booking creation timestamp
+        details:
+          type: object
+          additionalProperties: true
+          description: Booking details
+
+    CancelBookingReq:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Cancellation reason
+          example: "Change of plans"
+        meta:
+          type: object
+          additionalProperties: true
+          description: Additional metadata
+
+    # Error DTOs
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: "INTERNAL_ERROR"
+        message:
+          type: string
+          description: Error message
+          example: "Internal server error"
+        hint:
+          type: string
+          description: Error hint
+          example: "An unexpected error occurred"
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        path:
+          type: string
+          description: Request path
+          example: "/api/v1/itineraries"
+
+  securitySchemes:
+    # No authentication required in development mode
+    # This can be extended for production use
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication (not currently required)
+
+security:
+  # No security requirements in development mode
+  - {}

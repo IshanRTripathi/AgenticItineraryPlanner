@@ -23,8 +23,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	
-	// Google Cloud Firestore
+	// H2 Database
+	runtimeOnly 'com.h2database:h2'
+	
+	// Google Cloud Firestore (keeping for now, will remove later)
 	implementation 'com.google.cloud:google-cloud-firestore:3.14.0'
 	
 	// Google AI SDK (Gemini) - using REST API directly
@@ -43,6 +47,10 @@ dependencies {
 	// JSON processing
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// Lombok for reducing boilerplate code
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	
 	// JWT for Google ID token verification
 	implementation 'com.auth0:java-jwt:4.4.0'

@@ -13,6 +13,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -40,6 +45,9 @@ public class GeminiClient {
     
     @Value("${google.ai.max-tokens:8192}")
     private int maxTokens;
+    
+    @Value("${google.ai.mock-mode:false}")
+    private boolean mockMode;
     
     private HttpClient httpClient;
     private ObjectMapper objectMapper;
@@ -78,6 +86,7 @@ public class GeminiClient {
             logger.info("Model: {}", modelName);
             logger.info("Temperature: {}", temperature);
             logger.info("Max Tokens: {}", maxTokens);
+            logger.info("Mock Mode: {}", mockMode);
             logger.info("User Prompt Length: {}", userPrompt.length());
             logger.info("System Prompt Length: {}", systemPrompt != null ? systemPrompt.length() : 0);
             logger.info("User Prompt Preview: {}", userPrompt.length() > 200 ? userPrompt.substring(0, 200) + "..." : userPrompt);
@@ -86,52 +95,64 @@ public class GeminiClient {
             String requestBody = buildRequestPayload(userPrompt, systemPrompt);
             logger.info("Request Body Length: {}", requestBody.length());
             
-            // Make HTTP request to Gemini API
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GEMINI_API_URL + "?key=" + apiKey))
-                    .header("Content-Type", "application/json")
-                    .timeout(Duration.ofSeconds(60))
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
+            String generatedText;
             
-            logger.info("Sending request to Gemini API...");
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            
-            logger.info("=== GEMINI API RESPONSE ===");
-            logger.info("Status Code: {}", response.statusCode());
-            logger.info("Response Length: {}", response.body().length());
-            
-            if (response.statusCode() != 200) {
-                logger.error("Gemini API error: {} - {}", response.statusCode(), response.body());
-                throw new RuntimeException("Gemini API error: " + response.statusCode());
-            }
-            
-            // Parse response
-            JsonNode responseJson = objectMapper.readTree(response.body());
-            JsonNode candidates = responseJson.get("candidates");
-            
-            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
-                JsonNode firstCandidate = candidates.get(0);
-                JsonNode content = firstCandidate.get("content");
-                JsonNode parts = content.get("parts");
+            if (mockMode) {
+                logger.info("=== MOCK MODE: Returning cached response ===");
+                generatedText = getMockResponse(userPrompt, systemPrompt);
+                logger.info("Mock response length: {}", generatedText.length());
+            } else {
+                // Make HTTP request to Gemini API
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(GEMINI_API_URL + "?key=" + apiKey))
+                        .header("Content-Type", "application/json")
+                        .timeout(Duration.ofSeconds(60))
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                        .build();
                 
-                if (parts != null && parts.isArray() && parts.size() > 0) {
-                    String generatedText = parts.get(0).get("text").asText();
+                logger.info("Sending request to Gemini API...");
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                
+                logger.info("=== GEMINI API RESPONSE ===");
+                logger.info("Status Code: {}", response.statusCode());
+                logger.info("Response Length: {}", response.body().length());
+                
+                if (response.statusCode() != 200) {
+                    logger.error("Gemini API error: {} - {}", response.statusCode(), response.body());
+                    throw new RuntimeException("Gemini API error: " + response.statusCode());
+                }
+                
+                // Save the full response to file for later use
+                saveResponseToFile(userPrompt, systemPrompt, response.body());
+                
+                // Parse response
+                JsonNode responseJson = objectMapper.readTree(response.body());
+                JsonNode candidates = responseJson.get("candidates");
+                
+                if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                    JsonNode firstCandidate = candidates.get(0);
+                    JsonNode content = firstCandidate.get("content");
+                    JsonNode parts = content.get("parts");
                     
-                    logger.info("=== GEMINI CONTENT GENERATION RESPONSE ===");
-                    logger.info("Generated content length: {}", generatedText.length());
-                    logger.info("Generated content preview: {}", 
-                               generatedText.length() > 300 ? generatedText.substring(0, 300) + "..." : generatedText);
-                    logger.info("=========================================");
-                    
-                    return generatedText;
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        generatedText = parts.get(0).get("text").asText();
+                        
+                        logger.info("=== GEMINI CONTENT GENERATION RESPONSE ===");
+                        logger.info("Generated content length: {}", generatedText.length());
+                        logger.info("Generated content preview: {}", 
+                                   generatedText.length() > 300 ? generatedText.substring(0, 300) + "..." : generatedText);
+                        logger.info("=========================================");
+                    } else {
+                        logger.warn("No parts found in response");
+                        generatedText = "";
+                    }
+                } else {
+                    logger.warn("No content found in response");
+                    generatedText = "";
                 }
             }
             
-            logger.warn("=== GEMINI NO CONTENT GENERATED ===");
-            logger.warn("Response structure: {}", responseJson.toString());
-            logger.warn("==================================");
-            return "";
+            return generatedText;
             
         } catch (Exception e) {
             logger.error("=== GEMINI CONTENT GENERATION FAILED ===");
@@ -214,5 +235,205 @@ public class GeminiClient {
     public String getModelInfo() {
         return String.format("Model: %s, Temperature: %.2f, Max Tokens: %d", 
                             modelName, temperature, maxTokens);
+    }
+    
+    /**
+     * Save Gemini response to file for later use in mock mode.
+     */
+    private void saveResponseToFile(String userPrompt, String systemPrompt, String responseBody) {
+        try {
+            // Create responses directory if it doesn't exist
+            Path responsesDir = Paths.get("responses");
+            if (!Files.exists(responsesDir)) {
+                Files.createDirectories(responsesDir);
+            }
+            
+            // Generate filename based on prompt hash and timestamp
+            String promptHash = String.valueOf(userPrompt.hashCode());
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String filename = String.format("gemini_response_%s_%s.json", promptHash, timestamp);
+            Path responseFile = responsesDir.resolve(filename);
+            
+            // Create response object with metadata
+            JsonNode responseJson = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseJson.get("candidates");
+            String generatedText = "";
+            
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode firstCandidate = candidates.get(0);
+                JsonNode content = firstCandidate.get("content");
+                JsonNode parts = content.get("parts");
+                
+                if (parts != null && parts.isArray() && parts.size() > 0) {
+                    generatedText = parts.get(0).get("text").asText();
+                }
+            }
+            
+            // Create metadata object
+            String metadata = objectMapper.writeValueAsString(new ResponseMetadata(
+                userPrompt, systemPrompt, generatedText, timestamp
+            ));
+            
+            // Save to file
+            Files.write(responseFile, metadata.getBytes());
+            logger.info("Saved Gemini response to: {}", responseFile);
+            
+        } catch (Exception e) {
+            logger.error("Failed to save response to file", e);
+        }
+    }
+    
+    /**
+     * Get mock response from saved files.
+     */
+    private String getMockResponse(String userPrompt, String systemPrompt) {
+        try {
+            // Check for specific mock response files first
+            Path mockResponsesDir = Paths.get("logs/gemini-responses");
+            if (Files.exists(mockResponsesDir)) {
+                // Look for Barcelona-specific mock response
+                if (userPrompt.toLowerCase().contains("barcelona")) {
+                    Path barcelonaFile = mockResponsesDir.resolve("barcelona_3day_family.json");
+                    if (Files.exists(barcelonaFile)) {
+                        String content = Files.readString(barcelonaFile);
+                        logger.info("Using Barcelona mock response from: {}", barcelonaFile.getFileName());
+                        return content;
+                    }
+                }
+            }
+            
+            // Fallback to cached responses
+            Path responsesDir = Paths.get("responses");
+            if (!Files.exists(responsesDir)) {
+                logger.warn("No responses directory found for mock mode");
+                return getDefaultMockResponse();
+            }
+            
+            // Look for the most recent response file
+            String promptHash = String.valueOf(userPrompt.hashCode());
+            String filenamePattern = "gemini_response_" + promptHash + "_";
+            
+            return Files.list(responsesDir)
+                .filter(path -> path.getFileName().toString().startsWith(filenamePattern))
+                .sorted((a, b) -> b.getFileName().toString().compareTo(a.getFileName().toString()))
+                .findFirst()
+                .map(path -> {
+                    try {
+                        String content = Files.readString(path);
+                        ResponseMetadata metadata = objectMapper.readValue(content, ResponseMetadata.class);
+                        logger.info("Using cached response from: {}", path.getFileName());
+                        return metadata.generatedText;
+                    } catch (Exception e) {
+                        logger.error("Failed to read cached response from: {}", path, e);
+                        return getDefaultMockResponse();
+                    }
+                })
+                .orElseGet(() -> {
+                    logger.warn("No cached response found for prompt hash: {}", promptHash);
+                    return getDefaultMockResponse();
+                });
+                
+        } catch (Exception e) {
+            logger.error("Failed to get mock response", e);
+            return getDefaultMockResponse();
+        }
+    }
+    
+    /**
+     * Get default mock response when no cached response is available.
+     */
+    private String getDefaultMockResponse() {
+        return """
+        {
+          "summary": "Mock itinerary response - no cached data available",
+          "highlights": ["Mock highlight 1", "Mock highlight 2"],
+          "totalEstimatedCost": 1000.0,
+          "currency": "USD",
+          "days": [
+            {
+              "dayNumber": 1,
+              "date": "2025-01-01",
+              "location": "Mock Location",
+              "activities": [
+                {
+                  "name": "Mock Activity",
+                  "description": "This is a mock activity for testing",
+                  "location": {
+                    "name": "Mock Location",
+                    "address": "Mock Address",
+                    "lat": 0.0,
+                    "lng": 0.0
+                  },
+                  "startTime": "09:00",
+                  "endTime": "17:00",
+                  "duration": "8 hours",
+                  "category": "Sightseeing",
+                  "price": {
+                    "amount": 50.0,
+                    "currency": "USD",
+                    "per": "person"
+                  },
+                  "bookingRequired": false,
+                  "tips": "Mock tips"
+                }
+              ],
+              "accommodation": {
+                "name": "Mock Hotel",
+                "type": "Hotel",
+                "location": {
+                  "name": "Mock Hotel Location",
+                  "address": "Mock Hotel Address",
+                  "lat": 0.0,
+                  "lng": 0.0
+                },
+                "price": {
+                  "amount": 100.0,
+                  "currency": "USD",
+                  "per": "night"
+                },
+                "rating": 4.0
+              },
+              "transportation": [],
+              "meals": [
+                {
+                  "type": "lunch",
+                  "name": "Mock Meal",
+                  "restaurant": "Mock Restaurant",
+                  "location": {
+                    "name": "Mock Restaurant Location",
+                    "address": "Mock Restaurant Address",
+                    "lat": 0.0,
+                    "lng": 0.0
+                  },
+                  "price": {
+                    "amount": 25.0,
+                    "currency": "USD",
+                    "per": "person"
+                  },
+                  "cuisine": "Mock Cuisine"
+                }
+              ],
+              "notes": "Mock day notes"
+            }
+          ]
+        }
+        """;
+    }
+    
+    /**
+     * Metadata class for storing response information.
+     */
+    private static class ResponseMetadata {
+        public String userPrompt;
+        public String systemPrompt;
+        public String generatedText;
+        public String timestamp;
+        
+        public ResponseMetadata(String userPrompt, String systemPrompt, String generatedText, String timestamp) {
+            this.userPrompt = userPrompt;
+            this.systemPrompt = systemPrompt;
+            this.generatedText = generatedText;
+            this.timestamp = timestamp;
+        }
     }
 }

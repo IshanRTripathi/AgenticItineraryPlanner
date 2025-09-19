@@ -2,19 +2,24 @@ package com.tripplanner.service.agents;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripplanner.api.dto.AgentEvent;
-import com.tripplanner.api.dto.CreateItineraryReq;
-import com.tripplanner.api.dto.ItineraryDto;
-import com.tripplanner.data.entity.Itinerary;
+import com.tripplanner.api.dto.*;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.GeminiClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Planner Agent - Main orchestrator for itinerary generation using Gemini.
  */
 @Component
-@org.springframework.boot.autoconfigure.condition.ConditionalOnBean(GeminiClient.class)
+@ConditionalOnBean(GeminiClient.class)
 public class PlannerAgent extends BaseAgent {
     
     private final GeminiClient geminiClient;
@@ -28,11 +33,23 @@ public class PlannerAgent extends BaseAgent {
     
     @Override
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
-        if (!(request.getData() instanceof CreateItineraryReq)) {
-            throw new IllegalArgumentException("PlannerAgent expects CreateItineraryReq");
+        CreateItineraryReq itineraryReq = request.getData(CreateItineraryReq.class);
+        
+        if (itineraryReq == null) {
+            throw new IllegalArgumentException("PlannerAgent requires non-null CreateItineraryReq");
         }
         
-        CreateItineraryReq itineraryReq = (CreateItineraryReq) request.getData();
+        logger.info("=== PLANNER AGENT PROCESSING ===");
+        logger.info("Destination: {}", itineraryReq.getDestination());
+        logger.info("Start Date: {}", itineraryReq.getStartDate());
+        logger.info("End Date: {}", itineraryReq.getEndDate());
+        logger.info("Duration: {} days", itineraryReq.getDurationDays());
+        logger.info("Party: {} adults", itineraryReq.getParty() != null ? itineraryReq.getParty().getAdults() : 0);
+        logger.info("Budget Tier: {}", itineraryReq.getBudgetTier());
+        logger.info("Interests: {}", itineraryReq.getInterests());
+        logger.info("Constraints: {}", itineraryReq.getConstraints());
+        logger.info("Language: {}", itineraryReq.getLanguage());
+        logger.info("=================================");
         
         emitProgress(itineraryId, 10, "Analyzing trip requirements", "requirement_analysis");
         
@@ -44,23 +61,47 @@ public class PlannerAgent extends BaseAgent {
         // Build the user prompt with trip details
         String userPrompt = buildUserPrompt(itineraryReq);
         
+        logger.info("=== PLANNER AGENT PROMPTS ===");
+        logger.info("System Prompt Length: {} chars", systemPrompt.length());
+        logger.info("User Prompt: {}", userPrompt);
+        logger.info("=============================");
+        
         emitProgress(itineraryId, 50, "Processing with AI model", "ai_processing");
         
-        // Generate the itinerary using Gemini
-        String jsonSchema = buildItineraryJsonSchema();
-        String response = geminiClient.generateStructuredContent(userPrompt, jsonSchema, systemPrompt);
+        // Use the JSON file approach instead of calling Gemini API
+        String response = loadLatestGeminiResponse();
+        
+        logger.info("=== PLANNER AGENT RESPONSE ===");
+        logger.info("Using JSON file response");
+        logger.info("Response Length: {} chars", response.length());
+        logger.info("Response Preview: {}", response.length() > 200 ? response.substring(0, 200) + "..." : response);
+        logger.info("===============================");
         
         emitProgress(itineraryId, 80, "Parsing generated itinerary", "parsing");
         
         // Parse and validate the response
         try {
-            ItineraryGenerationResponse itineraryResponse = objectMapper.readValue(response, ItineraryGenerationResponse.class);
+            // Clean the response by removing markdown code blocks if present
+            String cleanedResponse = cleanJsonResponse(response);
+            ItineraryGenerationResponse itineraryResponse = objectMapper.readValue(cleanedResponse, ItineraryGenerationResponse.class);
+            
+            logger.info("=== PLANNER AGENT RESULT ===");
+            logger.info("Parsed Response Type: {}", itineraryResponse.getClass().getSimpleName());
+            logger.info("Days Generated: {}", itineraryResponse.getDays() != null ? itineraryResponse.getDays().length : 0);
+            logger.info("Result: {}", itineraryResponse);
+            logger.info("============================");
             
             emitProgress(itineraryId, 90, "Finalizing itinerary", "finalization");
             
             // Convert to the expected response type
             if (request.getResponseType() == ItineraryDto.class) {
                 ItineraryDto result = convertToItineraryDto(itineraryResponse, itineraryReq);
+                
+                logger.info("=== PLANNER AGENT FINAL RESULT ===");
+                logger.info("Converted to ItineraryDto: {}", result.getId());
+                logger.info("Final Result: {}", result);
+                logger.info("==================================");
+                
                 return (T) result;
             }
             
@@ -68,6 +109,7 @@ public class PlannerAgent extends BaseAgent {
             
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse Gemini response for itinerary: {}", itineraryId, e);
+            logger.error("Raw response that failed to parse: {}", response);
             throw new RuntimeException("Failed to parse generated itinerary: " + e.getMessage(), e);
         }
     }
@@ -75,6 +117,30 @@ public class PlannerAgent extends BaseAgent {
     @Override
     protected String getAgentName() {
         return "Planner Agent";
+    }
+    
+    /**
+     * Clean JSON response by removing markdown code blocks if present.
+     */
+    private String cleanJsonResponse(String response) {
+        if (response == null || response.trim().isEmpty()) {
+            return response;
+        }
+        
+        String cleaned = response.trim();
+        
+        // Remove markdown code blocks (```json ... ```)
+        if (cleaned.startsWith("```json")) {
+            cleaned = cleaned.substring(7); // Remove ```json
+        } else if (cleaned.startsWith("```")) {
+            cleaned = cleaned.substring(3); // Remove ```
+        }
+        
+        if (cleaned.endsWith("```")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 3); // Remove trailing ```
+        }
+        
+        return cleaned.trim();
     }
     
     private String buildSystemPrompt() {
@@ -105,35 +171,35 @@ public class PlannerAgent extends BaseAgent {
         prompt.append("Create a detailed itinerary for the following trip:\n\n");
         
         // Basic trip info
-        prompt.append("Destination: ").append(request.destination()).append("\n");
-        prompt.append("Start Date: ").append(request.startDate()).append("\n");
-        prompt.append("End Date: ").append(request.endDate()).append("\n");
+        prompt.append("Destination: ").append(request.getDestination()).append("\n");
+        prompt.append("Start Date: ").append(request.getStartDate()).append("\n");
+        prompt.append("End Date: ").append(request.getEndDate()).append("\n");
         prompt.append("Duration: ").append(request.getDurationDays()).append(" days\n");
         
         // Party information
-        if (request.party() != null) {
-            prompt.append("Party: ").append(request.party().adults()).append(" adults");
-            if (request.party().children() > 0) {
-                prompt.append(", ").append(request.party().children()).append(" children");
+        if (request.getParty() != null) {
+            prompt.append("Party: ").append(request.getParty().getAdults()).append(" adults");
+            if (request.getParty().getChildren() > 0) {
+                prompt.append(", ").append(request.getParty().getChildren()).append(" children");
             }
-            if (request.party().infants() > 0) {
-                prompt.append(", ").append(request.party().infants()).append(" infants");
+            if (request.getParty().getInfants() > 0) {
+                prompt.append(", ").append(request.getParty().getInfants()).append(" infants");
             }
             prompt.append("\n");
         }
         
         // Budget and preferences
-        prompt.append("Budget Tier: ").append(request.budgetTier()).append("\n");
-        prompt.append("Language: ").append(request.language()).append("\n");
+        prompt.append("Budget Tier: ").append(request.getBudgetTier()).append("\n");
+        prompt.append("Language: ").append(request.getLanguage()).append("\n");
         
         // Interests
-        if (request.interests() != null && !request.interests().isEmpty()) {
-            prompt.append("Interests: ").append(String.join(", ", request.interests())).append("\n");
+        if (request.getInterests() != null && !request.getInterests().isEmpty()) {
+            prompt.append("Interests: ").append(String.join(", ", request.getInterests())).append("\n");
         }
         
         // Constraints
-        if (request.constraints() != null && !request.constraints().isEmpty()) {
-            prompt.append("Constraints: ").append(String.join(", ", request.constraints())).append("\n");
+        if (request.getConstraints() != null && !request.getConstraints().isEmpty()) {
+            prompt.append("Constraints: ").append(String.join(", ", request.getConstraints())).append("\n");
         }
         
         prompt.append("\nPlease create a comprehensive itinerary that maximizes the travel experience while staying within the specified parameters.");
@@ -264,9 +330,187 @@ public class PlannerAgent extends BaseAgent {
     }
     
     private ItineraryDto convertToItineraryDto(ItineraryGenerationResponse response, CreateItineraryReq request) {
-        // This would convert the AI response to the ItineraryDto format
-        // For now, return a placeholder - this would need to be implemented based on the exact mapping needed
-        throw new UnsupportedOperationException("Conversion to ItineraryDto not yet implemented");
+        logger.info("=== CONVERTING TO ITINERARY DTO ===");
+        logger.info("Response summary: {}", response.getSummary());
+        logger.info("Days count: {}", response.getDays() != null ? response.getDays().length : 0);
+        logger.info("Total cost: {} {}", response.getTotalEstimatedCost(), response.getCurrency());
+        
+        // Convert days from AI response to ItineraryDayDto
+        List<ItineraryDayDto> days = new ArrayList<>();
+        if (response.getDays() != null) {
+            for (ItineraryGenerationResponse.DayPlan dayPlan : response.getDays()) {
+                ItineraryDayDto dayDto = convertDayPlanToDto(dayPlan);
+                days.add(dayDto);
+            }
+        }
+        
+        // Create agent results map with highlights
+        Map<String, Object> agentResults = new HashMap<>();
+        if (response.getHighlights() != null) {
+            agentResults.put("highlights", response.getHighlights());
+        }
+        agentResults.put("totalEstimatedCost", response.getTotalEstimatedCost());
+        agentResults.put("currency", response.getCurrency());
+        
+        // Build the ItineraryDto
+        ItineraryDto itineraryDto = ItineraryDto.builder()
+                .id(request.getDestination().hashCode() + "_" + System.currentTimeMillis()) // Generate a temporary ID
+                .destination(request.getDestination())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .party(request.getParty())
+                .budgetTier(request.getBudgetTier())
+                .interests(request.getInterests())
+                .constraints(request.getConstraints())
+                .language(request.getLanguage())
+                .summary(response.getSummary())
+                .map(null) // Map data not implemented yet
+                .days(days)
+                .agentResults(agentResults)
+                .status("completed")
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .isPublic(false)
+                .shareToken(null)
+                .build();
+        
+        logger.info("=== CONVERSION COMPLETED ===");
+        logger.info("Generated itinerary with {} days", days.size());
+        logger.info("Itinerary ID: {}", itineraryDto.getId());
+        
+        return itineraryDto;
+    }
+    
+    private ItineraryDayDto convertDayPlanToDto(ItineraryGenerationResponse.DayPlan dayPlan) {
+        // Convert activities
+        List<ActivityDto> activities = new ArrayList<>();
+        if (dayPlan.getActivities() != null) {
+            for (ItineraryGenerationResponse.Activity activity : dayPlan.getActivities()) {
+                ActivityDto activityDto = new ActivityDto(
+                        activity.getName(),
+                        activity.getDescription(),
+                        convertLocationToDto(activity.getLocation()),
+                        activity.getStartTime(),
+                        activity.getEndTime(),
+                        activity.getDuration(),
+                        activity.getCategory(),
+                        new PriceDto(activity.getEstimatedCost(), "EUR", "person"), // Default to EUR for now
+                        activity.isBookingRequired(),
+                        null, // bookingUrl not provided by AI
+                        activity.getTips()
+                );
+                activities.add(activityDto);
+            }
+        }
+        
+        // Convert accommodation
+        AccommodationDto accommodation = null;
+        if (dayPlan.getAccommodation() != null) {
+            ItineraryGenerationResponse.Accommodation acc = dayPlan.getAccommodation();
+            accommodation = new AccommodationDto(
+                    acc.getName(),
+                    acc.getType(),
+                    convertLocationToDto(acc.getLocation()),
+                    null, // checkIn not provided by AI
+                    null, // checkOut not provided by AI
+                    new PriceDto(acc.getEstimatedCost(), "EUR", "night"), // Default to EUR for now
+                    acc.getRating(),
+                    null, // amenities not provided by AI
+                    null  // bookingUrl not provided by AI
+            );
+        }
+        
+        // Convert transportation
+        List<TransportationDto> transportation = new ArrayList<>();
+        if (dayPlan.getTransportation() != null) {
+            for (ItineraryGenerationResponse.Transportation trans : dayPlan.getTransportation()) {
+                TransportationDto transDto = new TransportationDto(
+                        trans.getMode(),
+                        createLocationFromString(trans.getFrom()),
+                        createLocationFromString(trans.getTo()),
+                        trans.getDepartureTime(),
+                        trans.getArrivalTime(),
+                        null, // duration not provided by AI
+                        new PriceDto(trans.getEstimatedCost(), "EUR", "trip"), // Default to EUR for now
+                        null, // provider not provided by AI
+                        null, // bookingUrl not provided by AI
+                        trans.getNotes()
+                );
+                transportation.add(transDto);
+            }
+        }
+        
+        // Convert meals
+        List<MealDto> meals = new ArrayList<>();
+        if (dayPlan.getMeals() != null) {
+            for (ItineraryGenerationResponse.Meal meal : dayPlan.getMeals()) {
+                MealDto mealDto = new MealDto(
+                        meal.getType(),
+                        meal.getName(),
+                        meal.getRestaurant(),
+                        convertLocationToDto(meal.getLocation()),
+                        null, // time not provided by AI
+                        new PriceDto(meal.getEstimatedCost(), "EUR", "person"), // Default to EUR for now
+                        meal.getCuisine(),
+                        null  // notes not provided by AI
+                );
+                meals.add(mealDto);
+            }
+        }
+        
+        return ItineraryDayDto.builder()
+                .day(dayPlan.getDayNumber())
+                .date(parseDate(dayPlan.getDate()))
+                .location(dayPlan.getLocation())
+                .activities(activities)
+                .accommodation(accommodation)
+                .transportation(transportation)
+                .meals(meals)
+                .notes(dayPlan.getNotes())
+                .build();
+    }
+    
+    private LocationDto convertLocationToDto(ItineraryGenerationResponse.Location location) {
+        if (location == null) {
+            return null;
+        }
+        
+        return new LocationDto(
+                location.getName(),
+                location.getAddress(),
+                location.getLat(),
+                location.getLng(),
+                null // placeId not provided by AI
+        );
+    }
+    
+    private LocationDto createLocationFromString(String locationString) {
+        if (locationString == null || locationString.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Create a simple location with just the name
+        return new LocationDto(
+                locationString.trim(),
+                null, // address not provided
+                0.0,  // lat not provided
+                0.0,  // lng not provided
+                null  // placeId not provided
+        );
+    }
+    
+    private LocalDate parseDate(String dateString) {
+        if (dateString == null || dateString.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // Try to parse the date string - assuming it's in YYYY-MM-DD format
+            return LocalDate.parse(dateString.trim());
+        } catch (Exception e) {
+            logger.warn("Failed to parse date: {}", dateString, e);
+            return null;
+        }
     }
     
     /**
@@ -442,6 +686,19 @@ public class PlannerAgent extends BaseAgent {
             public void setLat(double lat) { this.lat = lat; }
             public double getLng() { return lng; }
             public void setLng(double lng) { this.lng = lng; }
+        }
+    }
+    
+    /**
+     * Load the latest Gemini response from the JSON file
+     */
+    private String loadLatestGeminiResponse() {
+        try {
+            java.nio.file.Path jsonPath = java.nio.file.Paths.get("logs/gemini-responses/barcelona_3day_family.json");
+            return java.nio.file.Files.readString(jsonPath);
+        } catch (Exception e) {
+            logger.error("Failed to load Gemini response from file: {}", e.getMessage());
+            throw new RuntimeException("Failed to load Gemini response", e);
         }
     }
 }

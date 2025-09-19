@@ -84,17 +84,17 @@ export function WorkflowBuilderPanel({
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number } | null>(null);
   
-  const currentDay = dayPlans[selectedDay];
+  const currentDay = dayPlans[selectedDay] || null;
   
   const [nodes, setNodes] = useState<WorkflowNode[]>(
-    currentDay?.components.map((comp, index) => ({
+    currentDay?.components?.map((comp, index) => ({
       id: comp.id,
       component: comp,
       position: { 
         x: 100 + (index % 3) * 200, 
         y: 100 + Math.floor(index / 3) * 150 
       },
-      connections: index < currentDay.components.length - 1 ? [currentDay.components[index + 1].id] : []
+      connections: index < (currentDay?.components?.length || 0) - 1 ? [currentDay?.components?.[index + 1]?.id || ''] : []
     })) || []
   );
 
@@ -317,13 +317,13 @@ export function WorkflowBuilderPanel({
                       
                       <div className="flex items-center gap-1">
                         <DollarSign className="w-3 h-3" />
-                        <span>{node.component.cost.currency} {node.component.cost.pricePerPerson}/person</span>
+                        <span>{node.component.cost?.currency || 'USD'} {node.component.cost?.pricePerPerson || 0}/person</span>
                       </div>
                       
-                      {node.component.travel.distanceFromPrevious > 0 && (
+                      {(node.component.travel?.distanceFromPrevious || 0) > 0 && (
                         <div className="flex items-center gap-1">
                           <Car className="w-3 h-3" />
-                          <span>{node.component.travel.distanceFromPrevious}km • {formatDuration(node.component.travel.travelTimeFromPrevious)}</span>
+                          <span>{node.component.travel?.distanceFromPrevious || 0}km • {formatDuration(node.component.travel?.travelTimeFromPrevious || 0)}</span>
                         </div>
                       )}
                     </div>
@@ -453,7 +453,7 @@ export function WorkflowBuilderPanel({
                           <input 
                             type="number"
                             className="w-full mt-1 p-2 border rounded"
-                            value={node.component.cost.pricePerPerson}
+                            value={node.component.cost?.pricePerPerson || 0}
                             onChange={(e) => {
                               const updatedNodes = nodes.map(n => 
                                 n.id === selectedNode 
@@ -477,7 +477,7 @@ export function WorkflowBuilderPanel({
                           <label className="text-sm font-medium">Currency</label>
                           <select 
                             className="w-full mt-1 p-2 border rounded"
-                            value={node.component.cost.currency}
+                            value={node.component.cost?.currency || 'USD'}
                           >
                             <option value="USD">USD</option>
                             <option value="EUR">EUR</option>
@@ -518,10 +518,10 @@ export function WorkflowBuilderPanel({
                       <div className="space-y-2">
                         <h4 className="font-medium text-sm">Travel Info</h4>
                         <div className="text-sm space-y-1">
-                          <p>Distance from previous: {node.component.travel.distanceFromPrevious}km</p>
-                          <p>Travel time: {formatDuration(node.component.travel.travelTimeFromPrevious)}</p>
-                          <p>Transport: {node.component.travel.transportMode}</p>
-                          <p>Transport cost: {node.component.cost.currency} {node.component.travel.transportCost}</p>
+                          <p>Distance from previous: {node.component.travel?.distanceFromPrevious || 0}km</p>
+                          <p>Travel time: {formatDuration(node.component.travel?.travelTimeFromPrevious || 0)}</p>
+                          <p>Transport: {node.component.travel?.transportMode || 'walking'}</p>
+                          <p>Transport cost: {node.component.cost?.currency || 'USD'} {node.component.travel?.transportCost || 0}</p>
                         </div>
                       </div>
                     </div>
@@ -539,7 +539,7 @@ export function WorkflowBuilderPanel({
           <div className="flex items-center gap-4">
             <span>Day {currentDay?.dayNumber} - {currentDay?.location}</span>
             <span>{currentDay?.components.length || 0} components</span>
-            <span>Total: {currentDay?.cost.currency} {currentDay?.totalCost}</span>
+            <span>Total: €{currentDay?.totalCost || 0}</span>
           </div>
           <div className="text-gray-500">
             Drag components to reorder • Click to edit • Delete with trash icon

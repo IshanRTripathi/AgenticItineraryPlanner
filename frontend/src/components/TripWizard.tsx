@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Switch } from './ui/switch';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { ArrowLeft, ArrowRight, CalendarIcon, MapPin, Sparkles, Star, Clock, Users, Plus, Trash2 } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 // Date formatting utility
 const formatDate = (date: Date | undefined) => {

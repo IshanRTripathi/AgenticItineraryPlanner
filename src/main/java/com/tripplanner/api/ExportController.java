@@ -1,31 +1,27 @@
 package com.tripplanner.api;
 
-import com.tripplanner.security.GoogleUserPrincipal;
 import com.tripplanner.service.PdfService;
-import com.tripplanner.service.EmailService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * REST controller for export operations (PDF, Email).
  */
-@RestController
-@RequestMapping("/api/v1")
+// @RestController
+@RequestMapping("/api/v1/export")
 public class ExportController {
     
     private static final Logger logger = LoggerFactory.getLogger(ExportController.class);
@@ -41,13 +37,10 @@ public class ExportController {
      * Generate and download PDF for an itinerary.
      */
     @GetMapping("/itineraries/{id}/pdf")
-    public ResponseEntity<byte[]> generatePdf(
-            @PathVariable String id,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+    public ResponseEntity<byte[]> generatePdf(@PathVariable String id) {
+        logger.info("Generating PDF for itinerary: {}", id);
         
-        logger.info("Generating PDF for itinerary: {} for user: {}", id, user.getUserId());
-        
-        byte[] pdfBytes = pdfService.generateItineraryPdf(id, user);
+        byte[] pdfBytes = pdfService.generateItineraryPdf(id);
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -64,11 +57,8 @@ public class ExportController {
      * Send itinerary via email.
      */
     @PostMapping("/email/send")
-    public ResponseEntity<EmailResponse> sendEmail(
-            @Valid @RequestBody EmailRequest request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
-        
-        logger.info("Sending email for user: {} to: {}", user.getUserId(), request.to());
+    public ResponseEntity<EmailResponse> sendEmail(@Valid @RequestBody EmailRequest request) {
+        logger.info("Sending email to: {}", request.to());
         
         EmailResponse response = new EmailResponse("", "QUEUED", Instant.now());
                 // emailService.sendItineraryEmail(request, user);
@@ -81,11 +71,8 @@ public class ExportController {
      * Send itinerary share link via email.
      */
     @PostMapping("/email/share")
-    public ResponseEntity<EmailResponse> shareViaEmail(
-            @Valid @RequestBody ShareEmailRequest request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
-        
-        logger.info("Sharing itinerary via email for user: {} to: {}", user.getUserId(), request.to());
+    public ResponseEntity<EmailResponse> shareViaEmail(@Valid @RequestBody ShareEmailRequest request) {
+        logger.info("Sharing itinerary via email to: {}", request.to());
 
         EmailResponse response = new EmailResponse("", "QUEUED", Instant.now());
         // emailService.shareItineraryViaEmail(request, user);
@@ -113,9 +100,7 @@ public class ExportController {
      * Request DTO for sending email.
      */
     public record EmailRequest(
-            @NotBlank(message = "Recipient email is required")
-            @Email(message = "Invalid email format")
-            String to,
+            @jakarta.validation.constraints.Email String to,
             
             @NotBlank(message = "Subject is required")
             String subject,

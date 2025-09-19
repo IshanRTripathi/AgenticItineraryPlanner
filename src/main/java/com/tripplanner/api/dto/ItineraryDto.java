@@ -2,6 +2,8 @@ package com.tripplanner.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.tripplanner.data.entity.Itinerary;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -11,26 +13,33 @@ import java.util.Map;
 /**
  * Response DTO for itinerary data.
  */
+@Data
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ItineraryDto(
-        String id,
-        String destination,
-        LocalDate startDate,
-        LocalDate endDate,
-        PartyDto party,
-        String budgetTier,
-        List<String> interests,
-        List<String> constraints,
-        String language,
-        String summary,
-        Map<String, Object> map,
-        List<ItineraryDayDto> days,
-        String status,
-        Instant createdAt,
-        Instant updatedAt,
-        boolean isPublic,
-        String shareToken
-) {
+public class ItineraryDto {
+    private String id;
+    private String destination;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private PartyDto party;
+    private String budgetTier;
+    private List<String> interests;
+    private List<String> constraints;
+    @Builder.Default
+    private String language = "en";
+    private String summary;
+    private Map<String, Object> map;
+    private List<ItineraryDayDto> days;
+    private Map<String, Object> agentResults;
+    @Builder.Default
+    private String status = "draft";
+    @Builder.Default
+    private Instant createdAt = Instant.now();
+    @Builder.Default
+    private Instant updatedAt = Instant.now();
+    @Builder.Default
+    private boolean isPublic = false;
+    private String shareToken;
     
     /**
      * Create DTO from entity.
@@ -40,26 +49,27 @@ public record ItineraryDto(
             return null;
         }
         
-        return new ItineraryDto(
-                entity.getId(),
-                entity.getDestination(),
-                entity.getStartDate(),
-                entity.getEndDate(),
-                entity.getParty() != null ? PartyDto.fromEntity(entity.getParty()) : null,
-                entity.getBudgetTier(),
-                entity.getInterests(),
-                entity.getConstraints(),
-                entity.getLanguage(),
-                entity.getSummary(),
-                entity.getMap(),
-                entity.getDays() != null ? 
-                        entity.getDays().stream().map(ItineraryDayDto::fromEntity).toList() : null,
-                entity.getStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt(),
-                entity.isPublic(),
-                entity.getShareToken()
-        );
+        return ItineraryDto.builder()
+                .id(entity.getId().toString())
+                .destination(entity.getDestination())
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .party(entity.getParty() != null ? PartyDto.fromEntity(entity.getParty()) : null)
+                .budgetTier(entity.getBudgetTier())
+                .interests(entity.getInterests())
+                .constraints(entity.getConstraints())
+                .language(entity.getLanguage())
+                .summary(entity.getSummary())
+                .map(null) // Map data not implemented in JPA version yet
+                .days(entity.getDays() != null ? 
+                        entity.getDays().stream().map(ItineraryDayDto::fromEntity).toList() : null)
+                .agentResults(null) // will be populated separately
+                .status(entity.getStatus())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .isPublic(entity.isPublic())
+                .shareToken(entity.getShareToken())
+                .build();
     }
     
     /**
@@ -70,26 +80,27 @@ public record ItineraryDto(
             return null;
         }
         
-        return new ItineraryDto(
-                entity.getId(),
-                entity.getDestination(),
-                entity.getStartDate(),
-                entity.getEndDate(),
-                entity.getParty() != null ? PartyDto.fromEntity(entity.getParty()) : null,
-                entity.getBudgetTier(),
-                entity.getInterests(),
-                entity.getConstraints(),
-                entity.getLanguage(),
-                entity.getSummary(),
-                entity.getMap(),
-                entity.getDays() != null ? 
-                        entity.getDays().stream().map(ItineraryDayDto::fromEntity).toList() : null,
-                entity.getStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt(),
-                true, // Always true for public DTOs
-                null  // Don't expose share token in public view
-        );
+        return ItineraryDto.builder()
+                .id(entity.getId().toString())
+                .destination(entity.getDestination())
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .party(entity.getParty() != null ? PartyDto.fromEntity(entity.getParty()) : null)
+                .budgetTier(entity.getBudgetTier())
+                .interests(entity.getInterests())
+                .constraints(entity.getConstraints())
+                .language(entity.getLanguage())
+                .summary(entity.getSummary())
+                .map(null) // Map data not implemented in JPA version yet
+                .days(entity.getDays() != null ? 
+                        entity.getDays().stream().map(ItineraryDayDto::fromEntity).toList() : null)
+                .agentResults(null) // will be populated separately
+                .status(entity.getStatus())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .isPublic(true) // Always true for public DTOs
+                .shareToken(null) // Don't expose share token in public view
+                .build();
     }
     
     /**

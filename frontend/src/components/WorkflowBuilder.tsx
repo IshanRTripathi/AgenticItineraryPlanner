@@ -16,7 +16,6 @@ import 'reactflow/dist/style.css';
 import { 
   validateWorkflowNode, 
   autoArrangeNodes, 
-  generateTimelineFromNodes,
   createNewNode,
   formatDuration,
   formatCurrency 
@@ -55,7 +54,7 @@ import {
   Info,
 } from 'lucide-react';
 import { WorkflowNode } from './workflow/WorkflowNode';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 
 // Register custom node types
 const nodeTypes = {
@@ -96,7 +95,122 @@ interface WorkflowDay {
   edges: Edge[];
 }
 
-// Mock seed data for 3 days
+// Convert API trip data to WorkflowDay format
+const createWorkflowDaysFromTripData = (tripData: TripData): WorkflowDay[] => {
+  if (!tripData.itinerary?.days || tripData.itinerary.days.length === 0) {
+    return [];
+  }
+
+  return tripData.itinerary.days.map((day, dayIndex) => {
+    const nodes: Node<WorkflowNodeData>[] = day.components.map((component, componentIndex) => {
+      // Map TripComponent type to WorkflowNodeData type
+      const mapComponentType = (type: string): WorkflowNodeData['type'] => {
+        switch (type.toLowerCase()) {
+          case 'attraction':
+          case 'activity':
+            return 'Attraction';
+          case 'restaurant':
+          case 'meal':
+            return 'Meal';
+          case 'hotel':
+          case 'accommodation':
+            return 'Hotel';
+          case 'transport':
+          case 'transportation':
+            return 'Transit';
+          default:
+            return 'Attraction';
+        }
+      };
+
+      // Parse time strings to get start time
+      const parseStartTime = (timeStr: string): string => {
+        if (!timeStr) return '09:00';
+        
+        // If it's already in HH:MM format
+        if (/^\d{1,2}:\d{2}$/.test(timeStr)) {
+          return timeStr;
+        }
+        
+        try {
+          const date = new Date(timeStr);
+          if (!isNaN(date.getTime())) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          }
+        } catch {
+          // Fall through to default
+        }
+        
+        return '09:00';
+      };
+
+      // Calculate duration in minutes
+      const parseDuration = (durationStr: string | number): number => {
+        if (typeof durationStr === 'number') return durationStr;
+        if (!durationStr) return 120; // Default 2 hours
+        
+        const str = durationStr.toString().toLowerCase();
+        
+        // Handle different duration formats
+        if (str.includes('hour') || str.includes('hr')) {
+          const match = str.match(/(\d+)/);
+          return match ? parseInt(match[1]) * 60 : 120;
+        } else if (str.includes('min')) {
+          const match = str.match(/(\d+)/);
+          return match ? parseInt(match[1]) : 120;
+        } else {
+          // Try to extract number and assume hours
+          const match = str.match(/(\d+)/);
+          return match ? parseInt(match[1]) * 60 : 120;
+        }
+      };
+
+      return {
+        id: component.id,
+        type: 'workflow',
+        position: { 
+          x: 100 + (componentIndex % 3) * 200, 
+          y: 100 + Math.floor(componentIndex / 3) * 150 
+        },
+        data: {
+          id: component.id,
+          type: mapComponentType(component.type),
+          title: component.name,
+          tags: component.details?.tags || [component.type],
+          start: parseStartTime(component.timing?.startTime || '09:00'),
+          durationMin: parseDuration(component.timing?.duration || '2h'),
+          costINR: component.cost?.pricePerPerson || 0,
+          meta: {
+            rating: component.details?.rating || 4.0,
+            open: '09:00',
+            close: '18:00',
+            address: component.location?.address || component.location?.name || 'Unknown',
+            distanceKm: component.travel?.distanceFromPrevious || 0,
+          },
+        },
+      };
+    });
+
+    // Create edges between consecutive components
+    const edges: Edge[] = [];
+    for (let i = 0; i < nodes.length - 1; i++) {
+      edges.push({
+        id: `e${dayIndex}-${i}`,
+        source: nodes[i].id,
+        target: nodes[i + 1].id,
+      });
+    }
+
+    return {
+      day: day.dayNumber,
+      date: day.date,
+      nodes,
+      edges,
+    };
+  });
+};
+
+// Mock seed data for 3 days (fallback)
 const createSeedData = (): WorkflowDay[] => [
   {
     day: 1,
@@ -426,12 +540,15 @@ const createSeedData = (): WorkflowDay[] => [
 ];
 
 const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSave, onCancel }) => {
-  const [workflowDays, setWorkflowDays] = useState<WorkflowDay[]>(createSeedData);
+  const [workflowDays, setWorkflowDays] = useState<WorkflowDay[]>(() => 
+    createWorkflowDaysFromTripData(tripData).length > 0 
+      ? createWorkflowDaysFromTripData(tripData) 
+      : createSeedData()
+  );
   const [activeDay, setActiveDay] = useState(0);
   const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
   const [undoStack, setUndoStack] = useState<WorkflowDay[][]>([]);
   const [redoStack, setRedoStack] = useState<WorkflowDay[][]>([]);
-  const [showTimeline, setShowTimeline] = useState(true);
 
   const currentDay = workflowDays[activeDay];
   const [nodes, setNodes, onNodesChange] = useNodesState(currentDay?.nodes || []);
@@ -439,6 +556,15 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { project, getViewport } = useReactFlow();
+
+  // Update workflow days when trip data changes
+  useEffect(() => {
+    const newWorkflowDays = createWorkflowDaysFromTripData(tripData);
+    if (newWorkflowDays.length > 0) {
+      setWorkflowDays(newWorkflowDays);
+      setActiveDay(0); // Reset to first day
+    }
+  }, [tripData]);
 
   // Update React Flow when active day changes
   useEffect(() => {
@@ -541,13 +667,14 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   }, [redoStack, workflowDays]);
 
   const resetDemo = useCallback(() => {
-    const seedData = createSeedData();
-    setWorkflowDays(seedData);
+    const tripDataWorkflow = createWorkflowDaysFromTripData(tripData);
+    const workflowData = tripDataWorkflow.length > 0 ? tripDataWorkflow : createSeedData();
+    setWorkflowDays(workflowData);
     setActiveDay(0);
     setSelectedNode(null);
     setUndoStack([]);
     setRedoStack([]);
-  }, []);
+  }, [tripData]);
 
   const applyToItinerary = useCallback(() => {
     const generatedItinerary = workflowDays.map(day => ({
@@ -577,10 +704,6 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     onSave({ itinerary: { days: generatedItinerary } });
   }, [workflowDays, onSave]);
 
-  const generateTimeline = useCallback(() => {
-    if (!currentDay) return [];
-    return generateTimelineFromNodes(currentDay.nodes);
-  }, [currentDay]);
 
   const getNodeIcon = (type: WorkflowNodeData['type']) => {
     const iconMap = {
@@ -622,7 +745,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
               Auto Arrange
             </Button>
             <Button variant="outline" onClick={resetDemo}>
-              Reset Demo
+              Reset to Original
             </Button>
             <Button onClick={applyToItinerary}>
               <Save className="h-4 w-4 mr-2" />
@@ -666,14 +789,6 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
                   </Button>
                 );
               })}
-              <Separator orientation="vertical" className="mx-4 h-6" />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTimeline(!showTimeline)}
-              >
-                {showTimeline ? 'Hide Timeline' : 'Show Timeline'}
-              </Button>
             </div>
           </div>
 
@@ -700,50 +815,6 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
               </ReactFlow>
             </div>
 
-            {/* Timeline Preview */}
-            {showTimeline && (
-              <div className="w-80 bg-white border-l">
-                <div className="p-4 border-b">
-                  <h3 className="font-medium">Day {currentDay?.day} Timeline</h3>
-                  <p className="text-sm text-gray-600">Generated from workflow</p>
-                </div>
-                <ScrollArea className="h-full">
-                  <div className="p-4 space-y-3">
-                    {generateTimeline().map((item, index) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {item.time}
-                            </Badge>
-                            {item.validation?.status === 'warning' && (
-                              <AlertTriangle className="h-4 w-4 text-amber-500" />
-                            )}
-                            {item.validation?.status === 'error' && (
-                              <AlertTriangle className="h-4 w-4 text-red-500" />
-                            )}
-                            {item.validation?.status === 'valid' && (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
-                            )}
-                          </div>
-                        </div>
-                        <h4 className="font-medium text-sm">{item.title}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {item.type}
-                          </Badge>
-                          <span className="text-xs text-gray-500">{item.duration}min</span>
-                          <span className="text-xs text-gray-500">₹{item.cost}</span>
-                        </div>
-                        {item.validation?.message && (
-                          <p className="text-xs text-amber-600 mt-1">{item.validation.message}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            )}
           </div>
         </div>
 

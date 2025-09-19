@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
 import { MapPin, Clock, Route, Star, X } from 'lucide-react';
-import { TripData } from '../App';
+import { TripData } from '../types/TripData';
 import { AgentOrchestrator } from './AgentOrchestrator';
 
 interface GeneratingPlanProps {

@@ -34,7 +34,9 @@ public abstract class BaseAgent {
         logger.info("Agent ID: {}", agentId);
         logger.info("Itinerary ID: {}", itineraryId);
         logger.info("Request Type: {}", request.getResponseType().getSimpleName());
-        logger.info("Request Data: {}", String.valueOf(request.getData()));
+        Object requestData = request.getData();
+        logger.info("Request Data: {}", requestData != null ? requestData.toString() : "null");
+        logger.info("Request Details: {}", requestData != null ? requestData.toString() : "null");
         logger.info("=============================");
         
         // Emit queued event
@@ -56,7 +58,7 @@ public abstract class BaseAgent {
             logger.info("Agent Kind: {}", agentKind);
             logger.info("Itinerary ID: {}", itineraryId);
             logger.info("Result Type: {}", result != null ? result.getClass().getSimpleName() : "null");
-            logger.info("Result: {}", String.valueOf(result));
+            logger.info("Result: {}", result != null ? result.toString() : "null");
             logger.info("=================================");
             
             return result;
@@ -140,6 +142,18 @@ public abstract class BaseAgent {
         
         @SuppressWarnings("unchecked")
         public <D> D getData() {
+            return (D) data;
+        }
+        
+        @SuppressWarnings("unchecked")
+        public <D> D getData(Class<D> expectedType) {
+            if (data == null) {
+                return null;
+            }
+            if (!expectedType.isAssignableFrom(data.getClass())) {
+                throw new ClassCastException("Cannot cast " + data.getClass().getSimpleName() + 
+                    " to " + expectedType.getSimpleName());
+            }
             return (D) data;
         }
         

@@ -1,7 +1,6 @@
 package com.tripplanner.data.entity;
 
-import com.google.cloud.firestore.annotation.DocumentId;
-import com.google.cloud.firestore.annotation.PropertyName;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -10,38 +9,41 @@ import java.util.Objects;
 
 /**
  * User entity representing authenticated users in the system.
- * Stored in Firestore collection: users/{userId}
+ * Stored in H2 database table: users
  */
+@Entity
+@Table(name = "users")
 public class User {
     
-    @DocumentId
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
     @NotBlank
     @Email
-    @PropertyName("email")
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
     
     @NotBlank
-    @PropertyName("name")
+    @Column(name = "name", nullable = false)
     private String name;
     
-    @PropertyName("createdAt")
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
     
-    @PropertyName("updatedAt")
+    @Column(name = "updated_at")
     private Instant updatedAt;
     
-    @PropertyName("lastLoginAt")
+    @Column(name = "last_login_at")
     private Instant lastLoginAt;
     
-    @PropertyName("profileImageUrl")
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
     
-    @PropertyName("preferredLanguage")
+    @Column(name = "preferred_language")
     private String preferredLanguage = "en";
     
-    @PropertyName("timezone")
+    @Column(name = "timezone")
     private String timezone = "UTC";
     
     public User() {
@@ -56,11 +58,11 @@ public class User {
     }
     
     // Getters and Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
     
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
     

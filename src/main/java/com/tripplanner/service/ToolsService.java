@@ -1,7 +1,6 @@
 package com.tripplanner.service;
 
 import com.tripplanner.api.ToolsController;
-import com.tripplanner.security.GoogleUserPrincipal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,8 @@ public class ToolsService {
     /**
      * Generate packing list.
      */
-    public ToolsController.PackingListRes generatePackingList(ToolsController.PackingListReq request, GoogleUserPrincipal user) {
-        logger.info("Generating packing list for user: {}", user.getUserId());
+    public ToolsController.PackingListRes generatePackingList(ToolsController.PackingListReq request) {
+        logger.info("Generating packing list");
         
         // TODO: Implement packing list generation with LLM
         
@@ -28,8 +27,8 @@ public class ToolsService {
     /**
      * Get photo spots.
      */
-    public ToolsController.PhotoSpotsRes getPhotoSpots(ToolsController.PhotoSpotsReq request, GoogleUserPrincipal user) {
-        logger.info("Getting photo spots for user: {}", user.getUserId());
+    public ToolsController.PhotoSpotsRes getPhotoSpots(ToolsController.PhotoSpotsReq request) {
+        logger.info("Getting photo spots");
         
         // TODO: Implement photo spots retrieval with LLM
         
@@ -39,8 +38,8 @@ public class ToolsService {
     /**
      * Get must-try foods.
      */
-    public ToolsController.MustTryFoodsRes getMustTryFoods(ToolsController.MustTryFoodsReq request, GoogleUserPrincipal user) {
-        logger.info("Getting must-try foods for user: {}", user.getUserId());
+    public ToolsController.MustTryFoodsRes getMustTryFoods(ToolsController.MustTryFoodsReq request) {
+        logger.info("Getting must-try foods");
         
         // TODO: Implement must-try foods retrieval with LLM
         
@@ -50,12 +49,31 @@ public class ToolsService {
     /**
      * Generate cost estimate.
      */
-    public ToolsController.CostEstimateRes generateCostEstimate(ToolsController.CostEstimateReq request, GoogleUserPrincipal user) {
-        logger.info("Generating cost estimate for user: {}", user.getUserId());
+    public ToolsController.CostEstimateRes generateCostEstimate(ToolsController.CostEstimateReq request) {
+        logger.info("Generating cost estimate");
         
         // TODO: Implement cost estimation with LLM
         
         throw new UnsupportedOperationException("Cost estimation not yet implemented");
+    }
+    
+    /**
+     * Get weather information.
+     */
+    public ToolsController.WeatherRes getWeather(String destination, String date) {
+        logger.info("Getting weather for destination: {}, date: {}", destination, date);
+        
+        // Return mock weather data for now
+        return new ToolsController.WeatherRes(
+            destination,
+            date != null ? date : "2025-06-01",
+            22.5,
+            "Sunny",
+            "Clear skies with light winds",
+            65.0,
+            12.5,
+            "Celsius"
+        );
     }
 }
 

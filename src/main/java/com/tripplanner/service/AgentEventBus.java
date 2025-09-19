@@ -91,17 +91,9 @@ public class AgentEventBus {
                 successCount++;
                 
             } catch (IOException e) {
-                logger.warn("Failed to send event to SSE emitter for itinerary: {}", itineraryId, e);
+                logger.warn("Failed to send event to SSE emitter for itinerary: {} (client likely disconnected)", itineraryId);
                 failureCount++;
-                
-                // Complete the failed emitter and remove it
-                try {
-                    emitter.complete();
-                } catch (Exception completionError) {
-                    logger.debug("Error completing failed emitter", completionError);
-                }
-                
-                // Remove the failed emitter
+                // Do not attempt to complete/flush on broken response; just remove the emitter
                 itineraryEmitters.remove(emitter);
             }
         }

@@ -1,6 +1,5 @@
 package com.tripplanner.api;
 
-import com.tripplanner.security.GoogleUserPrincipal;
 import com.tripplanner.service.BookingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -20,6 +18,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BookingController {
     
     private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
@@ -34,14 +33,10 @@ public class BookingController {
      * Create Razorpay order for payment.
      */
     @PostMapping("/payments/razorpay/order")
-    public ResponseEntity<RazorpayOrderRes> createRazorpayOrder(
-            @Valid @RequestBody RazorpayOrderReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+    public ResponseEntity<RazorpayOrderRes> createRazorpayOrder(@Valid @RequestBody RazorpayOrderReq request) {
+        logger.info("Creating Razorpay order, amount: {} {}", request.amount(), request.currency());
         
-        logger.info("Creating Razorpay order for user: {}, amount: {} {}", 
-                   user.getUserId(), request.amount(), request.currency());
-        
-        RazorpayOrderRes response = bookingService.createRazorpayOrder(request, user);
+        RazorpayOrderRes response = bookingService.createRazorpayOrder(request);
         
         logger.info("Razorpay order created: {}", response.orderId());
         return ResponseEntity.ok(response);
@@ -70,13 +65,10 @@ public class BookingController {
     public ResponseEntity<BookingRes> executeProviderBooking(
             @PathVariable String vertical,
             @PathVariable String provider,
-            @Valid @RequestBody ProviderBookReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @Valid @RequestBody ProviderBookReq request) {
+        logger.info("Executing {} booking with provider {}", vertical, provider);
         
-        logger.info("Executing {} booking with provider {} for user: {}", 
-                   vertical, provider, user.getUserId());
-        
-        BookingRes response = bookingService.executeProviderBooking(vertical, provider, request, user);
+        BookingRes response = bookingService.executeProviderBooking(vertical, provider, request);
         
         logger.info("Provider booking executed: {}", response.bookingId());
         return ResponseEntity.ok(response);
@@ -87,12 +79,10 @@ public class BookingController {
      */
     @GetMapping("/bookings/{bookingId}")
     public ResponseEntity<BookingRes> getBooking(
-            @PathVariable String bookingId,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @PathVariable String bookingId) {
+        logger.debug("Getting booking: {} for user: {}", bookingId, "anonymous");
         
-        logger.debug("Getting booking: {} for user: {}", bookingId, user.getUserId());
-        
-        BookingRes booking = bookingService.getBooking(bookingId, user);
+        BookingRes booking = bookingService.getBooking(bookingId);
         return ResponseEntity.ok(booking);
     }
     
@@ -101,14 +91,12 @@ public class BookingController {
      */
     @GetMapping("/bookings")
     public ResponseEntity<java.util.List<BookingRes>> getUserBookings(
-            @AuthenticationPrincipal GoogleUserPrincipal user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        
         logger.debug("Getting bookings for user: {}, page: {}, size: {}", 
-                    user.getUserId(), page, size);
+                    "anonymous", page, size);
         
-        java.util.List<BookingRes> bookings = bookingService.getUserBookings(user, page, size);
+        java.util.List<BookingRes> bookings = bookingService.getUserBookings(page, size);
         return ResponseEntity.ok(bookings);
     }
     
@@ -118,12 +106,10 @@ public class BookingController {
     @PostMapping("/bookings/{bookingId}:cancel")
     public ResponseEntity<Void> cancelBooking(
             @PathVariable String bookingId,
-            @Valid @RequestBody CancelBookingReq request,
-            @AuthenticationPrincipal GoogleUserPrincipal user) {
+            @Valid @RequestBody CancelBookingReq request) {
+        logger.info("Canceling booking: {} for user: {}", bookingId, "anonymous");
         
-        logger.info("Canceling booking: {} for user: {}", bookingId, user.getUserId());
-        
-        bookingService.cancelBooking(bookingId, request, user);
+        bookingService.cancelBooking(bookingId, request);
         
         logger.info("Booking canceled: {}", bookingId);
         return ResponseEntity.ok().build();

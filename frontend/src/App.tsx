@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LandingPage } from './components/LandingPage';
 import { SimplifiedTripWizard } from './components/SimplifiedTripWizard';
 import { AgentProgressModal } from './components/AgentProgressModal';
@@ -12,6 +12,10 @@ import { BookingConfirmation } from './components/BookingConfirmation';
 import { ShareView } from './components/ShareView';
 import { TripDashboard } from './components/TripDashboard';
 import { TripData } from './types/TripData';
+import { useAppStore } from './state/hooks';
+import { useItinerary } from './state/query/hooks';
+import { Routes, Route, useNavigate, useParams, Outlet, Navigate } from 'react-router-dom';
+// Data transformation will be handled by the backend
 
 export type AppScreen = 
   | 'landing'
@@ -34,170 +38,226 @@ export interface AppState {
   trips: TripData[];
 }
 
-export default function App() {
-  const [appState, setAppState] = useState<AppState>({
-    currentScreen: 'landing',
-    isAuthenticated: false,
-    currentTrip: null,
-    trips: []
-  });
+function RoutedApp() {
+  const {
+    isAuthenticated,
+    currentTrip,
+    trips,
+    setScreen,
+    setCurrentTrip,
+    addTrip,
+    updateCurrentTrip,
+    setAuthenticated
+  } = useAppStore();
+  const navigate = useNavigate();
+  const { currentTrip: currentTripForHydrate } = useAppStore();
+  const { refetch } = useItinerary(currentTripForHydrate?.id || '');
 
-  const navigateToScreen = (screen: AppScreen, tripData?: TripData) => {
-    setAppState(prev => ({
-      ...prev,
-      currentScreen: screen,
-      ...(tripData && { currentTrip: tripData })
-    }));
+  React.useEffect(() => {
+    (async () => {
+      if (currentTripForHydrate?.id) {
+        try {
+          const r = await refetch();
+          if (r.data) {
+            // Avoid overwrite if already present
+            if (!currentTrip?.itinerary) {
+              const responseData = r.data as TripData;
+              
+              // Use the response data directly
+              setCurrentTrip(responseData);
+            }
+          }
+        } catch {}
+      }
+    })();
+  }, []);
+
+  const navigateToScreen = (path: string, tripData?: TripData) => {
+    if (tripData) setCurrentTrip(tripData);
+    navigate(path);
   };
 
-  const updateCurrentTrip = (updates: Partial<TripData>) => {
-    setAppState(prev => ({
-      ...prev,
-      currentTrip: prev.currentTrip ? { ...prev.currentTrip, ...updates } : null
-    }));
-  };
+  const authenticate = () => setAuthenticated(true);
 
-  const authenticate = () => {
-    setAppState(prev => ({ ...prev, isAuthenticated: true }));
-  };
-
-  const renderScreen = () => {
-    switch (appState.currentScreen) {
-      case 'landing':
-        return (
-          <LandingPage
-            isAuthenticated={appState.isAuthenticated}
-            onAuthenticate={authenticate}
-            onStartTrip={() => navigateToScreen('wizard')}
-            onViewTrips={() => navigateToScreen('dashboard')}
-            trips={appState.trips}
-          />
-        );
-      case 'wizard':
-        return (
-          <SimplifiedTripWizard
-            onComplete={(tripData) => {
-              console.log('Trip wizard completed with trip data:', tripData);
-              setAppState(prev => ({
-                ...prev,
-                trips: [...prev.trips, tripData],
-                currentTrip: tripData
-              }));
-              navigateToScreen('generating');
-            }}
-            onBack={() => navigateToScreen('landing')}
-          />
-        );
-      case 'generating':
-        return (
+  return (
+    <Routes>
+      <Route path="/" element={
+        <LandingPage
+          isAuthenticated={isAuthenticated}
+          onAuthenticate={authenticate}
+          onStartTrip={() => navigateToScreen('/wizard')}
+          onViewTrips={() => navigateToScreen('/dashboard')}
+          trips={trips}
+        />
+      } />
+      <Route path="/wizard" element={
+        <SimplifiedTripWizard
+          onComplete={(tripData) => {
+            addTrip(tripData);
+            setCurrentTrip(tripData);
+            navigateToScreen('/generating');
+          }}
+          onBack={() => navigateToScreen('/')}
+        />
+      } />
+      {/* Guarded routes requiring a current trip */}
+      <Route element={<RequireTrip tripExists={!!currentTrip} /> }>
+        <Route path="/generating" element={
           <AgentProgressModal
-            tripData={appState.currentTrip!}
-            onComplete={() => navigateToScreen('planner')}
+            tripData={currentTrip as TripData}
+            onComplete={() => navigateToScreen('/overview')}
           />
-        );
-      case 'overview':
-        return (
+        } />
+        <Route path="/overview" element={
           <ItineraryOverview
-            tripData={appState.currentTrip!}
-            onEdit={() => navigateToScreen('edit')}
-            onWorkflowEdit={() => navigateToScreen('workflow')}
-            onProceedToCost={() => navigateToScreen('cost')}
-            onBack={() => navigateToScreen('wizard')}
-            onOpenPlanner={() => navigateToScreen('planner')}
+            tripData={currentTrip as TripData}
+            onEdit={() => navigateToScreen('/edit')}
+            onWorkflowEdit={() => navigateToScreen('/workflow')}
+            onProceedToCost={() => navigateToScreen('/cost')}
+            onBack={() => navigateToScreen('/wizard')}
+            onOpenPlanner={() => navigateToScreen('/planner')}
           />
-        );
-      case 'planner':
-        return (
+        } />
+        <Route path="/planner" element={
           <StipplPlanner
-            tripData={appState.currentTrip!}
+            tripData={currentTrip as TripData}
             onSave={(updatedTrip) => {
               updateCurrentTrip(updatedTrip);
-              navigateToScreen('overview');
+              navigateToScreen('/overview');
             }}
-            onBack={() => navigateToScreen('overview')}
-            onShare={() => navigateToScreen('share')}
+            onBack={() => navigateToScreen('/overview')}
+            onShare={() => navigateToScreen('/share')}
             onExportPDF={() => {
               // Handle PDF export
               alert('PDF export functionality would be implemented here');
             }}
           />
-        );
-      case 'edit':
-        return (
+        } />
+        <Route path="/edit" element={
           <EditMode
-            tripData={appState.currentTrip!}
+            tripData={currentTrip as TripData}
             onSave={(updatedTrip) => {
               updateCurrentTrip(updatedTrip);
-              navigateToScreen('overview');
+              navigateToScreen('/overview');
             }}
-            onCancel={() => navigateToScreen('overview')}
+            onCancel={() => navigateToScreen('/overview')}
           />
-        );
-      case 'workflow':
-        return (
+        } />
+        <Route path="/workflow" element={
           <WorkflowBuilder
-            tripData={appState.currentTrip!}
+            tripData={currentTrip as TripData}
             onSave={(updatedTrip) => {
               updateCurrentTrip(updatedTrip);
-              navigateToScreen('overview');
+              navigateToScreen('/overview');
             }}
-            onCancel={() => navigateToScreen('overview')}
+            onCancel={() => navigateToScreen('/overview')}
           />
-        );
-      case 'cost':
-        return (
+        } />
+        <Route path="/cost" element={
           <CostAndCart
-            tripData={appState.currentTrip!}
-            onCheckout={() => navigateToScreen('checkout')}
-            onBack={() => navigateToScreen('overview')}
+            tripData={currentTrip as TripData}
+            onCheckout={() => navigateToScreen('/checkout')}
+            onBack={() => navigateToScreen('/overview')}
           />
-        );
-      case 'checkout':
-        return (
+        } />
+        <Route path="/checkout" element={
           <Checkout
-            tripData={appState.currentTrip!}
+            tripData={currentTrip as TripData}
             onSuccess={(bookingData) => {
               updateCurrentTrip({ bookingData });
-              navigateToScreen('confirmation');
+              navigateToScreen('/confirmation');
             }}
-            onBack={() => navigateToScreen('cost')}
+            onBack={() => navigateToScreen('/cost')}
           />
-        );
-      case 'confirmation':
-        return (
+        } />
+        <Route path="/confirmation" element={
           <BookingConfirmation
-            tripData={appState.currentTrip!}
-            onShare={() => navigateToScreen('share')}
-            onDashboard={() => navigateToScreen('dashboard')}
+            tripData={currentTrip as TripData}
+            onShare={() => navigateToScreen('/share')}
+            onDashboard={() => navigateToScreen('/dashboard')}
           />
-        );
-      case 'share':
-        return (
+        } />
+        <Route path="/share" element={
           <ShareView
-            tripData={appState.currentTrip!}
-            onBack={() => navigateToScreen('confirmation')}
+            tripData={currentTrip as TripData}
+            onBack={() => navigateToScreen('/confirmation')}
           />
-        );
-      case 'dashboard':
-        return (
-          <TripDashboard
-            trips={appState.trips}
-            onCreateTrip={() => navigateToScreen('wizard')}
-            onViewTrip={(trip) => {
-              setAppState(prev => ({ ...prev, currentTrip: trip }));
-              navigateToScreen('overview');
-            }}
-            onBack={() => navigateToScreen('landing')}
-          />
-        );
-      default:
-        return <div>Screen not found</div>;
-    }
-  };
+        } />
+      </Route>
+      <Route path="/dashboard" element={
+        <TripDashboard
+          trips={trips}
+          onCreateTrip={() => navigateToScreen('/wizard')}
+          onViewTrip={(trip) => {
+            setCurrentTrip(trip);
+            navigateToScreen('/overview');
+          }}
+          onBack={() => navigateToScreen('/')}
+        />
+      } />
+      <Route path="/trip/:id" element={<TripRouteLoader />} />
+      <Route path="/itinerary/:id" element={<ItineraryRouteLoader />} />
+      <Route path="*" element={<div>Not found</div>} />
+    </Routes>
+  );
+}
 
+function TripRouteLoader() {
+  const { id } = useParams();
+  const { trips, setCurrentTrip } = useAppStore();
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    const trip = trips.find(t => t.id === id);
+    if (trip) {
+      setCurrentTrip(trip);
+      navigate('/overview', { replace: true });
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [id]);
+  return null;
+}
+
+function ItineraryRouteLoader() {
+  const { id } = useParams();
+  const { setCurrentTrip } = useAppStore();
+  const navigate = useNavigate();
+  const { refetch } = useItinerary(id || '');
+  React.useEffect(() => {
+    (async () => {
+      if (!id) {
+        navigate('/', { replace: true });
+        return;
+      }
+      try {
+        const r = await refetch();
+        if (r.data) {
+          // Use the response data directly
+          const data: TripData = r.data;
+          setCurrentTrip(data);
+          navigate('/overview', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+      } catch {
+        navigate('/', { replace: true });
+      }
+    })();
+  }, [id]);
+  return null;
+}
+
+function RequireTrip({ tripExists }: { tripExists: boolean }) {
+  if (!tripExists) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
+export default function App() {
   return (
     <div className="size-full min-h-screen bg-background">
-      {renderScreen()}
+      <RoutedApp />
     </div>
   );
 }
