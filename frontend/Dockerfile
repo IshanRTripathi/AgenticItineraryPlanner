@@ -5,13 +5,12 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 RUN npm run build
+RUN ls -R /app   # Debug: shows us that /app/build exists
 
 # Stage 2: Serve with nginx
 FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
-# Remove default nginx html
-RUN rm -rf ./*
-# Copy the Vite build output
-COPY --from=build /app/build .    # ✅ uses "build" because outDir=build in vite.config.js
+RUN rm -rf ./*   #clear nginx default files
+COPY --from=build /app/build/ .   
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

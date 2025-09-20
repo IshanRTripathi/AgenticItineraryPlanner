@@ -3,9 +3,16 @@ name: Deploy Spring Boot + React to Cloud Run
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which service to deploy (backend, frontend, all)"
+        required: true
+        default: "all"
 
 jobs:
   backend-deploy:
+    if: ${{ github.event_name == 'push' || github.event.inputs.target == 'backend' || github.event.inputs.target == 'all' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,8 +46,9 @@ jobs:
           image: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:${{ github.sha }}
 
   frontend-deploy:
+    if: ${{ github.event_name == 'push' || github.event.inputs.target == 'frontend' || github.event.inputs.target == 'all' }}
     runs-on: ubuntu-latest
-    needs: backend-deploy
+    needs: [backend-deploy]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
