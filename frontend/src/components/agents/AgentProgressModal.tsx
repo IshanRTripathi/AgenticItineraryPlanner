@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card } from './ui/card';
-import { Progress } from './ui/progress';
-import { Badge } from './ui/badge';
+import { Card } from '../ui/card';
+import { Progress } from '../ui/progress';
+import { Badge } from '../ui/badge';
 import { CheckCircle2, Loader2, Clock, Zap } from 'lucide-react';
-import { AGENT_TASKS, AgentTask } from '../types/TripData';
-import { TripData } from '../types/TripData';
-import { apiClient, AgentEvent } from '../services/apiClient';
-import { useAppStore } from '../state/hooks';
-import { useItinerary } from '../state/query/hooks';
+import { AGENT_TASKS, AgentTask } from '../../types/TripData';
+import { TripData } from '../../types/TripData';
+import { apiClient, AgentEvent } from '../../services/apiClient';
+import { useAppStore } from '../../state/hooks';
+import { useItinerary } from '../../state/query/hooks';
 
 interface AgentProgressModalProps {
   tripData: TripData;
@@ -322,3 +322,6 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
     </div>
   );
 }
+
+
+

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { Checkbox } from './ui/checkbox';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
-import { Alert, AlertDescription } from './ui/alert';
-import { Progress } from './ui/progress';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Checkbox } from '../ui/checkbox';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Progress } from '../ui/progress';
 import { 
   ArrowLeft, 
   CreditCard, 
@@ -19,7 +19,7 @@ import {
   Clock,
   AlertTriangle
 } from 'lucide-react';
-import { TripData } from '../types/TripData';
+import { TripData } from '../../types/TripData';
 
 interface CheckoutProps {
   tripData: TripData;
@@ -441,3 +441,6 @@ export function Checkout({ tripData, onSuccess, onBack }: CheckoutProps) {
     </div>
   );
 }
+
+
+

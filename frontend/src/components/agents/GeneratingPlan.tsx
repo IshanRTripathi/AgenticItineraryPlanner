@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Progress } from './ui/progress';
-import { Badge } from './ui/badge';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Progress } from '../ui/progress';
+import { Badge } from '../ui/badge';
 import { MapPin, Clock, Route, Star, X } from 'lucide-react';
-import { TripData } from '../types/TripData';
+import { TripData } from '../../types/TripData';
 import { AgentOrchestrator } from './AgentOrchestrator';
 
 interface GeneratingPlanProps {
@@ -294,3 +294,6 @@ export function GeneratingPlan({ tripData, onComplete, onCancel }: GeneratingPla
     </div>
   );
 }
+
+
+

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
-import { Badge } from './ui/badge';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
-import { Alert, AlertDescription } from './ui/alert';
-import { useItinerary } from '../state/query/hooks';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { Alert, AlertDescription } from '../ui/alert';
+import { useItinerary } from '../../state/query/hooks';
 import { 
   ArrowLeft, 
   Save, 
@@ -19,7 +19,7 @@ import {
   Clock,
   AlertTriangle
 } from 'lucide-react';
-import { TripData } from '../types/TripData';
+import { TripData } from '../../types/TripData';
 
 interface EditModeProps {
   tripData: TripData;
@@ -509,3 +509,6 @@ export function EditMode({ tripData, onSave, onCancel }: EditModeProps) {
     </div>
   );
 }
+
+
+

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
 import { 
   CheckCircle, 
   Download, 
@@ -18,7 +18,7 @@ import {
   Copy,
   Home
 } from 'lucide-react';
-import { TripData } from '../types/TripData';
+import { TripData } from '../../types/TripData';
 
 interface BookingConfirmationProps {
   tripData: TripData;
@@ -368,3 +368,5 @@ Can't wait to explore!`;
     </div>
   );
 }
+
+

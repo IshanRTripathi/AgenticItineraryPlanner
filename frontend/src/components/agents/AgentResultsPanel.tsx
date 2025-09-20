@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Separator } from './ui/separator';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Separator } from '../ui/separator';
 import { 
   Plane, 
   Hotel, 
@@ -26,7 +26,7 @@ import {
   RestaurantOption, 
   PlaceOption, 
   TransportOption 
-} from '../types/TripData';
+} from '../../types/TripData';
 
 interface AgentResultsPanelProps {
   agentResults?: {
@@ -514,3 +514,7 @@ export function AgentResultsPanel({
     </div>
   );
 }
+
+
+
+

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Checkbox } from './ui/checkbox';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Separator } from './ui/separator';
-import { Switch } from './ui/switch';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Checkbox } from '../ui/checkbox';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
+import { Switch } from '../ui/switch';
 import { 
   ArrowLeft, 
   CreditCard, 
@@ -18,7 +18,7 @@ import {
   Info,
   Percent
 } from 'lucide-react';
-import { TripData } from '../types/TripData';
+import { TripData } from '../../types/TripData';
 
 interface CostAndCartProps {
   tripData: TripData;
@@ -437,3 +437,6 @@ export function CostAndCart({ tripData, onCheckout, onBack }: CostAndCartProps) 
     </div>
   );
 }
+
+
+

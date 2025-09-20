@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { 
   ArrowLeft, 
   Edit, 
@@ -18,9 +18,9 @@ import {
   GitBranch,
   Zap
 } from 'lucide-react';
-import { TripData } from '../types/TripData';
-import { AgentResultsPanel } from './AgentResultsPanel';
-import { useItinerary } from '../state/query/hooks';
+import { TripData } from '../../types/TripData';
+import { AgentResultsPanel } from '../agents/AgentResultsPanel';
+import { useItinerary } from '../../state/query/hooks';
 
 interface ItineraryOverviewProps {
   tripData: TripData;
@@ -245,7 +245,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                         Day {index + 1}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{Math.round(day.weather?.temperature?.high || 25)}°C</span>
+                        <span className="text-sm">{Math.round(25)}°C</span>
                         <div className="w-6 h-6 bg-yellow-200 rounded-full flex items-center justify-center">
                           ☀️
                         </div>
@@ -267,7 +267,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
               <CardHeader>
                 <CardTitle>Daily Itinerary</CardTitle>
                 <CardDescription>
-                  Your personalized {itinerary?.totalDays || 0}-day adventure
+                  Your personalized {itinerary?.days?.length || 0}-day adventure
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -294,10 +294,10 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                           </span>
                         </div>
 
-                        {(day.components || day.activities || []).map((activity, index: number) => (
+                        {(day.components || []).map((activity, index: number) => (
                           <div key={activity.id} className="relative">
                             {/* Timeline connector */}
-                            {index < (day.components || day.activities || []).length - 1 && (
+                            {index < (day.components || []).length - 1 && (
                               <div className="absolute left-6 top-12 w-0.5 h-16 bg-gray-200" />
                             )}
                             
@@ -307,7 +307,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                                   {getActivityIcon(activity.type)}
                                 </div>
                                 <span className="text-xs mt-1 font-medium">
-                                  {formatTime(activity.timing?.startTime || activity.time || '09:00')}
+                                  {formatTime(activity.timing?.startTime || '09:00')}
                                 </span>
                               </div>
                               
@@ -318,7 +318,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                                       <h4 className="font-medium">{activity.name}</h4>
                                       <div className="flex gap-1">
                                         <Badge variant="outline" className="text-xs">
-                                          {activity.timing?.duration || activity.duration || 60} min
+                                          {activity.timing?.duration || 60} min
                                         </Badge>
                                         {activity.details?.accessibility?.wheelchairAccessible && (
                                           <Badge variant="outline" className="text-xs bg-green-50">
@@ -333,8 +333,8 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
                                     </p>
                                     
                                     <div className="flex items-center justify-between text-xs text-gray-500">
-                                      <span>📍 {activity.travel?.travelTimeFromPrevious || activity.walkingTime || 0} min walk</span>
-                                      <span>🕒 {activity.details?.openingHours?.monday?.open || activity.openingHours || '09:00'} - {activity.details?.openingHours?.monday?.close || '18:00'}</span>
+                                      <span>📍 {activity.travel?.travelTimeFromPrevious || 0} min walk</span>
+                                      <span>🕒 {activity.details?.openingHours?.monday?.open || '09:00'} - {activity.details?.openingHours?.monday?.close || '18:00'}</span>
                                     </div>
                                   </CardContent>
                                 </Card>
@@ -363,3 +363,6 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
     </div>
   );
 }
+
+
+

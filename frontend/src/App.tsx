@@ -1,16 +1,13 @@
 import React from 'react';
 import { LandingPage } from './components/LandingPage';
-import { SimplifiedTripWizard } from './components/SimplifiedTripWizard';
-import { AgentProgressModal } from './components/AgentProgressModal';
-import { ItineraryOverview } from './components/ItineraryOverview';
-import { StipplPlanner } from './components/StipplPlanner';
-import { EditMode } from './components/EditMode';
-import { WorkflowBuilder } from './components/WorkflowBuilder';
-import { CostAndCart } from './components/CostAndCart';
-import { Checkout } from './components/Checkout';
-import { BookingConfirmation } from './components/BookingConfirmation';
-import { ShareView } from './components/ShareView';
-import { TripDashboard } from './components/TripDashboard';
+import { SimplifiedTripWizard } from './components/trip-wizard/SimplifiedTripWizard';
+import { AgentProgressModal } from './components/agents/AgentProgressModal';
+import { TravelPlanner } from './components/TravelPlanner';
+import { CostAndCart } from './components/booking/CostAndCart';
+import { Checkout } from './components/booking/Checkout';
+import { BookingConfirmation } from './components/booking/BookingConfirmation';
+import { ShareView } from './components/trip-management/ShareView';
+import { TripDashboard } from './components/trip-management/TripDashboard';
 import { TripData } from './types/TripData';
 import { useAppStore } from './state/hooks';
 import { useItinerary } from './state/query/hooks';
@@ -21,10 +18,7 @@ export type AppScreen =
   | 'landing'
   | 'wizard'
   | 'generating'
-  | 'overview'
   | 'planner'
-  | 'edit'
-  | 'workflow'
   | 'cost'
   | 'checkout'
   | 'confirmation'
@@ -105,27 +99,17 @@ function RoutedApp() {
         <Route path="/generating" element={
           <AgentProgressModal
             tripData={currentTrip as TripData}
-            onComplete={() => navigateToScreen('/overview')}
-          />
-        } />
-        <Route path="/overview" element={
-          <ItineraryOverview
-            tripData={currentTrip as TripData}
-            onEdit={() => navigateToScreen('/edit')}
-            onWorkflowEdit={() => navigateToScreen('/workflow')}
-            onProceedToCost={() => navigateToScreen('/cost')}
-            onBack={() => navigateToScreen('/wizard')}
-            onOpenPlanner={() => navigateToScreen('/planner')}
+            onComplete={() => navigateToScreen('/planner')}
           />
         } />
         <Route path="/planner" element={
-          <StipplPlanner
+          <TravelPlanner
             tripData={currentTrip as TripData}
             onSave={(updatedTrip) => {
               updateCurrentTrip(updatedTrip);
-              navigateToScreen('/overview');
+              navigateToScreen('/dashboard');
             }}
-            onBack={() => navigateToScreen('/overview')}
+            onBack={() => navigateToScreen('/dashboard')}
             onShare={() => navigateToScreen('/share')}
             onExportPDF={() => {
               // Handle PDF export
@@ -133,31 +117,11 @@ function RoutedApp() {
             }}
           />
         } />
-        <Route path="/edit" element={
-          <EditMode
-            tripData={currentTrip as TripData}
-            onSave={(updatedTrip) => {
-              updateCurrentTrip(updatedTrip);
-              navigateToScreen('/overview');
-            }}
-            onCancel={() => navigateToScreen('/overview')}
-          />
-        } />
-        <Route path="/workflow" element={
-          <WorkflowBuilder
-            tripData={currentTrip as TripData}
-            onSave={(updatedTrip) => {
-              updateCurrentTrip(updatedTrip);
-              navigateToScreen('/overview');
-            }}
-            onCancel={() => navigateToScreen('/overview')}
-          />
-        } />
         <Route path="/cost" element={
           <CostAndCart
             tripData={currentTrip as TripData}
             onCheckout={() => navigateToScreen('/checkout')}
-            onBack={() => navigateToScreen('/overview')}
+            onBack={() => navigateToScreen('/planner')}
           />
         } />
         <Route path="/checkout" element={
@@ -190,7 +154,7 @@ function RoutedApp() {
           onCreateTrip={() => navigateToScreen('/wizard')}
           onViewTrip={(trip) => {
             setCurrentTrip(trip);
-            navigateToScreen('/overview');
+            navigateToScreen('/planner');
           }}
           onBack={() => navigateToScreen('/')}
         />
@@ -210,7 +174,7 @@ function TripRouteLoader() {
     const trip = trips.find(t => t.id === id);
     if (trip) {
       setCurrentTrip(trip);
-      navigate('/overview', { replace: true });
+      navigate('/planner', { replace: true });
     } else {
       navigate('/', { replace: true });
     }
@@ -235,7 +199,7 @@ function ItineraryRouteLoader() {
           // Use the response data directly
           const data: TripData = r.data;
           setCurrentTrip(data);
-          navigate('/overview', { replace: true });
+          navigate('/planner', { replace: true });
         } else {
           navigate('/', { replace: true });
         }

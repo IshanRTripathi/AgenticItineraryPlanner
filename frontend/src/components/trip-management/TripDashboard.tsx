@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Input } from './ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { useItineraries } from '../state/query/hooks';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { useItineraries } from '../../state/query/hooks';
 import { 
   ArrowLeft,
   Plus,
@@ -24,7 +24,7 @@ import {
   Clock,
   Star
 } from 'lucide-react';
-import { TripData } from '../types/TripData';
+import { TripData } from '../../types/TripData';
 
 interface TripDashboardProps {
   trips: TripData[];
@@ -425,3 +425,5 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
     </div>
   );
 }
+
+

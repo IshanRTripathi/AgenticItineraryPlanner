@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { Label } from './ui/label';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Slider } from './ui/slider';
-import { Switch } from './ui/switch';
-import { Separator } from './ui/separator';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Card } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Label } from '../ui/label';
+import { Calendar } from '../ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Slider } from '../ui/slider';
+import { Switch } from '../ui/switch';
+import { Separator } from '../ui/separator';
 import { Plus, Minus, X, CalendarIcon, MapPin, Users, DollarSign, Settings2 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { DateRange } from 'react-day-picker';
-import { TripData, Traveler, TravelPreferences, TripSettings, TripLocation } from '../types/TripData';
-import { apiClient, CreateItineraryRequest } from '../services/apiClient';
-import { useCreateItinerary } from '../state/query/hooks';
-import { useAppStore } from '../state/hooks';
+import { TripData, Traveler, TravelPreferences, TripSettings, TripLocation } from '../../types/TripData';
+import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
+import { useCreateItinerary } from '../../state/query/hooks';
+import { useAppStore } from '../../state/hooks';
 // removed unused figma asset import for prototype
 
 interface SimplifiedTripWizardProps {
@@ -188,8 +188,8 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
         endLocation: endLocationData,
         isRoundTrip,
         dates: {
-          start: response.startDate,
-          end: response.endDate
+          start: dateRange?.from?.toISOString() || new Date().toISOString(),
+          end: dateRange?.to?.toISOString() || new Date().toISOString()
         },
         travelers,
         leadTraveler: travelers[0],
@@ -535,3 +535,6 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
     </div>
   );
 }
+
+
+
