@@ -13,6 +13,7 @@ export interface TravelPlannerProps {
 export interface ViewComponentProps {
   tripData: TripData;
   onUpdate?: (updates: Partial<TripData>) => void;
+  onDaySelect?: (dayNumber: number, dayData: any) => void;
 }
 
 // Destination management interfaces

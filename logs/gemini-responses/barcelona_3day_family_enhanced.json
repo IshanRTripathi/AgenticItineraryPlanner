@@ -1,0 +1,543 @@
+{
+  "summary": "A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food.",
+  "highlights": [
+    "Sagrada Familia",
+    "Park Güell",
+    "Gothic Quarter",
+    "Barcelona beaches",
+    "Tapas tour"
+  ],
+  "totalEstimatedCost": 1200,
+  "currency": "EUR",
+  "themes": ["culture", "architecture", "food", "family-friendly"],
+  "difficulty": "easy",
+  "bestTimeToVisit": "Spring and Fall",
+  "weather": {
+    "temperature": "15-25°C",
+    "condition": "sunny",
+    "precipitation": "low"
+  },
+  "packingList": [
+    "Comfortable walking shoes",
+    "Light jacket",
+    "Sunscreen",
+    "Camera",
+    "Universal adapter"
+  ],
+  "emergencyInfo": {
+    "emergencyNumber": "112",
+    "policeNumber": "091",
+    "hospital": "Hospital Clínic de Barcelona",
+    "embassy": "US Embassy Barcelona"
+  },
+  "localInfo": {
+    "language": "Spanish, Catalan",
+    "currency": "Euro (EUR)",
+    "timezone": "CET (UTC+1)",
+    "electricity": "220V, Type C/F plugs",
+    "tipping": "10-15% in restaurants"
+  },
+  "days": [
+    {
+      "dayNumber": 1,
+      "date": "2025-06-01",
+      "theme": "Gaudi's Masterpieces",
+      "location": "Barcelona",
+      "components": [
+        {
+          "id": "sagrada-familia-1",
+          "type": "attraction",
+          "name": "Sagrada Familia",
+          "description": "Visit the awe-inspiring Sagrada Familia Basilica, Antoni Gaudí's unfinished masterpiece and one of Barcelona's most iconic landmarks. This UNESCO World Heritage site combines Gothic and Art Nouveau elements in a unique architectural style.",
+          "location": {
+            "name": "Sagrada Familia",
+            "address": "Carrer de Mallorca, 401, 08013 Barcelona, Spain",
+            "coordinates": {
+              "lat": 41.4036299,
+              "lng": 2.1743558
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T09:00:00Z",
+            "endTime": "2025-06-01T12:00:00Z",
+            "duration": 180,
+            "suggestedDuration": 180
+          },
+          "cost": {
+            "pricePerPerson": 70,
+            "currency": "EUR",
+            "priceRange": "mid-range",
+            "includesWhat": ["Entry ticket", "Audio guide"],
+            "additionalCosts": ["Tower access (€8 extra)"]
+          },
+          "travel": {
+            "distanceFromPrevious": 0,
+            "travelTimeFromPrevious": 0,
+            "transportMode": "taxi",
+            "transportCost": 15
+          },
+          "details": {
+            "rating": 4.8,
+            "reviewCount": 125000,
+            "category": "architecture",
+            "tags": ["unesco", "gaudi", "basilica", "gothic", "art-nouveau"],
+            "openingHours": {
+              "monday": {"open": "09:00", "close": "18:00"},
+              "tuesday": {"open": "09:00", "close": "18:00"},
+              "wednesday": {"open": "09:00", "close": "18:00"},
+              "thursday": {"open": "09:00", "close": "18:00"},
+              "friday": {"open": "09:00", "close": "18:00"},
+              "saturday": {"open": "09:00", "close": "18:00"},
+              "sunday": {"open": "09:00", "close": "18:00"}
+            },
+            "contact": {
+              "phone": "+34 932 080 414",
+              "website": "https://sagradafamilia.org",
+              "email": "info@sagradafamilia.org"
+            },
+            "accessibility": {
+              "wheelchairAccessible": true,
+              "elevatorAccess": true,
+              "restrooms": true,
+              "parking": true
+            },
+            "amenities": ["Audio guide", "Gift shop", "Cafe", "Restrooms", "Parking"]
+          },
+          "booking": {
+            "required": true,
+            "bookingUrl": "https://sagradafamilia.org/en/tickets",
+            "phone": "+34 932 080 414",
+            "notes": "Book online in advance to avoid long queues"
+          },
+          "media": {
+            "images": [
+              "https://images.unsplash.com/photo-1539650116574-75c0c6d73c6e?w=800&h=600&fit=crop",
+              "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop",
+              "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop"
+            ],
+            "videos": ["https://www.youtube.com/watch?v=example1"],
+            "virtualTour": "https://sagradafamilia.org/virtual-tour"
+          },
+          "tips": {
+            "bestTimeToVisit": "Early morning (9-10 AM) to avoid crowds",
+            "whatToBring": ["Camera", "Comfortable shoes", "Water bottle"],
+            "insider": [
+              "Book tickets online in advance to avoid queues",
+              "Consider an audio guide for a more immersive experience",
+              "Visit the museum in the basement for more context"
+            ],
+            "warnings": [
+              "No photography allowed inside the basilica",
+              "Dress modestly - shoulders and knees should be covered",
+              "Large bags not allowed inside"
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "casa-batllo",
+              "name": "Casa Batlló",
+              "reason": "Another Gaudí masterpiece if Sagrada Familia is too crowded"
+            }
+          ],
+          "userNotes": "",
+          "isCustom": false,
+          "addedByUser": false,
+          "priority": "must-visit"
+        },
+        {
+          "id": "park-guell-1",
+          "type": "attraction",
+          "name": "Park Güell",
+          "description": "Explore the whimsical Park Güell, another Gaudí masterpiece featuring colorful mosaics, organic shapes, and stunning city views. This UNESCO World Heritage site offers a unique blend of nature and architecture.",
+          "location": {
+            "name": "Park Güell",
+            "address": "08024 Barcelona, Spain",
+            "coordinates": {
+              "lat": 41.4144886,
+              "lng": 2.1526596
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T14:00:00Z",
+            "endTime": "2025-06-01T17:00:00Z",
+            "duration": 180,
+            "suggestedDuration": 180
+          },
+          "cost": {
+            "pricePerPerson": 40,
+            "currency": "EUR",
+            "priceRange": "mid-range",
+            "includesWhat": ["Entry ticket", "Audio guide"],
+            "additionalCosts": []
+          },
+          "travel": {
+            "distanceFromPrevious": 3.2,
+            "travelTimeFromPrevious": 15,
+            "transportMode": "taxi",
+            "transportCost": 15
+          },
+          "details": {
+            "rating": 4.6,
+            "reviewCount": 89000,
+            "category": "architecture",
+            "tags": ["unesco", "gaudi", "park", "mosaics", "city-views"],
+            "openingHours": {
+              "monday": {"open": "08:00", "close": "21:30"},
+              "tuesday": {"open": "08:00", "close": "21:30"},
+              "wednesday": {"open": "08:00", "close": "21:30"},
+              "thursday": {"open": "08:00", "close": "21:30"},
+              "friday": {"open": "08:00", "close": "21:30"},
+              "saturday": {"open": "08:00", "close": "21:30"},
+              "sunday": {"open": "08:00", "close": "21:30"}
+            },
+            "contact": {
+              "phone": "+34 934 091 831",
+              "website": "https://parkguell.barcelona",
+              "email": "info@parkguell.barcelona"
+            },
+            "accessibility": {
+              "wheelchairAccessible": true,
+              "elevatorAccess": false,
+              "restrooms": true,
+              "parking": true
+            },
+            "amenities": ["Audio guide", "Gift shop", "Cafe", "Restrooms", "Parking", "Walking paths"]
+          },
+          "booking": {
+            "required": true,
+            "bookingUrl": "https://parkguell.barcelona/en/tickets",
+            "phone": "+34 934 091 831",
+            "notes": "Book online in advance, especially for the Monumental Zone"
+          },
+          "media": {
+            "images": [
+              "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop",
+              "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
+              "https://images.unsplash.com/photo-1539650116574-75c0c6d73c6e?w=800&h=600&fit=crop"
+            ],
+            "videos": ["https://www.youtube.com/watch?v=example2"],
+            "virtualTour": "https://parkguell.barcelona/virtual-tour"
+          },
+          "tips": {
+            "bestTimeToVisit": "Late afternoon for golden hour photos",
+            "whatToBring": ["Camera", "Comfortable walking shoes", "Water bottle", "Sunscreen"],
+            "insider": [
+              "Book tickets online in advance",
+              "Wear comfortable shoes as there's a lot of walking",
+              "Visit the Dragon Stairway for iconic photos"
+            ],
+            "warnings": [
+              "Some areas have steep inclines",
+              "Can get very crowded during peak hours",
+              "Limited shade in some areas"
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "casa-mila",
+              "name": "Casa Milà (La Pedrera)",
+              "reason": "Another Gaudí building if Park Güell is too crowded"
+            }
+          ],
+          "userNotes": "",
+          "isCustom": false,
+          "addedByUser": false,
+          "priority": "must-visit"
+        }
+      ],
+      "meals": [
+        {
+          "id": "breakfast-1",
+          "type": "restaurant",
+          "name": "Continental breakfast",
+          "description": "Start your day with a hearty continental breakfast at the hotel restaurant.",
+          "location": {
+            "name": "Hotel Barcelona Universal",
+            "address": "Carrer de Cristòfor Colom, 1-9, 08004 Barcelona",
+            "coordinates": {
+              "lat": 41.37735,
+              "lng": 2.17544
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T07:30:00Z",
+            "endTime": "2025-06-01T08:30:00Z",
+            "duration": 60,
+            "suggestedDuration": 60
+          },
+          "cost": {
+            "pricePerPerson": 20,
+            "currency": "EUR",
+            "priceRange": "mid-range",
+            "includesWhat": ["Buffet breakfast", "Coffee", "Juice"],
+            "additionalCosts": []
+          },
+          "travel": {
+            "distanceFromPrevious": 0,
+            "travelTimeFromPrevious": 0,
+            "transportMode": "walking",
+            "transportCost": 0
+          },
+          "details": {
+            "rating": 4.2,
+            "reviewCount": 1200,
+            "category": "restaurant",
+            "tags": ["breakfast", "buffet", "hotel", "continental"],
+            "openingHours": {
+              "monday": {"open": "07:00", "close": "10:00"},
+              "tuesday": {"open": "07:00", "close": "10:00"},
+              "wednesday": {"open": "07:00", "close": "10:00"},
+              "thursday": {"open": "07:00", "close": "10:00"},
+              "friday": {"open": "07:00", "close": "10:00"},
+              "saturday": {"open": "07:00", "close": "10:00"},
+              "sunday": {"open": "07:00", "close": "10:00"}
+            },
+            "contact": {
+              "phone": "+34 933 184 262",
+              "website": "https://hotelbarcelonauniversal.com",
+              "email": "info@hotelbarcelonauniversal.com"
+            },
+            "accessibility": {
+              "wheelchairAccessible": true,
+              "elevatorAccess": true,
+              "restrooms": true,
+              "parking": true
+            },
+            "amenities": ["Buffet", "Coffee", "Juice", "Pastries", "Fresh fruit"]
+          },
+          "booking": {
+            "required": false,
+            "bookingUrl": "",
+            "phone": "+34 933 184 262",
+            "notes": "Included with hotel stay"
+          },
+          "media": {
+            "images": [
+              "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop",
+              "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&h=600&fit=crop"
+            ],
+            "videos": [],
+            "virtualTour": ""
+          },
+          "tips": {
+            "bestTimeToVisit": "Early morning to avoid crowds",
+            "whatToBring": ["Appetite"],
+            "insider": [
+              "Try the local pastries",
+              "Fresh orange juice is a must"
+            ],
+            "warnings": [
+              "Can get busy during peak hours",
+              "Limited seating during busy periods"
+            ]
+          },
+          "alternatives": [],
+          "userNotes": "",
+          "isCustom": false,
+          "addedByUser": false,
+          "priority": "recommended"
+        }
+      ],
+      "accommodation": {
+        "id": "hotel-barcelona-universal-1",
+        "type": "hotel",
+        "name": "Hotel Barcelona Universal",
+        "description": "Comfortable 4-star hotel in the heart of Barcelona with excellent accessibility features and modern amenities.",
+        "location": {
+          "name": "Hotel Barcelona Universal",
+          "address": "Carrer de Cristòfor Colom, 1-9, 08004 Barcelona",
+          "coordinates": {
+            "lat": 41.37735,
+            "lng": 2.17544
+          }
+        },
+        "timing": {
+          "startTime": "2025-06-01T15:00:00Z",
+          "endTime": "2025-06-02T11:00:00Z",
+          "duration": 1320,
+          "suggestedDuration": 1320
+        },
+        "cost": {
+          "pricePerPerson": 150,
+          "currency": "EUR",
+          "priceRange": "mid-range",
+          "includesWhat": ["Room", "Breakfast", "WiFi", "Gym access"],
+          "additionalCosts": ["City tax (€2.50 per person per night)"]
+        },
+        "travel": {
+          "distanceFromPrevious": 0,
+          "travelTimeFromPrevious": 0,
+          "transportMode": "walking",
+          "transportCost": 0
+        },
+        "details": {
+          "rating": 4.0,
+          "reviewCount": 2800,
+          "category": "accommodation",
+          "tags": ["hotel", "4-star", "accessible", "central", "modern"],
+          "openingHours": {
+            "monday": {"open": "00:00", "close": "23:59"},
+            "tuesday": {"open": "00:00", "close": "23:59"},
+            "wednesday": {"open": "00:00", "close": "23:59"},
+            "thursday": {"open": "00:00", "close": "23:59"},
+            "friday": {"open": "00:00", "close": "23:59"},
+            "saturday": {"open": "00:00", "close": "23:59"},
+            "sunday": {"open": "00:00", "close": "23:59"}
+          },
+          "contact": {
+            "phone": "+34 933 184 262",
+            "website": "https://hotelbarcelonauniversal.com",
+            "email": "info@hotelbarcelonauniversal.com"
+          },
+          "accessibility": {
+            "wheelchairAccessible": true,
+            "elevatorAccess": true,
+            "restrooms": true,
+            "parking": true
+          },
+          "amenities": ["WiFi", "Gym", "Restaurant", "Bar", "Room service", "Concierge", "Laundry"]
+        },
+        "booking": {
+          "required": true,
+          "bookingUrl": "https://hotelbarcelonauniversal.com/book",
+          "phone": "+34 933 184 262",
+          "notes": "Book in advance for better rates"
+        },
+        "media": {
+          "images": [
+            "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop",
+            "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop"
+          ],
+          "videos": [],
+          "virtualTour": "https://hotelbarcelonauniversal.com/virtual-tour"
+        },
+        "tips": {
+          "bestTimeToVisit": "Check-in after 3 PM",
+          "whatToBring": ["ID", "Credit card", "Travel documents"],
+          "insider": [
+            "Ask for a room with city view",
+            "Use the concierge for restaurant recommendations"
+          ],
+          "warnings": [
+            "City tax not included in room rate",
+            "Parking spaces limited"
+          ]
+        },
+        "alternatives": [],
+        "userNotes": "",
+        "isCustom": false,
+        "addedByUser": false,
+        "priority": "recommended"
+      },
+      "transportation": [
+        {
+          "id": "taxi-hotel-sagrada-1",
+          "type": "transport",
+          "name": "Taxi to Sagrada Familia",
+          "description": "Wheelchair accessible taxi from hotel to Sagrada Familia.",
+          "location": {
+            "name": "Hotel to Sagrada Familia",
+            "address": "Carrer de Cristòfor Colom, 1-9 to Carrer de Mallorca, 401",
+            "coordinates": {
+              "lat": 41.3904,
+              "lng": 2.1750
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T08:30:00Z",
+            "endTime": "2025-06-01T09:00:00Z",
+            "duration": 30,
+            "suggestedDuration": 30
+          },
+          "cost": {
+            "pricePerPerson": 15,
+            "currency": "EUR",
+            "priceRange": "mid-range",
+            "includesWhat": ["Taxi ride"],
+            "additionalCosts": ["Tip (optional)"]
+          },
+          "travel": {
+            "distanceFromPrevious": 3.5,
+            "travelTimeFromPrevious": 15,
+            "transportMode": "taxi",
+            "transportCost": 15
+          },
+          "details": {
+            "rating": 4.5,
+            "reviewCount": 500,
+            "category": "transport",
+            "tags": ["taxi", "accessible", "door-to-door"],
+            "openingHours": {
+              "monday": {"open": "00:00", "close": "23:59"},
+              "tuesday": {"open": "00:00", "close": "23:59"},
+              "wednesday": {"open": "00:00", "close": "23:59"},
+              "thursday": {"open": "00:00", "close": "23:59"},
+              "friday": {"open": "00:00", "close": "23:59"},
+              "saturday": {"open": "00:00", "close": "23:59"},
+              "sunday": {"open": "00:00", "close": "23:59"}
+            },
+            "contact": {
+              "phone": "+34 933 300 300",
+              "website": "",
+              "email": ""
+            },
+            "accessibility": {
+              "wheelchairAccessible": true,
+              "elevatorAccess": false,
+              "restrooms": false,
+              "parking": false
+            },
+            "amenities": ["Wheelchair accessible", "Air conditioning", "Professional driver"]
+          },
+          "booking": {
+            "required": false,
+            "bookingUrl": "",
+            "phone": "+34 933 300 300",
+            "notes": "Can be hailed on street or called in advance"
+          },
+          "media": {
+            "images": [
+              "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop"
+            ],
+            "videos": [],
+            "virtualTour": ""
+          },
+          "tips": {
+            "bestTimeToVisit": "Avoid rush hours (8-9 AM, 6-7 PM)",
+            "whatToBring": ["Cash or card for payment"],
+            "insider": [
+              "Ask for wheelchair accessible taxi when calling",
+              "Have destination address ready"
+            ],
+            "warnings": [
+              "Traffic can be heavy during peak hours",
+              "Some drivers may not speak English"
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "metro-l3",
+              "name": "Metro L3 (Green Line)",
+              "reason": "Cheaper alternative, also wheelchair accessible"
+            }
+          ],
+          "userNotes": "",
+          "isCustom": false,
+          "addedByUser": false,
+          "priority": "recommended"
+        }
+      ],
+      "notes": "Remember to wear comfortable shoes and stay hydrated. Both attractions are wheelchair accessible.",
+      "totalDistance": 8.5,
+      "totalCost": 360,
+      "totalDuration": 8,
+      "startTime": "09:00",
+      "endTime": "18:00",
+      "weather": {
+        "temperature": { "min": 18, "max": 24 },
+        "condition": "sunny",
+        "precipitation": 0
+      }
+    }
+  ]
+}

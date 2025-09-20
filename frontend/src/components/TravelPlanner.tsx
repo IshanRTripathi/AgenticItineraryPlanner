@@ -55,6 +55,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(true);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
+  const [selectedDay, setSelectedDay] = useState<{ dayNumber: number; dayData: any } | null>(null);
 
 
   // Fetch fresh data from API instead of using cached props
@@ -179,6 +180,12 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
     setDestinations(prev => prev.filter(dest => dest.id !== id));
   };
 
+  // Day selection handler
+  const handleDaySelect = (dayNumber: number, dayData: any) => {
+    console.log('Day selected:', dayNumber, dayData);
+    setSelectedDay({ dayNumber, dayData });
+  };
+
   // Show loading state while fetching fresh data
   if (isLoading) {
     return <LoadingSpinner message="Loading planner..." fullScreen />;
@@ -260,7 +267,10 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
           </TabsContent>
           
           <TabsContent value="day-by-day" className="m-0 h-full overflow-y-auto">
-            <DayByDayView tripData={currentTripData} />
+            <DayByDayView 
+              tripData={currentTripData} 
+              onDaySelect={handleDaySelect}
+            />
           </TabsContent>
         </div>
       </Tabs>
@@ -338,6 +348,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
             <div className="h-full overflow-hidden">
               <WorkflowBuilder 
                 tripData={currentTripData}
+                selectedDay={selectedDay}
                 onSave={(updatedItinerary) => {
                   console.log('Workflow saved:', updatedItinerary);
                   // TODO: Implement save functionality

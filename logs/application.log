@@ -18860,3 +18860,965 @@ Please create a comprehensive itinerary that maximizes the travel experience whi
 2025-09-20 16:01:56.002 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-20 16:01:56.003 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
 2025-09-20 16:01:56.004 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:03:18.438 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:03:18.438 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:03:18.439 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:03:18.439 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:03:18.439 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:03:18.440 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:03:18.441 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:03:22.278 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:03:22.278 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:03:22.278 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:03:22.278 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:03:22.278 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:03:22.279 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:03:22.280 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:03:22.281 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:03:44.762 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:03:44.762 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:03:44.763 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:03:44.763 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:03:44.763 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:03:44.765 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:03:44.766 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:03:44.767 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:10:10.006 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:10:10.006 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:10:10.007 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:10:10.007 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:10:10.007 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:10:10.010 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:10:10.011 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:10:10.012 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:10:46.406 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:10:46.406 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:10:46.407 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:10:46.407 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:10:46.407 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:10:46.408 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:10:46.409 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:10:46.410 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:14:09.525 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:14:09.526 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:14:09.527 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:14:09.527 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:14:09.527 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:14:09.528 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:14:09.529 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:14:09.531 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:14:15.610 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:14:15.611 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:14:15.611 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:14:15.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:14:15.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:14:15.613 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:14:15.614 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:14:15.616 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:14:19.124 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:14:19.124 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:14:19.124 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:14:19.124 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:14:19.124 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:14:19.125 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:14:19.126 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:14:19.127 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:15:18.603 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:15:18.603 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:15:18.604 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:15:18.604 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:15:18.604 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:15:18.606 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:15:18.606 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:15:18.607 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:15:18.608 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:15:18.609 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:15:19.564 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:15:19.564 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:15:19.565 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:15:19.565 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:15:19.565 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:15:19.566 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:15:19.567 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:15:19.567 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:15:19.569 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:15:26.729 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:15:26.730 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:15:26.730 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:15:26.730 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:15:26.730 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:15:26.731 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:15:26.732 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:15:26.733 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:15:34.138 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:15:34.138 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:15:34.139 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:15:34.139 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:15:34.139 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:15:34.141 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:15:34.142 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:15:34.143 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:16:00.724 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:16:00.725 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:16:00.725 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:16:00.725 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:16:00.725 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:16:00.727 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:16:00.728 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:16:00.729 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:16:00.730 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:19:42.771 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:19:42.772 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:19:42.772 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:19:42.772 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:19:42.772 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:19:42.775 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:19:42.776 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:19:42.776 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:24:02.540 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:24:02.540 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:24:02.541 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:24:02.541 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:24:02.541 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:24:02.544 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:24:02.545 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:24:02.546 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:24:54.092 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:24:54.092 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:24:54.093 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:24:54.093 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:24:54.093 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:24:54.095 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:24:54.096 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:24:54.097 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:35:59.679 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - OPTIONS "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:35:59.680 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:35:59.680 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:35:59.682 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:35:59.683 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:35:59.683 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:35:59.683 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:35:59.683 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:35:59.685 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:35:59.686 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:35:59.687 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:36:13.822 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:36:13.822 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:36:13.823 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:36:13.823 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:36:13.823 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:36:13.825 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:36:13.826 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:36:13.827 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:38:23.666 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:38:23.666 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:38:23.666 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:38:23.666 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:38:23.666 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:38:23.668 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:38:23.669 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:38:23.670 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:03:45.567 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 17:03:45.567 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:03:45.568 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 17:03:45.568 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:03:45.568 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 17:03:45.570 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:03:45.571 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 17:03:45.572 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:23.676 [main] INFO  com.tripplanner.App - Starting App using Java 17.0.12 with PID 35724 (C:\Users\user\IdeaProjects\AgenticItineraryPlanner\build\classes\java\main started by user in C:\Users\user\IdeaProjects\AgenticItineraryPlanner)
+2025-09-20 17:04:23.678 [main] INFO  com.tripplanner.App - No active profile set, falling back to 1 default profile: "default"
+2025-09-20 17:04:24.095 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-20 17:04:24.140 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 40 ms. Found 3 JPA repository interfaces.
+2025-09-20 17:04:24.461 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-09-20 17:04:24.469 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-09-20 17:04:24.469 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.44]
+2025-09-20 17:04:24.508 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-09-20 17:04:24.508 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 805 ms
+2025-09-20 17:04:24.534 [main] DEBUG o.springframework.web.filter.ForwardedHeaderFilter - Filter 'forwardedHeaderFilter' configured for use
+2025-09-20 17:04:24.599 [main] INFO  org.hibernate.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-20 17:04:24.631 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.26.Final
+2025-09-20 17:04:24.648 [main] INFO  o.hibernate.cache.internal.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-09-20 17:04:24.798 [main] INFO  o.s.o.j.persistenceunit.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-20 17:04:24.816 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-09-20 17:04:24.909 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2025-09-20 17:04:24.910 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-09-20 17:04:24.923 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-09-20 17:04:24.935 [main] INFO  org.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-20 17:04:25.565 [main] INFO  o.h.e.t.jta.platform.internal.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-20 17:04:25.609 [main] INFO  o.s.orm.jpa.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-20 17:04:25.730 [main] INFO  o.s.data.jpa.repository.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-09-20 17:04:25.933 [main] INFO  com.tripplanner.service.RazorpayService - Initializing Razorpay client for environment: test
+2025-09-20 17:04:26.052 [main] INFO  com.tripplanner.service.RazorpayService - Razorpay client initialized successfully
+2025-09-20 17:04:26.105 [main] INFO  com.tripplanner.service.GeminiClient - Initializing Gemini client with model: gemini-1.5-pro
+2025-09-20 17:04:26.134 [main] INFO  com.tripplanner.service.GeminiClient - Gemini client initialized successfully
+2025-09-20 17:04:26.199 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-09-20 17:04:26.247 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 26 mappings in 'requestMappingHandlerMapping'
+2025-09-20 17:04:26.266 [main] DEBUG o.s.web.servlet.handler.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-09-20 17:04:26.281 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-09-20 17:04:26.306 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-09-20 17:04:26.347 [main] INFO  o.s.b.autoconfigure.h2.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2025-09-20 17:04:26.392 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2025-09-20 17:04:26.397 [main] INFO  com.tripplanner.App - Started App in 3.013 seconds (process running for 3.252)
+2025-09-20 17:04:27.612 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-09-20 17:04:27.613 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-09-20 17:04:27.613 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-09-20 17:04:27.613 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-09-20 17:04:27.613 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-09-20 17:04:27.613 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@1bae8e5e
+2025-09-20 17:04:27.614 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@4b9be679
+2025-09-20 17:04:27.614 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-09-20 17:04:27.614 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-09-20 17:04:27.620 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 17:04:27.627 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:04:27.650 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 17:04:27.651 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:04:27.651 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 17:04:27.713 [http-nio-8080-exec-1] ERROR com.tripplanner.service.ItineraryService - === GET ITINERARY FAILED ===
+2025-09-20 17:04:27.713 [http-nio-8080-exec-1] ERROR com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 17:04:27.713 [http-nio-8080-exec-1] ERROR com.tripplanner.service.ItineraryService - User: anonymous
+2025-09-20 17:04:27.713 [http-nio-8080-exec-1] ERROR com.tripplanner.service.ItineraryService - Error: Itinerary not found: 4
+java.lang.RuntimeException: Itinerary not found: 4
+	at com.tripplanner.service.ItineraryService.lambda$get$1(ItineraryService.java:148)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at com.tripplanner.service.ItineraryService.get(ItineraryService.java:148)
+	at com.tripplanner.api.ItinerariesController.getById(ItinerariesController.java:77)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:991)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:896)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-09-20 17:04:27.717 [http-nio-8080-exec-1] ERROR com.tripplanner.service.ItineraryService - ===============================
+2025-09-20 17:04:27.718 [http-nio-8080-exec-1] ERROR com.tripplanner.api.ItinerariesController - Failed to get itinerary: 4
+java.lang.RuntimeException: Failed to get itinerary
+	at com.tripplanner.service.ItineraryService.get(ItineraryService.java:189)
+	at com.tripplanner.api.ItinerariesController.getById(ItinerariesController.java:77)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:991)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:896)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.lang.RuntimeException: Itinerary not found: 4
+	at com.tripplanner.service.ItineraryService.lambda$get$1(ItineraryService.java:148)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at com.tripplanner.service.ItineraryService.get(ItineraryService.java:148)
+	... 54 common frames omitted
+2025-09-20 17:04:27.756 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:27.757 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
+2025-09-20 17:04:27.758 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 500 INTERNAL_SERVER_ERROR
+2025-09-20 17:04:28.765 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 17:04:28.766 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:04:28.766 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 17:04:28.766 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:04:28.766 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 17:04:28.767 [http-nio-8080-exec-2] ERROR com.tripplanner.service.ItineraryService - === GET ITINERARY FAILED ===
+2025-09-20 17:04:28.767 [http-nio-8080-exec-2] ERROR com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 17:04:28.767 [http-nio-8080-exec-2] ERROR com.tripplanner.service.ItineraryService - User: anonymous
+2025-09-20 17:04:28.767 [http-nio-8080-exec-2] ERROR com.tripplanner.service.ItineraryService - Error: Itinerary not found: 4
+java.lang.RuntimeException: Itinerary not found: 4
+	at com.tripplanner.service.ItineraryService.lambda$get$1(ItineraryService.java:148)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at com.tripplanner.service.ItineraryService.get(ItineraryService.java:148)
+	at com.tripplanner.api.ItinerariesController.getById(ItinerariesController.java:77)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:991)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:896)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-09-20 17:04:28.767 [http-nio-8080-exec-2] ERROR com.tripplanner.service.ItineraryService - ===============================
+2025-09-20 17:04:28.767 [http-nio-8080-exec-2] ERROR com.tripplanner.api.ItinerariesController - Failed to get itinerary: 4
+java.lang.RuntimeException: Failed to get itinerary
+	at com.tripplanner.service.ItineraryService.get(ItineraryService.java:189)
+	at com.tripplanner.api.ItinerariesController.getById(ItinerariesController.java:77)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:991)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:896)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.lang.RuntimeException: Itinerary not found: 4
+	at com.tripplanner.service.ItineraryService.lambda$get$1(ItineraryService.java:148)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at com.tripplanner.service.ItineraryService.get(ItineraryService.java:148)
+	... 54 common frames omitted
+2025-09-20 17:04:28.768 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:28.768 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
+2025-09-20 17:04:28.768 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 500 INTERNAL_SERVER_ERROR
+2025-09-20 17:04:29.666 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - OPTIONS "/api/v1/itineraries", parameters={}
+2025-09-20 17:04:29.667 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
+2025-09-20 17:04:29.668 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:29.672 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
+2025-09-20 17:04:29.673 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
+2025-09-20 17:04:29.674 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-20 17:04:29.701 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Found 0 itineraries
+2025-09-20 17:04:29.703 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:29.704 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[]]
+2025-09-20 17:04:29.711 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:42.643 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries", parameters={}
+2025-09-20 17:04:42.644 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#create(CreateItineraryReq)
+2025-09-20 17:04:42.671 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [CreateItineraryReq(destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyD (truncated)...]
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Creating itinerary
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Request: CreateItineraryReq(destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en)
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === CREATE ITINERARY REQUEST ===
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Request Details:
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Destination: Paris, France
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Start Date: 2025-10-04
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   End Date: 2025-10-11
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Duration: 7 days
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Budget Tier: mid-range
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Language: en
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Party: 1 adults, 0 children, 0 infants, 1 rooms
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Interests: relaxation, nature, cuisine
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService -   Constraints: budgetFriendly
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Set startDate: 2025-10-04 -> 2025-10-04
+2025-09-20 17:04:42.673 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Set endDate: 2025-10-11 -> 2025-10-11
+2025-09-20 17:04:42.718 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Starting itinerary generation for ID: 1
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === CREATE ITINERARY RESPONSE ===
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 1
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Status: generating
+2025-09-20 17:04:42.718 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - === UPDATE ITINERARY IN DATABASE ===
+2025-09-20 17:04:42.718 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Itinerary ID: 1
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Created At: 2025-09-20T11:34:42.673587100Z
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Orchestration started: 1
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - =====================================
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Itinerary created successfully: 1
+2025-09-20 17:04:42.718 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:42.724 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=1, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyD (truncated)...]
+2025-09-20 17:04:42.718 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Itinerary DTO: ItineraryDto(id=1, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en, summary=Your personalized itinerary for Paris, France, map=null, days=null, agentResults=null, status=generating, createdAt=2025-09-20T11:34:42.718098700Z, updatedAt=2025-09-20T11:34:42.718098700Z, isPublic=false, shareToken=null)
+2025-09-20 17:04:42.724 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Days in DTO: 0
+2025-09-20 17:04:42.728 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:42.729 [task-1] WARN  com.tripplanner.service.agents.AgentOrchestrator - No days to convert - itinerary.getDays() is null or empty
+2025-09-20 17:04:42.740 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - OPTIONS "/api/v1/itineraries/1", parameters={}
+2025-09-20 17:04:42.741 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:04:42.741 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:42.744 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/1", parameters={}
+2025-09-20 17:04:42.744 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:04:42.745 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 1
+2025-09-20 17:04:42.745 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:04:42.745 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 1
+2025-09-20 17:04:42.745 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/agents/stream?itineraryId=1", parameters={masked}
+2025-09-20 17:04:42.745 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.AgentController#stream(String)
+2025-09-20 17:04:42.746 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - === SSE STREAM REQUEST ===
+2025-09-20 17:04:42.746 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Itinerary ID: 1
+2025-09-20 17:04:42.746 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Request Time: 17:04:42.746098500
+2025-09-20 17:04:42.746 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Client requesting SSE connection
+2025-09-20 17:04:42.747 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Created SSE emitter: SseEmitter@da8c14a
+2025-09-20 17:04:42.747 [http-nio-8080-exec-8] INFO  com.tripplanner.service.AgentEventBus - === SSE EMITTER REGISTRATION ===
+2025-09-20 17:04:42.747 [http-nio-8080-exec-8] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.747 [http-nio-8080-exec-8] INFO  com.tripplanner.service.AgentEventBus - Emitter: SseEmitter@da8c14a
+2025-09-20 17:04:42.748 [http-nio-8080-exec-8] INFO  com.tripplanner.service.AgentEventBus - Total emitters for itinerary 1: 1
+2025-09-20 17:04:42.748 [http-nio-8080-exec-8] INFO  com.tripplanner.service.AgentEventBus - Total active itineraries: 1
+2025-09-20 17:04:42.748 [http-nio-8080-exec-8] INFO  com.tripplanner.service.AgentEventBus - ===============================
+2025-09-20 17:04:42.749 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Initial SSE connection event sent successfully
+2025-09-20 17:04:42.749 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - === SSE STREAM ESTABLISHED ===
+2025-09-20 17:04:42.749 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Itinerary ID: 1
+2025-09-20 17:04:42.749 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - Emitter registered and ready
+2025-09-20 17:04:42.749 [http-nio-8080-exec-8] INFO  com.tripplanner.api.AgentController - =============================
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Updated itinerary 1 in database with 0 days
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Running PlannerAgent for itinerary ID: 1
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - PlannerAgent instance: com.tripplanner.service.agents.PlannerAgent@6b4d0be2
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Request data: CreateItineraryReq(destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en)
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === AGENT EXECUTION START ===
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Agent Kind: planner
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Itinerary ID: 1
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Request Type: ItineraryDto
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Request Data: CreateItineraryReq(destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en)
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Request Details: CreateItineraryReq(destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en)
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - =============================
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: queued
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 0
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Agent queued for execution
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.750097700Z
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.750 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 0
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Agent started
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.750097700Z
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Executing agent-specific logic for: planner
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === PLANNER AGENT PROCESSING ===
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Destination: Paris, France
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Start Date: 2025-10-04
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - End Date: 2025-10-11
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Duration: 7 days
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Party: 1 adults
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Budget Tier: mid-range
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Interests: [relaxation, nature, cuisine]
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Constraints: [budgetFriendly]
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Language: en
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - =================================
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.751 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Analyzing trip requirements
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: requirement_analysis
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.751097200Z
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.752 [http-nio-8080-exec-8] DEBUG o.s.web.context.request.async.WebAsyncManager - Started async request for "/api/v1/agents/stream"
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 30
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Generating itinerary structure
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: structure_generation
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.752099800Z
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === PLANNER AGENT PROMPTS ===
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - System Prompt Length: 835 chars
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - User Prompt: Create a detailed itinerary for the following trip:
+
+Destination: Paris, France
+Start Date: 2025-10-04
+End Date: 2025-10-11
+Duration: 7 days
+Party: 1 adults
+Budget Tier: mid-range
+Language: en
+Interests: relaxation, nature, cuisine
+Constraints: budgetFriendly
+
+Please create a comprehensive itinerary that maximizes the travel experience while staying within the specified parameters.
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - =============================
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.752 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 50
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Processing with AI model
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: ai_processing
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.752099800Z
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 1
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Status: generating
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 1
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === PLANNER AGENT RESPONSE ===
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Using JSON file response
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Response Length: 13050 chars
+2025-09-20 17:04:42.753 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Response Preview: {
+  "summary": "A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food.",
+  "highlights": [
+    "Sagrada Familia",
+    "Park Güell",
+    "Got...
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - ===============================
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.753 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Parsing generated itinerary
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: parsing
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.753099300Z
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.754 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.761 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Exiting but response remains open for further handling
+2025-09-20 17:04:42.763 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === PLANNER AGENT RESULT ===
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Parsed Response Type: ItineraryGenerationResponse
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Days Generated: 3
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Result: com.tripplanner.service.agents.PlannerAgent$ItineraryGenerationResponse@6171dea1
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - ============================
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 90
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Finalizing itinerary
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: finalization
+2025-09-20 17:04:42.764 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.764098Z
+2025-09-20 17:04:42.765 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.765 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.765 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === CONVERTING TO ITINERARY DTO ===
+2025-09-20 17:04:42.765 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Response summary: A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food.
+2025-09-20 17:04:42.765 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Days count: 3
+2025-09-20 17:04:42.765 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Total cost: 1200.0 EUR
+2025-09-20 17:04:42.767 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === CONVERSION COMPLETED ===
+2025-09-20 17:04:42.767 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Generated itinerary with 3 days
+2025-09-20 17:04:42.767 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Itinerary ID: -2091310822_1758368082766
+2025-09-20 17:04:42.767 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === PLANNER AGENT FINAL RESULT ===
+2025-09-20 17:04:42.767 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Converted to ItineraryDto: -2091310822_1758368082766
+2025-09-20 17:04:42.774 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=1, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyD (truncated)...]
+2025-09-20 17:04:42.767 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Final Result: ItineraryDto(id=-2091310822_1758368082766, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en, summary=A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food., map=null, days=[ItineraryDayDto(day=1, date=2025-06-01, location=Barcelona, activities=[ActivityDto[name=Sagrada Familia, description=Visit the awe-inspiring Sagrada Familia Basilica., location=LocationDto[name=Sagrada Familia, address=Carrer de Mallorca, 401, 08013 Barcelona, Spain, lat=41.4036299, lng=2.1743558, placeId=null], startTime=09:00, endTime=12:00, duration=3h, category=architecture, price=PriceDto[amount=70.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance to avoid queues. Consider an audio guide for a more immersive experience.], ActivityDto[name=Park Güell, description=Explore the whimsical Park Güell, another Gaudi masterpiece., location=LocationDto[name=Park Güell, address=08024 Barcelona, Spain, lat=41.4144886, lng=2.1526596, placeId=null], startTime=14:00, endTime=17:00, duration=3h, category=architecture, park, price=PriceDto[amount=40.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance. Wear comfortable shoes as there's a lot of walking.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Taxi, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Sagrada Familia, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=08:30, arrivalTime=09:00, duration=null, price=PriceDto[amount=15.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Wheelchair accessible taxi.], TransportationDto[mode=Taxi, from=LocationDto[name=Sagrada Familia, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Park Güell, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=13:30, arrivalTime=14:00, duration=null, price=PriceDto[amount=15.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Wheelchair accessible taxi.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Tapas, restaurant=El Jardí de l'Àpat, location=LocationDto[name=El Jardí de l'Àpat, address=Passatge de Sant Josep Oriol, 1, 08002 Barcelona, lat=41.3821423, lng=2.1701867, placeId=null], time=null, price=PriceDto[amount=50.0, currency=EUR, per=person], cuisine=Spanish, notes=null], MealDto[type=dinner, name=Paella, restaurant=Can Solé, location=LocationDto[name=Can Solé, address=Carrer de Sant Carles, 4, 08003 Barcelona, lat=41.3842213, lng=2.1845678, placeId=null], time=null, price=PriceDto[amount=80.0, currency=EUR, per=person], cuisine=Seafood, notes=null]], notes=Remember to wear comfortable shoes and stay hydrated.), ItineraryDayDto(day=2, date=2025-06-02, location=Barcelona, activities=[ActivityDto[name=Gothic Quarter Walking Tour, description=Explore the historic Gothic Quarter with its medieval architecture., location=LocationDto[name=Gothic Quarter, address=Barri Gòtic, 08002 Barcelona, Spain, lat=41.3833, lng=2.1767, placeId=null], startTime=10:00, endTime=12:00, duration=2h, category=culture, history, price=PriceDto[amount=25.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Wear comfortable walking shoes. The area is wheelchair accessible.], ActivityDto[name=Barceloneta Beach, description=Relax at Barcelona's most famous beach., location=LocationDto[name=Barceloneta Beach, address=Barceloneta, 08003 Barcelona, Spain, lat=41.3789, lng=2.1894, placeId=null], startTime=14:00, endTime=17:00, duration=3h, category=beach, relaxation, price=PriceDto[amount=0.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Bring sunscreen and beach towels. Beach is wheelchair accessible.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Metro, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Gothic Quarter, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=09:30, arrivalTime=10:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.], TransportationDto[mode=Metro, from=LocationDto[name=Gothic Quarter, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Barceloneta, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=13:30, arrivalTime=14:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Seafood paella, restaurant=Restaurante Can Majó, location=LocationDto[name=Restaurante Can Majó, address=Carrer de l'Almirall Aixada, 23, 08003 Barcelona, lat=41.3789, lng=2.1894, placeId=null], time=null, price=PriceDto[amount=60.0, currency=EUR, per=person], cuisine=Seafood, notes=null], MealDto[type=dinner, name=Tapas dinner, restaurant=Quimet & Quimet, location=LocationDto[name=Quimet & Quimet, address=Carrer del Poeta Cabanyes, 25, 08004 Barcelona, lat=41.3756, lng=2.1639, placeId=null], time=null, price=PriceDto[amount=70.0, currency=EUR, per=person], cuisine=Spanish tapas, notes=null]], notes=Perfect day for exploring Barcelona's history and enjoying the Mediterranean.), ItineraryDayDto(day=3, date=2025-06-03, location=Barcelona, activities=[ActivityDto[name=La Boqueria Market, description=Explore Barcelona's most famous food market., location=LocationDto[name=La Boqueria Market, address=La Rambla, 91, 08001 Barcelona, Spain, lat=41.3819, lng=2.1719, placeId=null], startTime=09:00, endTime=11:00, duration=2h, category=food, culture, price=PriceDto[amount=30.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Go early to avoid crowds. Market is wheelchair accessible.], ActivityDto[name=Picasso Museum, description=Visit the world-renowned Picasso Museum., location=LocationDto[name=Picasso Museum, address=Carrer de Montcada, 15-23, 08003 Barcelona, Spain, lat=41.3851, lng=2.1809, placeId=null], startTime=12:00, endTime=14:00, duration=2h, category=art, culture, price=PriceDto[amount=25.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance. Museum is wheelchair accessible.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Metro, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=La Boqueria, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=08:30, arrivalTime=09:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.], TransportationDto[mode=Walking, from=LocationDto[name=La Boqueria, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Picasso Museum, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=11:30, arrivalTime=12:00, duration=null, price=PriceDto[amount=0.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Short walk through the Gothic Quarter.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Market fresh lunch, restaurant=La Boqueria Market, location=LocationDto[name=La Boqueria Market, address=La Rambla, 91, 08001 Barcelona, Spain, lat=41.3819, lng=2.1719, placeId=null], time=null, price=PriceDto[amount=40.0, currency=EUR, per=person], cuisine=Spanish, notes=null], MealDto[type=dinner, name=Farewell dinner, restaurant=El Nacional, location=LocationDto[name=El Nacional, address=Passeig de Gràcia, 24, 08007 Barcelona, lat=41.3917, lng=2.1649, placeId=null], time=null, price=PriceDto[amount=90.0, currency=EUR, per=person], cuisine=Spanish, notes=null]], notes=Final day to savor Barcelona's culinary and artistic treasures.)], agentResults={highlights=[Ljava.lang.String;@34fc6910, totalEstimatedCost=1200.0, currency=EUR}, status=completed, createdAt=2025-09-20T11:34:42.767103300Z, updatedAt=2025-09-20T11:34:42.767103300Z, isPublic=false, shareToken=null)
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - ==================================
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 39ab272c-9606-43c0-b56b-5b902e312966
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: planner
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Status: succeeded
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Message: Agent completed successfully
+2025-09-20 17:04:42.775 [task-1] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-09-20 17:04:42.776 [task-1] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-09-20T11:34:42.775102600Z
+2025-09-20 17:04:42.780 [task-1] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 emitters successfully, 0 failed for itinerary: 1
+2025-09-20 17:04:42.781 [task-1] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-09-20 17:04:42.781 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - === AGENT EXECUTION COMPLETED ===
+2025-09-20 17:04:42.781 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Agent Kind: planner
+2025-09-20 17:04:42.781 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Itinerary ID: 1
+2025-09-20 17:04:42.781 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Result Type: ItineraryDto
+2025-09-20 17:04:42.781 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - Result: ItineraryDto(id=-2091310822_1758368082766, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en, summary=A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food., map=null, days=[ItineraryDayDto(day=1, date=2025-06-01, location=Barcelona, activities=[ActivityDto[name=Sagrada Familia, description=Visit the awe-inspiring Sagrada Familia Basilica., location=LocationDto[name=Sagrada Familia, address=Carrer de Mallorca, 401, 08013 Barcelona, Spain, lat=41.4036299, lng=2.1743558, placeId=null], startTime=09:00, endTime=12:00, duration=3h, category=architecture, price=PriceDto[amount=70.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance to avoid queues. Consider an audio guide for a more immersive experience.], ActivityDto[name=Park Güell, description=Explore the whimsical Park Güell, another Gaudi masterpiece., location=LocationDto[name=Park Güell, address=08024 Barcelona, Spain, lat=41.4144886, lng=2.1526596, placeId=null], startTime=14:00, endTime=17:00, duration=3h, category=architecture, park, price=PriceDto[amount=40.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance. Wear comfortable shoes as there's a lot of walking.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Taxi, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Sagrada Familia, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=08:30, arrivalTime=09:00, duration=null, price=PriceDto[amount=15.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Wheelchair accessible taxi.], TransportationDto[mode=Taxi, from=LocationDto[name=Sagrada Familia, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Park Güell, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=13:30, arrivalTime=14:00, duration=null, price=PriceDto[amount=15.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Wheelchair accessible taxi.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Tapas, restaurant=El Jardí de l'Àpat, location=LocationDto[name=El Jardí de l'Àpat, address=Passatge de Sant Josep Oriol, 1, 08002 Barcelona, lat=41.3821423, lng=2.1701867, placeId=null], time=null, price=PriceDto[amount=50.0, currency=EUR, per=person], cuisine=Spanish, notes=null], MealDto[type=dinner, name=Paella, restaurant=Can Solé, location=LocationDto[name=Can Solé, address=Carrer de Sant Carles, 4, 08003 Barcelona, lat=41.3842213, lng=2.1845678, placeId=null], time=null, price=PriceDto[amount=80.0, currency=EUR, per=person], cuisine=Seafood, notes=null]], notes=Remember to wear comfortable shoes and stay hydrated.), ItineraryDayDto(day=2, date=2025-06-02, location=Barcelona, activities=[ActivityDto[name=Gothic Quarter Walking Tour, description=Explore the historic Gothic Quarter with its medieval architecture., location=LocationDto[name=Gothic Quarter, address=Barri Gòtic, 08002 Barcelona, Spain, lat=41.3833, lng=2.1767, placeId=null], startTime=10:00, endTime=12:00, duration=2h, category=culture, history, price=PriceDto[amount=25.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Wear comfortable walking shoes. The area is wheelchair accessible.], ActivityDto[name=Barceloneta Beach, description=Relax at Barcelona's most famous beach., location=LocationDto[name=Barceloneta Beach, address=Barceloneta, 08003 Barcelona, Spain, lat=41.3789, lng=2.1894, placeId=null], startTime=14:00, endTime=17:00, duration=3h, category=beach, relaxation, price=PriceDto[amount=0.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Bring sunscreen and beach towels. Beach is wheelchair accessible.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Metro, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Gothic Quarter, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=09:30, arrivalTime=10:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.], TransportationDto[mode=Metro, from=LocationDto[name=Gothic Quarter, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Barceloneta, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=13:30, arrivalTime=14:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Seafood paella, restaurant=Restaurante Can Majó, location=LocationDto[name=Restaurante Can Majó, address=Carrer de l'Almirall Aixada, 23, 08003 Barcelona, lat=41.3789, lng=2.1894, placeId=null], time=null, price=PriceDto[amount=60.0, currency=EUR, per=person], cuisine=Seafood, notes=null], MealDto[type=dinner, name=Tapas dinner, restaurant=Quimet & Quimet, location=LocationDto[name=Quimet & Quimet, address=Carrer del Poeta Cabanyes, 25, 08004 Barcelona, lat=41.3756, lng=2.1639, placeId=null], time=null, price=PriceDto[amount=70.0, currency=EUR, per=person], cuisine=Spanish tapas, notes=null]], notes=Perfect day for exploring Barcelona's history and enjoying the Mediterranean.), ItineraryDayDto(day=3, date=2025-06-03, location=Barcelona, activities=[ActivityDto[name=La Boqueria Market, description=Explore Barcelona's most famous food market., location=LocationDto[name=La Boqueria Market, address=La Rambla, 91, 08001 Barcelona, Spain, lat=41.3819, lng=2.1719, placeId=null], startTime=09:00, endTime=11:00, duration=2h, category=food, culture, price=PriceDto[amount=30.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Go early to avoid crowds. Market is wheelchair accessible.], ActivityDto[name=Picasso Museum, description=Visit the world-renowned Picasso Museum., location=LocationDto[name=Picasso Museum, address=Carrer de Montcada, 15-23, 08003 Barcelona, Spain, lat=41.3851, lng=2.1809, placeId=null], startTime=12:00, endTime=14:00, duration=2h, category=art, culture, price=PriceDto[amount=25.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance. Museum is wheelchair accessible.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Metro, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=La Boqueria, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=08:30, arrivalTime=09:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.], TransportationDto[mode=Walking, from=LocationDto[name=La Boqueria, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Picasso Museum, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=11:30, arrivalTime=12:00, duration=null, price=PriceDto[amount=0.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Short walk through the Gothic Quarter.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Market fresh lunch, restaurant=La Boqueria Market, location=LocationDto[name=La Boqueria Market, address=La Rambla, 91, 08001 Barcelona, Spain, lat=41.3819, lng=2.1719, placeId=null], time=null, price=PriceDto[amount=40.0, currency=EUR, per=person], cuisine=Spanish, notes=null], MealDto[type=dinner, name=Farewell dinner, restaurant=El Nacional, location=LocationDto[name=El Nacional, address=Passeig de Gràcia, 24, 08007 Barcelona, lat=41.3917, lng=2.1649, placeId=null], time=null, price=PriceDto[amount=90.0, currency=EUR, per=person], cuisine=Spanish, notes=null]], notes=Final day to savor Barcelona's culinary and artistic treasures.)], agentResults={highlights=[Ljava.lang.String;@34fc6910, totalEstimatedCost=1200.0, currency=EUR}, status=completed, createdAt=2025-09-20T11:34:42.767103300Z, updatedAt=2025-09-20T11:34:42.767103300Z, isPublic=false, shareToken=null)
+2025-09-20 17:04:42.782 [task-1] INFO  com.tripplanner.service.agents.PlannerAgent - =================================
+2025-09-20 17:04:42.782 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - === UPDATE ITINERARY IN DATABASE ===
+2025-09-20 17:04:42.782 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Itinerary ID: 1
+2025-09-20 17:04:42.782 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Itinerary DTO: ItineraryDto(id=-2091310822_1758368082766, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=mid-range, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en, summary=A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food., map=null, days=[ItineraryDayDto(day=1, date=2025-06-01, location=Barcelona, activities=[ActivityDto[name=Sagrada Familia, description=Visit the awe-inspiring Sagrada Familia Basilica., location=LocationDto[name=Sagrada Familia, address=Carrer de Mallorca, 401, 08013 Barcelona, Spain, lat=41.4036299, lng=2.1743558, placeId=null], startTime=09:00, endTime=12:00, duration=3h, category=architecture, price=PriceDto[amount=70.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance to avoid queues. Consider an audio guide for a more immersive experience.], ActivityDto[name=Park Güell, description=Explore the whimsical Park Güell, another Gaudi masterpiece., location=LocationDto[name=Park Güell, address=08024 Barcelona, Spain, lat=41.4144886, lng=2.1526596, placeId=null], startTime=14:00, endTime=17:00, duration=3h, category=architecture, park, price=PriceDto[amount=40.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance. Wear comfortable shoes as there's a lot of walking.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Taxi, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Sagrada Familia, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=08:30, arrivalTime=09:00, duration=null, price=PriceDto[amount=15.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Wheelchair accessible taxi.], TransportationDto[mode=Taxi, from=LocationDto[name=Sagrada Familia, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Park Güell, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=13:30, arrivalTime=14:00, duration=null, price=PriceDto[amount=15.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Wheelchair accessible taxi.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Tapas, restaurant=El Jardí de l'Àpat, location=LocationDto[name=El Jardí de l'Àpat, address=Passatge de Sant Josep Oriol, 1, 08002 Barcelona, lat=41.3821423, lng=2.1701867, placeId=null], time=null, price=PriceDto[amount=50.0, currency=EUR, per=person], cuisine=Spanish, notes=null], MealDto[type=dinner, name=Paella, restaurant=Can Solé, location=LocationDto[name=Can Solé, address=Carrer de Sant Carles, 4, 08003 Barcelona, lat=41.3842213, lng=2.1845678, placeId=null], time=null, price=PriceDto[amount=80.0, currency=EUR, per=person], cuisine=Seafood, notes=null]], notes=Remember to wear comfortable shoes and stay hydrated.), ItineraryDayDto(day=2, date=2025-06-02, location=Barcelona, activities=[ActivityDto[name=Gothic Quarter Walking Tour, description=Explore the historic Gothic Quarter with its medieval architecture., location=LocationDto[name=Gothic Quarter, address=Barri Gòtic, 08002 Barcelona, Spain, lat=41.3833, lng=2.1767, placeId=null], startTime=10:00, endTime=12:00, duration=2h, category=culture, history, price=PriceDto[amount=25.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Wear comfortable walking shoes. The area is wheelchair accessible.], ActivityDto[name=Barceloneta Beach, description=Relax at Barcelona's most famous beach., location=LocationDto[name=Barceloneta Beach, address=Barceloneta, 08003 Barcelona, Spain, lat=41.3789, lng=2.1894, placeId=null], startTime=14:00, endTime=17:00, duration=3h, category=beach, relaxation, price=PriceDto[amount=0.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Bring sunscreen and beach towels. Beach is wheelchair accessible.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Metro, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Gothic Quarter, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=09:30, arrivalTime=10:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.], TransportationDto[mode=Metro, from=LocationDto[name=Gothic Quarter, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Barceloneta, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=13:30, arrivalTime=14:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Seafood paella, restaurant=Restaurante Can Majó, location=LocationDto[name=Restaurante Can Majó, address=Carrer de l'Almirall Aixada, 23, 08003 Barcelona, lat=41.3789, lng=2.1894, placeId=null], time=null, price=PriceDto[amount=60.0, currency=EUR, per=person], cuisine=Seafood, notes=null], MealDto[type=dinner, name=Tapas dinner, restaurant=Quimet & Quimet, location=LocationDto[name=Quimet & Quimet, address=Carrer del Poeta Cabanyes, 25, 08004 Barcelona, lat=41.3756, lng=2.1639, placeId=null], time=null, price=PriceDto[amount=70.0, currency=EUR, per=person], cuisine=Spanish tapas, notes=null]], notes=Perfect day for exploring Barcelona's history and enjoying the Mediterranean.), ItineraryDayDto(day=3, date=2025-06-03, location=Barcelona, activities=[ActivityDto[name=La Boqueria Market, description=Explore Barcelona's most famous food market., location=LocationDto[name=La Boqueria Market, address=La Rambla, 91, 08001 Barcelona, Spain, lat=41.3819, lng=2.1719, placeId=null], startTime=09:00, endTime=11:00, duration=2h, category=food, culture, price=PriceDto[amount=30.0, currency=EUR, per=person], bookingRequired=false, bookingUrl=null, tips=Go early to avoid crowds. Market is wheelchair accessible.], ActivityDto[name=Picasso Museum, description=Visit the world-renowned Picasso Museum., location=LocationDto[name=Picasso Museum, address=Carrer de Montcada, 15-23, 08003 Barcelona, Spain, lat=41.3851, lng=2.1809, placeId=null], startTime=12:00, endTime=14:00, duration=2h, category=art, culture, price=PriceDto[amount=25.0, currency=EUR, per=person], bookingRequired=true, bookingUrl=null, tips=Book tickets online in advance. Museum is wheelchair accessible.]], accommodation=AccommodationDto[name=Hotel Barcelona Universal, type=Hotel, location=LocationDto[name=Hotel Barcelona Universal, address=Carrer de Cristòfor Colom, 1-9, 08004 Barcelona, lat=41.37735, lng=2.17544, placeId=null], checkIn=null, checkOut=null, price=PriceDto[amount=150.0, currency=EUR, per=night], rating=4.0, amenities=null, bookingUrl=null], transportation=[TransportationDto[mode=Metro, from=LocationDto[name=Hotel, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=La Boqueria, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=08:30, arrivalTime=09:00, duration=null, price=PriceDto[amount=5.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Metro is wheelchair accessible.], TransportationDto[mode=Walking, from=LocationDto[name=La Boqueria, address=null, lat=0.0, lng=0.0, placeId=null], to=LocationDto[name=Picasso Museum, address=null, lat=0.0, lng=0.0, placeId=null], departureTime=11:30, arrivalTime=12:00, duration=null, price=PriceDto[amount=0.0, currency=EUR, per=trip], provider=null, bookingUrl=null, notes=Short walk through the Gothic Quarter.]], meals=[MealDto[type=breakfast, name=Continental breakfast, restaurant=Hotel restaurant, location=LocationDto[name=Hotel, address=Hotel address, lat=0.0, lng=0.0, placeId=null], time=null, price=PriceDto[amount=20.0, currency=EUR, per=person], cuisine=European, notes=null], MealDto[type=lunch, name=Market fresh lunch, restaurant=La Boqueria Market, location=LocationDto[name=La Boqueria Market, address=La Rambla, 91, 08001 Barcelona, Spain, lat=41.3819, lng=2.1719, placeId=null], time=null, price=PriceDto[amount=40.0, currency=EUR, per=person], cuisine=Spanish, notes=null], MealDto[type=dinner, name=Farewell dinner, restaurant=El Nacional, location=LocationDto[name=El Nacional, address=Passeig de Gràcia, 24, 08007 Barcelona, lat=41.3917, lng=2.1649, placeId=null], time=null, price=PriceDto[amount=90.0, currency=EUR, per=person], cuisine=Spanish, notes=null]], notes=Final day to savor Barcelona's culinary and artistic treasures.)], agentResults={highlights=[Ljava.lang.String;@34fc6910, totalEstimatedCost=1200.0, currency=EUR}, status=completed, createdAt=2025-09-20T11:34:42.767103300Z, updatedAt=2025-09-20T11:34:42.767103300Z, isPublic=false, shareToken=null)
+2025-09-20 17:04:42.783 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Days in DTO: 3
+2025-09-20 17:04:42.785 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Converting 3 days from DTO to entity
+2025-09-20 17:04:42.785 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Converting day 1: Barcelona
+2025-09-20 17:04:42.785 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Converting day 2: Barcelona
+2025-09-20 17:04:42.786 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Converting day 3: Barcelona
+2025-09-20 17:04:42.786 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Successfully converted 3 days to entity
+2025-09-20 17:04:42.787 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/agents/stream?itineraryId=1", parameters={masked}
+2025-09-20 17:04:42.787 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.AgentController#stream(String)
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - === SSE STREAM REQUEST ===
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Itinerary ID: 1
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Request Time: 17:04:42.788133300
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Client requesting SSE connection
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Created SSE emitter: SseEmitter@58707222
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.service.AgentEventBus - === SSE EMITTER REGISTRATION ===
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: 1
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.service.AgentEventBus - Emitter: SseEmitter@58707222
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.service.AgentEventBus - Total emitters for itinerary 1: 2
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.service.AgentEventBus - Total active itineraries: 1
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.service.AgentEventBus - ===============================
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Initial SSE connection event sent successfully
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - === SSE STREAM ESTABLISHED ===
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Itinerary ID: 1
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - Emitter registered and ready
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] INFO  com.tripplanner.api.AgentController - =============================
+2025-09-20 17:04:42.788 [http-nio-8080-exec-9] DEBUG o.s.web.context.request.async.WebAsyncManager - Started async request for "/api/v1/agents/stream"
+2025-09-20 17:04:42.789 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Exiting but response remains open for further handling
+2025-09-20 17:04:42.794 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:42.836 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Updated itinerary 1 in database with 3 days
+2025-09-20 17:04:42.836 [task-1] INFO  com.tripplanner.service.agents.AgentOrchestrator - Itinerary generation completed for ID: 1
+2025-09-20 17:04:42.836 [task-1] INFO  com.tripplanner.service.ItineraryService - Agent orchestration completed for itinerary: 1
+2025-09-20 17:04:43.786 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/1", parameters={}
+2025-09-20 17:04:43.787 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:04:43.788 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 1
+2025-09-20 17:04:43.788 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:04:43.788 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 1
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 1
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 1
+2025-09-20 17:04:43.791 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:43.793 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=1, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyD (truncated)...]
+2025-09-20 17:04:43.796 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:04:43.807 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/1", parameters={}
+2025-09-20 17:04:43.807 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:04:43.808 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 1
+2025-09-20 17:04:43.808 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:04:43.808 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 1
+2025-09-20 17:04:43.811 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 17:04:43.811 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 17:04:43.811 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 1
+2025-09-20 17:04:43.812 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 17:04:43.812 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 17:04:43.812 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 17:04:43.812 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 17:04:43.812 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 1
+2025-09-20 17:04:43.812 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:04:43.813 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=1, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyD (truncated)...]
+2025-09-20 17:04:43.818 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 17:09:37.558 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/1", parameters={}
+2025-09-20 17:09:37.558 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 17:09:37.559 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 1
+2025-09-20 17:09:37.559 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 17:09:37.559 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 1
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 1
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 1
+2025-09-20 17:09:37.562 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 17:09:37.563 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=1, destination=Paris, France, startDate=2025-10-04, endDate=2025-10-11, party=PartyD (truncated)...]
+2025-09-20 17:09:37.566 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
