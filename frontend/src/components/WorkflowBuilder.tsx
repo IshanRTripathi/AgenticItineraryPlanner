@@ -84,8 +84,10 @@ export interface WorkflowNodeData {
 
 interface WorkflowBuilderProps {
   tripData: TripData;
+  selectedDay?: { dayNumber: number; dayData: any } | null;
   onSave: (updatedItinerary: any) => void;
   onCancel: () => void;
+  embedded?: boolean; // When true, removes full-screen layout and header
 }
 
 interface WorkflowDay {
@@ -539,7 +541,7 @@ const createSeedData = (): WorkflowDay[] => [
   },
 ];
 
-const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSave, onCancel }) => {
+const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, selectedDay, onSave, onCancel, embedded = false }) => {
   const [workflowDays, setWorkflowDays] = useState<WorkflowDay[]>(() => 
     createWorkflowDaysFromTripData(tripData).length > 0 
       ? createWorkflowDaysFromTripData(tripData) 
@@ -565,6 +567,16 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
       setActiveDay(0); // Reset to first day
     }
   }, [tripData]);
+
+  // Update active day when selectedDay changes
+  useEffect(() => {
+    if (selectedDay) {
+      const dayIndex = workflowDays.findIndex(day => day.day === selectedDay.dayNumber);
+      if (dayIndex !== -1) {
+        setActiveDay(dayIndex);
+      }
+    }
+  }, [selectedDay, workflowDays]);
 
   // Update React Flow when active day changes
   useEffect(() => {
@@ -718,42 +730,44 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onCancel}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-2xl">Workflow Builder</h1>
-              <p className="text-gray-600">{tripData.destination}</p>
+    <div className={embedded ? "h-full flex flex-col bg-gray-50" : "h-screen flex flex-col bg-gray-50"}>
+      {/* Header - Only show when not embedded */}
+      {!embedded && (
+        <div className="bg-white border-b px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={onCancel}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+              <div>
+                <h1 className="text-2xl">Workflow Builder</h1>
+                <p className="text-gray-600">{tripData.destination}</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={undo} disabled={undoStack.length === 0}>
+                <Undo className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" onClick={redo} disabled={redoStack.length === 0}>
+                <Redo className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" onClick={autoArrange}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Auto Arrange
+              </Button>
+              <Button variant="outline" onClick={resetDemo}>
+                Reset to Original
+              </Button>
+              <Button onClick={applyToItinerary}>
+                <Save className="h-4 w-4 mr-2" />
+                Apply to Itinerary
+              </Button>
             </div>
           </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={undo} disabled={undoStack.length === 0}>
-              <Undo className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={redo} disabled={redoStack.length === 0}>
-              <Redo className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={autoArrange}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Auto Arrange
-            </Button>
-            <Button variant="outline" onClick={resetDemo}>
-              Reset to Original
-            </Button>
-            <Button onClick={applyToItinerary}>
-              <Save className="h-4 w-4 mr-2" />
-              Apply to Itinerary
-            </Button>
-          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex-1 flex">
         {/* Main Canvas Area */}
@@ -771,8 +785,38 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
             </Tabs>
           </div>
 
-          {/* Toolbar */}
-          <div className="bg-white border-b px-6 py-3">
+          {/* Compact Toolbar for Embedded Mode */}
+          {embedded && (
+            <div className="bg-white border-b px-4 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={undo} disabled={undoStack.length === 0}>
+                    <Undo className="h-3 w-3" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={redo} disabled={redoStack.length === 0}>
+                    <Redo className="h-3 w-3" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={autoArrange}>
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    Arrange
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={resetDemo}>
+                    Reset
+                  </Button>
+                  <Button size="sm" onClick={applyToItinerary}>
+                    <Save className="h-3 w-3 mr-1" />
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toolbar - Only show when not embedded */}
+          {!embedded && (
+            <div className="bg-white border-b px-6 py-3">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium mr-4">Add Node:</span>
               {(['Attraction', 'Meal', 'Transit', 'Hotel', 'FreeTime'] as const).map((type) => {
@@ -791,6 +835,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
               })}
             </div>
           </div>
+          )}
 
           {/* Canvas Container */}
           <div className="flex-1 flex">

@@ -1,0 +1,318 @@
+{
+  "common": {
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফলতা",
+    "cancel": "বাতিল",
+    "save": "সংরক্ষণ",
+    "delete": "মুছে ফেলুন",
+    "edit": "সম্পাদনা",
+    "add": "যোগ করুন",
+    "search": "অনুসন্ধান",
+    "filter": "ফিল্টার",
+    "refresh": "রিফ্রেশ",
+    "share": "শেয়ার",
+    "export": "রপ্তানি",
+    "close": "বন্ধ",
+    "back": "পিছনে",
+    "next": "পরবর্তী",
+    "previous": "পূর্ববর্তী",
+    "done": "সম্পন্ন",
+    "yes": "হ্যাঁ",
+    "no": "না"
+  },
+  "navigation": {
+    "destinations": "গন্তব্য",
+    "dayByDay": "দিন দিন",
+    "map": "মানচিত্র",
+    "workflow": "কর্মপ্রবাহ",
+    "view": "দেখুন",
+    "budget": "বাজেট"
+  },
+  "tripWizard": {
+    "title": "আপনার নিখুঁত ভ্রমণের পরিকল্পনা করুন",
+    "subtitle": "আপনার ভ্রমণের পছন্দ সম্পর্কে আমাদের বলুন এবং আমরা একটি ব্যক্তিগত ভ্রমণ পরিকল্পনা তৈরি করব",
+    "destination": "আপনি কোথায় যেতে চান?",
+    "destinationPlaceholder": "গন্তব্য লিখুন (যেমন, বার্সেলোনা, স্পেন)",
+    "duration": "কত দিন?",
+    "travelers": "ভ্রমণকারীর সংখ্যা",
+    "budget": "প্রতি ব্যক্তির বাজেট",
+    "budgetPlaceholder": "আপনার বাজেট লিখুন",
+    "interests": "আপনার আগ্রহ কী?",
+    "interestsPlaceholder": "আপনার আগ্রহগুলি নির্বাচন করুন",
+    "startPlanning": "পরিকল্পনা শুরু করুন",
+    "planningInProgress": "আপনার ভ্রমণের পরিকল্পনা করা হচ্ছে...",
+    "planningComplete": "আপনার ভ্রমণ প্রস্তুত!"
+  },
+  "destinations": {
+    "title": "গন্তব্য",
+    "addDestination": "গন্তব্য যোগ করুন",
+    "editDestination": "গন্তব্য সম্পাদনা করুন",
+    "removeDestination": "গন্তব্য সরান",
+    "destinationName": "গন্তব্যের নাম",
+    "destinationNamePlaceholder": "গন্তব্যের নাম লিখুন",
+    "arrivalDate": "আগমনের তারিখ",
+    "departureDate": "প্রস্থানের তারিখ",
+    "notes": "নোট",
+    "notesPlaceholder": "এই গন্তব্য সম্পর্কে নোট যোগ করুন"
+  },
+  "dayByDay": {
+    "title": "দিন দিন ভ্রমণ পরিকল্পনা",
+    "day": "দিন",
+    "noItinerary": "এখনও ভ্রমণ পরিকল্পনার ডেটা পাওয়া যায়নি",
+    "noItineraryMessage": "পরিকল্পনা সম্পূর্ণ হওয়ার পর আপনার ব্যক্তিগত ভ্রমণ পরিকল্পনা এখানে দেখা যাবে।",
+    "activities": "কার্যক্রম",
+    "meals": "খাবার",
+    "accommodation": "আবাসন",
+    "transport": "পরিবহন",
+    "time": "সময়",
+    "duration": "সময়কাল",
+    "cost": "খরচ",
+    "location": "অবস্থান",
+    "rating": "রেটিং",
+    "category": "বিভাগ",
+    "bookingRequired": "বুকিং প্রয়োজন",
+    "bookNow": "এখনই বুক করুন",
+    "travelTip": "ভ্রমণ টিপ",
+    "timeTBD": "সময় নির্ধারিত নয়",
+    "from": "থেকে",
+    "until": "পর্যন্ত"
+  },
+  "transport": {
+    "title": "পরিবহন",
+    "addTransport": "পরিবহন যোগ করুন",
+    "transportMode": "পরিবহনের মাধ্যম",
+    "distance": "দূরত্ব",
+    "duration": "সময়কাল",
+    "cost": "খরচ",
+    "notes": "নোট",
+    "distanceUnit": "দূরত্বের একক",
+    "km": "কিলোমিটার",
+    "mi": "মাইল",
+    "walking": "হেঁটে",
+    "taxi": "ট্যাক্সি",
+    "flight": "ফ্লাইট",
+    "train": "ট্রেন",
+    "bus": "বাস",
+    "car": "গাড়ি",
+    "other": "অন্যান্য",
+    "removeTransport": "পরিবহন সরান",
+    "addAnother": "আরেকটি যোগ করুন"
+  },
+  "workflow": {
+    "title": "কর্মপ্রবাহ নির্মাতা",
+    "dragToReorder": "কার্যক্রম পুনরায় সাজাতে টেনে আনুন",
+    "addActivity": "কার্যক্রম যোগ করুন",
+    "saveWorkflow": "কর্মপ্রবাহ সংরক্ষণ করুন",
+    "cancel": "বাতিল",
+    "workflowSaved": "কর্মপ্রবাহ সফলভাবে সংরক্ষিত হয়েছে"
+  },
+  "map": {
+    "title": "মানচিত্র দৃশ্য",
+    "showRoute": "রুট দেখান",
+    "hideRoute": "রুট লুকান",
+    "zoomIn": "জুম ইন",
+    "zoomOut": "জুম আউট",
+    "fullscreen": "ফুলস্ক্রিন"
+  },
+  "budget": {
+    "title": "বাজেট সংক্ষিপ্ত",
+    "totalBudget": "মোট বাজেট",
+    "spent": "খরচ",
+    "remaining": "অবশিষ্ট",
+    "perDay": "প্রতি দিন",
+    "accommodation": "আবাসন",
+    "transport": "পরিবহন",
+    "food": "খাবার",
+    "activities": "কার্যক্রম",
+    "other": "অন্যান্য"
+  },
+  "realTime": {
+    "title": "রিয়েল-টাইম ভ্রমণ সংক্ষিপ্ত",
+    "refreshData": "ডেটা রিফ্রেশ করুন",
+    "weatherStatus": "আবহাওয়ার অবস্থা",
+    "transportStatus": "পরিবহনের অবস্থা",
+    "tripAnalytics": "ভ্রমণ বিশ্লেষণ",
+    "cities": "শহর",
+    "distance": "দূরত্ব",
+    "activities": "কার্যক্রম",
+    "avgPerDay": "গড়/দিন",
+    "transportModes": "পরিবহনের মাধ্যম",
+    "tripSummary": "ভ্রমণ সংক্ষিপ্ত",
+    "status": "অবস্থা",
+    "active": "সক্রিয়",
+    "onTime": "সময়মতো",
+    "delayed": "বিলম্বিত",
+    "cancelled": "বাতিল",
+    "updated": "আপডেট করা হয়েছে",
+    "scheduled": "নির্ধারিত",
+    "actual": "প্রকৃত",
+    "reason": "কারণ"
+  },
+  "weather": {
+    "sunny": "রৌদ্রজ্জ্বল",
+    "partlyCloudy": "আংশিক মেঘলা",
+    "cloudy": "মেঘলা",
+    "rainy": "বৃষ্টি",
+    "temperature": "তাপমাত্রা",
+    "humidity": "আর্দ্রতা",
+    "windSpeed": "বাতাসের গতি"
+  },
+  "currency": {
+    "usd": "USD",
+    "eur": "EUR",
+    "inr": "INR",
+    "gbp": "GBP"
+  },
+  "dateFormat": {
+    "short": "dd MMM, yyyy",
+    "long": "dd MMMM, yyyy",
+    "time": "HH:mm"
+  },
+  "mockData": {
+    "summary": "বার্সেলোনার সংস্কৃতি, স্থাপত্য এবং খাদ্য সম্পর্কে 3-দিনের পরিবার-বান্ধব এবং হুইলচেয়ার-অ্যাক্সেসযোগ্য অন্বেষণ।",
+    "highlights": [
+      "সাগ্রাডা ফ্যামিলিয়া",
+      "পার্ক গুয়েল",
+      "গথিক কোয়ার্টার",
+      "বার্সেলোনা সৈকত",
+      "তাপাস ট্যুর"
+    ],
+    "themes": {
+      "culture": "সংস্কৃতি",
+      "architecture": "স্থাপত্য",
+      "food": "খাদ্য",
+      "familyFriendly": "পরিবার-বান্ধব",
+      "history": "ইতিহাস",
+      "beach": "সৈকত",
+      "relaxation": "বিশ্রাম",
+      "park": "পার্ক"
+    },
+    "difficulty": {
+      "easy": "সহজ",
+      "medium": "মধ্যম",
+      "hard": "কঠিন"
+    },
+    "bestTimeToVisit": "বসন্ত এবং শরৎ",
+    "weather": {
+      "temperature": "15-25°C",
+      "condition": "রৌদ্র",
+      "precipitation": "কম",
+      "sunny": "রৌদ্র",
+      "cloudy": "মেঘলা",
+      "rainy": "বৃষ্টি",
+      "low": "কম",
+      "medium": "মধ্যম",
+      "high": "উচ্চ"
+    },
+    "packingList": [
+      "আরামদায়ক হাঁটার জুতা",
+      "হালকা জ্যাকেট",
+      "সানস্ক্রিন",
+      "ক্যামেরা",
+      "ইউনিভার্সাল অ্যাডাপ্টার"
+    ],
+    "emergencyInfo": {
+      "emergencyNumber": "112",
+      "policeNumber": "091",
+      "hospital": "হাসপাতাল ক্লিনিক ডি বার্সেলোনা",
+      "embassy": "ইউএস দূতাবাস বার্সেলোনা"
+    },
+    "localInfo": {
+      "language": "স্প্যানিশ, কাতালান",
+      "currency": "ইউরো (EUR)",
+      "timezone": "CET (UTC+1)",
+      "electricity": "220V, টাইপ C/F প্লাগ",
+      "tipping": "রেস্তোরাঁতে 10-15%"
+    },
+    "activities": {
+      "sagradaFamilia": {
+        "name": "সাগ্রাডা ফ্যামিলিয়া",
+        "description": "আশ্চর্যজনক সাগ্রাডা ফ্যামিলিয়া ব্যাসিলিকা দেখুন।",
+        "tips": "কিউ এড়াতে আগে থেকে অনলাইন টিকিট বুক করুন। আরও গভীর অভিজ্ঞতার জন্য অডিও গাইড বিবেচনা করুন।"
+      },
+      "parkGuell": {
+        "name": "পার্ক গুয়েল",
+        "description": "অদ্ভুত পার্ক গুয়েল অন্বেষণ করুন, গাউদির আরেকটি শিল্পকর্ম।",
+        "tips": "আগে থেকে অনলাইন টিকিট বুক করুন। অনেক হাঁটা আছে তাই আরামদায়ক জুতা পরুন।"
+      },
+      "gothicQuarter": {
+        "name": "গথিক কোয়ার্টার ওয়াকিং ট্যুর",
+        "description": "মধ্যযুগীয় স্থাপত্য সহ ঐতিহাসিক গথিক কোয়ার্টার অন্বেষণ করুন।",
+        "tips": "আরামদায়ক হাঁটার জুতা পরুন। এলাকাটি হুইলচেয়ার-অ্যাক্সেসযোগ্য।"
+      },
+      "barcelonetaBeach": {
+        "name": "বার্সেলোনেটা সৈকত",
+        "description": "বার্সেলোনার সবচেয়ে বিখ্যাত সৈকতে বিশ্রাম নিন।",
+        "tips": "সানস্ক্রিন এবং পানি নিয়ে আসুন। সৈকতটি হুইলচেয়ার-অ্যাক্সেসযোগ্য।"
+      },
+      "casaBatllo": {
+        "name": "কাসা বাটলো",
+        "description": "গাউদির স্থাপত্যের আরেকটি শিল্পকর্ম দেখুন।",
+        "tips": "আগে থেকে অনলাইন টিকিট বুক করুন। অডিও গাইড সুপারিশ করা হয়।"
+      },
+      "lasRamblas": {
+        "name": "লাস রামব্লাস",
+        "description": "বার্সেলোনার সবচেয়ে বিখ্যাত রাস্তায় হাঁটুন।",
+        "tips": "পকেটমারদের থেকে সতর্ক থাকুন। রাস্তাটি হুইলচেয়ার-অ্যাক্সেসযোগ্য।"
+      }
+    },
+    "meals": {
+      "breakfast": "সকালের নাস্তা",
+      "lunch": "দুপুরের খাবার",
+      "dinner": "রাতের খাবার",
+      "snack": "নাস্তা",
+      "continental": "কন্টিনেন্টাল সকালের নাস্তা",
+      "tapas": "তাপাস",
+      "paella": "পায়েলা",
+      "seafood": "সমুদ্রের খাবার",
+      "spanish": "স্প্যানিশ",
+      "european": "ইউরোপীয়",
+      "mediterranean": "ভূমধ্যসাগরীয়"
+    },
+    "accommodation": {
+      "hotel": "হোটেল",
+      "hostel": "হোস্টেল",
+      "apartment": "অ্যাপার্টমেন্ট",
+      "villa": "ভিলা",
+      "resort": "রিসোর্ট"
+    },
+    "transportation": {
+      "taxi": "ট্যাক্সি",
+      "metro": "মেট্রো",
+      "bus": "বাস",
+      "walking": "হাঁটা",
+      "bike": "সাইকেল",
+      "car": "গাড়ি",
+      "train": "ট্রেন",
+      "flight": "ফ্লাইট",
+      "wheelchairAccessible": "হুইলচেয়ার-অ্যাক্সেসযোগ্য"
+    },
+    "categories": {
+      "architecture": "স্থাপত্য",
+      "culture": "সংস্কৃতি",
+      "history": "ইতিহাস",
+      "beach": "সৈকত",
+      "relaxation": "বিশ্রাম",
+      "park": "পার্ক",
+      "food": "খাদ্য",
+      "shopping": "কেনাকাটা",
+      "nightlife": "রাতের জীবন",
+      "adventure": "অ্যাডভেঞ্চার"
+    },
+    "booking": {
+      "required": "বুকিং প্রয়োজন",
+      "notRequired": "বুকিং প্রয়োজন নেই",
+      "recommended": "বুকিং সুপারিশ করা হয়"
+    },
+    "tips": {
+      "comfortableShoes": "আরামদায়ক জুতা পরুন",
+      "stayHydrated": "হাইড্রেটেড থাকুন",
+      "bookInAdvance": "আগে থেকে অনলাইন টিকিট বুক করুন",
+      "audioGuide": "আরও গভীর অভিজ্ঞতার জন্য অডিও গাইড বিবেচনা করুন",
+      "sunscreen": "সানস্ক্রিন এবং পানি নিয়ে আসুন",
+      "pickpockets": "পকেটমারদের থেকে সতর্ক থাকুন",
+      "wheelchairAccessible": "এলাকাটি হুইলচেয়ার-অ্যাক্সেসযোগ্য"
+    }
+  }
+}

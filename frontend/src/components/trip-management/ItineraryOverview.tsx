@@ -97,7 +97,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
               {onOpenPlanner && (
                 <Button variant="outline" onClick={onOpenPlanner}>
                   <MapPin className="h-4 w-4 mr-2" />
-                  Stippl Planner
+                  Travel Planner
                 </Button>
               )}
             </div>
@@ -168,7 +168,7 @@ export function ItineraryOverview({ tripData, onEdit, onWorkflowEdit, onProceedT
               {onOpenPlanner && (
                 <Button variant="outline" onClick={onOpenPlanner}>
                   <MapPin className="h-4 w-4 mr-2" />
-                  Stippl Planner
+                  Travel Planner
                 </Button>
               )}
               <Button onClick={onProceedToCost}>

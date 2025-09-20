@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
 import { Input } from '../../ui/input';
@@ -18,6 +19,7 @@ export function DestinationsManager({
   onToggleNotes,
   onUpdateTransport
 }: DestinationManagerProps) {
+  const { t } = useTranslation();
   const [newDestination, setNewDestination] = useState('');
   const [transportConnections, setTransportConnections] = useState<Record<string, TransportDetails[]>>({});
 
@@ -65,17 +67,17 @@ export function DestinationsManager({
               <SelectContent>
                 {CURRENCIES.map(curr => (
                   <SelectItem key={curr} value={curr}>
-                    Cost in {curr} ({curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£'})
+                    {t('destinations.costIn', { currency: curr, symbol: curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£' })}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Badge variant="secondary">
-              {totalNights}/{maxNights} Nights planned
+              {t('destinations.nightsPlanned', { current: totalNights, max: maxNights })}
             </Badge>
             <Button variant="ghost" size="sm" onClick={onToggleNotes}>
               <Menu className="w-4 h-4 mr-2" />
-              Show notes
+              {t('destinations.showNotes')}
             </Button>
           </div>
         </div>

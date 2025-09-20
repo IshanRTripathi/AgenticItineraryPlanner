@@ -12,6 +12,7 @@ import { TripData } from './types/TripData';
 import { useAppStore } from './state/hooks';
 import { useItinerary } from './state/query/hooks';
 import { Routes, Route, useNavigate, useParams, Outlet, Navigate } from 'react-router-dom';
+import './i18n'; // Initialize i18n
 // Data transformation will be handled by the backend
 
 export type AppScreen = 

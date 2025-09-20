@@ -9,8 +9,11 @@ import {
   Search 
 } from 'lucide-react';
 import { NavigationSidebarProps } from '../shared/types';
+import { useTranslation } from 'react-i18next';
 
 export function NavigationSidebar({ activeView, onViewChange }: NavigationSidebarProps) {
+  const { t } = useTranslation();
+  
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200">
@@ -30,7 +33,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             onClick={() => onViewChange('view')}
           >
             <Eye className="w-4 h-4 mr-2" />
-            View
+            {t('navigation.view')}
           </Button>
           <Button 
             variant={activeView === 'plan' ? 'default' : 'ghost'} 
@@ -38,7 +41,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             onClick={() => onViewChange('plan')}
           >
             <MapPin className="w-4 h-4 mr-2" />
-            Plan
+            {t('navigation.plan')}
           </Button>
           <Button 
             variant={activeView === 'budget' ? 'default' : 'ghost'} 
@@ -46,7 +49,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             onClick={() => onViewChange('budget')}
           >
             <Calculator className="w-4 h-4 mr-2" />
-            Budget
+            {t('navigation.budget')}
           </Button>
           <Button 
             variant={activeView === 'packing' ? 'default' : 'ghost'} 
@@ -54,7 +57,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             onClick={() => onViewChange('packing')}
           >
             <Package className="w-4 h-4 mr-2" />
-            Packing
+            {t('navigation.packing')}
           </Button>
           <Button 
             variant={activeView === 'collection' ? 'default' : 'ghost'} 
@@ -62,7 +65,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             onClick={() => onViewChange('collection')}
           >
             <FileText className="w-4 h-4 mr-2" />
-            Collection
+            {t('navigation.collection')}
           </Button>
           <Button 
             variant={activeView === 'docs' ? 'default' : 'ghost'} 
@@ -70,7 +73,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             onClick={() => onViewChange('docs')}
           >
             <FileText className="w-4 h-4 mr-2" />
-            Docs
+            {t('navigation.docs')}
           </Button>
         </div>
       </nav>

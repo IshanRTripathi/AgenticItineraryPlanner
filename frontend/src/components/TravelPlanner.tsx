@@ -6,6 +6,8 @@ import { Input } from './ui/input';
 import { Search, Globe, Workflow, Video, Share2, RotateCcw } from 'lucide-react';
 import { useItinerary } from '../state/query/hooks';
 import { TripData } from '../types/TripData';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from './shared/LanguageSelector';
 
 // Import extracted components
 import { NavigationSidebar } from './travel-planner/layout/NavigationSidebar';
@@ -41,7 +43,7 @@ interface TravelPlannerProps {
 }
 
 export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
-  console.log('=== STIPPL PLANNER COMPONENT RENDER ===');
+  console.log('=== TRAVEL PLANNER COMPONENT RENDER ===');
   console.log('Trip Data Props:', tripData);
   console.log('=======================================');
   
@@ -50,9 +52,9 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [activeTab, setActiveTab] = useState<PlanTab>('destinations');
   const [currency, setCurrency] = useState('EUR');
   const [showNotes, setShowNotes] = useState(false);
-  const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(45);
-  const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(true);
+  const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(true);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(25);
+  const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(false);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
   const [selectedDay, setSelectedDay] = useState<{ dayNumber: number; dayData: any } | null>(null);
@@ -65,7 +67,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const currentTripData = freshTripData || tripData;
 
   // Log data fetching status
-  console.log('=== STIPPL PLANNER DATA FETCH ===');
+  console.log('===  TRAVEL PLANNER DATA FETCH ===');
   console.log('Trip ID:', tripData.id);
   console.log('Is Loading:', isLoading);
   console.log('Error:', error);
@@ -270,6 +272,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
             <DayByDayView 
               tripData={currentTripData} 
               onDaySelect={handleDaySelect}
+              isCollapsed={!isLeftPanelExpanded}
             />
           </TabsContent>
         </div>
@@ -308,10 +311,10 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
               size="sm" 
               variant="outline" 
               onClick={() => {
-                setLeftPanelWidth(45);
-                setIsLeftPanelExpanded(true);
+                setLeftPanelWidth(25);
+                setIsLeftPanelExpanded(false);
               }}
-              title="Reset panel sizes to 45/55"
+              title="Reset panel sizes to 25/75"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
               Reset Layout
@@ -345,10 +348,11 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
               </div>
             </div>
           ) : (
-            <div className="h-full overflow-hidden">
+            <div className="h-full overflow-hidden relative">
               <WorkflowBuilder 
                 tripData={currentTripData}
                 selectedDay={selectedDay}
+                embedded={true}
                 onSave={(updatedItinerary) => {
                   console.log('Workflow saved:', updatedItinerary);
                   // TODO: Implement save functionality

@@ -70,9 +70,9 @@ export function LandingPage({
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+              <span className="text-white font-bold text-sm">TP</span>
             </div>
-            <span className="text-xl font-semibold text-gray-900">stippl.</span>
+            <span className="text-xl font-semibold text-gray-900">travel planner.</span>
           </div>
           
           <nav className="hidden md:flex space-x-8">
@@ -439,9 +439,9 @@ export function LandingPage({
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-r from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">S</span>
+                  <span className="text-white font-bold text-sm">TP</span>
                 </div>
-                <span className="text-xl font-semibold text-gray-900">stippl.</span>
+                <span className="text-xl font-semibold text-gray-900">travel planner.</span>
               </div>
               <div className="flex space-x-3">
                 <Button variant="ghost" size="sm" className="p-2">
@@ -511,7 +511,7 @@ export function LandingPage({
           </div>
           
           <div className="border-t border-gray-200 pt-8 text-center text-gray-600">
-            <p>&copy; 2024 Stippl. All rights reserved.</p>
+            <p>&copy; 2024 Travel Planner. All rights reserved.</p>
           </div>
         </div>
       </footer>

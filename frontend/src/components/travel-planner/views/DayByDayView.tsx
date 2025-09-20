@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
@@ -137,7 +138,8 @@ const getPlaceholderImage = (category: string, name: string) => {
   return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop';
 };
 
-export function DayByDayView({ tripData, onDaySelect }: ViewComponentProps) {
+export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: ViewComponentProps) {
+  const { t } = useTranslation();
   const [expandedDay, setExpandedDay] = useState<number | null>(0); // First day expanded by default
 
   const handleDayToggle = (dayNumber: number, dayData: any) => {
@@ -206,17 +208,17 @@ export function DayByDayView({ tripData, onDaySelect }: ViewComponentProps) {
                             <div className="flex items-center space-x-2 mb-2">
                               {getTypeIcon(component.type || component.category)}
                               <Badge variant="outline" className="text-xs">
-                                {component.type || component.category || 'activity'}
+                                {t(`mockData.categories.${component.type || component.category || 'activity'}`, component.type || component.category || 'activity')}
                               </Badge>
                               {(component.booking?.required || component.bookingRequired) && (
                                 <Badge variant="default" className="text-xs bg-orange-100 text-orange-700 border-orange-300">
-                                  Booking Required
+                                  {t('mockData.booking.required')}
                                 </Badge>
                               )}
                             </div>
-                            <h3 className="text-lg font-semibold mb-2">{component.name || 'Unnamed Activity'}</h3>
+                            <h3 className="text-lg font-semibold mb-2">{component.name || t('dayByDay.unnamedActivity')}</h3>
                             <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                              {component.description || 'No description available'}
+                              {component.description || t('dayByDay.noDescription')}
                             </p>
                           </div>
                         </div>
@@ -230,7 +232,7 @@ export function DayByDayView({ tripData, onDaySelect }: ViewComponentProps) {
                               <p className="font-semibold text-green-700">
                                 {component.cost?.currency || component.currency || 'EUR'} {component.cost?.pricePerPerson || component.estimatedCost || '0'}
                               </p>
-                              <p className="text-gray-500 text-xs">per person</p>
+                              <p className="text-gray-500 text-xs">{t('dayByDay.perPerson')}</p>
                             </div>
                           </div>
 
@@ -238,7 +240,7 @@ export function DayByDayView({ tripData, onDaySelect }: ViewComponentProps) {
                           <div className="flex items-center space-x-2 text-sm">
                             <MapPin className="w-4 h-4 text-blue-600" />
                             <div>
-                              <p className="font-semibold text-blue-700">{component.location?.name || 'Unknown'}</p>
+                              <p className="font-semibold text-blue-700">{component.location?.name || t('dayByDay.unknownLocation')}</p>
                               <p className="text-gray-500 text-xs truncate">{component.location?.address || ''}</p>
                             </div>
                           </div>
@@ -288,19 +290,19 @@ export function DayByDayView({ tripData, onDaySelect }: ViewComponentProps) {
                           {(component.booking?.required || component.bookingRequired) && (
                             <Button size="sm" variant="outline" className="bg-orange-50 text-orange-700 border-orange-300 hover:bg-orange-100">
                               <ExternalLink className="w-4 h-4 mr-2" />
-                              Book Required
+                              {t('dayByDay.bookNow')}
                             </Button>
                           )}
                           <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-800">
                             <MapPin className="w-4 h-4 mr-2" />
-                            View on Map
+                            {t('dayByDay.viewDetails')}
                           </Button>
                         </div>
 
                         {/* Tips */}
                         {component.tips && (
                           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm font-medium text-blue-800 mb-1">💡 Travel Tip</p>
+                            <p className="text-sm font-medium text-blue-800 mb-1">💡 {t('dayByDay.travelTip')}</p>
                             <p className="text-sm text-blue-700">
                               {typeof component.tips === 'string' 
                                 ? component.tips 
@@ -311,30 +313,32 @@ export function DayByDayView({ tripData, onDaySelect }: ViewComponentProps) {
                         )}
                       </div>
 
-                      {/* Image Section - Right Side */}
-                      <div className="w-64 h-64 flex-shrink-0 relative">
-                        <img 
-                          src={component.media?.images?.[0] || getPlaceholderImage(component.category || component.type, component.name)}
-                          alt={component.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = getPlaceholderImage(component.category || component.type, component.name);
-                          }}
-                        />
-                        {/* Image overlay with rating if available */}
-                        {(component.details?.rating || component.rating) && (
-                          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-                            <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                            <span className="text-xs font-medium">{component.details?.rating || component.rating}</span>
+                      {/* Image Section - Right Side - Only show when not collapsed */}
+                      {!isCollapsed && (
+                        <div className="w-64 h-64 flex-shrink-0 relative">
+                          <img 
+                            src={component.media?.images?.[0] || getPlaceholderImage(component.category || component.type, component.name)}
+                            alt={component.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = getPlaceholderImage(component.category || component.type, component.name);
+                            }}
+                          />
+                          {/* Image overlay with rating if available */}
+                          {(component.details?.rating || component.rating) && (
+                            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
+                              <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                              <span className="text-xs font-medium">{component.details?.rating || component.rating}</span>
+                            </div>
+                          )}
+                          {/* Category overlay */}
+                          <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
+                            <span className="text-xs text-white font-medium">
+                              {component.category || component.type || 'Activity'}
+                            </span>
                           </div>
-                        )}
-                        {/* Category overlay */}
-                        <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
-                          <span className="text-xs text-white font-medium">
-                            {component.category || component.type || 'Activity'}
-                          </span>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </Card>
                 ))}
