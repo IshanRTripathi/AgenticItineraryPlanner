@@ -17,16 +17,12 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Configure Docker to use gcloud
-      - name: Set up gcloud auth for Docker
-        run: gcloud auth configure-docker gcr.io --quiet
-
       # Build & Push Backend Image
       - name: Build & Push Backend Image
         run: |
           gcloud builds submit ./ \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:${{ github.sha }} \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:latest
+            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:${{ github.sha }} \
+            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:latest
 
       # Deploy Backend
       - name: Deploy Backend to Cloud Run
@@ -35,7 +31,7 @@ jobs:
           service: ai-trip-backend
           region: ${{ secrets.REGION }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:${{ github.sha }}
+          image: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:${{ github.sha }}
 
   frontend-deploy:
     runs-on: ubuntu-latest
@@ -50,15 +46,12 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up gcloud auth for Docker
-        run: gcloud auth configure-docker gcr.io --quiet
-
       # Build & Push Frontend Image
       - name: Build & Push Frontend Image
         run: |
           gcloud builds submit ./frontend \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-frontend:${{ github.sha }} \
-            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-frontend:latest
+            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-frontend:${{ github.sha }} \
+            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-frontend:latest
 
       # Deploy Frontend
       - name: Deploy Frontend to Cloud Run
@@ -66,3 +59,5 @@ jobs:
         with:
           service: ai-trip-frontend
           region: ${{ secrets.REGION }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          image: asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-frontend:${{ github.sha }}
