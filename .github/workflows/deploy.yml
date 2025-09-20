@@ -17,11 +17,16 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Build & Push Backend Image
-      - name: Build & Push Backend Image
+      # Build & Push Backend Image (commit SHA)
+      - name: Build & Push Backend Image (SHA)
         run: |
           gcloud builds submit ./ \
-            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:${{ github.sha }} \
+            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:${{ github.sha }}
+
+      # Build & Push Backend Image (latest)
+      - name: Build & Push Backend Image (latest)
+        run: |
+          gcloud builds submit ./ \
             --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-backend:latest
 
       # Deploy Backend
@@ -46,11 +51,16 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Build & Push Frontend Image
-      - name: Build & Push Frontend Image
+      # Build & Push Frontend Image (commit SHA)
+      - name: Build & Push Frontend Image (SHA)
         run: |
           gcloud builds submit ./frontend \
-            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-frontend:${{ github.sha }} \
+            --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-frontend:${{ github.sha }}
+
+      # Build & Push Frontend Image (latest)
+      - name: Build & Push Frontend Image (latest)
+        run: |
+          gcloud builds submit ./frontend \
             --tag asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-repo/ai-trip-frontend:latest
 
       # Deploy Frontend
