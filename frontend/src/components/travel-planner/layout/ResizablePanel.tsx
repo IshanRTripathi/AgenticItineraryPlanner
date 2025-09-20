@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ResizablePanelProps } from '../shared/types';
 
 export function ResizablePanel({ 
@@ -7,74 +8,55 @@ export function ResizablePanel({
   leftContent, 
   rightContent 
 }: ResizablePanelProps) {
-  const [isResizing, setIsResizing] = React.useState(false);
-  const resizeRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Resize handlers
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  }, []);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing || !resizeRef.current) return;
-    
-    const container = resizeRef.current.parentElement;
-    if (!container) return;
-    
-    const containerRect = container.getBoundingClientRect();
-    const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-    
-    // Constrain between 20% and 80%
-    const constrainedWidth = Math.min(Math.max(newWidth, 20), 80);
-    onWidthChange(constrainedWidth);
-  }, [isResizing, onWidthChange]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
+  // Toggle between collapsed and expanded states
+  const togglePanel = () => {
+    if (isExpanded) {
+      // Collapse to 25% (minimal view)
+      onWidthChange(25);
+      setIsExpanded(false);
     } else {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      // Expand to 45% (default view)
+      onWidthChange(45);
+      setIsExpanded(true);
     }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-  }, [isResizing, handleMouseMove, handleMouseUp]);
+  };
 
   return (
-    <div className="flex flex-1" ref={resizeRef}>
-      <div style={{ width: `${leftPanelWidth}%` }} className="flex-shrink-0 flex flex-col">
+    <div className="flex flex-1">
+      <div 
+        style={{ 
+          width: `${leftPanelWidth}%`,
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        }} 
+        className="flex-shrink-0 flex flex-col"
+      >
         {leftContent}
       </div>
       
-      {/* Resize Handle */}
-      <div 
-        className={`w-1 bg-gray-300 hover:bg-blue-400 cursor-col-resize flex-shrink-0 relative group ${isResizing ? 'bg-blue-500' : ''}`}
-        onMouseDown={handleMouseDown}
-        title="Drag to resize panels"
-      >
-        <div className="absolute inset-y-0 -left-1 -right-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="w-3 h-8 bg-blue-400 rounded-sm flex items-center justify-center">
-            <div className="w-0.5 h-4 bg-white rounded"></div>
-          </div>
-        </div>
+      {/* Toggle Button */}
+      <div className="w-1 bg-gray-300 flex-shrink-0 relative group">
+        <button
+          onClick={togglePanel}
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-8 bg-white rounded-sm shadow-sm border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all duration-200 z-10"
+          title={isExpanded ? "Collapse panel" : "Expand panel"}
+        >
+          {isExpanded ? (
+            <ChevronLeft className="w-4 h-4 text-blue-600 transition-transform duration-200" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-blue-600 transition-transform duration-200" />
+          )}
+        </button>
       </div>
       
-      <div style={{ width: `${100 - leftPanelWidth}%` }} className="bg-gray-100 relative border-l border-gray-200 flex-shrink-0 flex flex-col overflow-hidden">
+      <div 
+        style={{ 
+          width: `${100 - leftPanelWidth}%`,
+          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        }} 
+        className="bg-gray-100 relative border-l border-gray-200 flex-shrink-0 flex flex-col overflow-hidden"
+      >
         {rightContent}
       </div>
     </div>

@@ -16,16 +16,23 @@ export interface ViewComponentProps {
 }
 
 // Destination management interfaces
+export interface TransportDetails {
+  id: string;
+  mode: 'walk' | 'cab' | 'flight' | 'other';
+  distance: string;
+  distanceUnit: 'km' | 'mi';
+  duration?: string;
+  cost?: string;
+  notes?: string;
+}
+
 export interface Destination {
   id: string;
   name: string;
   nights: number;
   sleeping: boolean;
   discover: boolean;
-  transport?: {
-    distance: string;
-    duration: string;
-  };
+  transports?: TransportDetails[];
   notes: string;
   lat?: number;
   lng?: number;
@@ -40,6 +47,7 @@ export interface DestinationManagerProps {
   onRemove: (id: string) => void;
   onCurrencyChange: (currency: string) => void;
   onToggleNotes: () => void;
+  onUpdateTransport: (fromId: string, toId: string, transports: TransportDetails[]) => void;
 }
 
 // Agent status interfaces

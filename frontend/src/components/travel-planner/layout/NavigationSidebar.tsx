@@ -72,14 +72,6 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             <FileText className="w-4 h-4 mr-2" />
             Docs
           </Button>
-          <Button 
-            variant={activeView === 'discover' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('discover')}
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Discover
-          </Button>
         </div>
       </nav>
     </div>

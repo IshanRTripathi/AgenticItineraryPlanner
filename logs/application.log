@@ -18601,3 +18601,262 @@ Please create a comprehensive itinerary that maximizes the travel experience whi
 2025-09-20 15:37:01.590 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-20 15:37:01.590 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
 2025-09-20 15:37:01.591 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:39:05.857 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:39:05.857 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:39:05.858 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:39:05.858 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:39:05.858 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:39:05.861 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:39:05.862 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:39:05.863 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:39:05.864 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:39:05.865 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:39:05.865 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:39:05.865 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:39:05.865 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:39:05.866 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:39:05.867 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:39:05.868 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:42:38.590 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:42:38.590 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:42:38.590 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:42:38.590 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:42:38.592 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:42:38.594 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:42:38.595 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:42:38.596 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:42:43.595 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:42:43.595 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:42:43.595 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:42:43.595 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:42:43.595 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:42:43.596 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:42:43.597 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:51:41.348 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:51:41.348 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:51:41.349 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:51:41.349 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:51:41.349 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:51:41.351 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:51:41.352 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:51:41.353 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:54:23.592 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:54:23.592 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:54:23.592 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:54:23.592 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:54:23.592 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:54:23.593 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:54:23.593 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:54:23.593 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:54:23.593 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:54:23.594 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:54:23.594 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:54:23.594 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:54:23.594 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:54:23.594 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:54:23.594 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:54:23.595 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:54:27.602 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:54:27.602 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:54:27.603 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:54:27.603 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:54:27.603 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:54:27.604 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:54:27.605 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:54:31.601 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:54:31.601 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:54:31.602 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:54:31.602 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:54:31.602 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:54:31.603 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:54:31.604 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:54:31.605 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:54:53.608 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:54:53.609 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:54:53.609 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:54:53.609 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:54:53.609 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:54:53.611 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:54:53.612 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:54:53.614 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:55:53.553 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:55:53.554 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:55:53.554 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:55:53.554 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:55:53.554 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:55:53.555 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:55:53.555 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:55:53.555 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:55:53.555 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:55:53.555 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:55:53.556 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:55:53.556 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:55:53.556 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:55:53.556 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:55:53.556 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:55:53.557 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:57:40.609 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:57:40.609 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:57:40.609 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:57:40.609 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:57:40.609 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:57:40.611 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:57:40.612 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:57:40.613 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:57:44.608 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:57:44.608 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:57:44.609 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:57:44.609 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:57:44.609 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:57:44.610 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:57:44.610 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:57:44.610 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:57:44.610 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:57:44.610 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:57:44.610 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:57:44.611 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:57:44.611 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:57:44.611 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:57:44.611 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:57:44.612 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:57:48.604 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:57:48.604 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:57:48.605 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:57:48.605 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:57:48.605 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:57:48.606 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:57:48.607 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:57:48.608 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:58:12.599 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:58:12.599 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:58:12.601 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:58:12.601 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:58:12.601 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:58:12.602 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:58:12.603 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 15:59:03.588 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 15:59:03.588 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 15:59:03.589 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 15:59:03.589 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 15:59:03.589 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 15:59:03.590 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 15:59:03.591 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 15:59:03.592 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:01:55.997 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - OPTIONS "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:01:55.997 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:01:55.997 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-20 16:01:55.999 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/4", parameters={}
+2025-09-20 16:01:55.999 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getById(String)
+2025-09-20 16:01:56.000 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting itinerary: 4
+2025-09-20 16:01:56.000 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY REQUEST ===
+2025-09-20 16:01:56.000 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: 4
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Using JSON file data as fallback
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - === GET ITINERARY RESPONSE ===
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Found itinerary: 4
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Status: completed
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Destination: Paris, France
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - Days count: 3
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ItineraryService - ==================================
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Itinerary found: 4
+2025-09-20 16:01:56.002 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-20 16:01:56.003 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryDto(id=4, destination=Paris, France, startDate=2025-10-13, endDate=2025-10-21, party=PartyD (truncated)...]
+2025-09-20 16:01:56.004 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK

@@ -18,7 +18,6 @@ import { DocumentsView } from './travel-planner/views/DocumentsView';
 import { TripOverviewView } from './travel-planner/views/TripOverviewView';
 import { DayByDayView } from './travel-planner/views/DayByDayView';
 import { DestinationsManager } from './travel-planner/views/DestinationsManager';
-import { DiscoverView } from './travel-planner/views/DiscoverView';
 import { WorkflowBuilder } from './WorkflowBuilder';
 
 // Import error handling and loading components
@@ -52,7 +51,8 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [currency, setCurrency] = useState('EUR');
   const [showNotes, setShowNotes] = useState(false);
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(50);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(45);
+  const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(true);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
 
@@ -252,6 +252,10 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
               onRemove={removeDestination}
               onCurrencyChange={setCurrency}
               onToggleNotes={() => setShowNotes(!showNotes)}
+              onUpdateTransport={(fromId, toId, transports) => {
+                console.log(`Transport from ${fromId} to ${toId}:`, transports);
+                // TODO: Implement transport update logic
+              }}
             />
           </TabsContent>
           
@@ -286,20 +290,23 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
         </div>
         
         <div className="absolute top-4 right-4 space-y-2 z-10">
-          <Button size="sm" onClick={onShare}>Share trip</Button>
-          <Button size="sm" variant="outline">
-            <Video className="w-4 h-4 mr-2" />
-            Create movie
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={() => setLeftPanelWidth(50)}
-            title="Reset panel sizes to 50/50"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Reset Layout
-          </Button>
+          {!showWorkflowBuilder && (
+            <Button size="sm" onClick={onShare}>Share trip</Button>
+          )}
+          {showWorkflowBuilder && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => {
+                setLeftPanelWidth(45);
+                setIsLeftPanelExpanded(true);
+              }}
+              title="Reset panel sizes to 45/55"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Reset Layout
+            </Button>
+          )}
         </div>
         
         <div className="flex-1 overflow-hidden">
@@ -349,7 +356,10 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
     return (
       <ResizablePanel
         leftPanelWidth={leftPanelWidth}
-        onWidthChange={setLeftPanelWidth}
+        onWidthChange={(width) => {
+          setLeftPanelWidth(width);
+          setIsLeftPanelExpanded(width > 25);
+        }}
         leftContent={leftContent}
         rightContent={rightContent}
       />
@@ -384,17 +394,6 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
         return <CollectionView tripData={currentTripData} />;
       case 'docs':
         return <DocumentsView tripData={currentTripData} />;
-      case 'discover':
-        return (
-          <DiscoverView
-            tripData={currentTripData}
-            destinations={destinations}
-            onAddToTrip={(place, dayNumber) => {
-              console.log(`Adding ${place.name} to Day ${dayNumber}`);
-              // TODO: Implement add to itinerary functionality
-            }}
-          />
-        );
       default:
         return renderPlanView();
     }
