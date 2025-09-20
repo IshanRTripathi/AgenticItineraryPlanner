@@ -17,15 +17,24 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Build & Deploy Backend (Spring Boot)
+      # Configure Docker to use gcloud as credential helper
+      - name: Set up gcloud auth for Docker
+        run: gcloud auth configure-docker gcr.io --quiet
+
+      # Build & Push Backend Image
+      - name: Build & Push Backend Image
+        run: |
+          gcloud builds submit ./ \
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:${{ github.sha }}
+
+      # Deploy Backend
       - name: Deploy Backend to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: ai-trip-backend
           region: ${{ secrets.REGION }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          source: ./
-          dockerfile: ./Dockerfile   # 👈 Explicitly tell it to use your backend Dockerfile
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:${{ github.sha }}
 
   frontend-deploy:
     runs-on: ubuntu-latest
@@ -40,12 +49,88 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Build & Deploy Frontend (React)
+      - name: Set up gcloud auth for Docker
+        run: gcloud auth configure-docker gcr.io --quiet
+
+      # Build & Push Frontend Image
+      - name: Build & Push Frontend Image
+        run: |
+          gcloud builds submit ./frontend \
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-frontend:${{ github.sha }}
+
+      # Deploy Frontend
       - name: Deploy Frontend to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: ai-trip-frontend
           region: ${{ secrets.REGION }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          source: ./frontend
-          dockerfile: ./frontend/Dockerfile   # 👈 Explicitly tell it to use frontend Dockerfile
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-frontend:${{ github.sha }}
+name: Deploy Spring Boot + React to Cloud Run
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  backend-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Authenticate with GCP
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Configure Docker to use gcloud as credential helper
+      - name: Set up gcloud auth for Docker
+        run: gcloud auth configure-docker gcr.io --quiet
+
+      # Build & Push Backend Image
+      - name: Build & Push Backend Image
+        run: |
+          gcloud builds submit ./ \
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:${{ github.sha }}
+
+      # Deploy Backend
+      - name: Deploy Backend to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ai-trip-backend
+          region: ${{ secrets.REGION }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-backend:${{ github.sha }}
+
+  frontend-deploy:
+    runs-on: ubuntu-latest
+    needs: backend-deploy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Authenticate with GCP
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud auth for Docker
+        run: gcloud auth configure-docker gcr.io --quiet
+
+      # Build & Push Frontend Image
+      - name: Build & Push Frontend Image
+        run: |
+          gcloud builds submit ./frontend \
+            --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-frontend:${{ github.sha }}
+
+      # Deploy Frontend
+      - name: Deploy Frontend to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ai-trip-frontend
+          region: ${{ secrets.REGION }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/ai-trip-frontend:${{ github.sha }}
