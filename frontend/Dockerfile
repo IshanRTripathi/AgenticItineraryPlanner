@@ -12,7 +12,17 @@ FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
 COPY --from=build /app/build/ .
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-#use custom config
+
+# Replace nginx default config to bind on $PORT (Cloud Run requirement)
+RUN sh -c 'echo "server { \
+    listen       ${PORT}; \
+    server_name  localhost; \
+    root   /usr/share/nginx/html; \
+    index  index.html; \
+    location / { \
+      try_files \$uri /index.html; \
+    } \
+}" > /etc/nginx/conf.d/default.conf'
+
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
