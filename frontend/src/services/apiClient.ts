@@ -5,7 +5,8 @@
 import { DataTransformer } from './dataTransformer';
 import { TripData } from '../types/TripData';
 
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+//const API_BASE_URL = 'http://localhost:8080/api/v1';
+const API_BASE_URL = 'https://ai-trip-backend-342690752571.asia-south1.run.app';
 
 export interface ApiError {
   code: string;
@@ -95,12 +96,22 @@ class ApiClient {
       
       return responseData;
     } catch (error) {
-      console.error('API request failed:', {
-        url,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
+      let errorMessage = '';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        console.error('API request failed:', {
+          url,
+          error: error.message,
+          stack: error.stack
+        });
+      } else {
+        errorMessage = String(error);
+        console.error('API request failed:', {
+          url,
+          error: errorMessage
+        });
+      }
+      throw new Error(errorMessage);
     }
   }
 
@@ -464,4 +475,3 @@ export interface UserInfo {
 // Create and export a singleton instance
 export const apiClient = new ApiClient();
 export default apiClient;
-
