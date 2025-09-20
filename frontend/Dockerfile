@@ -1,13 +1,14 @@
-
-# Stage 1: Build the app
-FROM gradle:8.5-jdk17 AS build
+# Stage 1: Build React app
+FROM node:20 AS build
 WORKDIR /app
+COPY package*.json ./
+RUN npm install
 COPY . .
-RUN gradle clean build -x test
+RUN npm run build
 
-# Stage 2: Run the app
-FROM eclipse-temurin:17-jre
-WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+# Stage 2: Serve with nginx
+FROM nginx:stable-alpine
+WORKDIR /usr/share/nginx/html
+COPY --from=build /app/build .   # Copy only build output
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["nginx", "-g", "daemon off;"]
