@@ -23,8 +23,9 @@ jobs:
         with:
           service: ai-trip-backend
           region: ${{ secrets.REGION }}
-          source: .
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+          source: ./
+          dockerfile: ./Dockerfile   # 👈 Explicitly tell it to use your backend Dockerfile
 
   frontend-deploy:
     runs-on: ubuntu-latest
@@ -45,5 +46,6 @@ jobs:
         with:
           service: ai-trip-frontend
           region: ${{ secrets.REGION }}
-          source: ./frontend
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+          source: ./frontend
+          dockerfile: ./frontend/Dockerfile   # 👈 Explicitly tell it to use frontend Dockerfile
