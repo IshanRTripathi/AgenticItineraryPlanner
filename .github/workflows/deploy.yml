@@ -17,7 +17,7 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Build & Deploy Backend (Spring Boot)s
+      # Build & Deploy Backend (Spring Boot)
       - name: Deploy Backend to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
