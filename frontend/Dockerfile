@@ -10,7 +10,9 @@ RUN ls -R /app   # Debug: shows us that /app/build exists
 # Stage 2: Serve with nginx
 FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*   #clear nginx default files
-COPY --from=build /app/build/ .   
+RUN rm -rf ./*
+COPY --from=build /app/build/ .
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+#use custom config
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
