@@ -128,7 +128,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
       setDestinations([fallbackDestination]);
     }
     console.log('==================================');
-  }, [currentTripData]);
+  }, [JSON.stringify(currentTripData.itinerary?.days)]);
 
 
   // Update agent statuses when fresh data arrives

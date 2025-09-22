@@ -85,19 +85,19 @@ export class NormalizedDataTransformer {
    */
   private static transformNormalizedDay(day: NormalizedDay): DayPlan {
     return {
-      id: `day-${day.dayNumber}`,
+      id: day.id || `day-${day.dayNumber}`,
       date: day.date,
       dayNumber: day.dayNumber,
-      theme: this.generateThemeFromNodes(day.nodes),
+      theme: this.generateThemeFromNodes(day.nodes || []),
       location: day.location,
-      components: day.nodes.map(node => this.transformNormalizedNode(node)),
+      components: (day.nodes || []).map(node => this.transformNormalizedNode(node)),
       totalDistance: day.totals?.distanceKm || 0,
       totalCost: day.totals?.cost || 0,
       totalDuration: day.totals?.durationHr || 0,
       startTime: day.timeWindow?.start || '09:00',
       endTime: day.timeWindow?.end || '18:00',
-      meals: this.extractMealsFromNodes(day.nodes),
-      accommodation: this.extractAccommodationFromNodes(day.nodes),
+      meals: this.extractMealsFromNodes(day.nodes || []),
+      accommodation: this.extractAccommodationFromNodes(day.nodes || []),
       weather: {
         temperature: { min: 15, max: 25 },
         condition: 'sunny',
