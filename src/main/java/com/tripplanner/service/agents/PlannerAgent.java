@@ -286,6 +286,10 @@ public class PlannerAgent extends BaseAgent {
             5. Provide practical details like timing, costs, and tips
             6. Ensure realistic travel times and logical flow between activities
             
+            CRITICAL REQUIREMENT: You MUST populate ALL days with meaningful activities and nodes. 
+            Do NOT leave any days with empty nodes arrays. Each day should have at least 3-5 nodes 
+            including attractions, meals, and transportation as appropriate.
+            
             Node Types:
             - "attraction": Sightseeing, museums, landmarks, experiences
             - "meal": Restaurants, cafes, food experiences
@@ -298,6 +302,7 @@ public class PlannerAgent extends BaseAgent {
             - Include practical information like booking requirements and costs
             - Consider opening hours, weather, and seasonal factors
             - Provide realistic timing and duration estimates
+            - EVERY DAY must have multiple nodes - never leave a day empty
             
             Always respond with valid JSON matching the exact normalized schema provided.
             """;
@@ -345,7 +350,10 @@ public class PlannerAgent extends BaseAgent {
         prompt.append("Themes: ").append(String.join(", ", request.getInterests())).append("\n");
         prompt.append("Currency: USD\n");
         
-        prompt.append("\nPlease create a comprehensive normalized itinerary with nodes and edges that maximizes the travel experience while staying within the specified parameters.");
+        prompt.append("\nIMPORTANT: Create a comprehensive normalized itinerary with nodes and edges that maximizes the travel experience while staying within the specified parameters.");
+        prompt.append("\nYou MUST populate ALL ").append(request.getDurationDays()).append(" days with meaningful activities, meals, and transportation.");
+        prompt.append("\nEach day should have at least 3-5 nodes including attractions, meals, and transport as appropriate.");
+        prompt.append("\nDo NOT leave any days with empty nodes arrays.");
         
         return prompt.toString();
     }
