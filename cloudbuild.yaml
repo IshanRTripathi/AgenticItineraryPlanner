@@ -1,0 +1,136 @@
+# Google Cloud Build configuration for Agentic Itinerary Planner
+# This file builds and deploys both frontend and backend services
+
+steps:
+  # Build and deploy backend
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'Dockerfile.backend',
+      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA',
+      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest',
+      '.'
+    ]
+    id: 'build-backend'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA']
+    id: 'push-backend-sha'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest']
+    id: 'push-backend-latest'
+
+  # Deploy backend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'agentic-itinerary-planner-backend',
+      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--port', '8080',
+      '--memory', '2Gi',
+      '--cpu', '2',
+      '--max-instances', '10',
+      '--min-instances', '0',
+      '--concurrency', '100',
+      '--timeout', '900',
+      '--set-env-vars', 'SPRING_PROFILES_ACTIVE=cloud',
+      '--set-env-vars', 'GEMINI_API_KEY=${_GEMINI_API_KEY}',
+      '--set-env-vars', 'GEMINI_MOCK_MODE=true',
+      '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_ID=${_GOOGLE_OAUTH_CLIENT_ID}',
+      '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_SECRET=${_GOOGLE_OAUTH_CLIENT_SECRET}',
+      '--set-env-vars', 'RAZORPAY_KEY_ID=${_RAZORPAY_KEY_ID}',
+      '--set-env-vars', 'RAZORPAY_KEY_SECRET=${_RAZORPAY_KEY_SECRET}',
+      '--set-env-vars', 'SMTP_USERNAME=${_SMTP_USERNAME}',
+      '--set-env-vars', 'SMTP_PASSWORD=${_SMTP_PASSWORD}',
+      '--set-env-vars', 'EMAIL_FROM=${_EMAIL_FROM}',
+      '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
+      '--set-env-vars', 'APP_DATABASE_TYPE=firestore',
+      '--set-env-vars', 'FIRESTORE_USE_EMULATOR=false',
+      '--set-env-vars', 'FIRESTORE_CREDENTIALS=${_FIRESTORE_CREDENTIALS}',
+      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}'
+    ]
+    id: 'deploy-backend'
+    waitFor: ['push-backend-sha']
+
+  # Build and deploy frontend
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'Dockerfile.frontend',
+      '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
+      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
+      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
+      '.'
+    ]
+    id: 'build-frontend'
+    waitFor: ['build-backend']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA']
+    id: 'push-frontend-sha'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest']
+    id: 'push-frontend-latest'
+
+  # Deploy frontend to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'agentic-itinerary-planner-frontend',
+      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
+      '--region', '${_REGION}',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--port', '80',
+      '--memory', '512Mi',
+      '--cpu', '1',
+      '--max-instances', '10',
+      '--min-instances', '0',
+      '--concurrency', '1000',
+      '--timeout', '300'
+    ]
+    id: 'deploy-frontend'
+    waitFor: ['push-frontend-sha']
+
+  # Update backend with frontend URL
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        FRONTEND_URL=$$(gcloud run services describe agentic-itinerary-planner-frontend --region=${_REGION} --format='value(status.url)')
+        echo "Updating backend with frontend URL: $$FRONTEND_URL"
+        gcloud run services update agentic-itinerary-planner-backend \
+          --region=${_REGION} \
+          --set-env-vars="FRONTEND_URL=$$FRONTEND_URL"
+    id: 'update-backend-urls'
+    waitFor: ['deploy-frontend']
+
+# Substitution variables (hardcoded for mock setup)
+substitutions:
+  _REGION: 'us-south1'
+  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app'
+  _FRONTEND_URL: 'https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app'
+  _GEMINI_API_KEY: 'AIzaSyCmIwxSsiWnElgNy63Pm2Ub4KWKi1oNIr8'
+  _GCP_PROJECT_ID: 'tripplanner-bdd3c'
+  _FIRESTORE_CREDENTIALS: '${_FIRESTORE_CREDENTIALS}'
+  _GOOGLE_OAUTH_CLIENT_ID: 'dummy-oauth-client-id'
+  _GOOGLE_OAUTH_CLIENT_SECRET: 'dummy-oauth-client-secret'
+  _RAZORPAY_KEY_ID: 'dummy-razorpay-key-id'
+  _RAZORPAY_KEY_SECRET: 'dummy-razorpay-key-secret'
+  _SMTP_USERNAME: 'dummy-smtp-username'
+  _SMTP_PASSWORD: 'dummy-smtp-password'
+  _EMAIL_FROM: 'noreply@agenticitineraryplanner.com'
+
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+# Timeout for the entire build
+timeout: '1200s'

@@ -1,0 +1,350 @@
+{
+  "itineraryId": "it_barcelona_comprehensive",
+  "version": 1,
+  "summary": "3-day Barcelona adventure: Gaudi architecture, local cuisine, and Mediterranean beaches",
+  "currency": "EUR",
+  "themes": ["culture", "architecture", "food", "beach", "family"],
+  "days": [
+    {
+      "dayNumber": 1,
+      "date": "2025-06-01",
+      "location": "Barcelona",
+      "nodes": [
+        {
+          "id": "n_arrival",
+          "type": "transit",
+          "title": "Arrival at Barcelona Airport",
+          "location": {
+            "name": "Barcelona Airport",
+            "address": "El Prat de Llobregat, Barcelona",
+            "coordinates": {
+              "lat": 41.2974,
+              "lng": 2.0833
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T10:00:00Z",
+            "endTime": "2025-06-01T11:00:00Z",
+            "durationMin": 60
+          },
+          "cost": {
+            "amount": 0.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.0,
+            "category": "transit",
+            "tags": ["arrival", "airport"]
+          },
+          "labels": ["Arrival"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_hotel_checkin",
+          "type": "accommodation",
+          "title": "Hotel Check-in",
+          "location": {
+            "name": "Hotel Casa Fuster",
+            "address": "Passeig de Gràcia, 132, 08008 Barcelona",
+            "coordinates": {
+              "lat": 41.3947,
+              "lng": 2.1602
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T12:00:00Z",
+            "endTime": "2025-06-01T13:00:00Z",
+            "durationMin": 60
+          },
+          "cost": {
+            "amount": 200.0,
+            "currency": "EUR",
+            "per": "night"
+          },
+          "details": {
+            "rating": 4.5,
+            "category": "accommodation",
+            "tags": ["hotel", "luxury"]
+          },
+          "labels": ["Booked"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_lunch_1",
+          "type": "meal",
+          "title": "Lunch at La Boqueria Market",
+          "location": {
+            "name": "Mercat de la Boqueria",
+            "address": "La Rambla, 91, 08001 Barcelona",
+            "coordinates": {
+              "lat": 41.3819,
+              "lng": 2.1715
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T14:00:00Z",
+            "endTime": "2025-06-01T15:30:00Z",
+            "durationMin": 90
+          },
+          "cost": {
+            "amount": 25.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.2,
+            "category": "meal",
+            "tags": ["market", "local", "tapas"]
+          },
+          "labels": ["Local Experience"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_gothic_quarter",
+          "type": "attraction",
+          "title": "Gothic Quarter Walking Tour",
+          "location": {
+            "name": "Gothic Quarter",
+            "address": "Ciutat Vella, 08002 Barcelona",
+            "coordinates": {
+              "lat": 41.3833,
+              "lng": 2.1767
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T16:00:00Z",
+            "endTime": "2025-06-01T18:00:00Z",
+            "durationMin": 120
+          },
+          "cost": {
+            "amount": 15.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.3,
+            "category": "attraction",
+            "tags": ["historic", "walking", "culture"]
+          },
+          "labels": ["Must-Visit"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_park_guell",
+          "type": "attraction",
+          "title": "Park Güell",
+          "location": {
+            "name": "Park Güell",
+            "address": "08024 Barcelona",
+            "coordinates": {
+              "lat": 41.4145,
+              "lng": 2.1527
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-01T16:00:00Z",
+            "endTime": "2025-06-01T18:00:00Z",
+            "durationMin": 120
+          },
+          "cost": {
+            "amount": 10.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.6,
+            "category": "attraction",
+            "tags": ["gaudi", "park", "architecture"]
+          },
+          "labels": ["Must-Visit", "Booking Required"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        }
+      ]
+    },
+    {
+      "dayNumber": 2,
+      "date": "2025-06-02",
+      "location": "Barcelona",
+      "nodes": [
+        {
+          "id": "n_sagrada_familia",
+          "type": "attraction",
+          "title": "Sagrada Familia",
+          "location": {
+            "name": "Sagrada Familia",
+            "address": "Carrer de Mallorca, 401, 08013 Barcelona",
+            "coordinates": {
+              "lat": 41.4036,
+              "lng": 2.1744
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-02T09:00:00Z",
+            "endTime": "2025-06-02T11:00:00Z",
+            "durationMin": 120
+          },
+          "cost": {
+            "amount": 26.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.8,
+            "category": "attraction",
+            "tags": ["gaudi", "architecture", "basilica"]
+          },
+          "labels": ["Must-Visit", "Booking Required"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_dinner_1",
+          "type": "meal",
+          "title": "Dinner at Can Paixano",
+          "location": {
+            "name": "Can Paixano",
+            "address": "Carrer de la Reina Cristina, 7, 08003 Barcelona",
+            "coordinates": {
+              "lat": 41.3833,
+              "lng": 2.1833
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-02T19:00:00Z",
+            "endTime": "2025-06-02T21:00:00Z",
+            "durationMin": 120
+          },
+          "cost": {
+            "amount": 30.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.4,
+            "category": "meal",
+            "tags": ["tapas", "local", "wine"]
+          },
+          "labels": ["Local Experience"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        }
+      ]
+    },
+    {
+      "dayNumber": 3,
+      "date": "2025-06-03",
+      "location": "Barcelona",
+      "nodes": [
+        {
+          "id": "n_barceloneta_beach",
+          "type": "attraction",
+          "title": "Barceloneta Beach",
+          "location": {
+            "name": "Barceloneta Beach",
+            "address": "Barceloneta, 08003 Barcelona",
+            "coordinates": {
+              "lat": 41.3789,
+              "lng": 2.1894
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-03T10:00:00Z",
+            "endTime": "2025-06-03T13:00:00Z",
+            "durationMin": 180
+          },
+          "cost": {
+            "amount": 0.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.1,
+            "category": "attraction",
+            "tags": ["beach", "relaxation", "mediterranean"]
+          },
+          "labels": ["Free Activity"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_lunch_2",
+          "type": "meal",
+          "title": "Lunch at El Xampanyet",
+          "location": {
+            "name": "El Xampanyet",
+            "address": "Carrer de Montcada, 22, 08003 Barcelona",
+            "coordinates": {
+              "lat": 41.3847,
+              "lng": 2.1819
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-03T14:00:00Z",
+            "endTime": "2025-06-03T15:30:00Z",
+            "durationMin": 90
+          },
+          "cost": {
+            "amount": 20.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.3,
+            "category": "meal",
+            "tags": ["tapas", "champagne", "local"]
+          },
+          "labels": ["Local Experience"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        },
+        {
+          "id": "n_departure",
+          "type": "transit",
+          "title": "Departure from Barcelona",
+          "location": {
+            "name": "Barcelona Airport",
+            "address": "El Prat de Llobregat, Barcelona",
+            "coordinates": {
+              "lat": 41.2974,
+              "lng": 2.0833
+            }
+          },
+          "timing": {
+            "startTime": "2025-06-03T17:00:00Z",
+            "endTime": "2025-06-03T18:00:00Z",
+            "durationMin": 60
+          },
+          "cost": {
+            "amount": 0.0,
+            "currency": "EUR",
+            "per": "person"
+          },
+          "details": {
+            "rating": 4.0,
+            "category": "transit",
+            "tags": ["departure", "airport"]
+          },
+          "labels": ["Departure"],
+          "status": "planned",
+          "updatedBy": "system",
+          "updatedAt": "2025-01-21T19:00:00Z"
+        }
+      ]
+    }
+  ]
+}

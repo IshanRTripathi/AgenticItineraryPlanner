@@ -1,0 +1,420 @@
+{
+  "summary": "A 3-day family-friendly and wheelchair-accessible exploration of Barcelona's culture, architecture, and food.",
+  "highlights": [
+    "Sagrada Familia",
+    "Park Güell",
+    "Gothic Quarter",
+    "Barcelona beaches",
+    "Tapas tour"
+  ],
+  "totalEstimatedCost": 1200,
+  "currency": "EUR",
+  "themes": ["culture", "architecture", "food", "family-friendly"],
+  "difficulty": "easy",
+  "bestTimeToVisit": "Spring and Fall",
+  "weather": {
+    "temperature": "15-25°C",
+    "condition": "sunny",
+    "precipitation": "low"
+  },
+  "packingList": [
+    "Comfortable walking shoes",
+    "Light jacket",
+    "Sunscreen",
+    "Camera",
+    "Universal adapter"
+  ],
+  "emergencyInfo": {
+    "emergencyNumber": "112",
+    "policeNumber": "091",
+    "hospital": "Hospital Clínic de Barcelona",
+    "embassy": "US Embassy Barcelona"
+  },
+  "localInfo": {
+    "language": "Spanish, Catalan",
+    "currency": "Euro (EUR)",
+    "timezone": "CET (UTC+1)",
+    "electricity": "220V, Type C/F plugs",
+    "tipping": "10-15% in restaurants"
+  },
+  "days": [
+    {
+      "dayNumber": 1,
+      "date": "2025-06-01",
+      "theme": "Gaudi's Masterpieces",
+      "location": "Barcelona",
+      "activities": [
+        {
+          "name": "Sagrada Familia",
+          "description": "Visit the awe-inspiring Sagrada Familia Basilica.",
+          "startTime": "09:00",
+          "endTime": "12:00",
+          "duration": "3h",
+          "category": "architecture",
+          "estimatedCost": 70,
+          "location": {
+            "name": "Sagrada Familia",
+            "address": "Carrer de Mallorca, 401, 08013 Barcelona, Spain",
+            "lat": 41.4036299,
+            "lng": 2.1743558
+          },
+          "tips": "Book tickets online in advance to avoid queues. Consider an audio guide for a more immersive experience.",
+          "bookingRequired": true
+        },
+        {
+          "name": "Park Güell",
+          "description": "Explore the whimsical Park Güell, another Gaudi masterpiece.",
+          "startTime": "14:00",
+          "endTime": "17:00",
+          "duration": "3h",
+          "category": "architecture, park",
+          "estimatedCost": 40,
+          "location": {
+            "name": "Park Güell",
+            "address": "08024 Barcelona, Spain",
+            "lat": 41.4144886,
+            "lng": 2.1526596
+          },
+          "tips": "Book tickets online in advance. Wear comfortable shoes as there's a lot of walking.",
+          "bookingRequired": true
+        }
+      ],
+      "meals": [
+        {
+          "type": "breakfast",
+          "name": "Continental breakfast",
+          "restaurant": "Hotel restaurant",
+          "cuisine": "European",
+          "estimatedCost": 20,
+          "location": {
+            "name": "Hotel",
+            "address": "Hotel address",
+            "lat": 0,
+            "lng": 0
+          }
+        },
+        {
+          "type": "lunch",
+          "name": "Tapas",
+          "restaurant": "El Jardí de l'Àpat",
+          "cuisine": "Spanish",
+          "estimatedCost": 50,
+          "location": {
+            "name": "El Jardí de l'Àpat",
+            "address": "Passatge de Sant Josep Oriol, 1, 08002 Barcelona",
+            "lat": 41.3821423,
+            "lng": 2.1701867
+          }
+        },
+        {
+          "type": "dinner",
+          "name": "Paella",
+          "restaurant": "Can Solé",
+          "cuisine": "Seafood",
+          "estimatedCost": 80,
+          "location": {
+            "name": "Can Solé",
+            "address": "Carrer de Sant Carles, 4, 08003 Barcelona",
+            "lat": 41.3842213,
+            "lng": 2.1845678
+          }
+        }
+      ],
+      "accommodation": {
+        "name": "Hotel Barcelona Universal",
+        "type": "Hotel",
+        "estimatedCost": 150,
+        "rating": 4,
+        "location": {
+          "name": "Hotel Barcelona Universal",
+          "address": "Carrer de Cristòfor Colom, 1-9, 08004 Barcelona",
+          "lat": 41.37735,
+          "lng": 2.17544
+        }
+      },
+      "transportation": [
+        {
+          "mode": "Taxi",
+          "from": "Hotel",
+          "to": "Sagrada Familia",
+          "departureTime": "08:30",
+          "arrivalTime": "09:00",
+          "estimatedCost": 15,
+          "notes": "Wheelchair accessible taxi."
+        },
+        {
+          "mode": "Taxi",
+          "from": "Sagrada Familia",
+          "to": "Park Güell",
+          "departureTime": "13:30",
+          "arrivalTime": "14:00",
+          "estimatedCost": 15,
+          "notes": "Wheelchair accessible taxi."
+        }
+      ],
+      "notes": "Remember to wear comfortable shoes and stay hydrated.",
+      "totalDistance": 8.5,
+      "totalCost": 360,
+      "totalDuration": 8,
+      "startTime": "09:00",
+      "endTime": "18:00",
+      "weather": {
+        "temperature": { "min": 18, "max": 24 },
+        "condition": "sunny",
+        "precipitation": 0
+      }
+    },
+    {
+      "dayNumber": 2,
+      "date": "2025-06-02",
+      "theme": "Gothic Charm and Beach Relaxation",
+      "location": "Barcelona",
+      "activities": [
+        {
+          "name": "Gothic Quarter Walking Tour",
+          "description": "Explore the historic Gothic Quarter with its medieval architecture.",
+          "startTime": "10:00",
+          "endTime": "12:00",
+          "duration": "2h",
+          "category": "culture, history",
+          "estimatedCost": 25,
+          "location": {
+            "name": "Gothic Quarter",
+            "address": "Barri Gòtic, 08002 Barcelona, Spain",
+            "lat": 41.3833,
+            "lng": 2.1767
+          },
+          "tips": "Wear comfortable walking shoes. The area is wheelchair accessible.",
+          "bookingRequired": false
+        },
+        {
+          "name": "Barceloneta Beach",
+          "description": "Relax at Barcelona's most famous beach.",
+          "startTime": "14:00",
+          "endTime": "17:00",
+          "duration": "3h",
+          "category": "beach, relaxation",
+          "estimatedCost": 0,
+          "location": {
+            "name": "Barceloneta Beach",
+            "address": "Barceloneta, 08003 Barcelona, Spain",
+            "lat": 41.3789,
+            "lng": 2.1894
+          },
+          "tips": "Bring sunscreen and beach towels. Beach is wheelchair accessible.",
+          "bookingRequired": false
+        }
+      ],
+      "meals": [
+        {
+          "type": "breakfast",
+          "name": "Continental breakfast",
+          "restaurant": "Hotel restaurant",
+          "cuisine": "European",
+          "estimatedCost": 20,
+          "location": {
+            "name": "Hotel",
+            "address": "Hotel address",
+            "lat": 0,
+            "lng": 0
+          }
+        },
+        {
+          "type": "lunch",
+          "name": "Seafood paella",
+          "restaurant": "Restaurante Can Majó",
+          "cuisine": "Seafood",
+          "estimatedCost": 60,
+          "location": {
+            "name": "Restaurante Can Majó",
+            "address": "Carrer de l'Almirall Aixada, 23, 08003 Barcelona",
+            "lat": 41.3789,
+            "lng": 2.1894
+          }
+        },
+        {
+          "type": "dinner",
+          "name": "Tapas dinner",
+          "restaurant": "Quimet & Quimet",
+          "cuisine": "Spanish tapas",
+          "estimatedCost": 70,
+          "location": {
+            "name": "Quimet & Quimet",
+            "address": "Carrer del Poeta Cabanyes, 25, 08004 Barcelona",
+            "lat": 41.3756,
+            "lng": 2.1639
+          }
+        }
+      ],
+      "accommodation": {
+        "name": "Hotel Barcelona Universal",
+        "type": "Hotel",
+        "estimatedCost": 150,
+        "rating": 4,
+        "location": {
+          "name": "Hotel Barcelona Universal",
+          "address": "Carrer de Cristòfor Colom, 1-9, 08004 Barcelona",
+          "lat": 41.37735,
+          "lng": 2.17544
+        }
+      },
+      "transportation": [
+        {
+          "mode": "Metro",
+          "from": "Hotel",
+          "to": "Gothic Quarter",
+          "departureTime": "09:30",
+          "arrivalTime": "10:00",
+          "estimatedCost": 5,
+          "notes": "Metro is wheelchair accessible."
+        },
+        {
+          "mode": "Metro",
+          "from": "Gothic Quarter",
+          "to": "Barceloneta",
+          "departureTime": "13:30",
+          "arrivalTime": "14:00",
+          "estimatedCost": 5,
+          "notes": "Metro is wheelchair accessible."
+        }
+      ],
+      "notes": "Perfect day for exploring Barcelona's history and enjoying the Mediterranean.",
+      "totalDistance": 6.2,
+      "totalCost": 155,
+      "totalDuration": 7,
+      "startTime": "10:00",
+      "endTime": "18:00",
+      "weather": {
+        "temperature": { "min": 16, "max": 22 },
+        "condition": "partly cloudy",
+        "precipitation": 10
+      }
+    },
+    {
+      "dayNumber": 3,
+      "date": "2025-06-03",
+      "theme": "Culinary Delights and Artistic Exploration",
+      "location": "Barcelona",
+      "activities": [
+        {
+          "name": "La Boqueria Market",
+          "description": "Explore Barcelona's most famous food market.",
+          "startTime": "09:00",
+          "endTime": "11:00",
+          "duration": "2h",
+          "category": "food, culture",
+          "estimatedCost": 30,
+          "location": {
+            "name": "La Boqueria Market",
+            "address": "La Rambla, 91, 08001 Barcelona, Spain",
+            "lat": 41.3819,
+            "lng": 2.1719
+          },
+          "tips": "Go early to avoid crowds. Market is wheelchair accessible.",
+          "bookingRequired": false
+        },
+        {
+          "name": "Picasso Museum",
+          "description": "Visit the world-renowned Picasso Museum.",
+          "startTime": "12:00",
+          "endTime": "14:00",
+          "duration": "2h",
+          "category": "art, culture",
+          "estimatedCost": 25,
+          "location": {
+            "name": "Picasso Museum",
+            "address": "Carrer de Montcada, 15-23, 08003 Barcelona, Spain",
+            "lat": 41.3851,
+            "lng": 2.1809
+          },
+          "tips": "Book tickets online in advance. Museum is wheelchair accessible.",
+          "bookingRequired": true
+        }
+      ],
+      "meals": [
+        {
+          "type": "breakfast",
+          "name": "Continental breakfast",
+          "restaurant": "Hotel restaurant",
+          "cuisine": "European",
+          "estimatedCost": 20,
+          "location": {
+            "name": "Hotel",
+            "address": "Hotel address",
+            "lat": 0,
+            "lng": 0
+          }
+        },
+        {
+          "type": "lunch",
+          "name": "Market fresh lunch",
+          "restaurant": "La Boqueria Market",
+          "cuisine": "Spanish",
+          "estimatedCost": 40,
+          "location": {
+            "name": "La Boqueria Market",
+            "address": "La Rambla, 91, 08001 Barcelona, Spain",
+            "lat": 41.3819,
+            "lng": 2.1719
+          }
+        },
+        {
+          "type": "dinner",
+          "name": "Farewell dinner",
+          "restaurant": "El Nacional",
+          "cuisine": "Spanish",
+          "estimatedCost": 90,
+          "location": {
+            "name": "El Nacional",
+            "address": "Passeig de Gràcia, 24, 08007 Barcelona",
+            "lat": 41.3917,
+            "lng": 2.1649
+          }
+        }
+      ],
+      "accommodation": {
+        "name": "Hotel Barcelona Universal",
+        "type": "Hotel",
+        "estimatedCost": 150,
+        "rating": 4,
+        "location": {
+          "name": "Hotel Barcelona Universal",
+          "address": "Carrer de Cristòfor Colom, 1-9, 08004 Barcelona",
+          "lat": 41.37735,
+          "lng": 2.17544
+        }
+      },
+      "transportation": [
+        {
+          "mode": "Metro",
+          "from": "Hotel",
+          "to": "La Boqueria",
+          "departureTime": "08:30",
+          "arrivalTime": "09:00",
+          "estimatedCost": 5,
+          "notes": "Metro is wheelchair accessible."
+        },
+        {
+          "mode": "Walking",
+          "from": "La Boqueria",
+          "to": "Picasso Museum",
+          "departureTime": "11:30",
+          "arrivalTime": "12:00",
+          "estimatedCost": 0,
+          "notes": "Short walk through the Gothic Quarter."
+        }
+      ],
+      "notes": "Final day to savor Barcelona's culinary and artistic treasures.",
+      "totalDistance": 4.8,
+      "totalCost": 185,
+      "totalDuration": 6,
+      "startTime": "09:00",
+      "endTime": "16:00",
+      "weather": {
+        "temperature": { "min": 17, "max": 23 },
+        "condition": "sunny",
+        "precipitation": 0
+      }
+    }
+  ]
+}

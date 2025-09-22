@@ -1,0 +1,265 @@
+/* Change Preview Styles */
+
+.change-preview {
+  background: #e8f5e8;
+  border: 2px solid #4caf50;
+  border-radius: 12px;
+  margin: 16px 20px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #c8e6c9;
+}
+
+.preview-header h4 {
+  margin: 0;
+  color: #2e7d32;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.preview-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #388e3c;
+}
+
+.change-count {
+  background: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.change-details {
+  color: #666;
+}
+
+.preview-content {
+  margin-bottom: 16px;
+}
+
+.diff-section {
+  margin-bottom: 16px;
+}
+
+.diff-section:last-child {
+  margin-bottom: 0;
+}
+
+.diff-section-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.diff-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.diff-item {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  border-left: 4px solid #e0e0e0;
+}
+
+.diff-item.diff-added {
+  border-left-color: #4caf50;
+  background: #f1f8e9;
+}
+
+.diff-item.diff-removed {
+  border-left-color: #f44336;
+  background: #ffebee;
+}
+
+.diff-item.diff-updated {
+  border-left-color: #2196f3;
+  background: #e3f2fd;
+}
+
+.diff-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.diff-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+.diff-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.diff-node-id {
+  font-size: 11px;
+  color: #666;
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.diff-day {
+  font-size: 11px;
+  color: #666;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.diff-fields {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.diff-fields-label {
+  font-weight: 500;
+}
+
+.diff-fields-list {
+  color: #333;
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.no-changes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.no-changes-icon {
+  font-size: 20px;
+}
+
+.no-changes-text {
+  font-size: 14px;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #c8e6c9;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  color: #666;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.apply-button {
+  padding: 8px 16px;
+  border: none;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.apply-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.apply-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .change-preview {
+    margin: 12px 16px;
+    padding: 12px;
+  }
+  
+  .preview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .preview-header h4 {
+    font-size: 14px;
+  }
+  
+  .preview-summary {
+    font-size: 11px;
+  }
+  
+  .diff-item {
+    padding: 6px 10px;
+  }
+  
+  .diff-item-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .diff-fields {
+    font-size: 10px;
+  }
+  
+  .preview-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .apply-button {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,53 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+/frontend/node_modules/
+data/itinerarydb.mv.db
+data/itinerarydb.trace.db
+
+### Credentials and Secrets ###
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!firebase.json
+!firestore.rules
+!firestore.indexes.json
+!.firebaserc
+.env
+.env.local
+.env.production

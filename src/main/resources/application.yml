@@ -1,0 +1,156 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: agentic-itinerary-planner
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+  main:
+    allow-bean-definition-overriding: true
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: "*"
+  # Remove JPA/H2 completely; exclude autoconfiguration
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+  # Security completely disabled for development
+  security:
+    user:
+      name: disabled
+      password: disabled
+      roles: DISABLED
+
+google:
+  oauth:
+    client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
+    client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:}
+  ai:
+    api-key: ${GEMINI_API_KEY:AIzaSyCmIwxSsiWnElgNy63Pm2Ub4KWKi1oNIr8}
+    model: ${GEMINI_MODEL:gemini-1.5-pro}
+    temperature: ${GEMINI_TEMPERATURE:0.7}
+    max-tokens: ${GEMINI_MAX_TOKENS:8192}
+    mock-mode: ${GEMINI_MOCK_MODE:false}
+
+# Firestore Configuration
+firestore:
+  project-id: tripplanner-bdd3c
+  credentials: ${FIRESTORE_CREDENTIALS:}
+  credentials-file: ${FIRESTORE_CREDENTIALS_FILE:tripplanner-bdd3c-firebase-adminsdk-fbsvc-633254ef65.json}
+  emulator-host: ${FIRESTORE_EMULATOR_HOST:localhost:8080}
+  use-emulator: ${FIRESTORE_USE_EMULATOR:false}
+  enabled: ${FIRESTORE_ENABLED:true}
+
+# Application Database Configuration moved under single app block below
+
+razorpay:
+  enabled: ${RAZORPAY_ENABLED:false}
+  key-id: ${RAZORPAY_KEY_ID:}
+  key-secret: ${RAZORPAY_KEY_SECRET:}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  environment: ${RAZORPAY_ENVIRONMENT:test}
+
+email:
+  smtp:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    from: ${EMAIL_FROM:noreply@example.com}
+    from-name: ${EMAIL_FROM_NAME:Agentic Itinerary Planner}
+
+pdf:
+  base-url: ${PDF_BASE_URL:http://localhost:8080}
+  template-path: ${PDF_TEMPLATE_PATH:classpath:/templates/pdf/}
+
+providers:
+  hotels:
+    enabled: ${HOTELS_PROVIDER_ENABLED:true}
+    default: ${HOTELS_DEFAULT_PROVIDER:booking}
+    timeout: ${HOTELS_TIMEOUT:30s}
+  flights:
+    enabled: ${FLIGHTS_PROVIDER_ENABLED:true}
+    default: ${FLIGHTS_DEFAULT_PROVIDER:amadeus}
+    timeout: ${FLIGHTS_TIMEOUT:30s}
+  activities:
+    enabled: ${ACTIVITIES_PROVIDER_ENABLED:true}
+    default: ${ACTIVITIES_DEFAULT_PROVIDER:viator}
+    timeout: ${ACTIVITIES_TIMEOUT:30s}
+  ground:
+    enabled: ${GROUND_PROVIDER_ENABLED:true}
+    default: ${GROUND_DEFAULT_PROVIDER:rome2rio}
+    timeout: ${GROUND_TIMEOUT:30s}
+  public-transport:
+    enabled: ${PT_PROVIDER_ENABLED:true}
+    default: ${PT_DEFAULT_PROVIDER:transitland}
+    timeout: ${PT_TIMEOUT:30s}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: ${PROMETHEUS_ENABLED:false}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.tripplanner: ${APP_LOG_LEVEL:INFO}
+    com.tripplanner.api: INFO
+    com.tripplanner.service: INFO
+    com.tripplanner.data: INFO
+    com.tripplanner.security: INFO
+    com.tripplanner.service.agents: INFO
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.springframework.web: DEBUG
+    com.google.cloud: ${GCP_LOG_LEVEL:INFO}
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: DEBUG
+    org.springframework.web.cors: DEBUG
+    org.springframework.web.filter.CorsFilter: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/application.log}
+
+frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  database:
+    type: ${APP_DATABASE_TYPE:firestore}
+  max-itinerary-days: ${MAX_ITINERARY_DAYS:30}
+  max-party-size: ${MAX_PARTY_SIZE:20}
+  default-language: ${DEFAULT_LANGUAGE:en}
+  supported-languages: ${SUPPORTED_LANGUAGES:en,es,fr,de,it,pt,ja,ko,zh}
+  rate-limit:
+    requests-per-minute: ${RATE_LIMIT_RPM:100}
+    burst-capacity: ${RATE_LIMIT_BURST:200}
+  cache:
+    ttl-minutes: ${CACHE_TTL_MINUTES:60}
+  idempotency:
+    ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
+
+

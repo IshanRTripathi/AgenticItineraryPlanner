@@ -1,0 +1,265 @@
+// Types for the new normalized JSON structure from the backend
+
+export interface NormalizedItinerary {
+  itineraryId: string;
+  version: number;
+  summary: string;
+  currency: string;
+  themes: string[];
+  days: NormalizedDay[];
+  settings: ItinerarySettings;
+  agents: Record<string, AgentStatus>;
+}
+
+export interface NormalizedDay {
+  dayNumber: number;
+  date: string; // ISO date
+  location: string;
+  nodes: NormalizedNode[];
+  edges: Edge[];
+  pacing?: Pacing;
+  timeWindow?: TimeWindow;
+  totals?: DayTotals;
+  warnings?: string[];
+  notes?: string;
+}
+
+export interface NormalizedNode {
+  id: string;
+  type: 'attraction' | 'meal' | 'accommodation' | 'transport';
+  title: string;
+  location?: NodeLocation;
+  timing?: NodeTiming;
+  cost?: NodeCost;
+  details?: NodeDetails;
+  labels?: string[];
+  tips?: NodeTips;
+  links?: NodeLinks;
+  locked?: boolean;
+  bookingRef?: string;
+}
+
+export interface NodeLocation {
+  name: string;
+  address: string;
+  coordinates: Coordinates;
+}
+
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface NodeTiming {
+  startTime: string; // ISO string
+  endTime: string; // ISO string
+  durationMin: number;
+}
+
+export interface NodeCost {
+  amount: number;
+  currency: string;
+  per: string; // "person", "group", "night", etc.
+}
+
+export interface NodeDetails {
+  rating?: number;
+  category?: string;
+  tags?: string[];
+  timeSlots?: TimeSlot[];
+}
+
+export interface TimeSlot {
+  start: string; // HH:MM
+  end: string; // HH:MM
+  available: boolean;
+}
+
+export interface NodeTips {
+  bestTime?: string[];
+  travel?: string[];
+  warnings?: string[];
+}
+
+export interface NodeLinks {
+  booking?: string;
+  website?: string;
+  phone?: string;
+}
+
+export interface Edge {
+  from: string; // node ID
+  to: string; // node ID
+  transitInfo?: TransitInfo;
+}
+
+export interface TransitInfo {
+  mode: string; // "walking", "taxi", "bus", "train", etc.
+  durationMin?: number;
+  provider?: string;
+  bookingUrl?: string;
+}
+
+export interface Pacing {
+  style: string; // "relaxed", "balanced", "intensive"
+  avgDurationMin: number;
+  maxNodesPerDay: number;
+}
+
+export interface TimeWindow {
+  start: string; // HH:MM
+  end: string; // HH:MM
+}
+
+export interface DayTotals {
+  distanceKm: number;
+  cost: number;
+  durationHr: number;
+}
+
+export interface ItinerarySettings {
+  autoApply: boolean;
+  defaultScope: string; // "trip" | "day"
+}
+
+export interface AgentStatus {
+  lastRunAt?: string; // ISO string
+  status: string; // "idle" | "running" | "completed" | "failed"
+}
+
+// ChangeSet types for the new API
+export interface ChangeSet {
+  scope: string; // "trip" | "day"
+  day?: number;
+  ops: ChangeOperation[];
+  preferences?: ChangePreferences;
+}
+
+export interface ChangeOperation {
+  op: string; // "move" | "insert" | "delete"
+  id?: string; // node ID
+  after?: string; // node ID to insert after
+  node?: NormalizedNode; // for insert operations
+  startTime?: string; // ISO string for move operations
+  endTime?: string; // ISO string for move operations
+}
+
+export interface ChangePreferences {
+  userFirst: boolean;
+  autoApply: boolean;
+  respectLocks: boolean;
+}
+
+export interface ItineraryDiff {
+  added: DiffItem[];
+  removed: DiffItem[];
+  updated: DiffItem[];
+}
+
+export interface DiffItem {
+  id: string;
+  day: number;
+  fields: Record<string, any>;
+}
+
+export interface PatchEvent {
+  type: string;
+  itineraryId: string;
+  fromVersion: number;
+  toVersion: number;
+  diff: ItineraryDiff;
+  summary: string;
+  updatedBy: string;
+}
+
+// API Request/Response types
+export interface ProposeResponse {
+  proposed: NormalizedItinerary;
+  diff: ItineraryDiff;
+  previewVersion: number;
+}
+
+export interface ApplyRequest {
+  changeSetId?: string;
+  changeSet: ChangeSet;
+}
+
+export interface ApplyResponse {
+  toVersion: number;
+  diff: ItineraryDiff;
+}
+
+export interface UndoRequest {
+  toVersion?: number;
+}
+
+export interface UndoResponse {
+  toVersion: number;
+  diff: ItineraryDiff;
+}
+
+// Agent API types
+export interface AgentRunRequest {
+  itineraryId: string;
+  request: CreateItineraryRequest;
+}
+
+export interface AgentRunResponse {
+  itineraryId: string;
+  status: string;
+  message: string;
+}
+
+export interface ProcessRequestRequest {
+  itineraryId: string;
+  request: string;
+}
+
+export interface ProcessRequestResponse {
+  itineraryId: string;
+  status: string;
+  message: string;
+}
+
+export interface ApplyWithEnrichmentRequest {
+  itineraryId: string;
+  changeSet: ChangeSet;
+}
+
+export interface ApplyWithEnrichmentResponse {
+  itineraryId: string;
+  status: string;
+  message: string;
+}
+
+// Booking API types
+export interface MockBookingRequest {
+  itineraryId: string;
+  nodeId: string;
+  bookingRef?: string;
+}
+
+export interface MockBookingResponse {
+  itineraryId: string;
+  nodeId: string;
+  bookingRef: string;
+  locked: boolean;
+  message: string;
+}
+
+// Legacy types for backward compatibility
+export interface CreateItineraryRequest {
+  destination: string;
+  startDate: string;
+  endDate: string;
+  party: {
+    adults: number;
+    children: number;
+    infants: number;
+    rooms: number;
+  };
+  budgetTier: string;
+  interests: string[];
+  constraints: string[];
+  language: string;
+}

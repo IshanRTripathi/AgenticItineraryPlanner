@@ -1,0 +1,64 @@
+# Docker ignore file for the project
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Build artifacts
+build/
+target/
+dist/
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+src/test/
+**/*Test.java
+**/*Tests.java
+
+# Temporary files
+tmp/
+temp/
+
+# Database files
+data/
+*.db
+*.mv.db
+*.trace.db
+
+# Gradle
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# Frontend specific
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.vite/
+
+# Backend specific
+bin/
+out/

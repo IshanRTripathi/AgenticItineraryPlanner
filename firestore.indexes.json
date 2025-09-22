@@ -1,0 +1,15 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "itineraries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

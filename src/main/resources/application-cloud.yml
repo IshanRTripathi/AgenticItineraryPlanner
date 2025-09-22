@@ -1,0 +1,169 @@
+# Cloud-specific configuration for Google Cloud Run deployment
+server:
+  port: ${PORT:8080}
+  address: 0.0.0.0
+  forward-headers-strategy: framework
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 20000
+    keep-alive-timeout: 15000
+
+spring:
+  application:
+    name: agentic-itinerary-planner
+  autoconfigure:
+    exclude:
+      - org.springdoc.core.configuration.SpringDocConfiguration
+      - org.springdoc.webmvc.ui.SwaggerConfig
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+  main:
+    allow-bean-definition-overriding: true
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: "*"
+  # H2 Database Configuration - In-memory mode for Cloud Run
+  datasource:
+    url: jdbc:h2:mem:itinerarydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  h2:
+    console:
+      enabled: false  # Disable H2 console in production
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false  # Disable SQL logging in production
+    properties:
+      hibernate:
+        format_sql: false
+  # Security completely disabled for development
+  security:
+    user:
+      name: disabled
+      password: disabled
+      roles: DISABLED
+
+google:
+  oauth:
+    client-id: ${GOOGLE_OAUTH_CLIENT_ID:dummy-oauth-client-id}
+    client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:dummy-oauth-client-secret}
+  ai:
+    api-key: ${GEMINI_API_KEY:AIzaSyCmIwxSsiWnElgNy63Pm2Ub4KWKi1oNIr8}
+    model: ${GEMINI_MODEL:gemini-1.5-pro}
+    temperature: ${GEMINI_TEMPERATURE:0.7}
+    max-tokens: ${GEMINI_MAX_TOKENS:8192}
+    mock-mode: ${GEMINI_MOCK_MODE:true}
+
+# Firestore (disabled for now)
+firestore:
+  project-id: ${GCP_PROJECT_ID:}
+  credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
+  database-id: ${FIRESTORE_DATABASE_ID:(default)}
+  enabled: false
+
+razorpay:
+  key-id: ${RAZORPAY_KEY_ID:dummy-razorpay-key-id}
+  key-secret: ${RAZORPAY_KEY_SECRET:dummy-razorpay-key-secret}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:dummy-webhook-secret}
+  environment: ${RAZORPAY_ENVIRONMENT:test}
+
+email:
+  smtp:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:dummy-smtp-username}
+    password: ${SMTP_PASSWORD:dummy-smtp-password}
+    from: ${EMAIL_FROM:noreply@agenticitineraryplanner.com}
+    from-name: ${EMAIL_FROM_NAME:Agentic Itinerary Planner}
+
+pdf:
+  base-url: ${PDF_BASE_URL:}
+  template-path: ${PDF_TEMPLATE_PATH:classpath:/templates/pdf/}
+
+providers:
+  hotels:
+    enabled: ${HOTELS_PROVIDER_ENABLED:true}
+    default: ${HOTELS_DEFAULT_PROVIDER:booking}
+    timeout: ${HOTELS_TIMEOUT:30s}
+  flights:
+    enabled: ${FLIGHTS_PROVIDER_ENABLED:true}
+    default: ${FLIGHTS_DEFAULT_PROVIDER:amadeus}
+    timeout: ${FLIGHTS_TIMEOUT:30s}
+  activities:
+    enabled: ${ACTIVITIES_PROVIDER_ENABLED:true}
+    default: ${ACTIVITIES_DEFAULT_PROVIDER:viator}
+    timeout: ${ACTIVITIES_TIMEOUT:30s}
+  ground:
+    enabled: ${GROUND_PROVIDER_ENABLED:true}
+    default: ${GROUND_DEFAULT_PROVIDER:rome2rio}
+    timeout: ${GROUND_TIMEOUT:30s}
+  public-transport:
+    enabled: ${PT_PROVIDER_ENABLED:true}
+    default: ${PT_DEFAULT_PROVIDER:transitland}
+    timeout: ${PT_TIMEOUT:30s}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: ${PROMETHEUS_ENABLED:false}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.tripplanner: ${APP_LOG_LEVEL:INFO}
+    com.tripplanner.api: INFO
+    com.tripplanner.service: INFO
+    com.tripplanner.data: INFO
+    com.tripplanner.security: INFO
+    com.tripplanner.service.agents: INFO
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+    org.springframework.web: WARN
+    org.springframework.boot: INFO
+    org.springframework.context: INFO
+    com.google.cloud: ${GCP_LOG_LEVEL:INFO}
+    org.springframework.web.cors: DEBUG
+    org.springframework.web.filter.CorsFilter: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ${LOG_FILE:/tmp/application.log}
+
+app:
+  base-url: ${APP_BASE_URL:}
+  frontend-url: ${FRONTEND_URL:}
+  max-itinerary-days: ${MAX_ITINERARY_DAYS:30}
+  max-party-size: ${MAX_PARTY_SIZE:20}
+  default-language: ${DEFAULT_LANGUAGE:en}
+  supported-languages: ${SUPPORTED_LANGUAGES:en,es,fr,de,it,pt,ja,ko,zh}
+  rate-limit:
+    requests-per-minute: ${RATE_LIMIT_RPM:100}
+    burst-capacity: ${RATE_LIMIT_BURST:200}
+  cache:
+    ttl-minutes: ${CACHE_TTL_MINUTES:60}
+  idempotency:
+    ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}

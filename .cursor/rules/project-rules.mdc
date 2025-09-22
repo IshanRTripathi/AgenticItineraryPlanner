@@ -1,0 +1,8 @@
+---
+description:
+1. if it is a feature, plan properly, ask questions for 100% accuracy and create list of todos
+2. if it is an issue, read log data or request from user, analyse the response from both frontend and backend aspects, plan the fix and apply fixes
+3. after every code changes, build and run tests if applicable and address any issues before marking the issues complete
+globs:
+alwaysApply: true
+---
