@@ -13,6 +13,7 @@ export class DataTransformer {
    */
   static transformItineraryResponseToTripData(response: any): TripData {
     const travelers = this.transformPartyToTravelers(response.party || { adults: 1, children: 0, infants: 0, rooms: 1 });
+    const inferredDestination = response?.destination || response?.days?.[0]?.location || 'Unknown';
     
     return {
       id: response.id,
@@ -28,14 +29,15 @@ export class DataTransformer {
       },
       endLocation: {
         id: response.id,
-        name: response.destination,
-        country: this.extractCountry(response.destination),
-        city: this.extractCity(response.destination),
+        name: inferredDestination,
+        country: this.extractCountry(inferredDestination),
+        city: this.extractCity(inferredDestination),
         coordinates: { lat: 0, lng: 0 },
         timezone: 'UTC',
         currency: 'USD',
         exchangeRate: 1.0
       },
+      destination: inferredDestination,
       isRoundTrip: true,
       dates: {
         start: response.startDate,
