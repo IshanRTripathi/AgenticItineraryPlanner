@@ -20,12 +20,13 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow configured origin plus common local dev origins
+        // Allow configured origin plus common patterns (Cloud Run domains) and local dev origins
         if (frontendUrl != null && !frontendUrl.isEmpty()) {
-            configuration.setAllowedOrigins(Arrays.asList(frontendUrl));
+            configuration.addAllowedOriginPattern(frontendUrl);
         }
-        configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://127.0.0.1:3000");
+        configuration.addAllowedOriginPattern("https://*.run.app");
+        configuration.addAllowedOriginPattern("http://localhost:3000");
+        configuration.addAllowedOriginPattern("http://127.0.0.1:3000");
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
