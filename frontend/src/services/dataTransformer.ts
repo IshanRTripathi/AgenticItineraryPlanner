@@ -858,17 +858,19 @@ export class DataTransformer {
   /**
    * Extract country from destination string
    */
-  private static extractCountry(destination: string): string {
+  private static extractCountry(destination?: string): string {
+    if (!destination || typeof destination !== 'string') return 'Unknown';
     const parts = destination.split(',');
-    return parts.length > 1 ? parts[parts.length - 1].trim() : '';
+    return parts.length > 1 ? parts[parts.length - 1].trim() : destination.trim();
   }
 
   /**
    * Extract city from destination string
    */
-  private static extractCity(destination: string): string {
+  private static extractCity(destination?: string): string {
+    if (!destination || typeof destination !== 'string') return 'Unknown City';
     const parts = destination.split(',');
-    return parts[0].trim();
+    return (parts[0] || destination).trim();
   }
 
   /**
