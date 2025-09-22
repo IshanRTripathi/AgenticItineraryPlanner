@@ -97,19 +97,7 @@ steps:
     id: 'deploy-frontend'
     waitFor: ['push-frontend-sha']
 
-  # Update backend with frontend URL
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        FRONTEND_URL=$$(gcloud run services describe agentic-itinerary-planner-frontend --region=${_REGION} --format='value(status.url)')
-        echo "Updating backend with frontend URL: $$FRONTEND_URL"
-        gcloud run services update agentic-itinerary-planner-backend \
-          --region=${_REGION} \
-          --set-env-vars="FRONTEND_URL=$$FRONTEND_URL"
-    id: 'update-backend-urls'
-    waitFor: ['deploy-frontend']
+  
 
 # Substitution variables (hardcoded for mock setup)
 substitutions:
