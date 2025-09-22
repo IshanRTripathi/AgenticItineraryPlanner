@@ -3,7 +3,7 @@
  */
 
 import { DataTransformer } from './dataTransformer';
-import { NormalizedDataTransformer } from './NormalizedDataTransformer';
+import { NormalizedDataTransformer } from './normalizedDataTransformer';
 import { TripData } from '../types/TripData';
 import { 
   NormalizedItinerary, 
