@@ -81,10 +81,21 @@ public class ChangeEngine {
             
             // Create a copy for changes
             NormalizedItinerary updated = deepCopy(current);
-            updated.setVersion(current.getVersion() + 1);
             
             // Apply changes
             ItineraryDiff diff = applyChangesToItinerary(updated, changeSet);
+            
+            // If no changes detected, skip version bump and revision
+            boolean hasChanges = (diff.getAdded() != null && !diff.getAdded().isEmpty())
+                    || (diff.getRemoved() != null && !diff.getRemoved().isEmpty())
+                    || (diff.getUpdated() != null && !diff.getUpdated().isEmpty());
+            if (!hasChanges) {
+                logger.info("No-op ChangeSet: skipping version bump and revision save");
+                return new ApplyResult(current.getVersion(), diff);
+            }
+            
+            // Increment version only when there are changes
+            updated.setVersion(current.getVersion() + 1);
             
             // Save current version as revision
             saveRevision(current);

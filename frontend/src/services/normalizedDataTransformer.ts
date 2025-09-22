@@ -26,7 +26,7 @@ export class NormalizedDataTransformer {
       },
       endLocation: {
         id: normalized.itineraryId,
-        name: this.extractDestinationFromSummary(normalized.summary),
+        name: this.extractDestinationFromSummary(normalized.summary) || (normalized.days?.[0]?.location ?? 'Unknown'),
         country: this.extractCountryFromSummary(normalized.summary),
         city: this.extractCityFromSummary(normalized.summary),
         coordinates: { lat: 0, lng: 0 },
@@ -476,22 +476,21 @@ export class NormalizedDataTransformer {
    * Extract destination from summary
    */
   private static extractDestinationFromSummary(summary: string): string {
-    // Try to extract destination from summary
-    // Look for patterns like "to Barcelona", "Barcelona adventure", "in Barcelona"
+    // Broaden patterns: "exploration of X", "trip to X", "in X", "X adventure"
     const patterns = [
-      /to\s+([^,\s]+)/i,
-      /([A-Z][a-z]+)\s+adventure/i,
-      /in\s+([A-Z][a-z]+)/i,
-      /([A-Z][a-z]+)\s+for/i
+      /exploration of\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
+      /trip to\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
+      /to\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
+      /in\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
+      /([A-Z][A-Za-z\s]+)\s+adventure/i,
+      /([A-Z][A-Za-z\s]+)\s+for/i
     ];
-    
     for (const pattern of patterns) {
       const match = summary.match(pattern);
       if (match) {
         return match[1].trim();
       }
     }
-    
     return 'Unknown Destination';
   }
 

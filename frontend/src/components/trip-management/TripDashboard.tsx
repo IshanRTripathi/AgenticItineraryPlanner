@@ -25,6 +25,9 @@ import {
   Star
 } from 'lucide-react';
 import { TripData } from '../../types/TripData';
+import { apiClient } from '../../services/apiClient';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TripDashboardProps {
   trips: TripData[];
@@ -34,6 +37,7 @@ interface TripDashboardProps {
 }
 
 export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripDashboardProps) {
+  const qc = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState('all');
   const [sortBy, setSortBy] = useState('date');
@@ -131,6 +135,42 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
     const shareUrl = `https://tripai.com/share/${trip.id}`;
     navigator.clipboard.writeText(shareUrl);
   };
+
+  const deleteTrip = async (trip: TripData) => {
+    try {
+      await apiClient.deleteItinerary(trip.id);
+      // Refresh list
+      qc.invalidateQueries({ queryKey: ['itineraries'] });
+    } catch (e) {
+      console.error('Failed to delete trip', e);
+    }
+  };
+
+  function TripCardMenu({ trip }: { trip: TripData }) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onViewTrip(trip)}>
+            <Eye className="h-3 w-3 mr-2" /> View
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => shareTrip(trip)}>
+            <Share2 className="h-3 w-3 mr-2" /> Share
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => duplicateTrip(trip)}>
+            <Copy className="h-3 w-3 mr-2" /> Duplicate
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => deleteTrip(trip)} className="text-red-600 focus:text-red-700">
+            <Trash2 className="h-3 w-3 mr-2" /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -307,9 +347,9 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                           
                           <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${status.color}`} />
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
+                            <div className="relative">
+                              <TripCardMenu trip={trip} />
+                            </div>
                           </div>
                         </div>
                       </CardHeader>
