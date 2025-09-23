@@ -1,9 +1,9 @@
 package com.tripplanner.service;
 
-import com.tripplanner.api.dto.NodeCandidate;
-import com.tripplanner.api.dto.NormalizedItinerary;
-import com.tripplanner.api.dto.NormalizedDay;
-import com.tripplanner.api.dto.NormalizedNode;
+import com.tripplanner.dto.NodeCandidate;
+import com.tripplanner.dto.NormalizedItinerary;
+import com.tripplanner.dto.NormalizedDay;
+import com.tripplanner.dto.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

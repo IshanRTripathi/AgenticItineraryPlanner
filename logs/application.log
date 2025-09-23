@@ -2,9 +2,9 @@
 2025-09-23 00:06:51.671 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:06:51.671 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:06:51.671 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:06:51.673 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:06:51.673 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:06:53.350 [http-nio-8080-exec-9] WARN  com.tripplanner.api.ItinerariesController - Normalized itinerary not found: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:06:51.673 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:06:51.673 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:06:53.350 [http-nio-8080-exec-9] WARN  com.tripplanner.controller.ItinerariesController - Normalized itinerary not found: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:06:53.350 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-23 00:06:53.350 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
 2025-09-23 00:06:53.350 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 404 NOT_FOUND
@@ -13,9 +13,9 @@
 2025-09-23 00:06:53.958 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:06:53.959 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:06:53.959 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:06:53.959 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:06:53.959 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:06:54.280 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Found 1 itineraries
+2025-09-23 00:06:53.959 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:06:53.959 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:06:54.280 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Found 1 itineraries
 2025-09-23 00:06:54.280 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-23 00:06:54.281 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[ItineraryDto(id=it_c18e8413-b235-460b-b7fe-1d051765172b, destination=null, startDate=null, endDate= (truncated)...]
 2025-09-23 00:06:54.281 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
@@ -23,19 +23,19 @@
 2025-09-23 00:06:54.355 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:06:54.355 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:06:54.355 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:06:54.355 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:06:54.356 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:06:54.355 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:06:54.356 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:06:55.288 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:06:55.289 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:06:55.289 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:06:55.289 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:06:55.289 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:06:55.471 [http-nio-8080-exec-1] WARN  com.tripplanner.api.ItinerariesController - Normalized itinerary not found: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:06:55.289 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:06:55.289 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:06:55.471 [http-nio-8080-exec-1] WARN  com.tripplanner.controller.ItinerariesController - Normalized itinerary not found: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:06:55.471 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-23 00:06:55.471 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
 2025-09-23 00:06:55.471 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 404 NOT_FOUND
 2025-09-23 00:06:55.471 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-09-23 00:06:55.863 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Found 1 itineraries
+2025-09-23 00:06:55.863 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Found 1 itineraries
 2025-09-23 00:06:55.863 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-23 00:06:55.863 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[ItineraryDto(id=it_c18e8413-b235-460b-b7fe-1d051765172b, destination=null, startDate=null, endDate= (truncated)...]
 2025-09-23 00:06:55.863 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
@@ -77,15 +77,15 @@
 2025-09-23 00:07:20.184 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:20.186 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
 2025-09-23 00:07:20.186 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:07:20.187 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:07:20.187 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:07:20.192 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:07:20.198 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:07:22.290 [http-nio-8080-exec-3] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:20.187 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:07:20.187 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:07:20.192 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:07:20.198 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:22.290 [http-nio-8080-exec-3] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -231,7 +231,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -371,10 +371,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 17 common frames omitted
-2025-09-23 00:07:22.303 [http-nio-8080-exec-4] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:07:22.303 [http-nio-8080-exec-4] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -526,8 +526,8 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:22.310 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:07:22.310 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:07:22.310 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:07:22.310 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:07:22.310 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-23 00:07:22.310 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:07:22.310 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
 2025-09-23 00:07:22.318 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
 2025-09-23 00:07:22.318 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
 2025-09-23 00:07:22.318 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 500 INTERNAL_SERVER_ERROR
@@ -535,14 +535,14 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:22.320 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:22.320 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:22.320 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:07:22.320 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:07:22.321 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:22.320 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:07:22.321 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:07:22.618 [http-nio-8080-exec-5] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -679,10 +679,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:07:22.620 [http-nio-8080-exec-5] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:07:22.620 [http-nio-8080-exec-5] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -831,13 +831,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:23.636 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:07:23.637 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:07:23.637 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:07:23.637 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:07:23.637 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:07:23.855 [http-nio-8080-exec-6] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:23.637 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:07:23.637 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:07:23.855 [http-nio-8080-exec-6] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -984,7 +984,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -1121,10 +1121,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:07:23.943 [http-nio-8080-exec-7] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:07:23.943 [http-nio-8080-exec-7] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -1273,13 +1273,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:24.863 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:24.864 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:24.864 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:07:24.864 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:07:24.865 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:07:25.167 [http-nio-8080-exec-8] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:24.864 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:07:24.865 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:25.167 [http-nio-8080-exec-8] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -1428,17 +1428,17 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:53.652 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:07:53.652 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
 2025-09-23 00:07:53.652 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
-2025-09-23 00:07:53.652 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
+2025-09-23 00:07:53.652 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
 2025-09-23 00:07:53.652 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:07:53.652 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:07:53.653 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:07:53.653 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:53.652 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:07:53.653 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:07:53.653 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:07:53.951 [http-nio-8080-exec-1] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -1575,10 +1575,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:07:53.952 [http-nio-8080-exec-1] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:07:53.952 [http-nio-8080-exec-1] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -1727,14 +1727,14 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:53.955 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:07:53.956 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:07:53.956 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:07:53.956 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:07:53.956 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-23 00:07:53.956 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:07:53.956 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
 2025-09-23 00:07:55.107 [http-nio-8080-exec-4] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -1871,10 +1871,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:07:55.109 [http-nio-8080-exec-4] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:07:55.109 [http-nio-8080-exec-4] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2017,11 +2017,11 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
 2025-09-23 00:07:55.111 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2025-09-23 00:07:55.109 [http-nio-8080-exec-2] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:55.109 [http-nio-8080-exec-2] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2169,13 +2169,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:55.113 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:55.114 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:55.115 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:07:55.115 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:07:55.115 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:07:55.425 [http-nio-8080-exec-3] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:55.115 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:07:55.115 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:55.425 [http-nio-8080-exec-3] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2320,19 +2320,19 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:56.129 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:07:56.130 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:07:56.130 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:07:56.130 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:07:56.130 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-23 00:07:56.130 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:07:56.130 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
 2025-09-23 00:07:56.444 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:56.445 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:07:56.445 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:07:56.445 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:07:56.446 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:56.445 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:07:56.446 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:07:56.565 [http-nio-8080-exec-5] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2469,10 +2469,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:07:56.566 [http-nio-8080-exec-5] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:07:56.566 [http-nio-8080-exec-5] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2618,11 +2618,11 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:07:56.567 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
 2025-09-23 00:07:56.567 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 500 INTERNAL_SERVER_ERROR
 2025-09-23 00:07:56.567 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-09-23 00:07:57.597 [http-nio-8080-exec-6] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:07:57.597 [http-nio-8080-exec-6] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2767,13 +2767,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:08:20.555 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:08:20.556 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:08:20.556 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:08:20.556 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:08:20.557 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:08:20.869 [http-nio-8080-exec-7] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:08:20.556 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:08:20.557 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:08:20.869 [http-nio-8080-exec-7] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -2918,13 +2918,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:08:24.032 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:08:24.032 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:08:24.032 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:08:24.032 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:08:24.032 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:08:24.375 [http-nio-8080-exec-8] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:08:24.032 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:08:24.032 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:08:24.375 [http-nio-8080-exec-8] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3072,15 +3072,15 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:22:21.881 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:22:21.881 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
 2025-09-23 00:22:21.881 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:22:21.881 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:22:21.881 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:22:21.881 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:22:21.881 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:22:23.424 [http-nio-8080-exec-10] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:22:21.881 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:22:21.881 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:22:21.881 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:22:21.881 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:22:23.424 [http-nio-8080-exec-10] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3227,7 +3227,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3364,10 +3364,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:22:23.447 [http-nio-8080-exec-9] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:22:23.447 [http-nio-8080-exec-9] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3519,16 +3519,16 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:24:25.929 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:24:25.929 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
 2025-09-23 00:24:25.929 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:24:25.930 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:24:25.930 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:24:25.930 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:24:25.930 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:25.930 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:24:25.930 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:24:25.930 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:24:25.930 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:24:26.259 [http-nio-8080-exec-4] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3665,10 +3665,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:24:26.260 [http-nio-8080-exec-4] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:24:26.260 [http-nio-8080-exec-4] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3814,11 +3814,11 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:24:26.261 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
 2025-09-23 00:24:26.262 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 500 INTERNAL_SERVER_ERROR
 2025-09-23 00:24:26.262 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-09-23 00:24:27.399 [http-nio-8080-exec-1] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:27.399 [http-nio-8080-exec-1] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3968,15 +3968,15 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:24:30.760 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:24:30.760 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
 2025-09-23 00:24:30.760 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:24:30.760 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:24:30.760 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:24:30.760 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:24:30.761 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:24:31.065 [http-nio-8080-exec-6] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:30.760 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:24:30.760 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:24:30.760 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:24:30.761 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:31.065 [http-nio-8080-exec-6] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -4121,14 +4121,14 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:24:31.069 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:24:31.069 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:24:31.069 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:24:31.069 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:24:31.069 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:31.069 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:24:31.069 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:24:32.225 [http-nio-8080-exec-5] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -4265,10 +4265,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:24:32.227 [http-nio-8080-exec-5] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:24:32.227 [http-nio-8080-exec-5] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -4417,13 +4417,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:24:32.230 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:24:32.231 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:24:32.231 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:24:32.231 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:24:32.231 [http-nio-8080-exec-8] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:24:32.231 [http-nio-8080-exec-7] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:32.231 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:24:32.231 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:24:32.231 [http-nio-8080-exec-7] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -4570,7 +4570,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -4707,10 +4707,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:24:32.550 [http-nio-8080-exec-8] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:24:32.550 [http-nio-8080-exec-8] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -4859,18 +4859,18 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:24:33.252 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:24:33.252 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:24:33.253 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:24:33.253 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:24:33.253 [http-nio-8080-exec-10] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:33.253 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:24:33.253 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:24:33.566 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:24:33.566 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:24:33.566 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:24:33.566 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:24:33.566 [http-nio-8080-exec-9] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:24:33.717 [http-nio-8080-exec-10] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:24:33.566 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:24:33.566 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:24:33.717 [http-nio-8080-exec-10] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5017,7 +5017,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5154,10 +5154,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:24:34.712 [http-nio-8080-exec-9] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:24:34.712 [http-nio-8080-exec-9] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5306,34 +5306,34 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:37:43.437 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:37:43.438 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:37:43.438 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:37:43.438 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:37:43.438 [http-nio-8080-exec-4] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-23 00:37:43.438 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:37:43.438 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
 2025-09-23 00:37:43.825 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:37:43.825 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:37:43.825 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:37:43.825 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:37:43.825 [http-nio-8080-exec-1] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-23 00:37:43.825 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:37:43.825 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
 2025-09-23 00:37:43.826 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:37:43.826 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:37:43.826 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:37:43.826 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:37:43.827 [http-nio-8080-exec-2] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:37:43.826 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:37:43.827 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:37:45.046 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:37:45.047 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:37:45.047 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:37:45.047 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:37:45.047 [http-nio-8080-exec-3] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
+2025-09-23 00:37:45.047 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:37:45.047 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
 2025-09-23 00:37:45.049 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:37:45.049 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:37:45.049 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:37:45.050 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:37:45.050 [http-nio-8080-exec-6] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:37:45.050 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:37:45.050 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 2025-09-23 00:37:45.231 [http-nio-8080-exec-4] ERROR com.tripplanner.service.ItineraryService - Failed to get user itineraries
 java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5470,10 +5470,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:37:45.232 [http-nio-8080-exec-4] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:37:45.232 [http-nio-8080-exec-4] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5624,7 +5624,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5761,10 +5761,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:37:45.302 [http-nio-8080-exec-1] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:37:45.302 [http-nio-8080-exec-1] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -5910,11 +5910,11 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:37:45.303 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Nothing to write: null body
 2025-09-23 00:37:45.303 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 500 INTERNAL_SERVER_ERROR
 2025-09-23 00:37:45.303 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-09-23 00:37:45.494 [http-nio-8080-exec-2] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:37:45.494 [http-nio-8080-exec-2] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -6061,7 +6061,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -6198,10 +6198,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:37:45.574 [http-nio-8080-exec-3] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:37:45.574 [http-nio-8080-exec-3] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -6350,13 +6350,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:37:46.585 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
 2025-09-23 00:37:46.585 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
 2025-09-23 00:37:46.586 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-09-23 00:37:46.586 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getAll()
-2025-09-23 00:37:46.586 [http-nio-8080-exec-5] INFO  com.tripplanner.api.ItinerariesController - Getting all itineraries
-2025-09-23 00:37:46.729 [http-nio-8080-exec-6] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:37:46.586 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll()
+2025-09-23 00:37:46.586 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-09-23 00:37:46.729 [http-nio-8080-exec-6] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -6503,7 +6503,7 @@ java.lang.RuntimeException: Failed to list itineraries
 	at com.tripplanner.service.FirestoreDatabaseService.findAllOrderByUpdatedAtDesc(FirestoreDatabaseService.java:76)
 	at com.tripplanner.service.ItineraryJsonService.getAllItineraries(ItineraryJsonService.java:99)
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:169)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -6640,10 +6640,10 @@ Caused by: com.google.api.gax.rpc.PermissionDeniedException: io.grpc.StatusRunti
 Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insufficient permissions.
 	at io.grpc.Status.asRuntimeException(Status.java:539)
 	... 14 common frames omitted
-2025-09-23 00:37:46.965 [http-nio-8080-exec-5] ERROR com.tripplanner.api.ItinerariesController - Failed to get itineraries
+2025-09-23 00:37:46.965 [http-nio-8080-exec-5] ERROR com.tripplanner.controller.ItinerariesController - Failed to get itineraries
 java.lang.RuntimeException: Failed to get user itineraries
 	at com.tripplanner.service.ItineraryService.getUserItineraries(ItineraryService.java:178)
-	at com.tripplanner.api.ItinerariesController.getAll(ItinerariesController.java:73)
+	at com.tripplanner.controller.ItinerariesController.getAll(ItinerariesController.java:73)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -6792,13 +6792,13 @@ Caused by: io.grpc.StatusRuntimeException: PERMISSION_DENIED: Missing or insuffi
 2025-09-23 00:37:47.738 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:37:47.738 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json
 2025-09-23 00:37:47.738 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_f0f1d39b-30f8-442d-9730-36b1882bbe63/json", parameters={}
-2025-09-23 00:37:47.738 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.api.ItinerariesController#getItineraryJson(String)
-2025-09-23 00:37:47.739 [http-nio-8080-exec-7] INFO  com.tripplanner.api.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
-2025-09-23 00:37:48.262 [http-nio-8080-exec-7] ERROR com.tripplanner.api.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:37:47.738 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-23 00:37:47.739 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
+2025-09-23 00:37:48.262 [http-nio-8080-exec-7] ERROR com.tripplanner.controller.ItinerariesController - Failed to get normalized itinerary: it_f0f1d39b-30f8-442d-9730-36b1882bbe63
 java.lang.RuntimeException: Failed to find itinerary
 	at com.tripplanner.service.FirestoreDatabaseService.findById(FirestoreDatabaseService.java:47)
 	at com.tripplanner.service.ItineraryJsonService.getItinerary(ItineraryJsonService.java:66)
-	at com.tripplanner.api.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
+	at com.tripplanner.controller.ItinerariesController.getItineraryJson(ItinerariesController.java:138)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)

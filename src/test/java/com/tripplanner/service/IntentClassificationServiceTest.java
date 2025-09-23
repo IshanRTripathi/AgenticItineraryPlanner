@@ -1,6 +1,6 @@
 package com.tripplanner.service;
 
-import com.tripplanner.api.dto.IntentResult;
+import com.tripplanner.dto.IntentResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

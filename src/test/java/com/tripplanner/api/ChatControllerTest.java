@@ -1,8 +1,9 @@
 package com.tripplanner.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripplanner.api.dto.ChatRequest;
-import com.tripplanner.api.dto.ChatResponse;
+import com.tripplanner.dto.ChatRequest;
+import com.tripplanner.dto.ChatResponse;
+import com.tripplanner.controller.ChatController;
 import com.tripplanner.service.OrchestratorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

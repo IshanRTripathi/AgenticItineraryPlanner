@@ -1,17 +1,13 @@
 package com.tripplanner.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import com.tripplanner.api.dto.ItineraryDto;
-import com.tripplanner.data.repo.ItineraryRepository;
+import com.tripplanner.dto.ItineraryDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Service for PDF generation.

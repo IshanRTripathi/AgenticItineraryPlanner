@@ -1,6 +1,6 @@
 package com.tripplanner.service;
 
-import com.tripplanner.api.dto.AgentEvent;
+import com.tripplanner.dto.AgentEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

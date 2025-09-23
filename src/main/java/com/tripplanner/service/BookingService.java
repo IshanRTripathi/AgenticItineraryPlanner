@@ -1,6 +1,6 @@
 package com.tripplanner.service;
 
-import com.tripplanner.api.BookingController;
+import com.tripplanner.controller.BookingController;
 import com.tripplanner.data.entity.Booking;
 import com.tripplanner.data.repo.BookingRepository;
 import jakarta.servlet.http.HttpServletRequest;
