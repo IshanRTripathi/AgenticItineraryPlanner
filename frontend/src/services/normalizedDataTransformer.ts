@@ -55,7 +55,7 @@ export class NormalizedDataTransformer {
   private static transformNormalizedItinerary(normalized: NormalizedItinerary): TripItinerary {
     return {
       id: normalized.itineraryId,
-      days: normalized.days.map(day => this.transformNormalizedDay(day)),
+      days: (normalized.days || []).map(day => this.transformNormalizedDay(day)),
       totalCost: this.calculateTotalCost(normalized.days),
       totalDistance: this.calculateTotalDistance(normalized.days),
       totalDuration: normalized.days.length,
@@ -120,8 +120,8 @@ export class NormalizedDataTransformer {
         name: node.location?.name || node.title,
         address: node.location?.address || '',
         coordinates: {
-          lat: node.location?.coordinates.lat || 0,
-          lng: node.location?.coordinates.lng || 0
+          lat: node.location?.coordinates?.lat || 0,
+          lng: node.location?.coordinates?.lng || 0
         }
       },
       timing: {
@@ -313,8 +313,8 @@ export class NormalizedDataTransformer {
   private static extractHighlights(days: NormalizedDay[]): string[] {
     const highlights: string[] = [];
     
-    days.forEach(day => {
-      day.nodes.forEach(node => {
+    (days || []).forEach(day => {
+      (day.nodes || []).forEach(node => {
         if (node.type === 'attraction' && node.details?.rating && node.details.rating >= 4.5) {
           highlights.push(node.title);
         }
@@ -480,7 +480,7 @@ export class NormalizedDataTransformer {
     const patterns = [
       /exploration of\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
       /trip to\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
-      /to\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
+      /to\s+([A-Z][A-Za-z\s]+?)(?:\s+focusing|,|\.|$)/i,
       /in\s+([A-Z][A-Za-z\s]+?)(,|\.|$)/i,
       /([A-Z][A-Za-z\s]+)\s+adventure/i,
       /([A-Z][A-Za-z\s]+)\s+for/i
