@@ -120,8 +120,8 @@ export class NormalizedDataTransformer {
         name: node.location?.name || node.title,
         address: node.location?.address || '',
         coordinates: {
-          lat: node.location?.coordinates?.lat || 0,
-          lng: node.location?.coordinates?.lng || 0
+          lat: (node.location?.coordinates && typeof node.location.coordinates.lat === 'number') ? node.location.coordinates.lat : 0,
+          lng: (node.location?.coordinates && typeof node.location.coordinates.lng === 'number') ? node.location.coordinates.lng : 0
         }
       },
       timing: {
