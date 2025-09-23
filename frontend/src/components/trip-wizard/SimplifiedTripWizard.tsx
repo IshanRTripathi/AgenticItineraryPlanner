@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card } from '../ui/card';
@@ -11,7 +11,8 @@ import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
 import { Separator } from '../ui/separator';
 import { Plus, Minus, X, CalendarIcon, MapPin, Users, DollarSign, Settings2 } from 'lucide-react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, addMonths, startOfMonth } from 'date-fns';
+import { enUS, enGB } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { TripData, Traveler, TravelPreferences, TripSettings, TripLocation } from '../../types/TripData';
 import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
@@ -50,6 +51,38 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   });
   const [budget, setBudget] = useState(3000);
   const [currency, setCurrency] = useState('USD');
+  const [flexibleDays, setFlexibleDays] = useState<number>(0);
+  const [validationMessage, setValidationMessage] = useState<string>('');
+  const userLocale = useMemo(() => (typeof navigator !== 'undefined' ? navigator.language : 'en-US'), []);
+  const dayPickerLocale = useMemo(() => (userLocale?.toLowerCase()?.startsWith('en-gb') ? enGB : enUS), [userLocale]);
+
+  // Initialize from URL if query params exist
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const fromParam = params.get('from');
+      const toParam = params.get('to');
+      if (fromParam && toParam) {
+        const from = new Date(fromParam);
+        const to = new Date(toParam);
+        if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
+          setDateRange({ from, to });
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Persist selection to URL
+  useEffect(() => {
+    if (!dateRange?.from || !dateRange?.to) return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      params.set('from', dateRange.from.toISOString().slice(0,10));
+      params.set('to', dateRange.to.toISOString().slice(0,10));
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    } catch {}
+  }, [dateRange?.from, dateRange?.to]);
   
   const [travelers, setTravelers] = useState<Traveler[]>([
     {
@@ -302,14 +335,107 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={dateRange?.from}
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        numberOfMonths={2}
-                      />
+                      <div className="p-3">
+                        <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={dateRange?.from}
+                          selected={dateRange}
+                          onSelect={(range) => {
+                            setValidationMessage('');
+                            const today = new Date();
+                            const clamp = (d: Date | undefined) => d && d < new Date(today.getFullYear(), today.getMonth(), today.getDate()) ? today : d;
+                            const from = clamp(range?.from);
+                            const to = clamp(range?.to);
+                            const nextRange = { from: from, to: to } as any;
+                            setDateRange(nextRange);
+                            if (from && to) {
+                              const nights = Math.max(0, Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)));
+                              if (nights < 2) setValidationMessage('Minimum trip length is 2 nights.');
+                              else if (nights > 30) setValidationMessage('Maximum trip length is 30 nights.');
+                            }
+                          }}
+                          numberOfMonths={2}
+                          locale={dayPickerLocale}
+                          classNames={{
+                            day_outside: "invisible",
+                            day_today: "bg-primary/10 text-primary",
+                            // Ensure cells don't highlight when only an outside day is selected
+                            cell:
+                              "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected]:not(.rdp-day_outside))]:bg-accent [&:has(>.day-range-end)]:rounded-r-md first:[&:has([aria-selected]:not(.rdp-day_outside))]:rounded-l-md last:[&:has([aria-selected]:not(.rdp-day_outside))]:rounded-r-md",
+                          }}
+                          disabled={{ before: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()) }}
+                        />
+
+                        <div className="mt-3">
+                          <div className="text-xs text-gray-600 mb-2">Quick durations</div>
+                          <div className="flex flex-wrap gap-2">
+                            {[3,5,7,10,14].map((n) => (
+                              <Button key={n} size="sm" variant="secondary"
+                                onClick={() => {
+                                  const base = dateRange?.from && dateRange.from >= new Date() ? dateRange.from : new Date();
+                                  const from = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+                                  const to = addDays(from, n);
+                                  setDateRange({ from, to });
+                                  setValidationMessage('');
+                                }}>
+                                {n} nights
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          <div className="text-xs text-gray-600 mb-2">Presets</div>
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" variant="outline" onClick={() => {
+                              const today = new Date();
+                              const dow = today.getDay();
+                              const daysUntilSat = (6 - dow + 7) % 7;
+                              const sat = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSat);
+                              const sun = addDays(sat, 1);
+                              setDateRange({ from: sat, to: sun });
+                              setValidationMessage('');
+                            }}>This weekend</Button>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              const today = new Date();
+                              const dow = today.getDay();
+                              const daysUntilSat = (6 - dow + 7) % 7;
+                              const sat = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSat + 7);
+                              const sun = addDays(sat, 1);
+                              setDateRange({ from: sat, to: sun });
+                              setValidationMessage('');
+                            }}>Next weekend</Button>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              const today = new Date();
+                              const firstNextMonth = startOfMonth(addMonths(today, 1));
+                              const from = firstNextMonth;
+                              const to = addDays(firstNextMonth, 6);
+                              setDateRange({ from, to });
+                              setValidationMessage('');
+                            }}>First week next month</Button>
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm">Flexible dates</Label>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant={flexibleDays===0? 'secondary':'outline'} onClick={()=>setFlexibleDays(0)}>±0</Button>
+                              <Button size="sm" variant={flexibleDays===1? 'secondary':'outline'} onClick={()=>setFlexibleDays(1)}>±1</Button>
+                              <Button size="sm" variant={flexibleDays===3? 'secondary':'outline'} onClick={()=>setFlexibleDays(3)}>±3</Button>
+                              <Button size="sm" variant={flexibleDays===7? 'secondary':'outline'} onClick={()=>setFlexibleDays(7)}>±7</Button>
+                            </div>
+                          </div>
+                          {flexibleDays>0 && (
+                            <p className="mt-2 text-xs text-gray-600">We will try nearby dates within ±{flexibleDays} days.</p>
+                          )}
+                        </div>
+
+                        {validationMessage && (
+                          <div className="mt-3 text-sm text-red-600">{validationMessage}</div>
+                        )}
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
