@@ -56,6 +56,34 @@ import {
 import { WorkflowNode } from './workflow/WorkflowNode';
 import { TripData } from '../types/TripData';
 
+// Ladder positioning function
+const getLadderPosition = (index: number, nodeId?: string, savedPositions?: Record<string, { x: number; y: number }>): { x: number; y: number } => {
+  // Check if we have a saved position for this node
+  if (nodeId && savedPositions && savedPositions[nodeId]) {
+    return savedPositions[nodeId];
+  }
+  
+  const baseX = 100;
+  const baseY = 100;
+  const stepX = 200;
+  const stepY = 150;
+  
+  if (index < 3) {
+    // First ladder: cards 0, 1, 2
+    return {
+      x: baseX + index * stepX,
+      y: baseY + index * stepY
+    };
+  } else {
+    // Second ladder: cards 3, 4, 5 (below first card)
+    const secondLadderIndex = index - 3;
+    return {
+      x: baseX + secondLadderIndex * stepX,
+      y: baseY + 3 * stepY + secondLadderIndex * stepY
+    };
+  }
+};
+
 // Register custom node types
 const nodeTypes = {
   workflow: WorkflowNode,
@@ -97,7 +125,7 @@ interface WorkflowDay {
 }
 
 // Convert API trip data to WorkflowDay format
-const createWorkflowDaysFromTripData = (tripData: TripData): WorkflowDay[] => {
+const createWorkflowDaysFromTripData = (tripData: TripData, savedPositions?: Record<string, { x: number; y: number }>): WorkflowDay[] => {
   if (!tripData.itinerary?.days || tripData.itinerary.days.length === 0) {
     return [];
   }
@@ -169,10 +197,7 @@ const createWorkflowDaysFromTripData = (tripData: TripData): WorkflowDay[] => {
       return {
         id: component.id,
         type: 'workflow',
-        position: { 
-          x: 100 + (componentIndex % 3) * 200, 
-          y: 100 + Math.floor(componentIndex / 3) * 150 
-        },
+        position: getLadderPosition(componentIndex, component.id, savedPositions),
         data: {
           id: component.id,
           type: mapComponentType(component.type),
@@ -541,31 +566,95 @@ const createSeedData = (): WorkflowDay[] => [
 ];
 
 const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSave, onCancel, embedded = false }) => {
-  const [workflowDays, setWorkflowDays] = useState<WorkflowDay[]>(() => 
-    createWorkflowDaysFromTripData(tripData).length > 0 
-      ? createWorkflowDaysFromTripData(tripData) 
-      : createSeedData()
-  );
+  const [workflowDays, setWorkflowDays] = useState<WorkflowDay[]>(() => {
+    const savedPositions = (() => {
+      try {
+        const saved = localStorage.getItem(`workflow-positions-${tripData.id}`);
+        return saved ? JSON.parse(saved) : {};
+      } catch {
+        return {};
+      }
+    })();
+    
+    return createWorkflowDaysFromTripData(tripData, savedPositions).length > 0 
+      ? createWorkflowDaysFromTripData(tripData, savedPositions) 
+      : createSeedData();
+  });
   const [activeDay, setActiveDay] = useState(0);
   const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
   const [undoStack, setUndoStack] = useState<WorkflowDay[][]>([]);
   const [redoStack, setRedoStack] = useState<WorkflowDay[][]>([]);
+  const [savedPositions, setSavedPositions] = useState<Record<string, { x: number; y: number }>>(() => {
+    // Load saved positions from localStorage
+    try {
+      const saved = localStorage.getItem(`workflow-positions-${tripData.id}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const currentDay = workflowDays[activeDay];
-  const [nodes, setNodes, onNodesChange] = useNodesState(currentDay?.nodes || []);
+  const [nodes, setNodes, onNodesChangeBase] = useNodesState(currentDay?.nodes || []);
   const [edges, setEdges, onEdgesChange] = useEdgesState(currentDay?.edges || []);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { project, getViewport } = useReactFlow();
 
+  // Save positions to localStorage
+  const savePositions = useCallback((positions: Record<string, { x: number; y: number }>) => {
+    try {
+      localStorage.setItem(`workflow-positions-${tripData.id}`, JSON.stringify(positions));
+      setSavedPositions(positions);
+    } catch (error) {
+      console.error('Failed to save positions:', error);
+    }
+  }, [tripData.id]);
+
+  // Custom onNodesChange that saves positions when nodes are moved
+  const onNodesChange = useCallback((changes: any[]) => {
+    onNodesChangeBase(changes);
+    
+    // Check if any changes are position changes
+    const positionChanges = changes.filter(change => change.type === 'position' && change.position);
+    if (positionChanges.length > 0) {
+      const newPositions = { ...savedPositions };
+      positionChanges.forEach(change => {
+        if (change.position) {
+          newPositions[change.id] = change.position;
+        }
+      });
+      savePositions(newPositions);
+    }
+  }, [onNodesChangeBase, savedPositions, savePositions]);
+
+  // Reset positions to ladder pattern
+  const resetToLadderPattern = useCallback(() => {
+    if (!currentDay) return;
+    
+    const newPositions = { ...savedPositions };
+    currentDay.nodes.forEach((node, index) => {
+      newPositions[node.id] = getLadderPosition(index);
+    });
+    
+    // Update nodes with new positions
+    const updatedNodes = currentDay.nodes.map((node, index) => ({
+      ...node,
+      position: newPositions[node.id]
+    }));
+    
+    setNodes(updatedNodes);
+    savePositions(newPositions);
+  }, [currentDay, savedPositions, setNodes, savePositions]);
+
   // Update workflow days when trip data changes
   useEffect(() => {
-    const newWorkflowDays = createWorkflowDaysFromTripData(tripData);
+    const newWorkflowDays = createWorkflowDaysFromTripData(tripData, savedPositions);
     if (newWorkflowDays.length > 0) {
       setWorkflowDays(newWorkflowDays);
       setActiveDay(0); // Reset to first day
     }
-  }, [tripData]);
+  }, [tripData, savedPositions]);
 
 
   // Update React Flow when active day changes
@@ -747,6 +836,10 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Auto Arrange
               </Button>
+              <Button variant="outline" onClick={resetToLadderPattern}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset to Ladder
+              </Button>
               <Button onClick={applyToItinerary}>
                 <Save className="h-4 w-4 mr-2" />
                 Apply to Itinerary
@@ -774,6 +867,10 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
                   <Button variant="outline" size="sm" onClick={autoArrange}>
                     <RotateCcw className="h-3 w-3 mr-1" />
                     Arrange
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={resetToLadderPattern}>
+                    <RotateCcw className="h-3 w-3 mr-1" />
+                    Ladder
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">

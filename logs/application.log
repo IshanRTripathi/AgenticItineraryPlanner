@@ -4026,3 +4026,135 @@ Day 7 (Tokyo):
 2025-09-24 01:24:58.647 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
 2025-09-24 01:24:58.653 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
 2025-09-24 01:24:58.654 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:28:47.512 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:28:47.512 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:28:47.513 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:28:47.513 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:28:47.513 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:28:47.882 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:28:47.882 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:28:47.883 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:28:47.884 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:28:47.884 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:28:47.887 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:28:47.887 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:28:47.887 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:28:47.888 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:28:47.888 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:28:49.043 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:28:49.044 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:28:49.044 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:28:49.048 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:28:49.048 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:31:37.291 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:37.292 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:37.292 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:31:37.292 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:31:37.293 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:37.622 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:37.623 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:31:37.623 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:31:37.624 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:31:37.624 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:31:37.627 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:37.627 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:37.627 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:31:37.627 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:31:37.628 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:38.753 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:38.753 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:31:38.754 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:31:38.755 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:31:38.755 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:31:45.319 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:45.320 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:45.320 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:31:45.320 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:31:45.320 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:45.666 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:45.666 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:31:45.666 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:31:45.667 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:31:45.667 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:31:45.668 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:45.668 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:45.668 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:31:45.668 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:31:45.669 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:46.036 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:46.036 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:31:46.036 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:31:46.037 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:31:46.037 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:31:52.999 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:52.999 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:52.999 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:31:53.000 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:31:53.000 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:53.317 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:53.317 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:31:53.318 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:31:53.319 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:31:53.319 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:31:53.320 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:53.321 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:31:53.321 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:31:53.321 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:31:53.321 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:54.497 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:31:54.498 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:31:54.498 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:31:54.499 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:31:54.499 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:32:14.216 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:32:14.218 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:32:14.219 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:32:14.220 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:32:14.220 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:32:14.220 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:32:14.220 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:32:14.565 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:32:14.566 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:32:14.566 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:32:14.567 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:32:14.567 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:32:14.567 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:32:14.567 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:32:14.567 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:32:14.569 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:32:14.569 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:32:15.697 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:32:15.697 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:32:15.697 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:32:15.698 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:32:15.698 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:33:40.912 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:33:40.913 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:33:40.913 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:33:40.913 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:33:40.913 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:33:41.233 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:33:41.234 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:33:41.234 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:33:41.235 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:33:41.235 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:33:50.257 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:33:50.257 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:33:50.258 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:33:50.258 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:33:50.258 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:33:50.616 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:33:50.616 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:33:50.617 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:33:50.617 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:33:50.617 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-09-24 01:34:01.682 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:34:01.682 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json
+2025-09-24 01:34:01.682 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b/json", parameters={}
+2025-09-24 01:34:01.682 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String)
+2025-09-24 01:34:01.683 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:34:02.028 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b
+2025-09-24 01:34:02.028 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-09-24 01:34:02.028 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_ceba83d0-5fc5-485b-acb2-4441ecaa9e9b', version=1, summary='A 7-d (truncated)...]
+2025-09-24 01:34:02.029 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-09-24 01:34:02.029 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
