@@ -22,7 +22,8 @@ import {
   Settings,
   Plane,
   Clock,
-  Star
+  Star,
+  Trash2
 } from 'lucide-react';
 import { TripData } from '../../types/TripData';
 import { apiClient } from '../../services/apiClient';
