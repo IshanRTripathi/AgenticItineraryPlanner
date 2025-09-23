@@ -111,24 +111,18 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
       console.log('New Destinations:', newDestinations);
       setDestinations(newDestinations);
     } else {
-      console.log('No itinerary days found, using fallback destination');
-      // Fallback to basic destination
-      const fallbackDestination = {
-        id: '1',
-        name: currentTripData.endLocation?.name || currentTripData.destination || 'Unknown Destination',
-        nights: 2,
-        sleeping: false,
-        discover: false,
-        transport: { distance: '130 km', duration: '2h 40m' },
-        notes: '',
-        lat: 13.7563,
-        lng: 100.5018
-      };
-      console.log('Fallback Destination:', fallbackDestination);
-      setDestinations([fallbackDestination]);
+      console.log('No itinerary days found; awaiting fresh data');
+      setDestinations([]);
     }
     console.log('==================================');
   }, [JSON.stringify(currentTripData.itinerary?.days)]);
+
+  // Ensure fresh itinerary when days are empty (avoids stale state after generation)
+  useEffect(() => {
+    if (!isLoading && !error && (!currentTripData.itinerary?.days || currentTripData.itinerary.days.length === 0)) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.itinerary(tripData.id) }).catch(() => {});
+    }
+  }, [isLoading, error, currentTripData.itinerary?.days?.length, tripData.id]);
 
 
   // Update agent statuses when fresh data arrives
@@ -444,28 +438,22 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
 
   // Main component return
   return (
-    <ErrorBoundary>
+    <>
       <div className="h-screen flex flex-col bg-gray-50">
-        <ErrorBoundary>
-          <TopNavigation
-            tripData={currentTripData}
-            onShare={onShare}
-            onExportPDF={onExportPDF}
-            onBack={onBack}
-          />
-        </ErrorBoundary>
+        <TopNavigation
+          tripData={currentTripData}
+          onShare={onShare}
+          onExportPDF={onExportPDF}
+          onBack={onBack}
+        />
         <div className="flex flex-1 overflow-hidden">
-          <ErrorBoundary>
-            <NavigationSidebar
-              activeView={activeView}
-              onViewChange={setActiveView}
-            />
-          </ErrorBoundary>
-          <ErrorBoundary>
-            {renderCurrentView()}
-          </ErrorBoundary>
+          <NavigationSidebar
+            activeView={activeView}
+            onViewChange={setActiveView}
+          />
+          {renderCurrentView()}
         </div>
       </div>
-    </ErrorBoundary>
+    </>
   );
 }
