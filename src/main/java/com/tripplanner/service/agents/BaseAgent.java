@@ -115,20 +115,6 @@ public abstract class BaseAgent {
     }
     
     /**
-     * Get the agent ID.
-     */
-    public String getAgentId() {
-        return agentId;
-    }
-    
-    /**
-     * Get the agent kind.
-     */
-    public AgentEvent.AgentKind getAgentKind() {
-        return agentKind;
-    }
-    
-    /**
      * Request object for agent execution.
      */
     public static class AgentRequest<T> {

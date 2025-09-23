@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -68,47 +67,10 @@ public class ItineraryJsonService {
     }
     
     /**
-     * Get itinerary by any ID (handles both database ID and normalized ID).
-     */
-    public Optional<NormalizedItinerary> getItineraryByAnyId(String id) {
-        // First try direct lookup
-        Optional<NormalizedItinerary> result = getItinerary(id);
-        if (result.isPresent()) {
-            return result;
-        }
-        
-        // If not found, try with hardcoded mapping for development
-        if ("1".equals(id)) {
-            return getItinerary("it_barcelona_comprehensive");
-        }
-        
-        return Optional.empty();
-    }
-    
-    /**
-     * Check if itinerary exists.
-     */
-    public boolean existsById(String id) {
-        return databaseService.existsById(id);
-    }
-    
-    /**
      * Get all itineraries ordered by updated timestamp.
      */
     public List<NormalizedItinerary> getAllItineraries() {
         return databaseService.findAllOrderByUpdatedAtDesc()
-                .stream()
-                .map(this::deserializeItinerary)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-    }
-    
-    /**
-     * Get itineraries updated after a specific timestamp.
-     */
-    public List<NormalizedItinerary> getItinerariesUpdatedAfter(Instant timestamp) {
-        return databaseService.findByUpdatedAtAfter(timestamp)
                 .stream()
                 .map(this::deserializeItinerary)
                 .filter(Optional::isPresent)
@@ -156,12 +118,5 @@ public class ItineraryJsonService {
             logger.error("Failed to deserialize itinerary JSON", e);
             return Optional.empty();
         }
-    }
-    
-    /**
-     * Get current database type being used.
-     */
-    public String getDatabaseType() {
-        return databaseService.getDatabaseType();
     }
 }

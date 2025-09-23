@@ -116,6 +116,7 @@ public class GeminiClient {
                 logger.info("=== GEMINI API RESPONSE ===");
                 logger.info("Status Code: {}", response.statusCode());
                 logger.info("Response Length: {}", response.body().length());
+                logger.info("Response Body: {}", response.body());
                 
                 if (response.statusCode() != 200) {
                     logger.error("Gemini API error: {} - {}", response.statusCode(), response.body());

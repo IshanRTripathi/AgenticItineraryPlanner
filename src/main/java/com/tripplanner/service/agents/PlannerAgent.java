@@ -286,7 +286,7 @@ public class PlannerAgent extends BaseAgent {
             5. Provide practical details like timing, costs, and tips
             6. Ensure realistic travel times and logical flow between activities
             
-            CRITICAL REQUIREMENT: You MUST populate ALL days with meaningful activities and nodes. 
+            CRITICAL REQUIREMENT: You MUST populate ALL days with meaningful activities and nodes.
             Do NOT leave any days with empty nodes arrays. Each day should have at least 3-5 nodes 
             including attractions, meals, and transportation as appropriate.
             
@@ -294,7 +294,7 @@ public class PlannerAgent extends BaseAgent {
             - "attraction": Sightseeing, museums, landmarks, experiences
             - "meal": Restaurants, cafes, food experiences
             - "accommodation": Hotels, hostels, vacation rentals
-            - "transport": Travel between locations
+            - "transport": Travel type between locations i.e cabs, trains, buses, flights
             
             Guidelines:
             - All activities must be structured as nodes with id, type, title, location, timing, cost
@@ -348,7 +348,7 @@ public class PlannerAgent extends BaseAgent {
         
         // Add themes and currency
         prompt.append("Themes: ").append(String.join(", ", request.getInterests())).append("\n");
-        prompt.append("Currency: USD\n");
+        prompt.append("Currency: INR\n");
         
         prompt.append("\nIMPORTANT: Create a comprehensive normalized itinerary with nodes and edges that maximizes the travel experience while staying within the specified parameters.");
         prompt.append("\nYou MUST populate ALL ").append(request.getDurationDays()).append(" days with meaningful activities, meals, and transportation.");
@@ -506,83 +506,33 @@ public class PlannerAgent extends BaseAgent {
     }
 
     private String getChangeSetSchema() {
-        return "{\n" +
-                "  \"type\": \"object\",\n" +
-                "  \"properties\": {\n" +
-                "    \"scope\": {\"type\": \"string\"},\n" +
-                "    \"day\": {\"type\": \"integer\"},\n" +
-                "    \"ops\": {\n" +
-                "      \"type\": \"array\",\n" +
-                "      \"items\": {\n" +
-                "        \"type\": \"object\",\n" +
-                "        \"properties\": {\n" +
-                "          \"op\": {\"type\": \"string\"},\n" +
-                "          \"id\": {\"type\": \"string\"},\n" +
-                "          \"after\": {\"type\": \"string\"},\n" +
-                "          \"startTime\": {\"type\": \"string\"},\n" +
-                "          \"endTime\": {\"type\": \"string\"},\n" +
-                "          \"node\": {\"type\": \"object\"}\n" +
-                "        },\n" +
-                "        \"required\": [\"op\"]\n" +
-                "      }\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"required\": [\"ops\"]\n" +
-                "}";
-    }
-    
-    private ItineraryDto convertToItineraryDto(ItineraryGenerationResponse response, CreateItineraryReq request) {
-        logger.info("=== CONVERTING TO ITINERARY DTO ===");
-        logger.info("Response summary: {}", response.getSummary());
-        logger.info("Days count: {}", response.getDays() != null ? response.getDays().length : 0);
-        logger.info("Total cost: {} {}", response.getTotalEstimatedCost(), response.getCurrency());
-        
-        // Convert days from AI response to ItineraryDayDto
-        List<ItineraryDayDto> days = new ArrayList<>();
-        if (response.getDays() != null) {
-            for (ItineraryGenerationResponse.DayPlan dayPlan : response.getDays()) {
-                ItineraryDayDto dayDto = convertDayPlanToDto(dayPlan);
-                days.add(dayDto);
+        return """
+            {
+              "type": "object",
+              "properties": {
+                "scope": { "type": "string" },
+                "day": { "type": "integer" },
+                "ops": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "op": { "type": "string" },
+                      "id": { "type": "string" },
+                      "after": { "type": "string" },
+                      "startTime": { "type": "string", "format": "date-time" },
+                      "endTime": { "type": "string", "format": "date-time" },
+                      "node": { "type": "object" }
+                    },
+                    "required": ["op"]
+                  }
+                }
+              },
+              "required": ["ops"]
             }
-        }
-        
-        // Create agent results map with highlights
-        Map<String, Object> agentResults = new HashMap<>();
-        if (response.getHighlights() != null) {
-            agentResults.put("highlights", response.getHighlights());
-        }
-        agentResults.put("totalEstimatedCost", response.getTotalEstimatedCost());
-        agentResults.put("currency", response.getCurrency());
-        
-        // Build the ItineraryDto
-        ItineraryDto itineraryDto = ItineraryDto.builder()
-                .id(request.getDestination().hashCode() + "_" + System.currentTimeMillis()) // Generate a temporary ID
-                .destination(request.getDestination())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
-                .party(request.getParty())
-                .budgetTier(request.getBudgetTier())
-                .interests(request.getInterests())
-                .constraints(request.getConstraints())
-                .language(request.getLanguage())
-                .summary(response.getSummary())
-                .map(null) // Map data not implemented yet
-                .days(days)
-                .agentResults(agentResults)
-                .status("completed")
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .isPublic(false)
-                .shareToken(null)
-                .build();
-        
-        logger.info("=== CONVERSION COMPLETED ===");
-        logger.info("Generated itinerary with {} days", days.size());
-        logger.info("Itinerary ID: {}", itineraryDto.getId());
-        
-        return itineraryDto;
+            """;
     }
-    
+
     private ItineraryDto convertNormalizedToItineraryDto(NormalizedItinerary normalizedItinerary, CreateItineraryReq request) {
         logger.info("=== CONVERTING NORMALIZED TO ITINERARY DTO ===");
         logger.info("Itinerary ID: {}", normalizedItinerary.getItineraryId());
@@ -690,125 +640,7 @@ public class PlannerAgent extends BaseAgent {
                 .notes(null)
                 .build();
     }
-    
-    private ItineraryDayDto convertDayPlanToDto(ItineraryGenerationResponse.DayPlan dayPlan) {
-        // Convert activities
-        List<ActivityDto> activities = new ArrayList<>();
-        if (dayPlan.getActivities() != null) {
-            for (ItineraryGenerationResponse.Activity activity : dayPlan.getActivities()) {
-                ActivityDto activityDto = new ActivityDto(
-                        activity.getName(),
-                        activity.getDescription(),
-                        convertLocationToDto(activity.getLocation()),
-                        activity.getStartTime(),
-                        activity.getEndTime(),
-                        activity.getDuration(),
-                        activity.getCategory(),
-                        new PriceDto(activity.getEstimatedCost(), "EUR", "person"), // Default to EUR for now
-                        activity.isBookingRequired(),
-                        null, // bookingUrl not provided by AI
-                        activity.getTips()
-                );
-                activities.add(activityDto);
-            }
-        }
-        
-        // Convert accommodation
-        AccommodationDto accommodation = null;
-        if (dayPlan.getAccommodation() != null) {
-            ItineraryGenerationResponse.Accommodation acc = dayPlan.getAccommodation();
-            accommodation = new AccommodationDto(
-                    acc.getName(),
-                    acc.getType(),
-                    convertLocationToDto(acc.getLocation()),
-                    null, // checkIn not provided by AI
-                    null, // checkOut not provided by AI
-                    new PriceDto(acc.getEstimatedCost(), "EUR", "night"), // Default to EUR for now
-                    acc.getRating(),
-                    null, // amenities not provided by AI
-                    null  // bookingUrl not provided by AI
-            );
-        }
-        
-        // Convert transportation
-        List<TransportationDto> transportation = new ArrayList<>();
-        if (dayPlan.getTransportation() != null) {
-            for (ItineraryGenerationResponse.Transportation trans : dayPlan.getTransportation()) {
-                TransportationDto transDto = new TransportationDto(
-                        trans.getMode(),
-                        createLocationFromString(trans.getFrom()),
-                        createLocationFromString(trans.getTo()),
-                        trans.getDepartureTime(),
-                        trans.getArrivalTime(),
-                        null, // duration not provided by AI
-                        new PriceDto(trans.getEstimatedCost(), "EUR", "trip"), // Default to EUR for now
-                        null, // provider not provided by AI
-                        null, // bookingUrl not provided by AI
-                        trans.getNotes()
-                );
-                transportation.add(transDto);
-            }
-        }
-        
-        // Convert meals
-        List<MealDto> meals = new ArrayList<>();
-        if (dayPlan.getMeals() != null) {
-            for (ItineraryGenerationResponse.Meal meal : dayPlan.getMeals()) {
-                MealDto mealDto = new MealDto(
-                        meal.getType(),
-                        meal.getName(),
-                        meal.getRestaurant(),
-                        convertLocationToDto(meal.getLocation()),
-                        null, // time not provided by AI
-                        new PriceDto(meal.getEstimatedCost(), "EUR", "person"), // Default to EUR for now
-                        meal.getCuisine(),
-                        null  // notes not provided by AI
-                );
-                meals.add(mealDto);
-            }
-        }
-        
-        return ItineraryDayDto.builder()
-                .day(dayPlan.getDayNumber())
-                .date(parseDate(dayPlan.getDate()))
-                .location(dayPlan.getLocation())
-                .activities(activities)
-                .accommodation(accommodation)
-                .transportation(transportation)
-                .meals(meals)
-                .notes(dayPlan.getNotes())
-                .build();
-    }
-    
-    private LocationDto convertLocationToDto(ItineraryGenerationResponse.Location location) {
-        if (location == null) {
-            return null;
-        }
-        
-        return new LocationDto(
-                location.getName(),
-                location.getAddress(),
-                location.getLat(),
-                location.getLng(),
-                null // placeId not provided by AI
-        );
-    }
-    
-    private LocationDto createLocationFromString(String locationString) {
-        if (locationString == null || locationString.trim().isEmpty()) {
-            return null;
-        }
-        
-        // Create a simple location with just the name
-        return new LocationDto(
-                locationString.trim(),
-                null, // address not provided
-                0.0,  // lat not provided
-                0.0,  // lng not provided
-                null  // placeId not provided
-        );
-    }
-    
+
     private LocalDate parseDate(String dateString) {
         if (dateString == null || dateString.trim().isEmpty()) {
             return null;
@@ -822,260 +654,19 @@ public class PlannerAgent extends BaseAgent {
             return null;
         }
     }
-    
-    /**
-     * Response structure from Gemini for itinerary generation.
-     */
-    public static class ItineraryGenerationResponse {
-        private String summary;
-        private String[] highlights;
-        private double totalEstimatedCost;
-        private String currency;
-        private DayPlan[] days;
-        
-        // Getters and setters
-        public String getSummary() { return summary; }
-        public void setSummary(String summary) { this.summary = summary; }
-        public String[] getHighlights() { return highlights; }
-        public void setHighlights(String[] highlights) { this.highlights = highlights; }
-        public double getTotalEstimatedCost() { return totalEstimatedCost; }
-        public void setTotalEstimatedCost(double totalEstimatedCost) { this.totalEstimatedCost = totalEstimatedCost; }
-        public String getCurrency() { return currency; }
-        public void setCurrency(String currency) { this.currency = currency; }
-        public DayPlan[] getDays() { return days; }
-        public void setDays(DayPlan[] days) { this.days = days; }
-        
-        public static class DayPlan {
-            private int dayNumber;
-            private String date;
-            private String theme;
-            private String location;
-            private Activity[] activities;
-            private Meal[] meals;
-            private Accommodation accommodation;
-            private Transportation[] transportation;
-            private String notes;
-            
-            // Getters and setters
-            public int getDayNumber() { return dayNumber; }
-            public void setDayNumber(int dayNumber) { this.dayNumber = dayNumber; }
-            public String getDate() { return date; }
-            public void setDate(String date) { this.date = date; }
-            public String getTheme() { return theme; }
-            public void setTheme(String theme) { this.theme = theme; }
-            public String getLocation() { return location; }
-            public void setLocation(String location) { this.location = location; }
-            public Activity[] getActivities() { return activities; }
-            public void setActivities(Activity[] activities) { this.activities = activities; }
-            public Meal[] getMeals() { return meals; }
-            public void setMeals(Meal[] meals) { this.meals = meals; }
-            public Accommodation getAccommodation() { return accommodation; }
-            public void setAccommodation(Accommodation accommodation) { this.accommodation = accommodation; }
-            public Transportation[] getTransportation() { return transportation; }
-            public void setTransportation(Transportation[] transportation) { this.transportation = transportation; }
-            public String getNotes() { return notes; }
-            public void setNotes(String notes) { this.notes = notes; }
-        }
-        
-        public static class Activity {
-            private String name;
-            private String description;
-            private String startTime;
-            private String endTime;
-            private String duration;
-            private String category;
-            private double estimatedCost;
-            private Location location;
-            private String tips;
-            private boolean bookingRequired;
-            
-            // Getters and setters
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public String getDescription() { return description; }
-            public void setDescription(String description) { this.description = description; }
-            public String getStartTime() { return startTime; }
-            public void setStartTime(String startTime) { this.startTime = startTime; }
-            public String getEndTime() { return endTime; }
-            public void setEndTime(String endTime) { this.endTime = endTime; }
-            public String getDuration() { return duration; }
-            public void setDuration(String duration) { this.duration = duration; }
-            public String getCategory() { return category; }
-            public void setCategory(String category) { this.category = category; }
-            public double getEstimatedCost() { return estimatedCost; }
-            public void setEstimatedCost(double estimatedCost) { this.estimatedCost = estimatedCost; }
-            public Location getLocation() { return location; }
-            public void setLocation(Location location) { this.location = location; }
-            public String getTips() { return tips; }
-            public void setTips(String tips) { this.tips = tips; }
-            public boolean isBookingRequired() { return bookingRequired; }
-            public void setBookingRequired(boolean bookingRequired) { this.bookingRequired = bookingRequired; }
-        }
-        
-        public static class Meal {
-            private String type;
-            private String name;
-            private String restaurant;
-            private String cuisine;
-            private double estimatedCost;
-            private Location location;
-            
-            // Getters and setters
-            public String getType() { return type; }
-            public void setType(String type) { this.type = type; }
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public String getRestaurant() { return restaurant; }
-            public void setRestaurant(String restaurant) { this.restaurant = restaurant; }
-            public String getCuisine() { return cuisine; }
-            public void setCuisine(String cuisine) { this.cuisine = cuisine; }
-            public double getEstimatedCost() { return estimatedCost; }
-            public void setEstimatedCost(double estimatedCost) { this.estimatedCost = estimatedCost; }
-            public Location getLocation() { return location; }
-            public void setLocation(Location location) { this.location = location; }
-        }
-        
-        public static class Accommodation {
-            private String name;
-            private String type;
-            private double estimatedCost;
-            private double rating;
-            private Location location;
-            
-            // Getters and setters
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public String getType() { return type; }
-            public void setType(String type) { this.type = type; }
-            public double getEstimatedCost() { return estimatedCost; }
-            public void setEstimatedCost(double estimatedCost) { this.estimatedCost = estimatedCost; }
-            public double getRating() { return rating; }
-            public void setRating(double rating) { this.rating = rating; }
-            public Location getLocation() { return location; }
-            public void setLocation(Location location) { this.location = location; }
-        }
-        
-        public static class Transportation {
-            private String mode;
-            private String from;
-            private String to;
-            private String departureTime;
-            private String arrivalTime;
-            private double estimatedCost;
-            private String notes;
-            
-            // Getters and setters
-            public String getMode() { return mode; }
-            public void setMode(String mode) { this.mode = mode; }
-            public String getFrom() { return from; }
-            public void setFrom(String from) { this.from = from; }
-            public String getTo() { return to; }
-            public void setTo(String to) { this.to = to; }
-            public String getDepartureTime() { return departureTime; }
-            public void setDepartureTime(String departureTime) { this.departureTime = departureTime; }
-            public String getArrivalTime() { return arrivalTime; }
-            public void setArrivalTime(String arrivalTime) { this.arrivalTime = arrivalTime; }
-            public double getEstimatedCost() { return estimatedCost; }
-            public void setEstimatedCost(double estimatedCost) { this.estimatedCost = estimatedCost; }
-            public String getNotes() { return notes; }
-            public void setNotes(String notes) { this.notes = notes; }
-        }
-        
-        public static class Location {
-            private String name;
-            private String address;
-            private double lat;
-            private double lng;
-            
-            // Getters and setters
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public String getAddress() { return address; }
-            public void setAddress(String address) { this.address = address; }
-            public double getLat() { return lat; }
-            public void setLat(double lat) { this.lat = lat; }
-            public double getLng() { return lng; }
-            public void setLng(double lng) { this.lng = lng; }
-        }
-    }
-    
-    /**
-     * Load the latest Gemini response from the JSON file
-     */
-    private String loadLatestGeminiResponse() {
-        try {
-            java.nio.file.Path jsonPath = java.nio.file.Paths.get("logs/gemini-responses/barcelona_3day_family_normalized.json");
-            return java.nio.file.Files.readString(jsonPath);
-        } catch (Exception e) {
-            logger.error("Failed to load Gemini response from file: {}", e.getMessage());
-            throw new RuntimeException("Failed to load Gemini response", e);
-        }
-    }
-    
-    /**
-     * Build system prompt for change generation.
-     */
-    private String buildChangeSystemPrompt() {
-        return """
-            You are an expert travel planner AI that modifies existing itineraries based on user requests.
-            
-            Your responsibilities:
-            1. Analyze the current itinerary structure
-            2. Generate specific ChangeSet operations to fulfill user requests
-            3. Respect locked nodes (do not modify them)
-            4. Maintain logical flow and timing
-            5. Provide practical and realistic modifications
-            
-            Guidelines:
-            - Use "move" operations to change timing of existing nodes
-            - Use "insert" operations to add new activities/meals
-            - Use "delete" operations to remove unwanted items
-            - Always respect locked nodes (locked=true)
-            - Maintain realistic travel times between locations
-            - Consider opening hours and practical constraints
-            
-            Always respond with valid JSON matching the ChangeSet schema.
-            """;
-    }
-    
-    /**
-     * Build user prompt for change generation.
-     */
-    private String buildChangeUserPrompt(NormalizedItinerary currentItinerary, String userRequest) {
-        StringBuilder prompt = new StringBuilder();
-        
-        prompt.append("Current itinerary summary:\n");
-        prompt.append("Destination: ").append(currentItinerary.getSummary()).append("\n");
-        prompt.append("Days: ").append(currentItinerary.getDays() != null ? currentItinerary.getDays().size() : 0).append("\n");
-        
-        if (currentItinerary.getDays() != null) {
-            for (NormalizedDay day : currentItinerary.getDays()) {
-                prompt.append("Day ").append(day.getDayNumber()).append(": ");
-                if (day.getNodes() != null) {
-                    prompt.append(day.getNodes().size()).append(" activities");
-                }
-                prompt.append("\n");
-            }
-        }
-        
-        prompt.append("\nUser request: ").append(userRequest).append("\n");
-        prompt.append("\nGenerate a ChangeSet to fulfill this request while respecting locked nodes.");
-        
-        return prompt.toString();
-    }
-    
+
     /**
      * Parse ChangeSet from AI response.
      */
     private ChangeSet parseChangeSetFromResponse(String response, String userRequest) {
         // For now, create a simple mock ChangeSet based on the user request
         // In a real implementation, this would parse the AI response
-        
+
         ChangeSet changeSet = new ChangeSet();
         changeSet.setScope("trip");
-        
+
         List<ChangeOperation> operations = new ArrayList<>();
-        
+
         // Create a simple mock operation based on user request
         if (userRequest.toLowerCase().contains("add") || userRequest.toLowerCase().contains("insert")) {
             ChangeOperation insertOp = new ChangeOperation();
@@ -1096,18 +687,18 @@ public class PlannerAgent extends BaseAgent {
             moveOp.setEndTime(java.time.Instant.parse("2025-10-04T12:00:00Z"));
             operations.add(moveOp);
         }
-        
+
         changeSet.setOps(operations);
-        
+
         // Set preferences
         ChangePreferences preferences = new ChangePreferences();
         preferences.setUserFirst(true);
         preferences.setRespectLocks(true);
         changeSet.setPreferences(preferences);
-        
+
         return changeSet;
     }
-    
+
     /**
      * Create a mock node for testing.
      */
@@ -1118,17 +709,17 @@ public class PlannerAgent extends BaseAgent {
         node.setTitle("New " + type);
         node.setDetails(createNodeDetails("A new " + type + " added by the planner"));
         node.setLocked(false);
-        
+
         // Set audit trail fields
         setNodeAuditFields(node, "agent");
-        
+
         // Set timing
         NodeTiming timing = new NodeTiming();
         timing.setStartTime(java.time.Instant.parse("2025-10-04T14:00:00Z"));
         timing.setEndTime(java.time.Instant.parse("2025-10-04T16:00:00Z"));
         timing.setDurationMin(120);
         node.setTiming(timing);
-        
+
         // Set location
         NodeLocation location = new NodeLocation();
         location.setName("Barcelona Location");
@@ -1138,7 +729,7 @@ public class PlannerAgent extends BaseAgent {
         coords.setLng(2.1734);
         location.setCoordinates(coords);
         node.setLocation(location);
-        
+
         return node;
     }
     
@@ -1187,7 +778,7 @@ public class PlannerAgent extends BaseAgent {
         
         return null;
     }
-    
+
     /**
      * Create NodeDetails with category (using description as category for now).
      */
@@ -1196,26 +787,13 @@ public class PlannerAgent extends BaseAgent {
         details.setCategory(description);
         return details;
     }
-    
+
     /**
      * Set audit trail fields for a node.
      */
     private void setNodeAuditFields(NormalizedNode node, String updatedBy) {
         if (node != null) {
             node.markAsUpdated(updatedBy);
-        }
-    }
-    
-    /**
-     * Set node status with audit trail.
-     */
-    private void setNodeStatus(NormalizedNode node, String status) {
-        if (node != null && node.canTransitionTo(status)) {
-            node.setStatus(status);
-            node.markAsUpdated("agent");
-        } else if (node != null) {
-            logger.warn("Invalid status transition from {} to {} for node {}", 
-                       node.getStatus(), status, node.getId());
         }
     }
 }

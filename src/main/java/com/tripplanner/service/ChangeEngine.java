@@ -3,15 +3,11 @@ package com.tripplanner.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.api.dto.*;
-import com.tripplanner.data.entity.FirestoreItinerary;
-// Removed JPA repository usage in Firestore-only mode
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * ChangeEngine service for managing itinerary changes.
@@ -41,7 +37,7 @@ public class ChangeEngine {
         
         try {
             // Load current itinerary using the flexible ID lookup
-            Optional<NormalizedItinerary> currentOpt = itineraryJsonService.getItineraryByAnyId(itineraryId);
+            Optional<NormalizedItinerary> currentOpt = itineraryJsonService.getItinerary(itineraryId);
             if (currentOpt.isEmpty()) {
                 throw new IllegalArgumentException("Itinerary not found: " + itineraryId);
             }
@@ -72,7 +68,7 @@ public class ChangeEngine {
         
         try {
             // Load current itinerary using the flexible ID lookup
-            Optional<NormalizedItinerary> currentOpt = itineraryJsonService.getItineraryByAnyId(itineraryId);
+            Optional<NormalizedItinerary> currentOpt = itineraryJsonService.getItinerary(itineraryId);
             if (currentOpt.isEmpty()) {
                 throw new IllegalArgumentException("Itinerary not found: " + itineraryId);
             }
@@ -130,7 +126,7 @@ public class ChangeEngine {
             NormalizedItinerary restored = revision.get();
             
             // Get current version for diff calculation using the flexible ID lookup
-            Optional<NormalizedItinerary> currentOpt = itineraryJsonService.getItineraryByAnyId(itineraryId);
+            Optional<NormalizedItinerary> currentOpt = itineraryJsonService.getItinerary(itineraryId);
             if (currentOpt.isEmpty()) {
                 throw new IllegalArgumentException("Itinerary not found: " + itineraryId);
             }

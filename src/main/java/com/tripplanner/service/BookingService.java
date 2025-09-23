@@ -1,5 +1,6 @@
 package com.tripplanner.service;
 
+import com.tripplanner.api.BookingController;
 import com.tripplanner.data.entity.Booking;
 import com.tripplanner.data.repo.BookingRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class BookingService {
     /**
      * Create Razorpay order.
      */
-    public com.tripplanner.api.BookingController.RazorpayOrderRes createRazorpayOrder(com.tripplanner.api.BookingController.RazorpayOrderReq request) {
+    public BookingController.RazorpayOrderRes createRazorpayOrder(BookingController.RazorpayOrderReq request) {
         logger.info("=== CREATE RAZORPAY ORDER REQUEST ===");
         logger.info("Creating Razorpay order");
         logger.info("Item Type: {}", request.itemType());
@@ -40,7 +41,7 @@ public class BookingService {
         logger.info("Meta: {}", request.meta());
         
         try {
-            com.tripplanner.api.BookingController.RazorpayOrderRes result = razorpayService.createOrder(request);
+            BookingController.RazorpayOrderRes result = razorpayService.createOrder(request);
             
             logger.info("=== CREATE RAZORPAY ORDER RESPONSE ===");
             logger.info("Order ID: {}", result.orderId());
@@ -88,7 +89,7 @@ public class BookingService {
     /**
      * Execute provider booking.
      */
-    public com.tripplanner.api.BookingController.BookingRes executeProviderBooking(String vertical, String provider, com.tripplanner.api.BookingController.ProviderBookReq request) {
+    public BookingController.BookingRes executeProviderBooking(String vertical, String provider, BookingController.ProviderBookReq request) {
         // Note: Currently using hardcoded "anonymous" user - should be replaced with actual user authentication
         logger.info("Executing {} provider booking with {} for user: {}", vertical, "anonymous");
         
@@ -114,7 +115,7 @@ public class BookingService {
             
             logger.info("Provider booking completed: {}", booking.getId());
             
-            return new com.tripplanner.api.BookingController.BookingRes(
+            return new BookingController.BookingRes(
                     booking.getId().toString(),
                     booking.getStatus().toString(),
                     providerDetails.getConfirmationId(),
@@ -132,7 +133,7 @@ public class BookingService {
     /**
      * Get booking by ID.
      */
-    public com.tripplanner.api.BookingController.BookingRes getBooking(String bookingId) {
+    public BookingController.BookingRes getBooking(String bookingId) {
         logger.debug("Getting booking: {} for user: {}", bookingId, "anonymous");
         
         try {
@@ -142,7 +143,7 @@ public class BookingService {
             
             // Note: Ownership check removed as all users are currently anonymous
             
-            return new com.tripplanner.api.BookingController.BookingRes(
+            return new BookingController.BookingRes(
                     booking.getId().toString(),
                     booking.getStatus().toString(),
                     booking.getProvider() != null ? booking.getProvider().getConfirmationId() : null,
@@ -160,7 +161,7 @@ public class BookingService {
     /**
      * Get user bookings.
      */
-    public List<com.tripplanner.api.BookingController.BookingRes> getUserBookings(int page, int size) {
+    public List<BookingController.BookingRes> getUserBookings(int page, int size) {
         logger.debug("Getting bookings");
         
         try {
@@ -168,7 +169,7 @@ public class BookingService {
             List<com.tripplanner.data.entity.Booking> bookings = bookingRepository.findAll();
             
             return bookings.stream()
-                    .map(booking -> new com.tripplanner.api.BookingController.BookingRes(
+                    .map(booking -> new BookingController.BookingRes(
                             booking.getId().toString(),
                             booking.getStatus().toString(),
                             booking.getProvider() != null ? booking.getProvider().getConfirmationId() : null,
@@ -187,7 +188,7 @@ public class BookingService {
     /**
      * Cancel booking.
      */
-    public void cancelBooking(String bookingId, com.tripplanner.api.BookingController.CancelBookingReq request) {
+    public void cancelBooking(String bookingId, BookingController.CancelBookingReq request) {
         logger.info("Canceling booking: {} for user: {}", bookingId, "anonymous");
         
         try {

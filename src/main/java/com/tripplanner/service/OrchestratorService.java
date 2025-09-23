@@ -147,7 +147,7 @@ public class OrchestratorService {
         logger.debug("Handling explain intent");
         
         try {
-            var itineraryOpt = itineraryJsonService.getItineraryByAnyId(request.getItineraryId());
+            var itineraryOpt = itineraryJsonService.getItinerary(request.getItineraryId());
             if (itineraryOpt.isEmpty()) {
                 return ChatResponse.error("Itinerary not found", List.of());
             }
@@ -204,7 +204,7 @@ public class OrchestratorService {
      */
     private Integer findDayForNode(String itineraryId, String nodeId) {
         try {
-            var itineraryOpt = itineraryJsonService.getItineraryByAnyId(itineraryId);
+            var itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
             if (itineraryOpt.isEmpty()) {
                 logger.warn("Itinerary not found for day lookup: {}", itineraryId);
                 return null;

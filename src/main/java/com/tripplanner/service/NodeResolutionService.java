@@ -35,7 +35,7 @@ public class NodeResolutionService {
         
         try {
             // Load the itinerary using the flexible ID lookup
-            var itineraryOpt = itineraryJsonService.getItineraryByAnyId(itineraryId);
+            var itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
             if (itineraryOpt.isEmpty()) {
                 logger.warn("Itinerary not found: {}", itineraryId);
                 return List.of();

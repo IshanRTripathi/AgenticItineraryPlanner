@@ -70,8 +70,6 @@ public class AgentOrchestrator {
         }
     }
     
-    // Removed JPA update in Firestore-only mode
-    
     // ===== NEW MVP CONTRACT METHODS =====
     
     /**
