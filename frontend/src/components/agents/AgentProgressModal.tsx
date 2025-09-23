@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '../ui/card';
 import { Progress } from '../ui/progress';
 import { Badge } from '../ui/badge';
-import { CheckCircle2, Loader2, Clock, Zap } from 'lucide-react';
+import { CheckCircle2, Loader2, Clock, Zap, MapPin, Route, Users } from 'lucide-react';
 import { AGENT_TASKS, AgentTask } from '../../types/TripData';
 import { TripData } from '../../types/TripData';
 import { apiClient, AgentEvent } from '../../services/apiClient';
@@ -248,6 +248,28 @@ export function AgentProgressModal({ tripData, onComplete }: AgentProgressModalP
               <span>{overallProgress}%</span>
             </div>
             <Progress value={overallProgress} className="h-2" />
+          </div>
+
+          {/* Trip Summary */}
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t text-left">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-gray-400" />
+              <span className="text-sm">{tripData.startLocation?.name} → {tripData.endLocation?.name || tripData.destination}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-gray-400" />
+              <span className="text-sm">
+                {Math.ceil((new Date(tripData.dates.end).getTime() - new Date(tripData.dates.start).getTime()) / (1000 * 60 * 60 * 24))} days
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-gray-400" />
+              <span className="text-sm">{tripData.travelers?.length || 1} traveler{(tripData.travelers?.length || 1) > 1 ? 's' : ''}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Route className="h-4 w-4 text-gray-400" />
+              <span className="text-sm">{tripData.budget?.currency || 'USD'} {Number(tripData.budget?.total || 0).toLocaleString()}</span>
+            </div>
           </div>
 
           {/* Manual Continue Button - Fallback */}

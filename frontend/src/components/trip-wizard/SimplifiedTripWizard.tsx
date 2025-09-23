@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card } from '../ui/card';
@@ -41,6 +41,14 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   const { addTrip, setCurrentTrip } = useAppStore();
   const [startLocation, setStartLocation] = useState('New York, NY');
   const [endLocation, setEndLocation] = useState('Paris, France');
+  const [fromSuggestions, setFromSuggestions] = useState<string[]>([]);
+  const [toSuggestions, setToSuggestions] = useState<string[]>([]);
+  const [activeFromIndex, setActiveFromIndex] = useState<number>(-1);
+  const [activeToIndex, setActiveToIndex] = useState<number>(-1);
+  const fromAbort = useRef<AbortController | null>(null);
+  const toAbort = useRef<AbortController | null>(null);
+  const [fromFocused, setFromFocused] = useState<boolean>(false);
+  const [toFocused, setToFocused] = useState<boolean>(false);
   const [isRoundTrip, setIsRoundTrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
     // Default to Oct 5 to Oct 12 (current year)
@@ -83,12 +91,70 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
       window.history.replaceState({}, '', newUrl);
     } catch {}
   }, [dateRange?.from, dateRange?.to]);
+
+  // Debounced place lookup (OpenStreetMap Nominatim)
+  const formatPlaceLabel = (d: any): string => {
+    const a = d?.address || {};
+    const locality = a.city || a.town || a.village || a.municipality || a.suburb || a.county || d?.name;
+    const state = a.state || a.region || a.state_district;
+    const country = a.country || (a.country_code ? a.country_code.toUpperCase() : undefined);
+    if (locality && state && country) return `${locality}, ${state}, ${country}`;
+    if (locality && country) return `${locality}, ${country}`;
+    if (state && country) return `${state}, ${country}`;
+    return country || d?.display_name || '';
+  };
+
+  useEffect(() => {
+    if (!fromFocused || !startLocation || startLocation.length < 2) {
+      setFromSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        if (fromAbort.current) fromAbort.current.abort();
+        fromAbort.current = new AbortController();
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(startLocation)}&limit=5`, {
+          signal: fromAbort.current.signal,
+          headers: { 'Accept-Language': userLocale || 'en' }
+        });
+        const data = await res.json();
+        const names: string[] = (data || []).map((d: any) => formatPlaceLabel(d));
+        const unique = Array.from(new Set(names)).slice(0, 5);
+        setFromSuggestions(unique);
+        setActiveFromIndex(-1);
+      } catch {}
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [startLocation, userLocale, fromFocused]);
+
+  useEffect(() => {
+    if (!toFocused || !endLocation || endLocation.length < 2) {
+      setToSuggestions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        if (toAbort.current) toAbort.current.abort();
+        toAbort.current = new AbortController();
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(endLocation)}&limit=5`, {
+          signal: toAbort.current.signal,
+          headers: { 'Accept-Language': userLocale || 'en' }
+        });
+        const data = await res.json();
+        const names: string[] = (data || []).map((d: any) => formatPlaceLabel(d));
+        const unique = Array.from(new Set(names)).slice(0, 5);
+        setToSuggestions(unique);
+        setActiveToIndex(-1);
+      } catch {}
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [endLocation, userLocale, toFocused]);
   
   const [travelers, setTravelers] = useState<Traveler[]>([
     {
       id: '1',
       name: 'John Doe',
-      email: 'john@example.com',
+      email: '',
       age: 25,
       preferences: {
         dietaryRestrictions: [],
@@ -160,7 +226,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
            endLocation.trim() && 
            dateRange?.from && 
            dateRange?.to && 
-           travelers.every(t => t.name.trim() && t.email.trim()) &&
+           travelers.every(t => t.name.trim()) &&
            budget > 0;
   };
 
@@ -287,22 +353,94 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
               </div>
               
               <div className="space-y-4">
-                <div>
+                <div className="relative">
                   <Label>From</Label>
                   <Input 
                     placeholder="New York, NY" 
                     value={startLocation}
                     onChange={(e) => setStartLocation(e.target.value)}
+                    onFocus={() => setFromFocused(true)}
+                    onBlur={() => setTimeout(()=>{ setFromFocused(false); setFromSuggestions([]); }, 150)}
+                    onKeyDown={(e) => {
+                      if (fromSuggestions.length === 0) return;
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setActiveFromIndex((i) => Math.min(i + 1, fromSuggestions.length - 1));
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setActiveFromIndex((i) => Math.max(i - 1, 0));
+                      } else if (e.key === 'Enter' && activeFromIndex >= 0) {
+                        e.preventDefault();
+                        setStartLocation(fromSuggestions[activeFromIndex]);
+                        setFromSuggestions([]);
+                      } else if (e.key === 'Escape') {
+                        setFromSuggestions([]);
+                      }
+                    }}
                   />
+                  {fromFocused && fromSuggestions.length > 0 && (
+                    <div className="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                      {fromSuggestions.map((s, idx) => (
+                        <button
+                          type="button"
+                          key={`${s}-${idx}`}
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${idx===activeFromIndex? 'bg-gray-100':''}`}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setStartLocation(s);
+                            setFromSuggestions([]);
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
-                <div>
+                <div className="relative">
                   <Label>To</Label>
                   <Input 
                     placeholder="Paris, France" 
                     value={endLocation}
                     onChange={(e) => setEndLocation(e.target.value)}
+                    onFocus={() => setToFocused(true)}
+                    onBlur={() => setTimeout(()=>{ setToFocused(false); setToSuggestions([]); }, 150)}
+                    onKeyDown={(e) => {
+                      if (toSuggestions.length === 0) return;
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        setActiveToIndex((i) => Math.min(i + 1, toSuggestions.length - 1));
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        setActiveToIndex((i) => Math.max(i - 1, 0));
+                      } else if (e.key === 'Enter' && activeToIndex >= 0) {
+                        e.preventDefault();
+                        setEndLocation(toSuggestions[activeToIndex]);
+                        setToSuggestions([]);
+                      } else if (e.key === 'Escape') {
+                        setToSuggestions([]);
+                      }
+                    }}
                   />
+                  {toFocused && toSuggestions.length > 0 && (
+                    <div className="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                      {toSuggestions.map((s, idx) => (
+                        <button
+                          type="button"
+                          key={`${s}-${idx}`}
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${idx===activeToIndex? 'bg-gray-100':''}`}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setEndLocation(s);
+                            setToSuggestions([]);
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -336,11 +474,11 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <div className="p-3">
-                        <Calendar
-                          initialFocus
-                          mode="range"
-                          defaultMonth={dateRange?.from}
-                          selected={dateRange}
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange?.from}
+                        selected={dateRange}
                           onSelect={(range) => {
                             setValidationMessage('');
                             const today = new Date();
@@ -355,7 +493,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                               else if (nights > 30) setValidationMessage('Maximum trip length is 30 nights.');
                             }
                           }}
-                          numberOfMonths={2}
+                        numberOfMonths={2}
                           locale={dayPickerLocale}
                           classNames={{
                             day_outside: "invisible",
@@ -449,16 +587,68 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                 <h2 className="text-xl font-semibold">Budget</h2>
               </div>
               
-              <div className="space-y-4">
-                <div>
+              <div className="space-y-3">
                   <Label>Total Budget</Label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="number" 
-                      value={budget}
-                      onChange={(e) => setBudget(Number(e.target.value))}
-                      className="flex-1"
-                    />
+                {(() => {
+                  const ranges: Record<string, { min: number; max: number }>= {
+                    USD: { min: 500, max: 10000 },
+                    EUR: { min: 500, max: 9000 },
+                    GBP: { min: 400, max: 8000 },
+                    JPY: { min: 50000, max: 1500000 },
+                  };
+                  const { min, max } = ranges[currency] || ranges.USD;
+                  const clamp = (v: number) => Math.min(max, Math.max(min, v));
+                  const value = clamp(budget);
+                  if (value !== budget) setBudget(value);
+                  // Track which preset is selected (if any)
+                  type PresetKey = 'budget' | 'mid' | 'luxury' | null;
+                  const [selectedPreset, setSelectedPreset] = useState<PresetKey>(null);
+                  return (
+                    <>
+                      {/* Preset buttons - three vertical cards side by side */}
+                      <div className="grid grid-cols-3 gap-3">
+                        {(() => {
+                          const presets: Record<string, { key: PresetKey; label: string; value: number }[]> = {
+                            USD: [
+                              { key: 'budget', label: '💸 Budget', value: 800 },
+                              { key: 'mid', label: '💼 Mid-range', value: 2000 },
+                              { key: 'luxury', label: '✨ Luxury', value: 5000 },
+                            ],
+                            EUR: [
+                              { key: 'budget', label: '💸 Budget', value: 750 },
+                              { key: 'mid', label: '💼 Mid-range', value: 1800 },
+                              { key: 'luxury', label: '✨ Luxury', value: 4500 },
+                            ],
+                            GBP: [
+                              { key: 'budget', label: '💸 Budget', value: 650 },
+                              { key: 'mid', label: '💼 Mid-range', value: 1600 },
+                              { key: 'luxury', label: '✨ Luxury', value: 4000 },
+                            ],
+                            JPY: [
+                              { key: 'budget', label: '💸 Budget', value: 120000 },
+                              { key: 'mid', label: '💼 Mid-range', value: 250000 },
+                              { key: 'luxury', label: '✨ Luxury', value: 600000 },
+                            ],
+                          };
+                          return (presets[currency] || presets.USD).map(p => (
+                            <Button
+                              key={p.key}
+                              size="lg"
+                              variant={selectedPreset === p.key ? 'default' : 'outline'}
+                              className="w-full py-8 text-lg font-semibold rounded-xl shadow-sm hover:shadow md:text-xl"
+                              style={{ aspectRatio: '2 / 3' }}
+                              onClick={() => {
+                                setBudget(clamp(p.value));
+                                setSelectedPreset(p.key);
+                              }}
+                            >
+                              {p.label}
+                            </Button>
+                          ));
+                        })()}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <select 
                       value={currency} 
                       onChange={(e) => setCurrency(e.target.value)}
@@ -469,23 +659,43 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                       <option value="GBP">GBP</option>
                       <option value="JPY">JPY</option>
                     </select>
+                        <Slider
+                          value={[value]}
+                          min={min}
+                          max={max}
+                          step={currency === 'JPY' ? 10000 : 50}
+                          onValueChange={([v]) => {
+                            setBudget(clamp(v));
+                            // Unset preset when user drags slider
+                            // Only clear if it actually deviates from a preset value
+                            // to prevent flicker during initial selection
+                            setSelectedPreset(null);
+                          }}
+                          className="w-full"
+                          aria-label="Budget range"
+                        />
+                        <Input
+                          type="number"
+                          className="w-36"
+                          value={value}
+                          onChange={(e) => {
+                            const n = Number(e.target.value);
+                            if (Number.isFinite(n)) {
+                              setBudget(clamp(n));
+                              setSelectedPreset(null);
+                            }
+                          }}
+                        />
                   </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>{currency} {min.toLocaleString()}</span>
+                        <span>{currency} {max.toLocaleString()}</span>
                 </div>
-                
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div className="text-center p-2 bg-blue-50 rounded">
-                    <div className="font-medium">{currency} {Math.round(budget * 0.4)}</div>
-                    <div className="text-gray-600">Hotels</div>
-                  </div>
-                  <div className="text-center p-2 bg-green-50 rounded">
-                    <div className="font-medium">{currency} {Math.round(budget * 0.25)}</div>
-                    <div className="text-gray-600">Food</div>
-                  </div>
-                  <div className="text-center p-2 bg-purple-50 rounded">
-                    <div className="font-medium">{currency} {Math.round(budget * 0.35)}</div>
-                    <div className="text-gray-600">Other</div>
-                  </div>
-                </div>
+                <div className="text-xs text-gray-600">Note: Unrealistic budgets may lead to poor itinerary quality.</div>
+                <div className="text-xs text-gray-600">Please select from above 3 options if unsure.</div>
+                    </>
+                  );
+                })()}
               </div>
             </Card>
 
@@ -533,15 +743,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                           onChange={(e) => updateTraveler(traveler.id, { age: Number(e.target.value) })}
                         />
                       </div>
-                      <div className="col-span-2">
-                        <Label>Email</Label>
-                        <Input 
-                          type="email"
-                          placeholder="email@example.com"
-                          value={traveler.email}
-                          onChange={(e) => updateTraveler(traveler.id, { email: e.target.value })}
-                        />
-                      </div>
+                      
                     </div>
                     
                     {index === 0 && (
@@ -618,27 +820,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
               </div>
             </Card>
 
-            {/* Preview */}
-            <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
-              <h3 className="font-semibold mb-3">Trip Summary</h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">Route:</span> {startLocation || '...'} → {endLocation || '...'}</p>
-                <p><span className="font-medium">Duration:</span> {
-                  dateRange?.from && dateRange?.to 
-                    ? `${Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} days`
-                    : '...'
-                }</p>
-                <p><span className="font-medium">Travelers:</span> {travelers.length}</p>
-                <p><span className="font-medium">Budget:</span> {currency} {budget.toLocaleString()}</p>
-                <p><span className="font-medium">Top Interests:</span> {
-                  Object.entries(preferences)
-                    .sort(([,a], [,b]) => (b as number) - (a as number))
-                    .slice(0, 3)
-                    .map(([key]) => key)
-                    .join(', ')
-                }</p>
-              </div>
-            </Card>
+            {/* Summary moved to Generating page */}
           </div>
         </div>
 
