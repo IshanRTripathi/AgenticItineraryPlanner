@@ -17,6 +17,7 @@ export class DataTransformer {
     
     return {
       id: response.id,
+      summary: response.summary,
       startLocation: {
         id: 'start',
         name: 'Home',

@@ -198,6 +198,7 @@ export interface TripData {
   startLocation: TripLocation;
   endLocation: TripLocation;
   isRoundTrip: boolean;
+  summary?: string;
   dates: {
     start: string; // ISO date
     end: string;

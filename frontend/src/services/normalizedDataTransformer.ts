@@ -14,6 +14,7 @@ export class NormalizedDataTransformer {
   static transformNormalizedItineraryToTripData(normalized: NormalizedItinerary): TripData {
     return {
       id: normalized.itineraryId,
+      summary: normalized.summary,
       startLocation: {
         id: 'start',
         name: 'Home',

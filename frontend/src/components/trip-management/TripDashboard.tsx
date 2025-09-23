@@ -49,16 +49,37 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
   // Use fresh data if available, fallback to props
   const allTrips = freshTrips || trips;
 
-  const upcomingTrips = allTrips.filter(trip => 
-    new Date(trip.dates.start) > new Date()
-  );
+  const getStartDateString = (trip: TripData): string | undefined => {
+    return trip.dates?.start || (trip as any)?.createdAt;
+  };
 
-  const pastTrips = allTrips.filter(trip => 
-    new Date(trip.dates.end) < new Date()
-  );
+  const getEndDateString = (trip: TripData): string | undefined => {
+    return trip.dates?.end || (trip as any)?.updatedAt || (trip as any)?.createdAt;
+  };
+
+  const upcomingTrips = allTrips.filter(trip => {
+    const startStr = getStartDateString(trip);
+    return startStr ? new Date(startStr) > new Date() : false;
+  });
+
+  const pastTrips = allTrips.filter(trip => {
+    const endStr = getEndDateString(trip);
+    return endStr ? new Date(endStr) < new Date() : false;
+  });
+
+  const getDisplayDestination = (trip: TripData): string => {
+    const byFields = trip.destination || trip.endLocation?.name;
+    if (byFields) return byFields;
+    const summary: string | undefined = (trip as any)?.summary;
+    if (summary) {
+      const m = summary.match(/trip to\s+([A-Za-z\s]+?)(,|\.|$)/i) || summary.match(/to\s+([A-Za-z\s]+?)(,|\.|$)/i);
+      if (m && m[1]) return m[1].trim();
+    }
+    return 'Unknown';
+  };
 
   const filteredTrips = allTrips.filter(trip => {
-    const destination = trip.destination || trip.endLocation?.name || 'Unknown';
+    const destination = getDisplayDestination(trip);
     const themes = trip.themes || [];
     const matchesSearch = destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -70,15 +91,21 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
 
   const sortedTrips = filteredTrips.sort((a, b) => {
     if (sortBy === 'date') {
-      return new Date(b.dates.start).getTime() - new Date(a.dates.start).getTime();
+      const aStr = getStartDateString(a);
+      const bStr = getStartDateString(b);
+      const aTs = aStr ? new Date(aStr).getTime() : 0;
+      const bTs = bStr ? new Date(bStr).getTime() : 0;
+      return bTs - aTs;
     }
     if (sortBy === 'destination') {
-      const aDest = a.destination || a.endLocation?.name || 'Unknown';
-      const bDest = b.destination || b.endLocation?.name || 'Unknown';
+      const aDest = getDisplayDestination(a);
+      const bDest = getDisplayDestination(b);
       return aDest.localeCompare(bDest);
     }
     if (sortBy === 'budget') {
-      return b.budget.total - a.budget.total;
+      const aVal = (a.budget?.total ?? 0);
+      const bVal = (b.budget?.total ?? 0);
+      return bVal - aVal;
     }
     return 0;
   });
@@ -119,11 +146,13 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
 
   const getTripStatus = (trip: TripData) => {
     const now = new Date();
-    const start = new Date(trip.dates.start);
-    const end = new Date(trip.dates.end);
+    const startStr = getStartDateString(trip);
+    const endStr = getEndDateString(trip);
+    const start = startStr ? new Date(startStr) : null;
+    const end = endStr ? new Date(endStr) : null;
     
-    if (now < start) return { status: 'upcoming', color: 'bg-blue-500' };
-    if (now >= start && now <= end) return { status: 'ongoing', color: 'bg-green-500' };
+    if (start && now < start) return { status: 'upcoming', color: 'bg-blue-500' };
+    if (start && end && now >= start && now <= end) return { status: 'ongoing', color: 'bg-green-500' };
     return { status: 'completed', color: 'bg-gray-500' };
   };
 
@@ -332,16 +361,18 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                           <div className="flex-1">
                             <CardTitle className="flex items-center gap-2 text-lg">
                               <MapPin className="h-4 w-4" />
-                              {trip.destination || trip.endLocation?.name || 'Unknown'}
+                              {`Trip to ${getDisplayDestination(trip)}`}
                             </CardTitle>
                             <CardDescription className="flex items-center gap-4 text-sm mt-1">
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
-                                {formatDate(trip.dates.start)}
+                                {getStartDateString(trip) && getEndDateString(trip)
+                                  ? `${formatDate(getStartDateString(trip) as string)} – ${formatDate(getEndDateString(trip) as string)}`
+                                  : (getStartDateString(trip) ? formatDate(getStartDateString(trip) as string) : '—')}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Users className="h-3 w-3" />
-                                {trip.partySize || trip.travelers.length}
+                                {trip.partySize || trip.travelers?.length || 1}
                               </span>
                             </CardDescription>
                           </div>
@@ -370,11 +401,19 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                             )}
                           </div>
                           
+                          {typeof trip.budget?.total === 'number' && (
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Budget</span>
-                            <span className="font-medium">₹{trip.budget.total.toLocaleString('en-IN')}</span>
-                          </div>
+                              <span className="text-gray-600">Budget</span>
+                              <span className="font-medium">₹{trip.budget.total.toLocaleString('en-IN')}</span>
+                            </div>
+                          )}
                           
+                          {trip.summary && (
+                            <div className="text-sm text-gray-700">
+                              {trip.summary}
+                            </div>
+                          )}
+
                           {trip.bookingData && (
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-600">Status</span>
@@ -392,9 +431,7 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
                             <Button size="sm" variant="outline" onClick={() => shareTrip(trip)}>
                               <Share2 className="h-3 w-3" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => duplicateTrip(trip)}>
-                              <Copy className="h-3 w-3" />
-                            </Button>
+                            {/* Removed duplicate Copy button; duplicate is available in the menu */}
                           </div>
                         </div>
                       </CardContent>

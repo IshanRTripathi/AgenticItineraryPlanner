@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -163,11 +164,37 @@ public class ItineraryService {
         
         try {
             return itineraryJsonService.getAllItineraries().stream()
-                    .map(ni -> ItineraryDto.builder()
-                            .id(ni.getItineraryId())
-                            .summary(ni.getSummary())
-                            .status("completed")
-                            .build())
+                    .map(ni -> {
+                        String destination = ni.getDestination();
+                        if (destination == null || destination.isBlank()) {
+                            destination = (ni.getDays() != null && !ni.getDays().isEmpty()) ? ni.getDays().get(0).getLocation() : null;
+                        }
+
+                        LocalDate startDate = null;
+                        if (ni.getStartDate() != null && !ni.getStartDate().isBlank()) {
+                            try { startDate = LocalDate.parse(ni.getStartDate()); } catch (Exception ignored) {}
+                        } else if (ni.getDays() != null && !ni.getDays().isEmpty()) {
+                            try { startDate = LocalDate.parse(ni.getDays().get(0).getDate()); } catch (Exception ignored) {}
+                        }
+
+                        LocalDate endDate = null;
+                        if (ni.getEndDate() != null && !ni.getEndDate().isBlank()) {
+                            try { endDate = LocalDate.parse(ni.getEndDate()); } catch (Exception ignored) {}
+                        } else if (ni.getDays() != null && !ni.getDays().isEmpty()) {
+                            try { endDate = LocalDate.parse(ni.getDays().get(ni.getDays().size() - 1).getDate()); } catch (Exception ignored) {}
+                        }
+
+                        return ItineraryDto.builder()
+                                .id(ni.getItineraryId())
+                                .destination(destination)
+                                .startDate(startDate)
+                                .endDate(endDate)
+                                .language("en")
+                                .summary(ni.getSummary())
+                                .interests(ni.getThemes())
+                                .status("completed")
+                                .build();
+                    })
                     .toList();
         } catch (Exception e) {
             logger.error("Failed to get user itineraries", e);

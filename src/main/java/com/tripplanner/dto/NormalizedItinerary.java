@@ -31,6 +31,16 @@ public class NormalizedItinerary {
     
     @JsonProperty("themes")
     private List<String> themes;
+
+    // Explicit trip meta to avoid parsing from summary
+    @JsonProperty("destination")
+    private String destination;
+
+    @JsonProperty("startDate")
+    private String startDate; // ISO yyyy-MM-dd
+
+    @JsonProperty("endDate")
+    private String endDate; // ISO yyyy-MM-dd
     
     @Valid
     @NotNull
@@ -91,6 +101,30 @@ public class NormalizedItinerary {
     
     public void setThemes(List<String> themes) {
         this.themes = themes;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
     
     public List<NormalizedDay> getDays() {

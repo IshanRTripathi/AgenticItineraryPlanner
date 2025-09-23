@@ -185,6 +185,15 @@ public class AgentOrchestrator {
         itinerary.setCurrency("EUR");
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
         itinerary.setDays(new ArrayList<>());
+
+        // Set explicit trip meta
+        itinerary.setDestination(request.getDestination());
+        if (request.getStartDate() != null) {
+            itinerary.setStartDate(request.getStartDate().toString());
+        }
+        if (request.getEndDate() != null) {
+            itinerary.setEndDate(request.getEndDate().toString());
+        }
         
         // Set settings
         ItinerarySettings settings = new ItinerarySettings();
