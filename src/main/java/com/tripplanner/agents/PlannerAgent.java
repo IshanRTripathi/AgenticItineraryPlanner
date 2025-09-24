@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.ChangeEngine;
-import com.tripplanner.service.GeminiClient;
+import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ItineraryJsonService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -21,18 +21,18 @@ import java.util.Map;
  * Planner Agent - Main orchestrator for itinerary generation using Gemini.
  */
 @Component
-@ConditionalOnBean(GeminiClient.class)
+@ConditionalOnBean(AiClient.class)
 public class PlannerAgent extends BaseAgent {
     
-    private final GeminiClient geminiClient;
+    private final AiClient aiClient;
     private final ObjectMapper objectMapper;
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
     
-    public PlannerAgent(AgentEventBus eventBus, GeminiClient geminiClient, ObjectMapper objectMapper,
+    public PlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                        ItineraryJsonService itineraryJsonService, ChangeEngine changeEngine) {
         super(eventBus, AgentEvent.AgentKind.planner);
-        this.geminiClient = geminiClient;
+        this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
@@ -77,7 +77,7 @@ public class PlannerAgent extends BaseAgent {
         
         // Call Gemini for structured JSON
         String schema = buildItineraryJsonSchema();
-        String response = geminiClient.generateStructuredContent(userPrompt, schema, systemPrompt);
+        String response = aiClient.generateStructuredContent(userPrompt, schema, systemPrompt);
         
         logger.info("=== PLANNER AGENT RESPONSE ===");
         logger.info("Using JSON file response");
@@ -196,7 +196,7 @@ public class PlannerAgent extends BaseAgent {
             // Build prompt for change generation
             String systemPrompt = buildSystemPromptForChanges();
             String userPrompt = buildUserPromptForChanges(itineraryId, currentItinerary.get(), userRequest);
-            String response = geminiClient.generateStructuredContent(userPrompt, getChangeSetSchema(), systemPrompt);
+            String response = aiClient.generateStructuredContent(userPrompt, getChangeSetSchema(), systemPrompt);
             
             emitProgress(itineraryId, 60, "Parsing changes", "parsing");
             

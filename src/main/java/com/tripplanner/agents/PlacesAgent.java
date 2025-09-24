@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.AgentEvent;
 import com.tripplanner.service.AgentEventBus;
-import com.tripplanner.service.GeminiClient;
+import com.tripplanner.service.ai.AiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Component;
  * Places Agent - Discovers and analyzes places, areas, and local insights.
  */
 @Component
-@ConditionalOnBean(GeminiClient.class)
+@ConditionalOnBean(AiClient.class)
 public class PlacesAgent extends BaseAgent {
     
-    private final GeminiClient geminiClient;
+    private final AiClient aiClient;
     private final ObjectMapper objectMapper;
     
-    public PlacesAgent(AgentEventBus eventBus, GeminiClient geminiClient, ObjectMapper objectMapper) {
+    public PlacesAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper) {
         super(eventBus, AgentEvent.AgentKind.places);
-        this.geminiClient = geminiClient;
+        this.aiClient = aiClient;
         this.objectMapper = objectMapper;
     }
     
@@ -49,7 +49,7 @@ public class PlacesAgent extends BaseAgent {
         
         emitProgress(itineraryId, 50, "Discovering places and areas", "place_discovery");
         
-        String response = geminiClient.generateStructuredContent(userPrompt, jsonSchema, systemPrompt);
+        String response = aiClient.generateStructuredContent(userPrompt, jsonSchema, systemPrompt);
         
         logger.info("=== PLACES AGENT RESPONSE ===");
         logger.info("Response Length: {} chars", response.length());

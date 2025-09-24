@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tripplanner.service.ai.AiClient;
 
 /**
  * Service for interacting with Google's Gemini AI model via REST API.
@@ -29,7 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
     value = "google.ai.api-key",
     matchIfMissing = false
 )
-public class GeminiClient {
+public class GeminiClient implements AiClient {
     
     private static final Logger logger = LoggerFactory.getLogger(GeminiClient.class);
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
@@ -80,6 +81,7 @@ public class GeminiClient {
     /**
      * Generate content using Gemini with a system prompt and user prompt.
      */
+    @Override
     public String generateContent(String userPrompt, String systemPrompt) {
         try {
             logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
@@ -200,6 +202,7 @@ public class GeminiClient {
     /**
      * Generate structured JSON content using Gemini.
      */
+    @Override
     public String generateStructuredContent(String prompt, String jsonSchema, String systemPrompt) {
         String fullPrompt = buildStructuredPrompt(prompt, jsonSchema, systemPrompt);
         return generateContent(fullPrompt, null);
@@ -226,6 +229,7 @@ public class GeminiClient {
     /**
      * Check if the Gemini client is available and properly configured.
      */
+    @Override
     public boolean isAvailable() {
         return httpClient != null && apiKey != null && !apiKey.trim().isEmpty();
     }
@@ -233,6 +237,7 @@ public class GeminiClient {
     /**
      * Get model information.
      */
+    @Override
     public String getModelInfo() {
         return String.format("Model: %s, Temperature: %.2f, Max Tokens: %d", 
                             modelName, temperature, maxTokens);

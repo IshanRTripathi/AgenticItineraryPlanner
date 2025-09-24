@@ -42,11 +42,23 @@ google:
     client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
     client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:}
   ai:
-    api-key: ${GEMINI_API_KEY:AIzaSyCmIwxSsiWnElgNy63Pm2Ub4KWKi1oNIr8}
+    api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-1.5-pro}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:8192}
     mock-mode: ${GEMINI_MOCK_MODE:false}
+
+ai:
+  provider: ${AI_PROVIDER:openrouter}
+  model: ${AI_MODEL:qwen/qwen-2.5-72b-instruct:free}
+  temperature: ${AI_TEMPERATURE:0.7}
+  max-tokens: ${AI_MAX_TOKENS:8192}
+  mock-mode: ${AI_MOCK_MODE:false}
+
+openrouter:
+  api-key: ${OPENROUTER_API_KEY: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}
+  base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
+  timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:60}
 
 # Firestore Configuration
 firestore:
