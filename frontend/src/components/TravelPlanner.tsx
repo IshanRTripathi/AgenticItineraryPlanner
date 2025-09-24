@@ -23,6 +23,7 @@ import { DayByDayView } from './travel-planner/views/DayByDayView';
 import { DestinationsManager } from './travel-planner/views/DestinationsManager';
 import { WorkflowBuilder } from './WorkflowBuilder';
 import { ChatInterface } from './ChatInterface';
+import { TripMap } from './travel-planner/TripMap';
 
 // Import error handling and loading components
 import { ErrorBoundary } from './travel-planner/shared/ErrorBoundary';
@@ -345,28 +346,28 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
               onItineraryUpdate={handleItineraryUpdateFromChat}
             />
           ) : !showWorkflowBuilder ? (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              <div className="text-center">
-                <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <p>Interactive Map</p>
-                <p className="text-sm">Showing {destinations.length} destinations</p>
-              </div>
-              <div className="absolute top-20 left-4">
-                <div className="bg-white rounded-lg p-3 shadow-sm border">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span className="text-xs">Destinations</span>
-                  </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-xs">Attractions</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                    <span className="text-xs">Transport</span>
+            <div className="h-full overflow-hidden relative">
+              {/* Feature flag: simplest gated render for map MVP */}
+              {Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY) ? (
+                <div className="h-full">
+                  {/* TripMap integration */}
+                  <TripMap
+                    itineraryId={currentTripData.id}
+                    mapBounds={currentTripData.itinerary?.mapBounds}
+                    countryCentroid={currentTripData.itinerary?.countryCentroid}
+                    nodes={[]}
+                    className="w-full h-full"
+                  />
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p>Interactive Map</p>
+                    <p className="text-sm">Set VITE_GOOGLE_MAPS_BROWSER_KEY to enable the map</p>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
              <div className="h-full overflow-hidden relative">

@@ -77,7 +77,9 @@ export class NormalizedDataTransformer {
         customs: [],
         etiquette: [],
         laws: []
-      }
+      },
+      mapBounds: normalized.mapBounds,
+      countryCentroid: normalized.countryCentroid
     };
   }
 

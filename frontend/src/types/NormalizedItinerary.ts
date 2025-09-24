@@ -6,9 +6,14 @@ export interface NormalizedItinerary {
   summary: string;
   currency: string;
   themes: string[];
+  destination?: string;
+  startDate?: string;
+  endDate?: string;
   days: NormalizedDay[];
   settings: ItinerarySettings;
   agents: Record<string, AgentStatus>;
+  mapBounds?: MapBounds;
+  countryCentroid?: Coordinates;
 }
 
 export interface NormalizedDay {
@@ -67,6 +72,7 @@ export interface NodeDetails {
   category?: string;
   tags?: string[];
   timeSlots?: TimeSlot[];
+  googleMapsUri?: string;
 }
 
 export interface TimeSlot {
@@ -245,6 +251,14 @@ export interface MockBookingResponse {
   bookingRef: string;
   locked: boolean;
   message: string;
+}
+
+// Map-related types
+export interface MapBounds {
+  south: number;
+  west: number;
+  north: number;
+  east: number;
 }
 
 // Legacy types for backward compatibility

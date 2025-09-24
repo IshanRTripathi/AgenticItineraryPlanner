@@ -1,6 +1,11 @@
 # Google Cloud Build configuration for Agentic Itinerary Planner
 # This file builds and deploys both frontend and backend services
 
+availableSecrets:
+  secretManager:
+  - versionName: projects/tripplanner-bdd3c/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
+    env: 'GOOGLE_MAPS_BROWSER_KEY'
+
 steps:
   # Build and deploy backend
   - name: 'gcr.io/cloud-builders/docker'
@@ -54,7 +59,8 @@ steps:
       '--set-env-vars', 'APP_DATABASE_TYPE=firestore',
       '--set-env-vars', 'FIRESTORE_USE_EMULATOR=false',
       '--set-secrets', 'FIRESTORE_CREDENTIALS=_FIRESTORE_CREDENTIALS:latest',
-      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}'
+      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
+      '--set-secrets', 'GOOGLE_MAPS_BROWSER_KEY=_GOOGLE_MAPS_BROWSER_KEY:latest'
     ]
     id: 'deploy-backend'
     waitFor: ['push-backend-sha']
@@ -65,10 +71,12 @@ steps:
       'build',
       '-f', 'Dockerfile.frontend',
       '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
+      '--build-arg', 'GOOGLE_MAPS_BROWSER_KEY=$$GOOGLE_MAPS_BROWSER_KEY',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '.'
     ]
+    secretEnv: ['GOOGLE_MAPS_BROWSER_KEY']
     id: 'build-frontend'
     waitFor: ['build-backend']
 

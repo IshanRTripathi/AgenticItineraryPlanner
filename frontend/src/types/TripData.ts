@@ -189,6 +189,16 @@ export interface TripItinerary {
     etiquette: string[];
     laws: string[];
   };
+  mapBounds?: {
+    south: number;
+    west: number;
+    north: number;
+    east: number;
+  };
+  countryCentroid?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface TripData {

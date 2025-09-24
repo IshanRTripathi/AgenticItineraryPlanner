@@ -55,6 +55,14 @@ public class NormalizedItinerary {
     @JsonProperty("agents")
     private Map<String, AgentStatus> agents;
     
+    @Valid
+    @JsonProperty("mapBounds")
+    private MapBounds mapBounds;
+    
+    @Valid
+    @JsonProperty("countryCentroid")
+    private Coordinates countryCentroid;
+    
     public NormalizedItinerary() {}
     
     public NormalizedItinerary(String itineraryId, Integer version) {
@@ -151,6 +159,22 @@ public class NormalizedItinerary {
         this.agents = agents;
     }
     
+    public MapBounds getMapBounds() {
+        return mapBounds;
+    }
+    
+    public void setMapBounds(MapBounds mapBounds) {
+        this.mapBounds = mapBounds;
+    }
+    
+    public Coordinates getCountryCentroid() {
+        return countryCentroid;
+    }
+    
+    public void setCountryCentroid(Coordinates countryCentroid) {
+        this.countryCentroid = countryCentroid;
+    }
+    
     @Override
     public String toString() {
         return "NormalizedItinerary{" +
@@ -159,9 +183,14 @@ public class NormalizedItinerary {
                 ", summary='" + summary + '\'' +
                 ", currency='" + currency + '\'' +
                 ", themes=" + themes +
+                ", destination='" + destination + '\'' +
+                ", startDate='" + startDate + '\'' +
+                ", endDate='" + endDate + '\'' +
                 ", days=" + days +
                 ", settings=" + settings +
                 ", agents=" + agents +
+                ", mapBounds=" + mapBounds +
+                ", countryCentroid=" + countryCentroid +
                 '}';
     }
 }

@@ -22,6 +22,9 @@ public class NodeDetails {
     @JsonProperty("openingHours")
     private Map<String, TimeSlot> openingHours;
     
+    @JsonProperty("googleMapsUri")
+    private String googleMapsUri;
+    
     public NodeDetails() {}
     
     public NodeDetails(Double rating, String category, List<String> tags, Map<String, TimeSlot> openingHours) {
@@ -64,6 +67,14 @@ public class NodeDetails {
         this.openingHours = openingHours;
     }
     
+    public String getGoogleMapsUri() {
+        return googleMapsUri;
+    }
+    
+    public void setGoogleMapsUri(String googleMapsUri) {
+        this.googleMapsUri = googleMapsUri;
+    }
+    
     @Override
     public String toString() {
         return "NodeDetails{" +
@@ -71,6 +82,7 @@ public class NodeDetails {
                 ", category='" + category + '\'' +
                 ", tags=" + tags +
                 ", openingHours=" + openingHours +
+                ", googleMapsUri='" + googleMapsUri + '\'' +
                 '}';
     }
 }

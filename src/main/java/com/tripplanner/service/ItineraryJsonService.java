@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.data.entity.FirestoreItinerary;
 import com.tripplanner.dto.NormalizedItinerary;
+import com.tripplanner.dto.NormalizedNode;
+import com.tripplanner.dto.MapBounds;
+import com.tripplanner.dto.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,9 @@ public class ItineraryJsonService {
     
     @Autowired
     private DatabaseService databaseService;
+    
+    @Autowired
+    private MapBoundsCalculator mapBoundsCalculator;
     
     private final ObjectMapper objectMapper;
     
@@ -109,14 +115,47 @@ public class ItineraryJsonService {
     }
     
     /**
-     * Deserialize JSON string to NormalizedItinerary.
+     * Deserialize JSON string to NormalizedItinerary and populate map fields.
      */
     private Optional<NormalizedItinerary> deserializeItinerary(FirestoreItinerary entity) {
         try {
-            return Optional.of(objectMapper.readValue(entity.getJson(), NormalizedItinerary.class));
+            NormalizedItinerary itinerary = objectMapper.readValue(entity.getJson(), NormalizedItinerary.class);
+            
+            // Populate map fields if not already present
+            populateMapFields(itinerary);
+            
+            return Optional.of(itinerary);
         } catch (JsonProcessingException e) {
             logger.error("Failed to deserialize itinerary JSON", e);
             return Optional.empty();
+        }
+    }
+    
+    /**
+     * Populate map bounds and country centroid for the itinerary.
+     */
+    private void populateMapFields(NormalizedItinerary itinerary) {
+        if (itinerary == null || itinerary.getDays() == null) {
+            return;
+        }
+        
+        // Extract all nodes from all days
+        List<NormalizedNode> allNodes = itinerary.getDays().stream()
+                .flatMap(day -> day.getNodes() != null ? day.getNodes().stream() : java.util.stream.Stream.empty())
+                .collect(java.util.stream.Collectors.toList());
+        
+        // Calculate and set map bounds if not already present
+        if (itinerary.getMapBounds() == null) {
+            MapBounds bounds = mapBoundsCalculator.calculateBounds(allNodes);
+            itinerary.setMapBounds(bounds);
+            logger.debug("Populated map bounds for itinerary {}: {}", itinerary.getItineraryId(), bounds);
+        }
+        
+        // Calculate and set country centroid if not already present
+        if (itinerary.getCountryCentroid() == null) {
+            Coordinates centroid = mapBoundsCalculator.calculateCentroid(allNodes);
+            itinerary.setCountryCentroid(centroid);
+            logger.debug("Populated country centroid for itinerary {}: {}", itinerary.getItineraryId(), centroid);
         }
     }
 }
