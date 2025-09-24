@@ -42,7 +42,7 @@ steps:
       '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
       '--set-env-vars', 'GEMINI_MOCK_MODE=false',
       '--set-env-vars', 'AI_PROVIDER=openrouter',
-      '--set-env-vars', 'AI_MODEL=_AI_MODEL:latest',
+      '--set-secrets', 'AI_MODEL=_AI_MODEL:latest',
       '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_ID=dummy-oauth-client-id',
       '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_SECRET=dummy-oauth-client-secret',
       '--set-env-vars', 'RAZORPAY_KEY_ID=dummy-razorpay-key-id',

@@ -7774,3 +7774,4 @@ Do NOT leave any days with empty nodes arrays.
 2025-09-24 17:53:12.454 [task-1] INFO  com.tripplanner.agents.EnrichmentAgent - =================================
 2025-09-24 17:53:13.557 [task-1] INFO  com.tripplanner.agents.AgentOrchestrator - === NORMALIZED ITINERARY GENERATION COMPLETE ===
 2025-09-24 17:53:13.557 [task-1] INFO  com.tripplanner.agents.AgentOrchestrator - Final itinerary has 3 days
+2025-09-24 18:12:46.567 [SpringApplicationShutdownHook] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
