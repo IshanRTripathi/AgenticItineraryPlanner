@@ -31,11 +31,6 @@ public class OpenRouterClient implements AiClient {
 	@Value("${openrouter.api-key:}")
 	private String apiKey;
 
-	@Value("${openrouter.app-url:}")
-	private String appUrl;
-
-	@Value("${openrouter.app-title:}")
-	private String appTitle;
 
 	@Value("${ai.model:}")
 	private String modelName;
@@ -58,7 +53,9 @@ public class OpenRouterClient implements AiClient {
 	@PostConstruct
 	public void initialize() {
 		this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
-		logger.info("Initialized OpenRouter client with model: {}", modelName);
+        String keyStatus = (apiKey == null || apiKey.isBlank()) ? "MISSING" : ("SET(len=" + apiKey.trim().length() + ")");
+        logger.info("Initialized OpenRouter client with model: {} | apiKey={}",
+                modelName, keyStatus);
 	}
 
 	@PreDestroy
@@ -82,13 +79,7 @@ public class OpenRouterClient implements AiClient {
 					.header("Content-Type", "application/json")
 					.header("Authorization", "Bearer " + apiKey);
 
-			// Optional attribution headers
-			if (appUrl != null && !appUrl.isBlank()) {
-				builder.header("HTTP-Referer", appUrl);
-			}
-			if (appTitle != null && !appTitle.isBlank()) {
-				builder.header("X-Title", appTitle);
-			}
+            // Attribution headers intentionally omitted
 
 			HttpRequest request = builder.POST(HttpRequest.BodyPublishers.ofString(body)).build();
 
@@ -129,13 +120,7 @@ public class OpenRouterClient implements AiClient {
 					.header("Content-Type", "application/json")
 					.header("Authorization", "Bearer " + apiKey);
 
-			// Optional attribution headers
-			if (appUrl != null && !appUrl.isBlank()) {
-				builder.header("HTTP-Referer", appUrl);
-			}
-			if (appTitle != null && !appTitle.isBlank()) {
-				builder.header("X-Title", appTitle);
-			}
+            // Attribution headers intentionally omitted
 
 			HttpRequest request = builder.POST(HttpRequest.BodyPublishers.ofString(body)).build();
 
