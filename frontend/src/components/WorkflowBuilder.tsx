@@ -15,7 +15,6 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { 
   validateWorkflowNode, 
-  autoArrangeNodes, 
   createNewNode,
   formatDuration,
   formatCurrency 
@@ -56,35 +55,84 @@ import {
 import { WorkflowNode } from './workflow/WorkflowNode';
 import { TripData } from '../types/TripData';
 
-// Ladder positioning function
-const getLadderPosition = (index: number, nodeId?: string, savedPositions?: Record<string, { x: number; y: number }>): { x: number; y: number } => {
-  // Check if we have a saved position for this node
-  if (nodeId && savedPositions && savedPositions[nodeId]) {
+// Calculate optimal zoom based on number of nodes
+const calculateOptimalZoom = (nodeCount: number): number => {
+  if (nodeCount <= 3) return 0.8;
+  if (nodeCount <= 6) return 0.6;
+  if (nodeCount <= 9) return 0.5;
+  if (nodeCount <= 12) return 0.4;
+  return 0.3; // For more than 12 nodes
+};
+
+// Calculate vertical separation based on node count to avoid overlap
+const calculateVerticalSeparation = (nodeCount: number): number => {
+  const baseSeparation = 250; // Base separation
+  const additionalSeparation = Math.max(0, (nodeCount - 3) * 20); // Extra space for more nodes
+  return baseSeparation + additionalSeparation;
+};
+
+// Ladder positioning function - top-left to bottom-right diagonal
+const getLadderPosition = (index: number, nodeId?: string, savedPositions?: Record<string, { x: number; y: number }>, totalNodes?: number): { x: number; y: number } => {
+  // Check if we have a saved position for this node (but only if it's not at origin and reasonable)
+  if (nodeId && savedPositions && savedPositions[nodeId] && 
+      (savedPositions[nodeId].x !== 0 || savedPositions[nodeId].y !== 0) &&
+      savedPositions[nodeId].x > 50 && savedPositions[nodeId].y > 50) {
+    console.log(`📍 SAVED POSITION for ${nodeId}:`, {
+      position: savedPositions[nodeId],
+      index,
+      totalNodes
+    });
     return savedPositions[nodeId];
   }
   
-  const baseX = 100;
-  const baseY = 100;
-  const stepX = 200;
-  const stepY = 150;
+  const baseX = 400; // Start from center-left
+  const baseY = 300; // Start from center-top
+  const stepX = 250; // Move right
+  const stepY = 100; // Move down
+  const verticalSeparation = totalNodes ? calculateVerticalSeparation(totalNodes) : 250;
+  
+  let position;
+  let ladderType;
   
   if (index < 3) {
-    // First ladder: cards 0, 1, 2
-    return {
+    // First ladder: cards 0, 1, 2 (top-left to bottom-right)
+    position = {
       x: baseX + index * stepX,
       y: baseY + index * stepY
     };
+    ladderType = "FIRST LADDER";
   } else {
-    // Second ladder: cards 3, 4, 5 (below first card)
+    // Second ladder: cards 3, 4, 5 (below corresponding first ladder cards)
     const secondLadderIndex = index - 3;
-    return {
-      x: baseX + secondLadderIndex * stepX,
-      y: baseY + 3 * stepY + secondLadderIndex * stepY
+    
+    // Calculate the position of the corresponding card in the first ladder
+    const correspondingFirstLadderIndex = secondLadderIndex;
+    const firstLadderCardX = baseX + correspondingFirstLadderIndex * stepX;
+    const firstLadderCardY = baseY + correspondingFirstLadderIndex * stepY;
+    
+    // Position the second ladder card directly below the corresponding first ladder card
+    position = {
+      x: firstLadderCardX,
+      y: firstLadderCardY + verticalSeparation
     };
+    ladderType = "SECOND LADDER";
   }
+  
+  console.log(`🎯 CALCULATED POSITION for ${nodeId || 'unknown'}:`, {
+    nodeId,
+    index,
+    ladderType,
+    position,
+    totalNodes,
+    verticalSeparation,
+    baseCoordinates: { baseX, baseY },
+    stepValues: { stepX, stepY }
+  });
+  
+  return position;
 };
 
-// Register custom node types
+// Register custom node types (moved outside component to prevent React Flow warning)
 const nodeTypes = {
   workflow: WorkflowNode,
 };
@@ -197,7 +245,7 @@ const createWorkflowDaysFromTripData = (tripData: TripData, savedPositions?: Rec
       return {
         id: component.id,
         type: 'workflow',
-        position: getLadderPosition(componentIndex, component.id, savedPositions),
+        position: getLadderPosition(componentIndex, component.id, savedPositions, day.components.length),
         data: {
           id: component.id,
           type: mapComponentType(component.type),
@@ -228,7 +276,7 @@ const createWorkflowDaysFromTripData = (tripData: TripData, savedPositions?: Rec
     }
 
     return {
-      day: day.dayNumber,
+      day: dayIndex + 1, // Use 1-based day number for display
       date: day.date,
       nodes,
       edges,
@@ -599,11 +647,19 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   const [edges, setEdges, onEdgesChange] = useEdgesState(currentDay?.edges || []);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { project, getViewport } = useReactFlow();
+  const { project, getViewport, setViewport } = useReactFlow();
 
   // Save positions to localStorage
   const savePositions = useCallback((positions: Record<string, { x: number; y: number }>) => {
     try {
+      console.log(`💾 SAVING POSITIONS:`, {
+        tripId: tripData.id,
+        positionCount: Object.keys(positions).length,
+        positions: Object.entries(positions).map(([nodeId, pos]) => ({
+          nodeId,
+          position: pos
+        }))
+      });
       localStorage.setItem(`workflow-positions-${tripData.id}`, JSON.stringify(positions));
       setSavedPositions(positions);
     } catch (error) {
@@ -628,13 +684,28 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     }
   }, [onNodesChangeBase, savedPositions, savePositions]);
 
+  // Clear bad saved positions (positions at origin or top-left)
+  const clearBadPositions = useCallback(() => {
+    const cleanedPositions = { ...savedPositions };
+    Object.keys(cleanedPositions).forEach(nodeId => {
+      const pos = cleanedPositions[nodeId];
+      if (pos.x === 0 && pos.y === 0) {
+        delete cleanedPositions[nodeId];
+      }
+    });
+    savePositions(cleanedPositions);
+  }, [savedPositions, savePositions]);
+
   // Reset positions to ladder pattern
   const resetToLadderPattern = useCallback(() => {
     if (!currentDay) return;
     
+    // Clear any bad positions first
+    clearBadPositions();
+    
     const newPositions = { ...savedPositions };
     currentDay.nodes.forEach((node, index) => {
-      newPositions[node.id] = getLadderPosition(index);
+      newPositions[node.id] = getLadderPosition(index, node.id, {}, currentDay.nodes.length);
     });
     
     // Update nodes with new positions
@@ -645,25 +716,55 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     
     setNodes(updatedNodes);
     savePositions(newPositions);
-  }, [currentDay, savedPositions, setNodes, savePositions]);
+  }, [currentDay, savedPositions, setNodes, savePositions, clearBadPositions]);
 
-  // Update workflow days when trip data changes
+  // Update workflow days when trip data changes (only on initial load)
   useEffect(() => {
     const newWorkflowDays = createWorkflowDaysFromTripData(tripData, savedPositions);
-    if (newWorkflowDays.length > 0) {
+    if (newWorkflowDays.length > 0 && workflowDays.length === 0) {
       setWorkflowDays(newWorkflowDays);
-      setActiveDay(0); // Reset to first day
+      setActiveDay(0);
     }
-  }, [tripData, savedPositions]);
+  }, [tripData]);
+
+  // Update workflow days with saved positions when savedPositions changes
+  useEffect(() => {
+    if (workflowDays.length > 0) {
+      const updatedWorkflowDays = createWorkflowDaysFromTripData(tripData, savedPositions);
+      setWorkflowDays(updatedWorkflowDays);
+    }
+  }, [savedPositions]);
 
 
   // Update React Flow when active day changes
   useEffect(() => {
     if (currentDay) {
+      console.log(`📅 SWITCHING TO DAY ${activeDay + 1}:`, {
+        dayNumber: currentDay.day,
+        nodeCount: currentDay.nodes.length,
+        nodePositions: currentDay.nodes.map(n => ({
+          id: n.id,
+          position: n.position,
+          title: n.data.title
+        }))
+      });
       setNodes(currentDay.nodes);
       setEdges(currentDay.edges);
     }
   }, [activeDay, setNodes, setEdges]);
+
+  // Update viewport zoom when nodes change
+  useEffect(() => {
+    if (nodes.length > 0) {
+      const optimalZoom = calculateOptimalZoom(nodes.length);
+      const currentViewport = getViewport();
+      setViewport({
+        x: currentViewport.x,
+        y: currentViewport.y,
+        zoom: optimalZoom
+      });
+    }
+  }, [nodes.length, setViewport, getViewport]);
 
   // Update workflowDays when nodes/edges change
   useEffect(() => {
@@ -734,10 +835,6 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     } : null);
   }, [selectedNode, setNodes]);
 
-  const autoArrange = useCallback(() => {
-    const arrangedNodes = autoArrangeNodes(nodes);
-    setNodes(arrangedNodes);
-  }, [nodes, setNodes]);
 
   const undo = useCallback(() => {
     if (undoStack.length > 0) {
@@ -810,96 +907,52 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
   return (
     <div className={embedded ? "h-full flex flex-col bg-gray-50" : "h-screen flex flex-col bg-gray-50"}>
-      {/* Header - Only show when not embedded */}
-      {!embedded && (
-        <div className="bg-white border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={onCancel}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-              <div>
-                <h1 className="text-2xl">Workflow Builder</h1>
-                <p className="text-gray-600">{tripData.destination}</p>
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={undo} disabled={undoStack.length === 0}>
-                <Undo className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" onClick={redo} disabled={redoStack.length === 0}>
-                <Redo className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" onClick={autoArrange}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Auto Arrange
-              </Button>
-              <Button variant="outline" onClick={resetToLadderPattern}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset to Ladder
-              </Button>
-              <Button onClick={applyToItinerary}>
-                <Save className="h-4 w-4 mr-2" />
-                Apply to Itinerary
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="flex-1 flex">
         {/* Main Canvas Area */}
         <div className="flex-1 flex flex-col">
 
-          {/* Compact Toolbar for Embedded Mode */}
-          {embedded && (
-            <div className="bg-white border-b px-4 py-2">
+          {/* Section 1: Main Navigation (Map/Workflow/AI Assistant) - Only show when not embedded */}
+          {!embedded && (
+            <div className="bg-white border-b px-6 py-4 mb-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={undo} disabled={undoStack.length === 0}>
-                    <Undo className="h-3 w-3" />
+                <div className="flex items-center gap-4">
+                  <Button variant="ghost" onClick={onCancel}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
                   </Button>
-                  <Button variant="outline" size="sm" onClick={redo} disabled={redoStack.length === 0}>
-                    <Redo className="h-3 w-3" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={autoArrange}>
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    Arrange
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={resetToLadderPattern}>
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    Ladder
-                  </Button>
+                  <div>
+                    <h1 className="text-2xl">Workflow Builder</h1>
+                    <p className="text-gray-600">{tripData.destination}</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" onClick={applyToItinerary}>
-                    <Save className="h-3 w-3 mr-1" />
-                    Apply
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Day Navigation */}
-              <div className="mt-2">
-                <Tabs value={activeDay.toString()} onValueChange={(value) => setActiveDay(parseInt(value))}>
-                  <TabsList className="h-8">
-                    {workflowDays.map((day, index) => (
-                      <TabsTrigger key={index} value={index.toString()} className="text-xs px-3">
-                        Day {day.day}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
+                <Button onClick={applyToItinerary}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Apply to Itinerary
+                </Button>
               </div>
             </div>
           )}
 
-          {/* Toolbar - Only show when not embedded */}
-          {!embedded && (
-            <div className="bg-white border-b px-6 py-3">
-            <div className="flex items-center gap-2">
+
+          {/* Section 2: Day Navigation */}
+          <div className="bg-white border-b px-4 py-4 mb-2">
+            <div className="flex items-center justify-center">
+              <Tabs value={activeDay.toString()} onValueChange={(value) => setActiveDay(parseInt(value))}>
+                <TabsList className="h-10 gap-2">
+                  {workflowDays.map((day, index) => (
+                    <TabsTrigger key={index} value={index.toString()} className="text-sm px-4 py-2 mx-1">
+                      Day {day.day}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Section 3: Add Node Toolbar */}
+          <div className="bg-white border-b px-4 py-4 mb-2">
+            <div className="flex items-center justify-center gap-2">
               <span className="text-sm font-medium mr-4">Add Node:</span>
               {(['Attraction', 'Meal', 'Transit', 'Hotel', 'FreeTime'] as const).map((type) => {
                 const Icon = getNodeIcon(type);
@@ -917,10 +970,9 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
               })}
             </div>
           </div>
-          )}
 
           {/* Canvas Container */}
-          <div className="flex-1 flex">
+          <div className="flex-1 flex relative">
             {/* React Flow Canvas */}
             <div className="flex-1" ref={reactFlowWrapper}>
               <ReactFlow
@@ -933,6 +985,8 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
                 onPaneClick={onPaneClick}
                 nodeTypes={nodeTypes}
                 fitView
+                fitViewOptions={{ padding: 0.3, minZoom: 0.1, maxZoom: 1.5 }}
+                defaultViewport={{ x: 0, y: 0, zoom: calculateOptimalZoom(nodes.length) }}
                 snapToGrid
                 snapGrid={[20, 20]}
               >
@@ -940,6 +994,39 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
                 <MiniMap />
                 <Background variant="dots" gap={20} size={1} />
               </ReactFlow>
+            </div>
+
+            {/* Floating Action Buttons */}
+            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={undo}
+                disabled={undoStack.length === 0}
+                className="w-10 h-10 p-0 shadow-lg"
+                title="Undo"
+              >
+                <Undo className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={redo}
+                disabled={redoStack.length === 0}
+                className="w-10 h-10 p-0 shadow-lg"
+                title="Redo"
+              >
+                <Redo className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetToLadderPattern}
+                className="w-10 h-10 p-0 shadow-lg"
+                title="Reset to Ladder"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
             </div>
 
           </div>
