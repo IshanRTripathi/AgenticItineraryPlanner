@@ -119,15 +119,15 @@ export type MapEventType =
   | 'idle';
 
 export interface MapEventHandlers {
-  onClick?: (event: google.maps.MapMouseEvent) => void;
-  onDoubleClick?: (event: google.maps.MapMouseEvent) => void;
-  onRightClick?: (event: google.maps.MapMouseEvent) => void;
-  onMouseMove?: (event: google.maps.MapMouseEvent) => void;
-  onMouseOver?: (event: google.maps.MapMouseEvent) => void;
-  onMouseOut?: (event: google.maps.MapMouseEvent) => void;
-  onDragStart?: (event: google.maps.MapMouseEvent) => void;
-  onDrag?: (event: google.maps.MapMouseEvent) => void;
-  onDragEnd?: (event: google.maps.MapMouseEvent) => void;
+  onClick?: (event: any) => void;
+  onDoubleClick?: (event: any) => void;
+  onRightClick?: (event: any) => void;
+  onMouseMove?: (event: any) => void;
+  onMouseOver?: (event: any) => void;
+  onMouseOut?: (event: any) => void;
+  onDragStart?: (event: any) => void;
+  onDrag?: (event: any) => void;
+  onDragEnd?: (event: any) => void;
   onZoomChanged?: () => void;
   onCenterChanged?: () => void;
   onBoundsChanged?: () => void;
@@ -149,7 +149,10 @@ export const MAP_CONSTANTS = {
   MAX_ZOOM: 20,
   ANIMATION_DURATION: 1000,
   MARKER_CLUSTER_SIZE: 200,
-  BOUNDS_PADDING: 48
+  BOUNDS_PADDING: 48,
+  CLUSTERING_THRESHOLD: 10, // Use clustering for 10+ markers
+  CLUSTER_GRID_SIZE: 60,
+  CLUSTER_MAX_ZOOM: 15
 } as const;
 
 // Map type options for terrain control

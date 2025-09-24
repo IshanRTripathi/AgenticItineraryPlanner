@@ -24,6 +24,7 @@ import { DestinationsManager } from './travel-planner/views/DestinationsManager'
 import { WorkflowBuilder } from './WorkflowBuilder';
 import { ChatInterface } from './ChatInterface';
 import { TripMap } from './travel-planner/TripMap';
+import { MapErrorBoundary } from './travel-planner/MapErrorBoundary';
 
 // Import error handling and loading components
 import { ErrorBoundary } from './travel-planner/shared/ErrorBoundary';
@@ -350,14 +351,21 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
               {/* Feature flag: simplest gated render for map MVP */}
               {Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY) ? (
                 <div className="h-full">
-                  {/* TripMap integration */}
-                  <TripMap
-                    itineraryId={currentTripData.id}
-                    mapBounds={currentTripData.itinerary?.mapBounds}
-                    countryCentroid={currentTripData.itinerary?.countryCentroid}
-                    nodes={[]}
-                    className="w-full h-full"
-                  />
+                  {/* TripMap integration with error boundary */}
+                  <MapErrorBoundary
+                    onError={(error) => {
+                      console.error('Map error:', error);
+                      // Could send to error tracking service here
+                    }}
+                  >
+                    <TripMap
+                      itineraryId={currentTripData.id}
+                      mapBounds={currentTripData.itinerary?.mapBounds}
+                      countryCentroid={currentTripData.itinerary?.countryCentroid}
+                      nodes={[]}
+                      className="w-full h-full"
+                    />
+                  </MapErrorBoundary>
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-500">
