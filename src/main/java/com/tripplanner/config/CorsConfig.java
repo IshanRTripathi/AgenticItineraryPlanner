@@ -1,6 +1,5 @@
 package com.tripplanner.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,36 +19,11 @@ public class CorsConfig {
     @Value("${spring.profiles.active:}")
     private String activeProfile;
 
-    @Autowired
-    private CorsProperties corsProperties;
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Use configuration properties if available, otherwise fall back to environment-aware defaults
-        if (corsProperties.getAllowedOrigins() != null && !corsProperties.getAllowedOrigins().isEmpty()) {
-            configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
-        } else {
-            // Fallback to environment-aware configuration
-            configureEnvironmentAwareOrigins(configuration);
-        }
-        
-        if (corsProperties.getAllowedOriginPatterns() != null && !corsProperties.getAllowedOriginPatterns().isEmpty()) {
-            corsProperties.getAllowedOriginPatterns().forEach(configuration::addAllowedOriginPattern);
-        }
-        
-        configuration.setAllowedMethods(corsProperties.getAllowedMethods());
-        configuration.setAllowedHeaders(corsProperties.getAllowedHeaders());
-        configuration.setAllowCredentials(corsProperties.isAllowCredentials());
-        configuration.setMaxAge(corsProperties.getMaxAge());
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-    
-    private void configureEnvironmentAwareOrigins(CorsConfiguration configuration) {
+        // Environment-aware configuration
         if ("cloud".equals(activeProfile) || "production".equals(activeProfile)) {
             // Production: Allow specific frontend URL and Cloud Run patterns
             if (frontendUrl != null && !frontendUrl.isEmpty()) {
@@ -71,5 +45,14 @@ public class CorsConfig {
                 configuration.addAllowedOrigin(frontendUrl);
             }
         }
+        
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(false);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
