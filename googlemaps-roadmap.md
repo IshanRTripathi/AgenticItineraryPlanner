@@ -85,7 +85,7 @@ This roadmap provides a systematic approach to integrating Google Maps into the 
     google:
       maps:
         places-api-key: ${GOOGLE_PLACES_API_KEY:}
-        browser-key: ${GOOGLE_MAPS_BROWSER_KEY:}
+        browser-key: ${VITE_GOOGLE_MAPS_BROWSER_KEY:}
     ```
 
 - [x] **Create configuration class**

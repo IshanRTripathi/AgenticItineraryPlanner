@@ -62,12 +62,15 @@ export interface TripMapProps {
   selectedNodeId?: string;
   selectedDay?: number;
   onMarkerClick?: (nodeId: string) => void;
-  onMapReady?: (map: google.maps.Map) => void;
+  onMapReady?: (map: any) => void;
+  days?: Array<{ id: string; dayNumber: number; date?: string; location?: string }>;
+  onAddPlace?: (args: { dayId: string; dayNumber: number; place: { name: string; lat: number; lng: number; address?: string } }) => void; // legacy (optional)
+  onPlaceSelected?: (place: { name?: string; address?: string; lat: number; lng: number }) => void;
   className?: string;
 }
 
 export interface MarkerManagerProps {
-  map: google.maps.Map;
+  map: any;
   markers: MapMarker[];
   selectedNodeId?: string;
   onMarkerClick?: (nodeId: string) => void;
@@ -91,16 +94,7 @@ export interface MapLoadingState {
 }
 
 // Google Maps API types (extending the global google.maps namespace)
-declare global {
-  namespace google.maps {
-    interface MapTypeId {
-      static readonly ROADMAP: 'roadmap';
-      static readonly SATELLITE: 'satellite';
-      static readonly HYBRID: 'hybrid';
-      static readonly TERRAIN: 'terrain';
-    }
-  }
-}
+// Note: avoid augmenting google.maps types here to prevent TS conflicts in environments without the global types
 
 // Utility types for map operations
 export type MapEventType = 

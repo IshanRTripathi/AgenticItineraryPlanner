@@ -24,7 +24,9 @@ import { DestinationsManager } from './travel-planner/views/DestinationsManager'
 import { WorkflowBuilder } from './WorkflowBuilder';
 import { ChatInterface } from './ChatInterface';
 import { TripMap } from './travel-planner/TripMap';
-import { MapErrorBoundary } from './travel-planner/MapErrorBoundary';
+import { PlaceAddModal } from './travel-planner/modals/PlaceAddModal';
+import type { MapMarker } from '../types/MapTypes';
+import MapErrorBoundary from './travel-planner/MapErrorBoundary';
 
 // Import error handling and loading components
 import { ErrorBoundary } from './travel-planner/shared/ErrorBoundary';
@@ -63,6 +65,8 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
   const [selectedDay, setSelectedDay] = useState<{ dayNumber: number; dayData: any } | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<{ name?: string; address?: string; lat: number; lng: number } | null>(null);
+  const [placeModalOpen, setPlaceModalOpen] = useState(false);
 
 
   // Fetch fresh data from API instead of using cached props
@@ -294,6 +298,35 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
       </Tabs>
     );
 
+    // Build map markers from itinerary days/components
+    const mapMarkers: MapMarker[] = (() => {
+      const markers: MapMarker[] = [];
+      const days = currentTripData.itinerary?.days || [];
+      days.forEach((day, dayIdx) => {
+        const comps = day.components || [];
+        comps.forEach((c: any, compIdx: number) => {
+          const lat = c?.location?.coordinates?.lat;
+          const lng = c?.location?.coordinates?.lng;
+          if (typeof lat === 'number' && typeof lng === 'number') {
+            markers.push({
+              id: c.id || `${dayIdx}-${compIdx}`,
+              position: { lat, lng },
+              title: c.name || c.type || `Place ${compIdx + 1}`,
+              type: (c.type === 'restaurant' ? 'meal' :
+                    c.type === 'hotel' ? 'accommodation' :
+                    c.type === 'transport' ? 'transport' : 'attraction'),
+              status: 'planned',
+              locked: false,
+              rating: c.rating,
+              googleMapsUri: c.googleMapsUri,
+            });
+          }
+        });
+      });
+      console.log('[Maps] Built markers from itinerary:', markers);
+      return markers;
+    })();
+
     const rightContent = (
       <>
         <div className="absolute top-4 left-4 z-20">
@@ -355,15 +388,34 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
                   <MapErrorBoundary
                     onError={(error) => {
                       console.error('Map error:', error);
-                      // Could send to error tracking service here
                     }}
                   >
                     <TripMap
                       itineraryId={currentTripData.id}
                       mapBounds={currentTripData.itinerary?.mapBounds}
                       countryCentroid={currentTripData.itinerary?.countryCentroid}
-                      nodes={[]}
+                      nodes={mapMarkers}
+                      days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx+1}`, dayNumber: d.dayNumber || (idx+1), date: d.date, location: d.location }))}
+                      onPlaceSelected={(place) => {
+                        setSelectedPlace(place)
+                        setPlaceModalOpen(true)
+                      }}
                       className="w-full h-full"
+                    />
+                    <PlaceAddModal
+                      open={placeModalOpen}
+                      place={selectedPlace}
+                      days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx+1}`, dayNumber: d.dayNumber || (idx+1), date: d.date, location: d.location }))}
+                      onConfirm={({ dayId, dayNumber, place }) => {
+                        console.log('[Maps] Confirm add place', { dayId, dayNumber, place })
+                        setPlaceModalOpen(false)
+                        setSelectedPlace(null)
+                        // TODO: Persist via backend and then refresh itinerary
+                      }}
+                      onClose={() => {
+                        setPlaceModalOpen(false)
+                        setSelectedPlace(null)
+                      }}
                     />
                   </MapErrorBoundary>
                 </div>
