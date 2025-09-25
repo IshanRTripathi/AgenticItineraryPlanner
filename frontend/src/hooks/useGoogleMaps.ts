@@ -7,7 +7,7 @@ export function useGoogleMaps() {
   const [api, setApi] = useState<typeof google | null>(null)
 
   useEffect(() => {
-    const key = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY as string
+    const key = ((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY as string | undefined)?.trim() || ''
     setIsLoading(true)
     setError(null)
     loadGoogleMaps(key)

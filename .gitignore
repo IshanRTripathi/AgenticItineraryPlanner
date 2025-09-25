@@ -51,3 +51,5 @@ data/itinerarydb.trace.db
 .env
 .env.local
 .env.production
+.env.local
+frontend/.env.example
