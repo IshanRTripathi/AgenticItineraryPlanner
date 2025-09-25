@@ -3,7 +3,7 @@
 
 availableSecrets:
   secretManager:
-  - versionName: projects/tripplanner-bdd3c/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
+  - versionName: projects/tripaiplanner/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
     env: 'GOOGLE_MAPS_BROWSER_KEY'
 
 steps:
