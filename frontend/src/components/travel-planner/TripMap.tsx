@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import { useGoogleMaps } from '../../hooks/useGoogleMaps'
 import type { TripMapProps } from '../../types/MapTypes'
+import { createRoot, Root } from 'react-dom/client'
+import { PlaceInfoCard } from './cards/PlaceInfoCard'
 
 export function TripMap({
   itineraryId,
@@ -18,6 +20,8 @@ export function TripMap({
   const mapInstanceRef = useRef<any | null>(null)
   const pendingClickRef = useRef<{ lat: number; lng: number; name?: string; address?: string } | null>(null)
   const infoDivRef = useRef<HTMLDivElement | null>(null)
+  const infoWindowRef = useRef<any | null>(null)
+  const infoRootRef = useRef<Root | null>(null)
 
   // Initialize map
   useEffect(() => {
@@ -40,22 +44,61 @@ export function TripMap({
         const lng = ev?.latLng?.lng?.();
         if (typeof lat !== 'number' || typeof lng !== 'number') return;
         pendingClickRef.current = { lat, lng };
+        console.info('[Maps] Click at', { lat, lng })
         let name: string | undefined;
         let address: string | undefined;
-        if (api.maps.places) {
+        if (api.maps) {
           const geocoder = new api.maps.Geocoder();
           const res = await geocoder.geocode({ location: { lat, lng } });
           const first = res.results?.[0];
           address = first?.formatted_address;
-          name = first?.address_components?.[0]?.long_name || address;
+          // Prefer place name from types or location details; fallback to formatted address
+          name = (first?.address_components?.find((c: any) => c.types?.includes('point_of_interest'))?.long_name)
+              || first?.address_components?.find((c: any) => c.types?.includes('establishment'))?.long_name
+              || first?.address_components?.find((c: any) => c.types?.includes('premise'))?.long_name
+              || first?.address_components?.find((c: any) => c.types?.includes('route'))?.long_name
+              || first?.address_components?.[0]?.long_name
+              || address;
+          console.info('[Maps] Reverse geocode result', {
+            formattedAddress: address,
+            chosenName: name,
+            resultTypes: first?.types,
+          })
         }
         pendingClickRef.current = { lat, lng, name, address };
         // Prefer lifting to parent to render a modal/portal
         if (onPlaceSelected) {
           onPlaceSelected({ lat, lng, name, address })
         } else if (onAddPlace && days && days.length > 0) {
-          // Backward-compatible overlay
-          showOverlayPrompt({ lat, lng, name, address });
+          // Render React card inside a Google Maps InfoWindow at clicked LatLng
+          try {
+            if (!infoDivRef.current) {
+              infoDivRef.current = document.createElement('div')
+            } else {
+              infoRootRef.current?.unmount()
+              infoDivRef.current.innerHTML = ''
+            }
+            infoRootRef.current = createRoot(infoDivRef.current)
+            infoRootRef.current.render(
+              <PlaceInfoCard
+                place={{ lat, lng, name, address }}
+                days={days}
+                onAdd={({ dayId, dayNumber }) => {
+                  onAddPlace?.({ dayId, dayNumber, place: { name: name || 'Selected location', address, lat, lng } })
+                  infoWindowRef.current?.close()
+                }}
+                onClose={() => infoWindowRef.current?.close()}
+              />
+            )
+            if (!infoWindowRef.current) {
+              infoWindowRef.current = new api.maps.InfoWindow({ maxWidth: 520 })
+            }
+            infoWindowRef.current.setContent(infoDivRef.current)
+            infoWindowRef.current.setPosition({ lat, lng })
+            infoWindowRef.current.open({ map })
+            // Pan into view if needed
+            map.panTo({ lat, lng })
+          } catch {}
         }
       } catch (e) {
         // ignore

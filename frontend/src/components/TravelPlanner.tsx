@@ -24,7 +24,7 @@ import { DestinationsManager } from './travel-planner/views/DestinationsManager'
 import { WorkflowBuilder } from './WorkflowBuilder';
 import { ChatInterface } from './ChatInterface';
 import { TripMap } from './travel-planner/TripMap';
-import { PlaceAddModal } from './travel-planner/modals/PlaceAddModal';
+// Removed modal-based add flow; use on-map InfoWindow card instead
 import type { MapMarker } from '../types/MapTypes';
 import MapErrorBoundary from './travel-planner/MapErrorBoundary';
 
@@ -65,8 +65,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
   const [selectedDay, setSelectedDay] = useState<{ dayNumber: number; dayData: any } | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<{ name?: string; address?: string; lat: number; lng: number } | null>(null);
-  const [placeModalOpen, setPlaceModalOpen] = useState(false);
+  // Modal flow removed in favor of on-map InfoWindow
 
 
   // Fetch fresh data from API instead of using cached props
@@ -396,26 +395,11 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
                       countryCentroid={currentTripData.itinerary?.countryCentroid}
                       nodes={mapMarkers}
                       days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx+1}`, dayNumber: d.dayNumber || (idx+1), date: d.date, location: d.location }))}
-                      onPlaceSelected={(place) => {
-                        setSelectedPlace(place)
-                        setPlaceModalOpen(true)
+                      onAddPlace={({ dayId, dayNumber, place }) => {
+                        console.log('[Maps] Add place to itinerary (InfoWindow)', { dayId, dayNumber, place })
+                        // TODO: Persist via backend mutation; then refresh itinerary
                       }}
                       className="w-full h-full"
-                    />
-                    <PlaceAddModal
-                      open={placeModalOpen}
-                      place={selectedPlace}
-                      days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx+1}`, dayNumber: d.dayNumber || (idx+1), date: d.date, location: d.location }))}
-                      onConfirm={({ dayId, dayNumber, place }) => {
-                        console.log('[Maps] Confirm add place', { dayId, dayNumber, place })
-                        setPlaceModalOpen(false)
-                        setSelectedPlace(null)
-                        // TODO: Persist via backend and then refresh itinerary
-                      }}
-                      onClose={() => {
-                        setPlaceModalOpen(false)
-                        setSelectedPlace(null)
-                      }}
                     />
                   </MapErrorBoundary>
                 </div>
