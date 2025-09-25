@@ -4,7 +4,7 @@
 availableSecrets:
   secretManager:
   - versionName: projects/tripaiplanner/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
-    env: 'GOOGLE_MAPS_BROWSER_KEY'
+    env: 'VITE_GOOGLE_MAPS_BROWSER_KEY'
 
 steps:
   # Build and deploy backend
@@ -70,12 +70,12 @@ steps:
       'build',
       '-f', 'Dockerfile.frontend',
       '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
-      '--build-arg', 'GOOGLE_MAPS_BROWSER_KEY=$$GOOGLE_MAPS_BROWSER_KEY',
+      '--build-arg', 'VITE_GOOGLE_MAPS_BROWSER_KEY=$$VITE_GOOGLE_MAPS_BROWSER_KEY',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '.'
     ]
-    secretEnv: ['GOOGLE_MAPS_BROWSER_KEY']
+    secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY']
     id: 'build-frontend'
     waitFor: ['build-backend']
 
