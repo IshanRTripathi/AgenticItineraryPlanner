@@ -7,7 +7,11 @@ export function useGoogleMaps() {
   const [api, setApi] = useState<any | null>(null)
 
   useEffect(() => {
-    const key = ((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY as string | undefined)?.trim() || ''
+    const envKey = ((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY as string | undefined)?.trim() || ''
+    // Temporary hardcoded fallback for production until CI secret substitution is fixed
+    const key = (!envKey || envKey.startsWith('$') || envKey.includes('VITE_GOOGLE_MAPS_BROWSER_KEY'))
+      ? 'AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss'
+      : envKey
     setIsLoading(true)
     setError(null)
     try {
