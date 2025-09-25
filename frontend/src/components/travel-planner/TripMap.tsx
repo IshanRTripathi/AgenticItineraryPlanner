@@ -47,22 +47,67 @@ export function TripMap({
         console.info('[Maps] Click at', { lat, lng })
         let name: string | undefined;
         let address: string | undefined;
-        if (api.maps) {
+        let placeDetails: any | undefined;
+        if (api.maps?.importLibrary) {
+          try {
+            // Use the NEW Places API (searchNearby + fetchFields)
+            const placesLib: any = await (api.maps as any).importLibrary('places')
+            const Place = placesLib.Place
+            const SearchNearbyRankPreference = placesLib.SearchNearbyRankPreference
+            const request = {
+              locationRestriction: { center: { lat, lng }, radius: 40 },
+              includedPrimaryTypes: undefined, // generic; let API choose
+              maxResultCount: 5,
+              rankPreference: SearchNearbyRankPreference.POPULARITY,
+              fields: ['id', 'displayName', 'formattedAddress', 'location', 'types'],
+            }
+            const nearby: any = await Place.searchNearby(request)
+            const top: any | undefined = nearby?.places?.[0]
+            if (top) {
+              // Fetch richer fields for the top place
+              const fetched = await top.fetchFields({
+                fields: [
+                  'id',
+                  'displayName',
+                  'formattedAddress',
+                  'location',
+                  'types',
+                  'rating',
+                  'userRatingCount',
+                  'internationalPhoneNumber',
+                ],
+              })
+              placeDetails = fetched || top
+              name = placeDetails?.displayName || top?.displayName || undefined
+              address = placeDetails?.formattedAddress || top?.formattedAddress || undefined
+              console.info('[Maps] Places (new) result', {
+                name,
+                address,
+                rating: placeDetails?.rating,
+                userRatingCount: placeDetails?.userRatingCount,
+                types: placeDetails?.types,
+                mapsLink: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+              })
+            }
+          } catch (e) {
+            console.warn('[Maps] Places (new) failed, falling back to Geocoder', e)
+          }
+        }
+        if (!name && api.maps) {
           const geocoder = new api.maps.Geocoder();
           const res = await geocoder.geocode({ location: { lat, lng } });
           const first = res.results?.[0];
-          address = first?.formatted_address;
-          // Prefer place name from types or location details; fallback to formatted address
-          name = (first?.address_components?.find((c: any) => c.types?.includes('point_of_interest'))?.long_name)
+          address = address || first?.formatted_address;
+          name = name || (first?.address_components?.find((c: any) => c.types?.includes('point_of_interest'))?.long_name)
               || first?.address_components?.find((c: any) => c.types?.includes('establishment'))?.long_name
               || first?.address_components?.find((c: any) => c.types?.includes('premise'))?.long_name
               || first?.address_components?.find((c: any) => c.types?.includes('route'))?.long_name
               || first?.address_components?.[0]?.long_name
               || address;
-          console.info('[Maps] Reverse geocode result', {
+          console.info('[Maps] Reverse geocode result (fallback)', {
             formattedAddress: address,
             chosenName: name,
-            resultTypes: first?.types,
+            resultTypes: res.results?.[0]?.types,
           })
         }
         pendingClickRef.current = { lat, lng, name, address };
@@ -91,7 +136,7 @@ export function TripMap({
               />
             )
             if (!infoWindowRef.current) {
-              infoWindowRef.current = new api.maps.InfoWindow({ maxWidth: 520 })
+              infoWindowRef.current = new api.maps.InfoWindow({ maxWidth: 450 })
             }
             infoWindowRef.current.setContent(infoDivRef.current)
             infoWindowRef.current.setPosition({ lat, lng })
