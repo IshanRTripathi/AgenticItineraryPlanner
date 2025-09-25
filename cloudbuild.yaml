@@ -59,8 +59,7 @@ steps:
       '--set-env-vars', 'APP_DATABASE_TYPE=firestore',
       '--set-env-vars', 'FIRESTORE_USE_EMULATOR=false',
       '--set-secrets', 'FIRESTORE_CREDENTIALS=_FIRESTORE_CREDENTIALS:latest',
-      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
-      '--set-secrets', 'GOOGLE_MAPS_BROWSER_KEY=_GOOGLE_MAPS_BROWSER_KEY:latest'
+      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}'
     ]
     id: 'deploy-backend'
     waitFor: ['push-backend-sha']
