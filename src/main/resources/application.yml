@@ -29,6 +29,8 @@ app:
       - "*"
     allow-credentials: false
     max-age: 3600
+
+spring:
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
