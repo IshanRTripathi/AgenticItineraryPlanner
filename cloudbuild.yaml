@@ -45,6 +45,7 @@ steps:
       '--set-env-vars', 'SPRING_PROFILES_ACTIVE=cloud',
       '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
       '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
+      '--set-secrets', 'VITE_GOOGLE_MAPS_BROWSER_KEY=_GOOGLE_MAPS_BROWSER_KEY:latest',
       '--set-env-vars', 'GEMINI_MOCK_MODE=false',
       '--set-env-vars', 'AI_PROVIDER=openrouter',
       '--set-secrets', 'AI_MODEL=_AI_MODEL:latest',
