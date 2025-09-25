@@ -15,6 +15,16 @@ spring:
     exclude:
       - org.springdoc.core.configuration.SpringDocConfiguration
       - org.springdoc.webmvc.ui.SwaggerConfig
+  cloud:
+    gcp:
+      project-id: tripplanner-bdd3c
+      firestore:
+        project-id: tripplanner-bdd3c
+        host: ${FIRESTORE_HOST:firestore.googleapis.com:443}
+        emulator:
+          enabled: false
+        credentials:
+          location: ${FIRESTORE_CREDENTIALS_FILE:}
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
@@ -85,12 +95,12 @@ openrouter:
   app-url: ${OPENROUTER_APP_URL:}
   app-title: ${OPENROUTER_APP_TITLE:}
 
-# Firestore (disabled for now)
+# Firestore Configuration
 firestore:
-  project-id: ${GCP_PROJECT_ID:}
+  project-id: tripplanner-bdd3c
   credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
   database-id: ${FIRESTORE_DATABASE_ID:(default)}
-  enabled: false
+  enabled: true
 
 razorpay:
   key-id: ${RAZORPAY_KEY_ID:dummy-razorpay-key-id}

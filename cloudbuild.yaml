@@ -113,7 +113,7 @@ steps:
 # Substitution variables (hardcoded for mock setup)
 substitutions:
   _REGION: 'us-south1'
-  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app'
+  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-7cbftguaga-vp.a.run.app'
   _FRONTEND_URL: 'https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app'
   _GCP_PROJECT_ID: 'tripaiplanner'
 
