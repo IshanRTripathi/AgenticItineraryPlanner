@@ -23,6 +23,9 @@ public class CorsConfig {
         if (frontendUrl != null && !frontendUrl.isEmpty()) {
             configuration.addAllowedOriginPattern(frontendUrl);
         }
+        
+        
+        // Add pattern for all Cloud Run domains
         configuration.addAllowedOriginPattern("https://*.run.app");
         configuration.addAllowedOriginPattern("http://localhost:3000");
         configuration.addAllowedOriginPattern("http://127.0.0.1:3000");
