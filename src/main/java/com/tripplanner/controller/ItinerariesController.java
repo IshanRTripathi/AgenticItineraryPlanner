@@ -20,13 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * REST controller for itinerary operations.
  */
-@CrossOrigin(origins = {
-    "http://localhost:3000", 
-    "http://localhost:3001", 
-    "http://127.0.0.1:3000", 
-    "http://127.0.0.1:3001",
-    "https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app"
-})
 @RestController
 @RequestMapping("/api/v1/itineraries")
 public class ItinerariesController {
