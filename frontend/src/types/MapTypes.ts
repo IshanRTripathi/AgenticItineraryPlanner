@@ -64,7 +64,21 @@ export interface TripMapProps {
   onMarkerClick?: (nodeId: string) => void;
   onMapReady?: (map: any) => void;
   days?: Array<{ id: string; dayNumber: number; date?: string; location?: string }>;
-  onAddPlace?: (args: { dayId: string; dayNumber: number; place: { name: string; lat: number; lng: number; address?: string } }) => void; // legacy (optional)
+  onAddPlace?: (args: { 
+    dayId: string; 
+    dayNumber: number; 
+    place: { 
+      name: string; 
+      lat: number; 
+      lng: number; 
+      address?: string;
+      types?: string[];
+      rating?: number;
+      userRatingCount?: number;
+      phoneNumber?: string;
+      mapsLink?: string;
+    } 
+  }) => void;
   onPlaceSelected?: (place: { name?: string; address?: string; lat: number; lng: number }) => void;
   className?: string;
 }

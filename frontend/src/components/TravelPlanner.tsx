@@ -27,6 +27,8 @@ import { TripMap } from './travel-planner/TripMap';
 // Removed modal-based add flow; use on-map InfoWindow card instead
 import type { MapMarker } from '../types/MapTypes';
 import MapErrorBoundary from './travel-planner/MapErrorBoundary';
+import { addPlaceToItineraryDay } from '../utils/addPlaceToItinerary';
+import { createWorkflowNodeFromPlace } from '../utils/placeToWorkflowNode';
 
 // Import error handling and loading components
 import { ErrorBoundary } from './travel-planner/shared/ErrorBoundary';
@@ -397,7 +399,46 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
                       days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx+1}`, dayNumber: d.dayNumber || (idx+1), date: d.date, location: d.location }))}
                       onAddPlace={({ dayId, dayNumber, place }) => {
                         console.log('[Maps] Add place to itinerary (InfoWindow)', { dayId, dayNumber, place })
-                        // TODO: Persist via backend mutation; then refresh itinerary
+                        console.log('[Maps] Place types:', place.types)
+                        console.log('[Maps] Place name:', place.name)
+                        
+                        try {
+                          // 1. Add to day-by-day view
+                          const updatedTripData = addPlaceToItineraryDay(currentTripData, {
+                            dayId,
+                            dayNumber,
+                            place,
+                          });
+                          
+                          // Update the trip data via query client
+                          queryClient.setQueryData(
+                            queryKeys.itinerary(currentTripData.id),
+                            updatedTripData
+                          );
+                          
+                          // 2. Create workflow node if workflow builder is available
+                          if (showWorkflowBuilder) {
+                            const dayIndex = dayNumber - 1; // Convert to 0-based index
+                            const workflowNode = createWorkflowNodeFromPlace(
+                              place,
+                              dayIndex,
+                              { x: 200 + Math.random() * 300, y: 200 + Math.random() * 300 }
+                            );
+                            
+                            console.log('[Maps] Created workflow node:', workflowNode);
+                            
+                            // TODO: Add the workflow node to the workflow builder
+                            // This would require access to the workflow builder's state management
+                            // For now, we'll just log it
+                          }
+                          
+                          // 3. TODO: Persist via backend mutation; then refresh itinerary
+                          // This would involve calling the backend API to save the changes
+                          
+                          console.log('[Maps] Successfully added place to itinerary');
+                        } catch (error) {
+                          console.error('[Maps] Failed to add place to itinerary:', error);
+                        }
                       }}
                       className="w-full h-full"
                     />

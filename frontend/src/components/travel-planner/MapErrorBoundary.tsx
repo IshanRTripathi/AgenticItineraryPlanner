@@ -2,7 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import type { MapError } from '../../types/MapTypes';
 
 interface Props {
-  children: ReactNode;
+  children?: ReactNode;
   fallback?: ReactNode;
   onError?: (error: MapError) => void;
 }

@@ -3,7 +3,17 @@ import React, { useState } from 'react'
 interface DayOption { id: string; dayNumber: number; date?: string; location?: string }
 
 interface Props {
-  place: { name?: string; address?: string; lat: number; lng: number }
+  place: { 
+    name?: string; 
+    address?: string; 
+    lat: number; 
+    lng: number;
+    types?: string[];
+    rating?: number;
+    userRatingCount?: number;
+    phoneNumber?: string;
+    mapsLink?: string;
+  }
   days: DayOption[]
   onAdd: (args: { dayId: string; dayNumber: number }) => void
   onClose: () => void

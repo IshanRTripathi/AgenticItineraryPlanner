@@ -47,6 +47,11 @@ export function TripMap({
         console.info('[Maps] Click at', { lat, lng })
         let name: string | undefined;
         let address: string | undefined;
+        let placeTypes: string[] | undefined;
+        let placeRating: number | undefined;
+        let placeUserRatingCount: number | undefined;
+        let placePhoneNumber: string | undefined;
+        let placeMapsLink: string | undefined;
         let placeDetails: any | undefined;
         if (api.maps?.importLibrary) {
           try {
@@ -80,13 +85,19 @@ export function TripMap({
               placeDetails = fetched || top
               name = placeDetails?.displayName || top?.displayName || undefined
               address = placeDetails?.formattedAddress || top?.formattedAddress || undefined
+              placeTypes = placeDetails?.types || top?.types || undefined
+              placeRating = placeDetails?.rating || top?.rating || undefined
+              placeUserRatingCount = placeDetails?.userRatingCount || top?.userRatingCount || undefined
+              placePhoneNumber = placeDetails?.internationalPhoneNumber || top?.internationalPhoneNumber || undefined
+              placeMapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${placeDetails?.id || top?.id}`
               console.info('[Maps] Places (new) result', {
                 name,
                 address,
-                rating: placeDetails?.rating,
-                userRatingCount: placeDetails?.userRatingCount,
-                types: placeDetails?.types,
-                mapsLink: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+                types: placeTypes,
+                rating: placeRating,
+                userRatingCount: placeUserRatingCount,
+                phoneNumber: placePhoneNumber,
+                mapsLink: placeMapsLink,
               })
             }
           } catch (e) {
@@ -104,13 +115,16 @@ export function TripMap({
               || first?.address_components?.find((c: any) => c.types?.includes('route'))?.long_name
               || first?.address_components?.[0]?.long_name
               || address;
+          placeTypes = placeTypes || first?.types || undefined;
+          placeMapsLink = placeMapsLink || `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
           console.info('[Maps] Reverse geocode result (fallback)', {
             formattedAddress: address,
             chosenName: name,
+            types: placeTypes,
             resultTypes: res.results?.[0]?.types,
           })
         }
-        pendingClickRef.current = { lat, lng, name, address };
+        pendingClickRef.current = { lat, lng, name, address, types: placeTypes, rating: placeRating, userRatingCount: placeUserRatingCount, phoneNumber: placePhoneNumber, mapsLink: placeMapsLink };
         // Prefer lifting to parent to render a modal/portal
         if (onPlaceSelected) {
           onPlaceSelected({ lat, lng, name, address })
@@ -126,10 +140,24 @@ export function TripMap({
             infoRootRef.current = createRoot(infoDivRef.current)
             infoRootRef.current.render(
               <PlaceInfoCard
-                place={{ lat, lng, name, address }}
+                place={{ lat, lng, name, address, types: placeTypes, rating: placeRating, userRatingCount: placeUserRatingCount, phoneNumber: placePhoneNumber, mapsLink: placeMapsLink }}
                 days={days}
                 onAdd={({ dayId, dayNumber }) => {
-                  onAddPlace?.({ dayId, dayNumber, place: { name: name || 'Selected location', address, lat, lng } })
+                  onAddPlace?.({ 
+                    dayId, 
+                    dayNumber, 
+                    place: { 
+                      name: name || 'Selected location', 
+                      address, 
+                      lat, 
+                      lng,
+                      types: placeTypes,
+                      rating: placeRating,
+                      userRatingCount: placeUserRatingCount,
+                      phoneNumber: placePhoneNumber,
+                      mapsLink: placeMapsLink
+                    } 
+                  })
                   infoWindowRef.current?.close()
                 }}
                 onClose={() => infoWindowRef.current?.close()}
