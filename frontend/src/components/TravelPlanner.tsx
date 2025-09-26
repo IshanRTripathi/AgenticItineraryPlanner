@@ -31,8 +31,9 @@ import { addPlaceToItineraryDay } from '../utils/addPlaceToItinerary';
 import { createWorkflowNodeFromPlace } from '../utils/placeToWorkflowNode';
 
 // Import error handling and loading components
-import { ErrorBoundary } from './travel-planner/shared/ErrorBoundary';
+import { ErrorBoundary, withErrorBoundary } from './travel-planner/shared/ErrorBoundary';
 import { LoadingSpinner } from './travel-planner/shared/LoadingSpinner';
+import { ErrorDisplay } from './shared/ErrorDisplay';
 
 // Import types
 import { 
@@ -50,7 +51,7 @@ interface TravelPlannerProps {
   onExportPDF: () => void;
 }
 
-export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
+function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
   console.log('=== TRAVEL PLANNER COMPONENT RENDER ===');
   console.log('Trip Data Props:', tripData);
   console.log('=======================================');
@@ -62,12 +63,11 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   const [showNotes, setShowNotes] = useState(false);
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(true);
   const [showChatInterface, setShowChatInterface] = useState(false);
-  const [leftPanelWidth, setLeftPanelWidth] = useState(25);
-  const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(false);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(45); // Start with expanded view
+  const [isLeftPanelExpanded, setIsLeftPanelExpanded] = useState(true); // Start expanded
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [agentStatuses, setAgentStatuses] = useState<AgentStatus[]>([]);
   const [selectedDay, setSelectedDay] = useState<{ dayNumber: number; dayData: any } | null>(null);
-  // Modal flow removed in favor of on-map InfoWindow
 
 
   // Fetch fresh data from API instead of using cached props
@@ -216,14 +216,11 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
   // Show error state if API call failed
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8 max-w-md mx-auto">
-          <div className="text-center">
-            <p className="text-red-600 mb-4">Failed to load planner data</p>
-            <Button onClick={onBack}>Go Back</Button>
-          </div>
-        </Card>
-      </div>
+      <ErrorDisplay
+        error={error}
+        onRetry={() => window.location.reload()}
+        onGoBack={onBack}
+      />
     );
   }
 
@@ -235,9 +232,27 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
     console.log('Destinations:', destinations);
     console.log('Current Trip Data Itinerary:', currentTripData.itinerary);
     console.log('Current Trip Data Days:', currentTripData.itinerary?.days);
+    console.log('Has Itinerary Data:', !!(currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0));
     console.log('========================');
     
-    if (destinations.length === 0) {
+    // Check if we have actual itinerary data, not just destinations array
+    const hasItineraryData = currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0;
+    
+    // Show loading state while data is being fetched
+    if (isLoading) {
+      return (
+        <div className="p-6 space-y-6">
+          <Card className="p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <span className="text-gray-600">Loading your itinerary...</span>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+    
+    if (!hasItineraryData) {
       return (
         <div className="p-6 space-y-6">
           <Card className="p-6">
@@ -251,9 +266,9 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
           </Card>
           
           <Card className="p-6">
-            <h3 className="font-semibold mb-2">Collect all your online research in one place</h3>
+            <h3 className="font-semibold mb-2">No itinerary data available yet</h3>
             <p className="text-gray-600 text-sm mb-4">
-              Save your links from Instagram, Pinterest, blogs and more to your trip for easy reference.
+              Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below.
             </p>
             <Button>Add a link</Button>
           </Card>
@@ -269,9 +284,9 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
             <TabsTrigger value="day-by-day">Day by day</TabsTrigger>
           </TabsList>
         </div>
-        
-        <div className="flex-1 overflow-hidden">
-          <TabsContent value="destinations" className="m-0 h-full overflow-y-auto">
+
+        <div className="flex-1 min-h-0 flex flex-col">
+          <TabsContent value="destinations" className="m-0 flex-1 overflow-y-auto">
             <DestinationsManager
               destinations={destinations}
               currency={currency}
@@ -287,8 +302,8 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
               }}
             />
           </TabsContent>
-          
-          <TabsContent value="day-by-day" className="m-0 h-full overflow-y-auto">
+
+          <TabsContent value="day-by-day" className="m-0 flex-1 overflow-y-auto">
             <DayByDayView 
               tripData={currentTripData} 
               onDaySelect={handleDaySelect}
@@ -299,32 +314,49 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
       </Tabs>
     );
 
-    // Build map markers from itinerary days/components
+    // Build map markers from itinerary days/components with error handling
     const mapMarkers: MapMarker[] = (() => {
       const markers: MapMarker[] = [];
       const days = currentTripData.itinerary?.days || [];
-      days.forEach((day, dayIdx) => {
-        const comps = day.components || [];
-        comps.forEach((c: any, compIdx: number) => {
-          const lat = c?.location?.coordinates?.lat;
-          const lng = c?.location?.coordinates?.lng;
-          if (typeof lat === 'number' && typeof lng === 'number') {
-            markers.push({
-              id: c.id || `${dayIdx}-${compIdx}`,
-              position: { lat, lng },
-              title: c.name || c.type || `Place ${compIdx + 1}`,
-              type: (c.type === 'restaurant' ? 'meal' :
-                    c.type === 'hotel' ? 'accommodation' :
-                    c.type === 'transport' ? 'transport' : 'attraction'),
-              status: 'planned',
-              locked: false,
-              rating: c.rating,
-              googleMapsUri: c.googleMapsUri,
-            });
-          }
+      
+      try {
+        days.forEach((day, dayIdx) => {
+          const comps = day.components || [];
+          comps.forEach((c: any, compIdx: number) => {
+            try {
+              const lat = c?.location?.coordinates?.lat;
+              const lng = c?.location?.coordinates?.lng;
+              
+              // Validate coordinates
+              if (typeof lat === 'number' && typeof lng === 'number' && 
+                  !isNaN(lat) && !isNaN(lng) && 
+                  lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                
+                markers.push({
+                  id: c.id || `${dayIdx}-${compIdx}`,
+                  position: { lat, lng },
+                  title: c.name || c.type || `Place ${compIdx + 1}`,
+                  type: (c.type === 'restaurant' ? 'meal' :
+                        c.type === 'hotel' ? 'accommodation' :
+                        c.type === 'transport' ? 'transport' : 'attraction'),
+                  status: 'planned',
+                  locked: false,
+                  rating: c.rating || 0,
+                  googleMapsUri: c.googleMapsUri || '',
+                });
+              } else {
+                console.warn('[Maps] Invalid coordinates for component:', c);
+              }
+            } catch (error) {
+              console.error('[Maps] Error processing component:', c, error);
+            }
+          });
         });
-      });
-      console.log('[Maps] Built markers from itinerary:', markers);
+      } catch (error) {
+        console.error('[Maps] Error building markers:', error);
+      }
+      
+      console.log('[Maps] Built markers from itinerary:', markers.length, 'valid markers');
       return markers;
     })();
 
@@ -456,20 +488,18 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
             </div>
           ) : (
              <div className="h-full overflow-hidden relative">
-               <div className="pt-16 h-full">
-                 <WorkflowBuilder 
-                   tripData={currentTripData}
-                   embedded={true}
-                   onSave={(updatedItinerary) => {
-                     console.log('Workflow saved:', updatedItinerary);
-                     // TODO: Implement save functionality
-                   }}
-                   onCancel={() => {
-                     console.log('Workflow cancelled');
-                     setShowWorkflowBuilder(false);
-                   }}
-                 />
-               </div>
+               <WorkflowBuilder 
+                 tripData={currentTripData}
+                 embedded={true}
+                 onSave={(updatedItinerary) => {
+                   console.log('Workflow saved:', updatedItinerary);
+                   // TODO: Implement save functionality
+                 }}
+                 onCancel={() => {
+                   console.log('Workflow cancelled');
+                   setShowWorkflowBuilder(false);
+                 }}
+               />
              </div>
           )}
         </div>
@@ -481,7 +511,7 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
         leftPanelWidth={leftPanelWidth}
         onWidthChange={(width) => {
           setLeftPanelWidth(width);
-          setIsLeftPanelExpanded(width > 25);
+          setIsLeftPanelExpanded(width > 30); // Consistent with ResizablePanel logic
         }}
         leftContent={leftContent}
         rightContent={rightContent}
@@ -524,22 +554,25 @@ export function TravelPlanner({ tripData, onSave, onBack, onShare, onExportPDF }
 
   // Main component return
   return (
-    <>
-      <div className="h-screen flex flex-col bg-gray-50">
-        <TopNavigation
-          tripData={currentTripData}
-          onShare={onShare}
-          onExportPDF={onExportPDF}
-          onBack={onBack}
+    <div className="h-screen flex flex-col bg-gray-50">
+      <TopNavigation
+        tripData={currentTripData}
+        onShare={onShare}
+        onExportPDF={onExportPDF}
+        onBack={onBack}
+      />
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <NavigationSidebar
+          activeView={activeView}
+          onViewChange={setActiveView}
         />
-        <div className="flex flex-1 overflow-hidden">
-          <NavigationSidebar
-            activeView={activeView}
-            onViewChange={setActiveView}
-          />
+        <div className="flex-1 min-h-0">
           {renderCurrentView()}
         </div>
       </div>
-    </>
+    </div>
   );
 }
+
+// Export with error boundary
+export const TravelPlanner = withErrorBoundary(TravelPlannerComponent);

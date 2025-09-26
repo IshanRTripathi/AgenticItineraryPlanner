@@ -164,7 +164,10 @@ export function TripMap({
               />
             )
             if (!infoWindowRef.current) {
-              infoWindowRef.current = new api.maps.InfoWindow({ maxWidth: 450 })
+              infoWindowRef.current = new api.maps.InfoWindow({ 
+                maxWidth: 420,
+                pixelOffset: new api.maps.Size(0, -10)
+              })
             }
             infoWindowRef.current.setContent(infoDivRef.current)
             infoWindowRef.current.setPosition({ lat, lng })

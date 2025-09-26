@@ -3,6 +3,7 @@ package com.tripplanner.agents;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.service.ItineraryJsonService;
+import com.tripplanner.service.UserDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -26,49 +27,19 @@ public class AgentOrchestrator {
     private final EnrichmentAgent enrichmentAgent;
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
+    private final UserDataService userDataService;
     
     public AgentOrchestrator(PlannerAgent plannerAgent, EnrichmentAgent enrichmentAgent,
                            ItineraryJsonService itineraryJsonService,
-                           ChangeEngine changeEngine) {
+                           ChangeEngine changeEngine, UserDataService userDataService) {
         this.plannerAgent = plannerAgent;
         this.enrichmentAgent = enrichmentAgent;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
+        this.userDataService = userDataService;
     }
     
-    /**
-     * Generate a complete itinerary using multiple agents.
-     */
-    @Async
-    public CompletableFuture<ItineraryDto> generateItinerary(String itineraryId, CreateItineraryReq request) {
-        logger.info("Starting itinerary generation for ID: {}", itineraryId);
-        
-        try {
-            // Create initial normalized itinerary and persist
-            NormalizedItinerary initialItinerary = createInitialNormalizedItinerary(itineraryId, request);
-            itineraryJsonService.createItinerary(initialItinerary);
-            
-            // Run the planner agent to generate the actual itinerary
-            logger.info("Running PlannerAgent for itinerary ID: {}", itineraryId);
-            logger.info("PlannerAgent instance: {}", plannerAgent);
-            logger.info("Request data: {}", request);
-            
-            // Create agent request
-            BaseAgent.AgentRequest<ItineraryDto> agentRequest = new BaseAgent.AgentRequest<>(request, ItineraryDto.class);
-            ItineraryDto completedItinerary = plannerAgent.execute(itineraryId, agentRequest);
-            
-            // Convert to normalized and persist (keep same generated ID)
-            NormalizedItinerary plannerItinerary = convertToNormalizedItinerary(itineraryId, completedItinerary, request);
-            itineraryJsonService.updateItinerary(plannerItinerary);
-            
-            logger.info("Itinerary generation completed for ID: {}", itineraryId);
-            return CompletableFuture.completedFuture(completedItinerary);
-            
-        } catch (Exception e) {
-            logger.error("Failed to generate itinerary for ID: {}", itineraryId, e);
-            throw new RuntimeException("Itinerary generation failed", e);
-        }
-    }
+    // Old generateItinerary method removed - use generateNormalizedItinerary instead
     
     // ===== NEW MVP CONTRACT METHODS =====
     
@@ -77,7 +48,7 @@ public class AgentOrchestrator {
      * This method works with normalized JSON and uses the ChangeEngine.
      */
     @Async
-    public CompletableFuture<NormalizedItinerary> generateNormalizedItinerary(String itineraryId, CreateItineraryReq request) {
+    public CompletableFuture<NormalizedItinerary> generateNormalizedItinerary(String itineraryId, CreateItineraryReq request, String userId) {
         logger.info("=== AGENT ORCHESTRATOR: NORMALIZED ITINERARY GENERATION ===");
         logger.info("Itinerary ID: {}", itineraryId);
         logger.info("Destination: {}", request.getDestination());
@@ -85,10 +56,14 @@ public class AgentOrchestrator {
         try {
             // Step 1: Create initial normalized itinerary structure
             logger.info("Step 1: Creating initial itinerary structure");
-            NormalizedItinerary initialItinerary = createInitialNormalizedItinerary(itineraryId, request);
+            NormalizedItinerary initialItinerary = createInitialNormalizedItinerary(itineraryId, request, userId);
             
-            // Save initial itinerary to JSON storage
-            itineraryJsonService.createItinerary(initialItinerary);
+            // Save initial itinerary to user-specific storage
+            userDataService.saveUserItinerary(userId, initialItinerary);
+            
+            // Add a small delay to allow frontend to establish SSE connection
+            logger.info("Waiting 3 seconds for frontend to establish SSE connection...");
+            Thread.sleep(3000);
             
             // Step 2: Run PlannerAgent to generate the main itinerary
             logger.info("Step 2: Running PlannerAgent");
@@ -177,10 +152,13 @@ public class AgentOrchestrator {
     /**
      * Create initial normalized itinerary structure.
      */
-    private NormalizedItinerary createInitialNormalizedItinerary(String itineraryId, CreateItineraryReq request) {
+    private NormalizedItinerary createInitialNormalizedItinerary(String itineraryId, CreateItineraryReq request, String userId) {
         NormalizedItinerary itinerary = new NormalizedItinerary();
         itinerary.setItineraryId(itineraryId);
         itinerary.setVersion(1);
+        itinerary.setUserId(userId);
+        itinerary.setCreatedAt(System.currentTimeMillis());
+        itinerary.setUpdatedAt(System.currentTimeMillis());
         itinerary.setSummary("Your personalized itinerary for " + request.getDestination());
         itinerary.setCurrency("EUR");
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());

@@ -31,8 +31,8 @@ dependencies {
 	// Google Cloud Firestore (keeping for now, will remove later)
 	implementation 'com.google.cloud:google-cloud-firestore:3.14.0'
 	
-	// Google AI SDK (Gemini) - using REST API directly
-	// No additional dependencies needed - using Java 11+ HttpClient
+	// Firebase Admin SDK
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
 	
 	// Razorpay Java SDK
 	implementation 'com.razorpay:razorpay-java:1.4.3'

@@ -8,29 +8,28 @@ export function ResizablePanel({
   leftContent, 
   rightContent 
 }: ResizablePanelProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Determine if panel is expanded based on current width
+  const isExpanded = leftPanelWidth > 30; // Consider expanded if more than 30%
 
   // Toggle between collapsed and expanded states
   const togglePanel = () => {
     if (isExpanded) {
       // Collapse to 25% (minimal view)
       onWidthChange(25);
-      setIsExpanded(false);
     } else {
       // Expand to 45% (default view)
       onWidthChange(45);
-      setIsExpanded(true);
     }
   };
 
   return (
-    <div className="flex flex-1">
+    <div className="flex flex-1 h-full min-h-0">
       <div 
         style={{ 
           width: `${leftPanelWidth}%`,
           transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
         }} 
-        className="flex-shrink-0 flex flex-col"
+        className="flex-shrink-0 flex flex-col min-h-0 h-full"
       >
         {leftContent}
       </div>

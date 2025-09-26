@@ -17,8 +17,19 @@ export function TopNavigation({ tripData, onShare, onExportPDF, onBack }: TopNav
           {t('common.yourTripTo', { destination: tripData.endLocation?.name || tripData.destination || 'Unknown' })}
         </h1>
         <span className="text-gray-500">
-          {tripData.dates?.start ? new Date(tripData.dates.start).toLocaleDateString('en-US', { day: 'numeric', month: 'long' }) : 'TBD'} – {' '}
-          {tripData.dates?.end ? new Date(tripData.dates.end).toLocaleDateString('en-US', { day: 'numeric', month: 'long' }) : 'TBD'}
+          {(() => {
+            const formatDate = (dateStr: string | undefined) => {
+              if (!dateStr) return 'TBD';
+              try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return 'TBD';
+                return date.toLocaleDateString('en-US', { day: 'numeric', month: 'long' });
+              } catch {
+                return 'TBD';
+              }
+            };
+            return `${formatDate(tripData.dates?.start)} - ${formatDate(tripData.dates?.end)}`;
+          })()}
         </span>
       </div>
       

@@ -89,16 +89,18 @@ public class BookingService {
     /**
      * Execute provider booking.
      */
-    public BookingController.BookingRes executeProviderBooking(String vertical, String provider, BookingController.ProviderBookReq request) {
-        // Note: Currently using hardcoded "anonymous" user - should be replaced with actual user authentication
-        logger.info("Executing {} provider booking with {} for user: {}", vertical, "anonymous");
+    public BookingController.BookingRes executeProviderBooking(String userId, String vertical, String provider, BookingController.ProviderBookReq request) {
+        logger.info("Executing {} provider booking with {} for user: {}", vertical, provider, userId);
         
         try {
             // Find booking by payment details
             com.tripplanner.data.entity.Booking booking = bookingRepository.findByRazorpayOrderId(request.payment().orderId())
                     .orElseThrow(() -> new RuntimeException("Booking not found for order: " + request.payment().orderId()));
             
-            // Note: Ownership check removed as all users are currently anonymous
+            // Validate user ownership
+            if (!booking.getUserId().equals(userId)) {
+                throw new RuntimeException("User " + userId + " does not own booking " + booking.getId());
+            }
             
             // Update booking status to confirmed (simplified for current implementation)
             booking.setStatus(Booking.BookingStatus.CONFIRMED);
@@ -133,15 +135,18 @@ public class BookingService {
     /**
      * Get booking by ID.
      */
-    public BookingController.BookingRes getBooking(String bookingId) {
-        logger.debug("Getting booking: {} for user: {}", bookingId, "anonymous");
+    public BookingController.BookingRes getBooking(String userId, String bookingId) {
+        logger.debug("Getting booking: {} for user: {}", bookingId, userId);
         
         try {
             Long longBookingId = Long.parseLong(bookingId);
             com.tripplanner.data.entity.Booking booking = bookingRepository.findById(longBookingId)
                     .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
             
-            // Note: Ownership check removed as all users are currently anonymous
+            // Validate user ownership
+            if (!booking.getUserId().equals(userId)) {
+                throw new RuntimeException("User " + userId + " does not own booking " + bookingId);
+            }
             
             return new BookingController.BookingRes(
                     booking.getId().toString(),
@@ -188,15 +193,18 @@ public class BookingService {
     /**
      * Cancel booking.
      */
-    public void cancelBooking(String bookingId, BookingController.CancelBookingReq request) {
-        logger.info("Canceling booking: {} for user: {}", bookingId, "anonymous");
+    public void cancelBooking(String userId, String bookingId, BookingController.CancelBookingReq request) {
+        logger.info("Canceling booking: {} for user: {}", bookingId, userId);
         
         try {
             Long longBookingId = Long.parseLong(bookingId);
             com.tripplanner.data.entity.Booking booking = bookingRepository.findById(longBookingId)
                     .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
             
-            // Note: Ownership check removed as all users are currently anonymous
+            // Validate user ownership
+            if (!booking.getUserId().equals(userId)) {
+                throw new RuntimeException("User " + userId + " does not own booking " + bookingId);
+            }
             
             // Update booking status
             booking.setStatus(Booking.BookingStatus.CANCELLED);

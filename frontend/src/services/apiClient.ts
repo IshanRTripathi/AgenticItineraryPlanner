@@ -50,15 +50,18 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retryOptions: { maxRetries?: number; retryDelay?: number } = {}
   ): Promise<T> {
+    const { maxRetries = 3, retryDelay = 1000 } = retryOptions;
     const url = `${this.baseUrl}${endpoint}`;
     
     console.log('API Request:', {
       method: options.method || 'GET',
       url,
       baseUrl: this.baseUrl,
-      endpoint
+      endpoint,
+      maxRetries
     });
     
     const headers: HeadersInit = {
@@ -66,71 +69,126 @@ class ApiClient {
       ...options.headers,
     };
 
+    // Add Authorization header if auth token is available
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
+
     const config: RequestInit = {
       ...options,
       headers,
       mode: 'cors',
-      credentials: 'omit', // Don't send credentials for now
+      credentials: 'include', // Include credentials for authentication
     };
 
-    try {
-      const response = await fetch(url, config);
-      
-      console.log('API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
+    let lastError: Error;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch(url, config);
         
-        let errorData: ApiError;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = {
-            code: 'UNKNOWN_ERROR',
-            message: `HTTP ${response.status}: ${response.statusText}`,
-            timestamp: new Date().toISOString(),
-            path: endpoint
-          };
+        console.log('API Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          attempt: attempt + 1
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          
+          let errorData: ApiError;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = {
+              code: 'UNKNOWN_ERROR',
+              message: `HTTP ${response.status}: ${response.statusText}`,
+              timestamp: new Date().toISOString(),
+              path: endpoint
+            };
+          }
+          
+          const error = new Error(`API Error: ${errorData.message} (${response.status})`);
+          
+          // Don't retry on client errors (4xx) except 408, 429
+          if (response.status >= 400 && response.status < 500 && 
+              response.status !== 408 && response.status !== 429) {
+            throw error;
+          }
+          
+          // Don't retry on last attempt
+          if (attempt === maxRetries) {
+            throw error;
+          }
+          
+          lastError = error;
+          console.log(`Retrying request in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
+          await this.delay(retryDelay * Math.pow(2, attempt)); // Exponential backoff
+          continue;
+        }
+
+        // Handle empty responses (like 204 No Content)
+        if (response.status === 204) {
+          return {} as T;
+        }
+
+        const responseData = await response.json();
+        console.log('API Response Data:', responseData);
+        
+        return responseData;
+      } catch (error) {
+        console.error('API request failed:', {
+          url,
+          error: error.message,
+          stack: error.stack,
+          attempt: attempt + 1
+        });
+        
+        // Don't retry on last attempt
+        if (attempt === maxRetries) {
+          throw error;
         }
         
-        throw new Error(`API Error: ${errorData.message} (${response.status})`);
+        // Don't retry on network errors that are likely permanent
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+          // This is likely a network error, retry with exponential backoff
+          lastError = error;
+          console.log(`Network error, retrying in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
+          await this.delay(retryDelay * Math.pow(2, attempt));
+          continue;
+        }
+        
+        // For other errors, don't retry
+        throw error;
       }
-
-      // Handle empty responses (like 204 No Content)
-      if (response.status === 204) {
-        return {} as T;
-      }
-
-      const responseData = await response.json();
-      console.log('API Response Data:', responseData);
-      
-      return responseData;
-    } catch (error) {
-      console.error('API request failed:', {
-        url,
-        error: error.message,
-        stack: error.stack
-      });
-      throw error;
     }
+    
+    throw lastError!;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   // Itinerary endpoints
-  async createItinerary(data: CreateItineraryRequest): Promise<TripData> {
+  async createItinerary(data: CreateItineraryRequest, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
     const response = await this.request<ItineraryResponse>('/itineraries', {
       method: 'POST',
       body: JSON.stringify(data),
-    });
+    }, retryOptions);
     return DataTransformer.transformItineraryResponseToTripData(response);
   }
 
-  async getItinerary(id: string): Promise<TripData> {
-    const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`);
+  async getItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
+    const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`, {}, retryOptions);
+    console.log('=== API CLIENT GET ITINERARY ===');
+    console.log('Itinerary ID:', id);
+    console.log('Raw API Response:', response);
+    console.log('Days Count:', response.days?.length || 0);
+    console.log('Days Data:', response.days);
+    console.log('================================');
     return NormalizedDataTransformer.transformNormalizedItineraryToTripData(response);
   }
 
@@ -142,8 +200,8 @@ class ApiClient {
     return this.request<ItineraryResponse[]>(`/itineraries?page=${page}&size=${size}`);
   }
 
-  async getAllItineraries(): Promise<TripData[]> {
-    const responses = await this.request<ItineraryResponse[]>('/itineraries');
+  async getAllItineraries(retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData[]> {
+    const responses = await this.request<ItineraryResponse[]>('/itineraries', {}, retryOptions);
     return responses.map(response => DataTransformer.transformItineraryResponseToTripData(response));
   }
 
@@ -173,15 +231,21 @@ class ApiClient {
     });
   }
 
-  async deleteItinerary(id: string): Promise<void> {
+  async deleteItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<void> {
     return this.request<void>(`/itineraries/${id}`, {
       method: 'DELETE',
-    });
+    }, retryOptions);
   }
 
   // Agent SSE stream
   createAgentEventStream(itineraryId: string): EventSource {
-    const url = `${this.baseUrl}/agents/stream?itineraryId=${itineraryId}`;
+    let url = `${this.baseUrl}/agents/stream?itineraryId=${itineraryId}`;
+    
+    // Add auth token as query parameter since EventSource doesn't support headers
+    if (this.authToken) {
+      url += `&token=${encodeURIComponent(this.authToken)}`;
+    }
+    
     const eventSource = new EventSource(url);
     
     eventSource.onerror = (error) => {

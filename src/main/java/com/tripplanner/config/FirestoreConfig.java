@@ -5,6 +5,9 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,7 +79,35 @@ public class FirestoreConfig {
         }
     }
 
-    private Credentials resolveCredentials() {
+    @Bean
+    public FirebaseAuth firebaseAuth() {
+        try {
+            // Initialize Firebase if not already initialized
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseOptions.Builder builder = FirebaseOptions.builder();
+                
+                if (projectId != null && !projectId.isEmpty()) {
+                    builder.setProjectId(projectId);
+                }
+                
+                // Use the same credentials as Firestore
+                GoogleCredentials credentials = resolveCredentials();
+                if (credentials != null) {
+                    builder.setCredentials(credentials);
+                }
+                
+                FirebaseApp.initializeApp(builder.build());
+                logger.info("Firebase initialized for project: {}", projectId);
+            }
+            
+            return FirebaseAuth.getInstance();
+        } catch (Exception e) {
+            logger.error("Failed to initialize Firebase Auth", e);
+            throw new RuntimeException("Failed to initialize Firebase Auth", e);
+        }
+    }
+
+    private GoogleCredentials resolveCredentials() {
         try {
             // 1) Inline JSON takes precedence
             if (credentialsJson != null && !credentialsJson.isEmpty()) {

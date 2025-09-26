@@ -21,17 +21,20 @@ public class ItineraryService {
     
     private final AgentOrchestrator agentOrchestrator;
     private final ItineraryJsonService itineraryJsonService;
+    private final UserDataService userDataService;
     
     public ItineraryService(AgentOrchestrator agentOrchestrator,
-                            ItineraryJsonService itineraryJsonService) {
+                            ItineraryJsonService itineraryJsonService,
+                            UserDataService userDataService) {
         this.agentOrchestrator = agentOrchestrator;
         this.itineraryJsonService = itineraryJsonService;
+        this.userDataService = userDataService;
     }
     
     /**
-     * Create a new itinerary.
+     * Create a new itinerary for a specific user.
      */
-    public ItineraryDto create(CreateItineraryReq request) {
+    public ItineraryDto create(CreateItineraryReq request, String userId) {
         logger.info("=== CREATE ITINERARY REQUEST ===");
         logger.info("Request Details:");
         logger.info("  Destination: {}", request.getDestination());
@@ -54,7 +57,14 @@ public class ItineraryService {
         
         try {
             String itineraryId = "it_" + java.util.UUID.randomUUID();
-            agentOrchestrator.generateNormalizedItinerary(itineraryId, request);
+            
+            // Generate the itinerary using AgentOrchestrator
+            agentOrchestrator.generateNormalizedItinerary(itineraryId, request, userId);
+            
+            // Save the itinerary to user-specific storage
+            // Note: The actual itinerary data will be saved by AgentOrchestrator
+            // We just need to ensure it's associated with the user
+            logger.info("Itinerary generation started for user: {} with ID: {}", userId, itineraryId);
 
             ItineraryDto result = ItineraryDto.builder()
                     .id(itineraryId)
@@ -71,6 +81,7 @@ public class ItineraryService {
                     .build();
 
             logger.info("=== CREATE ITINERARY RESPONSE ===");
+            logger.info("User ID: {}", userId);
             logger.info("Itinerary ID: {}", result.getId());
             logger.info("Status: {}", result.getStatus());
             logger.info("Orchestration started: {}", itineraryId);
@@ -80,7 +91,7 @@ public class ItineraryService {
 
         } catch (Exception e) {
             logger.error("=== CREATE ITINERARY FAILED ===");
-            logger.error("User: {}", "anonymous");
+            logger.error("User: {}", userId);
             logger.error("Destination: {}", request.getDestination());
             logger.error("Error: {}", e.getMessage(), e);
             logger.error("===================================");
@@ -89,14 +100,15 @@ public class ItineraryService {
     }
     
     /**
-     * Get an itinerary by ID.
+     * Get an itinerary by ID for a specific user.
      */
-    public ItineraryDto get(String id) {
+    public ItineraryDto get(String id, String userId) {
         logger.info("=== GET ITINERARY REQUEST ===");
         logger.info("Itinerary ID: {}", id);
         
         try {
-            var niOpt = itineraryJsonService.getItinerary(id);
+            // Get itinerary from user-specific storage
+            var niOpt = userDataService.getUserItinerary(userId, id);
             if (niOpt.isEmpty()) {
                 throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.NOT_FOUND,
@@ -111,6 +123,7 @@ public class ItineraryService {
                     .build();
 
             logger.info("=== GET ITINERARY RESPONSE ===");
+            logger.info("User ID: {}", userId);
             logger.info("Found itinerary: {}", id);
             logger.info("Summary: {}", result.getSummary());
             logger.info("==================================");
@@ -120,7 +133,7 @@ public class ItineraryService {
         } catch (Exception e) {
             logger.error("=== GET ITINERARY FAILED ===");
             logger.error("Itinerary ID: {}", id);
-            logger.error("User: {}", "anonymous");
+            logger.error("User: {}", userId);
             logger.error("Error: {}", e.getMessage(), e);
             logger.error("===============================");
             throw new RuntimeException("Failed to get itinerary", e);
@@ -159,11 +172,11 @@ public class ItineraryService {
     /**
      * Get user's itineraries.
      */
-    public List<ItineraryDto> getUserItineraries(int page, int size) {
+    public List<ItineraryDto> getUserItineraries(String userId, int page, int size) {
         logger.debug("Getting itineraries");
         
         try {
-            return itineraryJsonService.getAllItineraries().stream()
+            return userDataService.getUserItineraries(userId).stream()
                     .map(ni -> {
                         String destination = ni.getDestination();
                         if (destination == null || destination.isBlank()) {
@@ -203,16 +216,16 @@ public class ItineraryService {
     }
     
     /**
-     * Delete an itinerary.
+     * Delete an itinerary for a specific user.
      */
-    public void delete(String id) {
-        logger.info("Deleting itinerary: {}", id);
+    public void delete(String id, String userId) {
+        logger.info("Deleting itinerary: {} for user: {}", id, userId);
         
         try {
-            itineraryJsonService.deleteItinerary(id);
-            logger.info("Itinerary deleted: {}", id);
+            userDataService.deleteUserItinerary(userId, id);
+            logger.info("Itinerary deleted: {} for user: {}", id, userId);
         } catch (Exception e) {
-            logger.error("Failed to delete itinerary: " + id, e);
+            logger.error("Failed to delete itinerary: {} for user: {}", id, userId, e);
             throw new RuntimeException("Failed to delete itinerary", e);
         }
     }

@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { ErrorDisplay } from '../../shared/ErrorDisplay';
 
 interface Props {
   children: ReactNode;
@@ -41,41 +42,14 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      // Use the new ErrorDisplay component for better UX
       return (
-        <Card className="p-6 m-4">
-          <div className="text-center">
-            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Something went wrong
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {this.state.error?.message || 'An unexpected error occurred'}
-            </p>
-            <div className="space-y-2">
-              <Button onClick={this.handleRetry} className="w-full">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.reload()}
-                className="w-full"
-              >
-                Reload Page
-              </Button>
-            </div>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">
-                  Error Details (Development)
-                </summary>
-                <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
-                  {this.state.error.stack}
-                </pre>
-              </details>
-            )}
-          </div>
-        </Card>
+        <ErrorDisplay
+          error={this.state.error || new Error('An unexpected error occurred')}
+          onRetry={this.handleRetry}
+          onGoBack={() => window.history.back()}
+          className="min-h-[400px]"
+        />
       );
     }
 

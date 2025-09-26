@@ -1,6 +1,7 @@
 package com.tripplanner.controller;
 
 import com.tripplanner.service.PdfService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -37,10 +38,17 @@ public class ExportController {
      * Generate and download PDF for an itinerary.
      */
     @GetMapping("/itineraries/{id}/pdf")
-    public ResponseEntity<byte[]> generatePdf(@PathVariable String id) {
+    public ResponseEntity<byte[]> generatePdf(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Generating PDF for itinerary: {}", id);
         
-        byte[] pdfBytes = pdfService.generateItineraryPdf(id);
+        // Extract userId from request attributes (set by FirebaseAuthConfig)
+        String userId = (String) httpRequest.getAttribute("userId");
+        if (userId == null) {
+            logger.error("User ID not found in request");
+            return ResponseEntity.status(401).build();
+        }
+        
+        byte[] pdfBytes = pdfService.generateItineraryPdf(id, userId);
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

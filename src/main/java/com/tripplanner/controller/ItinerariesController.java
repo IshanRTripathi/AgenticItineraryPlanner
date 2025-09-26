@@ -4,6 +4,8 @@ import com.tripplanner.dto.*;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.ItineraryService;
+import com.tripplanner.service.UserDataService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,30 +31,41 @@ public class ItinerariesController {
     private final ItineraryService itineraryService;
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
+    private final UserDataService userDataService;
     
     // SSE emitters for real-time updates
     private final Map<String, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
     
     public ItinerariesController(ItineraryService itineraryService, 
                                ItineraryJsonService itineraryJsonService,
-                               ChangeEngine changeEngine) {
+                               ChangeEngine changeEngine,
+                               UserDataService userDataService) {
         this.itineraryService = itineraryService;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
+        this.userDataService = userDataService;
     }
     
     /**
      * Create a new itinerary.
      */
     @PostMapping
-    public ResponseEntity<ItineraryDto> create(@Valid @RequestBody CreateItineraryReq request) {
+    public ResponseEntity<ItineraryDto> create(@Valid @RequestBody CreateItineraryReq request, 
+                                             HttpServletRequest httpRequest) {
         logger.info("Creating itinerary");
         logger.info("Request: {}", request);
         
         try {
-            ItineraryDto itinerary = itineraryService.create(request);
+            // Extract userId from request attributes (set by FirebaseAuthConfig)
+            String userId = (String) httpRequest.getAttribute("userId");
+            if (userId == null) {
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             
-            logger.info("Itinerary created successfully: {}", itinerary.getId());
+            ItineraryDto itinerary = itineraryService.create(request, userId);
+            
+            logger.info("Itinerary created successfully: {} for user: {}", itinerary.getId(), userId);
             return ResponseEntity.ok(itinerary);
             
         } catch (Exception e) {
@@ -62,16 +75,23 @@ public class ItinerariesController {
     }
     
     /**
-     * Get all itineraries.
+     * Get all itineraries for the authenticated user.
      */
     @GetMapping
-    public ResponseEntity<List<ItineraryDto>> getAll() {
+    public ResponseEntity<List<ItineraryDto>> getAll(HttpServletRequest httpRequest) {
         logger.info("Getting all itineraries");
         
         try {
-            List<ItineraryDto> itineraries = itineraryService.getUserItineraries(0, 10);
+            // Extract userId from request attributes (set by FirebaseAuthConfig)
+            String userId = (String) httpRequest.getAttribute("userId");
+            if (userId == null) {
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             
-            logger.info("Found {} itineraries", itineraries.size());
+            List<ItineraryDto> itineraries = itineraryService.getUserItineraries(userId, 0, 10);
+            
+            logger.info("Found {} itineraries for user: {}", itineraries.size(), userId);
             return ResponseEntity.ok(itineraries);
             
         } catch (Exception e) {
@@ -81,44 +101,58 @@ public class ItinerariesController {
     }
     
     /**
-     * Get itinerary by ID.
+     * Get itinerary by ID for the authenticated user.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ItineraryDto> getById(@PathVariable String id) {
+    public ResponseEntity<ItineraryDto> getById(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Getting itinerary: {}", id);
         
+        // Extract userId from request attributes (set by FirebaseAuthConfig)
+        String userId = (String) httpRequest.getAttribute("userId");
+        if (userId == null) {
+            logger.error("User ID not found in request");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
         try {
-            ItineraryDto itinerary = itineraryService.get(id);
-            logger.info("Itinerary found: {}", itinerary.getId());
+            ItineraryDto itinerary = itineraryService.get(id, userId);
+            logger.info("Itinerary found: {} for user: {}", itinerary.getId(), userId);
             return ResponseEntity.ok(itinerary);
         } catch (org.springframework.web.server.ResponseStatusException rse) {
             if (rse.getStatusCode().value() == 404) {
-                logger.warn("Itinerary not found: {}", id);
+                logger.warn("Itinerary not found: {} for user: {}", id, userId);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
-            logger.error("Failed to get itinerary (RSE): {}", id, rse);
+            logger.error("Failed to get itinerary (RSE): {} for user: {}", id, userId, rse);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            logger.error("Failed to get itinerary: {}", id, e);
+            logger.error("Failed to get itinerary: {} for user: {}", id, userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     
     /**
-     * Delete itinerary.
+     * Delete itinerary for the authenticated user.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
+    public ResponseEntity<Void> delete(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Deleting itinerary: {}", id);
         
+        // Extract userId from request attributes (set by FirebaseAuthConfig)
+        String userId = (String) httpRequest.getAttribute("userId");
+        if (userId == null) {
+            logger.error("User ID not found in request");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
         try {
-            itineraryService.delete(id);
+            itineraryService.delete(id, userId);
             
-            logger.info("Itinerary deleted successfully: {}", id);
+            logger.info("Itinerary deleted successfully: {} for user: {}", id, userId);
             return ResponseEntity.noContent().build();
             
         } catch (Exception e) {
-            logger.error("Failed to delete itinerary: {}", id, e);
+            logger.error("Failed to delete itinerary: {} for user: {}", id, userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -128,17 +162,37 @@ public class ItinerariesController {
     /**
      * Get itinerary by ID (returns master JSON).
      * GET /itineraries/{id} → 200 → returns master JSON
+     * This endpoint is public (no authentication required) for backward compatibility
      */
     @GetMapping("/{id}/json")
-    public ResponseEntity<NormalizedItinerary> getItineraryJson(@PathVariable String id) {
+    public ResponseEntity<NormalizedItinerary> getItineraryJson(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Getting normalized itinerary JSON: {}", id);
         
+        // Extract userId from request attributes (set by FirebaseAuthConfig) - optional
+        String userId = (String) httpRequest.getAttribute("userId");
+        
         try {
-            var itinerary = itineraryJsonService.getItinerary(id);
+            // If user is authenticated, try user-specific storage first
+            if (userId != null) {
+                logger.info("User authenticated, checking user-specific storage: {}", userId);
+                var itinerary = userDataService.getUserItinerary(userId, id);
+                
+                if (itinerary.isPresent()) {
+                    logger.info("Normalized itinerary found in user storage: {}", id);
+                    return ResponseEntity.ok(itinerary.get());
+                } else {
+                    logger.info("Not found in user storage, trying legacy storage: {}", id);
+                }
+            } else {
+                logger.info("No user authentication, checking legacy storage: {}", id);
+            }
             
-            if (itinerary.isPresent()) {
-                logger.info("Normalized itinerary found: {}", id);
-                return ResponseEntity.ok(itinerary.get());
+            // Fallback to legacy storage system
+            var legacyItinerary = itineraryJsonService.getItinerary(id);
+            
+            if (legacyItinerary.isPresent()) {
+                logger.info("Normalized itinerary found in legacy storage: {}", id);
+                return ResponseEntity.ok(legacyItinerary.get());
             } else {
                 logger.warn("Normalized itinerary not found: {}", id);
                 return ResponseEntity.notFound().build();

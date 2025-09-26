@@ -12,6 +12,8 @@ import {
   ChatIntent 
 } from '../types/ChatTypes';
 import { chatService } from '../services/chatService';
+import { chatStorageService, ChatMessage as StoredChatMessage } from '../services/chatStorageService';
+import { useAuth } from '../contexts/AuthContext';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatInput } from './ChatInput';
 import { DisambiguationPanel } from './DisambiguationPanel';
@@ -35,6 +37,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onItineraryUpdate,
   className = '',
 }) => {
+  const { user } = useAuth();
   const [chatState, setChatState] = useState<ChatState>({
     messages: [],
     isLoading: false,
@@ -72,18 +75,55 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }));
   }, [itineraryId, selectedNodeId, selectedDay, scope]);
 
-  // Add welcome message when chat first loads
+  // Load chat history when component mounts
   useEffect(() => {
-    if (chatState.messages.length === 0) {
-      addMessage({
-        text: `Hi! I'm your AI travel assistant. I can help you modify your itinerary by:\n\n• Adding or removing places\n• Changing the order of activities\n• Replacing attractions with alternatives\n• Adjusting timing and schedules\n• Answering questions about your trip\n\nJust tell me what you'd like to change!`,
-        sender: 'assistant',
-        intent: 'WELCOME'
-      });
-    }
-  }, []);
+    const loadChatHistory = async () => {
+      if (!user?.uid) return;
+      
+      try {
+        console.log('[ChatInterface] Loading chat history for user:', user.uid, 'itinerary:', itineraryId);
+        const storedMessages = await chatStorageService.getChatHistory(user.uid, itineraryId);
+        
+        if (storedMessages.length > 0) {
+          // Convert stored messages to chat state format
+          const chatMessages: ChatMessage[] = storedMessages.map((msg: StoredChatMessage) => ({
+            text: msg.message,
+            sender: msg.sender,
+            timestamp: msg.timestamp,
+            intent: msg.metadata?.intent || 'UNKNOWN',
+            nodeId: msg.metadata?.nodeId,
+            dayNumber: msg.metadata?.dayNumber
+          }));
+          
+          setChatState(prev => ({
+            ...prev,
+            messages: chatMessages
+          }));
+          
+          console.log('[ChatInterface] Loaded', chatMessages.length, 'messages from storage');
+        } else {
+          // Add welcome message if no history exists
+          await addMessage({
+            text: `Hi! I'm your AI travel assistant. I can help you modify your itinerary by:\n\n• Adding or removing places\n• Changing the order of activities\n• Replacing attractions with alternatives\n• Adjusting timing and schedules\n• Answering questions about your trip\n\nJust tell me what you'd like to change!`,
+            sender: 'assistant',
+            intent: 'WELCOME'
+          });
+        }
+      } catch (error) {
+        console.error('[ChatInterface] Failed to load chat history:', error);
+        // Add welcome message as fallback
+        await addMessage({
+          text: `Hi! I'm your AI travel assistant. I can help you modify your itinerary by:\n\n• Adding or removing places\n• Changing the order of activities\n• Replacing attractions with alternatives\n• Adjusting timing and schedules\n• Answering questions about your trip\n\nJust tell me what you'd like to change!`,
+          sender: 'assistant',
+          intent: 'WELCOME'
+        });
+      }
+    };
+    
+    loadChatHistory();
+  }, [user?.uid, itineraryId]);
 
-  const addMessage = (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
+  const addMessage = async (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     const newMessage: ChatMessage = {
       ...message,
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -94,13 +134,35 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       ...prev,
       messages: [...prev.messages, newMessage],
     }));
+
+    // Save to Firebase if user is authenticated
+    if (user?.uid) {
+      try {
+        const storedMessage: StoredChatMessage = {
+          message: newMessage.text,
+          sender: newMessage.sender,
+          timestamp: newMessage.timestamp,
+          itineraryId: itineraryId,
+          metadata: {
+            nodeId: newMessage.nodeId,
+            dayNumber: newMessage.dayNumber,
+            intent: newMessage.intent
+          }
+        };
+        
+        await chatStorageService.saveMessage(user.uid, storedMessage);
+        console.log('[ChatInterface] Message saved to Firebase');
+      } catch (error) {
+        console.error('[ChatInterface] Failed to save message to Firebase:', error);
+      }
+    }
   };
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || chatState.isLoading) return;
 
     // Add user message
-    addMessage({
+    await addMessage({
       text: text.trim(),
       sender: 'user',
     });
@@ -120,7 +182,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       );
 
       // Add assistant response
-      addMessage({
+      await addMessage({
         text: response.message || 'No response received',
         sender: 'assistant',
         intent: response.intent,
@@ -155,7 +217,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     } catch (error) {
       console.error('Chat error:', error);
-      addMessage({
+      await addMessage({
         text: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         sender: 'assistant',
         intent: 'ERROR',
@@ -183,7 +245,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       );
 
       // Add assistant response
-      addMessage({
+      await addMessage({
         text: response.message,
         sender: 'assistant',
         intent: response.intent,
@@ -208,7 +270,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     } catch (error) {
       console.error('Disambiguation error:', error);
-      addMessage({
+      await addMessage({
         text: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         sender: 'assistant',
         intent: 'ERROR',
@@ -235,7 +297,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       );
 
       if (result.success) {
-        addMessage({
+        await addMessage({
           text: 'Changes applied successfully!',
           sender: 'assistant',
           intent: 'APPLY_SUCCESS',
@@ -245,7 +307,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           onItineraryUpdate(itineraryId);
         }
       } else {
-        addMessage({
+        await addMessage({
           text: `Failed to apply changes: ${result.message}`,
           sender: 'assistant',
           intent: 'ERROR',
@@ -254,7 +316,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     } catch (error) {
       console.error('Apply changes error:', error);
-      addMessage({
+      await addMessage({
         text: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         sender: 'assistant',
         intent: 'ERROR',

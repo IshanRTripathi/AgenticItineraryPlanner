@@ -71,62 +71,37 @@ const calculateVerticalSeparation = (nodeCount: number): number => {
   return baseSeparation + additionalSeparation;
 };
 
-// Ladder positioning function - top-left to bottom-right diagonal
-const getLadderPosition = (index: number, nodeId?: string, savedPositions?: Record<string, { x: number; y: number }>, totalNodes?: number): { x: number; y: number } => {
-  // Check if we have a saved position for this node (but only if it's not at origin and reasonable)
+// Simplified grid positioning function
+const getGridPosition = (index: number, nodeId?: string, savedPositions?: Record<string, { x: number; y: number }>, totalNodes?: number): { x: number; y: number } => {
+  // Check if we have a valid saved position for this node
   if (nodeId && savedPositions && savedPositions[nodeId] && 
-      (savedPositions[nodeId].x !== 0 || savedPositions[nodeId].y !== 0) &&
-      savedPositions[nodeId].x > 50 && savedPositions[nodeId].y > 50) {
-    console.log(`📍 SAVED POSITION for ${nodeId}:`, {
-      position: savedPositions[nodeId],
-      index,
-      totalNodes
-    });
+      savedPositions[nodeId].x > 50 && savedPositions[nodeId].y > 50 &&
+      savedPositions[nodeId].x < 2000 && savedPositions[nodeId].y < 2000) {
+    console.log(`📍 Using saved position for ${nodeId}:`, savedPositions[nodeId]);
     return savedPositions[nodeId];
   }
   
-  const baseX = 400; // Start from center-left
-  const baseY = 300; // Start from center-top
-  const stepX = 250; // Move right
-  const stepY = 100; // Move down
-  const verticalSeparation = totalNodes ? calculateVerticalSeparation(totalNodes) : 250;
+  // Simple grid layout: 3 columns, rows as needed
+  const colsPerRow = 3;
+  const colWidth = 300;
+  const rowHeight = 200;
+  const startX = 200;
+  const startY = 200;
   
-  let position;
-  let ladderType;
+  const row = Math.floor(index / colsPerRow);
+  const col = index % colsPerRow;
   
-  if (index < 3) {
-    // First ladder: cards 0, 1, 2 (top-left to bottom-right)
-    position = {
-      x: baseX + index * stepX,
-      y: baseY + index * stepY
-    };
-    ladderType = "FIRST LADDER";
-  } else {
-    // Second ladder: cards 3, 4, 5 (below corresponding first ladder cards)
-    const secondLadderIndex = index - 3;
-    
-    // Calculate the position of the corresponding card in the first ladder
-    const correspondingFirstLadderIndex = secondLadderIndex;
-    const firstLadderCardX = baseX + correspondingFirstLadderIndex * stepX;
-    const firstLadderCardY = baseY + correspondingFirstLadderIndex * stepY;
-    
-    // Position the second ladder card directly below the corresponding first ladder card
-    position = {
-      x: firstLadderCardX,
-      y: firstLadderCardY + verticalSeparation
-    };
-    ladderType = "SECOND LADDER";
-  }
+  const position = {
+    x: startX + col * colWidth,
+    y: startY + row * rowHeight
+  };
   
-  console.log(`🎯 CALCULATED POSITION for ${nodeId || 'unknown'}:`, {
+  console.log(`🎯 Grid position for ${nodeId || 'unknown'}:`, {
     nodeId,
     index,
-    ladderType,
-    position,
-    totalNodes,
-    verticalSeparation,
-    baseCoordinates: { baseX, baseY },
-    stepValues: { stepX, stepY }
+    row,
+    col,
+    position
   });
   
   return position;
@@ -245,7 +220,7 @@ const createWorkflowDaysFromTripData = (tripData: TripData, savedPositions?: Rec
       return {
         id: component.id,
         type: 'workflow',
-        position: getLadderPosition(componentIndex, component.id, savedPositions, day.components.length),
+        position: getGridPosition(componentIndex, component.id, savedPositions, day.components.length),
         data: {
           id: component.id,
           type: mapComponentType(component.type),
@@ -696,8 +671,8 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     savePositions(cleanedPositions);
   }, [savedPositions, savePositions]);
 
-  // Reset positions to ladder pattern
-  const resetToLadderPattern = useCallback(() => {
+  // Reset positions to grid pattern
+  const resetToGridPattern = useCallback(() => {
     if (!currentDay) return;
     
     // Clear any bad positions first
@@ -705,7 +680,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     
     const newPositions = { ...savedPositions };
     currentDay.nodes.forEach((node, index) => {
-      newPositions[node.id] = getLadderPosition(index, node.id, {}, currentDay.nodes.length);
+      newPositions[node.id] = getGridPosition(index, node.id, {}, currentDay.nodes.length);
     });
     
     // Update nodes with new positions
@@ -1021,9 +996,9 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
               <Button
                 variant="outline"
                 size="sm"
-                onClick={resetToLadderPattern}
+                onClick={resetToGridPattern}
                 className="w-10 h-10 p-0 shadow-lg"
-                title="Reset to Ladder"
+                title="Reset to Grid"
               >
                 <RotateCcw className="h-4 w-4" />
               </Button>

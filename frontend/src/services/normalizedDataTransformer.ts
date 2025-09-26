@@ -12,6 +12,12 @@ export class NormalizedDataTransformer {
    * Transform normalized itinerary to frontend TripData
    */
   static transformNormalizedItineraryToTripData(normalized: NormalizedItinerary): TripData {
+    console.log('=== NORMALIZED DATA TRANSFORMER ===');
+    console.log('Input Normalized:', normalized);
+    console.log('Days Count:', normalized.days?.length || 0);
+    console.log('Days Data:', normalized.days);
+    console.log('===================================');
+    
     return {
       id: normalized.itineraryId,
       summary: normalized.summary,
@@ -43,7 +49,7 @@ export class NormalizedDataTransformer {
       preferences: this.transformThemesToPreferences(normalized.themes),
       settings: this.createDefaultSettings(),
       itinerary: this.transformNormalizedItinerary(normalized),
-      status: 'completed',
+      status: normalized.days && normalized.days.length > 0 ? 'completed' : 'generating',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       isPublic: false
@@ -54,6 +60,12 @@ export class NormalizedDataTransformer {
    * Transform NormalizedItinerary to TripItinerary
    */
   private static transformNormalizedItinerary(normalized: NormalizedItinerary): TripItinerary {
+    console.log('=== TRANSFORM NORMALIZED ITINERARY ===');
+    console.log('Input Days:', normalized.days);
+    console.log('Days Length:', normalized.days?.length || 0);
+    console.log('Mapped Days:', (normalized.days || []).map(day => this.transformNormalizedDay(day)));
+    console.log('=====================================');
+    
     return {
       id: normalized.itineraryId,
       days: (normalized.days || []).map(day => this.transformNormalizedDay(day)),

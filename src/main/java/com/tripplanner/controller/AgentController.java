@@ -6,9 +6,13 @@ import com.tripplanner.dto.NormalizedItinerary;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.agents.AgentOrchestrator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +34,9 @@ public class AgentController {
     private final AgentEventBus agentEventBus;
     private final AgentOrchestrator agentOrchestrator;
     
+    @Autowired
+    private FirebaseAuth firebaseAuth;
+    
     public AgentController(AgentEventBus agentEventBus, AgentOrchestrator agentOrchestrator) {
         this.agentEventBus = agentEventBus;
         this.agentOrchestrator = agentOrchestrator;
@@ -39,11 +46,28 @@ public class AgentController {
      * Stream agent events for an itinerary via SSE.
      */
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@RequestParam String itineraryId) {
+    public SseEmitter stream(@RequestParam String itineraryId, 
+                           @RequestParam(required = false) String token,
+                           HttpServletRequest request) {
         logger.info("=== SSE STREAM REQUEST ===");
         logger.info("Itinerary ID: {}", itineraryId);
         logger.info("Request Time: {}", now());
         logger.info("Client requesting SSE connection");
+        
+        // Validate token if provided
+        String userId = null;
+        if (token != null && !token.isEmpty()) {
+            try {
+                FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
+                userId = decodedToken.getUid();
+                logger.info("Token validated for SSE connection, user: {}", userId);
+            } catch (Exception e) {
+                logger.error("Invalid token for SSE connection", e);
+                throw new RuntimeException("Invalid authentication token");
+            }
+        } else {
+            logger.warn("No token provided for SSE connection");
+        }
         
         // Create SSE emitter with no timeout (0L means no timeout)
         SseEmitter emitter = new SseEmitter(0L);
@@ -158,17 +182,24 @@ public class AgentController {
      * POST /agents/run → 200 → body: CreateItineraryReq → {itineraryId, status}
      */
     @PostMapping("/run")
-    public ResponseEntity<AgentRunResponse> runAgents(@Valid @RequestBody CreateItineraryReq request) {
+    public ResponseEntity<AgentRunResponse> runAgents(@Valid @RequestBody CreateItineraryReq request, HttpServletRequest httpRequest) {
         logger.info("=== AGENT CONTROLLER: RUNNING AGENTS ===");
         logger.info("Destination: {}", request.getDestination());
         logger.info("Duration: {} days", request.getDurationDays());
         
         try {
+            // Extract userId from request attributes (set by FirebaseAuthConfig)
+            String userId = (String) httpRequest.getAttribute("userId");
+            if (userId == null) {
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(401).build();
+            }
+            
             // Generate a unique itinerary ID
             String itineraryId = "it_" + request.getDestination().toLowerCase().replaceAll("\\s+", "_") + "_" + System.currentTimeMillis();
             
             // Run the agent orchestration asynchronously
-            CompletableFuture<NormalizedItinerary> future = agentOrchestrator.generateNormalizedItinerary(itineraryId, request);
+            CompletableFuture<NormalizedItinerary> future = agentOrchestrator.generateNormalizedItinerary(itineraryId, request, userId);
             
             // Return immediately with the itinerary ID
             AgentRunResponse response = new AgentRunResponse(

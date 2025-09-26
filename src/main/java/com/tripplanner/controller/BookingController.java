@@ -75,10 +75,12 @@ public class BookingController {
     public ResponseEntity<BookingRes> executeProviderBooking(
             @PathVariable String vertical,
             @PathVariable String provider,
-            @Valid @RequestBody ProviderBookReq request) {
-        logger.info("Executing {} booking with provider {}", vertical, provider);
+            @Valid @RequestBody ProviderBookReq request,
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("userId");
+        logger.info("Executing {} booking with provider {} for user {}", vertical, provider, userId);
         
-        BookingRes response = bookingService.executeProviderBooking(vertical, provider, request);
+        BookingRes response = bookingService.executeProviderBooking(userId, vertical, provider, request);
         
         logger.info("Provider booking executed: {}", response.bookingId());
         return ResponseEntity.ok(response);
@@ -89,10 +91,12 @@ public class BookingController {
      */
     @GetMapping("/bookings/{bookingId}")
     public ResponseEntity<BookingRes> getBooking(
-            @PathVariable String bookingId) {
-        logger.debug("Getting booking: {} for user: {}", bookingId, "anonymous");
+            @PathVariable String bookingId,
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("userId");
+        logger.debug("Getting booking: {} for user: {}", bookingId, userId);
         
-        BookingRes booking = bookingService.getBooking(bookingId);
+        BookingRes booking = bookingService.getBooking(userId, bookingId);
         return ResponseEntity.ok(booking);
     }
     
@@ -116,10 +120,12 @@ public class BookingController {
     @PostMapping("/bookings/{bookingId}:cancel")
     public ResponseEntity<Void> cancelBooking(
             @PathVariable String bookingId,
-            @Valid @RequestBody CancelBookingReq request) {
-        logger.info("Canceling booking: {} for user: {}", bookingId, "anonymous");
+            @Valid @RequestBody CancelBookingReq request,
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("userId");
+        logger.info("Canceling booking: {} for user: {}", bookingId, userId);
         
-        bookingService.cancelBooking(bookingId, request);
+        bookingService.cancelBooking(userId, bookingId, request);
         
         logger.info("Booking canceled: {}", bookingId);
         return ResponseEntity.ok().build();

@@ -29,12 +29,12 @@ public class PdfService {
     /**
      * Generate PDF for itinerary.
      */
-    public byte[] generateItineraryPdf(String itineraryId) {
-        logger.info("Generating PDF for itinerary: {} for user: {}", "anonymous");
+    public byte[] generateItineraryPdf(String itineraryId, String userId) {
+        logger.info("Generating PDF for itinerary: {} for user: {}", itineraryId, userId);
         
         try {
             // Get itinerary data
-            ItineraryDto itinerary = itineraryService.get(itineraryId);
+            ItineraryDto itinerary = itineraryService.get(itineraryId, userId);
             
             // Generate HTML content
             String htmlContent = generateHtmlContent(itinerary);

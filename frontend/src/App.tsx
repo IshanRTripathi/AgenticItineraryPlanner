@@ -13,6 +13,11 @@ import { TripData } from './types/TripData';
 import { useAppStore } from './state/hooks';
 import { useItinerary } from './state/query/hooks';
 import { Routes, Route, useNavigate, useParams, Outlet, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { GoogleSignIn } from './components/GoogleSignIn';
+import { LoginPage } from './components/LoginPage';
+import { GlobalErrorBoundary } from './components/shared/GlobalErrorBoundary';
 import './i18n'; // Initialize i18n
 // Data transformation will be handled by the backend
 
@@ -77,24 +82,29 @@ function RoutedApp() {
 
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={
-        <LandingPage
-          isAuthenticated={isAuthenticated}
-          onAuthenticate={authenticate}
-          onStartTrip={() => navigateToScreen('/wizard')}
-          onViewTrips={() => navigateToScreen('/dashboard')}
-          trips={trips}
-        />
+        <ProtectedRoute requireAuth={false}>
+          <LandingPage
+            isAuthenticated={isAuthenticated}
+            onAuthenticate={authenticate}
+            onStartTrip={() => navigateToScreen('/wizard')}
+            onViewTrips={() => navigateToScreen('/dashboard')}
+            trips={trips}
+          />
+        </ProtectedRoute>
       } />
       <Route path="/wizard" element={
-        <SimplifiedTripWizard
-          onComplete={(tripData) => {
-            addTrip(tripData);
-            setCurrentTrip(tripData);
-            navigateToScreen('/generating');
-          }}
-          onBack={() => navigateToScreen('/')}
-        />
+        <ProtectedRoute>
+          <SimplifiedTripWizard
+            onComplete={(tripData) => {
+              addTrip(tripData);
+              setCurrentTrip(tripData);
+              navigateToScreen('/generating');
+            }}
+            onBack={() => navigateToScreen('/')}
+          />
+        </ProtectedRoute>
       } />
       {/* Guarded routes requiring a current trip */}
       <Route element={<RequireTrip tripExists={!!currentTrip} /> }>
@@ -102,6 +112,7 @@ function RoutedApp() {
           <AgentProgressModal
             tripData={currentTrip as TripData}
             onComplete={() => navigateToScreen('/planner')}
+            onCancel={() => navigateToScreen('/dashboard')}
           />
         } />
         <Route path="/planner" element={
@@ -151,15 +162,17 @@ function RoutedApp() {
         } />
       </Route>
       <Route path="/dashboard" element={
-        <TripDashboard
-          trips={trips}
-          onCreateTrip={() => navigateToScreen('/wizard')}
-          onViewTrip={(trip) => {
-            setCurrentTrip(trip);
-            navigateToScreen('/planner');
-          }}
-          onBack={() => navigateToScreen('/')}
-        />
+        <ProtectedRoute>
+          <TripDashboard
+            trips={trips}
+            onCreateTrip={() => navigateToScreen('/wizard')}
+            onViewTrip={(trip) => {
+              setCurrentTrip(trip);
+              navigateToScreen('/planner');
+            }}
+            onBack={() => navigateToScreen('/')}
+          />
+        </ProtectedRoute>
       } />
       <Route path="/trip/:id" element={<TripRouteLoader />} />
       <Route path="/itinerary/:id" element={<ItineraryRouteLoader />} />
@@ -228,8 +241,12 @@ function ItineraryChatRouteLoader() {
 
 export default function App() {
   return (
-    <div className="size-full min-h-screen bg-background">
-      <RoutedApp />
-    </div>
+    <GlobalErrorBoundary>
+      <AuthProvider>
+        <div className="size-full min-h-screen bg-background">
+          <RoutedApp />
+        </div>
+      </AuthProvider>
+    </GlobalErrorBoundary>
   );
 }

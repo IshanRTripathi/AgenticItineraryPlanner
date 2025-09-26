@@ -6,6 +6,9 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useItineraries } from '../../state/query/hooks';
+import { useAuth } from '../../contexts/AuthContext';
+import { ErrorDisplay } from '../shared/ErrorDisplay';
+import { withErrorBoundary } from '../travel-planner/shared/ErrorBoundary';
 import { 
   ArrowLeft,
   Plus,
@@ -37,14 +40,15 @@ interface TripDashboardProps {
   onBack: () => void;
 }
 
-export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripDashboardProps) {
+function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: TripDashboardProps) {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState('all');
   const [sortBy, setSortBy] = useState('date');
 
-  // Fetch fresh data from API instead of using cached props
-  const { data: freshTrips, isLoading, error } = useItineraries();
+  // Fetch fresh data from API only when user is authenticated
+  const { data: freshTrips, isLoading, error } = useItineraries(!!user);
   
   // Use fresh data if available, fallback to props
   const allTrips = freshTrips || trips;
@@ -125,14 +129,11 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
   // Show error state if API call failed
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="max-w-md mx-auto">
-            <p className="text-red-600 mb-4">Failed to load trips</p>
-            <Button onClick={onBack}>Go Back</Button>
-          </div>
-        </div>
-      </div>
+      <ErrorDisplay
+        error={error}
+        onRetry={() => window.location.reload()}
+        onGoBack={onBack}
+      />
     );
   }
 
@@ -503,5 +504,8 @@ export function TripDashboard({ trips, onCreateTrip, onViewTrip, onBack }: TripD
     </div>
   );
 }
+
+// Export with error boundary
+export const TripDashboard = withErrorBoundary(TripDashboardComponent);
 
 

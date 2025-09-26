@@ -23,6 +23,15 @@ public class NormalizedItinerary {
     @JsonProperty("version")
     private Integer version;
     
+    @JsonProperty("userId")
+    private String userId;
+    
+    @JsonProperty("createdAt")
+    private Long createdAt;
+    
+    @JsonProperty("updatedAt")
+    private Long updatedAt;
+    
     @JsonProperty("summary")
     private String summary;
     
@@ -85,6 +94,30 @@ public class NormalizedItinerary {
     
     public void setVersion(Integer version) {
         this.version = version;
+    }
+    
+    public String getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    
+    public Long getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(Long createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public Long getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(Long updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
     public String getSummary() {
@@ -180,6 +213,9 @@ public class NormalizedItinerary {
         return "NormalizedItinerary{" +
                 "itineraryId='" + itineraryId + '\'' +
                 ", version=" + version +
+                ", userId='" + userId + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 ", summary='" + summary + '\'' +
                 ", currency='" + currency + '\'' +
                 ", themes=" + themes +

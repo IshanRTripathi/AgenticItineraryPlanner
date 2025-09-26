@@ -32,11 +32,14 @@ export const PlaceInfoCard: React.FC<Props> = ({ place, days, onAdd, onClose }) 
 
   return (
     <div style={{ 
-      width: 400, 
-      padding: 10, 
+      width: '100%',
+      maxWidth: 400,
+      minWidth: 320,
+      padding: 12, 
       fontFamily: 'system-ui, -apple-system, sans-serif',
       fontSize: 14,
-      lineHeight: 1.4
+      lineHeight: 1.4,
+      boxSizing: 'border-box'
     }}>
       {/* Header */}
       <div style={{ 
@@ -116,7 +119,12 @@ export const PlaceInfoCard: React.FC<Props> = ({ place, days, onAdd, onClose }) 
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: 8, 
+        justifyContent: 'flex-end',
+        flexWrap: 'wrap'
+      }}>
         <button
           onClick={onClose}
           style={{ 
@@ -124,10 +132,12 @@ export const PlaceInfoCard: React.FC<Props> = ({ place, days, onAdd, onClose }) 
             color: '#6b7280', 
             border: '1px solid #d1d5db', 
             borderRadius: 6, 
-            padding: '6px 12px', 
+            padding: '8px 16px', 
             cursor: 'pointer',
             fontSize: 13,
-            fontWeight: 500
+            fontWeight: 500,
+            minWidth: 80,
+            flex: '1 1 auto'
           }}
         >
           Cancel
@@ -139,10 +149,12 @@ export const PlaceInfoCard: React.FC<Props> = ({ place, days, onAdd, onClose }) 
             color: 'white', 
             border: 'none', 
             borderRadius: 6, 
-            padding: '6px 12px', 
+            padding: '8px 16px', 
             cursor: 'pointer',
             fontSize: 13,
-            fontWeight: 500
+            fontWeight: 500,
+            minWidth: 100,
+            flex: '1 1 auto'
           }}
         >
           Add to Day

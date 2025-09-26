@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
-import { ViewComponentProps } from '../shared/types';
+import { ViewComponentProps, ErrorBoundary } from '../shared/types';
 import { 
   Clock, 
   MapPin, 
@@ -117,13 +117,13 @@ const getPlaceholderImage = (category: string, name: string) => {
     'architecture': 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop',
     'culture': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=300&fit=crop',
     'art': 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=300&fit=crop',
-    'food': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
+    'restaurant': 'https://images.unsplash.com/photo-1602273660127-a0000560a4c1?w=400&auto=format&fit=crop',
     'beach': 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
     'park': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
     'history': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    'sightseeing': 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop',
-    'travel': 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop',
-    'accommodation': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'
+    'attraction': 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop',
+    'transport': 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400&h=300&fit=crop',
+    'hotel': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop'
   };
   
   // Try to find a matching category
@@ -140,7 +140,7 @@ const getPlaceholderImage = (category: string, name: string) => {
 
 export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: ViewComponentProps) {
   const { t } = useTranslation();
-  const [expandedDay, setExpandedDay] = useState<number | null>(0); // First day expanded by default
+  const [expandedDay, setExpandedDay] = useState<number | null>(1); // First day (day 1) expanded by default
 
   const handleDayToggle = (dayNumber: number, dayData: any) => {
     if (expandedDay === dayNumber) {
@@ -152,8 +152,9 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
   };
 
   return (
-    <div className="m-0 h-full overflow-y-auto p-6">
-      <div className="space-y-4">
+    <ErrorBoundary>
+      <div className="p-6">
+        <div className="space-y-4">
         {tripData.itinerary?.days?.map((day: any, index: number) => {
           const dayNumber = day.dayNumber || index + 1;
           const isExpanded = expandedDay === dayNumber;
@@ -378,7 +379,8 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
             </div>
           </Card>
         )}
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

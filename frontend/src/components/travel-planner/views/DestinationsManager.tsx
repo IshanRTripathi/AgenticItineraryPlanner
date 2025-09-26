@@ -4,7 +4,7 @@ import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
 import { Input } from '../../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
-import { Menu, Plus, Minus, Search, FileText, Trash2 } from 'lucide-react';
+import { Menu, Plus, Minus, Search, FileText, Trash2, MapPin } from 'lucide-react';
 import { DestinationManagerProps, CURRENCIES, ErrorBoundary, TransportDetails } from '../shared/types';
 import { TransportConnector } from '../shared/TransportConnector';
 
@@ -54,6 +54,44 @@ export function DestinationsManager({
     const connectionKey = `${fromId}-${toId}`;
     return transportConnections[connectionKey] || [];
   };
+
+  // Show empty state if no destinations
+  if (destinations.length === 0) {
+    return (
+      <ErrorBoundary>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <Select value={currency} onValueChange={onCurrencyChange}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map(curr => (
+                    <SelectItem key={curr} value={curr}>
+                      {t('destinations.costIn', { currency: curr, symbol: curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Badge variant="secondary">
+                {t('destinations.nightsPlanned', { current: totalNights, max: maxNights })}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Empty State */}
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MapPin className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No destinations added yet</h3>
+            <p className="text-gray-600 mb-6">Start building your trip by adding destinations below.</p>
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
