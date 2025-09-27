@@ -8,7 +8,7 @@ interface KeyboardShortcutsHelpProps {
   trigger?: React.ReactNode;
 }
 
-export function KeyboardShortcutsHelp({ trigger }: KeyboardShortcutsHelpProps) {
+export const KeyboardShortcutsHelp = React.forwardRef<HTMLDivElement, KeyboardShortcutsHelpProps>(({ trigger }, ref) => {
   const shortcuts = useKeyboardShortcuts();
 
   const defaultTrigger = (
@@ -23,7 +23,7 @@ export function KeyboardShortcutsHelp({ trigger }: KeyboardShortcutsHelpProps) {
       <DialogTrigger asChild>
         {trigger || defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" ref={ref}>
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Keyboard className="h-5 w-5" />
@@ -58,4 +58,6 @@ export function KeyboardShortcutsHelp({ trigger }: KeyboardShortcutsHelpProps) {
       </DialogContent>
     </Dialog>
   );
-}
+});
+
+KeyboardShortcutsHelp.displayName = 'KeyboardShortcutsHelp';

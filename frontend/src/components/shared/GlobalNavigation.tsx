@@ -39,12 +39,6 @@ export function GlobalNavigation({
       label: 'My Trips',
       icon: MapPin,
       requiresAuth: true
-    },
-    {
-      path: '/wizard',
-      label: 'New Trip',
-      icon: Plus,
-      requiresAuth: true
     }
   ];
 

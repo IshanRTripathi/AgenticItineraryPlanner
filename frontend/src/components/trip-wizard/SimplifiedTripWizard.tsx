@@ -9,7 +9,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Slider } from '../ui/slider';
 import { Switch } from '../ui/switch';
 import { Separator } from '../ui/separator';
-import { Plus, Minus, X, CalendarIcon, MapPin, Users, DollarSign, Settings2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Plus, Minus, X, CalendarIcon, MapPin, Users, DollarSign, Settings2, ArrowLeft } from 'lucide-react';
 import { format, addDays, addMonths, startOfMonth } from 'date-fns';
 import { enUS, enGB } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
@@ -59,12 +60,26 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
     const to = new Date(year, 9, 12);
     return { from, to };
   });
+  const [numberOfMonths, setNumberOfMonths] = useState(2);
   const [budget, setBudget] = useState(3000);
   const [currency, setCurrency] = useState('USD');
   const [flexibleDays, setFlexibleDays] = useState<number>(0);
   const [validationMessage, setValidationMessage] = useState<string>('');
   const userLocale = useMemo(() => (typeof navigator !== 'undefined' ? navigator.language : 'en-US'), []);
   const dayPickerLocale = useMemo(() => (userLocale?.toLowerCase()?.startsWith('en-gb') ? enGB : enUS), [userLocale]);
+
+  // Handle window resize for calendar numberOfMonths
+  useEffect(() => {
+    const handleResize = () => {
+      setNumberOfMonths(window.innerWidth < 768 ? 1 : 2);
+    };
+    
+    // Set initial value
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Initialize from URL if query params exist
   useEffect(() => {
@@ -337,32 +352,34 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Top Header with Profile */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={onBack} className="flex items-center space-x-2">
-              <X className="w-4 h-4" />
-              <span>Back</span>
-            </Button>
-            <GlobalNavigation variant="horizontal" showLabels={false} />
+      {/* Header - Consistent with My Trips */}
+      <div className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-3 sm:gap-4">
+            {/* Left Section */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Button variant="ghost" size="sm" onClick={onBack} className="p-2 sm:p-2">
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-semibold truncate">Plan Your Trip</h1>
+              </div>
+            </div>
+            
+            {/* Right Section - User Profile Only */}
+            <div className="flex items-center">
+              <UserProfileButton />
+            </div>
           </div>
-          <UserProfileButton />
         </div>
       </div>
 
-      {/* Breadcrumbs */}
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
-        <div className="max-w-6xl mx-auto">
-          <BreadcrumbNavigation />
-        </div>
-      </div>
 
       <div className="p-4">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
+          {/* Description */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Plan Your Perfect Trip</h1>
             <p className="text-gray-600">Tell us about your travel preferences and we'll create an amazing itinerary</p>
           </div>
 
@@ -496,8 +513,8 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <div className="p-3">
+                    <PopoverContent className="w-auto p-0 sm:w-auto" align="start">
+                      <div className="p-1 sm:p-3">
                       <Calendar
                         initialFocus
                         mode="range"
@@ -517,7 +534,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                               else if (nights > 30) setValidationMessage('Maximum trip length is 30 nights.');
                             }
                           }}
-                        numberOfMonths={2}
+                        numberOfMonths={numberOfMonths}
                           locale={dayPickerLocale}
                           classNames={{
                             day_outside: "invisible",
@@ -529,73 +546,47 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                           disabled={{ before: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()) }}
                         />
 
-                        <div className="mt-3">
-                          <div className="text-xs text-gray-600 mb-2">Quick durations</div>
-                          <div className="flex flex-wrap gap-2">
-                            {[3,5,7,10,14].map((n) => (
-                              <Button key={n} size="sm" variant="secondary"
-                                onClick={() => {
-                                  const base = dateRange?.from && dateRange.from >= new Date() ? dateRange.from : new Date();
-                                  const from = new Date(base.getFullYear(), base.getMonth(), base.getDate());
-                                  const to = addDays(from, n);
-                                  setDateRange({ from, to });
-                                  setValidationMessage('');
-                                }}>
-                                {n} nights
-                              </Button>
-                            ))}
-                          </div>
+                        <div className="mt-2 sm:mt-3">
+                          <div className="text-xs text-gray-600 mb-1 sm:mb-2">Quick durations</div>
+                          <Select onValueChange={(value) => {
+                            const nights = parseInt(value);
+                            const base = dateRange?.from && dateRange.from >= new Date() ? dateRange.from : new Date();
+                            const from = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+                            const to = addDays(from, nights);
+                            setDateRange({ from, to });
+                            setValidationMessage('');
+                          }}>
+                            <SelectTrigger className="h-8 text-xs sm:text-sm">
+                              <SelectValue placeholder="Select duration" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[3,5,7,10,14].map((n) => (
+                                <SelectItem key={n} value={n.toString()}>
+                                  {n} nights
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
-                        <div className="mt-4">
-                          <div className="text-xs text-gray-600 mb-2">Presets</div>
-                          <div className="flex flex-wrap gap-2">
-                            <Button size="sm" variant="outline" onClick={() => {
-                              const today = new Date();
-                              const dow = today.getDay();
-                              const daysUntilSat = (6 - dow + 7) % 7;
-                              const sat = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSat);
-                              const sun = addDays(sat, 1);
-                              setDateRange({ from: sat, to: sun });
-                              setValidationMessage('');
-                            }}>This weekend</Button>
-                            <Button size="sm" variant="outline" onClick={() => {
-                              const today = new Date();
-                              const dow = today.getDay();
-                              const daysUntilSat = (6 - dow + 7) % 7;
-                              const sat = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSat + 7);
-                              const sun = addDays(sat, 1);
-                              setDateRange({ from: sat, to: sun });
-                              setValidationMessage('');
-                            }}>Next weekend</Button>
-                            <Button size="sm" variant="outline" onClick={() => {
-                              const today = new Date();
-                              const firstNextMonth = startOfMonth(addMonths(today, 1));
-                              const from = firstNextMonth;
-                              const to = addDays(firstNextMonth, 6);
-                              setDateRange({ from, to });
-                              setValidationMessage('');
-                            }}>First week next month</Button>
-                          </div>
-                        </div>
 
-                        <div className="mt-4">
+                        <div className="mt-2 sm:mt-4">
                           <div className="flex items-center justify-between">
                             <Label className="text-sm">Flexible dates</Label>
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" variant={flexibleDays===0? 'secondary':'outline'} onClick={()=>setFlexibleDays(0)}>±0</Button>
-                              <Button size="sm" variant={flexibleDays===1? 'secondary':'outline'} onClick={()=>setFlexibleDays(1)}>±1</Button>
-                              <Button size="sm" variant={flexibleDays===3? 'secondary':'outline'} onClick={()=>setFlexibleDays(3)}>±3</Button>
-                              <Button size="sm" variant={flexibleDays===7? 'secondary':'outline'} onClick={()=>setFlexibleDays(7)}>±7</Button>
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <Button size="sm" variant={flexibleDays===0? 'secondary':'outline'} className="text-xs sm:text-sm px-2 sm:px-3" onClick={()=>setFlexibleDays(0)}>±0</Button>
+                              <Button size="sm" variant={flexibleDays===1? 'secondary':'outline'} className="text-xs sm:text-sm px-2 sm:px-3" onClick={()=>setFlexibleDays(1)}>±1</Button>
+                              <Button size="sm" variant={flexibleDays===3? 'secondary':'outline'} className="text-xs sm:text-sm px-2 sm:px-3" onClick={()=>setFlexibleDays(3)}>±3</Button>
+                              <Button size="sm" variant={flexibleDays===7? 'secondary':'outline'} className="text-xs sm:text-sm px-2 sm:px-3" onClick={()=>setFlexibleDays(7)}>±7</Button>
                             </div>
                           </div>
                           {flexibleDays>0 && (
-                            <p className="mt-2 text-xs text-gray-600">We will try nearby dates within ±{flexibleDays} days.</p>
+                            <p className="mt-1 sm:mt-2 text-xs text-gray-600">We will try nearby dates within ±{flexibleDays} days.</p>
                           )}
                         </div>
 
                         {validationMessage && (
-                          <div className="mt-3 text-sm text-red-600">{validationMessage}</div>
+                          <div className="mt-2 sm:mt-3 text-sm text-red-600">{validationMessage}</div>
                         )}
                       </div>
                     </PopoverContent>

@@ -44,13 +44,6 @@ export function BreadcrumbNavigation({
             icon: MapPin 
           });
           break;
-        case 'wizard':
-          breadcrumbs.push({ 
-            label: 'New Trip', 
-            path, 
-            icon: Plus 
-          });
-          break;
         case 'planner':
           breadcrumbs.push({ 
             label: 'Trip Planner', 

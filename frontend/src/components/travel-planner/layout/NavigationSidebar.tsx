@@ -162,24 +162,21 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
         </div>
 
         {/* Navigation Items */}
-        <div className="p-2">
+        <div className="flex-1 p-2">
           <nav className="space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
-                <button
+                <Button
                   key={item.id}
+                  variant={activeView === item.id ? "default" : "ghost"}
                   onClick={() => handleItemClick(item.id)}
-                  className={`w-full flex items-center justify-start min-h-[44px] py-3 px-3 text-left rounded-lg transition-colors ${
-                    activeView === item.id 
-                      ? 'bg-blue-100 text-blue-900' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className="w-full justify-start min-h-[44px] h-auto py-3 px-3"
                   title={item.tooltip}
                 >
-                  <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </button>
+                  <Icon className="w-4 h-4 mr-3" />
+                  <span>{item.label}</span>
+                </Button>
               );
             })}
           </nav>
