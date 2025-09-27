@@ -182,20 +182,20 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
   };
 
   return (
-    <div className="p-6 overflow-y-auto h-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Real-Time Trip Overview</h2>
-        <div className="flex items-center space-x-3">
+    <div className="p-4 md:p-6 overflow-y-auto h-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-semibold">Real-Time Trip Overview</h2>
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <Button 
             variant="outline" 
             onClick={refreshData}
             disabled={isRefreshing}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 min-h-[44px]"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>{t('realTime.refreshData')}</span>
+            <span className="hidden sm:inline">{t('realTime.refreshData')}</span>
           </Button>
-          <Button variant="outline" onClick={onShare}>
+          <Button variant="outline" onClick={onShare} className="min-h-[44px]">
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>

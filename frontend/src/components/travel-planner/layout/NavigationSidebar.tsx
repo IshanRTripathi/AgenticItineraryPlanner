@@ -1,22 +1,62 @@
 import React from 'react';
-import { Button } from '../../ui/button';
 import { 
   Eye, 
   MapPin, 
   Calculator, 
   Package, 
   FileText, 
+  FolderOpen,
   Search
 } from 'lucide-react';
 import { NavigationSidebarProps } from '../shared/types';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../../ui/button';
 
 export function NavigationSidebar({ activeView, onViewChange }: NavigationSidebarProps) {
   const { t } = useTranslation();
   
+  const navigationItems = [
+    {
+      id: 'view',
+      label: t('navigation.view'),
+      icon: Eye,
+      tooltip: 'Trip Overview & Analytics',
+    },
+    {
+      id: 'plan',
+      label: t('navigation.plan'),
+      icon: MapPin,
+      tooltip: 'Day-by-Day Planning',
+    },
+    {
+      id: 'budget',
+      label: t('navigation.budget'),
+      icon: Calculator,
+      tooltip: 'Budget & Expenses',
+    },
+    {
+      id: 'packing',
+      label: t('navigation.packing'),
+      icon: Package,
+      tooltip: 'Packing Lists',
+    },
+    {
+      id: 'collection',
+      label: t('navigation.collection'),
+      icon: FolderOpen,
+      tooltip: 'Saved Collections',
+    },
+    {
+      id: 'docs',
+      label: t('navigation.docs'),
+      icon: FileText,
+      tooltip: 'Travel Documents',
+    },
+  ];
+  
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-      <div className="p-4 border-b border-gray-200">
+      <div className="border-b border-gray-200 p-4">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-r from-teal-400 to-teal-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">T</span>
@@ -25,58 +65,25 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
         </div>
       </div>
       
-      <nav className="flex-1 p-4">
-        <div className="space-y-2">
-          <Button 
-            variant={activeView === 'view' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('view')}
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            {t('navigation.view')}
-          </Button>
-          <Button 
-            variant={activeView === 'plan' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('plan')}
-          >
-            <MapPin className="w-4 h-4 mr-2" />
-            {t('navigation.plan')}
-          </Button>
-          <Button 
-            variant={activeView === 'budget' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('budget')}
-          >
-            <Calculator className="w-4 h-4 mr-2" />
-            {t('navigation.budget')}
-          </Button>
-          <Button 
-            variant={activeView === 'packing' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('packing')}
-          >
-            <Package className="w-4 h-4 mr-2" />
-            {t('navigation.packing')}
-          </Button>
-          <Button 
-            variant={activeView === 'collection' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('collection')}
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            {t('navigation.collection')}
-          </Button>
-          <Button 
-            variant={activeView === 'docs' ? 'default' : 'ghost'} 
-            className="w-full justify-start"
-            onClick={() => onViewChange('docs')}
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            {t('navigation.docs')}
-          </Button>
-        </div>
-      </nav>
+      <div className="flex-1 p-2">
+        <nav className="space-y-1">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Button
+                key={item.id}
+                variant={activeView === item.id ? "default" : "ghost"}
+                onClick={() => onViewChange(item.id)}
+                className="w-full justify-start min-h-[44px] h-auto py-3 px-3"
+                title={item.tooltip}
+              >
+                <Icon className="w-4 h-4 mr-3" />
+                <span>{item.label}</span>
+              </Button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 }

@@ -50,15 +50,15 @@ export function PackingListView({ tripData, onUpdate }: PackingListProps) {
   const packingCategories = getPackingCategories(tripData);
 
   return (
-    <div className="p-6 overflow-y-auto h-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Packing list</h2>
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm">
+    <div className="p-4 md:p-6 overflow-y-auto h-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-semibold">Packing list</h2>
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+          <Button variant="outline" size="sm" className="min-h-[44px]">
             <UserPlus className="w-4 h-4 mr-2" />
-            Invite friends
+            <span className="hidden sm:inline">Invite friends</span>
           </Button>
-          <Button size="sm">Add list</Button>
+          <Button size="sm" className="min-h-[44px]">Add list</Button>
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export function PackingListView({ tripData, onUpdate }: PackingListProps) {
         <p className="text-sm text-gray-600 mt-1">9% complete</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
         <div className="space-y-3">
           {packingCategories.map((category, index) => (
             <Card 
@@ -85,10 +85,10 @@ export function PackingListView({ tripData, onUpdate }: PackingListProps) {
           ))}
         </div>
 
-        <div className="col-span-3">
+        <div className="md:col-span-3">
           <Card className="p-4">
             <h3 className="font-medium mb-4">{packingCategories[activePackingCategory]?.name || 'Category'}</h3>
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-64 md:h-80">
               <div className="space-y-2">
                 {packingCategories[activePackingCategory]?.items?.length > 0 ? (
                   packingCategories[activePackingCategory].items.map((item, index) => (

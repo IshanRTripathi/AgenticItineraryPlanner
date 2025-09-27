@@ -342,10 +342,22 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
 
         {/* Trips Tabs */}
         <Tabs defaultValue="all" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">All Trips ({allTrips.length})</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming ({upcomingTrips.length})</TabsTrigger>
-            <TabsTrigger value="past">Past ({pastTrips.length})</TabsTrigger>
+          <TabsList className="w-full justify-start overflow-x-auto">
+            <TabsTrigger value="all" className="min-h-[44px] text-xs md:text-sm">
+              <span className="hidden sm:inline">All Trips</span>
+              <span className="sm:hidden">All</span>
+              <span className="ml-1">({allTrips.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="upcoming" className="min-h-[44px] text-xs md:text-sm">
+              <span className="hidden sm:inline">Upcoming</span>
+              <span className="sm:hidden">Upcoming</span>
+              <span className="ml-1">({upcomingTrips.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="past" className="min-h-[44px] text-xs md:text-sm">
+              <span className="hidden sm:inline">Past</span>
+              <span className="sm:hidden">Past</span>
+              <span className="ml-1">({pastTrips.length})</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="space-y-4">

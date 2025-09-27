@@ -883,27 +883,28 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   return (
     <div className={embedded ? "h-full flex flex-col bg-gray-50" : "h-screen flex flex-col bg-gray-50"}>
 
-      <div className="flex-1 flex">
+      <div className="flex-1 flex flex-col lg:flex-row">
         {/* Main Canvas Area */}
         <div className="flex-1 flex flex-col">
 
           {/* Section 1: Main Navigation (Map/Workflow/AI Assistant) - Only show when not embedded */}
           {!embedded && (
-            <div className="bg-white border-b px-6 py-4 mb-2">
-              <div className="flex items-center justify-between">
+            <div className="bg-white border-b px-4 md:px-6 py-4 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <Button variant="ghost" onClick={onCancel}>
+                  <Button variant="ghost" onClick={onCancel} className="min-h-[44px]">
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back
                   </Button>
                   <div>
-                    <h1 className="text-2xl">Workflow Builder</h1>
-                    <p className="text-gray-600">{tripData.destination}</p>
+                    <h1 className="text-xl md:text-2xl">Workflow Builder</h1>
+                    <p className="text-gray-600 text-sm md:text-base">{tripData.destination}</p>
                   </div>
                 </div>
-                <Button onClick={applyToItinerary}>
+                <Button onClick={applyToItinerary} className="min-h-[44px]">
                   <Save className="h-4 w-4 mr-2" />
-                  Apply to Itinerary
+                  <span className="hidden sm:inline">Apply to Itinerary</span>
+                  <span className="sm:hidden">Apply</span>
                 </Button>
               </div>
             </div>
@@ -912,11 +913,11 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
           {/* Section 2: Day Navigation */}
           <div className="bg-white border-b px-4 py-4 mb-2">
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center overflow-x-auto">
               <Tabs value={activeDay.toString()} onValueChange={(value) => setActiveDay(parseInt(value))}>
-                <TabsList className="h-10 gap-2">
+                <TabsList className="h-10 gap-2 min-w-max">
                   {workflowDays.map((day, index) => (
-                    <TabsTrigger key={index} value={index.toString()} className="text-sm px-4 py-2 mx-1">
+                    <TabsTrigger key={index} value={index.toString()} className="text-sm px-3 md:px-4 py-2 mx-1 min-h-[44px]">
                       Day {day.day}
                     </TabsTrigger>
                   ))}
@@ -927,22 +928,25 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
           {/* Section 3: Add Node Toolbar */}
           <div className="bg-white border-b px-4 py-4 mb-2">
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-sm font-medium mr-4">Add Node:</span>
-              {(['Attraction', 'Meal', 'Transit', 'Hotel', 'FreeTime'] as const).map((type) => {
-                const Icon = getNodeIcon(type);
-                return (
-                  <Button
-                    key={type}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addNewNode(type)}
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    {type}
-                  </Button>
-                );
-              })}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-2">
+              <span className="text-sm font-medium mr-4 hidden sm:inline">Add Node:</span>
+              <div className="flex flex-wrap justify-center gap-2">
+                {(['Attraction', 'Meal', 'Transit', 'Hotel', 'FreeTime'] as const).map((type) => {
+                  const Icon = getNodeIcon(type);
+                  return (
+                    <Button
+                      key={type}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addNewNode(type)}
+                      className="min-h-[44px]"
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">{type}</span>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -1009,7 +1013,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
         {/* Side Panel - Node Inspector */}
         {selectedNode && (
-          <div className="w-80 bg-white border-l">
+          <div className="w-full lg:w-80 bg-white border-l lg:border-l border-t lg:border-t-0">
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium">Node Inspector</h3>
@@ -1017,6 +1021,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
                   variant="ghost"
                   size="sm"
                   onClick={() => deleteNode(selectedNode.id)}
+                  className="min-h-[44px]"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

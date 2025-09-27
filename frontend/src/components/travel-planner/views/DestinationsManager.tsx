@@ -58,12 +58,11 @@ export function DestinationsManager({
   // Show empty state if no destinations
   if (destinations.length === 0) {
     return (
-      <ErrorBoundary>
-        <div className="p-6">
+      <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               <Select value={currency} onValueChange={onCurrencyChange}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 min-h-[44px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -89,17 +88,15 @@ export function DestinationsManager({
             <p className="text-gray-600 mb-6">Start building your trip by adding destinations below.</p>
           </div>
         </div>
-      </ErrorBoundary>
     );
   }
 
   return (
-    <ErrorBoundary>
-      <div className="p-6">
+    <div className="p-4 md:p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <Select value={currency} onValueChange={onCurrencyChange}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 min-h-[44px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -113,7 +110,7 @@ export function DestinationsManager({
             <Badge variant="secondary">
               {t('destinations.nightsPlanned', { current: totalNights, max: maxNights })}
             </Badge>
-            <Button variant="ghost" size="sm" onClick={onToggleNotes}>
+            <Button variant="ghost" size="sm" onClick={onToggleNotes} className="min-h-[44px]">
               <Menu className="w-4 h-4 mr-2" />
               {t('destinations.showNotes')}
             </Button>
@@ -140,7 +137,7 @@ export function DestinationsManager({
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="w-6 h-6 p-0"
+                              className="w-6 h-6 p-0 min-h-[44px]"
                               onClick={() => onUpdate(destination.id, { nights: Math.max(0, destination.nights - 1) })}
                             >
                               <Minus className="w-3 h-3" />
@@ -148,7 +145,7 @@ export function DestinationsManager({
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="w-6 h-6 p-0"
+                              className="w-6 h-6 p-0 min-h-[44px]"
                               onClick={() => onUpdate(destination.id, { nights: destination.nights + 1 })}
                             >
                               <Plus className="w-3 h-3" />
@@ -158,7 +155,7 @@ export function DestinationsManager({
                         <Button 
                           variant={destination.sleeping ? "default" : "outline"} 
                           size="sm" 
-                          className="h-6 px-2 text-xs"
+                          className="h-6 px-2 text-xs min-h-[44px]"
                           onClick={() => onUpdate(destination.id, { sleeping: !destination.sleeping })}
                         >
                           {destination.sleeping ? 'Sleeping' : 'No Sleep'}
@@ -166,7 +163,7 @@ export function DestinationsManager({
                         <Button 
                           variant={destination.discover ? "default" : "outline"} 
                           size="sm" 
-                          className="h-6 px-2 text-xs bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200"
+                          className="h-6 px-2 text-xs bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200 min-h-[44px]"
                           onClick={() => onUpdate(destination.id, { discover: !destination.discover })}
                         >
                           Discover
@@ -178,7 +175,7 @@ export function DestinationsManager({
                     variant="ghost" 
                     size="sm" 
                     onClick={() => onRemove(destination.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 min-h-[44px]"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -190,7 +187,7 @@ export function DestinationsManager({
                       placeholder="Add notes for this destination..." 
                       value={destination.notes}
                       onChange={(e) => onUpdate(destination.id, { notes: e.target.value })}
-                      className="text-sm"
+                      className="text-sm min-h-[44px]"
                     />
                   </div>
                 )}
@@ -217,9 +214,9 @@ export function DestinationsManager({
               value={newDestination}
               onChange={(e) => setNewDestination(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addDestination()}
-              className="flex-1"
+              className="flex-1 min-h-[44px]"
             />
-            <Button onClick={addDestination}>
+            <Button onClick={addDestination} className="min-h-[44px]">
               <Plus className="w-4 h-4 mr-2" />
               Add Destination
             </Button>
@@ -228,12 +225,11 @@ export function DestinationsManager({
 
         {/* Action Buttons */}
         <div className="flex justify-center space-x-4 mt-6">
-          <Button variant="outline">
+          <Button variant="outline" className="min-h-[44px]">
             <FileText className="w-4 h-4 mr-2" />
             Collection
           </Button>
         </div>
       </div>
-    </ErrorBoundary>
   );
 }

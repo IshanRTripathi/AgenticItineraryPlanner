@@ -11,12 +11,12 @@ interface BudgetViewProps {
 
 export function BudgetView({ tripData, currency, onCurrencyChange }: BudgetViewProps) {
   return (
-    <div className="p-6 overflow-y-auto h-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Budget & Costs</h2>
+    <div className="p-4 md:p-6 overflow-y-auto h-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-semibold">Budget & Costs</h2>
         <div className="flex items-center space-x-3">
           <Select value={currency} onValueChange={onCurrencyChange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 min-h-[44px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

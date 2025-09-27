@@ -5,10 +5,10 @@ import { ViewComponentProps } from '../shared/types';
 
 export function CollectionView({ tripData }: ViewComponentProps) {
   return (
-    <div className="p-6 overflow-y-auto h-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Collection</h2>
-        <Button>Add to Collection</Button>
+    <div className="p-4 md:p-6 overflow-y-auto h-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-semibold">Collection</h2>
+        <Button className="min-h-[44px]">Add to Collection</Button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

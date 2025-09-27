@@ -241,8 +241,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     // Show loading state while data is being fetched
     if (isLoading) {
       return (
-        <div className="p-6 space-y-6">
-          <Card className="p-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+          <Card className="p-4 md:p-6">
             <div className="flex items-center space-x-3 mb-4">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
               <span className="text-gray-600">Loading your itinerary...</span>
@@ -254,8 +254,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     
     if (!hasItineraryData) {
       return (
-        <div className="p-6 space-y-6">
-          <Card className="p-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+          <Card className="p-4 md:p-6">
             <div className="flex items-center space-x-3 mb-4">
               <Search className="w-5 h-5 text-gray-400" />
               <Input 
@@ -265,7 +265,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             </div>
           </Card>
           
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <h3 className="font-semibold mb-2">No itinerary data available yet</h3>
             <p className="text-gray-600 text-sm mb-4">
               Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below.
@@ -278,10 +278,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
     const leftContent = (
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
-        <div className="border-b border-gray-200 px-6 flex-shrink-0">
-          <TabsList className="h-12">
-            <TabsTrigger value="destinations">Destinations</TabsTrigger>
-            <TabsTrigger value="day-by-day">Day by day</TabsTrigger>
+        <div className="border-b border-gray-200 px-4 md:px-6 flex-shrink-0">
+          <TabsList className="h-10 md:h-12">
+            <TabsTrigger value="destinations" className="text-sm md:text-base min-h-[44px]">Destinations</TabsTrigger>
+            <TabsTrigger value="day-by-day" className="text-sm md:text-base min-h-[44px]">Day by day</TabsTrigger>
           </TabsList>
         </div>
 
@@ -393,9 +393,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 setShowWorkflowBuilder(false);
                 setShowChatInterface(false);
               }}
+              className="min-h-[44px]"
             >
               <Globe className="w-4 h-4 mr-2" />
-              Map
+              <span className="hidden sm:inline">Map</span>
             </Button>
             <Button 
               size="sm" 
@@ -404,9 +405,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 setShowWorkflowBuilder(true);
                 setShowChatInterface(false);
               }}
+              className="min-h-[44px]"
             >
               <Workflow className="w-4 h-4 mr-2" />
-              Workflow
+              <span className="hidden sm:inline">Workflow</span>
             </Button>
             <Button 
               size="sm" 
@@ -415,16 +417,17 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 setShowWorkflowBuilder(false);
                 setShowChatInterface(true);
               }}
+              className="min-h-[44px]"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
-              AI Assistant
+              <span className="hidden sm:inline">AI Assistant</span>
             </Button>
           </div>
         </div>
         
         <div className="absolute top-4 right-4 space-y-2 z-20">
           {!showWorkflowBuilder && !showChatInterface && (
-            <Button size="sm" onClick={onShare}>Share trip</Button>
+            <Button size="sm" onClick={onShare} className="min-h-[44px]">Share trip</Button>
           )}
         </div>
         

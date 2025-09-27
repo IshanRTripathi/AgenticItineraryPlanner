@@ -34,12 +34,12 @@ export function TransportPlanner({ destination, tripData, onUpdate }: TransportP
         </SheetHeader>
         <div className="mt-6">
           <Tabs value={transportMode} onValueChange={(value) => setTransportMode(value as any)}>
-            <TabsList className="grid grid-cols-5 w-full">
-              <TabsTrigger value="drive">Drive</TabsTrigger>
-              <TabsTrigger value="flights">Flights</TabsTrigger>
-              <TabsTrigger value="train">Train</TabsTrigger>
-              <TabsTrigger value="bus">Bus</TabsTrigger>
-              <TabsTrigger value="ferry">Ferry</TabsTrigger>
+            <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full overflow-x-auto">
+              <TabsTrigger value="drive" className="min-h-[44px] text-xs md:text-sm">Drive</TabsTrigger>
+              <TabsTrigger value="flights" className="min-h-[44px] text-xs md:text-sm">Flights</TabsTrigger>
+              <TabsTrigger value="train" className="min-h-[44px] text-xs md:text-sm">Train</TabsTrigger>
+              <TabsTrigger value="bus" className="min-h-[44px] text-xs md:text-sm">Bus</TabsTrigger>
+              <TabsTrigger value="ferry" className="min-h-[44px] text-xs md:text-sm">Ferry</TabsTrigger>
             </TabsList>
             
             <TabsContent value="drive" className="mt-6">

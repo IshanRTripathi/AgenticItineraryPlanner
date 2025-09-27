@@ -152,8 +152,7 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
   };
 
   return (
-    <ErrorBoundary>
-      <div className="p-6">
+    <div className="p-4 md:p-6">
         <div className="space-y-4">
         {tripData.itinerary?.days?.map((day: any, index: number) => {
           const dayNumber = day.dayNumber || index + 1;
@@ -168,7 +167,7 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
             >
               {/* Day Header - Always Visible */}
               <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                <div className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors min-h-[60px]">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
                       {dayNumber}
@@ -289,12 +288,12 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
                         {/* Action Buttons */}
                         <div className="flex items-center space-x-2">
                           {(component.booking?.required || component.bookingRequired) && (
-                            <Button size="sm" variant="outline" className="bg-orange-50 text-orange-700 border-orange-300 hover:bg-orange-100">
+                            <Button size="sm" variant="outline" className="bg-orange-50 text-orange-700 border-orange-300 hover:bg-orange-100 min-h-[44px]">
                               <ExternalLink className="w-4 h-4 mr-2" />
                               {t('dayByDay.bookNow')}
                             </Button>
                           )}
-                          <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-800">
+                          <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-800 min-h-[44px]">
                             <MapPin className="w-4 h-4 mr-2" />
                             {t('dayByDay.viewDetails')}
                           </Button>
@@ -381,6 +380,5 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
         )}
         </div>
       </div>
-    </ErrorBoundary>
   );
 }

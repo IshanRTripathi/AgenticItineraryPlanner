@@ -139,5 +139,5 @@ export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
 export { LoadingSpinner, SkeletonCard, SkeletonTable } from './LoadingSpinner';
 
 // View types
-export type TravelPlannerView = 'view' | 'plan' | 'budget' | 'packing' | 'collection' | 'docs' | 'discover';
+export type TravelPlannerView = 'view' | 'plan' | 'budget' | 'packing' | 'collection' | 'docs';
 export type PlanTab = 'destinations' | 'day-by-day';
