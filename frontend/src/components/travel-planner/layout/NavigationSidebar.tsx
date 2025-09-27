@@ -6,7 +6,8 @@ import {
   Package,
   FileText,
   FolderOpen,
-  Menu,
+  ChevronRight,
+  ChevronLeft,
   X
 } from 'lucide-react';
 import { NavigationSidebarProps } from '../shared/types';
@@ -101,31 +102,54 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
   // Mobile/Tablet: Show hamburger button and overlay sidebar
   return (
     <>
-      {/* Hamburger Menu Button - hide while sidebarOpen to avoid it sitting above overlay */}
-      <button
-        onClick={(e) => {
-          console.log('NavigationSidebar: hamburger button clicked, current sidebarOpen:', sidebarOpen);
-          handleSidebarToggle(e);
+      {/* Custom Sidebar Toggle - thin overlay with middle button */}
+      <div 
+        className={`fixed left-0 top-0 bottom-0 z-50 flex flex-col items-start justify-center ${sidebarOpen ? 'hidden' : 'block'}`}
+        style={{ 
+          display: sidebarOpen ? 'none' : 'flex',
+          width: '20px'
         }}
-        aria-expanded={sidebarOpen}
-        aria-controls="mobile-sidebar"
-        className={`fixed top-4 left-4 z-50 w-12 h-12 bg-white shadow-lg border border-gray-200 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors ${sidebarOpen ? 'hidden' : 'block'}`}
-        style={{ display: sidebarOpen ? 'none' : 'flex' }}
       >
-        <Menu className="w-5 h-5 text-gray-700" />
-      </button>
+        {/* Thin overlay line from top to bottom */}
+        <div 
+          className="absolute top-0 bottom-0 w-1 bg-gray-300 hover:bg-gray-400 transition-colors cursor-pointer"
+          onClick={(e) => {
+            console.log('NavigationSidebar: thin overlay clicked, current sidebarOpen:', sidebarOpen);
+            handleSidebarToggle(e);
+          }}
+        />
+        
+        {/* Middle button with bulge */}
+        <button
+          onClick={(e) => {
+            console.log('NavigationSidebar: sidebar toggle button clicked, current sidebarOpen:', sidebarOpen);
+            handleSidebarToggle(e);
+          }}
+          aria-expanded={sidebarOpen}
+          aria-controls="mobile-sidebar"
+          className="relative w-12 h-12 bg-white shadow-lg border border-gray-200 rounded-r-lg flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+          style={{ 
+            backgroundColor: '#ffffff',
+            border: '1px solid #e5e7eb',
+            borderLeft: 'none'
+          }}
+        >
+          <ChevronRight className="w-5 h-5 text-gray-700" />
+        </button>
+      </div>
 
       {/* Transparent overlay - allows clicking outside to close sidebar */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[45]"
           onClick={(e) => { 
             e.stopPropagation(); 
-            console.log('NavigationSidebar: outside area clicked, closing sidebar');
+            console.log('NavigationSidebar: outside area clicked, closing sidebar, event target:', e.target);
             setSidebarOpen(false); 
           }}
           onKeyDown={(e) => { if (e.key === 'Escape') setSidebarOpen(false); }}
           role="presentation"
+          style={{ zIndex: 45 }}
         />
       )}
 
@@ -157,7 +181,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
             aria-label="Close navigation"
             className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>
         </div>
 

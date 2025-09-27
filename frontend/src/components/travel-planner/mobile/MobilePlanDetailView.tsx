@@ -61,20 +61,13 @@ export function MobilePlanDetailView({
               console.log('Mobile detail view empty state back button clicked');
               onBack();
             }}
-            className="flex items-center space-x-2 min-h-[44px]"
+            className="flex items-center space-x-2"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
           </Button>
           <h1 className="text-lg font-semibold">Plan</h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRefresh}
-            className="min-h-[44px]"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </Button>
+          <div className="w-16" /> {/* Spacer for centering */}
         </div>
 
         {/* Empty State */}
@@ -84,11 +77,7 @@ export function MobilePlanDetailView({
               <RefreshCw className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No destinations yet</h3>
-            <p className="text-gray-600 mb-4">Your itinerary will appear here once planning is complete.</p>
-            <Button onClick={handleRefresh} className="min-h-[44px]">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
+            <p className="text-gray-600">Your itinerary will appear here once planning is complete.</p>
           </div>
         </div>
       </div>
@@ -107,7 +96,7 @@ export function MobilePlanDetailView({
             console.log('Mobile detail view back button clicked');
             onBack();
           }}
-          className="flex items-center space-x-2 min-h-[44px]"
+          className="flex items-center space-x-2"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>

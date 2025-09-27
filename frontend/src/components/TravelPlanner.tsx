@@ -652,23 +652,28 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // Main component return
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <TopNavigation
-        tripData={currentTripData}
-        onShare={onShare}
-        onExportPDF={onExportPDF}
-        onBack={onBack}
-      />
+      {/* Only show TopNavigation when not in mobile plan view */}
+      {!((isMobile || isTablet) && activeView === 'plan') && (
+        <TopNavigation
+          tripData={currentTripData}
+          onShare={onShare}
+          onExportPDF={onExportPDF}
+          onBack={onBack}
+        />
+      )}
       
       {/* Main content area */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Sidebar - Desktop: part of layout, Mobile: overlay */}
-        <NavigationSidebar
-          activeView={activeView}
-          onViewChange={(view) => {
-            console.log('TravelPlanner: onViewChange called with', view);
-            setActiveView(view);
-          }}
-        />
+        {/* Sidebar - Desktop: part of layout, Mobile: overlay - only show when not in mobile layout */}
+        {!((isMobile || isTablet) && activeView === 'plan') && (
+          <NavigationSidebar
+            activeView={activeView}
+            onViewChange={(view) => {
+              console.log('TravelPlanner: onViewChange called with', view);
+              setActiveView(view);
+            }}
+          />
+        )}
         
         {/* Content area */}
         <div className="flex-1 min-h-0">
@@ -684,6 +689,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             
             return shouldShowMobile ? (
               <MobileLayout
+                key={activeView} // Force re-render when activeView changes to reset currentCard
                 tripData={currentTripData}
                 destinations={destinations}
                 mapMarkers={mapMarkers}

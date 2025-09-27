@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '../../ui/card';
 import { MapPin, Globe, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { TopNavigation } from '../layout/TopNavigation';
 
 interface MobilePlanViewProps {
   onCardSelect: (cardType: 'plan' | 'map' | 'chat') => void;
@@ -44,13 +45,15 @@ export function MobilePlanView({ onCardSelect, onBack }: MobilePlanViewProps) {
     <div className="h-full w-full flex flex-col" style={{ 
       minHeight: '100vh', 
       backgroundColor: '#f9fafb',
-      position: 'relative',
-      zIndex: 1
+      position: 'relative'
     }}>
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-center">
-        <h1 className="text-lg font-semibold text-gray-900">Plan Your Trip</h1>
-      </div>
+      {/* Top Navigation */}
+      <TopNavigation
+        tripData={null as any} // We don't need trip data for this view
+        onShare={() => {}} // Not needed for this view
+        onExportPDF={() => {}} // Not needed for this view
+        onBack={onBack}
+      />
 
       {/* Cards Grid */}
       <div className="flex-1 p-4" style={{ backgroundColor: '#f9fafb' }}>

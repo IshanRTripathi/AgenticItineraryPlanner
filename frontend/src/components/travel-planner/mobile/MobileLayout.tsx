@@ -3,6 +3,7 @@ import { MobilePlanView } from './MobilePlanView';
 import { MobilePlanDetailView } from './MobilePlanDetailView';
 import { MobileMapDetailView } from './MobileMapDetailView';
 import { MobileChatDetailView } from './MobileChatDetailView';
+import { NavigationSidebar } from '../layout/NavigationSidebar';
 import { TripData } from '../../../types/TripData';
 import { Destination } from '../shared/types';
 import type { MapMarker } from '../../../types/MapTypes';
@@ -46,7 +47,7 @@ export function MobileLayout({
 }: MobileLayoutProps) {
   const [currentCard, setCurrentCard] = useState<'plan' | 'map' | 'chat' | null>(null);
 
-  // Reset currentCard when activeView changes
+  // Reset currentCard when activeView changes (this ensures we always show cards when sidebar is opened)
   useEffect(() => {
     console.log('MobileLayout: activeView changed to', activeView);
     setCurrentCard(null);
@@ -70,6 +71,10 @@ export function MobileLayout({
   if (activeView === 'plan' && !currentCard) {
     return (
       <div className="h-full">
+        <NavigationSidebar
+          activeView={activeView}
+          onViewChange={onViewChange}
+        />
         <MobilePlanView
           onCardSelect={handleCardSelect}
           onBack={() => onViewChange('view')}
@@ -82,6 +87,10 @@ export function MobileLayout({
   if (activeView === 'plan' && currentCard) {
     return (
       <div className="h-full flex flex-col">
+        <NavigationSidebar
+          activeView={activeView}
+          onViewChange={onViewChange}
+        />
         {currentCard === 'plan' && (
           <MobilePlanDetailView
             tripData={tripData}
