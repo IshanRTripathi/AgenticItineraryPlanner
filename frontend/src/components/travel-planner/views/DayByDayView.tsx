@@ -200,172 +200,165 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
             {(day.components || day.activities) && (day.components || day.activities).length > 0 ? (
               <div className="grid gap-4">
                 {(day.components || day.activities).map((component: any, compIndex: number) => (
-                  <Card key={compIndex} className="overflow-hidden">
-                    <div className="flex">
-                      {/* Content Section */}
-                      <div className="flex-1 p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              {getTypeIcon(component.type || component.category)}
-                              <Badge variant="outline" className="text-xs">
-                                {t(`mockData.categories.${component.type || component.category || 'activity'}`, component.type || component.category || 'activity')}
-                              </Badge>
-                              {(component.booking?.required || component.bookingRequired) && (
-                                <Badge variant="default" className="text-xs bg-orange-100 text-orange-700 border-orange-300">
-                                  {t('mockData.booking.required')}
-                                </Badge>
-                              )}
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">{component.name || t('dayByDay.unnamedActivity')}</h3>
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                              {component.description || t('dayByDay.noDescription')}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Key Info Row - Money, Location, Distance */}
-                        <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
-                          {/* Cost */}
-                          <div className="flex items-center space-x-2 text-sm">
-                            <DollarSign className="w-4 h-4 text-green-600" />
-                            <div>
-                              <p className="font-semibold text-green-700">
-                                {component.cost?.currency || component.currency || 'EUR'} {component.cost?.pricePerPerson || component.estimatedCost || '0'}
-                              </p>
-                              <p className="text-gray-500 text-xs">{t('dayByDay.perPerson')}</p>
-                            </div>
-                          </div>
-
-                          {/* Location */}
-                          <div className="flex items-center space-x-2 text-sm">
-                            <MapPin className="w-4 h-4 text-blue-600" />
-                            <div>
-                              <p className="font-semibold text-blue-700">{component.location?.name || t('dayByDay.unknownLocation')}</p>
-                              <p className="text-gray-500 text-xs truncate">{component.location?.address || ''}</p>
-                            </div>
-                          </div>
-
-                          {/* Duration */}
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Clock className="w-4 h-4 text-purple-600" />
-                            <div>
-                              <p className="font-semibold text-purple-700">{formatDuration(component.timing?.duration || component.duration)}</p>
-                              <p className="text-gray-500 text-xs">
-                                {(() => {
-                                  const startTime = formatTime(component.timing?.startTime || component.startTime);
-                                  const endTime = formatTime(component.timing?.endTime || component.endTime);
-                                  
-                                  if (startTime === 'TBD' && endTime === 'TBD') {
-                                    return 'Time TBD';
-                                  } else if (startTime === 'TBD') {
-                                    return `Until ${endTime}`;
-                                  } else if (endTime === 'TBD') {
-                                    return `From ${startTime}`;
-                                  } else {
-                                    return `${startTime} - ${endTime}`;
-                                  }
-                                })()}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Additional Info */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {component.category && (
-                            <Badge variant="secondary" className="text-xs">
-                              {component.category}
-                            </Badge>
-                          )}
-                          {/* Show tips as badges if available */}
-                          {component.tips && (
-                            <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300">
-                              💡 Has Tips
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center space-x-2">
-                          {(component.booking?.required || component.bookingRequired) && (
-                            <Button size="sm" variant="outline" className="bg-orange-50 text-orange-700 border-orange-300 hover:bg-orange-100 min-h-[44px]">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              {t('dayByDay.bookNow')}
-                            </Button>
-                          )}
-                          <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-800 min-h-[44px]">
-                            <MapPin className="w-4 h-4 mr-2" />
-                            {t('dayByDay.viewDetails')}
-                          </Button>
-                        </div>
-
-                        {/* Tips */}
-                        {component.tips && (
-                          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm font-medium text-blue-800 mb-1">💡 {t('dayByDay.travelTip')}</p>
-                            <p className="text-sm text-blue-700">
-                              {typeof component.tips === 'string' 
-                                ? component.tips 
-                                : component.tips.insider?.[0] || component.tips.bestTimeToVisit || 'Travel tip available'
-                              }
-                            </p>
+                  <Card key={compIndex} className="overflow-hidden p-0">
+                    {/* Full Card Image with Gradient Overlay */}
+                    <div className="relative h-64 w-full">
+                      <img 
+                        src={component.media?.images?.[0] || getPlaceholderImage(component.category || component.type, component.name)}
+                        alt={component.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = getPlaceholderImage(component.category || component.type, component.name);
+                        }}
+                      />
+                      
+                      {/* Full Card Translucent Overlay */}
+                      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm">
+                        {/* Top Right - Rating */}
+                        {(component.details?.rating || component.rating) && (
+                          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-1 shadow-lg z-20">
+                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                            <span className="text-sm font-semibold text-gray-800">{component.details?.rating || component.rating}</span>
                           </div>
                         )}
-                      </div>
-
-                      {/* Image Section - Right Side - Only show when not collapsed */}
-                      {!isCollapsed && (
-                        <div className="w-64 h-64 flex-shrink-0 relative">
-                          <img 
-                            src={component.media?.images?.[0] || getPlaceholderImage(component.category || component.type, component.name)}
-                            alt={component.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = getPlaceholderImage(component.category || component.type, component.name);
-                            }}
-                          />
-                          {/* Image overlay with rating if available */}
-                          {(component.details?.rating || component.rating) && (
-                            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center space-x-1">
-                              <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                              <span className="text-xs font-medium">{component.details?.rating || component.rating}</span>
-                            </div>
-                          )}
-                          {/* Category overlay */}
-                          <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1">
-                            <span className="text-xs text-white font-medium">
-                              {component.category || component.type || 'Activity'}
-                            </span>
+                        
+                        {/* Top Left - Category Badge */}
+                        <div className="absolute top-4 left-4 z-20">
+                          <div className="flex items-center space-x-2">
+                            {getTypeIcon(component.type || component.category)}
+                            <Badge variant="secondary" className="bg-white/95 text-gray-800 border-0 shadow-lg">
+                              {t(`mockData.categories.${component.type || component.category || 'activity'}`, component.type || component.category || 'activity')}
+                            </Badge>
+                            {(component.booking?.required || component.bookingRequired) && (
+                              <Badge variant="default" className="bg-orange-500 text-white border-0 shadow-lg">
+                                {t('mockData.booking.required')}
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                      )}
+
+                        {/* Content positioned over the translucent overlay with proper spacing */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 z-10" style={{paddingTop: '60px'}}>
+                          <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg line-clamp-2">
+                            {component.name || t('dayByDay.unnamedActivity')}
+                          </h3>
+                          <p className="text-white/90 text-sm mb-3 line-clamp-2 drop-shadow-md">
+                            {component.description || t('dayByDay.noDescription')}
+                          </p>
+                          
+                          {/* Key Info Row */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              {/* Cost */}
+                              <div className="flex items-center space-x-2 text-white">
+                                <DollarSign className="w-4 h-4" />
+                                <div>
+                                  <p className="font-semibold text-sm">
+                                    {component.cost?.currency || component.currency || 'EUR'} {typeof (component.cost?.pricePerPerson || component.estimatedCost) === 'object' ? '0' : (component.cost?.pricePerPerson || component.estimatedCost || '0')}
+                                  </p>
+                                  <p className="text-white/70 text-xs">{t('dayByDay.perPerson')}</p>
+                                </div>
+                              </div>
+
+                              {/* Duration */}
+                              <div className="flex items-center space-x-2 text-white">
+                                <Clock className="w-4 h-4" />
+                                <div>
+                                  <p className="font-semibold text-sm">{typeof (component.duration || component.estimatedDuration) === 'object' ? '2h' : (component.duration || component.estimatedDuration || '2h')}</p>
+                                  <p className="text-white/70 text-xs">{t('dayByDay.duration')}</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Location */}
+                            <div className="flex items-center space-x-2 text-white">
+                              <MapPin className="w-4 h-4" />
+                              <div className="text-right">
+                                <p className="font-semibold text-sm">{typeof component.location?.name === 'object' ? t('dayByDay.unknownLocation') : (component.location?.name || t('dayByDay.unknownLocation'))}</p>
+                                <p className="text-white/70 text-xs truncate max-w-32">{typeof component.location?.address === 'object' ? '' : (component.location?.address || '')}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Opening Hours */}
+                          {(component.details?.openingHours || component.openingHours) && (
+                            <div className="mt-4 pt-4 border-t border-white/20">
+                              <div className="flex items-center space-x-2 text-white">
+                                <Clock className="w-4 h-4" />
+                                <div>
+                                  <p className="font-semibold text-sm">Opening Hours</p>
+                                  <p className="text-white/70 text-xs">
+                                    {(() => {
+                                      const hours = component.details?.openingHours || component.openingHours;
+                                      if (typeof hours === 'object' || !hours || hours === 'dayByDay.openingHours') {
+                                        return 'N/A';
+                                      }
+                                      return hours;
+                                    })()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
+                    
+                    {/* Additional Details Section - Only show if there's contact info */}
+                    {(component.contact?.phone || component.contact?.website) && (
+                      <div className="p-6 space-y-4">
+                        {/* Contact Information */}
+                        <div className="flex flex-wrap gap-3">
+                          {component.contact?.phone && (
+                            <Button variant="outline" size="sm" className="text-xs">
+                              <Phone className="w-3 h-3 mr-1" />
+                              {typeof component.contact.phone === 'object' ? 'Phone' : component.contact.phone}
+                            </Button>
+                          )}
+                          {component.contact?.website && (
+                            <Button variant="outline" size="sm" className="text-xs">
+                              <Globe className="w-3 h-3 mr-1" />
+                              {t('dayByDay.website')}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </Card>
                 ))}
               </div>
             ) : (
               <Card className="p-8 text-center">
                 <div className="text-gray-500">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium mb-2">No activities planned yet</p>
-                  <p className="text-sm">Your itinerary will be populated once the planning is complete.</p>
+                  <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <p className="text-xl font-medium mb-2">No activities planned for this day</p>
+                  <p className="text-sm">Your personalized itinerary will appear here once planning is complete.</p>
                 </div>
               </Card>
             )}
             
-                  {/* Day Notes */}
-                  {day.notes && (
-                    <Card className="p-4 bg-blue-50 border-blue-200">
-                      <div className="flex items-start space-x-2">
-                        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-blue-800 mb-1">Day Notes</p>
-                          <p className="text-sm text-blue-700">{day.notes}</p>
-                        </div>
-                      </div>
-                    </Card>
+            {/* Transport Information */}
+            {day.transport && (
+              <Card className="p-4">
+                <div className="flex items-center space-x-3">
+                  {getTransportIcon(day.transport.mode)}
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm">{day.transport.mode} Transport</h4>
+                    <p className="text-gray-600 text-sm">
+                      {day.transport.distance && `${day.transport.distance} • `}
+                      {day.transport.duration && `${day.transport.duration}`}
+                    </p>
+                  </div>
+                  {day.transport.cost && (
+                    <div className="text-right">
+                      <p className="font-semibold text-sm text-green-600">
+                        {day.transport.currency || 'EUR'} {day.transport.cost}
+                      </p>
+                    </div>
                   )}
+                </div>
+              </Card>
+            )}
                 </div>
               </CollapsibleContent>
             </Collapsible>
