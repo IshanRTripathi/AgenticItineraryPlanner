@@ -107,10 +107,10 @@ public class OpenRouterClient implements AiClient {
 	@Override
 	public String generateStructuredContent(String userPrompt, String jsonSchema, String systemPrompt) {
 		try {
-			if (mockMode) {
-				logger.info("OpenRouter mock mode enabled; returning empty JSON");
-				return "{}";
-			}
+		if (mockMode) {
+			logger.info("OpenRouter mock mode enabled; returning mock itinerary");
+			return getMockItineraryResponse(userPrompt);
+		}
 
 			String endpoint = baseUrl.endsWith("/") ? baseUrl + "chat/completions" : baseUrl + "/chat/completions";
 			String body = buildChatCompletionsPayload(userPrompt, systemPrompt, true, jsonSchema);
@@ -215,6 +215,200 @@ public class OpenRouterClient implements AiClient {
 
 	private String jsonEscape(String s) {
 		return objectMapper.valueToTree(s).toString();
+	}
+	
+	/**
+	 * Get mock itinerary response for testing/development.
+	 */
+	private String getMockItineraryResponse(String userPrompt) {
+		// Extract destination from user prompt if possible
+		String destination = "Barcelona"; // Default
+		if (userPrompt.toLowerCase().contains("paris")) {
+			destination = "Paris";
+		} else if (userPrompt.toLowerCase().contains("london")) {
+			destination = "London";
+		} else if (userPrompt.toLowerCase().contains("rome")) {
+			destination = "Rome";
+		} else if (userPrompt.toLowerCase().contains("tokyo")) {
+			destination = "Tokyo";
+		}
+		
+		// Return a proper mock itinerary structure
+		return String.format("""
+			{
+			  "itineraryId": "it_mock_%s_%d",
+			  "version": 1,
+			  "summary": "3-day %s adventure with local attractions, cuisine, and cultural experiences",
+			  "currency": "EUR",
+			  "themes": ["culture", "food", "sightseeing"],
+			  "days": [
+			    {
+			      "dayNumber": 1,
+			      "date": "2025-06-01",
+			      "location": "%s",
+			      "nodes": [
+			        {
+			          "id": "n_arrival",
+			          "type": "transport",
+			          "title": "Arrival at %s",
+			          "location": {
+			            "name": "%s Airport",
+			            "address": "%s",
+			            "coordinates": {
+			              "lat": 41.3851,
+			              "lng": 2.1734
+			            }
+			          },
+			          "timing": {
+			            "startTime": "2025-06-01T10:00:00Z",
+			            "endTime": "2025-06-01T11:00:00Z",
+			            "durationMin": 60
+			          },
+			          "cost": {
+			            "amount": 0.0,
+			            "currency": "EUR",
+			            "per": "person"
+			          },
+			          "details": {
+			            "rating": 4.0,
+			            "category": "transport",
+			            "tags": ["arrival", "airport"]
+			          },
+			          "labels": ["Arrival"],
+			          "status": "planned",
+			          "updatedBy": "system",
+			          "updatedAt": "2025-01-21T19:00:00Z"
+			        },
+			        {
+			          "id": "n_attraction_1",
+			          "type": "attraction",
+			          "title": "Main Attraction in %s",
+			          "location": {
+			            "name": "Main Attraction",
+			            "address": "%s",
+			            "coordinates": {
+			              "lat": 41.3851,
+			              "lng": 2.1734
+			            }
+			          },
+			          "timing": {
+			            "startTime": "2025-06-01T14:00:00Z",
+			            "endTime": "2025-06-01T17:00:00Z",
+			            "durationMin": 180
+			          },
+			          "cost": {
+			            "amount": 25.0,
+			            "currency": "EUR",
+			            "per": "person"
+			          },
+			          "details": {
+			            "rating": 4.5,
+			            "category": "attraction",
+			            "tags": ["sightseeing", "culture"]
+			          },
+			          "labels": ["Must-Visit"],
+			          "status": "planned",
+			          "updatedBy": "system",
+			          "updatedAt": "2025-01-21T19:00:00Z"
+			        }
+			      ]
+			    },
+			    {
+			      "dayNumber": 2,
+			      "date": "2025-06-02",
+			      "location": "%s",
+			      "nodes": [
+			        {
+			          "id": "n_meal_1",
+			          "type": "meal",
+			          "title": "Local Restaurant",
+			          "location": {
+			            "name": "Local Restaurant",
+			            "address": "%s",
+			            "coordinates": {
+			              "lat": 41.3851,
+			              "lng": 2.1734
+			            }
+			          },
+			          "timing": {
+			            "startTime": "2025-06-02T12:00:00Z",
+			            "endTime": "2025-06-02T14:00:00Z",
+			            "durationMin": 120
+			          },
+			          "cost": {
+			            "amount": 30.0,
+			            "currency": "EUR",
+			            "per": "person"
+			          },
+			          "details": {
+			            "rating": 4.2,
+			            "category": "meal",
+			            "tags": ["local", "cuisine"]
+			          },
+			          "labels": ["Local Experience"],
+			          "status": "planned",
+			          "updatedBy": "system",
+			          "updatedAt": "2025-01-21T19:00:00Z"
+			        }
+			      ]
+			    },
+			    {
+			      "dayNumber": 3,
+			      "date": "2025-06-03",
+			      "location": "%s",
+			      "nodes": [
+			        {
+			          "id": "n_departure",
+			          "type": "transport",
+			          "title": "Departure from %s",
+			          "location": {
+			            "name": "%s Airport",
+			            "address": "%s",
+			            "coordinates": {
+			              "lat": 41.3851,
+			              "lng": 2.1734
+			            }
+			          },
+			          "timing": {
+			            "startTime": "2025-06-03T17:00:00Z",
+			            "endTime": "2025-06-03T18:00:00Z",
+			            "durationMin": 60
+			          },
+			          "cost": {
+			            "amount": 0.0,
+			            "currency": "EUR",
+			            "per": "person"
+			          },
+			          "details": {
+			            "rating": 4.0,
+			            "category": "transport",
+			            "tags": ["departure", "airport"]
+			          },
+			          "labels": ["Departure"],
+			          "status": "planned",
+			          "updatedBy": "system",
+			          "updatedAt": "2025-01-21T19:00:00Z"
+			        }
+			      ]
+			    }
+			  ]
+			}
+			""", 
+			destination.toLowerCase(), 
+			System.currentTimeMillis(),
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination,
+			destination
+		);
 	}
 }
 

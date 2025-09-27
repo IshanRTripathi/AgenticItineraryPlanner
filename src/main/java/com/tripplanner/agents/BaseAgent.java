@@ -44,7 +44,7 @@ public abstract class BaseAgent {
         
         try {
             // Emit running event
-            emitEvent(itineraryId, AgentEvent.AgentStatus.running, 0, "Agent started", null);
+            emitEvent(itineraryId, AgentEvent.AgentStatus.running, 10, "Agent started", null);
             
             logger.info("Executing agent-specific logic for: {}", agentKind);
             

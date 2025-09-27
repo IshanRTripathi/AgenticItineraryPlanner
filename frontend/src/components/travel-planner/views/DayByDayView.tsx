@@ -5,6 +5,7 @@ import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
 import { ViewComponentProps, ErrorBoundary } from '../shared/types';
+import { AutoRefreshEmptyState } from '../../shared/AutoRefreshEmptyState';
 import { 
   Clock, 
   MapPin, 
@@ -138,7 +139,7 @@ const getPlaceholderImage = (category: string, name: string) => {
   return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop';
 };
 
-export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: ViewComponentProps) {
+export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRefresh }: ViewComponentProps) {
   const { t } = useTranslation();
   const [expandedDay, setExpandedDay] = useState<number | null>(1); // First day (day 1) expanded by default
 
@@ -359,13 +360,16 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
             </Collapsible>
           );
         }) || (
-          <Card className="p-8 text-center">
-            <div className="text-gray-500">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-xl font-medium mb-2">No itinerary data available yet</p>
-              <p className="text-sm">Your personalized itinerary will appear here once planning is complete.</p>
-            </div>
-          </Card>
+          <AutoRefreshEmptyState
+            title="No itinerary data available yet"
+            description="Your personalized itinerary will appear here once planning is complete."
+            onRefresh={() => {
+              console.log('DayByDayView: Manual refresh triggered');
+              onRefresh?.();
+            }}
+            showRefreshButton={true}
+            icon={<Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />}
+          />
         )}
         </div>
       </div>

@@ -8,6 +8,8 @@ import { useItinerary, queryKeys } from '../state/query/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { TripData } from '../types/TripData';
 import { useTranslation } from 'react-i18next';
+import { AgentProgressModal } from './agents/AgentProgressModal';
+import { AutoRefreshEmptyState } from './shared/AutoRefreshEmptyState';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { MobileLayout } from './travel-planner/mobile/MobileLayout';
@@ -76,7 +78,22 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
 
   // Fetch fresh data from API instead of using cached props
-  const { data: freshTripData, isLoading, error } = useItinerary(tripData.id);
+  const { data: freshTripData, isLoading, error, refetch } = useItinerary(tripData.id);
+  
+  // State for showing progress modal
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  
+  // Polling for itinerary completion when status is 'planning'
+  useEffect(() => {
+    if (freshTripData?.status === 'planning' && (!freshTripData.itinerary || !freshTripData.itinerary.days || freshTripData.itinerary.days.length === 0)) {
+      const pollInterval = setInterval(() => {
+        console.log('Polling for itinerary completion...');
+        refetch();
+      }, 3000); // Poll every 3 seconds
+      
+      return () => clearInterval(pollInterval);
+    }
+  }, [freshTripData?.status, freshTripData?.itinerary, refetch]);
   const queryClient = useQueryClient();
   
   // Use fresh data if available, fallback to props
@@ -228,6 +245,24 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     );
   }
 
+  // Show progress modal if itinerary is still being generated
+  if (currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
+    return (
+      <AgentProgressModal
+        tripData={currentTripData}
+        onComplete={() => {
+          console.log('Itinerary generation completed!');
+          setShowProgressModal(false);
+          refetch(); // Refresh data when complete
+        }}
+        onCancel={() => {
+          setShowProgressModal(false);
+          onBack(); // Go back to dashboard
+        }}
+      />
+    );
+  }
+
 
   // Render plan view with resizable panels
   const renderPlanView = () => {
@@ -269,13 +304,16 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             </div>
           </Card>
           
-          <Card className="p-4 md:p-6">
-            <h3 className="font-semibold mb-2">No itinerary data available yet</h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below.
-            </p>
-            <Button>Add a link</Button>
-          </Card>
+          <AutoRefreshEmptyState
+            title="No itinerary data available yet"
+            description="Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below."
+            onRefresh={() => {
+              console.log('TravelPlanner: Manual refresh triggered');
+              refetch();
+            }}
+            showRefreshButton={true}
+            icon={<Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />}
+          />
         </div>
       );
     }
@@ -312,6 +350,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               tripData={currentTripData} 
               onDaySelect={handleDaySelect}
               isCollapsed={!isLeftPanelExpanded}
+              onRefresh={() => {
+                console.log('TravelPlanner: DayByDayView refresh triggered');
+                refetch();
+              }}
             />
           </TabsContent>
         </div>
@@ -689,7 +731,6 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             
             return shouldShowMobile ? (
               <MobileLayout
-                key={activeView} // Force re-render when activeView changes to reset currentCard
                 tripData={currentTripData}
                 destinations={destinations}
                 mapMarkers={mapMarkers}

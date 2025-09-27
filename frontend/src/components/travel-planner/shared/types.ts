@@ -15,6 +15,7 @@ export interface ViewComponentProps {
   onUpdate?: (updates: Partial<TripData>) => void;
   onDaySelect?: (dayNumber: number, dayData: any) => void;
   isCollapsed?: boolean;
+  onRefresh?: () => void;
 }
 
 // Destination management interfaces

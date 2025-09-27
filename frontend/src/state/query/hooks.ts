@@ -16,13 +16,13 @@ export function useUser() {
   });
 }
 
-export function useItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }) {
+export function useItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }, initialDelay?: number) {
   return useQuery({
     queryKey: queryKeys.itinerary(id),
     queryFn: () => apiClient.getItinerary(id, retryOptions),
     enabled: !!id,
     retry: (failureCount, error) => {
-      // Don't retry on 4xx errors except 408, 429
+      // Don't retry on 4xx errors
       if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
         return false;
       }
@@ -30,6 +30,12 @@ export function useItinerary(id: string, retryOptions?: { maxRetries?: number; r
       return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff, max 30s
+    // Add initial delay to prevent immediate API calls after creation
+    ...(initialDelay && { 
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    }),
   });
 }
 

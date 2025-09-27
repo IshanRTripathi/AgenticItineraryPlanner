@@ -25,7 +25,7 @@ public class EnrichmentAgent extends BaseAgent {
     private final ChangeEngine changeEngine;
     
     public EnrichmentAgent(AgentEventBus eventBus, ItineraryJsonService itineraryJsonService, ChangeEngine changeEngine) {
-        super(eventBus, AgentEvent.AgentKind.planner); // Use planner for now since enrichment doesn't exist
+        super(eventBus, AgentEvent.AgentKind.enrichment);
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
     }

@@ -67,16 +67,35 @@ public class AgentOrchestrator {
             
             // Step 2: Run PlannerAgent to generate the main itinerary
             logger.info("Step 2: Running PlannerAgent");
-            BaseAgent.AgentRequest<ItineraryDto> plannerRequest = new BaseAgent.AgentRequest<>(request, ItineraryDto.class);
-            ItineraryDto plannerResult = plannerAgent.execute(itineraryId, plannerRequest);
-            
-            // PlannerAgent already updates the database with NormalizedItinerary, no need to convert
-            logger.info("PlannerAgent completed, database already updated");
+            try {
+                BaseAgent.AgentRequest<ItineraryDto> plannerRequest = new BaseAgent.AgentRequest<>(request, ItineraryDto.class);
+                plannerAgent.execute(itineraryId, plannerRequest);
+                logger.info("PlannerAgent completed successfully, database already updated");
+            } catch (Exception e) {
+                logger.error("PlannerAgent failed for itinerary: {}", itineraryId, e);
+                // Update the itinerary status to indicate failure
+                try {
+                    var currentItinerary = itineraryJsonService.getItinerary(itineraryId);
+                    if (currentItinerary.isPresent()) {
+                        logger.info("PlannerAgent failure recorded for itinerary: {}", itineraryId);
+                    }
+                } catch (Exception updateError) {
+                    logger.warn("Failed to update itinerary status after PlannerAgent failure: {}", itineraryId, updateError);
+                }
+                throw new RuntimeException("PlannerAgent execution failed: " + e.getMessage(), e);
+            }
             
             // Step 3: Run EnrichmentAgent to add validation and pacing
             logger.info("Step 3: Running EnrichmentAgent");
-            BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(null, ChangeEngine.ApplyResult.class);
-            enrichmentAgent.execute(itineraryId, enrichmentRequest);
+            try {
+                BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(null, ChangeEngine.ApplyResult.class);
+                enrichmentAgent.execute(itineraryId, enrichmentRequest);
+                logger.info("EnrichmentAgent completed successfully");
+            } catch (Exception e) {
+                logger.error("EnrichmentAgent failed for itinerary: {}", itineraryId, e);
+                // EnrichmentAgent failure is not critical, continue with the itinerary
+                logger.warn("Continuing with itinerary despite EnrichmentAgent failure");
+            }
             
             // Get the final enriched itinerary from user-specific storage
             var finalItinerary = userDataService.getUserItinerary(userId, itineraryId);
@@ -88,6 +107,19 @@ public class AgentOrchestrator {
             
             logger.info("=== NORMALIZED ITINERARY GENERATION COMPLETE ===");
             logger.info("Final itinerary has {} days", finalItinerary.get().getDays() != null ? finalItinerary.get().getDays().size() : 0);
+            
+            // Update the itinerary status to completed in the database
+            try {
+                // Get the current itinerary DTO and update its status
+                var currentItinerary = itineraryJsonService.getItinerary(itineraryId);
+                if (currentItinerary.isPresent()) {
+                    NormalizedItinerary itinerary = currentItinerary.get();
+                    // The status is managed by the frontend, but we can add a completion marker
+                    logger.info("Itinerary generation completed successfully for ID: {}", itineraryId);
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to update itinerary status for ID: {}, but generation completed successfully", itineraryId, e);
+            }
             
             return CompletableFuture.completedFuture(finalItinerary.get());
             

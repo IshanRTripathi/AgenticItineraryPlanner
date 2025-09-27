@@ -4,7 +4,7 @@
 
 import { DataTransformer } from './dataTransformer';
 import { NormalizedDataTransformer } from './normalizedDataTransformer';
-import { TripData } from '../types/TripData';
+import { TripData, Traveler, TravelPreferences, TripSettings } from '../types/TripData';
 import { 
   NormalizedItinerary, 
   ChangeSet, 
@@ -208,9 +208,18 @@ class ApiClient {
       console.error('Error stack:', error.stack);
       console.error('Itinerary ID:', id);
       console.error('=====================================');
+      
+      // If it's a 404 error, it might be that the itinerary is still being generated
+      // Just throw the error - let the calling code handle it appropriately
+      if (error.message.includes('404')) {
+        console.log('404 error detected - itinerary might still be generating');
+        throw error;
+      }
+      
       throw error;
     }
   }
+
 
   async getPublicItinerary(id: string): Promise<ItineraryResponse> {
     return this.request<ItineraryResponse>(`/itineraries/${id}/public`);

@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card } from '../ui/card';
-import { Progress } from '../ui/progress';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { CheckCircle2, Loader2, Clock, Zap, MapPin, Route, Users, AlertCircle, RefreshCw, X } from 'lucide-react';
-import { AGENT_TASKS, AgentTask } from '../../types/TripData';
-import { TripData } from '../../types/TripData';
-import { apiClient, AgentEvent } from '../../services/apiClient';
-import { useAppStore } from '../../state/hooks';
-import { useItinerary } from '../../state/query/hooks';
+import React, {useEffect, useRef, useState} from 'react';
+import {Card} from '../ui/card';
+import {Progress} from '../ui/progress';
+import {Badge} from '../ui/badge';
+import {Button} from '../ui/button';
+import {AlertCircle, CheckCircle2, Clock, Loader2, MapPin, RefreshCw, Route, Users, X, Zap} from 'lucide-react';
+import {AGENT_TASKS, AgentTask, TripData} from '../../types/TripData';
+import {AgentEvent, apiClient} from '../../services/apiClient';
+import {useAppStore} from '../../state/hooks';
+import {useItinerary} from '../../state/query/hooks';
 
 interface AgentProgressModalProps {
   tripData: TripData;
@@ -20,6 +19,7 @@ interface AgentProgress {
   task: AgentTask;
   status: 'pending' | 'running' | 'completed' | 'failed';
   progress: number;
+  lastEmittedProgress: number; // Boundary for individual agent progress
   startTime?: number;
   endTime?: number;
   error?: string;
@@ -27,18 +27,23 @@ interface AgentProgress {
 
 export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProgressModalProps) {
   const { setCurrentTrip } = useAppStore();
+  // Make API calls immediately for SSE connection, but delay completion checking
   const { refetch: refetchItinerary } = useItinerary(tripData.id);
   const [agents, setAgents] = useState<AgentProgress[]>(
     AGENT_TASKS.map(task => ({
       task,
       status: 'pending',
-      progress: 0
+      progress: 0,
+      lastEmittedProgress: 0
     }))
   );
   
   const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
+  const [targetProgress, setTargetProgress] = useState(0);
+  const [lastEmittedProgress, setLastEmittedProgress] = useState(0);
   const [startTime] = useState(Date.now());
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -47,6 +52,68 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
   const completionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const maxTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const progressAnimationRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Smooth progress animation - moves 2% per second towards target, but respects lastEmittedProgress as boundary
+  useEffect(() => {
+    if (progressAnimationRef.current) {
+      clearInterval(progressAnimationRef.current);
+    }
+
+    // Only animate if target is higher than current AND we haven't exceeded the last emitted progress
+    if (targetProgress > overallProgress && overallProgress < lastEmittedProgress) {
+      console.log(`Starting progress animation: current=${overallProgress}%, target=${targetProgress}%, boundary=${lastEmittedProgress}%`);
+      progressAnimationRef.current = setInterval(() => {
+        setOverallProgress(prev => {
+          // Don't exceed the last emitted progress - this is our boundary
+          const maxAllowedProgress = Math.min(targetProgress, lastEmittedProgress);
+          const newProgress = Math.min(prev + 2, maxAllowedProgress);
+          
+          console.log(`Progress animation: ${prev}% → ${newProgress}% (boundary: ${lastEmittedProgress}%)`);
+          
+          if (newProgress >= maxAllowedProgress) {
+            console.log(`Progress animation stopped at boundary: ${maxAllowedProgress}%`);
+            if (progressAnimationRef.current) {
+              clearInterval(progressAnimationRef.current);
+              progressAnimationRef.current = null;
+            }
+          }
+          return newProgress;
+        });
+      }, 1000); // Update every 1 second (2% per second)
+    } else {
+      console.log(`Progress animation skipped: current=${overallProgress}%, target=${targetProgress}%, boundary=${lastEmittedProgress}%`);
+    }
+
+    return () => {
+      if (progressAnimationRef.current) {
+        clearInterval(progressAnimationRef.current);
+        progressAnimationRef.current = null;
+      }
+    };
+  }, [targetProgress, overallProgress, lastEmittedProgress]);
+
+  // Individual agent progress animation - moves 2% per second towards target, but respects lastEmittedProgress as boundary
+  useEffect(() => {
+    setAgents(prev => prev.map(agent => {
+      // Only animate if agent is running and current progress is below the boundary
+      if (agent.status === 'running' && agent.progress < agent.lastEmittedProgress) {
+        const newProgress = Math.min(agent.progress + 2, agent.lastEmittedProgress);
+        console.log(`Agent ${agent.task.name} progress animation: ${agent.progress}% → ${newProgress}% (boundary: ${agent.lastEmittedProgress}%)`);
+        return { ...agent, progress: newProgress };
+      }
+      return agent;
+    }));
+  }, [elapsedTime]); // Trigger every second when elapsedTime updates
+
+  // Update elapsed time every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedTime(Date.now() - startTime);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [startTime]);
 
   const handleSSEEvent = (event: MessageEvent) => {
     try {
@@ -71,7 +138,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
       // Update agent status based on event
       setAgents(prev => prev.map(agent => {
         // Direct match by agent kind
-        if (agent.task.id === agentEvent.kind) {
+        if (agent.task.id === agentEvent.kind) { // todo keep consistent status names across the repo managed by types
           const newStatus = agentEvent.status === 'succeeded' ? 'completed' : 
                            agentEvent.status === 'running' ? 'running' : 
                            agentEvent.status === 'failed' ? 'failed' : 'pending';
@@ -82,6 +149,9 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
             ...agent,
             status: newStatus,
             progress: agentEvent.progress || agent.progress,
+            lastEmittedProgress: agentEvent.progress !== null && agentEvent.progress !== undefined ? agentEvent.progress : 
+                                newStatus === 'completed' ? 100 : 
+                                newStatus === 'failed' ? 0 : agent.lastEmittedProgress,
             startTime: agentEvent.status === 'running' && !agent.startTime ? Date.now() : agent.startTime,
             endTime: agentEvent.status === 'succeeded' || agentEvent.status === 'failed' ? Date.now() : agent.endTime,
             error: agentEvent.status === 'failed' ? agentEvent.message || 'Agent failed' : undefined
@@ -91,17 +161,35 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
         return agent;
       }));
       
-      // Update overall progress
+      // Individual agent progress boundaries are now handled per-agent above
+      
+      // Update overall progress with smooth calculation for multiple agents
       setAgents(prev => {
         const completedCount = prev.filter(a => a.status === 'completed').length;
         const failedCount = prev.filter(a => a.status === 'failed').length;
         const runningAgent = prev.find(a => a.status === 'running');
-        const runningProgress = runningAgent ? (runningAgent.progress / 100) : 0;
         
-        const totalProgress = ((completedCount + runningProgress) / AGENT_TASKS.length) * 100;
-        setOverallProgress(Math.round(totalProgress));
+        // Calculate progress: completed agents + current running agent progress
+        let totalProgress = 0;
+        if (completedCount === AGENT_TASKS.length) {
+          totalProgress = 100;
+        } else if (runningAgent) {
+          // Base progress from completed agents + current agent progress
+          const baseProgress = (completedCount / AGENT_TASKS.length) * 100;
+          const currentAgentProgress = (runningAgent.progress / 100) * (100 / AGENT_TASKS.length);
+          totalProgress = baseProgress + currentAgentProgress;
+        } else {
+          totalProgress = (completedCount / AGENT_TASKS.length) * 100;
+        }
+        
+        // Set target progress - the animation will smoothly move towards it
+        setTargetProgress(Math.round(totalProgress));
+        
+        // Update last emitted progress as the boundary
+        setLastEmittedProgress(Math.round(totalProgress));
         
         console.log(`Progress update: ${completedCount}/${AGENT_TASKS.length} completed, ${failedCount} failed, ${Math.round(totalProgress)}% total`);
+        console.log(`Boundary set: lastEmittedProgress = ${Math.round(totalProgress)}%`);
         
         // Check if any agent failed
         if (failedCount > 0 && !hasError) {
@@ -112,31 +200,15 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
         return prev;
       });
       
-      // Check if planner agent is completed
-      if (agentEvent.kind === 'planner' && agentEvent.status === 'succeeded') {
-        console.log('Planner agent completed, refetching itinerary...');
-        if (!hasCompleted && !hasError) {
-          setHasCompleted(true);
-          setTimeout(async () => {
-            console.log('Refetching itinerary before completion');
-            try {
-              const result = await refetchItinerary();
-              if (result.data) {
-                const responseData = result.data as TripData;
-                setCurrentTrip(responseData);
-              }
-            } catch (e) {
-              console.warn('Itinerary refetch failed, proceeding anyway', e);
-            }
-            console.log('Calling onComplete()');
-            onComplete();
-          }, 1000);
-        }
+      // Check if all agents are completed - but don't trigger completion here
+      // Let the completion checker handle it to avoid race conditions
+      if (agentEvent.status === 'succeeded') {
+        console.log(`${agentEvent.kind} agent completed, will be handled by completion checker`);
       }
       
-      // Check if planner agent failed
-      if (agentEvent.kind === 'planner' && agentEvent.status === 'failed') {
-        console.log('Planner agent failed');
+      // Check if any agent failed
+      if (agentEvent.status === 'failed') {
+        console.log(`${agentEvent.kind} agent failed`);
         setHasError(true);
         setErrorMessage(`Trip generation failed: ${agentEvent.message || 'Unknown error occurred'}`);
       }
@@ -204,13 +276,46 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
           if (result.data) {
             const responseData = result.data as TripData;
             console.log('Checking completion status:', responseData.status);
-            // Only consider completed if status is explicitly 'completed' AND has actual content
-            if (responseData.status === 'completed' && responseData.itinerary?.days && responseData.itinerary.days.length > 0) {
-              console.log('Itinerary is completed, proceeding to next screen');
+            console.log('Days count:', responseData.itinerary?.days?.length || 0);
+            
+            // Check if we have actual itinerary content (not just placeholder data)
+            const hasActualContent = responseData.itinerary?.days && 
+                                   responseData.itinerary.days.length > 0 && 
+                                   responseData.destination !== 'Loading...';
+            
+            // Check if all agents are completed by looking at current agent states
+            const allAgentsCompleted = agents.every(agent => agent.status === 'completed');
+            
+            // Only consider completed if all agents are done AND has actual content
+            if (allAgentsCompleted && hasActualContent) {
+              console.log('All agents completed with actual content, proceeding to next screen');
               setHasCompleted(true);
+              setTargetProgress(100); // Set target to 100% - animation will handle the smooth transition
+              setLastEmittedProgress(100); // Set boundary to 100% for completion
+              setOverallProgress(100); // Also set immediately to ensure 100% is shown
               setCurrentTrip(responseData);
+              
+              // Clean up timers and event source
+              if (completionTimeoutRef.current) {
+                clearTimeout(completionTimeoutRef.current);
+                completionTimeoutRef.current = null;
+              }
+              if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+                eventSourceRef.current = null;
+              }
+              if (progressAnimationRef.current) {
+                clearInterval(progressAnimationRef.current);
+                progressAnimationRef.current = null;
+              }
+              
               onComplete();
               return;
+            } else if (responseData.status === 'planning' && hasActualContent) {
+              console.log('Itinerary has content but agents still running, updating current trip data');
+              setCurrentTrip(responseData);
+            } else if (responseData.status === 'planning' && !hasActualContent) {
+              console.log('Itinerary is still generating with no content yet');
             }
           }
         } catch (e) {
@@ -218,9 +323,11 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
           // Don't set error on completion check failure, just continue
         }
         
-        // Schedule next check
-        const timeout = setTimeout(checkCompletion, 2000);
-        completionTimeoutRef.current = timeout;
+        // Schedule next check only if not completed
+        if (!hasCompleted && !hasError) {
+          const timeout = setTimeout(checkCompletion, 2000);
+          completionTimeoutRef.current = timeout;
+        }
       }
     };
 
@@ -228,9 +335,8 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
     const eventSource = apiClient.createAgentEventStream(tripData.id);
     eventSourceRef.current = eventSource;
     
-    // Start checking after 2 seconds (reduced from 5 seconds)
-    const initialTimeout = setTimeout(checkCompletion, 2000);
-    completionTimeoutRef.current = initialTimeout;
+    // Start checking after 30 seconds to allow backend processing time
+    completionTimeoutRef.current = setTimeout(checkCompletion, 30000);
     
     eventSource.onopen = () => {
       console.log('SSE connection opened for itinerary:', tripData.id);
@@ -272,6 +378,9 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
+      if (progressAnimationRef.current) {
+        clearInterval(progressAnimationRef.current);
+      }
     };
   }, [tripData.id, onComplete, refetchItinerary, setCurrentTrip, hasCompleted, hasError, isRetrying]);
 
@@ -305,9 +414,6 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
     }
   };
 
-  const getElapsedTime = () => {
-    return Date.now() - startTime;
-  };
 
   // Show error state
   if (hasError) {
@@ -510,7 +616,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
 
           {/* Footer */}
           <div className="text-center text-sm text-gray-500">
-            <p>Elapsed time: {formatTime(getElapsedTime())}</p>
+            <p>Elapsed time: {formatTime(elapsedTime)}</p>
             <p className="mt-1">This usually takes 30-60 seconds</p>
             <p className="mt-1">Connection: 
               <span className={`ml-1 ${

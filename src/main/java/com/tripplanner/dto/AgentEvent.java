@@ -52,6 +52,7 @@ public record AgentEvent(
      */
     public enum AgentKind {
         planner,
+        enrichment,
         places,
         route,
         hotels,

@@ -19,9 +19,10 @@ import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
 import { useCreateItinerary } from '../../state/query/hooks';
 import { useAppStore } from '../../state/hooks';
 import { UserProfileButton } from '../shared/UserProfileButton';
+import { useFormSubmission } from '../../hooks/useFormSubmission';
 import { GlobalNavigation } from '../shared/GlobalNavigation';
 import { BreadcrumbNavigation } from '../shared/BreadcrumbNavigation';
-// removed unused figma asset import for prototype
+import { AgentProgressModal } from '../agents/AgentProgressModal';
 
 interface SimplifiedTripWizardProps {
   onComplete: (tripData: TripData) => void;
@@ -42,8 +43,20 @@ const PREFERENCE_CONTROLS = [
 export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizardProps) {
   const createItineraryMutation = useCreateItinerary();
   const { addTrip, setCurrentTrip } = useAppStore();
-  const [startLocation, setStartLocation] = useState('New York, NY');
-  const [endLocation, setEndLocation] = useState('Paris, France');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedTripData, setGeneratedTripData] = useState<TripData | null>(null);
+  
+  // Form submission with debouncing
+  const { isSubmitting, submit: submitForm, error: submissionError } = useFormSubmission({
+    debounceMs: 2000, // 2 second debounce
+    onError: (error) => {
+      console.error('Form submission error:', error);
+      alert(`Failed to create itinerary: ${error.message}`);
+    }
+  });
+  
+  const [startLocation, setStartLocation] = useState('Bengaluru, India');
+  const [endLocation, setEndLocation] = useState('Bali, Indonesia');
   const [fromSuggestions, setFromSuggestions] = useState<string[]>([]);
   const [toSuggestions, setToSuggestions] = useState<string[]>([]);
   const [activeFromIndex, setActiveFromIndex] = useState<number>(-1);
@@ -54,19 +67,22 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   const [toFocused, setToFocused] = useState<boolean>(false);
   const [isRoundTrip, setIsRoundTrip] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-    // Default to Oct 5 to Oct 12 (current year)
     const year = new Date().getFullYear();
-    const from = new Date(year, 9, 5); // month is 0-indexed
-    const to = new Date(year, 9, 12);
+    const from = new Date(year, 12, 25); // month is 0-indexed
+    const to = new Date(year, 12, 28);
     return { from, to };
   });
   const [numberOfMonths, setNumberOfMonths] = useState(2);
-  const [budget, setBudget] = useState(3000);
-  const [currency, setCurrency] = useState('USD');
+  const [budget, setBudget] = useState(50000);
+  const [currency, setCurrency] = useState('INR');
   const [flexibleDays, setFlexibleDays] = useState<number>(0);
   const [validationMessage, setValidationMessage] = useState<string>('');
   const userLocale = useMemo(() => (typeof navigator !== 'undefined' ? navigator.language : 'en-US'), []);
   const dayPickerLocale = useMemo(() => (userLocale?.toLowerCase()?.startsWith('en-gb') ? enGB : enUS), [userLocale]);
+  
+  // Track which preset is selected (if any) - moved from inside IIFE
+  type PresetKey = 'budget' | 'mid' | 'luxury' | null;
+  const [selectedPreset, setSelectedPreset] = useState<PresetKey>(null);
 
   // Handle window resize for calendar numberOfMonths
   useEffect(() => {
@@ -170,9 +186,9 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   const [travelers, setTravelers] = useState<Traveler[]>([
     {
       id: '1',
-      name: 'John Doe',
+      name: 'Ishan',
       email: '',
-      age: 25,
+      age: 27,
       preferences: {
         dietaryRestrictions: [],
         mobilityNeeds: [],
@@ -250,109 +266,143 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   const handleSubmit = async () => {
     if (!isFormValid()) return;
 
-    try {
-      // Create the API request
-      const createRequest: CreateItineraryRequest = {
-        destination: endLocation,
-        startDate: dateRange!.from!.toISOString().split('T')[0],
-        endDate: dateRange!.to!.toISOString().split('T')[0],
-        party: {
-          adults: travelers[0] ? 1 : 0,
-          children: 0,
-          infants: 0,
-          rooms: 1
-        },
-        budgetTier: budget <= 2000 ? 'economy' : budget <= 5000 ? 'mid-range' : 'luxury',
-        interests: Object.entries(preferences)
-          .filter(([_, value]) => (value as number) > 50)
-          .map(([key]) => key as string),
-        constraints: Object.entries(settings)
-          .filter(([_, value]) => value as boolean)
-          .map(([key]) => key as string),
-        language: 'en'
-      };
+    // Use the debounced form submission
+    await submitForm(async () => {
+      setIsGenerating(true);
 
-      // Call the backend API via mutation
-      const response = await createItineraryMutation.mutateAsync(createRequest);
+      try {
+        // Create the API request
+        const createRequest: CreateItineraryRequest = {
+          destination: endLocation,
+          startDate: dateRange!.from!.toISOString().split('T')[0],
+          endDate: dateRange!.to!.toISOString().split('T')[0],
+          party: {
+            adults: travelers[0] ? 1 : 0, // todo should be length of travellers array?
+            children: 0,
+            infants: 0,
+            rooms: 1
+          },
+          budgetTier: budget <= 2000 ? 'economy' : budget <= 5000 ? 'mid-range' : 'luxury', // todo take input from ui component
+          interests: Object.entries(preferences)
+            .filter(([_, value]) => (value as number) > 50)
+            .map(([key]) => key as string),
+          constraints: Object.entries(settings)
+            .filter(([_, value]) => value as boolean)
+            .map(([key]) => key as string),
+          language: 'en'
+        };
 
-      // Convert API response to TripData format for frontend
-      const startLocationData: TripLocation = {
-        id: '1',
-        name: startLocation,
-        country: 'Unknown',
-        city: startLocation,
-        coordinates: { lat: 0, lng: 0 },
-        timezone: 'UTC',
-        currency: currency,
-        exchangeRate: 1
-      };
+        // Call the backend API via mutation
+        const response = await createItineraryMutation.mutateAsync(createRequest);
 
-      const endLocationData: TripLocation = {
-        id: '2',
-        name: endLocation,
-        country: 'Unknown', 
-        city: endLocation,
-        coordinates: { lat: 0, lng: 0 },
-        timezone: 'UTC',
-        currency: currency,
-        exchangeRate: 1
-      };
+        // Convert API response to TripData format for frontend
+        const startLocationData: TripLocation = {
+          id: '1',
+          name: startLocation,
+          country: 'Unknown',
+          city: startLocation,
+          coordinates: { lat: 0, lng: 0 },
+          timezone: 'UTC',
+          currency: currency,
+          exchangeRate: 1
+        };
 
-      const tripData: TripData = {
-        id: response.id,
-        startLocation: startLocationData,
-        endLocation: endLocationData,
-        isRoundTrip,
-        dates: {
-          start: dateRange?.from?.toISOString() || new Date().toISOString(),
-          end: dateRange?.to?.toISOString() || new Date().toISOString()
-        },
-        travelers,
-        leadTraveler: travelers[0],
-        budget: {
-          total: budget,
-          currency,
-          breakdown: {
-            accommodation: Math.round(budget * 0.4),
-            food: Math.round(budget * 0.25),
-            transport: Math.round(budget * 0.15),
-            activities: Math.round(budget * 0.15),
-            shopping: Math.round(budget * 0.03),
-            emergency: Math.round(budget * 0.02)
-          }
-        },
-        preferences,
-        settings,
-        status: 'planning',
-        createdAt: response.createdAt,
-        updatedAt: response.updatedAt,
-        isPublic: response.isPublic,
-        // Add computed properties expected by components
-        destination: endLocation,
-        partySize: travelers.length,
-        dietaryRestrictions: travelers.flatMap(t => t.preferences?.dietaryRestrictions || []),
-        walkingTolerance: 3, // Default moderate walking
-        pace: 3, // Default moderate pace
-        stayType: 'Hotel',
-        transport: 'Public',
-        themes: Object.entries(preferences)
-          .filter(([_, value]) => (value as number) > 50)
-          .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
-      };
+        const endLocationData: TripLocation = {
+          id: '2',
+          name: endLocation,
+          country: 'Unknown', 
+          city: endLocation,
+          coordinates: { lat: 0, lng: 0 },
+          timezone: 'UTC',
+          currency: currency,
+          exchangeRate: 1
+        };
 
-      addTrip(tripData);
-      setCurrentTrip(tripData);
-      onComplete(tripData);
-    } catch (error) {
-      // Handle error - could show a toast notification
-      // Error logging should be handled by the error boundary or logging service
-      alert('Failed to create itinerary. Please try again.');
-    }
+        const tripData: TripData = {
+          id: response.id,
+          startLocation: startLocationData,
+          endLocation: endLocationData,
+          isRoundTrip,
+          dates: {
+            start: dateRange?.from?.toISOString() || new Date().toISOString(),
+            end: dateRange?.to?.toISOString() || new Date().toISOString()
+          },
+          travelers,
+          leadTraveler: travelers[0],
+          budget: {
+            total: budget,
+            currency,
+            breakdown: {
+              accommodation: Math.round(budget * 0.4),
+              food: Math.round(budget * 0.25),
+              transport: Math.round(budget * 0.15),
+              activities: Math.round(budget * 0.15),
+              shopping: Math.round(budget * 0.03),
+              emergency: Math.round(budget * 0.02)
+            }
+          },
+          preferences,
+          settings,
+          status: 'planning', // todo make this centralised using enums or types at all places
+          createdAt: response.createdAt,
+          updatedAt: response.updatedAt,
+          isPublic: response.isPublic,
+          // Add computed properties expected by components
+          destination: endLocation,
+          partySize: travelers.length,
+          dietaryRestrictions: travelers.flatMap(t => t.preferences?.dietaryRestrictions || []),
+          walkingTolerance: 3, // Default moderate walking
+          pace: 3, // Default moderate pace
+          stayType: 'Hotel',
+          transport: 'Public',
+          themes: Object.entries(preferences)
+            .filter(([_, value]) => (value as number) > 50)
+            .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1))
+        };
+
+        addTrip(tripData);
+        setCurrentTrip(tripData);
+        setGeneratedTripData(tripData);
+        
+        // If the itinerary is still generating, show progress modal
+        if ((response.status as string) === 'planning') {
+          // The itinerary is being generated asynchronously
+          // Keep the progress modal open and don't set isGenerating to false
+          console.log('Itinerary is being generated asynchronously, showing progress modal');
+        } else {
+          // The itinerary is complete
+          console.log('Itinerary is complete, proceeding to next screen');
+          setIsGenerating(false);
+          onComplete(tripData);
+        }
+
+        return tripData;
+      } catch (error) {
+        setIsGenerating(false);
+        throw error; // Re-throw to be handled by the form submission hook
+      }
+    });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header - Consistent with My Trips */}
+      {/* Show progress modal if generating */}
+      {isGenerating && generatedTripData ? (
+        <AgentProgressModal
+          tripData={generatedTripData}
+          onComplete={() => {
+            console.log('Itinerary generation completed!');
+            setIsGenerating(false);
+            onComplete(generatedTripData);
+          }}
+          onCancel={() => {
+            setIsGenerating(false);
+            onBack();
+          }}
+        />
+      ) : (
+        <>
+          {/* Header - Consistent with My Trips */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
@@ -397,7 +447,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                 <div className="relative">
                   <Label>From</Label>
                   <Input 
-                    placeholder="New York, NY" 
+                    placeholder="Bengaluru, India"
                     value={startLocation}
                     onChange={(e) => setStartLocation(e.target.value)}
                     onFocus={() => setFromFocused(true)}
@@ -442,7 +492,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                 <div className="relative">
                   <Label>To</Label>
                   <Input 
-                    placeholder="Paris, France" 
+                    placeholder="Bali, Indonesia"
                     value={endLocation}
                     onChange={(e) => setEndLocation(e.target.value)}
                     onFocus={() => setToFocused(true)}
@@ -531,7 +581,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                             if (from && to) {
                               const nights = Math.max(0, Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)));
                               if (nights < 2) setValidationMessage('Minimum trip length is 2 nights.');
-                              else if (nights > 30) setValidationMessage('Maximum trip length is 30 nights.');
+                              else if (nights > 7) setValidationMessage('Maximum trip length is 7 nights.');
                             }
                           }}
                         numberOfMonths={numberOfMonths}
@@ -610,14 +660,12 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                     EUR: { min: 500, max: 9000 },
                     GBP: { min: 400, max: 8000 },
                     JPY: { min: 50000, max: 1500000 },
+                    INR: { min: 30000, max: 300000 },
                   };
-                  const { min, max } = ranges[currency] || ranges.USD;
+                  const { min, max } = ranges[currency] || ranges.INR;
                   const clamp = (v: number) => Math.min(max, Math.max(min, v));
                   const value = clamp(budget);
                   if (value !== budget) setBudget(value);
-                  // Track which preset is selected (if any)
-                  type PresetKey = 'budget' | 'mid' | 'luxury' | null;
-                  const [selectedPreset, setSelectedPreset] = useState<PresetKey>(null);
                   return (
                     <>
                       {/* Preset buttons - three vertical cards side by side */}
@@ -640,6 +688,11 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                               { key: 'luxury', label: '✨ Luxury', value: 4000 },
                             ],
                             JPY: [
+                              { key: 'budget', label: '💸 Budget', value: 120000 },
+                              { key: 'mid', label: '💼 Mid-range', value: 250000 },
+                              { key: 'luxury', label: '✨ Luxury', value: 600000 },
+                            ],
+                            INR: [
                               { key: 'budget', label: '💸 Budget', value: 120000 },
                               { key: 'mid', label: '💼 Mid-range', value: 250000 },
                               { key: 'luxury', label: '✨ Luxury', value: 600000 },
@@ -669,6 +722,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
                       onChange={(e) => setCurrency(e.target.value)}
                       className="px-3 py-2 border rounded-md"
                     >
+                      <option value="INR">INR</option>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                       <option value="GBP">GBP</option>
@@ -847,15 +901,33 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
           
           <Button 
             onClick={handleSubmit} 
-            disabled={!isFormValid()}
+            disabled={!isFormValid() || isSubmitting || isGenerating}
             size="lg"
             className="px-8"
           >
-            Create My Itinerary
+            {isSubmitting || isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {isGenerating ? 'Creating Itinerary...' : 'Processing...'}
+              </>
+            ) : (
+              'Create My Itinerary'
+            )}
           </Button>
         </div>
+        
+        {/* Show error message if submission failed */}
+        {submissionError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">
+              {submissionError.message}
+            </p>
+          </div>
+        )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

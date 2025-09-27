@@ -256,3 +256,8 @@ This document contains all TODO items found in the repository, organized by cate
    - Firebase SDK configuration
    - Future roadmap features
    - Technical documentation improvements
+
+
+Other requests to do
+
+complete analysis of itineraryjsonservice and its usages as well as userdataservice and its usages. plan a roadmap on how to effieicently decomission itineraryjson service as it is legacy

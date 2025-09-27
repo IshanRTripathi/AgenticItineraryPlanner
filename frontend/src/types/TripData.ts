@@ -331,6 +331,13 @@ export const AGENT_TASKS: AgentTask[] = [
     description: 'Creating your personalized itinerary with activities, accommodations, and recommendations',
     icon: '📋',
     estimatedDuration: 3000
+  },
+  {
+    id: 'enrichment',
+    name: 'Enrichment Agent',
+    description: 'Adding validation, pacing, and detailed information to your itinerary',
+    icon: '✨',
+    estimatedDuration: 2000
   }
 ];
 

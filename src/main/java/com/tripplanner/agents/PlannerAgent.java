@@ -2,6 +2,7 @@ package com.tripplanner.agents;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.ChangeEngine;
@@ -24,13 +25,13 @@ import java.util.Map;
 @Component
 @ConditionalOnBean(AiClient.class)
 public class PlannerAgent extends BaseAgent {
-    
+
     private final AiClient aiClient;
     private final ObjectMapper objectMapper;
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
     private final UserDataService userDataService;
-    
+
     public PlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                        ItineraryJsonService itineraryJsonService, ChangeEngine changeEngine,
                        UserDataService userDataService) {
@@ -41,15 +42,15 @@ public class PlannerAgent extends BaseAgent {
         this.changeEngine = changeEngine;
         this.userDataService = userDataService;
     }
-    
+
     @Override
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
         CreateItineraryReq itineraryReq = request.getData(CreateItineraryReq.class);
-        
+
         if (itineraryReq == null) {
             throw new IllegalArgumentException("PlannerAgent requires non-null CreateItineraryReq");
         }
-        
+
         logger.info("=== PLANNER AGENT PROCESSING ===");
         logger.info("Destination: {}", itineraryReq.getDestination());
         logger.info("Start Date: {}", itineraryReq.getStartDate());
@@ -61,92 +62,111 @@ public class PlannerAgent extends BaseAgent {
         logger.info("Constraints: {}", itineraryReq.getConstraints());
         logger.info("Language: {}", itineraryReq.getLanguage());
         logger.info("=================================");
-        
+
         emitProgress(itineraryId, 10, "Analyzing trip requirements", "requirement_analysis");
-        
+
         // Build the system prompt for itinerary planning
         String systemPrompt = buildSystemPrompt();
-        
-        emitProgress(itineraryId, 30, "Generating itinerary structure", "structure_generation");
-        
+
+        emitProgress(itineraryId, 20, "Generating itinerary structure", "structure_generation");
+
         // Build the user prompt with trip details
         String userPrompt = buildUserPrompt(itineraryReq);
-        
+
         logger.info("=== PLANNER AGENT PROMPTS ===");
         logger.info("System Prompt Length: {} chars", systemPrompt.length());
         logger.info("User Prompt: {}", userPrompt);
         logger.info("=============================");
-        
-        emitProgress(itineraryId, 50, "Processing with AI model", "ai_processing");
-        
+
+        emitProgress(itineraryId, 75, "Processing with AI model", "ai_processing");
+
         // Call Gemini for structured JSON
         String schema = buildItineraryJsonSchema();
         String response = aiClient.generateStructuredContent(userPrompt, schema, systemPrompt);
-        
+
         logger.info("=== PLANNER AGENT RESPONSE ===");
         logger.info("Using JSON file response");
         logger.info("Response Length: {} chars", response.length());
         logger.info("Response Preview: {}", response.length() > 200 ? response.substring(0, 200) + "..." : response);
         logger.info("===============================");
-        
+
         emitProgress(itineraryId, 80, "Parsing generated itinerary", "parsing");
-        
+
         // Parse and validate the response
         try {
+            // Check if response is empty or invalid
+            if (response == null || response.trim().isEmpty() || response.trim().equals("{}")) {
+                logger.error("AI client returned empty or invalid response: '{}'", response);
+                throw new RuntimeException("AI client returned empty response. Please check AI provider configuration and credentials.");
+            }
+
             // Parse JSON tree first to normalize time fields like "14:00" → "YYYY-MM-DDTHH:mm:00Z"
             String cleanedResponse = cleanJsonResponse(response);
             com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(cleanedResponse);
+
+            // Validate that the response has the required structure
+            if (!root.has("days") || !root.get("days").isArray() || root.get("days").isEmpty()) {
+                logger.error("AI response missing required 'days' array or empty days: {}", root.toPrettyString());
+                throw new RuntimeException("AI response is missing required itinerary days. Please check AI provider response format.");
+            }
+
             normalizeTimeFields(root);
             NormalizedItinerary normalizedItinerary = objectMapper.treeToValue(root, NormalizedItinerary.class);
-            
+
+            // Validate that the parsed object is not null
+            if (normalizedItinerary == null) {
+                logger.error("Failed to parse AI response into NormalizedItinerary object. Response: {}", response);
+                throw new RuntimeException("Failed to parse AI response into itinerary object. Please check AI provider response format.");
+            }
+
             // Ensure the correct itinerary ID is set
             normalizedItinerary.setItineraryId(itineraryId);
-            
+
             logger.info("=== PLANNER AGENT RESULT ===");
             logger.info("Parsed Response Type: {}", normalizedItinerary.getClass().getSimpleName());
             logger.info("Itinerary ID: {}", normalizedItinerary.getItineraryId());
             logger.info("Days Generated: {}", normalizedItinerary.getDays() != null ? normalizedItinerary.getDays().size() : 0);
             logger.info("Result: {}", normalizedItinerary);
             logger.info("============================");
-            
+
             emitProgress(itineraryId, 90, "Finalizing itinerary", "finalization");
-            
+
             // Update the existing itinerary with the generated content
             // Save to both legacy storage (for compatibility) and user-specific storage
             itineraryJsonService.updateItinerary(normalizedItinerary);
-            
+
             // Also save to user-specific storage if userId is available
             if (normalizedItinerary.getUserId() != null) {
                 userDataService.saveUserItinerary(normalizedItinerary.getUserId(), normalizedItinerary);
                 logger.info("Saved generated itinerary to user-specific storage for user: {}", normalizedItinerary.getUserId());
             }
-            
+
             // Convert to the expected response type
             if (request.getResponseType() == ItineraryDto.class) {
                 ItineraryDto result = convertNormalizedToItineraryDto(normalizedItinerary, itineraryReq);
-                
+
                 logger.info("=== PLANNER AGENT FINAL RESULT ===");
                 logger.info("Converted to ItineraryDto: {}", result.getId());
                 logger.info("Final Result: {}", result);
                 logger.info("==================================");
-                
+
                 return (T) result;
             }
-            
+
             return (T) normalizedItinerary;
-            
+
         } catch (JsonProcessingException e) {
             logger.error("Failed to parse Gemini response for itinerary: {}", itineraryId, e);
             logger.error("Raw response that failed to parse: {}", response);
             throw new RuntimeException("Failed to parse generated itinerary: " + e.getMessage(), e);
         }
     }
-    
+
     @Override
     protected String getAgentName() {
         return "Planner Agent";
     }
-    
+
     /**
      * Normalize time fields in the normalized itinerary JSON tree.
      * Accepts times like "14:00" and converts them into ISO-8601 instants
@@ -161,7 +181,7 @@ public class PlannerAgent extends BaseAgent {
             if (!day.has("nodes") || !day.get("nodes").isArray()) continue;
             for (com.fasterxml.jackson.databind.JsonNode node : day.get("nodes")) {
                 if (!node.has("timing")) continue;
-                com.fasterxml.jackson.databind.node.ObjectNode timing = (com.fasterxml.jackson.databind.node.ObjectNode) node.get("timing");
+                ObjectNode timing = (ObjectNode) node.get("timing");
                 if (timing == null) continue;
 
                 // Normalize startTime and endTime if they are short times like HH:mm
@@ -171,7 +191,7 @@ public class PlannerAgent extends BaseAgent {
         }
     }
 
-    private void normalizeIsoInstant(com.fasterxml.jackson.databind.node.ObjectNode obj, String field, String dayDate) {
+    private void normalizeIsoInstant(ObjectNode obj, String field, String dayDate) {
         if (obj == null || !obj.has(field)) return;
         String value = obj.get(field).asText(null);
         if (value == null || value.isBlank()) return;
@@ -335,6 +355,8 @@ public class PlannerAgent extends BaseAgent {
             - Consider opening hours, weather, and seasonal factors
             - Provide realistic timing and duration estimates
             - EVERY DAY must have multiple nodes - never leave a day empty
+            - Add itineraries for multiple cities of the destination if applicable, handle stays and transport logically
+            - People usuallly checkout of accommodation by 11 AM if moving to different city, plan accordingly
             
             Always respond with valid JSON matching the exact normalized schema provided.
             """;

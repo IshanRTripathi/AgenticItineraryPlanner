@@ -71,7 +71,7 @@ export class DataTransformer {
       preferences: this.transformInterestsToPreferences(response.interests || []),
       settings: this.transformConstraintsToSettings(response.constraints || []),
       itinerary: this.transformItineraryResponse(response),
-      status: response.status === 'completed' ? 'completed' : 'planning',
+      status: response.status === 'completed' ? 'completed' : response.status === 'generating' ? 'planning' : 'planning',
       isPublic: response.public || response.isPublic || false,
       createdAt: response.createdAt,
       updatedAt: response.updatedAt
