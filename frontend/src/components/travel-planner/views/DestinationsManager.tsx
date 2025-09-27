@@ -33,7 +33,6 @@ export function DestinationsManager({
         name: newDestination,
         nights: 1,
         sleeping: false,
-        discover: false,
         notes: ''
       };
       onAdd(newDest);
@@ -58,17 +57,18 @@ export function DestinationsManager({
   // Show empty state if no destinations
   if (destinations.length === 0) {
     return (
-      <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
+      <div className="h-full flex flex-col min-h-0">
+        <div className="flex-shrink-0 p-4 md:p-6">
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <Select value={currency} onValueChange={onCurrencyChange}>
-                <SelectTrigger className="w-48 min-h-[44px]">
+                <SelectTrigger className="w-32 sm:w-48 min-h-[44px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {CURRENCIES.map(curr => (
                     <SelectItem key={curr} value={curr}>
-                      {t('destinations.costIn', { currency: curr, symbol: curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£' })}
+                      {curr} {curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -79,8 +79,11 @@ export function DestinationsManager({
             </div>
           </div>
 
-          {/* Empty State */}
-          <div className="text-center py-12">
+        </div>
+        
+        {/* Empty State */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <MapPin className="w-8 h-8 text-gray-400" />
             </div>
@@ -88,21 +91,23 @@ export function DestinationsManager({
             <p className="text-gray-600 mb-6">Start building your trip by adding destinations below.</p>
           </div>
         </div>
+      </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+    <div className="h-full flex flex-col min-h-0">
+      <div className="flex-shrink-0 p-4 md:p-6">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Select value={currency} onValueChange={onCurrencyChange}>
-              <SelectTrigger className="w-48 min-h-[44px]">
+              <SelectTrigger className="w-32 sm:w-48 min-h-[44px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {CURRENCIES.map(curr => (
                   <SelectItem key={curr} value={curr}>
-                    {t('destinations.costIn', { currency: curr, symbol: curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£' })}
+                    {curr} {curr === 'EUR' ? '€' : curr === 'USD' ? '$' : '£'}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -117,7 +122,10 @@ export function DestinationsManager({
           </div>
         </div>
 
-        {/* Destinations List */}
+      </div>
+      
+      {/* Scrollable Destinations List */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-4">
         <div className="space-y-4">
           {destinations.map((destination, index) => (
             <div key={destination.id}>
@@ -159,14 +167,6 @@ export function DestinationsManager({
                           onClick={() => onUpdate(destination.id, { sleeping: !destination.sleeping })}
                         >
                           {destination.sleeping ? 'Sleeping' : 'No Sleep'}
-                        </Button>
-                        <Button 
-                          variant={destination.discover ? "default" : "outline"} 
-                          size="sm" 
-                          className="h-6 px-2 text-xs bg-amber-100 border-amber-300 text-amber-700 hover:bg-amber-200 min-h-[44px]"
-                          onClick={() => onUpdate(destination.id, { discover: !destination.discover })}
-                        >
-                          Discover
                         </Button>
                       </div>
                     </div>
@@ -222,7 +222,7 @@ export function DestinationsManager({
             </Button>
           </div>
         </div>
-
+        
         {/* Action Buttons */}
         <div className="flex justify-center space-x-4 mt-6">
           <Button variant="outline" className="min-h-[44px]">
@@ -231,5 +231,6 @@ export function DestinationsManager({
           </Button>
         </div>
       </div>
+    </div>
   );
 }

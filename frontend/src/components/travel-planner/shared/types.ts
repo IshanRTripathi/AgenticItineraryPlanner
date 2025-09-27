@@ -33,7 +33,6 @@ export interface Destination {
   name: string;
   nights: number;
   sleeping: boolean;
-  discover: boolean;
   transports?: TransportDetails[];
   notes: string;
   lat?: number;
@@ -90,26 +89,6 @@ export interface TransportPlannerProps {
   onUpdate: (destinationId: string, transport: TransportInfo) => void;
 }
 
-// Discover view interfaces
-export interface Place {
-  id: string;
-  name: string;
-  type: string;
-  description: string;
-  rating: number;
-  cost: number;
-  currency: string;
-  duration: string;
-  image: string;
-  tags: string[];
-  location: string;
-}
-
-export interface DiscoverViewProps {
-  tripData: TripData;
-  destinations: Destination[];
-  onAddToTrip: (place: Place, dayNumber: number) => void;
-}
 
 // Layout component interfaces
 export interface NavigationSidebarProps {

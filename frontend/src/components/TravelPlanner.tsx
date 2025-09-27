@@ -9,6 +9,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { TripData } from '../types/TripData';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './shared/LanguageSelector';
+import { useDeviceDetection } from '../hooks/useDeviceDetection';
+import { MobileLayout } from './travel-planner/mobile/MobileLayout';
 
 // Import extracted components
 import { NavigationSidebar } from './travel-planner/layout/NavigationSidebar';
@@ -55,6 +57,9 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   console.log('=== TRAVEL PLANNER COMPONENT RENDER ===');
   console.log('Trip Data Props:', tripData);
   console.log('=======================================');
+  
+  // Device detection
+  const { isMobile, isTablet } = useDeviceDetection();
   
   // Main state
   const [activeView, setActiveView] = useState<TravelPlannerView>('plan');
@@ -105,7 +110,6 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           name: day.location,
           nights: 1,
           sleeping: !!day.accommodation,
-          discover: day.components && day.components.length > 0,
           transport: day.components?.find(c => c.type === 'transport') ? {
             distance: `${day.totalDistance || 0} km`,
             duration: `${Math.round((day.totalDuration || 0) / 60)}h ${(day.totalDuration || 0) % 60}m`
@@ -577,6 +581,74 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     }
   };
 
+  // Build map markers for mobile layout
+  const mapMarkers: MapMarker[] = (() => {
+    const markers: MapMarker[] = [];
+    const days = currentTripData.itinerary?.days || [];
+    
+    try {
+      days.forEach((day, dayIdx) => {
+        const comps = day.components || [];
+        comps.forEach((c: any, compIdx: number) => {
+          try {
+            const lat = c?.location?.coordinates?.lat;
+            const lng = c?.location?.coordinates?.lng;
+            
+            // Validate coordinates - must be valid numbers and not null/undefined
+            if (lat !== null && lng !== null && lat !== undefined && lng !== undefined &&
+                typeof lat === 'number' && typeof lng === 'number' && 
+                !isNaN(lat) && !isNaN(lng) && 
+                lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+              
+              markers.push({
+                id: c.id || `${dayIdx}-${compIdx}`,
+                position: { lat, lng },
+                title: c.name || c.type || `Place ${compIdx + 1}`,
+                type: (c.type === 'restaurant' ? 'meal' :
+                      c.type === 'hotel' ? 'accommodation' :
+                      c.type === 'transport' ? 'transport' : 'attraction'),
+                status: 'planned',
+                locked: false,
+                rating: c.rating || 0,
+                googleMapsUri: c.googleMapsUri || '',
+              });
+            }
+          } catch (error) {
+            console.error('[Maps] Error processing component:', c, error);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('[Maps] Error building markers:', error);
+    }
+    
+    return markers;
+  })();
+
+  // Handle place addition for mobile
+  const handleAddPlace = ({ dayId, dayNumber, place }: { dayId: string; dayNumber: number; place: any }) => {
+    console.log('[Mobile] Add place to itinerary:', { dayId, dayNumber, place });
+    
+    try {
+      // Add to day-by-day view
+      const updatedTripData = addPlaceToItineraryDay(currentTripData, {
+        dayId,
+        dayNumber,
+        place,
+      });
+      
+      // Update the trip data via query client
+      queryClient.setQueryData(
+        queryKeys.itinerary(currentTripData.id),
+        updatedTripData
+      );
+      
+      console.log('[Mobile] Successfully added place to itinerary');
+    } catch (error) {
+      console.error('[Mobile] Failed to add place to itinerary:', error);
+    }
+  };
+
   // Main component return
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -586,13 +658,59 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
         onExportPDF={onExportPDF}
         onBack={onBack}
       />
+      
+      {/* Main content area */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Sidebar - Desktop: part of layout, Mobile: overlay */}
         <NavigationSidebar
           activeView={activeView}
-          onViewChange={setActiveView}
+          onViewChange={(view) => {
+            console.log('TravelPlanner: onViewChange called with', view);
+            setActiveView(view);
+          }}
         />
+        
+        {/* Content area */}
         <div className="flex-1 min-h-0">
-          {renderCurrentView()}
+          {/* Show mobile layout for plan tab on mobile/tablet, otherwise show normal view */}
+          {(() => {
+            const shouldShowMobile = (isMobile || isTablet) && activeView === 'plan';
+            console.log('TravelPlanner render decision:', { 
+              isMobile, 
+              isTablet, 
+              activeView, 
+              shouldShowMobile 
+            });
+            
+            return shouldShowMobile ? (
+              <MobileLayout
+                tripData={currentTripData}
+                destinations={destinations}
+                mapMarkers={mapMarkers}
+                currency={currency}
+                showNotes={showNotes}
+                onUpdateDestination={updateDestination}
+                onAddDestination={addDestination}
+                onRemoveDestination={removeDestination}
+                onCurrencyChange={setCurrency}
+                onToggleNotes={() => setShowNotes(!showNotes)}
+                onUpdateTransport={(fromId, toId, transports) => {
+                  console.log(`Transport from ${fromId} to ${toId}:`, transports);
+                  // TODO: Implement transport update logic
+                }}
+                onDaySelect={handleDaySelect}
+                onAddPlace={handleAddPlace}
+                onItineraryUpdate={handleItineraryUpdateFromChat}
+                onViewChange={(view) => {
+                  console.log('TravelPlanner: MobileLayout onViewChange called with', view);
+                  setActiveView(view);
+                }}
+                activeView={activeView}
+              />
+            ) : (
+              renderCurrentView()
+            );
+          })()}
         </div>
       </div>
     </div>

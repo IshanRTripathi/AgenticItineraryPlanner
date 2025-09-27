@@ -11,6 +11,7 @@ This document contains all TODO items found in the repository, organized by cate
 | Add workflow node to workflow builder | `frontend/src/components/TravelPlanner.tsx:430` | ⚠️ Partial | High | Integration between map place selection and workflow builder |
 | Implement save functionality | `frontend/src/components/TravelPlanner.tsx:465` | ❌ Not Implemented | High | Save workflow changes to backend |
 | Persist via backend mutation | `frontend/src/components/TravelPlanner.tsx:435` | ❌ Not Implemented | High | Backend API integration for place additions |
+| Implement save functionality for desktop version | `frontend/src/components/TravelPlanner.tsx:669` | ❌ Not Implemented | Medium | Desktop version doesn't save changes, keep same for simplicity |
 
 ### Firebase Configuration
 | TODO Item | File | Status | Priority | Description |

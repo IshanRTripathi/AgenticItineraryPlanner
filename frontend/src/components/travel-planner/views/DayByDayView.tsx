@@ -152,7 +152,8 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
   };
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="space-y-4">
         {tripData.itinerary?.days?.map((day: any, index: number) => {
           const dayNumber = day.dayNumber || index + 1;
@@ -380,5 +381,6 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
         )}
         </div>
       </div>
+    </div>
   );
 }
