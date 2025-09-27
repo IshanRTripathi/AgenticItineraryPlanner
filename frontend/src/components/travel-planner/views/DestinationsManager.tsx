@@ -24,7 +24,7 @@ export function DestinationsManager({
   const [transportConnections, setTransportConnections] = useState<Record<string, TransportDetails[]>>({});
 
   const totalNights = destinations.reduce((sum, dest) => sum + dest.nights, 0);
-  const maxNights = 10;
+  const maxNights = 10; // todo find this info from the user request or itinerary data 
 
   const addDestination = () => {
     if (newDestination.trim()) {

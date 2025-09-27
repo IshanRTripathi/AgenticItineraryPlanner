@@ -600,6 +600,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             agentStatuses={agentStatuses}
             onShare={onShare}
             onExportPDF={onExportPDF}
+            destinations={destinations}
           />
         );
       case 'plan':

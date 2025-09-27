@@ -6,22 +6,18 @@ import { Progress } from '../../ui/progress';
 import { Badge } from '../../ui/badge';
 import { Share2, FileText, RefreshCw, MapPin, Cloud, Train, Plane, Car, Navigation, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { AgentStatus } from '../shared/types';
+import { weatherService, WeatherData } from '../../../services/weatherService';
+import { extractCitiesFromItinerary, getTotalActivities, getTransportModes } from '../../../utils/itineraryUtils';
 
 interface TripOverviewViewProps {
   tripData: any;
   agentStatuses: AgentStatus[];
   onShare: () => void;
   onExportPDF: () => void;
+  destinations?: Array<{ id: string; name: string; nights: number; sleeping: boolean; notes: string }>;
 }
 
-interface WeatherInfo {
-  city: string;
-  temperature: number;
-  condition: string;
-  humidity: number;
-  windSpeed: number;
-  lastUpdated: string;
-}
+// Using WeatherData from weatherService instead of local interface
 
 interface TransportDelay {
   id: string;
@@ -42,26 +38,58 @@ interface TripAnalytics {
   totalActivities: number;
 }
 
-export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF }: TripOverviewViewProps) {
+export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF, destinations }: TripOverviewViewProps) {
   const { t } = useTranslation();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [weatherData, setWeatherData] = useState<WeatherInfo[]>([]);
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [transportDelays, setTransportDelays] = useState<TransportDelay[]>([]);
   const [tripAnalytics, setTripAnalytics] = useState<TripAnalytics | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
 
-  // Mock data generators
-  const generateMockWeather = (): WeatherInfo[] => {
-    const cities = ['Barcelona', 'Madrid', 'Seville', 'Valencia'];
-    const conditions = ['sunny', 'partly-cloudy', 'cloudy', 'rainy'];
+  // Real weather data fetching
+  const fetchWeatherData = async (): Promise<void> => {
+    setWeatherLoading(true);
+    setWeatherError(null);
     
-    return cities.map(city => ({
-      city,
-      temperature: Math.round(15 + Math.random() * 20),
-      condition: conditions[Math.floor(Math.random() * conditions.length)],
-      humidity: Math.round(40 + Math.random() * 40),
-      windSpeed: Math.round(5 + Math.random() * 15),
-      lastUpdated: new Date().toLocaleTimeString()
-    }));
+    try {
+      // Get unique city names from destinations
+      let cities: string[] = [];
+      
+      if (destinations && destinations.length > 0) {
+        // Use destinations directly - much simpler and more accurate
+        // Extract unique city names to avoid duplicate API calls
+        const uniqueCities = new Set(destinations.map(dest => dest.name));
+        cities = Array.from(uniqueCities);
+        console.log('Using destinations for weather:', destinations.map(dest => dest.name));
+        console.log('Unique cities after deduplication:', cities);
+      } else {
+        // Fallback to extracting from itinerary data if no destinations available
+        cities = extractCitiesFromItinerary(tripData);
+        console.log('Fallback: extracting cities from itinerary:', cities);
+      }
+      
+      if (cities.length === 0) {
+        console.warn('No cities found in destinations or itinerary data');
+        setWeatherData([]);
+        return;
+      }
+
+      console.log('Fetching weather for unique cities:', cities);
+      
+      // Fetch weather data for all cities
+      const weatherResults = await weatherService.getWeatherForCities(cities);
+      setWeatherData(weatherResults);
+      
+      console.log('Weather data fetched successfully:', weatherResults);
+    } catch (error) {
+      console.error('Failed to fetch weather data:', error);
+      setWeatherError('Failed to load weather data');
+      // Set empty array on error
+      setWeatherData([]);
+    } finally {
+      setWeatherLoading(false);
+    }
   };
 
   const generateMockDelays = (): TransportDelay[] => {
@@ -104,34 +132,31 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
     
     return {
       uniqueCities,
-      totalDistance: Math.round(800 + Math.random() * 400), // km
-      transportModes: {
-        'flight': 2,
-        'train': 3,
-        'bus': 1,
-        'walking': 8
-      },
-      averageCostPerDay: Math.round(120 + Math.random() * 80),
-      totalActivities: days.reduce((total: number, day: any) => 
-        total + (day.components?.length || day.activities?.length || 0), 0)
+      totalDistance: Math.round(800 + Math.random() * 400), // km - TODO: Calculate from real data
+      transportModes: getTransportModes(tripData),
+      averageCostPerDay: Math.round(120 + Math.random() * 80), // TODO: Calculate from real data
+      totalActivities: getTotalActivities(tripData)
     };
   };
 
   const refreshData = async () => {
     setIsRefreshing(true);
     
-    // Simulate API calls with delays
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setWeatherData(generateMockWeather());
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    setTransportDelays(generateMockDelays());
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    setTripAnalytics(generateTripAnalytics());
-    
-    setIsRefreshing(false);
+    try {
+      // Fetch real weather data
+      await fetchWeatherData();
+      
+      // Simulate other API calls with delays
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setTransportDelays(generateMockDelays());
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setTripAnalytics(generateTripAnalytics());
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   useEffect(() => {
@@ -139,14 +164,19 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
     refreshData();
   }, []);
 
-  const getWeatherIcon = (condition: string) => {
-    switch (condition) {
-      case 'sunny': return '☀️';
-      case 'partly-cloudy': return '⛅';
-      case 'cloudy': return '☁️';
-      case 'rainy': return '🌧️';
-      default: return '🌤️';
+  // Refetch weather data when trip data changes
+  useEffect(() => {
+    if (tripData?.itinerary?.days) {
+      fetchWeatherData();
     }
+  }, [tripData?.itinerary?.days]);
+
+  const getWeatherIcon = (weatherData: WeatherData) => {
+    // Use the icon from OpenWeather API if available, otherwise fall back to condition
+    if (weatherData.icon) {
+      return weatherService.getWeatherIconFromCode(weatherData.icon);
+    }
+    return weatherService.getWeatherIcon(weatherData.condition);
   };
 
   const getTransportIcon = (type: string) => {
@@ -208,50 +238,50 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
 
       {/* Trip Analytics */}
       {tripAnalytics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-600">{t('realTime.cities')}</p>
-                  <p className="text-2xl font-bold">{tripAnalytics.uniqueCities}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{t('realTime.cities')}</p>
+                  <p className="text-lg sm:text-2xl font-bold">{tripAnalytics.uniqueCities}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Navigation className="w-5 h-5 text-green-600" />
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Navigation className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                 <div>
-                  <p className="text-sm text-gray-600">{t('realTime.distance')}</p>
-                  <p className="text-2xl font-bold">{tripAnalytics.totalDistance}km</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{t('realTime.distance')}</p>
+                  <p className="text-lg sm:text-2xl font-bold">{tripAnalytics.totalDistance}km</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-purple-600" />
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
                 <div>
-                  <p className="text-sm text-gray-600">{t('realTime.activities')}</p>
-                  <p className="text-2xl font-bold">{tripAnalytics.totalActivities}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{t('realTime.activities')}</p>
+                  <p className="text-lg sm:text-2xl font-bold">{tripAnalytics.totalActivities}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">💰</span>
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <span className="text-sm sm:text-lg">💰</span>
                 <div>
-                  <p className="text-sm text-gray-600">{t('realTime.avgPerDay')}</p>
-                  <p className="text-2xl font-bold">€{tripAnalytics.averageCostPerDay}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{t('realTime.avgPerDay')}</p>
+                  <p className="text-lg sm:text-2xl font-bold">€{tripAnalytics.averageCostPerDay}</p>
                 </div>
               </div>
             </CardContent>
@@ -269,23 +299,52 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {weatherData.map((weather, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{getWeatherIcon(weather.condition)}</span>
-                    <div>
-                      <p className="font-medium">{weather.city}</p>
-                      <p className="text-sm text-gray-600 capitalize">{weather.condition}</p>
+            {weatherLoading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2 text-gray-600">Loading weather data...</span>
+              </div>
+            ) : weatherError ? (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 text-sm">{weatherError}</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={fetchWeatherData}
+                  className="mt-2"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
+                </Button>
+              </div>
+            ) : weatherData.length === 0 ? (
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-gray-600 text-sm">No weather data available</p>
+                <p className="text-xs text-gray-500 mt-1">Cities will be detected from your itinerary</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {weatherData.map((weather, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{getWeatherIcon(weather)}</span>
+                      <div>
+                        <p className="font-medium">{weather.city}</p>
+                        <p className="text-sm text-gray-600 capitalize">{weather.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold">{weather.temperature}°C</p>
+                      <p className="text-xs text-gray-500">{t('realTime.updated')}: {weather.lastUpdated}</p>
+                      <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        <span>💧 {weather.humidity}%</span>
+                        <span>💨 {weather.windSpeed} km/h</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold">{weather.temperature}°C</p>
-                    <p className="text-xs text-gray-500">{t('realTime.updated')}: {weather.lastUpdated}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 

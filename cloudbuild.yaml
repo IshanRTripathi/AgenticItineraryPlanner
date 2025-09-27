@@ -5,6 +5,8 @@ availableSecrets:
   secretManager:
   - versionName: projects/tripaiplanner/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
     env: 'VITE_GOOGLE_MAPS_BROWSER_KEY'
+  - versionName: projects/tripaiplanner/secrets/OPENWEATHER_API/versions/latest
+    env: 'VITE_OPENWEATHER_API_KEY'
 
 steps:
   # Build and deploy backend
@@ -71,11 +73,12 @@ steps:
       '-f', 'Dockerfile.frontend',
       '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
       '--build-arg', 'VITE_GOOGLE_MAPS_BROWSER_KEY=$$VITE_GOOGLE_MAPS_BROWSER_KEY',
+      '--build-arg', 'VITE_OPENWEATHER_API_KEY=$$VITE_OPENWEATHER_API_KEY',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '.'
     ]
-    secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY']
+    secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY', 'VITE_OPENWEATHER_API_KEY']
     id: 'build-frontend'
     waitFor: ['build-backend']
 
