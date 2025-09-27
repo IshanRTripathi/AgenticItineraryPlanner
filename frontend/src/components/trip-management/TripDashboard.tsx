@@ -9,7 +9,10 @@ import { useItineraries } from '../../state/query/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { ErrorDisplay } from '../shared/ErrorDisplay';
 import { withErrorBoundary } from '../travel-planner/shared/ErrorBoundary';
-import { 
+import { UserProfileButton } from '../shared/UserProfileButton';
+import { GlobalNavigation } from '../shared/GlobalNavigation';
+import { BreadcrumbNavigation } from '../shared/BreadcrumbNavigation';
+import {
   ArrowLeft,
   Plus,
   Search,
@@ -220,7 +223,8 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <GlobalNavigation variant="horizontal" showLabels={false} />
               <Button variant="outline">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -229,8 +233,16 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                 <Plus className="h-4 w-4 mr-2" />
                 New Trip
               </Button>
+              <UserProfileButton />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Breadcrumbs */}
+      <div className="bg-gray-50 border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 py-2">
+          <BreadcrumbNavigation />
         </div>
       </div>
 

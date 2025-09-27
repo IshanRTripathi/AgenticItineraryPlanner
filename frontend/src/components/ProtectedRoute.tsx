@@ -35,7 +35,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If authentication is not required but user is authenticated (e.g., login page)
-  if (!requireAuth && user) {
+  // Only redirect if we're on the login page specifically, not on other public pages like home
+  if (!requireAuth && user && location.pathname === '/login') {
     // Redirect to home or dashboard
     const homePath = redirectTo || '/dashboard';
     return <Navigate to={homePath} replace />;

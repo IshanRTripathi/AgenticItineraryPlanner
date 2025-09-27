@@ -3,7 +3,6 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -18,6 +17,9 @@ import { TripData, Traveler, TravelPreferences, TripSettings, TripLocation } fro
 import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
 import { useCreateItinerary } from '../../state/query/hooks';
 import { useAppStore } from '../../state/hooks';
+import { UserProfileButton } from '../shared/UserProfileButton';
+import { GlobalNavigation } from '../shared/GlobalNavigation';
+import { BreadcrumbNavigation } from '../shared/BreadcrumbNavigation';
 // removed unused figma asset import for prototype
 
 interface SimplifiedTripWizardProps {
@@ -334,13 +336,35 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Plan Your Perfect Trip</h1>
-          <p className="text-gray-600">Tell us about your travel preferences and we'll create an amazing itinerary</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Top Header with Profile */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" onClick={onBack} className="flex items-center space-x-2">
+              <X className="w-4 h-4" />
+              <span>Back</span>
+            </Button>
+            <GlobalNavigation variant="horizontal" showLabels={false} />
+          </div>
+          <UserProfileButton />
         </div>
+      </div>
+
+      {/* Breadcrumbs */}
+      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+        <div className="max-w-6xl mx-auto">
+          <BreadcrumbNavigation />
+        </div>
+      </div>
+
+      <div className="p-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-2">Plan Your Perfect Trip</h1>
+            <p className="text-gray-600">Tell us about your travel preferences and we'll create an amazing itinerary</p>
+          </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left Side - Trip Details & Travelers */}
@@ -838,6 +862,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
           >
             Create My Itinerary
           </Button>
+        </div>
         </div>
       </div>
     </div>

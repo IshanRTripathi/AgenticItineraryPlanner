@@ -19,12 +19,14 @@ public class ChangeEngine {
     private static final Logger logger = LoggerFactory.getLogger(ChangeEngine.class);
     
     private final ItineraryJsonService itineraryJsonService;
-    // Removed JPA repository
+    private final UserDataService userDataService;
     private final ObjectMapper objectMapper;
     
     public ChangeEngine(ItineraryJsonService itineraryJsonService,
+                       UserDataService userDataService,
                        ObjectMapper objectMapper) {
         this.itineraryJsonService = itineraryJsonService;
+        this.userDataService = userDataService;
         this.objectMapper = objectMapper;
     }
     
@@ -385,8 +387,6 @@ public class ChangeEngine {
         
         // Set timing (same as original)
         NodeTiming timing = new NodeTiming();
-        timing.setStartTime(java.time.Instant.parse("2025-06-02T12:00:00Z"));
-        timing.setEndTime(java.time.Instant.parse("2025-06-02T14:00:00Z"));
         timing.setDurationMin(120);
         replacement.setTiming(timing);
         
@@ -540,7 +540,8 @@ public class ChangeEngine {
      */
     private void saveRevision(NormalizedItinerary itinerary) {
         try {
-            itineraryJsonService.saveRevision(itinerary.getItineraryId(), itinerary);
+            // Save revision using the new user-specific structure
+            userDataService.saveItineraryRevision(itinerary.getUserId(), itinerary.getItineraryId(), itinerary);
         } catch (Exception e) {
             logger.error("Failed to save revision", e);
         }

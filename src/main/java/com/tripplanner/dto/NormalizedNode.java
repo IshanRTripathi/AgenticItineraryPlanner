@@ -1,5 +1,6 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -69,10 +70,10 @@ public class NormalizedNode {
     private String updatedBy; // "agent" or "user"
     
     @JsonProperty("updatedAt")
-    private Instant updatedAt;
+    private Long updatedAt;
     
     public NormalizedNode() {
-        this.updatedAt = Instant.now();
+        this.updatedAt = System.currentTimeMillis();
     }
     
     public NormalizedNode(String id, String type, String title) {
@@ -203,42 +204,54 @@ public class NormalizedNode {
         this.updatedBy = updatedBy;
     }
     
-    public Instant getUpdatedAt() {
+    public Long getUpdatedAt() {
         return updatedAt;
     }
     
-    public void setUpdatedAt(Instant updatedAt) {
+    public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
     }
     
+    // Helper method to get Instant object
+    @JsonIgnore
+    public Instant getUpdatedAtAsInstant() {
+        return updatedAt != null ? Instant.ofEpochMilli(updatedAt) : null;
+    }
+    
     // Helper methods for status management
+    @JsonIgnore
     public boolean isPlanned() {
         return "planned".equals(status);
     }
     
+    @JsonIgnore
     public boolean isInProgress() {
         return "in_progress".equals(status);
     }
     
+    @JsonIgnore
     public boolean isSkipped() {
         return "skipped".equals(status);
     }
     
+    @JsonIgnore
     public boolean isCancelled() {
         return "cancelled".equals(status);
     }
     
+    @JsonIgnore
     public boolean isCompleted() {
         return "completed".equals(status);
     }
     
+    @JsonIgnore
     public boolean isBooked() {
         return bookingRef != null && !bookingRef.trim().isEmpty();
     }
     
     public void markAsUpdated(String updatedBy) {
         this.updatedBy = updatedBy;
-        this.updatedAt = Instant.now();
+        this.updatedAt = System.currentTimeMillis();
     }
     
     public boolean canTransitionTo(String newStatus) {

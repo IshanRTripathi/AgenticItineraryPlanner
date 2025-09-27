@@ -12,12 +12,14 @@ import { ItineraryWithChat } from './components/ItineraryWithChat';
 import { TripData } from './types/TripData';
 import { useAppStore } from './state/hooks';
 import { useItinerary } from './state/query/hooks';
-import { Routes, Route, useNavigate, useParams, Outlet, Navigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { GoogleSignIn } from './components/GoogleSignIn';
 import { LoginPage } from './components/LoginPage';
 import { GlobalErrorBoundary } from './components/shared/GlobalErrorBoundary';
+import { KeyboardShortcuts } from './components/shared/KeyboardShortcuts';
+import { TripViewLoader } from './components/TripViewLoader';
 import './i18n'; // Initialize i18n
 // Data transformation will be handled by the backend
 
@@ -51,12 +53,22 @@ function RoutedApp() {
     setAuthenticated
   } = useAppStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentTrip: currentTripForHydrate } = useAppStore();
-  const { refetch } = useItinerary(currentTripForHydrate?.id || '');
+  
+  // Only fetch itinerary data for routes that need it
+  const shouldFetchItinerary = location.pathname.includes('/generating') ||
+                              location.pathname.includes('/planner') ||
+                              location.pathname.includes('/cost') ||
+                              location.pathname.includes('/checkout') ||
+                              location.pathname.includes('/confirmation') ||
+                              location.pathname.includes('/share');
+  
+  const { refetch } = useItinerary(shouldFetchItinerary ? (currentTripForHydrate?.id || '') : '');
 
   React.useEffect(() => {
     (async () => {
-      if (currentTripForHydrate?.id) {
+      if (currentTripForHydrate?.id && shouldFetchItinerary) {
         try {
           const r = await refetch();
           if (r.data) {
@@ -71,7 +83,7 @@ function RoutedApp() {
         } catch {}
       }
     })();
-  }, []);
+  }, [currentTripForHydrate?.id, shouldFetchItinerary, refetch, currentTrip?.itinerary, setCurrentTrip]);
 
   const navigateToScreen = (path: string, tripData?: TripData) => {
     if (tripData) setCurrentTrip(tripData);
@@ -168,13 +180,14 @@ function RoutedApp() {
             onCreateTrip={() => navigateToScreen('/wizard')}
             onViewTrip={(trip) => {
               setCurrentTrip(trip);
-              navigateToScreen('/planner');
+              navigate('/planner');
             }}
             onBack={() => navigateToScreen('/')}
           />
         </ProtectedRoute>
       } />
       <Route path="/trip/:id" element={<TripRouteLoader />} />
+      <Route path="/planner" element={<PlannerRouteLoader />} />
       <Route path="/itinerary/:id" element={<ItineraryRouteLoader />} />
       <Route path="/itinerary/:id/chat" element={<ItineraryChatRouteLoader />} />
       <Route path="*" element={<div>Not found</div>} />
@@ -192,10 +205,38 @@ function TripRouteLoader() {
       setCurrentTrip(trip);
       navigate('/planner', { replace: true });
     } else {
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [id]);
   return null;
+}
+
+function PlannerRouteLoader() {
+  const { currentTrip, setCurrentTrip } = useAppStore();
+  const navigate = useNavigate();
+  
+  // If no current trip is set, redirect to dashboard
+  if (!currentTrip) {
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
+  
+  return (
+    <TripViewLoader
+      itineraryId={currentTrip.id}
+      onSave={(updatedTrip) => {
+        // Update the trip in the store
+        setCurrentTrip(updatedTrip);
+        console.log('Trip saved:', updatedTrip);
+      }}
+      onBack={() => navigate('/dashboard')}
+      onShare={() => navigate('/share')}
+      onExportPDF={() => {
+        // Handle PDF export
+        alert('PDF export functionality would be implemented here');
+      }}
+    />
+  );
 }
 
 function ItineraryRouteLoader() {
@@ -206,7 +247,7 @@ function ItineraryRouteLoader() {
   React.useEffect(() => {
     (async () => {
       if (!id) {
-        navigate('/', { replace: true });
+        navigate('/dashboard', { replace: true });
         return;
       }
       try {
@@ -217,10 +258,10 @@ function ItineraryRouteLoader() {
           setCurrentTrip(data);
           navigate('/planner', { replace: true });
         } else {
-          navigate('/', { replace: true });
+          navigate('/dashboard', { replace: true });
         }
       } catch {
-        navigate('/', { replace: true });
+        navigate('/dashboard', { replace: true });
       }
     })();
   }, [id]);
@@ -243,9 +284,11 @@ export default function App() {
   return (
     <GlobalErrorBoundary>
       <AuthProvider>
-        <div className="size-full min-h-screen bg-background">
-          <RoutedApp />
-        </div>
+        <KeyboardShortcuts>
+          <div className="size-full min-h-screen bg-background">
+            <RoutedApp />
+          </div>
+        </KeyboardShortcuts>
       </AuthProvider>
     </GlobalErrorBoundary>
   );

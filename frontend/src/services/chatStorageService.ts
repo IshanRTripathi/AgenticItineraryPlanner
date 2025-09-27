@@ -1,7 +1,7 @@
 /**
  * Chat Storage Service
  * Handles storing and retrieving chat history from Firebase Firestore
- * Structure: users/{userId}/chat/{chatId}
+ * Structure: users/{userId}/itineraries/{itineraryId}/chats/{chatId}
  */
 
 import { 
@@ -43,20 +43,27 @@ export interface ChatSession {
 
 class ChatStorageService {
   private readonly USERS_COLLECTION = 'users';
-  private readonly CHAT_COLLECTION = 'chat';
+  private readonly ITINERARIES_COLLECTION = 'itineraries';
+  private readonly CHATS_COLLECTION = 'chats';
 
   /**
    * Save a chat message to Firebase
    */
   async saveMessage(userId: string, message: ChatMessage): Promise<string> {
     try {
-      console.log('[ChatStorage] Saving message for user:', userId);
+      console.log('[ChatStorage] Saving message for user:', userId, 'itinerary:', message.itineraryId);
+      
+      if (!message.itineraryId) {
+        throw new Error('Itinerary ID is required for chat messages');
+      }
       
       const chatRef = collection(
         db, 
         this.USERS_COLLECTION, 
         userId, 
-        this.CHAT_COLLECTION
+        this.ITINERARIES_COLLECTION,
+        message.itineraryId,
+        this.CHATS_COLLECTION
       );
       
       const docRef = await addDoc(chatRef, {
@@ -76,34 +83,30 @@ class ChatStorageService {
   }
 
   /**
-   * Get chat history for a user
+   * Get chat history for a user and specific itinerary
    */
-  async getChatHistory(userId: string, itineraryId?: string, limitCount: number = 50): Promise<ChatMessage[]> {
+  async getChatHistory(userId: string, itineraryId: string, limitCount: number = 50): Promise<ChatMessage[]> {
     try {
       console.log('[ChatStorage] Getting chat history for user:', userId, 'itinerary:', itineraryId);
+      
+      if (!itineraryId) {
+        throw new Error('Itinerary ID is required for chat history');
+      }
       
       const chatRef = collection(
         db, 
         this.USERS_COLLECTION, 
         userId, 
-        this.CHAT_COLLECTION
+        this.ITINERARIES_COLLECTION,
+        itineraryId,
+        this.CHATS_COLLECTION
       );
       
-      let q = query(
+      const q = query(
         chatRef,
-        orderBy('timestamp', 'desc'),
+        orderBy('timestamp', 'asc'),
         limit(limitCount)
       );
-      
-      // If itineraryId is provided, filter by it
-      if (itineraryId) {
-        q = query(
-          chatRef,
-          orderBy('itineraryId'),
-          orderBy('timestamp', 'desc'),
-          limit(limitCount)
-        );
-      }
       
       const querySnapshot = await getDocs(q);
       const messages: ChatMessage[] = [];
@@ -115,18 +118,12 @@ class ChatStorageService {
           message: data.message,
           sender: data.sender,
           timestamp: data.timestamp?.toDate() || new Date(),
-          itineraryId: data.itineraryId,
+          itineraryId: itineraryId, // Use the provided itineraryId
           metadata: data.metadata
         };
         
-        // Filter by itineraryId if specified
-        if (!itineraryId || message.itineraryId === itineraryId) {
-          messages.push(message);
-        }
+        messages.push(message);
       });
-      
-      // Sort by timestamp ascending (oldest first)
-      messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
       
       console.log('[ChatStorage] Retrieved', messages.length, 'messages');
       return messages;
@@ -139,42 +136,40 @@ class ChatStorageService {
 
   /**
    * Get chat sessions for a user
+   * Note: This method now requires knowing the itinerary IDs in advance
+   * since chat messages are now organized under specific itineraries
    */
-  async getChatSessions(userId: string): Promise<ChatSession[]> {
+  async getChatSessions(userId: string, itineraryIds: string[]): Promise<ChatSession[]> {
     try {
-      console.log('[ChatStorage] Getting chat sessions for user:', userId);
+      console.log('[ChatStorage] Getting chat sessions for user:', userId, 'itineraries:', itineraryIds);
       
-      // Get all messages and group by itineraryId
-      const messages = await this.getChatHistory(userId);
-      const sessionMap = new Map<string, ChatSession>();
+      const sessions: ChatSession[] = [];
       
-      messages.forEach((message) => {
-        if (!message.itineraryId) return;
-        
-        const itineraryId = message.itineraryId;
-        
-        if (!sessionMap.has(itineraryId)) {
-          sessionMap.set(itineraryId, {
-            itineraryId,
-            title: `Chat for Itinerary ${itineraryId.slice(-8)}`,
-            createdAt: message.timestamp,
-            updatedAt: message.timestamp,
-            messageCount: 0,
-            lastMessage: message.message
-          });
+      // Get chat history for each itinerary
+      for (const itineraryId of itineraryIds) {
+        try {
+          const messages = await this.getChatHistory(userId, itineraryId);
+          
+          if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            const firstMessage = messages[0];
+            
+            sessions.push({
+              itineraryId,
+              title: `Chat for Itinerary ${itineraryId.slice(-8)}`,
+              createdAt: firstMessage.timestamp,
+              updatedAt: lastMessage.timestamp,
+              messageCount: messages.length,
+              lastMessage: lastMessage.message
+            });
+          }
+        } catch (error) {
+          console.warn('[ChatStorage] Failed to get chat history for itinerary:', itineraryId, error);
+          // Continue with other itineraries
         }
-        
-        const session = sessionMap.get(itineraryId)!;
-        session.messageCount++;
-        
-        // Update with latest message
-        if (message.timestamp > session.updatedAt) {
-          session.updatedAt = message.timestamp;
-          session.lastMessage = message.message;
-        }
-      });
+      }
       
-      const sessions = Array.from(sessionMap.values());
+      // Sort by most recent activity
       sessions.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
       
       console.log('[ChatStorage] Retrieved', sessions.length, 'chat sessions');
@@ -208,9 +203,9 @@ class ChatStorageService {
   }
 
   /**
-   * Get message count for a user
+   * Get message count for a user and specific itinerary
    */
-  async getMessageCount(userId: string, itineraryId?: string): Promise<number> {
+  async getMessageCount(userId: string, itineraryId: string): Promise<number> {
     try {
       const messages = await this.getChatHistory(userId, itineraryId);
       return messages.length;

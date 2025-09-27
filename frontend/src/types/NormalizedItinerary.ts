@@ -3,6 +3,9 @@
 export interface NormalizedItinerary {
   itineraryId: string;
   version: number;
+  userId?: string;
+  createdAt?: number; // milliseconds since epoch
+  updatedAt?: number; // milliseconds since epoch
   summary: string;
   currency: string;
   themes: string[];
@@ -21,7 +24,7 @@ export interface NormalizedDay {
   date: string; // ISO date
   location: string;
   nodes: NormalizedNode[];
-  edges: Edge[];
+  edges?: Edge[];
   pacing?: Pacing;
   timeWindow?: TimeWindow;
   totals?: DayTotals;
@@ -31,7 +34,7 @@ export interface NormalizedDay {
 
 export interface NormalizedNode {
   id: string;
-  type: 'attraction' | 'meal' | 'accommodation' | 'transport';
+  type: 'attraction' | 'meal' | 'hotel' | 'transit' | 'transport' | 'accommodation';
   title: string;
   location?: NodeLocation;
   timing?: NodeTiming;
@@ -40,8 +43,12 @@ export interface NormalizedNode {
   labels?: string[];
   tips?: NodeTips;
   links?: NodeLinks;
+  transit?: TransitInfo;
   locked?: boolean;
   bookingRef?: string;
+  status?: string; // "planned", "in_progress", "skipped", "cancelled", "completed"
+  updatedBy?: string; // "agent" or "user"
+  updatedAt?: number; // milliseconds since epoch
 }
 
 export interface NodeLocation {
@@ -56,9 +63,9 @@ export interface Coordinates {
 }
 
 export interface NodeTiming {
-  startTime: string; // ISO string
-  endTime: string; // ISO string
-  durationMin: number;
+  startTime?: number; // milliseconds since epoch
+  endTime?: number; // milliseconds since epoch
+  durationMin?: number;
 }
 
 export interface NodeCost {
@@ -129,7 +136,7 @@ export interface ItinerarySettings {
 }
 
 export interface AgentStatus {
-  lastRunAt?: string; // ISO string
+  lastRunAt?: number; // milliseconds since epoch
   status: string; // "idle" | "running" | "completed" | "failed"
 }
 

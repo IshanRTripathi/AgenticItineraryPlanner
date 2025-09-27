@@ -18,7 +18,8 @@ export class NormalizedDataTransformer {
     console.log('Days Data:', normalized.days);
     console.log('===================================');
     
-    return {
+    try {
+      const result = {
       id: normalized.itineraryId,
       summary: normalized.summary,
       startLocation: {
@@ -54,6 +55,21 @@ export class NormalizedDataTransformer {
       updatedAt: new Date().toISOString(),
       isPublic: false
     };
+    
+    console.log('=== TRANSFORMATION SUCCESS ===');
+    console.log('Result:', result);
+    console.log('==============================');
+    return result;
+    
+    } catch (error) {
+      console.error('=== TRANSFORMATION ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Input data:', normalized);
+      console.error('============================');
+      throw error;
+    }
   }
 
   /**
@@ -63,43 +79,68 @@ export class NormalizedDataTransformer {
     console.log('=== TRANSFORM NORMALIZED ITINERARY ===');
     console.log('Input Days:', normalized.days);
     console.log('Days Length:', normalized.days?.length || 0);
-    console.log('Mapped Days:', (normalized.days || []).map(day => this.transformNormalizedDay(day)));
-    console.log('=====================================');
     
-    return {
-      id: normalized.itineraryId,
-      days: (normalized.days || []).map(day => this.transformNormalizedDay(day)),
-      totalCost: this.calculateTotalCost(normalized.days),
-      totalDistance: this.calculateTotalDistance(normalized.days),
-      totalDuration: normalized.days.length,
-      highlights: this.extractHighlights(normalized.days),
-      themes: normalized.themes,
-      difficulty: 'easy',
-      packingList: [],
-      emergencyInfo: {
-        hospitals: [],
-        embassies: [],
-        police: [],
-        helplines: []
-      },
-      localInfo: {
-        currency: normalized.currency,
-        language: 'English',
-        timeZone: 'UTC',
-        customs: [],
-        etiquette: [],
-        laws: []
-      },
-      mapBounds: normalized.mapBounds,
-      countryCentroid: normalized.countryCentroid
-    };
+    try {
+      console.log('Mapping days...');
+      const mappedDays = (normalized.days || []).map((day, index) => {
+        console.log(`Mapping day ${index + 1}:`, day);
+        const transformedDay = this.transformNormalizedDay(day);
+        console.log(`Transformed day ${index + 1}:`, transformedDay);
+        return transformedDay;
+      });
+      console.log('Mapped Days:', mappedDays);
+      console.log('=====================================');
+      
+      return {
+        id: normalized.itineraryId,
+        days: mappedDays,
+        totalCost: this.calculateTotalCost(normalized.days),
+        totalDistance: this.calculateTotalDistance(normalized.days),
+        totalDuration: normalized.days.length,
+        highlights: this.extractHighlights(normalized.days),
+        themes: normalized.themes,
+        difficulty: 'easy',
+        packingList: [],
+        emergencyInfo: {
+          hospitals: [],
+          embassies: [],
+          police: [],
+          helplines: []
+        },
+        localInfo: {
+          currency: normalized.currency,
+          language: 'English',
+          timeZone: 'UTC',
+          customs: [],
+          etiquette: [],
+          laws: []
+        },
+        mapBounds: normalized.mapBounds,
+        countryCentroid: normalized.countryCentroid
+      };
+    } catch (error) {
+      console.error('=== TRANSFORM NORMALIZED ITINERARY ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Input normalized:', normalized);
+      console.error('===========================================');
+      throw error;
+    }
   }
 
   /**
    * Transform NormalizedDay to DayPlan
    */
   private static transformNormalizedDay(day: NormalizedDay): DayPlan {
-    return {
+    try {
+      console.log('=== TRANSFORM NORMALIZED DAY ===');
+      console.log('Input Day:', day);
+      console.log('Day Number:', day.dayNumber);
+      console.log('Nodes Count:', day.nodes?.length || 0);
+      console.log('Nodes:', day.nodes);
+      
+      const result = {
       id: day.id || `day-${day.dayNumber}`,
       date: day.date,
       dayNumber: day.dayNumber,
@@ -120,13 +161,36 @@ export class NormalizedDataTransformer {
       },
       notes: day.notes || ''
     };
+    
+    console.log('=== TRANSFORM NORMALIZED DAY SUCCESS ===');
+    console.log('Result:', result);
+    console.log('========================================');
+    return result;
+    
+    } catch (error) {
+      console.error('=== TRANSFORM NORMALIZED DAY ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Input day:', day);
+      console.error('=====================================');
+      throw error;
+    }
   }
 
   /**
    * Transform NormalizedNode to TripComponent
    */
   private static transformNormalizedNode(node: NormalizedNode): TripComponent {
-    return {
+    try {
+      console.log('=== TRANSFORM NORMALIZED NODE ===');
+      console.log('Input Node:', node);
+      console.log('Node ID:', node.id);
+      console.log('Node Type:', node.type);
+      console.log('Node Title:', node.title);
+      console.log('Node Timing:', node.timing);
+      
+      const result = {
       id: node.id,
       type: this.mapNodeTypeToComponentType(node.type),
       name: node.title,
@@ -135,13 +199,13 @@ export class NormalizedDataTransformer {
         name: node.location?.name || node.title,
         address: node.location?.address || '',
         coordinates: {
-          lat: (node.location?.coordinates && typeof node.location.coordinates.lat === 'number') ? node.location.coordinates.lat : 0,
-          lng: (node.location?.coordinates && typeof node.location.coordinates.lng === 'number') ? node.location.coordinates.lng : 0
+          lat: (node.location?.coordinates && typeof node.location.coordinates.lat === 'number' && !isNaN(node.location.coordinates.lat)) ? node.location.coordinates.lat : null,
+          lng: (node.location?.coordinates && typeof node.location.coordinates.lng === 'number' && !isNaN(node.location.coordinates.lng)) ? node.location.coordinates.lng : null
         }
       },
       timing: {
-        startTime: node.timing?.startTime || '09:00',
-        endTime: node.timing?.endTime || '10:00',
+        startTime: this.convertMillisecondsToTimeString(node.timing?.startTime) || '09:00',
+        endTime: this.convertMillisecondsToTimeString(node.timing?.endTime) || '10:00',
         duration: node.timing?.durationMin || 60,
         suggestedDuration: node.timing?.durationMin || 60
       },
@@ -191,6 +255,21 @@ export class NormalizedDataTransformer {
       },
       priority: this.mapLabelsToPriority(node.labels || [], node)
     };
+    
+    console.log('=== TRANSFORM NORMALIZED NODE SUCCESS ===');
+    console.log('Result:', result);
+    console.log('=========================================');
+    return result;
+    
+    } catch (error) {
+      console.error('=== TRANSFORM NORMALIZED NODE ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Input node:', node);
+      console.error('======================================');
+      throw error;
+    }
   }
 
   /**
@@ -201,6 +280,8 @@ export class NormalizedDataTransformer {
       case 'attraction': return 'attraction';
       case 'meal': return 'restaurant';
       case 'accommodation': return 'hotel';
+      case 'hotel': return 'hotel';
+      case 'transit': return 'transport';
       case 'transport': return 'transport';
       default: return 'activity';
     }
@@ -217,6 +298,10 @@ export class NormalizedDataTransformer {
         return `Enjoy ${node.title}`;
       case 'accommodation':
         return `Stay at ${node.title}`;
+      case 'hotel':
+        return `Stay at ${node.title}`;
+      case 'transit':
+        return `Travel to ${node.title}`;
       case 'transport':
         return `Travel to ${node.title}`;
       default:
@@ -245,6 +330,10 @@ export class NormalizedDataTransformer {
         return ['meal'];
       case 'accommodation':
         return ['room'];
+      case 'hotel':
+        return ['room'];
+      case 'transit':
+        return ['transportation'];
       case 'transport':
         return ['transportation'];
       default:
@@ -290,13 +379,13 @@ export class NormalizedDataTransformer {
     const title = node.title.toLowerCase();
     const startTime = node.timing?.startTime;
     
-    if (title.includes('breakfast') || (startTime && this.isMorningTime(startTime))) {
+    if (title.includes('breakfast') || (startTime && this.isMorningTime(this.convertTimestampToTimeString(startTime)))) {
       return 'breakfast';
     }
-    if (title.includes('lunch') || (startTime && this.isLunchTime(startTime))) {
+    if (title.includes('lunch') || (startTime && this.isLunchTime(this.convertTimestampToTimeString(startTime)))) {
       return 'lunch';
     }
-    if (title.includes('dinner') || (startTime && this.isEveningTime(startTime))) {
+    if (title.includes('dinner') || (startTime && this.isEveningTime(this.convertTimestampToTimeString(startTime)))) {
       return 'dinner';
     }
     
@@ -528,6 +617,16 @@ export class NormalizedDataTransformer {
   }
 
   /**
+   * Convert Long timestamp to time string (HH:MM format)
+   */
+  private static convertTimestampToTimeString(timestamp: number): string {
+    const date = new Date(timestamp);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  /**
    * Check if time is morning
    */
   private static isMorningTime(time: string): boolean {
@@ -549,5 +648,22 @@ export class NormalizedDataTransformer {
   private static isEveningTime(time: string): boolean {
     const hour = parseInt(time.split(':')[0]);
     return hour >= 18 && hour < 22;
+  }
+
+  /**
+   * Convert milliseconds since epoch to HH:MM time string
+   */
+  private static convertMillisecondsToTimeString(milliseconds?: number): string | null {
+    if (!milliseconds) return null;
+    
+    try {
+      const date = new Date(milliseconds);
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
+    } catch (error) {
+      console.warn('Failed to convert milliseconds to time string:', milliseconds, error);
+      return null;
+    }
   }
 }

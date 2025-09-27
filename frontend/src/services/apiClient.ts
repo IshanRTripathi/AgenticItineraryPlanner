@@ -182,14 +182,34 @@ class ApiClient {
   }
 
   async getItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
-    const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`, {}, retryOptions);
-    console.log('=== API CLIENT GET ITINERARY ===');
-    console.log('Itinerary ID:', id);
-    console.log('Raw API Response:', response);
-    console.log('Days Count:', response.days?.length || 0);
-    console.log('Days Data:', response.days);
-    console.log('================================');
-    return NormalizedDataTransformer.transformNormalizedItineraryToTripData(response);
+    try {
+      console.log('=== API CLIENT GET ITINERARY START ===');
+      console.log('Itinerary ID:', id);
+      
+      const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`, {}, retryOptions);
+      console.log('=== API CLIENT GET ITINERARY ===');
+      console.log('Itinerary ID:', id);
+      console.log('Raw API Response:', response);
+      console.log('Days Count:', response.days?.length || 0);
+      console.log('Days Data:', response.days);
+      console.log('================================');
+      
+      console.log('Starting data transformation...');
+      const transformedData = NormalizedDataTransformer.transformNormalizedItineraryToTripData(response);
+      console.log('=== API CLIENT GET ITINERARY SUCCESS ===');
+      console.log('Transformed Data:', transformedData);
+      console.log('========================================');
+      return transformedData;
+      
+    } catch (error) {
+      console.error('=== API CLIENT GET ITINERARY ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Itinerary ID:', id);
+      console.error('=====================================');
+      throw error;
+    }
   }
 
   async getPublicItinerary(id: string): Promise<ItineraryResponse> {

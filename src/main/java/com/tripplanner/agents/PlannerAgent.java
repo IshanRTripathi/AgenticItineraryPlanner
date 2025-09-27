@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.ChangeEngine;
+import com.tripplanner.service.UserDataService;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ItineraryJsonService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,14 +29,17 @@ public class PlannerAgent extends BaseAgent {
     private final ObjectMapper objectMapper;
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
+    private final UserDataService userDataService;
     
     public PlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
-                       ItineraryJsonService itineraryJsonService, ChangeEngine changeEngine) {
+                       ItineraryJsonService itineraryJsonService, ChangeEngine changeEngine,
+                       UserDataService userDataService) {
         super(eventBus, AgentEvent.AgentKind.planner);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
+        this.userDataService = userDataService;
     }
     
     @Override
@@ -108,7 +112,14 @@ public class PlannerAgent extends BaseAgent {
             emitProgress(itineraryId, 90, "Finalizing itinerary", "finalization");
             
             // Update the existing itinerary with the generated content
+            // Save to both legacy storage (for compatibility) and user-specific storage
             itineraryJsonService.updateItinerary(normalizedItinerary);
+            
+            // Also save to user-specific storage if userId is available
+            if (normalizedItinerary.getUserId() != null) {
+                userDataService.saveUserItinerary(normalizedItinerary.getUserId(), normalizedItinerary);
+                logger.info("Saved generated itinerary to user-specific storage for user: {}", normalizedItinerary.getUserId());
+            }
             
             // Convert to the expected response type
             if (request.getResponseType() == ItineraryDto.class) {
@@ -164,12 +175,33 @@ public class PlannerAgent extends BaseAgent {
         if (obj == null || !obj.has(field)) return;
         String value = obj.get(field).asText(null);
         if (value == null || value.isBlank()) return;
-        // If already ISO-8601 with date and 'T', keep as-is
-        if (value.contains("T")) return;
-        // If only time HH:mm, combine with dayDate, else skip
-        if (dayDate != null && value.matches("^\\d{2}:\\d{2}$")) {
-            String iso = dayDate + "T" + value + ":00Z";
-            obj.put(field, iso);
+        
+        try {
+            // If already ISO-8601 with date and 'T', convert to milliseconds
+            if (value.contains("T")) {
+                long milliseconds = java.time.Instant.parse(value).toEpochMilli();
+                obj.put(field, milliseconds);
+                return;
+            }
+            
+            // If only time HH:mm, combine with dayDate and convert to milliseconds
+            if (dayDate != null && value.matches("^\\d{2}:\\d{2}$")) {
+                String iso = dayDate + "T" + value + ":00Z";
+                long milliseconds = java.time.Instant.parse(iso).toEpochMilli();
+                obj.put(field, milliseconds);
+                return;
+            }
+            
+            // If it's already a number, keep it as is
+            if (value.matches("^\\d+$")) {
+                obj.put(field, Long.valueOf(value));
+                return;
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to normalize time field {} with value {}: {}", field, value, e.getMessage());
+            // If parsing fails, set to null
+            obj.putNull(field);
         }
     }
 
@@ -683,8 +715,8 @@ public class PlannerAgent extends BaseAgent {
             ChangeOperation moveOp = new ChangeOperation();
             moveOp.setOp("move");
             moveOp.setId("n_sagrada"); // Mock node to move
-            moveOp.setStartTime(java.time.Instant.parse("2025-10-04T10:00:00Z"));
-            moveOp.setEndTime(java.time.Instant.parse("2025-10-04T12:00:00Z"));
+            moveOp.setStartTime(java.time.Instant.parse("2025-10-04T10:00:00Z").toEpochMilli());
+            moveOp.setEndTime(java.time.Instant.parse("2025-10-04T12:00:00Z").toEpochMilli());
             operations.add(moveOp);
         }
 
@@ -715,8 +747,6 @@ public class PlannerAgent extends BaseAgent {
 
         // Set timing
         NodeTiming timing = new NodeTiming();
-        timing.setStartTime(java.time.Instant.parse("2025-10-04T14:00:00Z"));
-        timing.setEndTime(java.time.Instant.parse("2025-10-04T16:00:00Z"));
         timing.setDurationMin(120);
         node.setTiming(timing);
 

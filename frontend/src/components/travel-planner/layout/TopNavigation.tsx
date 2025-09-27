@@ -1,11 +1,10 @@
 import React from 'react';
 import { Button } from '../../ui/button';
-import { Avatar, AvatarFallback } from '../../ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../ui/dropdown-menu';
 import { Share2, Download } from 'lucide-react';
 import { TopNavigationProps } from '../shared/types';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from '../../shared/LanguageSelector';
+import { UserProfileButton } from '../../shared/UserProfileButton';
 
 export function TopNavigation({ tripData, onShare, onExportPDF, onBack }: TopNavigationProps) {
   const { t } = useTranslation();
@@ -47,22 +46,7 @@ export function TopNavigation({ tripData, onShare, onExportPDF, onBack }: TopNav
           <Download className="w-4 h-4 mr-2" />
           PDF
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="rounded-full">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onBack}>
-              {t('common.backToOverview')}
-            </DropdownMenuItem>
-            <DropdownMenuItem>{t('common.settings')}</DropdownMenuItem>
-            <DropdownMenuItem>{t('common.help')}</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <UserProfileButton />
       </div>
     </div>
   );

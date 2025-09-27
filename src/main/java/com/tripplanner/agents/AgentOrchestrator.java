@@ -78,11 +78,13 @@ public class AgentOrchestrator {
             BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(null, ChangeEngine.ApplyResult.class);
             enrichmentAgent.execute(itineraryId, enrichmentRequest);
             
-            // Get the final enriched itinerary
-            var finalItinerary = itineraryJsonService.getItinerary(itineraryId);
+            // Get the final enriched itinerary from user-specific storage
+            var finalItinerary = userDataService.getUserItinerary(userId, itineraryId);
             if (finalItinerary.isEmpty()) {
-                throw new RuntimeException("Failed to retrieve final itinerary");
+                throw new RuntimeException("Failed to retrieve final itinerary from user storage");
             }
+            
+            logger.info("Final enriched itinerary retrieved from user-specific storage for user: {}", userId);
             
             logger.info("=== NORMALIZED ITINERARY GENERATION COMPLETE ===");
             logger.info("Final itinerary has {} days", finalItinerary.get().getDays() != null ? finalItinerary.get().getDays().size() : 0);
@@ -280,8 +282,8 @@ public class AgentOrchestrator {
         
         // Set timing
         NodeTiming timing = new NodeTiming();
-        timing.setStartTime(java.time.Instant.parse(activity.startTime()));
-        timing.setEndTime(java.time.Instant.parse(activity.endTime()));
+        timing.setStartTime(parseTimeToLong(activity.startTime()));
+        timing.setEndTime(parseTimeToLong(activity.endTime()));
         timing.setDurationMin(parseDuration(activity.duration()));
         node.setTiming(timing);
         
@@ -321,8 +323,6 @@ public class AgentOrchestrator {
         
         // Set timing (meals don't have specific times in the DTO)
         NodeTiming timing = new NodeTiming();
-        timing.setStartTime(java.time.Instant.parse("2025-10-04T12:00:00Z")); // Default lunch time
-        timing.setEndTime(java.time.Instant.parse("2025-10-04T13:00:00Z"));
         timing.setDurationMin(60);
         node.setTiming(timing);
         
@@ -362,8 +362,6 @@ public class AgentOrchestrator {
         
         // Set timing (accommodation is typically overnight)
         NodeTiming timing = new NodeTiming();
-        timing.setStartTime(java.time.Instant.parse("2025-10-04T15:00:00Z")); // Check-in time
-        timing.setEndTime(java.time.Instant.parse("2025-10-05T11:00:00Z")); // Check-out time (next day)
         timing.setDurationMin(20 * 60); // 20 hours
         node.setTiming(timing);
         
@@ -412,6 +410,32 @@ public class AgentOrchestrator {
             return Integer.parseInt(duration.trim());
         } catch (NumberFormatException e) {
             return 0;
+        }
+    }
+    
+    private Long parseTimeToLong(String timeString) {
+        if (timeString == null || timeString.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // If it's already a number (milliseconds), parse it directly
+            if (timeString.matches("^\\d+$")) {
+                return Long.valueOf(timeString);
+            }
+            
+            // If it's an ISO string, convert to milliseconds
+            if (timeString.contains("T") || timeString.contains("Z")) {
+                return java.time.Instant.parse(timeString).toEpochMilli();
+            }
+            
+            // If it's a simple time like "14:00", return null for now
+            // In a real implementation, you'd need to combine with a date
+            return null;
+            
+        } catch (Exception e) {
+            logger.warn("Failed to parse time string: {}", timeString, e);
+            return null;
         }
     }
     

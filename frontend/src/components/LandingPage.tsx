@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { TripData } from '../types/TripData';
 import { apiClient } from '../services/apiClient';
+import { UserProfileButton } from './shared/UserProfileButton';
+import { GlobalNavigation } from './shared/GlobalNavigation';
 
 interface LandingPageProps {
   isAuthenticated: boolean;
@@ -54,10 +56,8 @@ export function LandingPage({
             <span className="text-xl font-semibold text-gray-900">travel planner.</span>
           </div>
           
-          <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">Product</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">Creators</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">Blog</a>
+          <nav className="hidden md:flex">
+            <GlobalNavigation variant="horizontal" showLabels={true} />
           </nav>
         </div>
         
@@ -79,6 +79,7 @@ export function LandingPage({
               <Button variant="outline" onClick={onViewTrips} className="rounded-full">
                 My Trips
               </Button>
+              <UserProfileButton />
             </>
           )}
         </div>

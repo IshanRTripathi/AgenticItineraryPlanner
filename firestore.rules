@@ -9,11 +9,16 @@ service cloud.firestore {
       // Itineraries subcollection
       match /itineraries/{itineraryId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // Chat subcollection
-      match /chat/{chatId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Chat messages subcollection under each itinerary
+        match /chats/{chatId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+        
+        // Revisions subcollection under each itinerary
+        match /revisions/{revisionId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
       }
     }
   }

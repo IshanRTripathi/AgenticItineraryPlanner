@@ -1,46 +1,59 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
 /**
  * Node timing information.
+ * Uses Long (milliseconds since epoch) for Firestore compatibility.
  */
 public class NodeTiming {
     
     @JsonProperty("startTime")
-    private Instant startTime;
+    private Long startTime; // milliseconds since epoch
     
     @JsonProperty("endTime")
-    private Instant endTime;
+    private Long endTime; // milliseconds since epoch
     
     @JsonProperty("durationMin")
     private Integer durationMin;
     
     public NodeTiming() {}
     
-    public NodeTiming(Instant startTime, Instant endTime, Integer durationMin) {
+    public NodeTiming(Long startTime, Long endTime, Integer durationMin) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.durationMin = durationMin;
     }
     
     // Getters and Setters
-    public Instant getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
     
-    public void setStartTime(Instant startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
     
-    public Instant getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
     
-    public void setEndTime(Instant endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+    
+    // Helper methods to get Instant objects
+    @JsonIgnore
+    public Instant getStartTimeAsInstant() {
+        return startTime != null ? Instant.ofEpochMilli(startTime) : null;
+    }
+    
+    @JsonIgnore
+    public Instant getEndTimeAsInstant() {
+        return endTime != null ? Instant.ofEpochMilli(endTime) : null;
     }
     
     public Integer getDurationMin() {

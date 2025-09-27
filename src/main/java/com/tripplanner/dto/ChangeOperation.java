@@ -1,5 +1,6 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 
@@ -19,10 +20,10 @@ public class ChangeOperation {
     private String id; // Node ID for move/delete operations
     
     @JsonProperty("startTime")
-    private Instant startTime; // For move operations
+    private Long startTime; // For move operations (milliseconds since epoch)
     
     @JsonProperty("endTime")
-    private Instant endTime; // For move operations
+    private Long endTime; // For move operations (milliseconds since epoch)
     
     @JsonProperty("after")
     private String after; // Node ID to insert after
@@ -37,11 +38,18 @@ public class ChangeOperation {
         this.id = id;
     }
     
-    public ChangeOperation(String op, String id, Instant startTime, Instant endTime) {
+    public ChangeOperation(String op, String id, Long startTime, Long endTime) {
         this.op = op;
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+    
+    public ChangeOperation(String op, String id, Instant startTime, Instant endTime) {
+        this.op = op;
+        this.id = id;
+        this.startTime = startTime != null ? startTime.toEpochMilli() : null;
+        this.endTime = endTime != null ? endTime.toEpochMilli() : null;
     }
     
     public ChangeOperation(String op, String after, NormalizedNode node) {
@@ -67,20 +75,31 @@ public class ChangeOperation {
         this.id = id;
     }
     
-    public Instant getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
     
-    public void setStartTime(Instant startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
     
-    public Instant getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
     
-    public void setEndTime(Instant endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+    
+    // Helper methods to get Instant objects
+    @JsonIgnore
+    public Instant getStartTimeAsInstant() {
+        return startTime != null ? Instant.ofEpochMilli(startTime) : null;
+    }
+    
+    @JsonIgnore
+    public Instant getEndTimeAsInstant() {
+        return endTime != null ? Instant.ofEpochMilli(endTime) : null;
     }
     
     public String getAfter() {

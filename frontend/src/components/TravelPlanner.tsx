@@ -327,8 +327,18 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               const lat = c?.location?.coordinates?.lat;
               const lng = c?.location?.coordinates?.lng;
               
-              // Validate coordinates
-              if (typeof lat === 'number' && typeof lng === 'number' && 
+              console.log(`[Maps] Processing component ${c.id}:`, {
+                name: c.name,
+                lat: lat,
+                lng: lng,
+                latType: typeof lat,
+                lngType: typeof lng,
+                hasValidCoords: lat !== null && lng !== null && lat !== undefined && lng !== undefined
+              });
+              
+              // Validate coordinates - must be valid numbers and not null/undefined
+              if (lat !== null && lng !== null && lat !== undefined && lng !== undefined &&
+                  typeof lat === 'number' && typeof lng === 'number' && 
                   !isNaN(lat) && !isNaN(lng) && 
                   lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
                 
@@ -344,8 +354,20 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                   rating: c.rating || 0,
                   googleMapsUri: c.googleMapsUri || '',
                 });
+                
+                console.log(`[Maps] Added marker for ${c.name} at (${lat}, ${lng})`);
               } else {
-                console.warn('[Maps] Invalid coordinates for component:', c);
+                console.warn('[Maps] Skipping component with invalid coordinates:', {
+                  id: c.id,
+                  name: c.name,
+                  lat: lat,
+                  lng: lng,
+                  reason: lat === null || lng === null ? 'null coordinates' : 
+                          lat === undefined || lng === undefined ? 'undefined coordinates' :
+                          typeof lat !== 'number' || typeof lng !== 'number' ? 'non-numeric coordinates' :
+                          isNaN(lat) || isNaN(lng) ? 'NaN coordinates' :
+                          'out of range coordinates'
+                });
               }
             } catch (error) {
               console.error('[Maps] Error processing component:', c, error);

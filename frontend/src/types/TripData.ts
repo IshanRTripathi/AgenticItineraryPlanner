@@ -58,8 +58,8 @@ export interface TripComponent {
     name: string;
     address: string;
     coordinates: {
-      lat: number;
-      lng: number;
+      lat: number | null;
+      lng: number | null;
     };
   };
   timing: {
