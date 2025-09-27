@@ -198,39 +198,39 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
 
             {/* Places Grid */}
             {(day.components || day.activities) && (day.components || day.activities).length > 0 ? (
-              <div className="grid gap-4">
+              <div className="grid gap-3 sm:gap-4">
                 {(day.components || day.activities).map((component: any, compIndex: number) => (
                   <Card key={compIndex} className="overflow-hidden p-0">
                     {/* Full Card Image with Gradient Overlay */}
-                    <div className="relative h-64 w-full">
+                    <div className="relative h-64 sm:h-56 md:h-64 w-full">
                       <img 
                         src={component.media?.images?.[0] || getPlaceholderImage(component.category || component.type, component.name)}
                         alt={component.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover brightness-75"
                         onError={(e) => {
                           e.currentTarget.src = getPlaceholderImage(component.category || component.type, component.name);
                         }}
                       />
                       
                       {/* Full Card Translucent Overlay */}
-                      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-black/50">
                         {/* Top Right - Rating */}
                         {(component.details?.rating || component.rating) && (
-                          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center space-x-1 shadow-lg z-20">
-                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                            <span className="text-sm font-semibold text-gray-800">{component.details?.rating || component.rating}</span>
+                          <div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 sm:px-3 sm:py-1.5 flex items-center space-x-1 shadow-lg z-20">
+                            <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 fill-current" />
+                            <span className="text-xs sm:text-sm font-semibold text-white">{component.details?.rating || component.rating}</span>
                           </div>
                         )}
                         
                         {/* Top Left - Category Badge */}
-                        <div className="absolute top-4 left-4 z-20">
-                          <div className="flex items-center space-x-2">
+                        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20">
+                          <div className="flex items-center space-x-1 sm:space-x-2">
                             {getTypeIcon(component.type || component.category)}
-                            <Badge variant="secondary" className="bg-white/95 text-gray-800 border-0 shadow-lg">
+                            <Badge variant="secondary" className="bg-black/80 text-white border-0 shadow-lg text-xs sm:text-sm px-2 py-1">
                               {t(`mockData.categories.${component.type || component.category || 'activity'}`, component.type || component.category || 'activity')}
                             </Badge>
                             {(component.booking?.required || component.bookingRequired) && (
-                              <Badge variant="default" className="bg-orange-500 text-white border-0 shadow-lg">
+                              <Badge variant="default" className="bg-orange-500 text-white border-0 shadow-lg text-xs px-2 py-1">
                                 {t('mockData.booking.required')}
                               </Badge>
                             )}
@@ -238,55 +238,50 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
                         </div>
 
                         {/* Content positioned over the translucent overlay with proper spacing */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 z-10" style={{paddingTop: '60px'}}>
-                          <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg line-clamp-2">
+                        <div className="absolute bottom-0 left-0 right-0 p-3 pb-4 sm:p-4 sm:pb-6 z-10" style={{paddingTop: '50px'}}>
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg line-clamp-2 leading-tight">
                             {component.name || t('dayByDay.unnamedActivity')}
                           </h3>
-                          <p className="text-white/90 text-sm mb-3 line-clamp-2 drop-shadow-md">
-                            {component.description || t('dayByDay.noDescription')}
-                          </p>
                           
-                          {/* Key Info Row */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              {/* Cost */}
-                              <div className="flex items-center space-x-2 text-white">
-                                <DollarSign className="w-4 h-4" />
-                                <div>
-                                  <p className="font-semibold text-sm">
-                                    {component.cost?.currency || component.currency || 'EUR'} {typeof (component.cost?.pricePerPerson || component.estimatedCost) === 'object' ? '0' : (component.cost?.pricePerPerson || component.estimatedCost || '0')}
-                                  </p>
-                                  <p className="text-white/70 text-xs">{t('dayByDay.perPerson')}</p>
-                                </div>
+                          {/* Key Info Row - Full Width Horizontal */}
+                          <div className="flex items-center justify-between gap-2 sm:gap-4">
+                            {/* Cost */}
+                            <div className="flex items-center space-x-1 sm:space-x-2 text-white flex-1 min-w-0">
+                              <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-xs sm:text-sm text-white truncate">
+                                  {component.cost?.currency || component.currency || 'EUR'} {typeof (component.cost?.pricePerPerson || component.estimatedCost) === 'object' ? '0' : (component.cost?.pricePerPerson || component.estimatedCost || '0')}
+                                </p>
+                                <p className="text-white/70 text-xs">{t('dayByDay.perPerson')}</p>
                               </div>
+                            </div>
 
-                              {/* Duration */}
-                              <div className="flex items-center space-x-2 text-white">
-                                <Clock className="w-4 h-4" />
-                                <div>
-                                  <p className="font-semibold text-sm">{typeof (component.duration || component.estimatedDuration) === 'object' ? '2h' : (component.duration || component.estimatedDuration || '2h')}</p>
-                                  <p className="text-white/70 text-xs">{t('dayByDay.duration')}</p>
-                                </div>
+                            {/* Duration */}
+                            <div className="flex items-center space-x-1 sm:space-x-2 text-white flex-1 min-w-0">
+                              <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-xs sm:text-sm text-white truncate">{typeof (component.duration || component.estimatedDuration) === 'object' ? '2h' : (component.duration || component.estimatedDuration || '2h')}</p>
+                                <p className="text-white/70 text-xs">{t('dayByDay.duration')}</p>
                               </div>
                             </div>
                             
                             {/* Location */}
-                            <div className="flex items-center space-x-2 text-white">
-                              <MapPin className="w-4 h-4" />
-                              <div className="text-right">
-                                <p className="font-semibold text-sm">{typeof component.location?.name === 'object' ? t('dayByDay.unknownLocation') : (component.location?.name || t('dayByDay.unknownLocation'))}</p>
-                                <p className="text-white/70 text-xs truncate max-w-32">{typeof component.location?.address === 'object' ? '' : (component.location?.address || '')}</p>
+                            <div className="flex items-center space-x-1 sm:space-x-2 text-white flex-1 min-w-0">
+                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-xs sm:text-sm text-white truncate">{typeof component.location?.name === 'object' ? t('dayByDay.unknownLocation') : (component.location?.name || t('dayByDay.unknownLocation'))}</p>
+                                <p className="text-white/70 text-xs truncate">{typeof component.location?.address === 'object' ? '' : (component.location?.address || '')}</p>
                               </div>
                             </div>
                           </div>
 
                           {/* Opening Hours */}
                           {(component.details?.openingHours || component.openingHours) && (
-                            <div className="mt-4 pt-4 border-t border-white/20">
-                              <div className="flex items-center space-x-2 text-white">
-                                <Clock className="w-4 h-4" />
+                            <div className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-white/20">
+                              <div className="flex items-center space-x-1 sm:space-x-2 text-white">
+                                <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                                 <div>
-                                  <p className="font-semibold text-sm">Opening Hours</p>
+                                    <p className="font-semibold text-xs sm:text-sm text-white">Opening Hours</p>
                                   <p className="text-white/70 text-xs">
                                     {(() => {
                                       const hours = component.details?.openingHours || component.openingHours;
@@ -306,17 +301,17 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false }: Vie
                     
                     {/* Additional Details Section - Only show if there's contact info */}
                     {(component.contact?.phone || component.contact?.website) && (
-                      <div className="p-6 space-y-4">
+                      <div className="p-3 sm:p-6 space-y-2 sm:space-y-4">
                         {/* Contact Information */}
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex flex-wrap gap-2 sm:gap-3">
                           {component.contact?.phone && (
-                            <Button variant="outline" size="sm" className="text-xs">
+                            <Button variant="outline" size="sm" className="text-xs px-2 py-1 sm:px-3 sm:py-2">
                               <Phone className="w-3 h-3 mr-1" />
                               {typeof component.contact.phone === 'object' ? 'Phone' : component.contact.phone}
                             </Button>
                           )}
                           {component.contact?.website && (
-                            <Button variant="outline" size="sm" className="text-xs">
+                            <Button variant="outline" size="sm" className="text-xs px-2 py-1 sm:px-3 sm:py-2">
                               <Globe className="w-3 h-3 mr-1" />
                               {t('dayByDay.website')}
                             </Button>
