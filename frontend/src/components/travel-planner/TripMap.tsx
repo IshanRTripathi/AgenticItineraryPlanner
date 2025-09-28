@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { useGoogleMaps } from '../../hooks/useGoogleMaps'
 import type { TripMapProps } from '../../types/MapTypes'
 import { createRoot, Root } from 'react-dom/client'
+import { useMapContext } from '../../contexts/MapContext'
 import { PlaceInfoCard } from './cards/PlaceInfoCard'
 
 export function TripMap({
@@ -16,6 +17,19 @@ export function TripMap({
   className,
 }: TripMapProps) {
   const { isLoading, error, api } = useGoogleMaps()
+  const { 
+    viewMode, 
+    center, 
+    zoom, 
+    highlightedMarkers, 
+    selectedNodeId,
+    setCenter,
+    setZoom,
+    setSelectedNode,
+    addHighlightedMarker,
+    clearHighlightedMarkers
+  } = useMapContext()
+  
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapInstanceRef = useRef<any | null>(null)
   const pendingClickRef = useRef<{ lat: number; lng: number; name?: string; address?: string } | null>(null)
@@ -26,9 +40,14 @@ export function TripMap({
   // Initialize map
   useEffect(() => {
     if (!api || !mapRef.current || mapInstanceRef.current) return
+    
+    // Use context center and zoom if available, otherwise use defaults
+    const initialCenter = center || { lat: 0, lng: 0 }
+    const initialZoom = center ? zoom : 2
+    
     const map = new api.maps.Map(mapRef.current, {
-      center: { lat: 0, lng: 0 },
-      zoom: 2,
+      center: initialCenter,
+      zoom: initialZoom,
       mapTypeId: api.maps.MapTypeId.ROADMAP,
       gestureHandling: 'greedy',
       fullscreenControl: true,
@@ -183,6 +202,25 @@ export function TripMap({
     onMapReady?.(map)
   }, [api, onMapReady])
 
+  // Update map center and zoom when context changes
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!api || !map || !center) return
+
+    console.log('=== MAP CENTER UPDATE ===')
+    console.log('New Center:', center)
+    console.log('New Zoom:', zoom)
+    console.log('View Mode:', viewMode)
+
+    try {
+      map.setCenter(center)
+      map.setZoom(zoom)
+      console.log('Map center and zoom updated successfully')
+    } catch (error) {
+      console.error('Failed to update map center/zoom:', error)
+    }
+  }, [api, center, zoom, viewMode])
+
   // Fit map to bounds/centroid/nodes when available
   useEffect(() => {
     const map = mapInstanceRef.current
@@ -231,6 +269,94 @@ export function TripMap({
       // Ignore fit errors
     }
   }, [api, mapBounds, countryCentroid, JSON.stringify(nodes)])
+
+  // Render markers with highlighting
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!api || !map || !nodes || nodes.length === 0) return
+
+    console.log('=== RENDERING MAP MARKERS ===');
+    console.log('Nodes:', nodes);
+    console.log('Highlighted Markers:', highlightedMarkers);
+    console.log('Selected Node ID:', selectedNodeId);
+
+    // Clear existing markers
+    const existingMarkers = map.markers || [];
+    existingMarkers.forEach((marker: any) => marker.setMap(null));
+    map.markers = [];
+
+    // Create new markers
+    nodes.forEach((node) => {
+      if (!node.position || typeof node.position.lat !== 'number' || typeof node.position.lng !== 'number') {
+        return;
+      }
+
+      const isHighlighted = highlightedMarkers.includes(node.id);
+      const isSelected = selectedNodeId === node.id;
+
+      console.log(`Creating marker for ${node.id}:`, {
+        position: node.position,
+        isHighlighted,
+        isSelected,
+        title: node.title
+      });
+
+      // Create marker with different styles based on state
+      const marker = new api.maps.Marker({
+        position: node.position,
+        map: map,
+        title: node.title,
+        icon: {
+          url: isHighlighted || isSelected 
+            ? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="12" fill="${isSelected ? '#ef4444' : '#3b82f6'}" stroke="white" stroke-width="3"/>
+                  <circle cx="16" cy="16" r="6" fill="white"/>
+                </svg>
+              `)
+            : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="8" fill="#6b7280" stroke="white" stroke-width="2"/>
+                </svg>
+              `),
+          scaledSize: new api.maps.Size(isHighlighted || isSelected ? 32 : 24, isHighlighted || isSelected ? 32 : 24),
+          anchor: new api.maps.Point(16, 16),
+        },
+        animation: isHighlighted || isSelected ? api.maps.Animation.BOUNCE : null,
+      });
+
+      // Add click listener
+      marker.addListener('click', () => {
+        console.log('=== MAP MARKER CLICK ===');
+        console.log('Marker clicked:', node.id);
+        console.log('Node:', node);
+        console.log('View Mode:', viewMode);
+        
+        // Update map context
+        setCenter(node.position);
+        setZoom(15);
+        
+        // Update selection for bidirectional sync
+        setSelectedNode(node.id);
+        clearHighlightedMarkers();
+        addHighlightedMarker(node.id);
+        
+        // Notify parent component
+        onPlaceSelected?.({
+          name: node.title,
+          address: node.title,
+          lat: node.position.lat,
+          lng: node.position.lng,
+        });
+      });
+
+      // Store marker reference
+      map.markers = map.markers || [];
+      map.markers.push(marker);
+    });
+
+    console.log('Markers rendered:', map.markers.length);
+  }, [api, nodes, highlightedMarkers, selectedNodeId, setCenter, setZoom, setSelectedNode, addHighlightedMarker, clearHighlightedMarkers, onPlaceSelected]);
 
   // Simple overlay UI for adding place to a day
   const showOverlayPrompt = (place: { lat: number; lng: number; name?: string; address?: string }) => {

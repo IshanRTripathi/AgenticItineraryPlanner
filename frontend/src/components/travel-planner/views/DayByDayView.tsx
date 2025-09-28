@@ -6,6 +6,8 @@ import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
 import { ViewComponentProps, ErrorBoundary } from '../shared/types';
 import { AutoRefreshEmptyState } from '../../shared/AutoRefreshEmptyState';
+import { useMapContext } from '../../../contexts/MapContext';
+import { geocodingService, geocodingUtils } from '../../../services/geocodingService';
 import { 
   Clock, 
   MapPin, 
@@ -142,6 +144,9 @@ const getPlaceholderImage = (category: string, name: string) => {
 export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRefresh }: ViewComponentProps) {
   const { t } = useTranslation();
   const [expandedDay, setExpandedDay] = useState<number | null>(1); // First day (day 1) expanded by default
+  
+  // Map context for centering map on hovered cards
+  const { centerOnDayComponent, setHoveredCard } = useMapContext();
 
   const handleDayToggle = (dayNumber: number, dayData: any) => {
     if (expandedDay === dayNumber) {
@@ -150,6 +155,36 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       setExpandedDay(dayNumber); // Expand the selected day
       onDaySelect?.(dayNumber, dayData); // Notify parent component
     }
+  };
+
+  const handleCardHover = async (component: any, dayNumber: number) => {
+    console.log('=== DAY BY DAY CARD HOVER ===');
+    console.log('Component:', component);
+    console.log('Day Number:', dayNumber);
+    
+    try {
+      // Try to get coordinates for the component
+      const coordinates = await geocodingUtils.getCoordinatesForComponent(component);
+      
+      if (coordinates) {
+        console.log('Found coordinates for component:', coordinates);
+        centerOnDayComponent(dayNumber, component.id, coordinates);
+        setHoveredCard({ dayNumber, componentId: component.id });
+      } else {
+        console.log('No coordinates found for component, skipping map center');
+        // Still set hovered card for visual feedback
+        setHoveredCard({ dayNumber, componentId: component.id });
+      }
+    } catch (error) {
+      console.error('Error handling card hover:', error);
+      // Still set hovered card for visual feedback
+      setHoveredCard({ dayNumber, componentId: component.id });
+    }
+  };
+
+  const handleCardLeave = () => {
+    console.log('=== DAY BY DAY CARD LEAVE ===');
+    setHoveredCard(null);
   };
 
   return (
@@ -201,7 +236,12 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
             {(day.components || day.activities) && (day.components || day.activities).length > 0 ? (
               <div className="grid gap-3 sm:gap-4">
                 {(day.components || day.activities).map((component: any, compIndex: number) => (
-                  <Card key={compIndex} className="overflow-hidden p-0">
+                  <Card 
+                    key={compIndex} 
+                    className="overflow-hidden p-0 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                    onMouseEnter={() => handleCardHover(component, dayNumber)}
+                    onMouseLeave={handleCardLeave}
+                  >
                     {/* Full Card Image with Gradient Overlay */}
                     <div className="relative h-64 sm:h-56 md:h-64 w-full">
                       <img 

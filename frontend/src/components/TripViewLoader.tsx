@@ -39,14 +39,14 @@ export function TripViewLoader({
           'Authorization': `Bearer ${await getAuthToken()}`
         },
         body: JSON.stringify({
-          destination: freshTripData?.endLocation?.name || freshTripData?.destination || 'Unknown',
-          startLocation: freshTripData?.startLocation?.name || 'Unknown',
-          startDate: freshTripData?.dates?.start || new Date().toISOString().split('T')[0],
-          endDate: freshTripData?.dates?.end || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          party: freshTripData?.travelers || [{ name: 'Traveler', age: 30 }],
-          budgetTier: freshTripData?.budget?.tier || 'mid',
-          interests: freshTripData?.preferences?.interests || [],
-          constraints: freshTripData?.preferences?.constraints || [],
+          destination: (freshTripData as TripData)?.endLocation?.name || (freshTripData as TripData)?.destination || 'Unknown',
+          startLocation: (freshTripData as TripData)?.startLocation?.name || 'Unknown',
+          startDate: (freshTripData as TripData)?.dates?.start || new Date().toISOString().split('T')[0],
+          endDate: (freshTripData as TripData)?.dates?.end || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          party: (freshTripData as TripData)?.travelers || [{ name: 'Traveler', age: 30 }],
+          budgetTier: 'mid', // Default budget tier
+          interests: [], // Default empty interests array
+          constraints: [], // Default empty constraints array
           language: 'en'
         })
       });
@@ -96,7 +96,7 @@ export function TripViewLoader({
   }
 
   // Use fresh data from API
-  const currentTripData = freshTripData;
+  const currentTripData = freshTripData as TripData;
 
   // Debug logging
   console.log('=== TRIP VIEW LOADER DEBUG ===');
@@ -116,16 +116,16 @@ export function TripViewLoader({
   if (error) {
     console.error('=== TRIP VIEW LOADER ERROR DETAILS ===');
     console.error('Error object:', error);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Error name:', error.name);
+    console.error('Error message:', (error as Error).message);
+    console.error('Error stack:', (error as Error).stack);
+    console.error('Error name:', (error as Error).name);
     console.error('=====================================');
   }
 
   // Check if we have valid itinerary data
   if (!currentTripData?.itinerary?.days || currentTripData.itinerary.days.length === 0) {
     const tripStatus = currentTripData?.status || 'unknown';
-    const isGenerating = tripStatus === 'generating' || tripStatus === 'pending';
+    const isGenerating = tripStatus === 'planning' || tripStatus === 'draft';
     
     // If we have a trip but no days, and it's not generating, it might be a failed generation
     const isFailedGeneration = !isGenerating && currentTripData && (!currentTripData.itinerary?.days || currentTripData.itinerary.days.length === 0);

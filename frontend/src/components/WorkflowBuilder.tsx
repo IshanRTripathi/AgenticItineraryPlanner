@@ -13,6 +13,7 @@ import ReactFlow, {
   useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { useMapContext } from '../contexts/MapContext';
 import { 
   validateWorkflowNode, 
   createNewNode,
@@ -53,6 +54,7 @@ import {
   Info,
 } from 'lucide-react';
 import { WorkflowNode } from './workflow/WorkflowNode';
+import { NodeInspectorModal } from './workflow/NodeInspectorModal';
 import { TripData } from '../types/TripData';
 
 // Calculate optimal zoom based on number of nodes
@@ -589,6 +591,17 @@ const createSeedData = (): WorkflowDay[] => [
 ];
 
 const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSave, onCancel, embedded = false }) => {
+  // Map context for highlighting associated nodes
+  const { 
+    viewMode, 
+    selectedNodeId, 
+    highlightedMarkers, 
+    addHighlightedMarker, 
+    removeHighlightedMarker, 
+    clearHighlightedMarkers,
+    setSelectedNode: setMapSelectedNode
+  } = useMapContext();
+  
   const [workflowDays, setWorkflowDays] = useState<WorkflowDay[]>(() => {
     const savedPositions = (() => {
       try {
@@ -605,6 +618,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   });
   const [activeDay, setActiveDay] = useState(0);
   const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
+  const [isNodeInspectorOpen, setIsNodeInspectorOpen] = useState(false);
   const [undoStack, setUndoStack] = useState<WorkflowDay[][]>([]);
   const [redoStack, setRedoStack] = useState<WorkflowDay[][]>([]);
   const [savedPositions, setSavedPositions] = useState<Record<string, { x: number; y: number }>>(() => {
@@ -754,6 +768,24 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     }
   }, [nodes, edges]);
 
+  // Sync with map context when view mode changes to workflow
+  useEffect(() => {
+    if (viewMode === 'workflow' && selectedNodeId) {
+      console.log('=== WORKFLOW VIEW MODE SYNC ===');
+      console.log('Selected Node ID from map:', selectedNodeId);
+      
+      // Find the node in the current day's nodes
+      const node = currentDay?.nodes.find(n => n.id === selectedNodeId);
+      if (node) {
+        console.log('Found node in workflow, selecting it:', node);
+        setSelectedNode(node);
+      } else {
+        console.log('Node not found in current day, clearing selection');
+        setSelectedNode(null);
+      }
+    }
+  }, [viewMode, selectedNodeId, currentDay]);
+
   const validateNodes = useCallback((dayNodes: Node<WorkflowNodeData>[]) => {
     return dayNodes.map(node => {
       const validation = validateWorkflowNode(node, dayNodes);
@@ -769,12 +801,31 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   }, [setEdges]);
 
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node<WorkflowNodeData>) => {
+    console.log('=== WORKFLOW NODE CLICK ===');
+    console.log('Node:', node);
+    console.log('Node ID:', node.id);
+    
     setSelectedNode(node);
-  }, []);
+    setIsNodeInspectorOpen(true);
+    
+    // Sync with map - highlight the corresponding marker
+    setMapSelectedNode(node.id);
+    addHighlightedMarker(node.id);
+    
+    console.log('Node selected and highlighted on map');
+  }, [setMapSelectedNode, addHighlightedMarker]);
 
   const onPaneClick = useCallback(() => {
+    console.log('=== WORKFLOW PANE CLICK ===');
     setSelectedNode(null);
-  }, []);
+    setIsNodeInspectorOpen(false);
+    
+    // Clear map selection
+    setMapSelectedNode(null);
+    clearHighlightedMarkers();
+    
+    console.log('Node deselected and map highlighting cleared');
+  }, [setMapSelectedNode, clearHighlightedMarkers]);
 
   const addNewNode = useCallback((nodeType: WorkflowNodeData['type']) => {
     const newNode = createNewNode(nodeType, activeDay, {
@@ -790,6 +841,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
     if (selectedNode?.id === nodeId) {
       setSelectedNode(null);
+      setIsNodeInspectorOpen(false);
     }
   }, [setNodes, setEdges, selectedNode]);
 
@@ -883,7 +935,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
   return (
     <div className={embedded ? "h-full flex flex-col bg-gray-50" : "h-screen flex flex-col bg-gray-50"}>
 
-      <div className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex-1 flex flex-col">
         {/* Main Canvas Area */}
         <div className="flex-1 flex flex-col">
 
@@ -951,9 +1003,9 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
           </div>
 
           {/* Canvas Container */}
-          <div className="flex-1 flex relative">
+          <div className="flex-1 relative">
             {/* React Flow Canvas */}
-            <div className="flex-1" ref={reactFlowWrapper}>
+            <div className="w-full h-full" ref={reactFlowWrapper}>
               <ReactFlow
                 nodes={validateNodes(nodes)}
                 edges={edges}
@@ -1011,137 +1063,14 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
           </div>
         </div>
 
-        {/* Side Panel - Node Inspector */}
-        {selectedNode && (
-          <div className="w-full lg:w-80 bg-white border-l lg:border-l border-t lg:border-t-0">
-            <div className="p-4 border-b">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">Node Inspector</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteNode(selectedNode.id)}
-                  className="min-h-[44px]"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
-                <div>
-                  <Label htmlFor="node-title">Title</Label>
-                  <Input
-                    id="node-title"
-                    value={selectedNode.data.title}
-                    onChange={(e) => updateSelectedNode({ title: e.target.value })}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="node-type">Category</Label>
-                  <Select
-                    value={selectedNode.data.type}
-                    onValueChange={(value: WorkflowNodeData['type']) => updateSelectedNode({ type: value })}
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Attraction">Attraction</SelectItem>
-                      <SelectItem value="Meal">Meal</SelectItem>
-                      <SelectItem value="Transit">Transit</SelectItem>
-                      <SelectItem value="Hotel">Hotel</SelectItem>
-                      <SelectItem value="FreeTime">Free Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label htmlFor="node-start">Start Time</Label>
-                    <Input
-                      id="node-start"
-                      type="time"
-                      value={selectedNode.data.start}
-                      onChange={(e) => updateSelectedNode({ start: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="node-duration">Duration (min)</Label>
-                    <Input
-                      id="node-duration"
-                      type="number"
-                      value={selectedNode.data.durationMin}
-                      onChange={(e) => updateSelectedNode({ durationMin: parseInt(e.target.value) || 0 })}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="node-cost">Cost (₹)</Label>
-                  <Input
-                    id="node-cost"
-                    type="number"
-                    value={selectedNode.data.costINR}
-                    onChange={(e) => updateSelectedNode({ costINR: parseInt(e.target.value) || 0 })}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="node-tags">Tags</Label>
-                  <Input
-                    id="node-tags"
-                    value={selectedNode.data.tags.join(', ')}
-                    onChange={(e) => updateSelectedNode({ tags: e.target.value.split(', ').filter(Boolean) })}
-                    placeholder="veg, family, heritage"
-                    className="mt-1"
-                  />
-                </div>
-
-                <Separator />
-
-                <div>
-                  <h4 className="font-medium mb-2">Read-only Meta</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Rating:</span>
-                      <span>{selectedNode.data.meta.rating}/5</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Hours:</span>
-                      <span>{selectedNode.data.meta.open} - {selectedNode.data.meta.close}</span>
-                    </div>
-                    <div className="text-gray-600">
-                      <span>Address:</span>
-                      <p className="mt-1 text-gray-900">{selectedNode.data.meta.address}</p>
-                    </div>
-                    {selectedNode.data.meta.distanceKm && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Distance:</span>
-                        <span>{selectedNode.data.meta.distanceKm}km</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {selectedNode.data.validation && selectedNode.data.validation.status !== 'valid' && (
-                  <Alert className={`${selectedNode.data.validation.status === 'error' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      {selectedNode.data.validation.message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-        )}
+        {/* Node Inspector Modal */}
+        <NodeInspectorModal
+          isOpen={isNodeInspectorOpen}
+          onClose={() => setIsNodeInspectorOpen(false)}
+          selectedNode={selectedNode}
+          onUpdateNode={updateSelectedNode}
+          onDeleteNode={deleteNode}
+        />
       </div>
     </div>
   );

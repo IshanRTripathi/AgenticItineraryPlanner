@@ -15,6 +15,7 @@ import { useItinerary } from './state/query/hooks';
 import { apiClient } from './services/apiClient';
 import { Routes, Route, useNavigate, useParams, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { MapProvider } from './contexts/MapContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { GoogleSignIn } from './components/GoogleSignIn';
 import { LoginPage } from './components/LoginPage';
@@ -264,7 +265,7 @@ function ItineraryRouteLoader() {
         const r = await refetch();
         if (r.data) {
           // Use the response data directly
-          const data: TripData = r.data;
+          const data: TripData = r.data as TripData;
           setCurrentTrip(data);
           navigate('/planner', { replace: true });
         } else {
@@ -291,14 +292,20 @@ function ItineraryChatRouteLoader() {
 }
 
 export default function App() {
+  const errorHandler = (error: Error, errorInfo: React.ErrorInfo) => {
+    console.error('Global error:', error, errorInfo);
+  };
+
   return (
-    <GlobalErrorBoundary>
+    <GlobalErrorBoundary onError={errorHandler}>
       <AuthProvider>
-        <KeyboardShortcuts>
-          <div className="size-full min-h-screen bg-background">
-            <RoutedApp />
-          </div>
-        </KeyboardShortcuts>
+        <MapProvider>
+          <KeyboardShortcuts>
+            <div className="size-full min-h-screen bg-background">
+              <RoutedApp />
+            </div>
+          </KeyboardShortcuts>
+        </MapProvider>
       </AuthProvider>
     </GlobalErrorBoundary>
   );

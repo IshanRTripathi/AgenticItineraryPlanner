@@ -14,6 +14,7 @@ import { AutoRefreshEmptyState } from './shared/AutoRefreshEmptyState';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { MobileLayout } from './travel-planner/mobile/MobileLayout';
+import { useMapContext, useMapViewMode, useMapSelection } from '../contexts/MapContext';
 
 // Import extracted components
 import { NavigationSidebar } from './travel-planner/layout/NavigationSidebar';
@@ -64,6 +65,21 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // Device detection
   const { isMobile, isTablet } = useDeviceDetection();
   
+  // Map context
+  const { 
+    viewMode, 
+    setViewMode, 
+    center, 
+    setCenter, 
+    centerOnFirstDestination,
+    centerOnDayComponent,
+    highlightedMarkers,
+    clearHighlightedMarkers
+  } = useMapContext();
+  
+  const { switchToDestinations, switchToDayByDay, switchToWorkflow } = useMapViewMode();
+  const { selectNode, clearSelection } = useMapSelection();
+  
   // Main state
   const [activeView, setActiveView] = useState<TravelPlannerView>('plan');
   const [activeTab, setActiveTab] = useState<PlanTab>('destinations');
@@ -88,7 +104,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   const queryClient = useQueryClient();
   
   // Use fresh data if available, fallback to props
-  const currentTripData = freshTripData || tripData;
+  const currentTripData = (freshTripData as TripData) || tripData;
 
   // Log data fetching status
   console.log('===  TRAVEL PLANNER DATA FETCH ===');
@@ -143,6 +159,58 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     }
   }, [isLoading, error, currentTripData.itinerary?.days?.length, tripData.id]);
 
+  // Map view mode switching based on active tab and workflow state
+  useEffect(() => {
+    console.log('=== MAP VIEW MODE SWITCHING ===');
+    console.log('Active Tab:', activeTab);
+    console.log('Show Workflow Builder:', showWorkflowBuilder);
+    console.log('Show Chat Interface:', showChatInterface);
+    
+    if (showWorkflowBuilder) {
+      console.log('Switching to workflow view mode');
+      switchToWorkflow();
+    } else if (activeTab === 'day-by-day') {
+      console.log('Switching to day-by-day view mode');
+      switchToDayByDay();
+    } else {
+      console.log('Switching to destinations view mode');
+      switchToDestinations();
+    }
+  }, [activeTab, showWorkflowBuilder, showChatInterface, switchToWorkflow, switchToDayByDay, switchToDestinations]);
+
+  // Handle map center based on view mode
+  useEffect(() => {
+    console.log('=== MAP CENTER HANDLING ===');
+    console.log('View Mode:', viewMode);
+    console.log('Destinations:', destinations);
+    console.log('Current Trip Data:', currentTripData);
+    
+    if (viewMode === 'destinations' && destinations.length > 0) {
+      console.log('Centering map on first destination');
+      centerOnFirstDestination(destinations);
+    } else if (viewMode === 'day-by-day' && currentTripData.itinerary?.days?.length > 0) {
+      console.log('Centering map on first day first component');
+      const firstDay = currentTripData.itinerary.days[0];
+      const firstComponent = firstDay.components?.[0];
+      
+      if (firstComponent?.location?.coordinates) {
+        const coordinates = {
+          lat: firstComponent.location.coordinates.lat,
+          lng: firstComponent.location.coordinates.lng,
+        };
+        centerOnDayComponent(1, firstComponent.id, coordinates);
+      } else if (firstComponent?.location?.address) {
+        // Try to geocode the address
+        import('../services/geocodingService').then(({ geocodingService }) => {
+          geocodingService.geocodeAddress(firstComponent.location.address).then((result) => {
+            if (result?.coordinates) {
+              centerOnDayComponent(1, firstComponent.id, result.coordinates);
+            }
+          });
+        });
+      }
+    }
+  }, [viewMode, destinations, currentTripData, centerOnFirstDestination, centerOnDayComponent]);
 
   // Update agent statuses when fresh data arrives
   useEffect(() => {
@@ -247,7 +315,11 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           // Fetch the completed itinerary from ItineraryJsonService
           try {
             const completedItinerary = await apiClient.getItinerary(currentTripData.id);
-            setCurrentTrip(completedItinerary);
+            // Update the trip data via query client
+            queryClient.setQueryData(
+              queryKeys.itinerary(currentTripData.id),
+              completedItinerary
+            );
           } catch (error) {
             console.error('Failed to fetch completed itinerary:', error);
             refetch(); // Fallback to refetch
