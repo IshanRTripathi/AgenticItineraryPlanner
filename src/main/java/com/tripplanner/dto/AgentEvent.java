@@ -74,7 +74,7 @@ public record AgentEvent(
     public enum AgentStatus {
         queued,
         running,
-        succeeded,
+        completed,
         failed
     }
 }

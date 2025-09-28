@@ -52,7 +52,7 @@ public abstract class BaseAgent {
             T result = executeInternal(itineraryId, request);
             
             // Emit success event
-            emitEvent(itineraryId, AgentEvent.AgentStatus.succeeded, 100, "Agent completed successfully", null);
+            emitEvent(itineraryId, AgentEvent.AgentStatus.completed, 100, "Agent completed successfully", null);
             
             logger.info("=== AGENT EXECUTION COMPLETED ===");
             logger.info("Agent Kind: {}", agentKind);

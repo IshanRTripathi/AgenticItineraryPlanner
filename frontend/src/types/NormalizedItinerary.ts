@@ -271,6 +271,7 @@ export interface MapBounds {
 // Legacy types for backward compatibility
 export interface CreateItineraryRequest {
   destination: string;
+  startLocation: string;
   startDate: string;
   endDate: string;
   party: {

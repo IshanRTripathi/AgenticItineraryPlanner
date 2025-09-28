@@ -1,6 +1,7 @@
 package com.tripplanner.agents;
 
 import com.tripplanner.dto.*;
+import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.UserDataService;
@@ -28,15 +29,18 @@ public class AgentOrchestrator {
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
     private final UserDataService userDataService;
+    private final AgentEventBus agentEventBus;
     
     public AgentOrchestrator(PlannerAgent plannerAgent, EnrichmentAgent enrichmentAgent,
                            ItineraryJsonService itineraryJsonService,
-                           ChangeEngine changeEngine, UserDataService userDataService) {
+                           ChangeEngine changeEngine, UserDataService userDataService,
+                           AgentEventBus agentEventBus) {
         this.plannerAgent = plannerAgent;
         this.enrichmentAgent = enrichmentAgent;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
         this.userDataService = userDataService;
+        this.agentEventBus = agentEventBus;
     }
     
     // Old generateItinerary method removed - use generateNormalizedItinerary instead
@@ -58,8 +62,12 @@ public class AgentOrchestrator {
             logger.info("Step 1: Creating initial itinerary structure");
             NormalizedItinerary initialItinerary = createInitialNormalizedItinerary(itineraryId, request, userId);
             
-            // Save initial itinerary to user-specific storage
-            userDataService.saveUserItinerary(userId, initialItinerary);
+            // Save initial itinerary to ItineraryJsonService (single source of truth)
+            itineraryJsonService.createItinerary(initialItinerary);
+            
+            // Save trip metadata to user-specific storage
+            TripMetadata tripMetadata = new TripMetadata(request, initialItinerary);
+            userDataService.saveUserTripMetadata(userId, tripMetadata);
             
             // Add a small delay to allow frontend to establish SSE connection
             logger.info("Waiting 3 seconds for frontend to establish SSE connection...");
@@ -97,13 +105,13 @@ public class AgentOrchestrator {
                 logger.warn("Continuing with itinerary despite EnrichmentAgent failure");
             }
             
-            // Get the final enriched itinerary from user-specific storage
-            var finalItinerary = userDataService.getUserItinerary(userId, itineraryId);
+            // Get the final enriched itinerary from ItineraryJsonService (single source of truth)
+            var finalItinerary = itineraryJsonService.getItinerary(itineraryId);
             if (finalItinerary.isEmpty()) {
-                throw new RuntimeException("Failed to retrieve final itinerary from user storage");
+                throw new RuntimeException("Failed to retrieve final itinerary from ItineraryJsonService");
             }
             
-            logger.info("Final enriched itinerary retrieved from user-specific storage for user: {}", userId);
+            logger.info("Final enriched itinerary retrieved from ItineraryJsonService for user: {}", userId);
             
             logger.info("=== NORMALIZED ITINERARY GENERATION COMPLETE ===");
             logger.info("Final itinerary has {} days", finalItinerary.get().getDays() != null ? finalItinerary.get().getDays().size() : 0);
@@ -120,6 +128,9 @@ public class AgentOrchestrator {
             } catch (Exception e) {
                 logger.warn("Failed to update itinerary status for ID: {}, but generation completed successfully", itineraryId, e);
             }
+            
+            // Send completion event to frontend
+            agentEventBus.sendCompletion(itineraryId);
             
             return CompletableFuture.completedFuture(finalItinerary.get());
             

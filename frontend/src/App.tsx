@@ -1,7 +1,7 @@
 import React from 'react';
 import { LandingPage } from './components/LandingPage';
 import { SimplifiedTripWizard } from './components/trip-wizard/SimplifiedTripWizard';
-import { AgentProgressModal } from './components/agents/AgentProgressModal';
+import { SimplifiedAgentProgress } from './components/agents/SimplifiedAgentProgress';
 import { TravelPlanner } from './components/TravelPlanner';
 import { CostAndCart } from './components/booking/CostAndCart';
 import { Checkout } from './components/booking/Checkout';
@@ -12,6 +12,7 @@ import { ItineraryWithChat } from './components/ItineraryWithChat';
 import { TripData } from './types/TripData';
 import { useAppStore } from './state/hooks';
 import { useItinerary } from './state/query/hooks';
+import { apiClient } from './services/apiClient';
 import { Routes, Route, useNavigate, useParams, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -83,7 +84,7 @@ function RoutedApp() {
         } catch {}
       }
     })();
-  }, [currentTripForHydrate?.id, shouldFetchItinerary, refetch, currentTrip?.itinerary, setCurrentTrip]);
+  }, [currentTripForHydrate?.id, shouldFetchItinerary, currentTrip?.itinerary, setCurrentTrip]);
 
   const navigateToScreen = (path: string, tripData?: TripData) => {
     if (tripData) setCurrentTrip(tripData);
@@ -121,9 +122,18 @@ function RoutedApp() {
       {/* Guarded routes requiring a current trip */}
       <Route element={<RequireTrip tripExists={!!currentTrip} /> }>
         <Route path="/generating" element={
-          <AgentProgressModal
+          <SimplifiedAgentProgress
             tripData={currentTrip as TripData}
-            onComplete={() => navigateToScreen('/planner')}
+            onComplete={async () => {
+              try {
+                // Fetch the completed itinerary from ItineraryJsonService using the API client
+                const completedItinerary = await apiClient.getItinerary(currentTrip?.id || '');
+                updateCurrentTrip(completedItinerary);
+              } catch (error) {
+                console.error('Failed to fetch completed itinerary:', error);
+              }
+              navigateToScreen('/planner');
+            }}
             onCancel={() => navigateToScreen('/dashboard')}
           />
         } />

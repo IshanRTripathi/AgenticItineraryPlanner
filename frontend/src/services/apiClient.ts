@@ -4,6 +4,7 @@
 
 import { DataTransformer } from './dataTransformer';
 import { NormalizedDataTransformer } from './normalizedDataTransformer';
+import { authService } from './authService';
 import { TripData, Traveler, TravelPreferences, TripSettings } from '../types/TripData';
 import { 
   NormalizedItinerary, 
@@ -35,6 +36,7 @@ export interface ApiError {
 class ApiClient {
   private baseUrl: string;
   private authToken: string | null = null;
+  private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
@@ -48,6 +50,23 @@ class ApiClient {
     this.authToken = null;
   }
 
+  /**
+   * Refresh the auth token and update the API client
+   */
+  private async refreshAuthToken(): Promise<boolean> {
+    try {
+      const newToken = await authService.getIdTokenForceRefresh();
+      if (newToken) {
+        this.authToken = newToken;
+        console.log('[ApiClient] Auth token refreshed successfully');
+        return true;
+      }
+    } catch (error) {
+      console.error('[ApiClient] Failed to refresh auth token:', error);
+    }
+    return false;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -55,6 +74,15 @@ class ApiClient {
   ): Promise<T> {
     const { maxRetries = 3, retryDelay = 1000 } = retryOptions;
     const url = `${this.baseUrl}${endpoint}`;
+    
+    // Create a unique key for this request to enable deduplication
+    const requestKey = `${options.method || 'GET'}:${endpoint}`;
+    
+    // Check if there's already a pending request for this endpoint
+    if (this.pendingRequests.has(requestKey)) {
+      console.log(`[ApiClient] Deduplicating request: ${requestKey}`);
+      return this.pendingRequests.get(requestKey)!;
+    }
     
     console.log('API Request:', {
       method: options.method || 'GET',
@@ -64,6 +92,25 @@ class ApiClient {
       maxRetries
     });
     
+    // Create the request promise and store it for deduplication
+    const requestPromise = this.executeRequest<T>(url, options, maxRetries, retryDelay);
+    this.pendingRequests.set(requestKey, requestPromise);
+    
+    try {
+      const result = await requestPromise;
+      return result;
+    } finally {
+      // Clean up the pending request
+      this.pendingRequests.delete(requestKey);
+    }
+  }
+
+  private async executeRequest<T>(
+    url: string,
+    options: RequestInit,
+    maxRetries: number,
+    retryDelay: number
+  ): Promise<T> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -80,7 +127,6 @@ class ApiClient {
       mode: 'cors',
       credentials: 'include', // Include credentials for authentication
     };
-
     let lastError: Error;
     
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -106,15 +152,32 @@ class ApiClient {
               code: 'UNKNOWN_ERROR',
               message: `HTTP ${response.status}: ${response.statusText}`,
               timestamp: new Date().toISOString(),
-              path: endpoint
+              path: url
             };
           }
           
           const error = new Error(`API Error: ${errorData.message} (${response.status})`);
           
-          // Don't retry on client errors (4xx) except 408, 429
+          // Handle token expiration (401 Unauthorized)
+          if (response.status === 401 && this.authToken) {
+            console.log('[ApiClient] Token expired, attempting to refresh...');
+            const tokenRefreshed = await this.refreshAuthToken();
+            if (tokenRefreshed) {
+              // Update the Authorization header with the new token
+              headers['Authorization'] = `Bearer ${this.authToken}`;
+              config.headers = headers;
+              console.log('[ApiClient] Retrying request with refreshed token');
+              continue; // Retry the request with the new token
+            } else {
+              console.error('[ApiClient] Failed to refresh token, clearing auth');
+              this.clearAuthToken();
+              throw new Error('Authentication failed - please sign in again');
+            }
+          }
+          
+          // Don't retry on client errors (4xx) except 401 (handled above), 408, 429
           if (response.status >= 400 && response.status < 500 && 
-              response.status !== 408 && response.status !== 429) {
+              response.status !== 401 && response.status !== 408 && response.status !== 429) {
             throw error;
           }
           
@@ -424,6 +487,7 @@ class ApiClient {
 // Type definitions matching backend DTOs
 export interface CreateItineraryRequest {
   destination: string;
+  startLocation: string;
   startDate: string;
   endDate: string;
   party: {
@@ -497,7 +561,7 @@ export interface ShareResponse {
 export interface AgentEvent {
   agentId: string;
   kind: string;
-  status: 'queued' | 'running' | 'succeeded' | 'failed';
+  status: 'queued' | 'running' | 'completed' | 'failed';
   progress?: number;
   message?: string;
   step?: string;

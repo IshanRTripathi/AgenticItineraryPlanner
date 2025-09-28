@@ -4,8 +4,11 @@ import com.tripplanner.dto.ChangeSet;
 import com.tripplanner.dto.CreateItineraryReq;
 import com.tripplanner.dto.NormalizedItinerary;
 import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.AgentRegistry;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.agents.AgentOrchestrator;
+import com.tripplanner.dto.AgentEvent;
+import java.util.Set;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,13 +36,15 @@ public class AgentController {
     
     private final AgentEventBus agentEventBus;
     private final AgentOrchestrator agentOrchestrator;
+    private final AgentRegistry agentRegistry;
     
     @Autowired
     private FirebaseAuth firebaseAuth;
     
-    public AgentController(AgentEventBus agentEventBus, AgentOrchestrator agentOrchestrator) {
+    public AgentController(AgentEventBus agentEventBus, AgentOrchestrator agentOrchestrator, AgentRegistry agentRegistry) {
         this.agentEventBus = agentEventBus;
         this.agentOrchestrator = agentOrchestrator;
+        this.agentRegistry = agentRegistry;
     }
     
     /**
@@ -99,6 +104,11 @@ public class AgentController {
                     .name("connected")
                     .data("Connected to agent stream for itinerary: " + itineraryId));
             logger.info("Initial SSE connection event sent successfully");
+            
+            // Send available agents list
+            Set<AgentEvent.AgentKind> availableAgents = agentRegistry.getRegisteredAgentKinds();
+            agentEventBus.sendAgentList(itineraryId, availableAgents);
+            
         } catch (Exception e) {
             logger.error("Failed to send initial SSE event", e);
         }

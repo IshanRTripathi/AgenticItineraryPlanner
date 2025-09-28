@@ -24,7 +24,7 @@ export const AutoRefreshEmptyState: React.FC<AutoRefreshEmptyStateProps> = ({
   const { countdown, isRefreshing, stopRefresh } = useAutoRefresh({
     interval: 3,
     onRefresh,
-    enabled: true
+    enabled: false // Disable auto-refresh by default to prevent repeated requests
   });
 
   const handleManualRefresh = () => {

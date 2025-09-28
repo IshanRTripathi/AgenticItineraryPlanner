@@ -137,7 +137,7 @@ public class PlannerAgent extends BaseAgent {
 
             // Also save to user-specific storage if userId is available
             if (normalizedItinerary.getUserId() != null) {
-                userDataService.saveUserItinerary(normalizedItinerary.getUserId(), normalizedItinerary);
+                userDataService.saveUserTripMetadata(normalizedItinerary.getUserId(), normalizedItinerary);
                 logger.info("Saved generated itinerary to user-specific storage for user: {}", normalizedItinerary.getUserId());
             }
 
@@ -365,10 +365,11 @@ public class PlannerAgent extends BaseAgent {
     private String buildUserPrompt(CreateItineraryReq request) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("Create a detailed normalized itinerary for the following trip:\n\n");
+        prompt.append("Create a detailed itinerary for the following trip:\n\n");
         
         // Basic trip info
         prompt.append("Itinerary ID: ").append(request.getDestination().hashCode() + "_" + System.currentTimeMillis()).append("\n");
+        prompt.append("Start Location: ").append(request.getStartLocation() != null ? request.getStartLocation() : "Not specified").append("\n");
         prompt.append("Destination: ").append(request.getDestination()).append("\n");
         prompt.append("Start Date: ").append(request.getStartDate()).append("\n");
         prompt.append("End Date: ").append(request.getEndDate()).append("\n");
@@ -387,7 +388,7 @@ public class PlannerAgent extends BaseAgent {
         }
         
         // Budget and preferences
-        prompt.append("Budget Tier: ").append(request.getBudgetTier()).append("\n");
+        prompt.append("Relative Budget Tier: ").append(request.getBudgetTier()).append("\n");
         prompt.append("Language: ").append(request.getLanguage()).append("\n");
         
         // Interests
@@ -404,9 +405,9 @@ public class PlannerAgent extends BaseAgent {
         prompt.append("Themes: ").append(String.join(", ", request.getInterests())).append("\n");
         prompt.append("Currency: INR\n");
         
-        prompt.append("\nIMPORTANT: Create a comprehensive normalized itinerary with nodes and edges that maximizes the travel experience while staying within the specified parameters.");
+        prompt.append("\nIMPORTANT: Create a comprehensive itinerary with nodes and edges that maximizes the travel experience while staying within the specified parameters.");
         prompt.append("\nYou MUST populate ALL ").append(request.getDurationDays()).append(" days with meaningful activities, meals, and transportation.");
-        prompt.append("\nEach day should have at least 3-5 nodes including attractions, meals, and transport as appropriate.");
+        prompt.append("\nEach day should have at least 3-8 nodes including attractions, meals, and transport as appropriate.");
         prompt.append("\nDo NOT leave any days with empty nodes arrays.");
         
         return prompt.toString();
@@ -432,7 +433,7 @@ public class PlannerAgent extends BaseAgent {
                 },
                 "currency": {
                   "type": "string",
-                  "description": "Currency code (e.g., USD, EUR)"
+                  "description": "Currency code (e.g., USD, INR)"
                 },
                 "themes": {
                   "type": "array",
@@ -546,7 +547,7 @@ public class PlannerAgent extends BaseAgent {
     }
 
     private String buildSystemPromptForChanges() {
-        return "You are a travel planning assistant. Generate a ChangeSet JSON that updates the existing normalized itinerary. Respect locked nodes unless explicitly told otherwise. Respond ONLY with valid JSON matching the schema.";
+        return "You are a travel planning assistant. Generate a ChangeSet JSON that updates the existing itinerary. Respect locked nodes unless explicitly told otherwise. Respond ONLY with valid JSON matching the schema.";
     }
 
     private String buildUserPromptForChanges(String itineraryId, NormalizedItinerary currentItinerary, String userRequest) {
@@ -660,7 +661,7 @@ public class PlannerAgent extends BaseAgent {
                 if (node.getCost() != null) {
                     priceDto = new PriceDto(
                             node.getCost().getAmount() != null ? node.getCost().getAmount() : 0.0,
-                            node.getCost().getCurrency() != null ? node.getCost().getCurrency() : "EUR",
+                            node.getCost().getCurrency() != null ? node.getCost().getCurrency() : "INR",
                             node.getCost().getPer() != null ? node.getCost().getPer() : "person"
                     );
                 }
@@ -669,9 +670,9 @@ public class PlannerAgent extends BaseAgent {
                         node.getTitle(),
                         node.getDetails() != null ? node.getDetails().getCategory() : "",
                         locationDto,
-                        node.getTiming() != null ? node.getTiming().getStartTime().toString() : "",
-                        node.getTiming() != null ? node.getTiming().getEndTime().toString() : "",
-                        node.getTiming() != null ? String.valueOf(node.getTiming().getDurationMin()) : "0",
+                        node.getTiming() != null && node.getTiming().getStartTime() != null ? node.getTiming().getStartTime().toString() : "",
+                        node.getTiming() != null && node.getTiming().getEndTime() != null ? node.getTiming().getEndTime().toString() : "",
+                        node.getTiming() != null && node.getTiming().getDurationMin() != null ? String.valueOf(node.getTiming().getDurationMin()) : "0",
                         node.getType(),
                         priceDto,
                         false, // bookingRequired
@@ -682,7 +683,7 @@ public class PlannerAgent extends BaseAgent {
                 activities.add(activityDto);
             }
         }
-        
+        // todo check if accommodation, transportation, meals can be set here and significance
         return ItineraryDayDto.builder()
                 .day(normalizedDay.getDayNumber())
                 .date(parseDate(normalizedDay.getDate()))
@@ -721,6 +722,7 @@ public class PlannerAgent extends BaseAgent {
 
         List<ChangeOperation> operations = new ArrayList<>();
 
+        // todo refactor this to use real data
         // Create a simple mock operation based on user request
         if (userRequest.toLowerCase().contains("add") || userRequest.toLowerCase().contains("insert")) {
             ChangeOperation insertOp = new ChangeOperation();
@@ -755,6 +757,7 @@ public class PlannerAgent extends BaseAgent {
 
     /**
      * Create a mock node for testing.
+     * todo refactor this to use real data
      */
     private NormalizedNode createMockNode(String id, String type) {
         NormalizedNode node = new NormalizedNode();

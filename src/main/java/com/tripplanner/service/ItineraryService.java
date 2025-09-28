@@ -107,8 +107,16 @@ public class ItineraryService {
         logger.info("Itinerary ID: {}", id);
         
         try {
-            // Get itinerary from user-specific storage
-            var niOpt = userDataService.getUserItinerary(userId, id);
+            // First check if user owns this trip
+            if (!userDataService.userOwnsTrip(userId, id)) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND,
+                    "Itinerary not found for user: " + userId
+                );
+            }
+            
+            // Get itinerary from ItineraryJsonService (single source of truth)
+            var niOpt = itineraryJsonService.getItinerary(id);
             if (niOpt.isEmpty()) {
                 throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.NOT_FOUND,
@@ -176,35 +184,34 @@ public class ItineraryService {
         logger.debug("Getting itineraries");
         
         try {
-            return userDataService.getUserItineraries(userId).stream()
-                    .map(ni -> {
-                        String destination = ni.getDestination();
+            // Get trip metadata from UserDataService
+            List<TripMetadata> tripMetadataList = userDataService.getUserTripMetadata(userId);
+            
+            return tripMetadataList.stream()
+                    .map(metadata -> {
+                        String destination = metadata.getDestination();
                         if (destination == null || destination.isBlank()) {
-                            destination = (ni.getDays() != null && !ni.getDays().isEmpty()) ? ni.getDays().get(0).getLocation() : null;
+                            destination = "Unknown Destination";
                         }
 
                         LocalDate startDate = null;
-                        if (ni.getStartDate() != null && !ni.getStartDate().isBlank()) {
-                            try { startDate = LocalDate.parse(ni.getStartDate()); } catch (Exception ignored) {}
-                        } else if (ni.getDays() != null && !ni.getDays().isEmpty()) {
-                            try { startDate = LocalDate.parse(ni.getDays().get(0).getDate()); } catch (Exception ignored) {}
+                        if (metadata.getStartDate() != null && !metadata.getStartDate().isBlank()) {
+                            try { startDate = LocalDate.parse(metadata.getStartDate()); } catch (Exception ignored) {}
                         }
 
                         LocalDate endDate = null;
-                        if (ni.getEndDate() != null && !ni.getEndDate().isBlank()) {
-                            try { endDate = LocalDate.parse(ni.getEndDate()); } catch (Exception ignored) {}
-                        } else if (ni.getDays() != null && !ni.getDays().isEmpty()) {
-                            try { endDate = LocalDate.parse(ni.getDays().get(ni.getDays().size() - 1).getDate()); } catch (Exception ignored) {}
+                        if (metadata.getEndDate() != null && !metadata.getEndDate().isBlank()) {
+                            try { endDate = LocalDate.parse(metadata.getEndDate()); } catch (Exception ignored) {}
                         }
 
                         return ItineraryDto.builder()
-                                .id(ni.getItineraryId())
+                                .id(metadata.getItineraryId())
                                 .destination(destination)
                                 .startDate(startDate)
                                 .endDate(endDate)
-                                .language("en")
-                                .summary(ni.getSummary())
-                                .interests(ni.getThemes())
+                                .language(metadata.getLanguage() != null ? metadata.getLanguage() : "en")
+                                .summary(metadata.getSummary())
+                                .interests(metadata.getInterests())
                                 .status("completed")
                                 .build();
                     })
@@ -222,7 +229,9 @@ public class ItineraryService {
         logger.info("Deleting itinerary: {} for user: {}", id, userId);
         
         try {
-            userDataService.deleteUserItinerary(userId, id);
+            // Delete from both services
+            userDataService.deleteUserTripMetadata(userId, id);
+            itineraryJsonService.deleteItinerary(id);
             logger.info("Itinerary deleted: {} for user: {}", id, userId);
         } catch (Exception e) {
             logger.error("Failed to delete itinerary: {} for user: {}", id, userId, e);

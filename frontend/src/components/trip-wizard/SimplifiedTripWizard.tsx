@@ -18,11 +18,11 @@ import { TripData, Traveler, TravelPreferences, TripSettings, TripLocation } fro
 import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
 import { useCreateItinerary } from '../../state/query/hooks';
 import { useAppStore } from '../../state/hooks';
+import { useNavigate } from 'react-router-dom';
 import { UserProfileButton } from '../shared/UserProfileButton';
 import { useFormSubmission } from '../../hooks/useFormSubmission';
 import { GlobalNavigation } from '../shared/GlobalNavigation';
 import { BreadcrumbNavigation } from '../shared/BreadcrumbNavigation';
-import { AgentProgressModal } from '../agents/AgentProgressModal';
 
 interface SimplifiedTripWizardProps {
   onComplete: (tripData: TripData) => void;
@@ -43,8 +43,17 @@ const PREFERENCE_CONTROLS = [
 export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizardProps) {
   const createItineraryMutation = useCreateItinerary();
   const { addTrip, setCurrentTrip } = useAppStore();
+  const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTripData, setGeneratedTripData] = useState<TripData | null>(null);
+  
+  // Redirect to generation page when trip is created
+  useEffect(() => {
+    if (isGenerating && generatedTripData) {
+      console.log('Redirecting to generation page for trip:', generatedTripData.id);
+      navigate('/generating');
+    }
+  }, [isGenerating, generatedTripData, navigate]);
   
   // Form submission with debouncing
   const { isSubmitting, submit: submitForm, error: submissionError } = useFormSubmission({
@@ -274,6 +283,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
         // Create the API request
         const createRequest: CreateItineraryRequest = {
           destination: endLocation,
+          startLocation: startLocation,
           startDate: dateRange!.from!.toISOString().split('T')[0],
           endDate: dateRange!.to!.toISOString().split('T')[0],
           party: {
@@ -386,20 +396,14 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Show progress modal if generating */}
+      {/* Show loading state if generating */}
       {isGenerating && generatedTripData ? (
-        <AgentProgressModal
-          tripData={generatedTripData}
-          onComplete={() => {
-            console.log('Itinerary generation completed!');
-            setIsGenerating(false);
-            onComplete(generatedTripData);
-          }}
-          onCancel={() => {
-            setIsGenerating(false);
-            onBack();
-          }}
-        />
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Redirecting to generation page...</p>
+          </div>
+        </div>
       ) : (
         <>
           {/* Header - Consistent with My Trips */}

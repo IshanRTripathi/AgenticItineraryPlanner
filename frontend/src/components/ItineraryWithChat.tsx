@@ -4,8 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { apiClient } from '../services/apiClient';
-import { NormalizedDataTransformer } from '../services/normalizedDataTransformer';
+import { useItinerary } from '../state/query/hooks';
 import { NormalizedItinerary } from '../types/NormalizedItinerary';
 import { TripData } from '../types/TripData';
 import { ChatInterface } from './ChatInterface';
@@ -21,40 +20,17 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
   itineraryId,
   className = '',
 }) => {
-  const [normalizedItinerary, setNormalizedItinerary] = useState<NormalizedItinerary | null>(null);
-  const [tripData, setTripData] = useState<TripData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: tripData, isLoading: loading, error: queryError, refetch } = useItinerary(itineraryId);
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [chatScope, setChatScope] = useState<'trip' | 'day'>('trip');
   const [activeTab, setActiveTab] = useState<'itinerary' | 'chat'>('itinerary');
 
-  useEffect(() => {
-    loadItinerary();
-  }, [itineraryId]);
-
-  const loadItinerary = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const normalized = await apiClient.getItineraryJson(itineraryId);
-      setNormalizedItinerary(normalized);
-      
-      const transformed = NormalizedDataTransformer.transformNormalizedItineraryToTripData(normalized);
-      setTripData(transformed);
-      
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load itinerary');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load itinerary') : null;
 
   const handleItineraryUpdate = async (updatedItineraryId: string) => {
     if (updatedItineraryId === itineraryId) {
-      await loadItinerary();
+      await refetch();
     }
   };
 
@@ -106,7 +82,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
     );
   }
 
-  if (!normalizedItinerary || !tripData) {
+  if (!tripData) {
     return (
       <div className={`itinerary-with-chat ${className}`}>
         <div className="empty-container">
@@ -187,6 +163,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
           <div className="itinerary-tab">
             <NormalizedItineraryViewer
               itineraryId={itineraryId}
+              tripData={tripData}
               onNodeSelect={handleNodeSelect}
               onDaySelect={handleDaySelect}
             />
@@ -217,7 +194,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
         </button>
         <button
           className="quick-action-button"
-          onClick={loadItinerary}
+          onClick={() => refetch()}
           title="Refresh itinerary"
         >
           🔄 Refresh

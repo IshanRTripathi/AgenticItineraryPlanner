@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class CreateItineraryReq {
     private String destination;
+    private String startLocation;
     private LocalDate startDate;
     private LocalDate endDate;
     private PartyDto party;

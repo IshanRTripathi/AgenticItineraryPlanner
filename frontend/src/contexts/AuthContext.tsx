@@ -63,6 +63,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // Periodic token refresh to prevent expiration
+  useEffect(() => {
+    if (!user) return;
+
+    // Refresh token every 45 minutes (tokens expire after 1 hour)
+    const refreshInterval = setInterval(async () => {
+      try {
+        const newToken = await authService.getIdTokenForceRefresh();
+        if (newToken) {
+          apiClient.setAuthToken(newToken);
+          console.log('[AuthContext] Token refreshed proactively');
+        }
+      } catch (error) {
+        console.error('[AuthContext] Failed to refresh token proactively:', error);
+      }
+    }, 45 * 60 * 1000); // 45 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [user]);
+
   const signInWithGoogle = async (): Promise<void> => {
     try {
       setLoading(true);

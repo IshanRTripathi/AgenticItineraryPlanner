@@ -30,11 +30,14 @@ export function useItinerary(id: string, retryOptions?: { maxRetries?: number; r
       return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff, max 30s
+    // Cache configuration to reduce unnecessary requests
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    refetchOnReconnect: false, // Don't refetch when network reconnects
     // Add initial delay to prevent immediate API calls after creation
     ...(initialDelay && { 
       refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
     }),
   });
 }

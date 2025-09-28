@@ -6,18 +6,45 @@ import { TripData } from '../types/TripData';
 
 interface NormalizedItineraryViewerProps {
   itineraryId: string;
+  normalizedItinerary?: NormalizedItinerary | null;
+  tripData?: TripData | null;
+  onNodeSelect?: (nodeId: string, day: number) => void;
+  onDaySelect?: (day: number) => void;
 }
 
-export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps> = ({ itineraryId }) => {
-  const [normalizedItinerary, setNormalizedItinerary] = useState<NormalizedItinerary | null>(null);
-  const [tripData, setTripData] = useState<TripData | null>(null);
-  const [loading, setLoading] = useState(true);
+export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps> = ({ 
+  itineraryId, 
+  normalizedItinerary: propNormalizedItinerary, 
+  tripData: propTripData,
+  onNodeSelect,
+  onDaySelect 
+}) => {
+  const [normalizedItinerary, setNormalizedItinerary] = useState<NormalizedItinerary | null>(propNormalizedItinerary || null);
+  const [tripData, setTripData] = useState<TripData | null>(propTripData || null);
+  const [loading, setLoading] = useState(!propNormalizedItinerary);
   const [error, setError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<number>(1);
 
+  // Update state when props change
   useEffect(() => {
-    loadItinerary();
-  }, [itineraryId]);
+    if (propNormalizedItinerary) {
+      setNormalizedItinerary(propNormalizedItinerary);
+      setLoading(false);
+    }
+  }, [propNormalizedItinerary]);
+
+  useEffect(() => {
+    if (propTripData) {
+      setTripData(propTripData);
+    }
+  }, [propTripData]);
+
+  // Only fetch data if not provided as props
+  useEffect(() => {
+    if (!propNormalizedItinerary) {
+      loadItinerary();
+    }
+  }, [itineraryId, propNormalizedItinerary]);
 
   const loadItinerary = async () => {
     try {

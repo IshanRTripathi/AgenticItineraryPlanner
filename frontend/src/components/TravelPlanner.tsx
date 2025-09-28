@@ -7,8 +7,9 @@ import { Search, Globe, Workflow, Video, Share2, MessageSquare } from 'lucide-re
 import { useItinerary, queryKeys } from '../state/query/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { TripData } from '../types/TripData';
+import { apiClient } from '../services/apiClient';
 import { useTranslation } from 'react-i18next';
-import { AgentProgressModal } from './agents/AgentProgressModal';
+import { SimplifiedAgentProgress } from './agents/SimplifiedAgentProgress';
 import { AutoRefreshEmptyState } from './shared/AutoRefreshEmptyState';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
@@ -83,17 +84,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // State for showing progress modal
   const [showProgressModal, setShowProgressModal] = useState(false);
   
-  // Polling for itinerary completion when status is 'planning'
-  useEffect(() => {
-    if (freshTripData?.status === 'planning' && (!freshTripData.itinerary || !freshTripData.itinerary.days || freshTripData.itinerary.days.length === 0)) {
-      const pollInterval = setInterval(() => {
-        console.log('Polling for itinerary completion...');
-        refetch();
-      }, 3000); // Poll every 3 seconds
-      
-      return () => clearInterval(pollInterval);
-    }
-  }, [freshTripData?.status, freshTripData?.itinerary, refetch]);
+  // Note: Polling removed - now using SSE-only flow with SimplifiedAgentProgress
   const queryClient = useQueryClient();
   
   // Use fresh data if available, fallback to props
@@ -248,12 +239,19 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // Show progress modal if itinerary is still being generated
   if (currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
     return (
-      <AgentProgressModal
+      <SimplifiedAgentProgress
         tripData={currentTripData}
-        onComplete={() => {
+        onComplete={async () => {
           console.log('Itinerary generation completed!');
           setShowProgressModal(false);
-          refetch(); // Refresh data when complete
+          // Fetch the completed itinerary from ItineraryJsonService
+          try {
+            const completedItinerary = await apiClient.getItinerary(currentTripData.id);
+            setCurrentTrip(completedItinerary);
+          } catch (error) {
+            console.error('Failed to fetch completed itinerary:', error);
+            refetch(); // Fallback to refetch
+          }
         }}
         onCancel={() => {
           setShowProgressModal(false);

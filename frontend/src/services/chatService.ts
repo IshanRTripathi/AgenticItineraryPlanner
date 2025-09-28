@@ -11,6 +11,7 @@ import {
   NodeCandidate 
 } from '../types/ChatTypes';
 import { safeJsonEncode, normalizeText } from '../utils/encodingUtils';
+import { apiClient } from './apiClient';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -279,21 +280,8 @@ export class ChatService {
    */
   async getItineraryJson(itineraryId: string): Promise<any> {
     try {
-      const response = await fetch(`${API_BASE_URL}/itineraries/${itineraryId}/json`, {
-        mode: 'cors',
-        credentials: 'omit',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          `Get itinerary error: ${response.status} ${response.statusText} - ${
-            errorData.message || 'Unknown error'
-          }`
-        );
-      }
-
-      return await response.json();
+      // Use the API client to get the itinerary JSON (includes deduplication and caching)
+      return await apiClient.getItineraryJson(itineraryId);
     } catch (error) {
       console.error('Get itinerary error:', error);
       throw error;

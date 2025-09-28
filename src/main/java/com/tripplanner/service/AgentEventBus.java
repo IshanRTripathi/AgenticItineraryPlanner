@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -99,6 +100,95 @@ public class AgentEventBus {
         }
         
         logger.info("Event sent to {} emitters successfully, {} failed for itinerary: {}", 
+                    successCount, failureCount, itineraryId);
+        logger.info("==============================");
+    }
+    
+    /**
+     * Send agent list to all emitters for an itinerary.
+     */
+    public void sendAgentList(String itineraryId, Set<AgentEvent.AgentKind> agentKinds) {
+        logger.info("=== SENDING AGENT LIST ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Agent Kinds: {}", agentKinds);
+        
+        CopyOnWriteArrayList<SseEmitter> itineraryEmitters = emitters.get(itineraryId);
+        if (itineraryEmitters == null || itineraryEmitters.isEmpty()) {
+            logger.warn("No emitters found for itinerary: {}", itineraryId);
+            logger.info("==============================");
+            return;
+        }
+        
+        // Create agent list event
+        Map<String, Object> agentListEvent = new HashMap<>();
+        agentListEvent.put("type", "agent-list");
+        agentListEvent.put("agents", agentKinds.stream().map(Enum::name).toArray());
+        agentListEvent.put("timestamp", System.currentTimeMillis());
+        
+        // Send event to all registered emitters
+        int successCount = 0;
+        int failureCount = 0;
+        
+        for (SseEmitter emitter : itineraryEmitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("agent-list")
+                        .data(agentListEvent));
+                successCount++;
+                
+            } catch (IOException e) {
+                logger.warn("Failed to send agent list to SSE emitter for itinerary: {} (client likely disconnected)", itineraryId);
+                failureCount++;
+                // Do not attempt to complete/flush on broken response; just remove the emitter
+                itineraryEmitters.remove(emitter);
+            }
+        }
+        
+        logger.info("Agent list sent to {} emitters successfully, {} failed for itinerary: {}", 
+                    successCount, failureCount, itineraryId);
+        logger.info("==============================");
+    }
+    
+    /**
+     * Send completion event to all emitters for an itinerary.
+     */
+    public void sendCompletion(String itineraryId) {
+        logger.info("=== SENDING COMPLETION EVENT ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        
+        CopyOnWriteArrayList<SseEmitter> itineraryEmitters = emitters.get(itineraryId);
+        if (itineraryEmitters == null || itineraryEmitters.isEmpty()) {
+            logger.warn("No emitters found for itinerary: {}", itineraryId);
+            logger.info("==============================");
+            return;
+        }
+        
+        // Create completion event
+        Map<String, Object> completionEvent = new HashMap<>();
+        completionEvent.put("type", "completion");
+        completionEvent.put("status", "completed");
+        completionEvent.put("timestamp", System.currentTimeMillis());
+        
+        // Send event to all registered emitters
+        int successCount = 0;
+        int failureCount = 0;
+        
+        for (SseEmitter emitter : itineraryEmitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("completion")
+                        .data(completionEvent));
+                successCount++;
+                
+            } catch (IOException e) {
+                logger.warn("Failed to send completion event to SSE emitter for itinerary: {} (client likely disconnected)", itineraryId);
+                failureCount++;
+                // Do not attempt to complete/flush on broken response; just remove the emitter
+                itineraryEmitters.remove(emitter);
+            }
+        }
+        
+        logger.info("Completion event sent to {} emitters successfully, {} failed for itinerary: {}", 
                     successCount, failureCount, itineraryId);
         logger.info("==============================");
     }

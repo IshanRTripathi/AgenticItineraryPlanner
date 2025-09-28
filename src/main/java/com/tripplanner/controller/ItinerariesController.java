@@ -172,27 +172,21 @@ public class ItinerariesController {
         String userId = (String) httpRequest.getAttribute("userId");
         
         try {
-            // If user is authenticated, try user-specific storage first
+            // If user is authenticated, check if they own this trip
             if (userId != null) {
-                logger.info("User authenticated, checking user-specific storage: {}", userId);
-                var itinerary = userDataService.getUserItinerary(userId, id);
-                
-                if (itinerary.isPresent()) {
-                    logger.info("Normalized itinerary found in user storage: {}", id);
-                    return ResponseEntity.ok(itinerary.get());
-                } else {
-                    logger.info("Not found in user storage, trying legacy storage: {}", id);
+                logger.info("User authenticated, checking ownership: {}", userId);
+                if (!userDataService.userOwnsTrip(userId, id)) {
+                    logger.warn("User {} does not own itinerary: {}", userId, id);
+                    return ResponseEntity.notFound().build();
                 }
-            } else {
-                logger.info("No user authentication, checking legacy storage: {}", id);
             }
             
-            // Fallback to legacy storage system
-            var legacyItinerary = itineraryJsonService.getItinerary(id);
+            // Get itinerary from ItineraryJsonService (single source of truth)
+            var itinerary = itineraryJsonService.getItinerary(id);
             
-            if (legacyItinerary.isPresent()) {
-                logger.info("Normalized itinerary found in legacy storage: {}", id);
-                return ResponseEntity.ok(legacyItinerary.get());
+            if (itinerary.isPresent()) {
+                logger.info("Normalized itinerary found: {}", id);
+                return ResponseEntity.ok(itinerary.get());
             } else {
                 logger.warn("Normalized itinerary not found: {}", id);
                 return ResponseEntity.notFound().build();

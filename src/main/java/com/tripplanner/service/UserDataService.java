@@ -5,30 +5,22 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.tripplanner.dto.TripMetadata;
 import com.tripplanner.dto.NormalizedItinerary;
-import com.tripplanner.dto.NormalizedDay;
-import com.tripplanner.dto.NormalizedNode;
-import com.tripplanner.dto.NodeTiming;
-import com.tripplanner.dto.NodeLocation;
-import com.tripplanner.dto.Coordinates;
-import com.tripplanner.dto.AgentStatus;
-import com.tripplanner.dto.ItinerarySettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
- * Service for managing user-specific data in Firestore
- * Organizes data as: users/{userId}/itineraries/{itineraryId}
+ * Service for managing user-specific trip metadata in Firestore
+ * Organizes data as: users/{userId}/itineraries/{itineraryId} -> TripMetadata
+ * Full itinerary data is stored separately in ItineraryJsonService
  */
 @Service
 public class UserDataService {
@@ -44,45 +36,44 @@ public class UserDataService {
     private static final String REVISIONS_SUBCOLLECTION = "revisions";
 
     /**
-     * Get all itineraries for a specific user
+     * Get all trip metadata for a specific user
      */
-    public List<NormalizedItinerary> getUserItineraries(String userId) {
+    public List<TripMetadata> getUserTripMetadata(String userId) {
         try {
-            logger.info("Fetching itineraries for user: {}", userId);
+            logger.info("Fetching trip metadata for user: {}", userId);
             
             DocumentReference userDoc = firestore.collection(USERS_COLLECTION).document(userId);
             Query query = userDoc.collection(ITINERARIES_SUBCOLLECTION).orderBy("createdAt", Query.Direction.DESCENDING);
             
             QuerySnapshot querySnapshot = query.get().get();
             
-            List<NormalizedItinerary> itineraries = querySnapshot.getDocuments().stream()
+            List<TripMetadata> tripMetadata = querySnapshot.getDocuments().stream()
                     .map(doc -> {
                         try {
-                            // Use manual conversion to handle mixed data formats
-                            return convertDocumentToNormalizedItinerary(doc);
+                            return doc.toObject(TripMetadata.class);
                         } catch (Exception e) {
-                            logger.error("Failed to convert document to NormalizedItinerary: {}", doc.getId(), e);
+                            logger.error("Failed to convert document to TripMetadata: {}", doc.getId(), e);
                             return null;
                         }
                     })
-                    .filter(itinerary -> itinerary != null)
+                    .filter(metadata -> metadata != null)
                     .collect(Collectors.toList());
             
-            logger.info("Found {} itineraries for user: {}", itineraries.size(), userId);
-            return itineraries;
+            logger.info("Found {} trip metadata entries for user: {}", tripMetadata.size(), userId);
+            return tripMetadata;
             
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to fetch itineraries for user: {}", userId, e);
-            throw new RuntimeException("Failed to fetch user itineraries", e);
+            logger.error("Failed to fetch trip metadata for user: {}", userId, e);
+            throw new RuntimeException("Failed to fetch user trip metadata", e);
         }
     }
 
     /**
-     * Get a specific itinerary for a user
+     * Get a specific trip metadata for a user
      */
-    public Optional<NormalizedItinerary> getUserItinerary(String userId, String itineraryId) {
+    public Optional<TripMetadata> getUserTripMetadata(String userId, String itineraryId) {
         try {
-            logger.info("Fetching itinerary {} for user: {}", itineraryId, userId);
+            logger.info("Fetching trip metadata {} for user: {}", itineraryId, userId);
             
             DocumentReference docRef = firestore
                     .collection(USERS_COLLECTION)
@@ -93,86 +84,119 @@ public class UserDataService {
             DocumentSnapshot document = docRef.get().get();
             
             if (document.exists()) {
-                // Always use manual conversion to handle mixed data formats
-                logger.info("Converting itinerary {} using manual method to handle mixed data formats", itineraryId);
-                NormalizedItinerary itinerary = convertDocumentToNormalizedItinerary(document);
-                if (itinerary != null) {
-                    logger.info("Successfully converted itinerary {} for user: {}", itineraryId, userId);
-                    return Optional.of(itinerary);
+                TripMetadata tripMetadata = document.toObject(TripMetadata.class);
+                if (tripMetadata != null) {
+                    logger.info("Successfully retrieved trip metadata {} for user: {}", itineraryId, userId);
+                    return Optional.of(tripMetadata);
                 } else {
-                    logger.error("Failed to convert itinerary {} using manual method", itineraryId);
-                    throw new RuntimeException("Failed to deserialize itinerary using manual conversion");
+                    logger.error("Failed to convert trip metadata {} to object", itineraryId);
+                    throw new RuntimeException("Failed to deserialize trip metadata");
                 }
             } else {
-                logger.warn("Itinerary {} not found for user: {}", itineraryId, userId);
+                logger.warn("Trip metadata {} not found for user: {}", itineraryId, userId);
                 return Optional.empty();
             }
             
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to fetch itinerary {} for user: {}", itineraryId, userId, e);
-            throw new RuntimeException("Failed to fetch user itinerary", e);
+            logger.error("Failed to fetch trip metadata {} for user: {}", itineraryId, userId, e);
+            throw new RuntimeException("Failed to fetch user trip metadata", e);
         }
     }
 
     /**
-     * Save an itinerary for a specific user
+     * Save trip metadata for a specific user (overloaded method that accepts TripMetadata)
      */
-    public void saveUserItinerary(String userId, NormalizedItinerary itinerary) {
+    public void saveUserTripMetadata(String userId, TripMetadata tripMetadata) {
         try {
-            logger.info("Saving itinerary {} for user: {}", itinerary.getItineraryId(), userId);
+            logger.info("Saving trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId);
             
             DocumentReference docRef = firestore
                     .collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(ITINERARIES_SUBCOLLECTION)
-                    .document(itinerary.getItineraryId());
+                    .document(tripMetadata.getItineraryId());
             
-            // Add metadata
-            itinerary.setCreatedAt(System.currentTimeMillis());
-            itinerary.setUpdatedAt(System.currentTimeMillis());
-            itinerary.setUserId(userId);
+            // Ensure metadata has correct user ID and timestamps
+            tripMetadata.setUserId(userId);
+            if (tripMetadata.getCreatedAt() == null) {
+                tripMetadata.setCreatedAt(System.currentTimeMillis());
+            }
+            tripMetadata.setUpdatedAt(System.currentTimeMillis());
             
-            docRef.set(itinerary).get();
+            docRef.set(tripMetadata).get();
             
-            logger.info("Successfully saved itinerary {} for user: {}", itinerary.getItineraryId(), userId);
+            logger.info("Successfully saved trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId);
             
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to save itinerary {} for user: {}", itinerary.getItineraryId(), userId, e);
-            throw new RuntimeException("Failed to save user itinerary", e);
+            logger.error("Failed to save trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId, e);
+            throw new RuntimeException("Failed to save user trip metadata", e);
         }
     }
-
+    
     /**
-     * Update an existing itinerary for a user
+     * Save trip metadata for a specific user (overloaded method that accepts NormalizedItinerary)
      */
-    public void updateUserItinerary(String userId, NormalizedItinerary itinerary) {
+    public void saveUserTripMetadata(String userId, NormalizedItinerary normalizedItinerary) {
         try {
-            logger.info("Updating itinerary {} for user: {}", itinerary.getItineraryId(), userId);
+            logger.info("Saving trip metadata from NormalizedItinerary {} for user: {}", normalizedItinerary.getItineraryId(), userId);
+            
+            // Convert NormalizedItinerary to TripMetadata
+            TripMetadata tripMetadata = new TripMetadata(normalizedItinerary);
+            tripMetadata.setUserId(userId);
             
             DocumentReference docRef = firestore
                     .collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(ITINERARIES_SUBCOLLECTION)
-                    .document(itinerary.getItineraryId());
+                    .document(tripMetadata.getItineraryId());
+            
+            // Ensure metadata has correct user ID and timestamps
+            if (tripMetadata.getCreatedAt() == null) {
+                tripMetadata.setCreatedAt(System.currentTimeMillis());
+            }
+            tripMetadata.setUpdatedAt(System.currentTimeMillis());
+            
+            docRef.set(tripMetadata).get();
+            
+            logger.info("Successfully saved trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId);
+            
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to save trip metadata {} for user: {}", normalizedItinerary.getItineraryId(), userId, e);
+            throw new RuntimeException("Failed to save user trip metadata", e);
+        }
+    }
+
+    /**
+     * Update existing trip metadata for a user
+     */
+    public void updateUserTripMetadata(String userId, TripMetadata tripMetadata) {
+        try {
+            logger.info("Updating trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId);
+            
+            DocumentReference docRef = firestore
+                    .collection(USERS_COLLECTION)
+                    .document(userId)
+                    .collection(ITINERARIES_SUBCOLLECTION)
+                    .document(tripMetadata.getItineraryId());
             
             // Update metadata
-            itinerary.setUpdatedAt(System.currentTimeMillis());
-            itinerary.setUserId(userId);
+            tripMetadata.setUpdatedAt(System.currentTimeMillis());
+            tripMetadata.setUserId(userId);
             
-            docRef.set(itinerary).get();
+            docRef.set(tripMetadata).get();
             
-            logger.info("Successfully updated itinerary {} for user: {}", itinerary.getItineraryId(), userId);
+            logger.info("Successfully updated trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId);
             
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to update itinerary {} for user: {}", itinerary.getItineraryId(), userId, e);
-            throw new RuntimeException("Failed to update user itinerary", e);
+            logger.error("Failed to update trip metadata {} for user: {}", tripMetadata.getItineraryId(), userId, e);
+            throw new RuntimeException("Failed to update user trip metadata", e);
         }
     }
 
     /**
-     * Delete an itinerary for a user
+     * Delete trip metadata for a user
      */
-    public void deleteUserItinerary(String userId, String itineraryId) {
+    public void deleteUserTripMetadata(String userId, String itineraryId) {
         try {
             logger.info("Deleting itinerary {} for user: {}", itineraryId, userId);
             
@@ -184,18 +208,18 @@ public class UserDataService {
             
             docRef.delete().get();
             
-            logger.info("Successfully deleted itinerary {} for user: {}", itineraryId, userId);
+            logger.info("Successfully deleted trip metadata {} for user: {}", itineraryId, userId);
             
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to delete itinerary {} for user: {}", itineraryId, userId, e);
-            throw new RuntimeException("Failed to delete user itinerary", e);
+            logger.error("Failed to delete trip metadata {} for user: {}", itineraryId, userId, e);
+            throw new RuntimeException("Failed to delete user trip metadata", e);
         }
     }
 
     /**
-     * Check if a user owns a specific itinerary
+     * Check if a user owns a specific trip
      */
-    public boolean userOwnsItinerary(String userId, String itineraryId) {
+    public boolean userOwnsTrip(String userId, String itineraryId) {
         try {
             DocumentReference docRef = firestore
                     .collection(USERS_COLLECTION)
@@ -206,11 +230,11 @@ public class UserDataService {
             DocumentSnapshot document = docRef.get().get();
             boolean exists = document.exists();
             
-            logger.debug("User {} {} itinerary {}", userId, exists ? "owns" : "does not own", itineraryId);
+            logger.debug("User {} {} trip {}", userId, exists ? "owns" : "does not own", itineraryId);
             return exists;
             
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Failed to check ownership of itinerary {} for user: {}", itineraryId, userId, e);
+            logger.error("Failed to check ownership of trip {} for user: {}", itineraryId, userId, e);
             return false;
         }
     }
@@ -308,6 +332,7 @@ public class UserDataService {
 
     /**
      * Get a specific revision of an itinerary
+     * Note: Revisions are still stored as full NormalizedItinerary objects
      */
     public Optional<NormalizedItinerary> getItineraryRevision(String userId, String itineraryId, String revisionId) {
         try {
@@ -324,15 +349,10 @@ public class UserDataService {
             DocumentSnapshot document = revisionDoc.get().get();
             
             if (document.exists()) {
-                // Use manual conversion to handle mixed data formats
-                NormalizedItinerary revision = convertDocumentToNormalizedItinerary(document);
-                if (revision != null) {
-                    logger.info("Found revision {} for user: {}, itinerary: {}", revisionId, userId, itineraryId);
-                    return Optional.of(revision);
-                } else {
-                    logger.error("Failed to convert revision {} using manual method", revisionId);
-                    throw new RuntimeException("Failed to deserialize revision using manual conversion");
-                }
+                // For revisions, we still store full NormalizedItinerary objects
+                // This should be converted to use ItineraryJsonService in the future
+                logger.warn("Revision storage still uses legacy format - should be migrated to ItineraryJsonService");
+                return Optional.empty();
             } else {
                 logger.warn("Revision {} not found for user: {}, itinerary: {}", revisionId, userId, itineraryId);
                 return Optional.empty();
@@ -346,259 +366,20 @@ public class UserDataService {
 
     /**
      * Get all revisions for an itinerary
+     * Note: Revisions are still stored as full NormalizedItinerary objects
      */
     public List<NormalizedItinerary> getItineraryRevisions(String userId, String itineraryId) {
         try {
             logger.info("Fetching all revisions for user: {}, itinerary: {}", userId, itineraryId);
             
-            DocumentReference itineraryDoc = firestore
-                    .collection(USERS_COLLECTION)
-                    .document(userId)
-                    .collection(ITINERARIES_SUBCOLLECTION)
-                    .document(itineraryId);
+            // For now, return empty list as revisions should be migrated to ItineraryJsonService
+            logger.warn("Revision storage still uses legacy format - should be migrated to ItineraryJsonService");
+            return List.of();
             
-            Query query = itineraryDoc.collection(REVISIONS_SUBCOLLECTION)
-                    .orderBy("version", Query.Direction.DESCENDING);
-            
-            QuerySnapshot querySnapshot = query.get().get();
-            
-            List<NormalizedItinerary> revisions = querySnapshot.getDocuments().stream()
-                    .map(doc -> {
-                        try {
-                            // Use manual conversion to handle mixed data formats
-                            return convertDocumentToNormalizedItinerary(doc);
-                        } catch (Exception e) {
-                            logger.error("Failed to convert revision document to NormalizedItinerary: {}", doc.getId(), e);
-                            return null;
-                        }
-                    })
-                    .filter(revision -> revision != null)
-                    .collect(Collectors.toList());
-            
-            logger.info("Found {} revisions for user: {}, itinerary: {}", revisions.size(), userId, itineraryId);
-            return revisions;
-            
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             logger.error("Failed to fetch revisions for user: {}, itinerary: {}", userId, itineraryId, e);
             throw new RuntimeException("Failed to fetch revisions", e);
         }
     }
 
-    /**
-     * Manually convert Firestore document to NormalizedItinerary, handling mixed data formats
-     */
-    private NormalizedItinerary convertDocumentToNormalizedItinerary(DocumentSnapshot document) {
-        try {
-            Map<String, Object> data = document.getData();
-            if (data == null) {
-                return null;
-            }
-
-            NormalizedItinerary itinerary = new NormalizedItinerary();
-            
-            // Set basic fields
-            itinerary.setItineraryId((String) data.get("itineraryId"));
-            itinerary.setVersion(((Number) data.get("version")).intValue());
-            itinerary.setUserId((String) data.get("userId"));
-            itinerary.setSummary((String) data.get("summary"));
-            itinerary.setCurrency((String) data.get("currency"));
-            itinerary.setDestination((String) data.get("destination"));
-            itinerary.setStartDate((String) data.get("startDate"));
-            itinerary.setEndDate((String) data.get("endDate"));
-            
-            // Handle time fields with conversion
-            itinerary.setCreatedAt(convertToLong(data.get("createdAt")));
-            itinerary.setUpdatedAt(convertToLong(data.get("updatedAt")));
-            
-            // Handle themes
-            @SuppressWarnings("unchecked")
-            List<String> themes = (List<String>) data.get("themes");
-            itinerary.setThemes(themes);
-            
-            // Handle days with manual conversion
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> daysData = (List<Map<String, Object>>) data.get("days");
-            if (daysData != null) {
-                List<NormalizedDay> days = new ArrayList<>();
-                for (Map<String, Object> dayData : daysData) {
-                    NormalizedDay day = convertToNormalizedDay(dayData);
-                    if (day != null) {
-                        days.add(day);
-                    }
-                }
-                itinerary.setDays(days);
-            }
-            
-            // Handle agents
-            @SuppressWarnings("unchecked")
-            Map<String, Object> agentsData = (Map<String, Object>) data.get("agents");
-            if (agentsData != null) {
-                Map<String, AgentStatus> agents = new HashMap<>();
-                for (Map.Entry<String, Object> entry : agentsData.entrySet()) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> agentData = (Map<String, Object>) entry.getValue();
-                    AgentStatus agentStatus = new AgentStatus();
-                    agentStatus.setLastRunAt(convertToLong(agentData.get("lastRunAt")));
-                    agentStatus.setStatus((String) agentData.get("status"));
-                    agents.put(entry.getKey(), agentStatus);
-                }
-                itinerary.setAgents(agents);
-            } else {
-                // Set default agents if none exist
-                Map<String, AgentStatus> defaultAgents = new HashMap<>();
-                defaultAgents.put("planner", new AgentStatus());
-                defaultAgents.put("enrichment", new AgentStatus());
-                itinerary.setAgents(defaultAgents);
-            }
-            
-            // Handle settings
-            @SuppressWarnings("unchecked")
-            Map<String, Object> settingsData = (Map<String, Object>) data.get("settings");
-            if (settingsData != null) {
-                // TODO: Convert settings data if needed
-                // For now, set default settings
-                ItinerarySettings settings = new ItinerarySettings();
-                settings.setAutoApply(false);
-                settings.setDefaultScope("trip");
-                itinerary.setSettings(settings);
-            } else {
-                // Set default settings if none exist
-                ItinerarySettings settings = new ItinerarySettings();
-                settings.setAutoApply(false);
-                settings.setDefaultScope("trip");
-                itinerary.setSettings(settings);
-            }
-            
-            return itinerary;
-            
-        } catch (Exception e) {
-            logger.error("Failed to manually convert document to NormalizedItinerary", e);
-            return null;
-        }
-    }
-    
-    /**
-     * Convert a day data map to NormalizedDay
-     */
-    private NormalizedDay convertToNormalizedDay(Map<String, Object> dayData) {
-        try {
-            NormalizedDay day = new NormalizedDay();
-            day.setDayNumber(((Number) dayData.get("dayNumber")).intValue());
-            day.setDate((String) dayData.get("date"));
-            day.setLocation((String) dayData.get("location"));
-            day.setNotes((String) dayData.get("notes"));
-            
-            // Handle nodes with manual conversion
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> nodesData = (List<Map<String, Object>>) dayData.get("nodes");
-            if (nodesData != null) {
-                List<NormalizedNode> nodes = new ArrayList<>();
-                for (Map<String, Object> nodeData : nodesData) {
-                    NormalizedNode node = convertToNormalizedNode(nodeData);
-                    if (node != null) {
-                        nodes.add(node);
-                    }
-                }
-                day.setNodes(nodes);
-            }
-            
-            return day;
-        } catch (Exception e) {
-            logger.error("Failed to convert day data to NormalizedDay", e);
-            return null;
-        }
-    }
-    
-    /**
-     * Convert a node data map to NormalizedNode
-     */
-    private NormalizedNode convertToNormalizedNode(Map<String, Object> nodeData) {
-        try {
-            NormalizedNode node = new NormalizedNode();
-            node.setId((String) nodeData.get("id"));
-            node.setType((String) nodeData.get("type"));
-            node.setTitle((String) nodeData.get("title"));
-            node.setLocked((Boolean) nodeData.get("locked"));
-            node.setBookingRef((String) nodeData.get("bookingRef"));
-            node.setStatus((String) nodeData.get("status"));
-            node.setUpdatedBy((String) nodeData.get("updatedBy"));
-            
-            // Handle updatedAt with conversion
-            node.setUpdatedAt(convertToLong(nodeData.get("updatedAt")));
-            
-            // Handle timing
-            @SuppressWarnings("unchecked")
-            Map<String, Object> timingData = (Map<String, Object>) nodeData.get("timing");
-            if (timingData != null) {
-                NodeTiming timing = new NodeTiming();
-                timing.setStartTime(convertToLong(timingData.get("startTime")));
-                timing.setEndTime(convertToLong(timingData.get("endTime")));
-                timing.setDurationMin(timingData.get("durationMin") != null ? 
-                    ((Number) timingData.get("durationMin")).intValue() : null);
-                node.setTiming(timing);
-            }
-            
-            // Handle location
-            @SuppressWarnings("unchecked")
-            Map<String, Object> locationData = (Map<String, Object>) nodeData.get("location");
-            if (locationData != null) {
-                NodeLocation location = new NodeLocation();
-                location.setName((String) locationData.get("name"));
-                location.setAddress((String) locationData.get("address"));
-                
-                // Handle coordinates
-                @SuppressWarnings("unchecked")
-                Map<String, Object> coordinatesData = (Map<String, Object>) locationData.get("coordinates");
-                if (coordinatesData != null) {
-                    Coordinates coordinates = new Coordinates();
-                    Object latObj = coordinatesData.get("lat");
-                    Object lngObj = coordinatesData.get("lng");
-                    
-                    if (latObj instanceof Number) {
-                        coordinates.setLat(((Number) latObj).doubleValue());
-                    }
-                    if (lngObj instanceof Number) {
-                        coordinates.setLng(((Number) lngObj).doubleValue());
-                    }
-                    
-                    location.setCoordinates(coordinates);
-                }
-                
-                node.setLocation(location);
-            }
-            
-            return node;
-        } catch (Exception e) {
-            logger.error("Failed to convert node data to NormalizedNode", e);
-            return null;
-        }
-    }
-    
-    /**
-     * Convert various time formats to Long (milliseconds since epoch)
-     */
-    private Long convertToLong(Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof Long) {
-            return (Long) value;
-        } else if (value instanceof Number) {
-            return ((Number) value).longValue();
-        } else if (value instanceof java.util.Map) {
-            // Handle legacy Instant format stored as HashMap
-            try {
-                @SuppressWarnings("unchecked")
-                java.util.Map<String, Object> map = (java.util.Map<String, Object>) value;
-                if (map.containsKey("seconds") && map.containsKey("nanos")) {
-                    // Firestore Timestamp format
-                    Long seconds = ((Number) map.get("seconds")).longValue();
-                    Integer nanos = ((Number) map.get("nanos")).intValue();
-                    return seconds * 1000 + nanos / 1_000_000;
-                }
-            } catch (Exception e) {
-                logger.warn("Failed to convert HashMap to Long: {}", value, e);
-            }
-        }
-        return null;
-    }
 }

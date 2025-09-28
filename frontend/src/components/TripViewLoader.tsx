@@ -40,6 +40,7 @@ export function TripViewLoader({
         },
         body: JSON.stringify({
           destination: freshTripData?.endLocation?.name || freshTripData?.destination || 'Unknown',
+          startLocation: freshTripData?.startLocation?.name || 'Unknown',
           startDate: freshTripData?.dates?.start || new Date().toISOString().split('T')[0],
           endDate: freshTripData?.dates?.end || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           party: freshTripData?.travelers || [{ name: 'Traveler', age: 30 }],

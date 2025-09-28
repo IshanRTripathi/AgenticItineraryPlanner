@@ -17,7 +17,7 @@ export interface TripSlice {
   updateCurrentTrip: (updates: Partial<TripData>) => void;
 }
 
-export type AgentStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+export type AgentStatus = 'queued' | 'running' | 'completed' | 'failed';
 
 export interface SseSlice {
   agentProgress: Record<string, { status: AgentStatus; progress: number; message?: string }>;

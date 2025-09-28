@@ -56,7 +56,7 @@ export interface DestinationManagerProps {
 export interface AgentStatus {
   id: string;
   kind: 'planner' | 'places' | 'route' | 'hotels' | 'flights' | 'activities' | 'bus' | 'train' | 'pt' | 'food' | 'photo' | 'packing' | 'cost';
-  status: 'queued' | 'running' | 'succeeded' | 'failed';
+  status: 'queued' | 'running' | 'completed' | 'failed';
   progress: number;
   message?: string;
   step?: string;
