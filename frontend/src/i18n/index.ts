@@ -29,7 +29,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development',
+    debug: false,
     
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],

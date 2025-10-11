@@ -6,18 +6,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.ChangeEngine;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Arrays;
 import com.tripplanner.service.UserDataService;
+import com.tripplanner.service.NodeIdGenerator;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ItineraryJsonService;
+import com.tripplanner.service.LLMResponseHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Planner Agent - Main orchestrator for itinerary generation using Gemini.
@@ -31,21 +34,116 @@ public class PlannerAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
     private final UserDataService userDataService;
+    private final LLMResponseHandler llmResponseHandler;
+    private final NodeIdGenerator nodeIdGenerator;
 
     public PlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                        ItineraryJsonService itineraryJsonService, ChangeEngine changeEngine,
-                       UserDataService userDataService) {
-        super(eventBus, AgentEvent.AgentKind.planner);
+                       UserDataService userDataService, LLMResponseHandler llmResponseHandler,
+                       NodeIdGenerator nodeIdGenerator) {
+        super(eventBus, AgentEvent.AgentKind.PLANNER);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
         this.userDataService = userDataService;
+        this.llmResponseHandler = llmResponseHandler;
+        this.nodeIdGenerator = nodeIdGenerator;
+    }
+    
+    @Override
+    public com.tripplanner.dto.AgentCapabilities getCapabilities() {
+        com.tripplanner.dto.AgentCapabilities capabilities = new com.tripplanner.dto.AgentCapabilities();
+        
+        // PlannerAgent handles initial itinerary creation (pipeline mode)
+        // SkeletonPlannerAgent handles skeleton generation
+        // For chat-based planning, use DayByDayPlannerAgent
+        // For editing, use EditorAgent
+        capabilities.addSupportedTask("create");
+        
+        // Define what data sections this agent works with
+        capabilities.addSupportedDataSection("itinerary");
+        capabilities.addSupportedDataSection("activities");
+        capabilities.addSupportedDataSection("meals");
+        capabilities.addSupportedDataSection("accommodation");
+        capabilities.addSupportedDataSection("transportation");
+        
+        // Set priority (lower = higher priority)
+        capabilities.setPriority(2); // Lower than DayByDayPlannerAgent (priority 5)
+        
+        // NOT chat-enabled - this is for pipeline mode only
+        capabilities.setChatEnabled(false);
+        
+        // Configuration
+        capabilities.setConfigurationValue("maxDays", 14);
+        capabilities.setConfigurationValue("requiresUserInput", true);
+        capabilities.setConfigurationValue("canCreateItinerary", true);
+        capabilities.setConfigurationValue("pipelineOnly", true);
+        
+        return capabilities;
+    }
+    
+    @Override
+    public boolean canHandle(String taskType, Object taskContext) {
+        // PlannerAgent handles its registered task types only
+        return super.canHandle(taskType);
+    }
+    
+    /**
+     * Request ENRICHMENT for a node through the standardized protocol.
+     */
+    protected EnrichmentResponse requestNodeEnrichment(String itineraryId, String nodeId, 
+                                                      EnrichmentRequest.EnrichmentType type, String userId) {
+        String traceId = "planner_enrich_" + System.currentTimeMillis();
+        
+        EnrichmentRequest request = new EnrichmentRequest(
+            traceId, 
+            "planner_" + type.name().toLowerCase() + "_" + nodeId + "_" + (System.currentTimeMillis() / 60000),
+            type, nodeId, itineraryId, userId);
+        
+        // Set context for PLANNER-initiated ENRICHMENT
+        request.addContext("initiator", "PLANNER");
+        request.addContext("operation", "enrich");
+        
+        // Use medium priority for PLANNER requests
+        request.setPriority(EnrichmentRequest.EnrichmentPriority.MEDIUM);
+        
+        try {
+            // For now, we'll create a simple ENRICHMENT response
+            // In a full implementation, this would route to the EnrichmentAgent
+            logger.debug("PlannerAgent requesting ENRICHMENT: {}", request);
+            
+            // Placeholder response - in real implementation would call EnrichmentAgent
+            Map<String, Object> enrichedData = new HashMap<>();
+            enrichedData.put("enrichmentRequested", true);
+            enrichedData.put("requestType", type.name());
+            
+            return EnrichmentResponse.success(traceId, request.getIdempotencyKey(), enrichedData, 0.8);
+            
+        } catch (Exception e) {
+            logger.error("Failed to request ENRICHMENT from PlannerAgent", e);
+            return EnrichmentResponse.failure(traceId, request.getIdempotencyKey(),
+                Arrays.asList(new EnrichmentResponse.EnrichmentError(
+                    "ENRICHMENT_REQUEST_FAILED", 
+                    "Failed to request ENRICHMENT: " + e.getMessage(),
+                    nodeId)));
+        }
     }
 
     @Override
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
-        CreateItineraryReq itineraryReq = request.getData(CreateItineraryReq.class);
+        // Extract CreateItineraryReq from Map or use directly
+        CreateItineraryReq itineraryReq;
+        Object data = request.getData();
+        if (data instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dataMap = (Map<String, Object>) data;
+            itineraryReq = (CreateItineraryReq) dataMap.get("request");
+        } else if (data instanceof CreateItineraryReq) {
+            itineraryReq = (CreateItineraryReq) data;
+        } else {
+            itineraryReq = null;
+        }
 
         if (itineraryReq == null) {
             throw new IllegalArgumentException("PlannerAgent requires non-null CreateItineraryReq");
@@ -92,19 +190,42 @@ public class PlannerAgent extends BaseAgent {
 
         emitProgress(itineraryId, 80, "Parsing generated itinerary", "parsing");
 
-        // Parse and validate the response
+        // Parse and validate the response using LLMResponseHandler
         try {
-            // Check if response is empty or invalid
-            if (response == null || response.trim().isEmpty() || response.trim().equals("{}")) {
-                logger.error("AI client returned empty or invalid response: '{}'", response);
-                throw new RuntimeException("AI client returned empty response. Please check AI provider configuration and credentials.");
+            // Create expected schema for validation
+            com.fasterxml.jackson.databind.JsonNode expectedSchema = createItinerarySchema();
+            
+            // Process response with LLMResponseHandler
+            LLMResponseHandler.ProcessedResponse processedResponse = 
+                llmResponseHandler.processResponse(response, expectedSchema, userPrompt);
+            
+            if (!processedResponse.isSuccess()) {
+                if (processedResponse.needsContinuation()) {
+                    // Handle continuation request
+                    logger.warn("LLM response needs continuation, attempting continuation request");
+                    String continuationResponse = aiClient.generateStructuredContent(
+                        processedResponse.getContinuationPrompt(), schema, systemPrompt);
+                    
+                    // Process continuation response
+                    processedResponse = llmResponseHandler.processResponse(
+                        continuationResponse, expectedSchema, processedResponse.getContinuationPrompt());
+                }
+                
+                if (!processedResponse.isSuccess()) {
+                    logger.error("Failed to process LLM response: {}", processedResponse.getErrors());
+                    throw new RuntimeException("Failed to process AI response: " + 
+                        String.join(", ", processedResponse.getErrors()));
+                }
             }
-
-            // Parse JSON tree first to normalize time fields like "14:00" → "YYYY-MM-DDTHH:mm:00Z"
-            String cleanedResponse = cleanJsonResponse(response);
-            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(cleanedResponse);
-
-            // Validate that the response has the required structure
+            
+            // Log any validation warnings
+            if (!processedResponse.getErrors().isEmpty()) {
+                logger.warn("LLM response validation warnings: {}", processedResponse.getErrors());
+            }
+            
+            com.fasterxml.jackson.databind.JsonNode root = processedResponse.getData();
+            
+            // Additional validation for itinerary structure
             if (!root.has("days") || !root.get("days").isArray() || root.get("days").isEmpty()) {
                 logger.error("AI response missing required 'days' array or empty days: {}", root.toPrettyString());
                 throw new RuntimeException("AI response is missing required itinerary days. Please check AI provider response format.");
@@ -132,7 +253,6 @@ public class PlannerAgent extends BaseAgent {
             emitProgress(itineraryId, 90, "Finalizing itinerary", "finalization");
 
             // Update the existing itinerary with the generated content
-            // Save to both legacy storage (for compatibility) and user-specific storage
             itineraryJsonService.updateItinerary(normalizedItinerary);
 
             // Also save to user-specific storage if userId is available
@@ -328,7 +448,7 @@ public class PlannerAgent extends BaseAgent {
     
     private String buildSystemPrompt() {
         return """
-            You are an expert travel planner AI that creates detailed, personalized itineraries using a normalized structure.
+            You are an expert travel PLANNER AI that creates detailed, personalized itineraries using a normalized structure.
             
             Your responsibilities:
             1. Create day-by-day itineraries based on traveler preferences
@@ -660,9 +780,8 @@ public class PlannerAgent extends BaseAgent {
                 PriceDto priceDto = null;
                 if (node.getCost() != null) {
                     priceDto = new PriceDto(
-                            node.getCost().getAmount() != null ? node.getCost().getAmount() : 0.0,
-                            node.getCost().getCurrency() != null ? node.getCost().getCurrency() : "INR",
-                            node.getCost().getPer() != null ? node.getCost().getPer() : "person"
+                            node.getCost().getAmountPerPerson() != null ? node.getCost().getAmountPerPerson() : 0.0,
+                            node.getCost().getCurrency() != null ? node.getCost().getCurrency() : "INR"
                     );
                 }
                 
@@ -728,17 +847,17 @@ public class PlannerAgent extends BaseAgent {
             ChangeOperation insertOp = new ChangeOperation();
             insertOp.setOp("insert");
             insertOp.setAfter("n_sagrada"); // Mock after node
-            insertOp.setNode(createMockNode("n_new_activity", "activity"));
+            insertOp.setNode(createMockNode(nodeIdGenerator.generateNodeId("activity", 1), "activity"));
             operations.add(insertOp);
         } else if (userRequest.toLowerCase().contains("remove") || userRequest.toLowerCase().contains("delete")) {
             ChangeOperation deleteOp = new ChangeOperation();
             deleteOp.setOp("delete");
-            deleteOp.setId("n_breakfast"); // Mock node to delete
+            deleteOp.setId(nodeIdGenerator.generateNodeId("meal", 1)); // Mock node to delete
             operations.add(deleteOp);
         } else if (userRequest.toLowerCase().contains("move") || userRequest.toLowerCase().contains("change time")) {
             ChangeOperation moveOp = new ChangeOperation();
             moveOp.setOp("move");
-            moveOp.setId("n_sagrada"); // Mock node to move
+            moveOp.setId(nodeIdGenerator.generateNodeId("attraction", 1)); // Mock node to move
             moveOp.setStartTime(java.time.Instant.parse("2025-10-04T10:00:00Z").toEpochMilli());
             moveOp.setEndTime(java.time.Instant.parse("2025-10-04T12:00:00Z").toEpochMilli());
             operations.add(moveOp);
@@ -764,7 +883,7 @@ public class PlannerAgent extends BaseAgent {
         node.setId(id);
         node.setType(type);
         node.setTitle("New " + type);
-        node.setDetails(createNodeDetails("A new " + type + " added by the planner"));
+        node.setDetails(createNodeDetails("A new " + type + " added by the PLANNER"));
         node.setLocked(false);
 
         // Set audit trail fields
@@ -849,6 +968,45 @@ public class PlannerAgent extends BaseAgent {
     private void setNodeAuditFields(NormalizedNode node, String updatedBy) {
         if (node != null) {
             node.markAsUpdated(updatedBy);
+        }
+    }
+    
+    /**
+     * Create JSON schema for itinerary validation.
+     */
+    private com.fasterxml.jackson.databind.JsonNode createItinerarySchema() {
+        try {
+            String schemaJson = """
+                {
+                  "type": "object",
+                  "required": ["itineraryId", "days"],
+                  "properties": {
+                    "itineraryId": { "type": "string" },
+                    "version": { "type": "integer" },
+                    "summary": { "type": "string" },
+                    "currency": { "type": "string" },
+                    "themes": { "type": "array", "items": { "type": "string" } },
+                    "days": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "required": ["dayNumber", "date", "location", "nodes"],
+                        "properties": {
+                          "dayNumber": { "type": "integer" },
+                          "date": { "type": "string" },
+                          "location": { "type": "string" },
+                          "nodes": { "type": "array" }
+                        }
+                      }
+                    }
+                  }
+                }
+                """;
+            return objectMapper.readTree(schemaJson);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to create itinerary schema", e);
+            return null;
         }
     }
 }

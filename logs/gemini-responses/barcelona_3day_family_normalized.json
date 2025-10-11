@@ -40,7 +40,7 @@
           "labels": ["Arrival"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_hotel_checkin",
@@ -72,7 +72,7 @@
           "labels": ["Booked"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_lunch_1",
@@ -104,7 +104,7 @@
           "labels": ["Local Experience"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_gothic_quarter",
@@ -136,7 +136,7 @@
           "labels": ["Must-Visit"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_park_guell",
@@ -168,7 +168,7 @@
           "labels": ["Must-Visit", "Booking Required"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         }
       ]
     },
@@ -207,7 +207,7 @@
           "labels": ["Must-Visit", "Booking Required"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_dinner_1",
@@ -239,7 +239,7 @@
           "labels": ["Local Experience"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         }
       ]
     },
@@ -278,7 +278,7 @@
           "labels": ["Free Activity"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_lunch_2",
@@ -310,7 +310,7 @@
           "labels": ["Local Experience"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         },
         {
           "id": "n_departure",
@@ -342,7 +342,7 @@
           "labels": ["Departure"],
           "status": "planned",
           "updatedBy": "system",
-          "updatedAt": "2025-01-21T19:00:00Z"
+          "updatedAt": 1737486000000
         }
       ]
     }

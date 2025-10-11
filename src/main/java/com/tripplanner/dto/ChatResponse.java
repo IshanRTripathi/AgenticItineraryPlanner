@@ -16,6 +16,7 @@ public class ChatResponse {
     private List<String> warnings;
     private boolean needsDisambiguation;
     private List<NodeCandidate> candidates;
+    private List<String> errors; // List of error messages
     
     // Constructors
     public ChatResponse() {}
@@ -129,6 +130,21 @@ public class ChatResponse {
         this.candidates = candidates;
     }
     
+    public List<String> getErrors() {
+        return errors;
+    }
+    
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
+    
+    /**
+     * Check if this response represents an error.
+     */
+    public boolean isError() {
+        return "ERROR".equals(intent) || (errors != null && !errors.isEmpty());
+    }
+    
     @Override
     public String toString() {
         return "ChatResponse{" +
@@ -141,6 +157,7 @@ public class ChatResponse {
                 ", warnings=" + warnings +
                 ", needsDisambiguation=" + needsDisambiguation +
                 ", candidates=" + candidates +
+                ", errors=" + errors +
                 '}';
     }
 }

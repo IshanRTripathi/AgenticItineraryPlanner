@@ -51,5 +51,24 @@ data/itinerarydb.trace.db
 .env
 .env.local
 .env.production
-.env.local
-frontend/.env.example
+.env.development
+.env.test
+.env.*.local
+# Allow .env.example templates (they should be committed)
+!.env.example
+!frontend/.env.example
+
+# API Keys and Secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*credentials*.json
+*-key.json
+*service-account*.json
+
+# Sensitive Configuration
+application-local.yml
+application-local.properties
+application-secrets.yml
+application-secrets.properties

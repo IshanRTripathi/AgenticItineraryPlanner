@@ -29,12 +29,31 @@ public class ChangeSet {
     @JsonProperty("preferences")
     private ChangePreferences preferences;
     
+    @JsonProperty("agent")
+    private String agent; // Agent that created this changeset
+    
+    @JsonProperty("reason")
+    private String reason; // Reason for the changes
+    
+    @JsonProperty("baseVersion")
+    private Integer baseVersion; // Expected version for conflict detection
+    
+    @JsonProperty("idempotencyKey")
+    private String idempotencyKey; // For duplicate detection
+    
     public ChangeSet() {}
     
     public ChangeSet(String scope, Integer day, List<ChangeOperation> ops) {
         this.scope = scope;
         this.day = day;
         this.ops = ops;
+    }
+    
+    public ChangeSet(String scope, Integer day, List<ChangeOperation> ops, Integer baseVersion) {
+        this.scope = scope;
+        this.day = day;
+        this.ops = ops;
+        this.baseVersion = baseVersion;
     }
     
     // Getters and Setters
@@ -70,6 +89,38 @@ public class ChangeSet {
         this.preferences = preferences;
     }
     
+    public String getAgent() {
+        return agent;
+    }
+    
+    public void setAgent(String agent) {
+        this.agent = agent;
+    }
+    
+    public String getReason() {
+        return reason;
+    }
+    
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+    
+    public Integer getBaseVersion() {
+        return baseVersion;
+    }
+    
+    public void setBaseVersion(Integer baseVersion) {
+        this.baseVersion = baseVersion;
+    }
+    
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+    
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+    
     @Override
     public String toString() {
         return "ChangeSet{" +
@@ -77,6 +128,9 @@ public class ChangeSet {
                 ", day=" + day +
                 ", ops=" + ops +
                 ", preferences=" + preferences +
+                ", agent='" + agent + '\'' +
+                ", reason='" + reason + '\'' +
+                ", baseVersion=" + baseVersion +
                 '}';
     }
 }

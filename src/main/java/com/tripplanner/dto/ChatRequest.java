@@ -24,6 +24,8 @@ public class ChatRequest {
     @NotNull(message = "Auto apply preference is required")
     private boolean autoApply;
     
+    private String userId; // User ID for the request
+    
     // Constructors
     public ChatRequest() {}
     
@@ -85,6 +87,14 @@ public class ChatRequest {
         this.autoApply = autoApply;
     }
     
+    public String getUserId() {
+        return userId;
+    }
+    
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    
     @Override
     public String toString() {
         return "ChatRequest{" +
@@ -94,6 +104,7 @@ public class ChatRequest {
                 ", selectedNodeId='" + selectedNodeId + '\'' +
                 ", text='" + text + '\'' +
                 ", autoApply=" + autoApply +
+                ", userId='" + userId + '\'' +
                 '}';
     }
 }

@@ -117,7 +117,7 @@ substitutions:
   _REGION: 'us-south1'
   _BACKEND_URL: 'https://agentic-itinerary-planner-backend-7cbftguaga-vp.a.run.app'
   _FRONTEND_URL: 'https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app'
-  _GCP_PROJECT_ID: 'tripaiplanner'
+  _GCP_PROJECT_ID: 'tripplanner-bdd3c'
 
 # Build options
 options:

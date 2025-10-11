@@ -3,6 +3,7 @@ package com.tripplanner.controller;
 import com.tripplanner.dto.ChatRequest;
 import com.tripplanner.dto.ChatResponse;
 import com.tripplanner.service.OrchestratorService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class ChatController {
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
     
     private final OrchestratorService orchestratorService;
-    
+
     public ChatController(OrchestratorService orchestratorService) {
         this.orchestratorService = orchestratorService;
     }
@@ -32,7 +33,7 @@ public class ChatController {
      * POST /api/v1/chat/route → 200 → body: ChatRequest → ChatResponse
      */
     @PostMapping("/route")
-    public ResponseEntity<ChatResponse> route(@Valid @RequestBody ChatRequest request) {
+    public ResponseEntity<ChatResponse> route(@Valid @RequestBody ChatRequest request, HttpServletRequest httpRequest) {
         logger.info("=== CHAT CONTROLLER: ROUTING MESSAGE ===");
         logger.info("Itinerary ID: {}", request.getItineraryId());
         logger.info("Scope: {}", request.getScope());
@@ -40,6 +41,10 @@ public class ChatController {
         logger.info("Selected Node ID: {}", request.getSelectedNodeId());
         logger.info("Text: {}", request.getText());
         logger.info("Auto Apply: {}", request.isAutoApply());
+        
+        // Extract userId from request attributes (optional for public endpoint)
+        String userId = (String) httpRequest.getAttribute("userId");
+        logger.info("User ID: {}", userId != null ? userId : "anonymous");
         
         try {
             // Validate request

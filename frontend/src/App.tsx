@@ -22,6 +22,7 @@ import { LoginPage } from './components/LoginPage';
 import { GlobalErrorBoundary } from './components/shared/GlobalErrorBoundary';
 import { KeyboardShortcuts } from './components/shared/KeyboardShortcuts';
 import { TripViewLoader } from './components/TripViewLoader';
+import { AppProviders } from './contexts/AppProviders';
 import './i18n'; // Initialize i18n
 // Data transformation will be handled by the backend
 
@@ -299,13 +300,15 @@ export default function App() {
   return (
     <GlobalErrorBoundary onError={errorHandler}>
       <AuthProvider>
-        <MapProvider>
-          <KeyboardShortcuts>
-            <div className="size-full min-h-screen bg-background">
-              <RoutedApp />
-            </div>
-          </KeyboardShortcuts>
-        </MapProvider>
+        <AppProviders>
+          <MapProvider>
+            <KeyboardShortcuts>
+              <div className="size-full min-h-screen bg-background">
+                <RoutedApp />
+              </div>
+            </KeyboardShortcuts>
+          </MapProvider>
+        </AppProviders>
       </AuthProvider>
     </GlobalErrorBoundary>
   );

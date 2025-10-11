@@ -1,58 +1,81 @@
 package com.tripplanner.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
-import java.util.List;
 
+/**
+ * CORS configuration to allow frontend access to backend APIs.
+ * Enables cross-origin requests from the React frontend.
+ */
 @Configuration
-public class CorsConfig {
+public class CorsConfig implements WebMvcConfigurer {
 
-    @Value("${FRONTEND_URL:}")
-    private String frontendUrl;
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOrigins(
+                    "http://localhost:3000",  // React dev server
+                    "http://localhost:5173",  // Vite dev server
+                    "http://127.0.0.1:3000",
+                    "http://127.0.0.1:5173"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+        
+        // Also allow CORS for WebSocket endpoints
+        registry.addMapping("/ws/**")
+                .allowedOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:5173",
+                    "http://127.0.0.1:3000",
+                    "http://127.0.0.1:5173"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
 
-    @Value("${spring.profiles.active:}")
-    private String activeProfile;
-
+    /**
+     * Additional CORS configuration bean for more complex scenarios.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Environment-aware configuration
-        if ("cloud".equals(activeProfile) || "production".equals(activeProfile)) {
-            // Production: Allow specific frontend URL and Cloud Run patterns
-            if (frontendUrl != null && !frontendUrl.isEmpty()) {
-                configuration.addAllowedOrigin(frontendUrl);
-            }
-            configuration.addAllowedOriginPattern("https://*.run.app");
-            configuration.addAllowedOriginPattern("https://*.a.run.app");
-        } else {
-            // Development: Allow localhost and configured frontend URL
-            List<String> devOrigins = Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:3001", 
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:3001"
-            );
-            configuration.setAllowedOrigins(devOrigins);
-            
-            if (frontendUrl != null && !frontendUrl.isEmpty()) {
-                configuration.addAllowedOrigin(frontendUrl);
-            }
-        }
+        // Allow specific origins
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+            "https://localhost:*",
+            "https://127.0.0.1:*"
+        ));
         
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
+        // Allow all headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Allow all HTTP methods
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"
+        ));
+        
+        // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
+        
+        // Cache preflight response for 1 hour
         configuration.setMaxAge(3600L);
-
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+        
         return source;
     }
 }

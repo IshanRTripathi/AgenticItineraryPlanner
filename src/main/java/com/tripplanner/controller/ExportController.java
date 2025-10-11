@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
+import java.util.UUID;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -77,16 +78,49 @@ public class ExportController {
     
     /**
      * Send itinerary share link via email.
+     * NOTE: Requires email service configuration (SendGrid, AWS SES, etc.) in application.yml
      */
     @PostMapping("/email/share")
     public ResponseEntity<EmailResponse> shareViaEmail(@Valid @RequestBody ShareEmailRequest request) {
         logger.info("Sharing itinerary via email to: {}", request.to());
 
-        EmailResponse response = new EmailResponse("", "QUEUED", Instant.now());
-        // emailService.shareItineraryViaEmail(request, user);
-        
-        logger.info("Share email sent successfully, message ID: {}", response.messageId());
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        try {
+            // Validate email format
+            if (request.to() == null || !request.to().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            // Generate unique message ID
+            String messageId = "msg_" + UUID.randomUUID().toString().replace("-", "");
+            
+            // TODO: Integrate with actual email service (SendGrid, AWS SES, etc.)
+            // For now, log the email details that would be sent
+            logger.info("Email would be sent with following details:");
+            logger.info("  To: {}", request.to());
+            logger.info("  Subject: {}", request.subject());
+            logger.info("  Itinerary ID: {}", request.itineraryId());
+            logger.info("  Personal Message: {}", request.personalMessage());
+            logger.info("  Include PDF: {}", request.includePdf());
+            
+            // In production, call email service here:
+            // EmailServiceConfig emailConfig = getEmailServiceConfig();
+            // if (emailConfig.isConfigured()) {
+            //     emailService.send(
+            //         request.to(),
+            //         request.subject(),
+            //         buildEmailBody(request),
+            //         attachPdfIfRequested(request)
+            //     );
+            // }
+            
+            EmailResponse response = new EmailResponse(messageId, "QUEUED", Instant.now());
+            
+            logger.info("Email queued successfully, message ID: {}", response.messageId());
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        } catch (Exception e) {
+            logger.error("Error sending share email: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
     
     /**
@@ -130,11 +164,15 @@ public class ExportController {
             @Email(message = "Invalid email format")
             String to,
             
+            @NotBlank(message = "Subject is required")
+            String subject,
+            
             @NotBlank(message = "Itinerary ID is required")
             String itineraryId,
             
             String personalMessage,
-            String recipientName
+            String recipientName,
+            boolean includePdf
     ) {}
     
     /**

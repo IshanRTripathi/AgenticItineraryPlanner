@@ -16,7 +16,19 @@ import java.util.Map;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+@com.fasterxml.jackson.annotation.JsonAutoDetect(
+    getterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE,
+    isGetterVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE,
+    fieldVisibility = com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY
+)
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize(builder = ItineraryDto.ItineraryDtoBuilder.class)
 public class ItineraryDto {
+    
+    @com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder(withPrefix = "")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ItineraryDtoBuilder {
+    }
     private String id;
     private String destination;
     private LocalDate startDate;
@@ -38,6 +50,7 @@ public class ItineraryDto {
     @Builder.Default
     private Instant updatedAt = Instant.now();
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonProperty("public")
     private boolean isPublic = false;
     private String shareToken;
     
@@ -106,6 +119,7 @@ public class ItineraryDto {
     /**
      * Get trip duration in days.
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public int getDurationDays() {
         if (startDate == null || endDate == null) {
             return 0;
@@ -116,6 +130,7 @@ public class ItineraryDto {
     /**
      * Check if itinerary is completed.
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isCompleted() {
         return "completed".equals(status);
     }
@@ -123,6 +138,7 @@ public class ItineraryDto {
     /**
      * Check if itinerary generation is in progress.
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isGenerating() {
         return "generating".equals(status);
     }

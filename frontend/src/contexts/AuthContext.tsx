@@ -6,6 +6,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { authService, AuthUser } from '../services/authService';
 import { apiClient } from '../services/apiClient';
+import { itineraryApi } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../state/query/hooks';
 
@@ -36,12 +37,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
       console.log('[AuthContext] Auth state changed:', user ? `User: ${user.email}` : 'No user');
       
-      // Set or clear auth token in API client
+      // Set or clear auth token in API clients
       if (user) {
         try {
           const token = await authService.getIdToken();
           if (token) {
             apiClient.setAuthToken(token);
+            itineraryApi.setAuthToken(token);
             console.log('[AuthContext] Auth token set for API requests');
             
             // Queries will be enabled automatically when components re-render with user state
@@ -49,9 +51,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } catch (error) {
           console.error('[AuthContext] Failed to get ID token:', error);
           apiClient.clearAuthToken();
+          itineraryApi.setAuthToken(null);
         }
       } else {
         apiClient.clearAuthToken();
+        itineraryApi.setAuthToken(null);
         console.log('[AuthContext] Auth token cleared');
         
         // Clear authenticated data
@@ -73,6 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const newToken = await authService.getIdTokenForceRefresh();
         if (newToken) {
           apiClient.setAuthToken(newToken);
+          itineraryApi.setAuthToken(newToken);
           console.log('[AuthContext] Token refreshed proactively');
         }
       } catch (error) {

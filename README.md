@@ -4,12 +4,12 @@ A comprehensive travel planning platform powered by AI agents that creates perso
 
 ## 🏗️ Architecture
 
-**Backend**: Java 17 + Spring Boot 3.x + Firestore + Gemini AI + Razorpay  
+**Backend**: Java 17 + Spring Boot 3.x + Firestore + OpenRouter/Gemini AI + Razorpay  
 **Frontend**: React + TypeScript + Vite + Radix UI + Tailwind CSS  
-**Real-time**: Server-Sent Events (SSE) for agent progress updates  
+**Real-time**: WebSocket + Server-Sent Events (SSE) for agent progress updates  
 **Database**: Google Cloud Firestore  
 **Payments**: Razorpay integration  
-**AI**: Google Gemini for intelligent itinerary generation  
+**AI**: OpenRouter (primary) + Google Gemini (fallback) with resilient client  
 
 ## 🚀 Features
 
@@ -23,13 +23,11 @@ A comprehensive travel planning platform powered by AI agents that creates perso
 - **Public Sharing**: Share itineraries with public links
 
 ### AI Agents
-- **Planner Agent**: Main orchestrator for itinerary generation
+- **Planner Agent**: Main orchestrator for itinerary generation using LLM
+- **Editor Agent**: Handles user-driven modifications and summarization
+- **Enrichment Agent**: Validates and enriches itineraries with place details
+- **Booking Agent**: Manages booking operations across multiple providers
 - **Places Agent**: Discovers locations and local insights
-- **Hotels Agent**: Finds accommodations based on preferences
-- **Activities Agent**: Curates activities and attractions
-- **Food Agent**: Recommends restaurants and local cuisine
-- **Route Agent**: Optimizes travel routes and timing
-- **Cost Agent**: Estimates and optimizes trip costs
 
 ### Tools
 - **Packing List Generator**: AI-generated packing recommendations
@@ -61,6 +59,8 @@ A comprehensive travel planning platform powered by AI agents that creates perso
    GOOGLE_OAUTH_CLIENT_ID=your-google-oauth-client-id
    GOOGLE_OAUTH_CLIENT_SECRET=your-google-oauth-client-secret
    GEMINI_API_KEY=your-gemini-api-key
+   OPENROUTER_API_KEY=your-openrouter-api-key
+   AI_PROVIDER=openrouter
    GCP_PROJECT_ID=your-gcp-project-id
    GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
 
@@ -77,7 +77,7 @@ A comprehensive travel planning platform powered by AI agents that creates perso
    EMAIL_FROM=noreply@yourdomain.com
 
    # Application
-   FRONTEND_URL=http://localhost:3000
+   APP_BASE_URL=http://localhost:8080
    ```
 
 3. **Build and run the backend**
@@ -162,10 +162,11 @@ npm test
 ## 🏗️ Development
 
 ### Backend Development
-- Follow the package structure: `com.tripplanner.{api,service,data,security,providers,agents,util}`
+- Follow the package structure: `com.tripplanner.{service,data,agents,controller,config,dto,exception}`
 - All services are conditionally loaded based on available dependencies
 - Use the `@ConditionalOnBean` annotations for optional features
-- Agent events are broadcasted via SSE for real-time updates
+- Agent events are broadcasted via WebSocket and SSE for real-time updates
+- New architecture includes canonical place registry, durable task system, and conflict resolution
 
 ### Frontend Development
 - React components in `frontend/src/components/`

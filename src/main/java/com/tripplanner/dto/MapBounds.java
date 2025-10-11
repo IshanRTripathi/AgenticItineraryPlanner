@@ -1,11 +1,13 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Map bounds for defining the geographic area of an itinerary.
  * Used for initial map camera positioning and bounds calculation.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MapBounds {
     
     @JsonProperty("south")

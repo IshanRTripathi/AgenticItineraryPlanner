@@ -118,7 +118,7 @@ public class BookingService {
             logger.info("Provider booking completed: {}", booking.getId());
             
             return new BookingController.BookingRes(
-                    booking.getId().toString(),
+                    booking.getBookingId(),
                     booking.getStatus().toString(),
                     providerDetails.getConfirmationId(),
                     booking.getItineraryId(),
@@ -139,8 +139,7 @@ public class BookingService {
         logger.debug("Getting booking: {} for user: {}", bookingId, userId);
         
         try {
-            Long longBookingId = Long.parseLong(bookingId);
-            com.tripplanner.data.entity.Booking booking = bookingRepository.findById(longBookingId)
+            com.tripplanner.data.entity.Booking booking = bookingRepository.findByBookingId(bookingId)
                     .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
             
             // Validate user ownership
@@ -149,7 +148,7 @@ public class BookingService {
             }
             
             return new BookingController.BookingRes(
-                    booking.getId().toString(),
+                    booking.getBookingId(),
                     booking.getStatus().toString(),
                     booking.getProvider() != null ? booking.getProvider().getConfirmationId() : null,
                     booking.getItineraryId(),
@@ -175,7 +174,7 @@ public class BookingService {
             
             return bookings.stream()
                     .map(booking -> new BookingController.BookingRes(
-                            booking.getId().toString(),
+                            booking.getBookingId(),
                             booking.getStatus().toString(),
                             booking.getProvider() != null ? booking.getProvider().getConfirmationId() : null,
                             booking.getItineraryId(),
@@ -197,8 +196,7 @@ public class BookingService {
         logger.info("Canceling booking: {} for user: {}", bookingId, userId);
         
         try {
-            Long longBookingId = Long.parseLong(bookingId);
-            com.tripplanner.data.entity.Booking booking = bookingRepository.findById(longBookingId)
+            com.tripplanner.data.entity.Booking booking = bookingRepository.findByBookingId(bookingId)
                     .orElseThrow(() -> new RuntimeException("Booking not found: " + bookingId));
             
             // Validate user ownership

@@ -11,9 +11,15 @@ import {
   AlertTriangle,
   CheckCircle,
   DollarSign,
-  Star
+  Star,
+  Lock,
+  Edit3,
+  Plus,
+  Move,
+  Trash2
 } from 'lucide-react';
 import { WorkflowNodeData } from '../WorkflowBuilder';
+import { NodeLockToggle } from '../locks/NodeLockToggle';
 
 const getNodeIcon = (type: WorkflowNodeData['type']) => {
   const iconMap = {
@@ -52,10 +58,42 @@ const getValidationIcon = (status?: 'valid' | 'warning' | 'error') => {
   }
 };
 
+const getChangeIcon = (changeType?: 'added' | 'modified' | 'moved' | 'deleted') => {
+  switch (changeType) {
+    case 'added':
+      return <Plus className="h-3 w-3" />;
+    case 'modified':
+      return <Edit3 className="h-3 w-3" />;
+    case 'moved':
+      return <Move className="h-3 w-3" />;
+    case 'deleted':
+      return <Trash2 className="h-3 w-3" />;
+    default:
+      return <Edit3 className="h-3 w-3" />;
+  }
+};
+
+const getChangeColor = (changeType?: 'added' | 'modified' | 'moved' | 'deleted') => {
+  switch (changeType) {
+    case 'added':
+      return 'bg-green-500 text-white';
+    case 'modified':
+      return 'bg-blue-500 text-white';
+    case 'moved':
+      return 'bg-orange-500 text-white';
+    case 'deleted':
+      return 'bg-red-500 text-white';
+    default:
+      return 'bg-blue-500 text-white';
+  }
+};
+
 export function WorkflowNode({ data, selected }: NodeProps<WorkflowNodeData>) {
   const Icon = getNodeIcon(data.type);
   const nodeColor = getNodeColor(data.type);
   const validationIcon = getValidationIcon(data.validation?.status);
+  const changeIcon = getChangeIcon(data.changeType);
+  const changeColor = getChangeColor(data.changeType);
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -73,6 +111,8 @@ export function WorkflowNode({ data, selected }: NodeProps<WorkflowNodeData>) {
         ${selected ? 'border-blue-500 shadow-xl' : 'border-gray-200 hover:border-gray-300'}
         ${data.validation?.status === 'error' ? 'border-red-300' : ''}
         ${data.validation?.status === 'warning' ? 'border-amber-300' : ''}
+        ${data.isLocked ? 'border-red-400 border-4' : ''}
+        ${data.userModified ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
       `}
     >
       {/* Input Handle */}
@@ -88,7 +128,14 @@ export function WorkflowNode({ data, selected }: NodeProps<WorkflowNodeData>) {
           <Icon className="h-4 w-4" />
           <span className="text-sm font-medium">{data.type}</span>
         </div>
-        {validationIcon}
+        <div className="flex items-center gap-1">
+          {validationIcon}
+          {data.userModified && (
+            <div className={`${changeColor} rounded-full p-1`} title={`User ${data.changeType || 'modified'}`}>
+              {changeIcon}
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Content */}
@@ -134,6 +181,21 @@ export function WorkflowNode({ data, selected }: NodeProps<WorkflowNodeData>) {
           )}
         </div>
         
+        {/* User Change Indicator */}
+        {data.userModified && (
+          <div className="mt-2 p-2 rounded text-xs bg-blue-50 border border-blue-200">
+            <div className="flex items-center gap-1 text-blue-700">
+              {changeIcon}
+              <span className="font-medium">User {data.changeType || 'modified'}</span>
+              {data.changeTimestamp && (
+                <span className="text-blue-500 ml-auto">
+                  {new Date(data.changeTimestamp).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Validation Message */}
         {data.validation?.message && data.validation.status !== 'valid' && (
           <div className="mt-2 p-2 rounded text-xs bg-gray-50 border">
@@ -145,6 +207,26 @@ export function WorkflowNode({ data, selected }: NodeProps<WorkflowNodeData>) {
           </div>
         )}
       </div>
+      
+      {/* Lock Toggle */}
+      {data.itineraryId && (
+        <div className="absolute -top-2 -right-2 z-10">
+          <NodeLockToggle
+            nodeId={data.id}
+            itineraryId={data.itineraryId}
+            isLocked={data.isLocked || false}
+            size="sm"
+            variant="icon"
+          />
+        </div>
+      )}
+      
+      {/* Locked Indicator */}
+      {data.isLocked && (
+        <div className="absolute top-2 left-2 bg-red-500 text-white p-1 rounded-full">
+          <Lock className="w-3 h-3" />
+        </div>
+      )}
       
       {/* Output Handle */}
       <Handle

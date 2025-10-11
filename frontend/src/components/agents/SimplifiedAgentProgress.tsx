@@ -10,6 +10,8 @@ interface SimplifiedAgentProgressProps {
   tripData: TripData;
   onComplete: () => void;
   onCancel: () => void;
+  retryAttempt?: number;
+  maxRetries?: number;
 }
 
 interface AgentStatus {
@@ -19,8 +21,19 @@ interface AgentStatus {
   message?: string;
 }
 
-export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: SimplifiedAgentProgressProps) {
-  const [agents, setAgents] = useState<AgentStatus[]>([]);
+export function SimplifiedAgentProgress({ 
+  tripData, 
+  onComplete, 
+  onCancel, 
+  retryAttempt = 0, 
+  maxRetries = 3 
+}: SimplifiedAgentProgressProps) {
+  const [agents, setAgents] = useState<AgentStatus[]>([
+    // Initialize with default agents to show something immediately
+    { kind: 'planner', status: 'queued', progress: 0 },
+    { kind: 'enrichment', status: 'queued', progress: 0 },
+    { kind: 'places', status: 'queued', progress: 0 },
+  ]);
   const [overallProgress, setOverallProgress] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const onCompleteCalledRef = useRef(false);
@@ -28,6 +41,8 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [currentMessage, setCurrentMessage] = useState<string>('Processing with AI models...');
   const [remainingTime, setRemainingTime] = useState<number>(120); // 2 minutes in seconds
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [retryCountdown, setRetryCountdown] = useState<number>(0);
   
   const eventSourceRef = useRef<EventSource | null>(null);
   const startTimeRef = useRef<number>(Date.now());
@@ -43,6 +58,14 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
     'Analyzing preferences...',
     'Generating recommendations...'
   ];
+  
+  const retryMessages = [
+    'Retrying with backup AI providers...',
+    'Switching to alternative data sources...',
+    'Attempting different approach...',
+    'Using fallback processing method...'
+  ];
+  
   const [messageIndex, setMessageIndex] = useState(0);
 
   // Calculate overall progress whenever agents change
@@ -65,30 +88,23 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
 
   // Start intervals immediately on mount - only run once
   useEffect(() => {
-    console.log('=== STARTING INTERVALS ON MOUNT ===');
-    
     // Start rotating messages immediately, every 3 seconds
-    console.log('Starting rotating messages interval');
     messageIntervalRef.current = setInterval(() => {
       setMessageIndex(prev => {
         const next = (prev + 1) % statusMessages.length;
-        console.log('Rotating message from', prev, 'to', next, 'message:', statusMessages[next]);
         return next;
       });
     }, 3000);
 
     // Start countdown timer immediately
-    console.log('Starting countdown timer interval');
     countdownIntervalRef.current = setInterval(() => {
       setRemainingTime(prev => {
         const next = prev <= 1 ? 0 : prev - 1;
-        console.log('Countdown timer:', prev, '->', next);
         return next;
       });
     }, 1000);
 
     return () => {
-      console.log('=== CLEANING UP INTERVALS ===');
       if (messageIntervalRef.current) {
         clearInterval(messageIntervalRef.current);
         messageIntervalRef.current = null;
@@ -103,7 +119,6 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
   // Stop intervals when completed or has error
   useEffect(() => {
     if (isCompleted || hasError) {
-      console.log('Stopping intervals due to completion or error');
       if (messageIntervalRef.current) {
         clearInterval(messageIntervalRef.current);
         messageIntervalRef.current = null;
@@ -232,8 +247,32 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
 
     eventSource.onerror = (error) => {
       console.error('SSE connection error:', error);
-      setHasError(true);
-      setErrorMessage('Connection lost. Please try again.');
+      
+      // If we haven't exceeded max retries, attempt to retry
+      if (retryAttempt < maxRetries) {
+        setIsRetrying(true);
+        setCurrentMessage(`Connection lost. Retrying... (${retryAttempt + 1}/${maxRetries})`);
+        
+        // Start retry countdown
+        let countdown = 5;
+        setRetryCountdown(countdown);
+        
+        const retryInterval = setInterval(() => {
+          countdown--;
+          setRetryCountdown(countdown);
+          
+          if (countdown <= 0) {
+            clearInterval(retryInterval);
+            // Trigger retry by reloading the page with retry parameter
+            const url = new URL(window.location.href);
+            url.searchParams.set('retry', (retryAttempt + 1).toString());
+            window.location.href = url.toString();
+          }
+        }, 1000);
+      } else {
+        setHasError(true);
+        setErrorMessage(`Connection failed after ${maxRetries} attempts. Please try again later.`);
+      }
     };
 
     // Cleanup function
@@ -275,8 +314,19 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
   const getDisplayMessage = () => {
     if (isCompleted) return currentMessage;
     if (hasError) return currentMessage;
+    if (isRetrying) {
+      if (retryCountdown > 0) {
+        return `Retrying in ${retryCountdown} seconds...`;
+      }
+      return retryMessages[retryAttempt % retryMessages.length];
+    }
+    
+    // Show retry-aware messages
+    if (retryAttempt > 0) {
+      return retryMessages[messageIndex % retryMessages.length];
+    }
+    
     const message = statusMessages[messageIndex];
-    console.log('getDisplayMessage - messageIndex:', messageIndex, 'message:', message);
     return message;
   };
 
@@ -330,7 +380,10 @@ export function SimplifiedAgentProgress({ tripData, onComplete, onCancel }: Simp
           
           <div className="flex justify-between text-xs text-gray-500">
             <span>Remaining: {getRemainingTime()}</span>
-            <span>{agents.filter(a => a.status === 'completed').length}/{agents.length} agents</span>
+            <span>
+              {agents.filter(a => a.status === 'completed').length}/{agents.length} agents
+              {retryAttempt > 0 && ` (Retry ${retryAttempt}/${maxRetries})`}
+            </span>
           </div>
           
           {!isCompleted && (

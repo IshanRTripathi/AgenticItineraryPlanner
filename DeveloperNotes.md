@@ -1,0 +1,5 @@
+1. Agent capabilities must be defined using an enum such that there are no issues related to english case and avoid ambiguity
+2. Planner agent doesnot account for requests that can be too large resulting in exceeding token limits, we need to create itineraries day by day and leverage summarisation of past days itineraries summaries to avoid token limits and duplicated locations on different days
+3. In the itinerary creation process, we have sync and async flows. Are we properly showing the UI as soon as we receive the itinerary id?
+4. Current strategy during itinerary generation, Agents complete → Orchestrator detects completion → Next agent starts. What if orchestrator is unable to detect completion and is the next agent starting only after orchestrator detects succesfully? Are there any possibilities of failure in this process? Can we make the backend to  keep on working on the agents and tasks and not dependent on if orchestrator receives the status or not?
+5. 

@@ -7,6 +7,7 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.tripplanner.dto.TripMetadata;
 import com.tripplanner.dto.NormalizedItinerary;
+import com.tripplanner.dto.CanonicalPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ public class UserDataService {
     private static final String ITINERARIES_SUBCOLLECTION = "itineraries";
     private static final String CHATS_SUBCOLLECTION = "chats";
     private static final String REVISIONS_SUBCOLLECTION = "revisions";
+    private static final String CANONICAL_PLACES_COLLECTION = "canonical_places";
 
     /**
      * Get all trip metadata for a specific user
@@ -349,9 +352,8 @@ public class UserDataService {
             DocumentSnapshot document = revisionDoc.get().get();
             
             if (document.exists()) {
-                // For revisions, we still store full NormalizedItinerary objects
-                // This should be converted to use ItineraryJsonService in the future
-                logger.warn("Revision storage still uses legacy format - should be migrated to ItineraryJsonService");
+                // Revisions are not supported in the new system
+                logger.error("Revision storage is not supported in the new system");
                 return Optional.empty();
             } else {
                 logger.warn("Revision {} not found for user: {}, itinerary: {}", revisionId, userId, itineraryId);
@@ -372,13 +374,124 @@ public class UserDataService {
         try {
             logger.info("Fetching all revisions for user: {}, itinerary: {}", userId, itineraryId);
             
-            // For now, return empty list as revisions should be migrated to ItineraryJsonService
-            logger.warn("Revision storage still uses legacy format - should be migrated to ItineraryJsonService");
+            // Revisions are not supported in the new system
+            logger.error("Revision storage is not supported in the new system");
             return List.of();
             
         } catch (Exception e) {
             logger.error("Failed to fetch revisions for user: {}, itinerary: {}", userId, itineraryId, e);
             throw new RuntimeException("Failed to fetch revisions", e);
+        }
+    }
+
+    // ===== CANONICAL PLACE METHODS =====
+    
+    /**
+     * Save a canonical place to the global canonical places collection.
+     */
+    public void saveCanonicalPlace(CanonicalPlace canonicalPlace) {
+        try {
+            logger.info("Saving canonical place: {}", canonicalPlace.getPlaceId());
+            
+            DocumentReference docRef = firestore
+                    .collection(CANONICAL_PLACES_COLLECTION)
+                    .document(canonicalPlace.getPlaceId());
+            
+            docRef.set(canonicalPlace).get();
+            
+            logger.info("Successfully saved canonical place: {}", canonicalPlace.getPlaceId());
+            
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to save canonical place: {}", canonicalPlace.getPlaceId(), e);
+            throw new RuntimeException("Failed to save canonical place", e);
+        }
+    }
+    
+    /**
+     * Get a canonical place by its ID.
+     */
+    public Optional<CanonicalPlace> getCanonicalPlace(String placeId) {
+        try {
+            logger.debug("Fetching canonical place: {}", placeId);
+            
+            DocumentReference docRef = firestore
+                    .collection(CANONICAL_PLACES_COLLECTION)
+                    .document(placeId);
+            
+            DocumentSnapshot document = docRef.get().get();
+            
+            if (document.exists()) {
+                CanonicalPlace canonicalPlace = document.toObject(CanonicalPlace.class);
+                if (canonicalPlace != null) {
+                    logger.debug("Successfully retrieved canonical place: {}", placeId);
+                    return Optional.of(canonicalPlace);
+                } else {
+                    logger.error("Failed to convert canonical place {} to object", placeId);
+                    return Optional.empty();
+                }
+            } else {
+                logger.debug("Canonical place {} not found", placeId);
+                return Optional.empty();
+            }
+            
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to fetch canonical place: {}", placeId, e);
+            return Optional.empty();
+        }
+    }
+    
+    /**
+     * Get all canonical places.
+     * Note: This is inefficient for large datasets and should be paginated in production.
+     */
+    public List<CanonicalPlace> getAllCanonicalPlaces() {
+        try {
+            logger.debug("Fetching all canonical places");
+            
+            QuerySnapshot querySnapshot = firestore
+                    .collection(CANONICAL_PLACES_COLLECTION)
+                    .get()
+                    .get();
+            
+            List<CanonicalPlace> canonicalPlaces = querySnapshot.getDocuments().stream()
+                    .map(doc -> {
+                        try {
+                            return doc.toObject(CanonicalPlace.class);
+                        } catch (Exception e) {
+                            logger.error("Failed to convert document to CanonicalPlace: {}", doc.getId(), e);
+                            return null;
+                        }
+                    })
+                    .filter(place -> place != null)
+                    .collect(Collectors.toList());
+            
+            logger.debug("Found {} canonical places", canonicalPlaces.size());
+            return canonicalPlaces;
+            
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to fetch all canonical places", e);
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * Delete a canonical place by its ID.
+     */
+    public void deleteCanonicalPlace(String placeId) {
+        try {
+            logger.info("Deleting canonical place: {}", placeId);
+            
+            DocumentReference docRef = firestore
+                    .collection(CANONICAL_PLACES_COLLECTION)
+                    .document(placeId);
+            
+            docRef.delete().get();
+            
+            logger.info("Successfully deleted canonical place: {}", placeId);
+            
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Failed to delete canonical place: {}", placeId, e);
+            throw new RuntimeException("Failed to delete canonical place", e);
         }
     }
 

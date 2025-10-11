@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { getErrorMessage, getErrorIcon, getErrorColor } from '../../utils/errorMessages';
+import { getErrorInfo, formatErrorMessage } from '../../utils/errorMessages';
 import { 
   AlertCircle, 
   WifiOff, 
@@ -38,17 +38,14 @@ export function ErrorDisplay({
   className = '',
   showSuggestions = true 
 }: ErrorDisplayProps) {
-  const errorInfo = getErrorMessage(error);
-  const iconName = getErrorIcon(error);
-  const iconColor = getErrorColor(error);
-  const IconComponent = iconMap[iconName] || AlertCircle;
+  const errorMessage = typeof error === 'string' ? error : error.message;
+  const errorInfo = formatErrorMessage(error);
+  const IconComponent = AlertCircle;
 
   const handleAction = () => {
-    if (errorInfo.action === 'Sign In' && onSignIn) {
+    if (onSignIn) {
       onSignIn();
-    } else if (errorInfo.action === 'Go Back' && onGoBack) {
-      onGoBack();
-    } else if (errorInfo.isRetryable && onRetry) {
+    } else if (onRetry) {
       onRetry();
     } else if (onGoBack) {
       onGoBack();
@@ -56,12 +53,16 @@ export function ErrorDisplay({
   };
 
   const getActionIcon = () => {
-    if (errorInfo.action === 'Sign In') return <LogIn className="w-4 h-4" />;
-    if (errorInfo.action === 'Go Back') return <ArrowLeft className="w-4 h-4" />;
-    if (errorInfo.action?.includes('Try Again') || errorInfo.action?.includes('Wait')) {
-      return <RefreshCw className="w-4 h-4" />;
-    }
+    if (onSignIn) return <LogIn className="w-4 h-4" />;
+    if (onGoBack) return <ArrowLeft className="w-4 h-4" />;
     return <RefreshCw className="w-4 h-4" />;
+  };
+
+  const getActionText = () => {
+    if (onSignIn) return 'Sign In';
+    if (onRetry) return 'Try Again';
+    if (onGoBack) return 'Go Back';
+    return 'Close';
   };
 
   return (
@@ -69,11 +70,11 @@ export function ErrorDisplay({
       <Card className="p-8 max-w-lg mx-auto">
         <div className="text-center">
           <div className="mb-6">
-            <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4`}>
-              <IconComponent className={`h-6 w-6 ${iconColor}`} />
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <IconComponent className="h-6 w-6 text-red-600" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {errorInfo.title}
+              Error
             </h3>
             <p className="text-sm text-gray-600 mb-4">
               {errorInfo.message}
@@ -100,10 +101,10 @@ export function ErrorDisplay({
               className="w-full flex items-center justify-center gap-2"
             >
               {getActionIcon()}
-              {errorInfo.action}
+              {getActionText()}
             </Button>
             
-            {errorInfo.isRetryable && onRetry && onGoBack && (
+            {onRetry && onGoBack && (
               <Button 
                 onClick={onGoBack}
                 variant="outline" 
@@ -130,23 +131,21 @@ export function InlineErrorDisplay({
   onRetry, 
   className = '' 
 }: Pick<ErrorDisplayProps, 'error' | 'onRetry' | 'className'>) {
-  const errorInfo = getErrorMessage(error);
-  const iconName = getErrorIcon(error);
-  const iconColor = getErrorColor(error);
-  const IconComponent = iconMap[iconName] || AlertCircle;
+  const errorInfo = formatErrorMessage(error);
+  const IconComponent = AlertCircle;
 
   return (
     <div className={`p-4 bg-red-50 border border-red-200 rounded-lg ${className}`}>
       <div className="flex items-start gap-3">
-        <IconComponent className={`h-5 w-5 ${iconColor} flex-shrink-0 mt-0.5`} />
+        <IconComponent className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           <h4 className="font-medium text-red-800 mb-1">
-            {errorInfo.title}
+            Error
           </h4>
           <p className="text-sm text-red-700 mb-3">
             {errorInfo.message}
           </p>
-          {errorInfo.isRetryable && onRetry && (
+          {onRetry && (
             <Button 
               onClick={onRetry}
               size="sm"

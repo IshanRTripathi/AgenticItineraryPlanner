@@ -189,9 +189,16 @@ export class NormalizedDataTransformer {
       console.log('Node Type:', node.type);
       console.log('Node Title:', node.title);
       console.log('Node Timing:', node.timing);
+      console.log('Node Locked (raw):', node.locked, 'Type:', typeof node.locked);
+      
+      // Warn if node.id is null/undefined (should not happen with centralized ID generation)
+      if (!node.id) {
+        console.warn('Node missing ID - this should not happen with centralized ID generation:', node);
+      }
       
       const result = {
-      id: node.id,
+      locked: node.locked === true, // Only true if explicitly set to true, otherwise false
+      id: node.id, // Backend guarantees non-null IDs
       type: this.mapNodeTypeToComponentType(node.type),
       name: node.title,
       description: this.generateDescriptionFromNode(node),
@@ -342,13 +349,12 @@ export class NormalizedDataTransformer {
   }
 
   /**
-   * Map labels to priority
+   * Map labels to priority - NO LOCK-BASED LOGIC
    */
   private static mapLabelsToPriority(labels: string[], node?: NormalizedNode): 'must-visit' | 'recommended' | 'optional' | 'backup' {
     if (labels.includes('Booking Required')) return 'must-visit';
     if (labels.includes('Booked')) return 'must-visit';
-    // Check if node is locked or has booking reference
-    if (node && (node.locked || node.bookingRef)) return 'must-visit';
+    // Removed lock-based priority logic - lock state is purely manual
     return 'recommended';
   }
 
@@ -666,4 +672,5 @@ export class NormalizedDataTransformer {
       return null;
     }
   }
+
 }

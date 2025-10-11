@@ -16,6 +16,9 @@ public class NodeDetails {
     @JsonProperty("category")
     private String category;
     
+    @JsonProperty("description")
+    private String description;
+    
     @JsonProperty("tags")
     private List<String> tags;
     
@@ -24,6 +27,12 @@ public class NodeDetails {
     
     @JsonProperty("googleMapsUri")
     private String googleMapsUri;
+    
+    @JsonProperty("photos")
+    private List<Photo> photos;
+    
+    @JsonProperty("reviews")
+    private List<Review> reviews;
     
     public NodeDetails() {}
     
@@ -51,6 +60,14 @@ public class NodeDetails {
         this.category = category;
     }
     
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
     public List<String> getTags() {
         return tags;
     }
@@ -75,6 +92,22 @@ public class NodeDetails {
         this.googleMapsUri = googleMapsUri;
     }
     
+    public List<Photo> getPhotos() {
+        return photos;
+    }
+    
+    public void setPhotos(List<Photo> photos) {
+        this.photos = photos;
+    }
+    
+    public List<Review> getReviews() {
+        return reviews;
+    }
+    
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+    
     @Override
     public String toString() {
         return "NodeDetails{" +
@@ -83,6 +116,8 @@ public class NodeDetails {
                 ", tags=" + tags +
                 ", openingHours=" + openingHours +
                 ", googleMapsUri='" + googleMapsUri + '\'' +
+                ", photos=" + photos +
+                ", reviews=" + reviews +
                 '}';
     }
 }

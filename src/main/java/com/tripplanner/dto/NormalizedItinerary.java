@@ -1,11 +1,15 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +17,7 @@ import java.util.Map;
  * Normalized itinerary JSON structure as per MVP contract.
  * This is the single source of truth for itinerary data.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NormalizedItinerary {
     
     @NotBlank
@@ -42,6 +47,9 @@ public class NormalizedItinerary {
     private List<String> themes;
 
     // Explicit trip meta to avoid parsing from summary
+    @JsonProperty("origin")
+    private String origin;
+    
     @JsonProperty("destination")
     private String destination;
 
@@ -72,9 +80,32 @@ public class NormalizedItinerary {
     @JsonProperty("countryCentroid")
     private Coordinates countryCentroid;
     
-    public NormalizedItinerary() {}
+    // Unified structure extensions for agent-friendly architecture
+    @Valid
+    @JsonProperty("agentData")
+    private Map<String, AgentDataSection> agentData;
+    
+    @Valid
+    @JsonProperty("workflow")
+    private WorkflowData workflow;
+    
+    @Valid
+    @JsonProperty("revisions")
+    private List<RevisionRecord> revisions;
+    
+    @Valid
+    @JsonProperty("chat")
+    private List<ChatRecord> chat;
+    
+    public NormalizedItinerary() {
+        // Initialize collections to prevent null pointer exceptions
+        this.agentData = new java.util.HashMap<>();
+        this.revisions = new java.util.ArrayList<>();
+        this.chat = new java.util.ArrayList<>();
+    }
     
     public NormalizedItinerary(String itineraryId, Integer version) {
+        this();
         this.itineraryId = itineraryId;
         this.version = version;
     }
@@ -144,6 +175,14 @@ public class NormalizedItinerary {
         this.themes = themes;
     }
 
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
     public String getDestination() {
         return destination;
     }
@@ -208,6 +247,56 @@ public class NormalizedItinerary {
         this.countryCentroid = countryCentroid;
     }
     
+    public Map<String, AgentDataSection> getAgentData() {
+        return agentData;
+    }
+    
+    public void setAgentData(Map<String, AgentDataSection> agentData) {
+        this.agentData = agentData;
+    }
+    
+    public WorkflowData getWorkflow() {
+        return workflow;
+    }
+    
+    public void setWorkflow(WorkflowData workflow) {
+        this.workflow = workflow;
+    }
+    
+    public List<RevisionRecord> getRevisions() {
+        return revisions;
+    }
+    
+    public void setRevisions(List<RevisionRecord> revisions) {
+        this.revisions = revisions;
+    }
+    
+    public List<ChatRecord> getChat() {
+        return chat;
+    }
+    
+    public void setChat(List<ChatRecord> chat) {
+        this.chat = chat;
+    }
+
+    /**
+     * Initialize collections for unified structure
+     */
+    public void initializeUnifiedStructure() {
+        if (this.agentData == null) {
+            this.agentData = new HashMap<>();
+        }
+        if (this.revisions == null) {
+            this.revisions = new ArrayList<>();
+        }
+        if (this.chat == null) {
+            this.chat = new ArrayList<>();
+        }
+        if (this.workflow == null) {
+            this.workflow = new WorkflowData();
+        }
+    }
+    
     @Override
     public String toString() {
         return "NormalizedItinerary{" +
@@ -219,6 +308,7 @@ public class NormalizedItinerary {
                 ", summary='" + summary + '\'' +
                 ", currency='" + currency + '\'' +
                 ", themes=" + themes +
+                ", origin='" + origin + '\'' +
                 ", destination='" + destination + '\'' +
                 ", startDate='" + startDate + '\'' +
                 ", endDate='" + endDate + '\'' +
@@ -227,6 +317,10 @@ public class NormalizedItinerary {
                 ", agents=" + agents +
                 ", mapBounds=" + mapBounds +
                 ", countryCentroid=" + countryCentroid +
+                ", agentData=" + agentData +
+                ", workflow=" + workflow +
+                ", revisions=" + revisions +
+                ", chat=" + chat +
                 '}';
     }
 }

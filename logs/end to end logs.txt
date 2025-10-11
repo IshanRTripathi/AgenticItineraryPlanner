@@ -1,0 +1,2219 @@
+2025-10-11 22:43:05.372 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-11 22:43:05.372 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-10-11 22:43:05.372 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
+2025-10-11 22:43:05.372 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
+2025-10-11 22:43:05.372 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected FixedThemeResolver
+2025-10-11 22:43:05.372 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@1cca3e8c
+2025-10-11 22:43:05.373 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@66226ab
+2025-10-11 22:43:05.373 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-10-11 22:43:05.373 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-10-11 22:43:05.382 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries
+2025-10-11 22:43:05.401 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries
+2025-10-11 22:43:05.403 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries
+2025-10-11 22:43:05.405 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries", parameters={}
+2025-10-11 22:43:05.406 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#create(CreateItineraryReq, HttpServletRequest)
+2025-10-11 22:43:05.471 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [CreateItineraryReq(destination=Almaty, Kazakhstan, startLocation=Bengaluru, India, startDate=2026-01 (truncated)...]
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Creating itinerary with real-time updates
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Request: CreateItineraryReq(destination=Almaty, Kazakhstan, startLocation=Bengaluru, India, startDate=2026-01-24, endDate=2026-01-27, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=luxury, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en)
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] WARN  com.tripplanner.controller.ItinerariesController - User ID not found in request, using anonymous for development
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === CREATE ITINERARY REQUEST ===
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Request Details:
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Destination: Almaty, Kazakhstan
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Start Date: 2026-01-24
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   End Date: 2026-01-27
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Duration: 4 days
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Budget Tier: luxury
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Language: en
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Party: 1 adults, 0 children, 0 infants, 1 rooms
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Interests: relaxation, nature, cuisine
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService -   Constraints: budgetFriendly
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Creating initial itinerary and establishing ownership synchronously
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - === AGENT ORCHESTRATOR: CREATING INITIAL ITINERARY ===
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - Destination: Almaty, Kazakhstan
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - User ID: anonymous
+2025-10-11 22:43:05.497 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - Step 1: Creating initial itinerary structure
+2025-10-11 22:43:05.498 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - Step 2: Saving initial itinerary to ItineraryJsonService
+2025-10-11 22:43:05.934 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - Step 3: Establishing ownership by saving trip metadata
+2025-10-11 22:43:05.934 [http-nio-8080-exec-2] INFO  com.tripplanner.service.UserDataService - Saving trip metadata it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1 for user: anonymous
+2025-10-11 22:43:07.255 [http-nio-8080-exec-2] INFO  com.tripplanner.service.UserDataService - Successfully saved trip metadata it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1 for user: anonymous
+2025-10-11 22:43:07.255 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - === INITIAL ITINERARY CREATED AND OWNERSHIP ESTABLISHED ===
+2025-10-11 22:43:07.255 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:07.255 [http-nio-8080-exec-2] INFO  com.tripplanner.agents.AgentOrchestrator - User can now access /itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json endpoint
+2025-10-11 22:43:07.256 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Waiting 2 seconds for frontend SSE connection to establish...
+2025-10-11 22:43:09.263 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Starting async itinerary generation for user: anonymous with ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.263 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Generation mode: pipeline
+2025-10-11 22:43:09.263 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Using PIPELINE mode for generation
+2025-10-11 22:43:09.265 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - === CREATE ITINERARY RESPONSE ===
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - User ID: anonymous
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Status: generating
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Mode: pipeline
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Ownership established: YES
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - Async generation started: YES
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - User can now access /itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json
+2025-10-11 22:43:09.266 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ItineraryService - =====================================
+2025-10-11 22:43:09.266 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - === PIPELINE ORCHESTRATOR: STARTING ===
+2025-10-11 22:43:09.266 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.266 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - Destination: Almaty, Kazakhstan, Duration: 4 days
+2025-10-11 22:43:09.266 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - Mode: pipeline, Parallel: true
+2025-10-11 22:43:09.267 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 1: SKELETON GENERATION ===
+2025-10-11 22:43:09.267 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Starting skeleton generation with timeout: 120000 ms
+2025-10-11 22:43:09.267 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Request details: destination=Almaty, Kazakhstan, duration=4 days
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.PipelineOrchestrator - SkeletonPlannerAgent.generateSkeleton() started for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT ===
+2025-10-11 22:43:09.267 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Enhanced itinerary creation response prepared: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1 for user: anonymous
+2025-10-11 22:43:09.267 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - SSE endpoint: /api/v1/itineraries/patches?itineraryId=it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1&executionId=exec_d4e78640-b2c5-4fb8-a272-9c1b9eb2105f
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating lightweight skeleton for 4 days
+2025-10-11 22:43:09.267 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Execution ID: exec_d4e78640-b2c5-4fb8-a272-9c1b9eb2105f
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Destination: Almaty, Kazakhstan
+2025-10-11 22:43:09.267 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Estimated completion: 2025-10-11T22:44:08.266382100
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 04246ccc-bc61-40f2-aed8-8cc3a0274332
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:43:09.267 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 1 structure
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:13:09.267382Z
+2025-10-11 22:43:09.268 [Pipeline-78] WARN  com.tripplanner.service.AgentEventBus - No SSE emitters found for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 1 with minimal prompt
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2505
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:43:09.268 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2890
+2025-10-11 22:43:09.272 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:43:09.276 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-11 22:43:09.278 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryCreationResponse{itinerary=it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1, executionId='exec_d4e78 (truncated)...]
+2025-10-11 22:43:09.287 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-11 22:43:09.288 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:43:09.309 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json
+2025-10-11 22:43:09.310 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:43:09.313 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:43:09.313 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json
+2025-10-11 22:43:09.314 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw", parameters={masked}
+2025-10-11 22:43:09.314 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json
+2025-10-11 22:43:09.314 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json", parameters={}
+2025-10-11 22:43:09.314 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AgentController#streamEvents(String)
+2025-10-11 22:43:09.314 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-11 22:43:09.321 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.321 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS REQUEST ===
+2025-10-11 22:43:09.321 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.321 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Request Time: 22:43:09.321130100
+2025-10-11 22:43:09.321 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Client requesting SSE events connection
+2025-10-11 22:43:09.322 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Created SSE emitter: SseEmitter@1d4431ad
+2025-10-11 22:43:09.322 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === SSE EMITTER REGISTRATION ===
+2025-10-11 22:43:09.322 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.322 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Emitter: SseEmitter@1d4431ad
+2025-10-11 22:43:09.323 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Total emitters for itinerary it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1: 1
+2025-10-11 22:43:09.323 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Total active itineraries: 1
+2025-10-11 22:43:09.323 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ===============================
+2025-10-11 22:43:09.324 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Initial SSE events connection event sent successfully
+2025-10-11 22:43:09.324 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS STREAM ESTABLISHED ===
+2025-10-11 22:43:09.324 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.324 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - Emitter registered and ready
+2025-10-11 22:43:09.324 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.AgentController - =============================
+2025-10-11 22:43:09.326 [http-nio-8080-exec-4] DEBUG o.s.web.context.request.async.WebAsyncManager - Started async request for "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1"
+2025-10-11 22:43:09.330 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Exiting but response remains open for further handling
+2025-10-11 22:43:09.331 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:43:09.681 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.682 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-11 22:43:09.685 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1', version=1, userId='anonym (truncated)...]
+2025-10-11 22:43:09.688 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-11 22:43:09.688 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:43:09.693 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json
+2025-10-11 22:43:09.693 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:43:09.694 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json
+2025-10-11 22:43:09.694 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1/json", parameters={}
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:43:09.694 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw", parameters={masked}
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AgentController#streamEvents(String)
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS REQUEST ===
+2025-10-11 22:43:09.694 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Request Time: 22:43:09.694253300
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Client requesting SSE events connection
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Created SSE emitter: SseEmitter@5e129d1a
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.service.AgentEventBus - === SSE EMITTER REGISTRATION ===
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.service.AgentEventBus - Emitter: SseEmitter@5e129d1a
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.service.AgentEventBus - Total emitters for itinerary it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1: 2
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.service.AgentEventBus - Total active itineraries: 1
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.service.AgentEventBus - ===============================
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Initial SSE events connection event sent successfully
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS STREAM ESTABLISHED ===
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - Emitter registered and ready
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.AgentController - =============================
+2025-10-11 22:43:09.694 [http-nio-8080-exec-7] DEBUG o.s.web.context.request.async.WebAsyncManager - Started async request for "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1"
+2025-10-11 22:43:09.695 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Exiting but response remains open for further handling
+2025-10-11 22:43:09.695 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:43:10.955 [http-nio-8080-exec-8] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:10.955 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-11 22:43:10.955 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1', version=1, userId='anonym (truncated)...]
+2025-10-11 22:43:10.956 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-11 22:43:10.956 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:43:22.475 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:43:22.475 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:43:22.475 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Length: 2725
+2025-10-11 22:43:22.475 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 1,\n  \"date\": \"2026-01-24\",\n  \"location\": \"Almaty, Kazakhstan\",\n  \"summary\": \"Arrival in Almaty, followed by a gentle exploration of nature and an introduction to local cuisine and relaxation.\",\n  \"nodes\": [\n    {\n      \"id\": \"node_1\",\n      \"type\": \"meal\",\n      \"title\": \"Breakfast\",\n      \"location\": {\n        \"name\": \"Accommodation Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"08:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node_2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Spot Visit\",\n      \"location\": {\n        \"name\": \"Almaty Surroundings\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 150\n      }\n    },\n    {\n      \"id\": \"node_3\",\n      \"type\": \"meal\",\n      \"title\": \"Lunch Break\",\n      \"location\": {\n        \"name\": \"Local Restaurant Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node_4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation or Local Experience\",\n      \"location\": {\n        \"name\": \"City Center Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:30\",\n        \"endTime\": \"17:30\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"node_5\",\n      \"type\": \"meal\",\n      \"title\": \"Dinner Experience\",\n      \"location\": {\n        \"name\": \"Upscale Dining District\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:30\",\n        \"endTime\": \"21:00\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"node_6\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"Luxury Hotel\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:30\",\n        \"endTime\": \"08:00\",\n        \"durationMin\": 630\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 679,
+    "candidatesTokenCount": 656,
+    "totalTokenCount": 2576,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 679
+      }
+    ],
+    "thoughtsTokenCount": 1241
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "MpDqaJOiDIex1e8PneXE0Qc"
+}
+
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_563330191_20251011_224322.json
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1893
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 1,
+  "date": "2026-01-24",
+  "location": "Almaty, Kazakhstan",
+  "summary": "Arrival in Almaty, followed by a gentle exploration of nature and an introduction to local cuisine and relaxation.",
+  "nodes": [
+    {
+      "id": "node_1",
+      "type": "meal",
+      "title": "Br...
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 1
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Raw Response: ```json
+{
+  "dayNumber": 1,
+  "date": "2026-01-24",
+  "location": "Almaty, Kazakhstan",
+  "summary": "Arrival in Almaty, followed by a gentle exploration of nature and an introduction to local cuisine and relaxation.",
+  "nodes": [
+    {
+      "id": "node_1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "Accommodation Area"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "node_2",
+      "type": "attraction",
+      "title": "Morning Nature Spot Visit",
+      "location": {
+        "name": "Almaty Surroundings"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "12:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "node_3",
+      "type": "meal",
+      "title": "Lunch Break",
+      "location": {
+        "name": "Local Restaurant Area"
+      },
+      "timing": {
+        "startTime": "12:30",
+        "endTime": "13:30",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "node_4",
+      "type": "attraction",
+      "title": "Afternoon Relaxation or Local Experience",
+      "location": {
+        "name": "City Center Area"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "17:30",
+        "durationMin": 180
+      }
+    },
+    {
+      "id": "node_5",
+      "type": "meal",
+      "title": "Dinner Experience",
+      "location": {
+        "name": "Upscale Dining District"
+      },
+      "timing": {
+        "startTime": "19:30",
+        "endTime": "21:00",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "node_6",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "Luxury Hotel"
+      },
+      "timing": {
+        "startTime": "21:30",
+        "endTime": "08:00",
+        "durationMin": 630
+      }
+    }
+  ]
+}
+```
+2025-10-11 22:43:22.479 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === END SKELETON PLANNER RESPONSE ===
+2025-10-11 22:43:22.480 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Cleaned Response: {
+  "dayNumber": 1,
+  "date": "2026-01-24",
+  "location": "Almaty, Kazakhstan",
+  "summary": "Arrival in Almaty, followed by a gentle exploration of nature and an introduction to local cuisine and relaxation.",
+  "nodes": [
+    {
+      "id": "node_1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "Accommodation Area"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "node_2",
+      "type": "attraction",
+      "title": "Morning Nature Spot Visit",
+      "location": {
+        "name": "Almaty Surroundings"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "12:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "node_3",
+      "type": "meal",
+      "title": "Lunch Break",
+      "location": {
+        "name": "Local Restaurant Area"
+      },
+      "timing": {
+        "startTime": "12:30",
+        "endTime": "13:30",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "node_4",
+      "type": "attraction",
+      "title": "Afternoon Relaxation or Local Experience",
+      "location": {
+        "name": "City Center Area"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "17:30",
+        "durationMin": 180
+      }
+    },
+    {
+      "id": "node_5",
+      "type": "meal",
+      "title": "Dinner Experience",
+      "location": {
+        "name": "Upscale Dining District"
+      },
+      "timing": {
+        "startTime": "19:30",
+        "endTime": "21:00",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "node_6",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "Luxury Hotel"
+      },
+      "timing": {
+        "startTime": "21:30",
+        "endTime": "08:00",
+        "durationMin": 630
+      }
+    }
+  ]
+}
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 1 created and saved
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 04246ccc-bc61-40f2-aed8-8cc3a0274332
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 35
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 2 structure
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:43:22.887 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:13:22.887467400Z
+2025-10-11 22:43:22.890 [Pipeline-78] WARN  com.tripplanner.service.AgentEventBus - Failed to send event to SSE emitter for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1 (client likely disconnected)
+2025-10-11 22:43:22.891 [http-nio-8080-exec-5] DEBUG o.s.web.context.request.async.WebAsyncManager - Servlet container error notification for "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1"
+2025-10-11 22:43:22.891 [http-nio-8080-exec-5] DEBUG o.s.web.context.request.async.WebAsyncManager - Async result set for "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1"
+2025-10-11 22:43:22.891 [http-nio-8080-exec-5] DEBUG o.s.web.context.request.async.WebAsyncManager - Performing async dispatch for "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1"
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 1 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 2 with minimal prompt
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2505
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:43:22.891 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2890
+2025-10-11 22:43:22.892 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:43:22.894 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:43:22.895 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:43:22.895 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - "ASYNC" dispatch for GET "/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw", parameters={masked}
+2025-10-11 22:43:22.895 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - Resume with async result [java.io.IOException: An established connection was aborted by the software in your host machine]
+2025-10-11 22:43:22.898 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Using @ExceptionHandler com.tripplanner.exception.GlobalExceptionHandler#handleGenericException(Exception, WebRequest)
+2025-10-11 22:43:22.898 [http-nio-8080-exec-5] ERROR com.tripplanner.exception.GlobalExceptionHandler - === GENERIC EXCEPTION ===
+2025-10-11 22:43:22.898 [http-nio-8080-exec-5] ERROR com.tripplanner.exception.GlobalExceptionHandler - Type: IOException
+2025-10-11 22:43:22.898 [http-nio-8080-exec-5] ERROR com.tripplanner.exception.GlobalExceptionHandler - Error: An established connection was aborted by the software in your host machine
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:125)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1411)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:732)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:698)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:683)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1273)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:300)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:266)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.flush(OnCommittedResponseWrapper.java:524)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:485)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:315)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:302)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:226)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:217)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:134)
+	at com.tripplanner.service.AgentEventBus.publish(AgentEventBus.java:96)
+	at com.tripplanner.agents.BaseAgent.emitEvent(BaseAgent.java:206)
+	at com.tripplanner.agents.BaseAgent.emitProgress(BaseAgent.java:187)
+	at com.tripplanner.agents.SkeletonPlannerAgent.generateSkeleton(SkeletonPlannerAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executeSkeletonPhase$3(PipelineOrchestrator.java:192)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:43:22.902 [http-nio-8080-exec-5] ERROR com.tripplanner.exception.GlobalExceptionHandler - Request: uri=/api/v1/agents/events/it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:22.902 [http-nio-8080-exec-5] ERROR com.tripplanner.exception.GlobalExceptionHandler - =========================
+2025-10-11 22:43:22.903 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Found 'Content-Type:text/event-stream' in response
+2025-10-11 22:43:22.903 [http-nio-8080-exec-5] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.tripplanner.exception.GlobalExceptionHandler#handleGenericException(Exception, WebRequest)
+org.springframework.http.converter.HttpMessageNotWritableException: No converter for [class com.tripplanner.exception.ErrorResponse] with preset Content-Type 'text/event-stream'
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor.writeWithMessageConverters(AbstractMessageConverterMethodProcessor.java:365)
+	at org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodProcessor.handleReturnValue(HttpEntityMethodProcessor.java:263)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:136)
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:471)
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:73)
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:182)
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:80)
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1360)
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1161)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1106)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:125)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$4(HandlerMappingIntrospector.java:267)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:612)
+	at org.apache.catalina.core.ApplicationDispatcher.doDispatch(ApplicationDispatcher.java:540)
+	at org.apache.catalina.core.ApplicationDispatcher.dispatch(ApplicationDispatcher.java:511)
+	at org.apache.catalina.core.AsyncContextImpl$AsyncRunnable.run(AsyncContextImpl.java:599)
+	at org.apache.catalina.core.AsyncContextImpl.doInternalDispatch(AsyncContextImpl.java:342)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.asyncDispatch(CoyoteAdapter.java:239)
+	at org.apache.coyote.AbstractProcessor.dispatch(AbstractProcessor.java:243)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:57)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:43:22.904 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Unresolved failure from "ASYNC" dispatch: java.io.IOException: An established connection was aborted by the software in your host machine
+2025-10-11 22:43:22.904 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:43:22.905 [http-nio-8080-exec-5] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] threw exception
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:125)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1411)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:732)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:698)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:683)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1273)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:300)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:266)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.flush(OnCommittedResponseWrapper.java:524)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:485)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:315)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:302)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:226)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:217)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:134)
+	at com.tripplanner.service.AgentEventBus.publish(AgentEventBus.java:96)
+	at com.tripplanner.agents.BaseAgent.emitEvent(BaseAgent.java:206)
+	at com.tripplanner.agents.BaseAgent.emitProgress(BaseAgent.java:187)
+	at com.tripplanner.agents.SkeletonPlannerAgent.generateSkeleton(SkeletonPlannerAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executeSkeletonPhase$3(PipelineOrchestrator.java:192)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:43:22.905 [http-nio-8080-exec-5] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:125)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1411)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:732)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:698)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:683)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1273)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:300)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:266)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.flush(OnCommittedResponseWrapper.java:524)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:485)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:315)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:302)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:226)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:217)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:134)
+	at com.tripplanner.service.AgentEventBus.publish(AgentEventBus.java:96)
+	at com.tripplanner.agents.BaseAgent.emitEvent(BaseAgent.java:206)
+	at com.tripplanner.agents.BaseAgent.emitProgress(BaseAgent.java:187)
+	at com.tripplanner.agents.SkeletonPlannerAgent.generateSkeleton(SkeletonPlannerAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executeSkeletonPhase$3(PipelineOrchestrator.java:192)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:43:32.101 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:43:32.101 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:43:32.101 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Length: 2729
+2025-10-11 22:43:32.101 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 2,\n  \"date\": \"2026-01-25\",\n  \"location\": \"Almaty, Kazakhstan\",\n  \"summary\": \"A day focused on relaxation and nature, with opportunities to enjoy local cuisine.\",\n  \"nodes\": [\n    {\n      \"id\": \"day2-node1\",\n      \"type\": \"meal\",\n      \"title\": \"Breakfast at Accommodation\",\n      \"location\": {\n        \"name\": \"Accommodation Dining\"\n      },\n      \"timing\": {\n        \"startTime\": \"08:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"day2-node2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Exploration\",\n      \"location\": {\n        \"name\": \"Scenic Natural Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 150\n      }\n    },\n    {\n      \"id\": \"day2-node3\",\n      \"type\": \"meal\",\n      \"title\": \"Lunch Break\",\n      \"location\": {\n        \"name\": \"Local Restaurant\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"day2-node4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation Activity\",\n      \"location\": {\n        \"name\": \"Wellness Center or Park\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:30\",\n        \"endTime\": \"17:00\",\n        \"durationMin\": 150\n      }\n    },\n    {\n      \"id\": \"day2-node5\",\n      \"type\": \"meal\",\n      \"title\": \"Dinner Experience\",\n      \"location\": {\n        \"name\": \"Fine Dining Establishment\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:30\",\n        \"endTime\": \"21:00\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day2-node6\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"Luxury Hotel\"\n      },\n      \"timing\": {\n        \"startTime\": \"22:00\",\n        \"endTime\": \"08:00\",\n        \"durationMin\": 600\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 679,
+    "candidatesTokenCount": 659,
+    "totalTokenCount": 1888,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 679
+      }
+    ],
+    "thoughtsTokenCount": 550
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "O5DqaM_fMv2o1e8P0OSHqAg"
+}
+
+2025-10-11 22:43:32.102 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_2127184653_20251011_224332.json
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1898
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 2,
+  "date": "2026-01-25",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation and nature, with opportunities to enjoy local cuisine.",
+  "nodes": [
+    {
+      "id": "day2-node1",
+      "type": "meal",
+      "title": "Breakfast at Accommodation",
+ ...
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 2
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Raw Response: ```json
+{
+  "dayNumber": 2,
+  "date": "2026-01-25",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation and nature, with opportunities to enjoy local cuisine.",
+  "nodes": [
+    {
+      "id": "day2-node1",
+      "type": "meal",
+      "title": "Breakfast at Accommodation",
+      "location": {
+        "name": "Accommodation Dining"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day2-node2",
+      "type": "attraction",
+      "title": "Morning Nature Exploration",
+      "location": {
+        "name": "Scenic Natural Area"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "12:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "day2-node3",
+      "type": "meal",
+      "title": "Lunch Break",
+      "location": {
+        "name": "Local Restaurant"
+      },
+      "timing": {
+        "startTime": "12:30",
+        "endTime": "13:30",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day2-node4",
+      "type": "attraction",
+      "title": "Afternoon Relaxation Activity",
+      "location": {
+        "name": "Wellness Center or Park"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "17:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "day2-node5",
+      "type": "meal",
+      "title": "Dinner Experience",
+      "location": {
+        "name": "Fine Dining Establishment"
+      },
+      "timing": {
+        "startTime": "19:30",
+        "endTime": "21:00",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day2-node6",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "Luxury Hotel"
+      },
+      "timing": {
+        "startTime": "22:00",
+        "endTime": "08:00",
+        "durationMin": 600
+      }
+    }
+  ]
+}
+```
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === END SKELETON PLANNER RESPONSE ===
+2025-10-11 22:43:32.103 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Cleaned Response: {
+  "dayNumber": 2,
+  "date": "2026-01-25",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation and nature, with opportunities to enjoy local cuisine.",
+  "nodes": [
+    {
+      "id": "day2-node1",
+      "type": "meal",
+      "title": "Breakfast at Accommodation",
+      "location": {
+        "name": "Accommodation Dining"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day2-node2",
+      "type": "attraction",
+      "title": "Morning Nature Exploration",
+      "location": {
+        "name": "Scenic Natural Area"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "12:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "day2-node3",
+      "type": "meal",
+      "title": "Lunch Break",
+      "location": {
+        "name": "Local Restaurant"
+      },
+      "timing": {
+        "startTime": "12:30",
+        "endTime": "13:30",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day2-node4",
+      "type": "attraction",
+      "title": "Afternoon Relaxation Activity",
+      "location": {
+        "name": "Wellness Center or Park"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "17:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "day2-node5",
+      "type": "meal",
+      "title": "Dinner Experience",
+      "location": {
+        "name": "Fine Dining Establishment"
+      },
+      "timing": {
+        "startTime": "19:30",
+        "endTime": "21:00",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day2-node6",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "Luxury Hotel"
+      },
+      "timing": {
+        "startTime": "22:00",
+        "endTime": "08:00",
+        "durationMin": 600
+      }
+    }
+  ]
+}
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 2 created and saved
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 04246ccc-bc61-40f2-aed8-8cc3a0274332
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 50
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 3 structure
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:43:32.523 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:13:32.523821700Z
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 3 with minimal prompt
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2505
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2890
+2025-10-11 22:43:32.524 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:43:37.209 [MessageBroker-1] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 0 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(0)-CONNECTED(0)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], outboundChannel[pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+2025-10-11 22:43:41.774 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:43:41.774 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:43:41.774 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Length: 2650
+2025-10-11 22:43:41.774 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 3,\n  \"date\": \"2026-01-26\",\n  \"location\": \"Almaty, Kazakhstan\",\n  \"summary\": \"A day focused on relaxation, nature, and local cuisine.\",\n  \"nodes\": [\n    {\n      \"id\": \"day3_node1\",\n      \"type\": \"meal\",\n      \"title\": \"Breakfast\",\n      \"location\": {\n        \"name\": \"Breakfast Spot\"\n      },\n      \"timing\": {\n        \"startTime\": \"08:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"day3_node2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Exploration\",\n      \"location\": {\n        \"name\": \"Nature Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 150\n      }\n    },\n    {\n      \"id\": \"day3_node3\",\n      \"type\": \"meal\",\n      \"title\": \"Lunch Break\",\n      \"location\": {\n        \"name\": \"Lunch Spot\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"day3_node4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation Activity\",\n      \"location\": {\n        \"name\": \"Relaxation Venue\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:30\",\n        \"endTime\": \"17:30\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"day3_node5\",\n      \"type\": \"meal\",\n      \"title\": \"Dinner Experience\",\n      \"location\": {\n        \"name\": \"Dinner Restaurant\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:00\",\n        \"endTime\": \"20:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day3_node6\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"Luxury Hotel\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:00\",\n        \"endTime\": \"08:00\",\n        \"durationMin\": 660\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 679,
+    "candidatesTokenCount": 651,
+    "totalTokenCount": 1927,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 679
+      }
+    ],
+    "thoughtsTokenCount": 597
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "RZDqaM2FH-qV1e8PgoXB6Qc"
+}
+
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-603928181_20251011_224341.json
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1819
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 3,
+  "date": "2026-01-26",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation, nature, and local cuisine.",
+  "nodes": [
+    {
+      "id": "day3_node1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "Breakfas...
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 3
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Raw Response: ```json
+{
+  "dayNumber": 3,
+  "date": "2026-01-26",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation, nature, and local cuisine.",
+  "nodes": [
+    {
+      "id": "day3_node1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "Breakfast Spot"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day3_node2",
+      "type": "attraction",
+      "title": "Morning Nature Exploration",
+      "location": {
+        "name": "Nature Area"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "12:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "day3_node3",
+      "type": "meal",
+      "title": "Lunch Break",
+      "location": {
+        "name": "Lunch Spot"
+      },
+      "timing": {
+        "startTime": "12:30",
+        "endTime": "13:30",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day3_node4",
+      "type": "attraction",
+      "title": "Afternoon Relaxation Activity",
+      "location": {
+        "name": "Relaxation Venue"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "17:30",
+        "durationMin": 180
+      }
+    },
+    {
+      "id": "day3_node5",
+      "type": "meal",
+      "title": "Dinner Experience",
+      "location": {
+        "name": "Dinner Restaurant"
+      },
+      "timing": {
+        "startTime": "19:00",
+        "endTime": "20:30",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day3_node6",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "Luxury Hotel"
+      },
+      "timing": {
+        "startTime": "21:00",
+        "endTime": "08:00",
+        "durationMin": 660
+      }
+    }
+  ]
+}
+```
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === END SKELETON PLANNER RESPONSE ===
+2025-10-11 22:43:41.776 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Cleaned Response: {
+  "dayNumber": 3,
+  "date": "2026-01-26",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation, nature, and local cuisine.",
+  "nodes": [
+    {
+      "id": "day3_node1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "Breakfast Spot"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day3_node2",
+      "type": "attraction",
+      "title": "Morning Nature Exploration",
+      "location": {
+        "name": "Nature Area"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "12:00",
+        "durationMin": 150
+      }
+    },
+    {
+      "id": "day3_node3",
+      "type": "meal",
+      "title": "Lunch Break",
+      "location": {
+        "name": "Lunch Spot"
+      },
+      "timing": {
+        "startTime": "12:30",
+        "endTime": "13:30",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day3_node4",
+      "type": "attraction",
+      "title": "Afternoon Relaxation Activity",
+      "location": {
+        "name": "Relaxation Venue"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "17:30",
+        "durationMin": 180
+      }
+    },
+    {
+      "id": "day3_node5",
+      "type": "meal",
+      "title": "Dinner Experience",
+      "location": {
+        "name": "Dinner Restaurant"
+      },
+      "timing": {
+        "startTime": "19:00",
+        "endTime": "20:30",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day3_node6",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "Luxury Hotel"
+      },
+      "timing": {
+        "startTime": "21:00",
+        "endTime": "08:00",
+        "durationMin": 660
+      }
+    }
+  ]
+}
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 3 created and saved
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 04246ccc-bc61-40f2-aed8-8cc3a0274332
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 65
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 4 structure
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:43:42.205 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:13:42.205011500Z
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 4 with minimal prompt
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2505
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2890
+2025-10-11 22:43:42.206 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:43:58.115 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:43:58.115 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:43:58.115 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Length: 2980
+2025-10-11 22:43:58.115 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 4,\n  \"date\": \"2026-01-27\",\n  \"location\": \"Almaty, Kazakhstan\",\n  \"summary\": \"A day focused on relaxation, nature, and exquisite cuisine experiences.\",\n  \"nodes\": [\n    {\n      \"id\": \"day4-node1\",\n      \"type\": \"meal\",\n      \"title\": \"Breakfast\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"08:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"day4-node2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Experience\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:30\",\n        \"endTime\": \"11:30\",\n        \"durationMin\": 120\n      }\n    },\n    {\n      \"id\": \"day4-node3\",\n      \"type\": \"transport\",\n      \"title\": \"Travel to Lunch Spot\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"11:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 30\n      }\n    },\n    {\n      \"id\": \"day4-node4\",\n      \"type\": \"meal\",\n      \"title\": \"Luxury Lunch Spot\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:00\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day4-node5\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation Activity\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:30\",\n        \"endTime\": \"16:30\",\n        \"durationMin\": 120\n      }\n    },\n    {\n      \"id\": \"day4-node6\",\n      \"type\": \"meal\",\n      \"title\": \"Farewell Dinner\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:00\",\n        \"endTime\": \"20:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day4-node7\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:00\",\n        \"endTime\": \"08:00\",\n        \"durationMin\": 660\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 679,
+    "candidatesTokenCount": 750,
+    "totalTokenCount": 3039,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 679
+      }
+    ],
+    "thoughtsTokenCount": 1610
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "VZDqaMbnM6ma1e8Pr-nKiAY"
+}
+
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_959926281_20251011_224358.json
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content length: 2105
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 4,
+  "date": "2026-01-27",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation, nature, and exquisite cuisine experiences.",
+  "nodes": [
+    {
+      "id": "day4-node1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "...
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 4
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Raw Response: ```json
+{
+  "dayNumber": 4,
+  "date": "2026-01-27",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation, nature, and exquisite cuisine experiences.",
+  "nodes": [
+    {
+      "id": "day4-node1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day4-node2",
+      "type": "attraction",
+      "title": "Morning Nature Experience",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "11:30",
+        "durationMin": 120
+      }
+    },
+    {
+      "id": "day4-node3",
+      "type": "transport",
+      "title": "Travel to Lunch Spot",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "11:30",
+        "endTime": "12:00",
+        "durationMin": 30
+      }
+    },
+    {
+      "id": "day4-node4",
+      "type": "meal",
+      "title": "Luxury Lunch Spot",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "12:00",
+        "endTime": "13:30",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day4-node5",
+      "type": "attraction",
+      "title": "Afternoon Relaxation Activity",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "16:30",
+        "durationMin": 120
+      }
+    },
+    {
+      "id": "day4-node6",
+      "type": "meal",
+      "title": "Farewell Dinner",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "19:00",
+        "endTime": "20:30",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day4-node7",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "21:00",
+        "endTime": "08:00",
+        "durationMin": 660
+      }
+    }
+  ]
+}
+```
+2025-10-11 22:43:58.116 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === END SKELETON PLANNER RESPONSE ===
+2025-10-11 22:43:58.117 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Cleaned Response: {
+  "dayNumber": 4,
+  "date": "2026-01-27",
+  "location": "Almaty, Kazakhstan",
+  "summary": "A day focused on relaxation, nature, and exquisite cuisine experiences.",
+  "nodes": [
+    {
+      "id": "day4-node1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "08:00",
+        "endTime": "09:00",
+        "durationMin": 60
+      }
+    },
+    {
+      "id": "day4-node2",
+      "type": "attraction",
+      "title": "Morning Nature Experience",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "09:30",
+        "endTime": "11:30",
+        "durationMin": 120
+      }
+    },
+    {
+      "id": "day4-node3",
+      "type": "transport",
+      "title": "Travel to Lunch Spot",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "11:30",
+        "endTime": "12:00",
+        "durationMin": 30
+      }
+    },
+    {
+      "id": "day4-node4",
+      "type": "meal",
+      "title": "Luxury Lunch Spot",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "12:00",
+        "endTime": "13:30",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day4-node5",
+      "type": "attraction",
+      "title": "Afternoon Relaxation Activity",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "14:30",
+        "endTime": "16:30",
+        "durationMin": 120
+      }
+    },
+    {
+      "id": "day4-node6",
+      "type": "meal",
+      "title": "Farewell Dinner",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "19:00",
+        "endTime": "20:30",
+        "durationMin": 90
+      }
+    },
+    {
+      "id": "day4-node7",
+      "type": "accommodation",
+      "title": "Overnight Stay",
+      "location": {
+        "name": "General Area"
+      },
+      "timing": {
+        "startTime": "21:00",
+        "endTime": "08:00",
+        "durationMin": 660
+      }
+    }
+  ]
+}
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 4 created and saved
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 04246ccc-bc61-40f2-aed8-8cc3a0274332
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Skeleton complete
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_complete
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:13:58.585158500Z
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:58.585 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:43:59.863 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON COMPLETE ===
+2025-10-11 22:43:59.864 [Pipeline-78] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generated 4 days with 25 total node placeholders
+2025-10-11 22:43:59.864 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Skeleton generation completed successfully for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:59.864 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 1 complete: 4 days created (50598 ms)
+2025-10-11 22:43:59.864 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 2: POPULATION ===
+2025-10-11 22:43:59.864 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Running population agents in PARALLEL
+2025-10-11 22:43:59.864 [Pipeline-94] INFO  com.tripplanner.service.PipelineOrchestrator - [ActivityAgent] Starting...
+2025-10-11 22:43:59.864 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - === ACTIVITY AGENT ===
+2025-10-11 22:43:59.864 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Populating attraction nodes for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:59.864 [Pipeline-78] INFO  com.tripplanner.service.PipelineOrchestrator - [TransportAgent] Starting...
+2025-10-11 22:43:59.864 [Pipeline-95] INFO  com.tripplanner.service.PipelineOrchestrator - [MealAgent] Starting...
+2025-10-11 22:43:59.864 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT ===
+2025-10-11 22:43:59.864 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - === MEAL AGENT ===
+2025-10-11 22:43:59.864 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Populating transport nodes for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:59.864 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Populating meal nodes for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:43:59.864 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Found 8 attraction nodes to populate
+2025-10-11 22:43:59.864 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Found 1 transport nodes to populate
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Calling AI to populate 1 transport segments
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Found 12 meal nodes to populate
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Calling AI to populate 8 attractions
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2645
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel expert specializing in attractions and activities.
+
+Your task: Suggest SPECIFIC attractions for placeholder activity nodes.
+
+CRITICAL: Use the EXACT node IDs provided in the user prom...
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2031
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Calling AI to populate 12 meals
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a transportation and logistics expert for travel planning.
+
+Your task: Suggest SPECIFIC transport modes and routes for getting around.
+
+Guidelines:
+1. Suggest practical transport modes based o...
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 3108
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a culinary travel expert specializing in dining recommendations.
+
+Your task: Suggest SPECIFIC restaurants and dining places for meal slots.
+
+CRITICAL: Use the EXACT node IDs provided in the us...
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2960
+2025-10-11 22:43:59.865 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3442
+2025-10-11 22:43:59.865 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2336
+2025-10-11 22:43:59.865 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:44:08.092 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:44:08.092 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:44:08.092 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Length: 1200
+2025-10-11 22:44:08.092 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"transports\": [\n    {\n      \"nodeId\": \"day4-node3\",\n      \"title\": \"Rideshare to Almaty International Airport (ALA)\",\n      \"description\": \"For convenient and direct travel from your accommodation in Almaty (e.g., city center hotel) to Almaty International Airport (ALA) for your departure. Rideshare apps like Yandex.Taxi are widely used and offer transparent pricing and door-to-door convenience, which is ideal when traveling with luggage. Book directly through the app. Allow for potential traffic, especially during evening hours.\",\n      \"mode\": \"rideshare\",\n      \"durationMinutes\": 40\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 523,
+    "candidatesTokenCount": 157,
+    "totalTokenCount": 1621,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 523
+      }
+    ],
+    "thoughtsTokenCount": 941
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "X5DqaPK4MsKa1e8Pvp-Z8Qc"
+}
+
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-298862961_20251011_224408.json
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content length: 620
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "transports": [
+    {
+      "nodeId": "day4-node3",
+      "title": "Rideshare to Almaty International Airport (ALA)",
+      "description": "For convenient and direct travel from your accommodation in Almaty (e.g., city center hotel) to Almaty International Airport (ALA) for your departur...
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Contexts to populate: 1
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Raw Response: ```json
+{
+  "transports": [
+    {
+      "nodeId": "day4-node3",
+      "title": "Rideshare to Almaty International Airport (ALA)",
+      "description": "For convenient and direct travel from your accommodation in Almaty (e.g., city center hotel) to Almaty International Airport (ALA) for your departure. Rideshare apps like Yandex.Taxi are widely used and offer transparent pricing and door-to-door convenience, which is ideal when traveling with luggage. Book directly through the app. Allow for potential traffic, especially during evening hours.",
+      "mode": "rideshare",
+      "durationMinutes": 40
+    }
+  ]
+}
+```
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - === END TRANSPORT AGENT RESPONSE ===
+2025-10-11 22:44:08.093 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Cleaned Response: {
+  "transports": [
+    {
+      "nodeId": "day4-node3",
+      "title": "Rideshare to Almaty International Airport (ALA)",
+      "description": "For convenient and direct travel from your accommodation in Almaty (e.g., city center hotel) to Almaty International Airport (ALA) for your departure. Rideshare apps like Yandex.Taxi are widely used and offer transparent pricing and door-to-door convenience, which is ideal when traveling with luggage. Book directly through the app. Allow for potential traffic, especially during evening hours.",
+      "mode": "rideshare",
+      "durationMinutes": 40
+    }
+  ]
+}
+2025-10-11 22:44:08.543 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Saved itinerary with populated transport
+2025-10-11 22:44:08.543 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT COMPLETE ===
+2025-10-11 22:44:08.543 [Pipeline-78] INFO  com.tripplanner.agents.TransportAgent - Populated 1 transport segments
+2025-10-11 22:44:08.543 [Pipeline-78] INFO  com.tripplanner.service.PipelineOrchestrator - [TransportAgent] Complete
+2025-10-11 22:44:21.457 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:44:21.457 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:44:21.457 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Response Length: 4647
+2025-10-11 22:44:21.457 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"attractions\": [\n    {\n      \"nodeId\": \"node_2\",\n      \"title\": \"Panfilov Park & Zenkov Cathedral\",\n      \"description\": \"Stroll through the tranquil Panfilov Park, a beautiful green oasis dedicated to the 28 Panfilov Guardsmen. Admire the stunning Zenkov Cathedral, one of the world's tallest wooden buildings, showcasing intricate Russian Orthodox architecture without a single nail.\",\n      \"category\": \"landmark\",\n      \"durationMinutes\": 120,\n      \"locationName\": \"Almaty City Center\"\n    },\n    {\n      \"nodeId\": \"node_4\",\n      \"title\": \"Kok Tobe Hill\",\n      \"description\": \"Ascend to Kok Tobe Hill via a scenic cable car ride for breathtaking panoramic views of Almaty city against the backdrop of the Tian Shan mountains. Enjoy various attractions at the summit, including a small zoo, restaurants, and the iconic TV Tower.\",\n      \"category\": \"landmark\",\n      \"durationMinutes\": 180,\n      \"locationName\": \"Kok Tobe, Almaty\"\n    },\n    {\n      \"nodeId\": \"day2-node2\",\n      \"title\": \"Green Bazaar (Zelyony Bazaar)\",\n      \"description\": \"Immerse yourself in the vibrant atmosphere of Almaty's Green Bazaar. This bustling market is a sensory delight, offering a wide array of fresh local produce, spices, traditional Kazakh sweets, and unique souvenirs. It's a perfect place to experience local life and taste authentic flavors.\",\n      \"category\": \"shopping\",\n      \"durationMinutes\": 120,\n      \"locationName\": \"Almaty City Center\"\n    },\n    {\n      \"nodeId\": \"day2-node4\",\n      \"title\": \"First President's Park\",\n      \"description\": \"Relax and unwind in the expansive First President's Park, a beautifully landscaped urban park featuring wide avenues, meticulously maintained gardens, and impressive fountains. It's an ideal spot for a leisurely stroll, enjoying the fresh air and stunning views of the mountains.\",\n      \"category\": \"park\",\n      \"durationMinutes\": 150,\n      \"locationName\": \"Southern Almaty\"\n    },\n    {\n      \"nodeId\": \"day3_node2\",\n      \"title\": \"Shymbulak Ski Resort\",\n      \"description\": \"Take a scenic gondola ride up to Shymbulak Ski Resort, nestled high in the Zailiysky Alatau mountains. Even outside of ski season, the resort offers stunning alpine views, fresh mountain air, and hiking opportunities, making it a perfect escape into nature.\",\n      \"category\": \"nature\",\n      \"durationMinutes\": 240,\n      \"locationName\": \"Medeu Valley, Almaty\"\n    },\n    {\n      \"nodeId\": \"day3_node4\",\n      \"title\": \"Medeu Skating Rink\",\n      \"description\": \"Visit the iconic Medeu Skating Rink, the highest-altitude outdoor skating rink in the world, located in a picturesque mountain valley. Even if you're not skating, the impressive architecture and surrounding natural beauty make it a fantastic spot for photos and a leisurely walk.\",\n      \"category\": \"landmark\",\n      \"durationMinutes\": 90,\n      \"locationName\": \"Medeu Valley, Almaty\"\n    },\n    {\n      \"nodeId\": \"day4-node2\",\n      \"title\": \"Arasan Baths\",\n      \"description\": \"Indulge in a relaxing and traditional Kazakh bath experience at Arasan Baths, one of Central Asia's most luxurious bathhouses. Choose from various thermal rooms, including Russian, Finnish, and Turkish, for a rejuvenating and culturally immersive experience.\",\n      \"category\": \"experience\",\n      \"durationMinutes\": 180,\n      \"locationName\": \"Almaty City Center\"\n    },\n    {\n      \"nodeId\": \"day4-node5\",\n      \"title\": \"Zhibek Zholy Pedestrian Street\",\n      \"description\": \"Enjoy a relaxed evening stroll along Zhibek Zholy Pedestrian Street, a lively hub in the city center. This vibrant street is perfect for people-watching, browsing local shops for last-minute souvenirs, or enjoying a coffee at one of its many charming cafes.\",\n      \"category\": \"shopping\",\n      \"durationMinutes\": 120,\n      \"locationName\": \"Almaty City Center\"\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 784,
+    "candidatesTokenCount": 998,
+    "totalTokenCount": 3904,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 784
+      }
+    ],
+    "thoughtsTokenCount": 2122
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "bZDqaLDCC86j1e8PvuaZgQY"
+}
+
+2025-10-11 22:44:21.458 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-1816047375_20251011_224421.json
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Generated content length: 3851
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "attractions": [
+    {
+      "nodeId": "node_2",
+      "title": "Panfilov Park & Zenkov Cathedral",
+      "description": "Stroll through the tranquil Panfilov Park, a beautiful green oasis dedicated to the 28 Panfilov Guardsmen. Admire the stunning Zenkov Cathedral, one of the world's ta...
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - === ACTIVITY AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Contexts to populate: 8
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Raw Response: ```json
+{
+  "attractions": [
+    {
+      "nodeId": "node_2",
+      "title": "Panfilov Park & Zenkov Cathedral",
+      "description": "Stroll through the tranquil Panfilov Park, a beautiful green oasis dedicated to the 28 Panfilov Guardsmen. Admire the stunning Zenkov Cathedral, one of the world's tallest wooden buildings, showcasing intricate Russian Orthodox architecture without a single nail.",
+      "category": "landmark",
+      "durationMinutes": 120,
+      "locationName": "Almaty City Center"
+    },
+    {
+      "nodeId": "node_4",
+      "title": "Kok Tobe Hill",
+      "description": "Ascend to Kok Tobe Hill via a scenic cable car ride for breathtaking panoramic views of Almaty city against the backdrop of the Tian Shan mountains. Enjoy various attractions at the summit, including a small zoo, restaurants, and the iconic TV Tower.",
+      "category": "landmark",
+      "durationMinutes": 180,
+      "locationName": "Kok Tobe, Almaty"
+    },
+    {
+      "nodeId": "day2-node2",
+      "title": "Green Bazaar (Zelyony Bazaar)",
+      "description": "Immerse yourself in the vibrant atmosphere of Almaty's Green Bazaar. This bustling market is a sensory delight, offering a wide array of fresh local produce, spices, traditional Kazakh sweets, and unique souvenirs. It's a perfect place to experience local life and taste authentic flavors.",
+      "category": "shopping",
+      "durationMinutes": 120,
+      "locationName": "Almaty City Center"
+    },
+    {
+      "nodeId": "day2-node4",
+      "title": "First President's Park",
+      "description": "Relax and unwind in the expansive First President's Park, a beautifully landscaped urban park featuring wide avenues, meticulously maintained gardens, and impressive fountains. It's an ideal spot for a leisurely stroll, enjoying the fresh air and stunning views of the mountains.",
+      "category": "park",
+      "durationMinutes": 150,
+      "locationName": "Southern Almaty"
+    },
+    {
+      "nodeId": "day3_node2",
+      "title": "Shymbulak Ski Resort",
+      "description": "Take a scenic gondola ride up to Shymbulak Ski Resort, nestled high in the Zailiysky Alatau mountains. Even outside of ski season, the resort offers stunning alpine views, fresh mountain air, and hiking opportunities, making it a perfect escape into nature.",
+      "category": "nature",
+      "durationMinutes": 240,
+      "locationName": "Medeu Valley, Almaty"
+    },
+    {
+      "nodeId": "day3_node4",
+      "title": "Medeu Skating Rink",
+      "description": "Visit the iconic Medeu Skating Rink, the highest-altitude outdoor skating rink in the world, located in a picturesque mountain valley. Even if you're not skating, the impressive architecture and surrounding natural beauty make it a fantastic spot for photos and a leisurely walk.",
+      "category": "landmark",
+      "durationMinutes": 90,
+      "locationName": "Medeu Valley, Almaty"
+    },
+    {
+      "nodeId": "day4-node2",
+      "title": "Arasan Baths",
+      "description": "Indulge in a relaxing and traditional Kazakh bath experience at Arasan Baths, one of Central Asia's most luxurious bathhouses. Choose from various thermal rooms, including Russian, Finnish, and Turkish, for a rejuvenating and culturally immersive experience.",
+      "category": "experience",
+      "durationMinutes": 180,
+      "locationName": "Almaty City Center"
+    },
+    {
+      "nodeId": "day4-node5",
+      "title": "Zhibek Zholy Pedestrian Street",
+      "description": "Enjoy a relaxed evening stroll along Zhibek Zholy Pedestrian Street, a lively hub in the city center. This vibrant street is perfect for people-watching, browsing local shops for last-minute souvenirs, or enjoying a coffee at one of its many charming cafes.",
+      "category": "shopping",
+      "durationMinutes": 120,
+      "locationName": "Almaty City Center"
+    }
+  ]
+}
+```
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - === END ACTIVITY AGENT RESPONSE ===
+2025-10-11 22:44:21.459 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Cleaned Response: {
+  "attractions": [
+    {
+      "nodeId": "node_2",
+      "title": "Panfilov Park & Zenkov Cathedral",
+      "description": "Stroll through the tranquil Panfilov Park, a beautiful green oasis dedicated to the 28 Panfilov Guardsmen. Admire the stunning Zenkov Cathedral, one of the world's tallest wooden buildings, showcasing intricate Russian Orthodox architecture without a single nail.",
+      "category": "landmark",
+      "durationMinutes": 120,
+      "locationName": "Almaty City Center"
+    },
+    {
+      "nodeId": "node_4",
+      "title": "Kok Tobe Hill",
+      "description": "Ascend to Kok Tobe Hill via a scenic cable car ride for breathtaking panoramic views of Almaty city against the backdrop of the Tian Shan mountains. Enjoy various attractions at the summit, including a small zoo, restaurants, and the iconic TV Tower.",
+      "category": "landmark",
+      "durationMinutes": 180,
+      "locationName": "Kok Tobe, Almaty"
+    },
+    {
+      "nodeId": "day2-node2",
+      "title": "Green Bazaar (Zelyony Bazaar)",
+      "description": "Immerse yourself in the vibrant atmosphere of Almaty's Green Bazaar. This bustling market is a sensory delight, offering a wide array of fresh local produce, spices, traditional Kazakh sweets, and unique souvenirs. It's a perfect place to experience local life and taste authentic flavors.",
+      "category": "shopping",
+      "durationMinutes": 120,
+      "locationName": "Almaty City Center"
+    },
+    {
+      "nodeId": "day2-node4",
+      "title": "First President's Park",
+      "description": "Relax and unwind in the expansive First President's Park, a beautifully landscaped urban park featuring wide avenues, meticulously maintained gardens, and impressive fountains. It's an ideal spot for a leisurely stroll, enjoying the fresh air and stunning views of the mountains.",
+      "category": "park",
+      "durationMinutes": 150,
+      "locationName": "Southern Almaty"
+    },
+    {
+      "nodeId": "day3_node2",
+      "title": "Shymbulak Ski Resort",
+      "description": "Take a scenic gondola ride up to Shymbulak Ski Resort, nestled high in the Zailiysky Alatau mountains. Even outside of ski season, the resort offers stunning alpine views, fresh mountain air, and hiking opportunities, making it a perfect escape into nature.",
+      "category": "nature",
+      "durationMinutes": 240,
+      "locationName": "Medeu Valley, Almaty"
+    },
+    {
+      "nodeId": "day3_node4",
+      "title": "Medeu Skating Rink",
+      "description": "Visit the iconic Medeu Skating Rink, the highest-altitude outdoor skating rink in the world, located in a picturesque mountain valley. Even if you're not skating, the impressive architecture and surrounding natural beauty make it a fantastic spot for photos and a leisurely walk.",
+      "category": "landmark",
+      "durationMinutes": 90,
+      "locationName": "Medeu Valley, Almaty"
+    },
+    {
+      "nodeId": "day4-node2",
+      "title": "Arasan Baths",
+      "description": "Indulge in a relaxing and traditional Kazakh bath experience at Arasan Baths, one of Central Asia's most luxurious bathhouses. Choose from various thermal rooms, including Russian, Finnish, and Turkish, for a rejuvenating and culturally immersive experience.",
+      "category": "experience",
+      "durationMinutes": 180,
+      "locationName": "Almaty City Center"
+    },
+    {
+      "nodeId": "day4-node5",
+      "title": "Zhibek Zholy Pedestrian Street",
+      "description": "Enjoy a relaxed evening stroll along Zhibek Zholy Pedestrian Street, a lively hub in the city center. This vibrant street is perfect for people-watching, browsing local shops for last-minute souvenirs, or enjoying a coffee at one of its many charming cafes.",
+      "category": "shopping",
+      "durationMinutes": 120,
+      "locationName": "Almaty City Center"
+    }
+  ]
+}
+2025-10-11 22:44:21.956 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Saved itinerary with populated attractions
+2025-10-11 22:44:21.956 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - === ACTIVITY AGENT COMPLETE ===
+2025-10-11 22:44:21.956 [Pipeline-94] INFO  com.tripplanner.agents.ActivityAgent - Populated 8 attractions
+2025-10-11 22:44:21.956 [Pipeline-94] INFO  com.tripplanner.service.PipelineOrchestrator - [ActivityAgent] Complete
+2025-10-11 22:44:31.210 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:44:31.210 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:44:31.210 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Response Length: 6980
+2025-10-11 22:44:31.210 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"meals\": [\n    {\n      \"nodeId\": \"node_1\",\n      \"title\": \"Traditional Kazakh Lunch\",\n      \"description\": \"Embark on an authentic culinary journey at Navat, a beloved spot for traditional Kazakh cuisine. Savor hearty dishes like Beshbarmak (national dish with horse meat and noodles) or a rich Laghman (hand-pulled noodle soup), served in a vibrant, culturally rich setting. It's the perfect introduction to Almaty's local flavors.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Navat\"\n    },\n    {\n      \"nodeId\": \"node_3\",\n      \"title\": \"Central Asian Village Dinner\",\n      \"description\": \"Step into the enchanting world of Kishlak, designed to evoke a charming Central Asian village. Indulge in flavorful Uzbek plov, succulent shashlik (grilled kebabs), and freshly baked samsa (savory pastries), all prepared with authentic recipes. The cozy ambiance makes for a truly immersive dining experience.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Kishlak\"\n    },\n    {\n      \"nodeId\": \"node_5\",\n      \"title\": \"Elegant Italian Dinner with a View\",\n      \"description\": \"Experience refined dining at Parmigiano Ristorante, offering exquisite Italian cuisine alongside breathtaking city views. Enjoy expertly crafted pasta, delicate risottos, and premium seafood dishes in a sophisticated, romantic atmosphere. It's an ideal choice for a special evening out.\",\n      \"cuisineType\": \"italian\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Parmigiano Ristorante\"\n    },\n    {\n      \"nodeId\": \"day2-node1\",\n      \"title\": \"Green Bazaar Street Food Adventure\",\n      \"description\": \"Immerse yourself in the bustling energy of Almaty's Green Bazaar (Zelyony Bazaar). Explore countless stalls offering local street food delights like hot samsa, freshly made kurt (dried cheese balls), and a vibrant array of dried fruits and nuts. It's a sensory feast and a great way to experience local life.\",\n      \"cuisineType\": \"street_food\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Green Bazaar (Zelyony Bazaar)\"\n    },\n    {\n      \"nodeId\": \"day2-node3\",\n      \"title\": \"Authentic Uighur Cuisine\",\n      \"description\": \"Discover the unique and aromatic flavors of Uighur cuisine, a rich blend of Central Asian and Chinese influences. Savor hand-pulled laghman noodles, spicy lamb kebabs, and steamed manty dumplings at a local Uighur restaurant like Urumchi. It's a delicious journey into a distinct regional tradition.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Urumchi Restaurant\"\n    },\n    {\n      \"nodeId\": \"day2-node5\",\n      \"title\": \"Modern International Dining\",\n      \"description\": \"D.E.S.T.O offers a contemporary dining experience with an innovative international menu. Enjoy creative dishes prepared with fresh ingredients in a stylish, modern setting. It's a perfect spot for those seeking a chic atmosphere and a sophisticated culinary adventure.\",\n      \"cuisineType\": \"international\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"D.E.S.T.O\"\n    },\n    {\n      \"nodeId\": \"day3_node1\",\n      \"title\": \"Relaxed Cafe Lunch\",\n      \"description\": \"Enjoy a delightful and relaxed lunch at Nedelka Cafe, a popular European-style spot known for its charming ambiance. Choose from a selection of fresh salads, gourmet sandwiches, and light mains, accompanied by excellent coffee or refreshing beverages. It's perfect for a casual and delicious midday break.\",\n      \"cuisineType\": \"cafe\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Nedelka Cafe\"\n    },\n    {\n      \"nodeId\": \"day3_node3\",\n      \"title\": \"Gourmet Kazakh Experience\",\n      \"description\": \"Indulge in an elevated Kazakh dining experience at Gakku Kazakh Gourmet, where traditional dishes are presented with a modern, refined touch. Enjoy sophisticated interpretations of local specialties in an elegant setting, showcasing the best of Kazakh hospitality and cuisine.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Gakku Kazakh Gourmet\"\n    },\n    {\n      \"nodeId\": \"day3_node5\",\n      \"title\": \"Fresh Japanese Sushi & Rolls\",\n      \"description\": \"Satisfy your cravings for exquisite Japanese cuisine at Sushi Room, a sleek and popular spot for sushi lovers. Choose from a wide array of expertly prepared sushi, sashimi, and classic Japanese dishes in a contemporary and inviting atmosphere. It’s a great option for a lighter yet flavorful dinner.\",\n      \"cuisineType\": \"japanese\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Sushi Room\"\n    },\n    {\n      \"nodeId\": \"day4-node1\",\n      \"title\": \"Hearty Central Asian Lunch\",\n      \"description\": \"For a quick and satisfying lunch, head to Tyubeteika, a vibrant spot famous for its authentic Central Asian flavors. Delight in hearty portions of plov (rice pilaf), laghman, or other regional favorites, offering a true taste of local comfort food in a lively atmosphere.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Tyubeteika\"\n    },\n    {\n      \"nodeId\": \"day4-node4\",\n      \"title\": \"Coffee and Pastry Break\",\n      \"description\": \"Recharge with a delightful snack at Coffee Boom, a popular local coffee chain. Enjoy expertly brewed coffee, a selection of delicious pastries, or a light dessert. It's the perfect spot for a quick break and a sweet treat to refuel during your day.\",\n      \"cuisineType\": \"cafe\",\n      \"mealType\": \"snack\",\n      \"locationName\": \"Coffee Boom\"\n    },\n    {\n      \"nodeId\": \"day4-node6\",\n      \"title\": \"Farewell Fine Dining\",\n      \"description\": \"Conclude your culinary journey in Almaty with a memorable farewell dinner at Line Brew Mix. Renowned for its prime steaks, diverse international menu, and extensive wine list, this elegant restaurant offers a sophisticated ambiance and impeccable service, ensuring a perfect final evening.\",\n      \"cuisineType\": \"international\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Line Brew Mix\"\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1002,
+    "candidatesTokenCount": 1516,
+    "totalTokenCount": 4203,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1002
+      }
+    ],
+    "thoughtsTokenCount": 1685
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "dpDqaJ_LOdqWosUP0sK9kAY"
+}
+
+2025-10-11 22:44:31.212 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_902537786_20251011_224431.json
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Generated content length: 6037
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "meals": [
+    {
+      "nodeId": "node_1",
+      "title": "Traditional Kazakh Lunch",
+      "description": "Embark on an authentic culinary journey at Navat, a beloved spot for traditional Kazakh cuisine. Savor hearty dishes like Beshbarmak (national dish with horse meat and noodles) or ...
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - === MEAL AGENT - FULL LLM RESPONSE ===
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Contexts to populate: 12
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Raw Response: ```json
+{
+  "meals": [
+    {
+      "nodeId": "node_1",
+      "title": "Traditional Kazakh Lunch",
+      "description": "Embark on an authentic culinary journey at Navat, a beloved spot for traditional Kazakh cuisine. Savor hearty dishes like Beshbarmak (national dish with horse meat and noodles) or a rich Laghman (hand-pulled noodle soup), served in a vibrant, culturally rich setting. It's the perfect introduction to Almaty's local flavors.",
+      "cuisineType": "local",
+      "mealType": "lunch",
+      "locationName": "Navat"
+    },
+    {
+      "nodeId": "node_3",
+      "title": "Central Asian Village Dinner",
+      "description": "Step into the enchanting world of Kishlak, designed to evoke a charming Central Asian village. Indulge in flavorful Uzbek plov, succulent shashlik (grilled kebabs), and freshly baked samsa (savory pastries), all prepared with authentic recipes. The cozy ambiance makes for a truly immersive dining experience.",
+      "cuisineType": "local",
+      "mealType": "dinner",
+      "locationName": "Kishlak"
+    },
+    {
+      "nodeId": "node_5",
+      "title": "Elegant Italian Dinner with a View",
+      "description": "Experience refined dining at Parmigiano Ristorante, offering exquisite Italian cuisine alongside breathtaking city views. Enjoy expertly crafted pasta, delicate risottos, and premium seafood dishes in a sophisticated, romantic atmosphere. It's an ideal choice for a special evening out.",
+      "cuisineType": "italian",
+      "mealType": "dinner",
+      "locationName": "Parmigiano Ristorante"
+    },
+    {
+      "nodeId": "day2-node1",
+      "title": "Green Bazaar Street Food Adventure",
+      "description": "Immerse yourself in the bustling energy of Almaty's Green Bazaar (Zelyony Bazaar). Explore countless stalls offering local street food delights like hot samsa, freshly made kurt (dried cheese balls), and a vibrant array of dried fruits and nuts. It's a sensory feast and a great way to experience local life.",
+      "cuisineType": "street_food",
+      "mealType": "lunch",
+      "locationName": "Green Bazaar (Zelyony Bazaar)"
+    },
+    {
+      "nodeId": "day2-node3",
+      "title": "Authentic Uighur Cuisine",
+      "description": "Discover the unique and aromatic flavors of Uighur cuisine, a rich blend of Central Asian and Chinese influences. Savor hand-pulled laghman noodles, spicy lamb kebabs, and steamed manty dumplings at a local Uighur restaurant like Urumchi. It's a delicious journey into a distinct regional tradition.",
+      "cuisineType": "local",
+      "mealType": "dinner",
+      "locationName": "Urumchi Restaurant"
+    },
+    {
+      "nodeId": "day2-node5",
+      "title": "Modern International Dining",
+      "description": "D.E.S.T.O offers a contemporary dining experience with an innovative international menu. Enjoy creative dishes prepared with fresh ingredients in a stylish, modern setting. It's a perfect spot for those seeking a chic atmosphere and a sophisticated culinary adventure.",
+      "cuisineType": "international",
+      "mealType": "dinner",
+      "locationName": "D.E.S.T.O"
+    },
+    {
+      "nodeId": "day3_node1",
+      "title": "Relaxed Cafe Lunch",
+      "description": "Enjoy a delightful and relaxed lunch at Nedelka Cafe, a popular European-style spot known for its charming ambiance. Choose from a selection of fresh salads, gourmet sandwiches, and light mains, accompanied by excellent coffee or refreshing beverages. It's perfect for a casual and delicious midday break.",
+      "cuisineType": "cafe",
+      "mealType": "lunch",
+      "locationName": "Nedelka Cafe"
+    },
+    {
+      "nodeId": "day3_node3",
+      "title": "Gourmet Kazakh Experience",
+      "description": "Indulge in an elevated Kazakh dining experience at Gakku Kazakh Gourmet, where traditional dishes are presented with a modern, refined touch. Enjoy sophisticated interpretations of local specialties in an elegant setting, showcasing the best of Kazakh hospitality and cuisine.",
+      "cuisineType": "local",
+      "mealType": "dinner",
+      "locationName": "Gakku Kazakh Gourmet"
+    },
+    {
+      "nodeId": "day3_node5",
+      "title": "Fresh Japanese Sushi & Rolls",
+      "description": "Satisfy your cravings for exquisite Japanese cuisine at Sushi Room, a sleek and popular spot for sushi lovers. Choose from a wide array of expertly prepared sushi, sashimi, and classic Japanese dishes in a contemporary and inviting atmosphere. It’s a great option for a lighter yet flavorful dinner.",
+      "cuisineType": "japanese",
+      "mealType": "dinner",
+      "locationName": "Sushi Room"
+    },
+    {
+      "nodeId": "day4-node1",
+      "title": "Hearty Central Asian Lunch",
+      "description": "For a quick and satisfying lunch, head to Tyubeteika, a vibrant spot famous for its authentic Central Asian flavors. Delight in hearty portions of plov (rice pilaf), laghman, or other regional favorites, offering a true taste of local comfort food in a lively atmosphere.",
+      "cuisineType": "local",
+      "mealType": "lunch",
+      "locationName": "Tyubeteika"
+    },
+    {
+      "nodeId": "day4-node4",
+      "title": "Coffee and Pastry Break",
+      "description": "Recharge with a delightful snack at Coffee Boom, a popular local coffee chain. Enjoy expertly brewed coffee, a selection of delicious pastries, or a light dessert. It's the perfect spot for a quick break and a sweet treat to refuel during your day.",
+      "cuisineType": "cafe",
+      "mealType": "snack",
+      "locationName": "Coffee Boom"
+    },
+    {
+      "nodeId": "day4-node6",
+      "title": "Farewell Fine Dining",
+      "description": "Conclude your culinary journey in Almaty with a memorable farewell dinner at Line Brew Mix. Renowned for its prime steaks, diverse international menu, and extensive wine list, this elegant restaurant offers a sophisticated ambiance and impeccable service, ensuring a perfect final evening.",
+      "cuisineType": "international",
+      "mealType": "dinner",
+      "locationName": "Line Brew Mix"
+    }
+  ]
+}
+```
+2025-10-11 22:44:31.213 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - === END MEAL AGENT RESPONSE ===
+2025-10-11 22:44:31.214 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Cleaned Response: {
+  "meals": [
+    {
+      "nodeId": "node_1",
+      "title": "Traditional Kazakh Lunch",
+      "description": "Embark on an authentic culinary journey at Navat, a beloved spot for traditional Kazakh cuisine. Savor hearty dishes like Beshbarmak (national dish with horse meat and noodles) or a rich Laghman (hand-pulled noodle soup), served in a vibrant, culturally rich setting. It's the perfect introduction to Almaty's local flavors.",
+      "cuisineType": "local",
+      "mealType": "lunch",
+      "locationName": "Navat"
+    },
+    {
+      "nodeId": "node_3",
+      "title": "Central Asian Village Dinner",
+      "description": "Step into the enchanting world of Kishlak, designed to evoke a charming Central Asian village. Indulge in flavorful Uzbek plov, succulent shashlik (grilled kebabs), and freshly baked samsa (savory pastries), all prepared with authentic recipes. The cozy ambiance makes for a truly immersive dining experience.",
+      "cuisineType": "local",
+      "mealType": "dinner",
+      "locationName": "Kishlak"
+    },
+    {
+      "nodeId": "node_5",
+      "title": "Elegant Italian Dinner with a View",
+      "description": "Experience refined dining at Parmigiano Ristorante, offering exquisite Italian cuisine alongside breathtaking city views. Enjoy expertly crafted pasta, delicate risottos, and premium seafood dishes in a sophisticated, romantic atmosphere. It's an ideal choice for a special evening out.",
+      "cuisineType": "italian",
+      "mealType": "dinner",
+      "locationName": "Parmigiano Ristorante"
+    },
+    {
+      "nodeId": "day2-node1",
+      "title": "Green Bazaar Street Food Adventure",
+      "description": "Immerse yourself in the bustling energy of Almaty's Green Bazaar (Zelyony Bazaar). Explore countless stalls offering local street food delights like hot samsa, freshly made kurt (dried cheese balls), and a vibrant array of dried fruits and nuts. It's a sensory feast and a great way to experience local life.",
+      "cuisineType": "street_food",
+      "mealType": "lunch",
+      "locationName": "Green Bazaar (Zelyony Bazaar)"
+    },
+    {
+      "nodeId": "day2-node3",
+      "title": "Authentic Uighur Cuisine",
+      "description": "Discover the unique and aromatic flavors of Uighur cuisine, a rich blend of Central Asian and Chinese influences. Savor hand-pulled laghman noodles, spicy lamb kebabs, and steamed manty dumplings at a local Uighur restaurant like Urumchi. It's a delicious journey into a distinct regional tradition.",
+      "cuisineType": "local",
+      "mealType": "dinner",
+      "locationName": "Urumchi Restaurant"
+    },
+    {
+      "nodeId": "day2-node5",
+      "title": "Modern International Dining",
+      "description": "D.E.S.T.O offers a contemporary dining experience with an innovative international menu. Enjoy creative dishes prepared with fresh ingredients in a stylish, modern setting. It's a perfect spot for those seeking a chic atmosphere and a sophisticated culinary adventure.",
+      "cuisineType": "international",
+      "mealType": "dinner",
+      "locationName": "D.E.S.T.O"
+    },
+    {
+      "nodeId": "day3_node1",
+      "title": "Relaxed Cafe Lunch",
+      "description": "Enjoy a delightful and relaxed lunch at Nedelka Cafe, a popular European-style spot known for its charming ambiance. Choose from a selection of fresh salads, gourmet sandwiches, and light mains, accompanied by excellent coffee or refreshing beverages. It's perfect for a casual and delicious midday break.",
+      "cuisineType": "cafe",
+      "mealType": "lunch",
+      "locationName": "Nedelka Cafe"
+    },
+    {
+      "nodeId": "day3_node3",
+      "title": "Gourmet Kazakh Experience",
+      "description": "Indulge in an elevated Kazakh dining experience at Gakku Kazakh Gourmet, where traditional dishes are presented with a modern, refined touch. Enjoy sophisticated interpretations of local specialties in an elegant setting, showcasing the best of Kazakh hospitality and cuisine.",
+      "cuisineType": "local",
+      "mealType": "dinner",
+      "locationName": "Gakku Kazakh Gourmet"
+    },
+    {
+      "nodeId": "day3_node5",
+      "title": "Fresh Japanese Sushi & Rolls",
+      "description": "Satisfy your cravings for exquisite Japanese cuisine at Sushi Room, a sleek and popular spot for sushi lovers. Choose from a wide array of expertly prepared sushi, sashimi, and classic Japanese dishes in a contemporary and inviting atmosphere. It’s a great option for a lighter yet flavorful dinner.",
+      "cuisineType": "japanese",
+      "mealType": "dinner",
+      "locationName": "Sushi Room"
+    },
+    {
+      "nodeId": "day4-node1",
+      "title": "Hearty Central Asian Lunch",
+      "description": "For a quick and satisfying lunch, head to Tyubeteika, a vibrant spot famous for its authentic Central Asian flavors. Delight in hearty portions of plov (rice pilaf), laghman, or other regional favorites, offering a true taste of local comfort food in a lively atmosphere.",
+      "cuisineType": "local",
+      "mealType": "lunch",
+      "locationName": "Tyubeteika"
+    },
+    {
+      "nodeId": "day4-node4",
+      "title": "Coffee and Pastry Break",
+      "description": "Recharge with a delightful snack at Coffee Boom, a popular local coffee chain. Enjoy expertly brewed coffee, a selection of delicious pastries, or a light dessert. It's the perfect spot for a quick break and a sweet treat to refuel during your day.",
+      "cuisineType": "cafe",
+      "mealType": "snack",
+      "locationName": "Coffee Boom"
+    },
+    {
+      "nodeId": "day4-node6",
+      "title": "Farewell Fine Dining",
+      "description": "Conclude your culinary journey in Almaty with a memorable farewell dinner at Line Brew Mix. Renowned for its prime steaks, diverse international menu, and extensive wine list, this elegant restaurant offers a sophisticated ambiance and impeccable service, ensuring a perfect final evening.",
+      "cuisineType": "international",
+      "mealType": "dinner",
+      "locationName": "Line Brew Mix"
+    }
+  ]
+}
+2025-10-11 22:44:31.820 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Saved itinerary with populated meals
+2025-10-11 22:44:31.820 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - === MEAL AGENT COMPLETE ===
+2025-10-11 22:44:31.820 [Pipeline-95] INFO  com.tripplanner.agents.MealAgent - Populated 12 meals
+2025-10-11 22:44:31.820 [Pipeline-95] INFO  com.tripplanner.service.PipelineOrchestrator - [MealAgent] Complete
+2025-10-11 22:44:31.820 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - All population agents completed successfully
+2025-10-11 22:44:31.820 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 2 complete (31956 ms)
+2025-10-11 22:44:31.820 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 3: ENRICHMENT ===
+2025-10-11 22:44:31.820 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - === AGENT EXECUTION START ===
+2025-10-11 22:44:31.820 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Agent Kind: ENRICHMENT
+2025-10-11 22:44:31.820 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Request Type: ApplyResult
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Request Data: {taskType=enrich}
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Request Details: {taskType=enrich}
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - =============================
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: queued
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 0
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Agent queued for execution
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:31.821828900Z
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Agent started
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:31.821828900Z
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Executing agent-specific logic for: ENRICHMENT
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - === ENRICHMENT AGENT PROCESSING ===
+2025-10-11 22:44:31.821 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Loading itinerary
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: loading
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:33.192437700Z
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Enriching places with Google Places data
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: ENRICHMENT
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:33.192437700Z
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Created 0 ENRICHMENT operations
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 40
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Validating opening hours
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: validation
+2025-10-11 22:44:33.192 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:33.192437700Z
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 60
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Calculating pacing
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: pacing
+2025-10-11 22:44:33.193 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:33.193436700Z
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Computing transit durations
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: transit
+2025-10-11 22:44:33.194 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:33.194438400Z
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 90
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Applying enrichments
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: applying
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:33.195437300Z
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:33.195 [Pipeline-78] INFO  com.tripplanner.service.ChangeEngine - Applying changes for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.264 [Pipeline-78] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:44:51.265 [Pipeline-78] INFO  com.tripplanner.service.RevisionService - Saving revision rev_1760202891265_1256ceb8 for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:52.009 [Pipeline-78] INFO  com.tripplanner.service.RevisionService - Successfully saved revision rev_1760202891265_1256ceb8 for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Enrichment complete
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: complete
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:53.158624900Z
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - === ENRICHMENT COMPLETE ===
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Applied 42 ENRICHMENT operations
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - New version: 2
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.158 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 41ae06c7-982c-46a2-a868-deb3be6cc644
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Status: completed
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Message: Agent completed successfully
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T17:14:53.158624900Z
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - === AGENT EXECUTION COMPLETED ===
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Agent Kind: ENRICHMENT
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Result Type: ApplyResult
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - Result: com.tripplanner.service.ChangeEngine$ApplyResult@44103ed1
+2025-10-11 22:44:53.159 [Pipeline-78] INFO  com.tripplanner.agents.EnrichmentAgent - =================================
+2025-10-11 22:44:53.159 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 3 complete (21339 ms)
+2025-10-11 22:44:53.159 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 4: COST ESTIMATION ===
+2025-10-11 22:44:53.159 [Pipeline-77] INFO  com.tripplanner.agents.CostEstimatorAgent - === COST ESTIMATOR AGENT ===
+2025-10-11 22:44:53.159 [Pipeline-77] INFO  com.tripplanner.agents.CostEstimatorAgent - Estimating costs for itinerary: it_105ebb3d-b1a7-491c-a811-1af7fff0ecf1
+2025-10-11 22:44:53.907 [Pipeline-77] INFO  com.tripplanner.agents.CostEstimatorAgent - === COST ESTIMATOR COMPLETE ===
+2025-10-11 22:44:53.907 [Pipeline-77] INFO  com.tripplanner.agents.CostEstimatorAgent - Estimated costs for 25 nodes
+2025-10-11 22:44:53.907 [Pipeline-77] INFO  com.tripplanner.agents.CostEstimatorAgent - Total estimated cost: ₹46850 per person
+2025-10-11 22:44:53.907 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 4 complete (748 ms)
+2025-10-11 22:44:53.907 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 5: FINALIZATION ===
+2025-10-11 22:44:55.841 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - === PIPELINE COMPLETE ===
+2025-10-11 22:44:55.841 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Total time: 106575 ms
+2025-10-11 22:44:55.841 [Pipeline-77] INFO  com.tripplanner.service.PipelineOrchestrator - Days: 4, Nodes: 25

@@ -3,6 +3,7 @@ package com.tripplanner.service;
 import com.tripplanner.dto.AgentEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -18,6 +19,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AgentEventBus {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentEventBus.class);
+    
+    // WebSocketEventPublisher removed to break circular dependency
+    // WebSocket publishing will be handled separately
     
     // Map of itinerary ID to list of SSE emitters
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
@@ -73,9 +77,12 @@ public class AgentEventBus {
         logger.info("Step: {}", event.step());
         logger.info("Timestamp: {}", event.updatedAt());
         
+        // WebSocket publishing removed to break circular dependency
+        
+        // Also send to SSE emitters (for backward compatibility)
         CopyOnWriteArrayList<SseEmitter> itineraryEmitters = emitters.get(itineraryId);
         if (itineraryEmitters == null || itineraryEmitters.isEmpty()) {
-            logger.warn("No emitters found for itinerary: {}", itineraryId);
+            logger.warn("No SSE emitters found for itinerary: {}", itineraryId);
             logger.info("==============================");
             return;
         }
@@ -99,7 +106,7 @@ public class AgentEventBus {
             }
         }
         
-        logger.info("Event sent to {} emitters successfully, {} failed for itinerary: {}", 
+        logger.info("Event sent to {} SSE emitters successfully, {} failed for itinerary: {}", 
                     successCount, failureCount, itineraryId);
         logger.info("==============================");
     }
@@ -156,9 +163,12 @@ public class AgentEventBus {
         logger.info("=== SENDING COMPLETION EVENT ===");
         logger.info("Itinerary ID: {}", itineraryId);
         
+        // WebSocket publishing removed to break circular dependency
+        
+        // Also send to SSE emitters (for backward compatibility)
         CopyOnWriteArrayList<SseEmitter> itineraryEmitters = emitters.get(itineraryId);
         if (itineraryEmitters == null || itineraryEmitters.isEmpty()) {
-            logger.warn("No emitters found for itinerary: {}", itineraryId);
+            logger.warn("No SSE emitters found for itinerary: {}", itineraryId);
             logger.info("==============================");
             return;
         }
@@ -188,7 +198,7 @@ public class AgentEventBus {
             }
         }
         
-        logger.info("Completion event sent to {} emitters successfully, {} failed for itinerary: {}", 
+        logger.info("Completion event sent to {} SSE emitters successfully, {} failed for itinerary: {}", 
                     successCount, failureCount, itineraryId);
         logger.info("==============================");
     }

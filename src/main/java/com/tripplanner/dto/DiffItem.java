@@ -11,8 +11,8 @@ import java.util.List;
 public class DiffItem {
     
     @NotBlank
-    @JsonProperty("id")
-    private String id; // Node ID
+    @JsonProperty("nodeId")
+    private String nodeId; // Node ID
     
     @JsonProperty("day")
     private Integer day; // Day number
@@ -20,26 +20,36 @@ public class DiffItem {
     @JsonProperty("fields")
     private List<String> fields; // Fields that were updated
     
+    @JsonProperty("title")
+    private String title; // Node title for display
+    
     public DiffItem() {}
     
-    public DiffItem(String id, Integer day) {
-        this.id = id;
+    public DiffItem(String nodeId, Integer day) {
+        this.nodeId = nodeId;
         this.day = day;
     }
     
-    public DiffItem(String id, Integer day, List<String> fields) {
-        this.id = id;
+    public DiffItem(String nodeId, Integer day, List<String> fields) {
+        this.nodeId = nodeId;
         this.day = day;
         this.fields = fields;
     }
     
-    // Getters and Setters
-    public String getId() {
-        return id;
+    public DiffItem(String nodeId, Integer day, List<String> fields, String title) {
+        this.nodeId = nodeId;
+        this.day = day;
+        this.fields = fields;
+        this.title = title;
     }
     
-    public void setId(String id) {
-        this.id = id;
+    // Getters and Setters
+    public String getNodeId() {
+        return nodeId;
+    }
+    
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
     
     public Integer getDay() {
@@ -58,12 +68,22 @@ public class DiffItem {
         this.fields = fields;
     }
     
+    public String getTitle() {
+        return title;
+    }
+    
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
     @Override
     public String toString() {
         return "DiffItem{" +
-                "id='" + id + '\'' +
+                "nodeId='" + nodeId + '\'' +
                 ", day=" + day +
                 ", fields=" + fields +
+                ", title='" + title + '\'' +
                 '}';
     }
 }
+

@@ -44,7 +44,7 @@ public class BookingController {
      */
     @PostMapping("/payments/razorpay/order")
     public ResponseEntity<RazorpayOrderRes> createRazorpayOrder(@Valid @RequestBody RazorpayOrderReq request) {
-        logger.info("Creating Razorpay order, amount: {} {}", request.amount(), request.currency());
+        logger.info("Creating Razorpay order, amountPerPerson: {} {}", request.amount(), request.currency());
         
         RazorpayOrderRes response = bookingService.createRazorpayOrder(request);
         
@@ -290,7 +290,7 @@ public class BookingController {
         // Create a node with booking information
         NormalizedNode bookedNode = new NormalizedNode();
         bookedNode.setId(nodeId);
-        bookedNode.setLocked(true);
+        // DO NOT auto-lock booked nodes - user must manually lock if desired
         
         // Add booking reference to labels
         bookedNode.setLabels(java.util.List.of("Booked"));

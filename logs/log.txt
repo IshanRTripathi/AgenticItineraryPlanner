@@ -1,0 +1,1133 @@
+2025-10-11 22:06:46.961 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries
+2025-10-11 22:06:46.961 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries
+2025-10-11 22:06:46.962 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries", parameters={}
+2025-10-11 22:06:46.962 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#create(CreateItineraryReq, HttpServletRequest)
+2025-10-11 22:06:46.970 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [CreateItineraryReq(destination=Vietnam, Vietnam, startLocation=Bengaluru, India, startDate=2026-02-0 (truncated)...]
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Creating itinerary with real-time updates
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Request: CreateItineraryReq(destination=Vietnam, Vietnam, startLocation=Bengaluru, India, startDate=2026-02-09, endDate=2026-02-12, party=PartyDto(adults=1, children=0, infants=0, rooms=1), budgetTier=luxury, interests=[relaxation, nature, cuisine], constraints=[budgetFriendly], language=en)
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] WARN  com.tripplanner.controller.ItinerariesController - User ID not found in request, using anonymous for development
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === CREATE ITINERARY REQUEST ===
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Request Details:
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Destination: Vietnam, Vietnam
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Start Date: 2026-02-09
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   End Date: 2026-02-12
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Duration: 4 days
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Budget Tier: luxury
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Language: en
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Party: 1 adults, 0 children, 0 infants, 1 rooms
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Interests: relaxation, nature, cuisine
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService -   Constraints: budgetFriendly
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Creating initial itinerary and establishing ownership synchronously
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - === AGENT ORCHESTRATOR: CREATING INITIAL ITINERARY ===
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - Destination: Vietnam, Vietnam
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - User ID: anonymous
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - Step 1: Creating initial itinerary structure
+2025-10-11 22:06:46.991 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - Step 2: Saving initial itinerary to ItineraryJsonService
+2025-10-11 22:06:47.356 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - Step 3: Establishing ownership by saving trip metadata
+2025-10-11 22:06:47.356 [http-nio-8080-exec-1] INFO  com.tripplanner.service.UserDataService - Saving trip metadata it_258ae11e-32b1-4841-85c8-34728b4cb185 for user: anonymous
+2025-10-11 22:06:48.660 [http-nio-8080-exec-1] INFO  com.tripplanner.service.UserDataService - Successfully saved trip metadata it_258ae11e-32b1-4841-85c8-34728b4cb185 for user: anonymous
+2025-10-11 22:06:48.660 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - === INITIAL ITINERARY CREATED AND OWNERSHIP ESTABLISHED ===
+2025-10-11 22:06:48.660 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:48.660 [http-nio-8080-exec-1] INFO  com.tripplanner.agents.AgentOrchestrator - User can now access /itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json endpoint
+2025-10-11 22:06:48.660 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Waiting 2 seconds for frontend SSE connection to establish...
+2025-10-11 22:06:50.662 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Starting async itinerary generation for user: anonymous with ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.662 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Generation mode: pipeline
+2025-10-11 22:06:50.662 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Using PIPELINE mode for generation
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - === CREATE ITINERARY RESPONSE ===
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - User ID: anonymous
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Status: generating
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Mode: pipeline
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Ownership established: YES
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - Async generation started: YES
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - User can now access /itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json
+2025-10-11 22:06:50.664 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ItineraryService - =====================================
+2025-10-11 22:06:50.664 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - === PIPELINE ORCHESTRATOR: STARTING ===
+2025-10-11 22:06:50.664 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.664 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - Destination: Vietnam, Vietnam, Duration: 4 days
+2025-10-11 22:06:50.664 [AsyncTask-1] INFO  com.tripplanner.service.PipelineOrchestrator - Mode: pipeline, Parallel: true
+2025-10-11 22:06:50.665 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 1: SKELETON GENERATION ===
+2025-10-11 22:06:50.665 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Starting skeleton generation with timeout: 120000 ms
+2025-10-11 22:06:50.665 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Request details: destination=Vietnam, Vietnam, duration=4 days
+2025-10-11 22:06:50.665 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Enhanced itinerary creation response prepared: it_258ae11e-32b1-4841-85c8-34728b4cb185 for user: anonymous
+2025-10-11 22:06:50.665 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - SSE endpoint: /api/v1/itineraries/patches?itineraryId=it_258ae11e-32b1-4841-85c8-34728b4cb185&executionId=exec_75ce600e-0377-41db-aae5-35585df3d9b6
+2025-10-11 22:06:50.665 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Execution ID: exec_75ce600e-0377-41db-aae5-35585df3d9b6
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.PipelineOrchestrator - SkeletonPlannerAgent.generateSkeleton() started for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.665 [http-nio-8080-exec-1] INFO  com.tripplanner.controller.ItinerariesController - Estimated completion: 2025-10-11T22:07:49.664136500
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT ===
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating lightweight skeleton for 4 days
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Destination: Vietnam, Vietnam
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f10b9ea7-a08e-4183-8f71-d9c8833a98c4
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 1 structure
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:36:50.665137300Z
+2025-10-11 22:06:50.665 [Pipeline-149] WARN  com.tripplanner.service.AgentEventBus - No SSE emitters found for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:06:50.665 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 1 with minimal prompt
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2503
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2888
+2025-10-11 22:06:50.666 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:06:50.668 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-11 22:06:50.668 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ItineraryCreationResponse{itinerary=it_258ae11e-32b1-4841-85c8-34728b4cb185, executionId='exec_75ce6 (truncated)...]
+2025-10-11 22:06:50.670 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-11 22:06:50.670 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:06:50.689 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:06:50.689 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json
+2025-10-11 22:06:50.689 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:06:50.689 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw", parameters={masked}
+2025-10-11 22:06:50.690 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AgentController#streamEvents(String)
+2025-10-11 22:06:50.690 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS REQUEST ===
+2025-10-11 22:06:50.690 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.690 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Request Time: 22:06:50.690137
+2025-10-11 22:06:50.690 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Client requesting SSE events connection
+2025-10-11 22:06:50.691 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json
+2025-10-11 22:06:50.691 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Created SSE emitter: SseEmitter@65eb3789
+2025-10-11 22:06:50.691 [http-nio-8080-exec-3] INFO  com.tripplanner.service.AgentEventBus - === SSE EMITTER REGISTRATION ===
+2025-10-11 22:06:50.691 [http-nio-8080-exec-3] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.691 [http-nio-8080-exec-3] INFO  com.tripplanner.service.AgentEventBus - Emitter: SseEmitter@65eb3789
+2025-10-11 22:06:50.692 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json
+2025-10-11 22:06:50.692 [http-nio-8080-exec-3] INFO  com.tripplanner.service.AgentEventBus - Total emitters for itinerary it_258ae11e-32b1-4841-85c8-34728b4cb185: 1
+2025-10-11 22:06:50.692 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json", parameters={}
+2025-10-11 22:06:50.692 [http-nio-8080-exec-3] INFO  com.tripplanner.service.AgentEventBus - Total active itineraries: 1
+2025-10-11 22:06:50.692 [http-nio-8080-exec-3] INFO  com.tripplanner.service.AgentEventBus - ===============================
+2025-10-11 22:06:50.692 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-11 22:06:50.692 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.693 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Initial SSE events connection event sent successfully
+2025-10-11 22:06:50.693 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS STREAM ESTABLISHED ===
+2025-10-11 22:06:50.693 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:50.693 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - Emitter registered and ready
+2025-10-11 22:06:50.693 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.AgentController - =============================
+2025-10-11 22:06:50.696 [http-nio-8080-exec-3] DEBUG o.s.web.context.request.async.WebAsyncManager - Started async request for "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185"
+2025-10-11 22:06:50.699 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Exiting but response remains open for further handling
+2025-10-11 22:06:50.699 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:06:51.101 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:51.102 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-11 22:06:51.102 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_258ae11e-32b1-4841-85c8-34728b4cb185', version=1, userId='anonym (truncated)...]
+2025-10-11 22:06:51.102 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-11 22:06:51.102 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:06:51.108 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:06:51.108 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:06:51.108 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw", parameters={masked}
+2025-10-11 22:06:51.108 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json
+2025-10-11 22:06:51.108 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AgentController#streamEvents(String)
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS REQUEST ===
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Request Time: 22:06:51.109281200
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Client requesting SSE events connection
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Created SSE emitter: SseEmitter@7a18bb98
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.service.AgentEventBus - === SSE EMITTER REGISTRATION ===
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.service.AgentEventBus - Emitter: SseEmitter@7a18bb98
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.service.AgentEventBus - Total emitters for itinerary it_258ae11e-32b1-4841-85c8-34728b4cb185: 2
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.service.AgentEventBus - Total active itineraries: 1
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.service.AgentEventBus - ===============================
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Initial SSE events connection event sent successfully
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - === SSE EVENTS STREAM ESTABLISHED ===
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:51.109 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - Emitter registered and ready
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.AgentController - =============================
+2025-10-11 22:06:51.109 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_258ae11e-32b1-4841-85c8-34728b4cb185/json", parameters={}
+2025-10-11 22:06:51.109 [http-nio-8080-exec-2] DEBUG o.s.web.context.request.async.WebAsyncManager - Started async request for "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185"
+2025-10-11 22:06:51.109 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-11 22:06:51.109 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:51.110 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Exiting but response remains open for further handling
+2025-10-11 22:06:51.110 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:06:52.327 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:06:52.327 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-11 22:06:52.327 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_258ae11e-32b1-4841-85c8-34728b4cb185', version=1, userId='anonym (truncated)...]
+2025-10-11 22:06:52.327 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-11 22:06:52.327 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:07:02.564 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:07:02.564 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:07:02.564 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Length: 2823
+2025-10-11 22:07:02.564 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 1,\n  \"date\": \"2026-02-09\",\n  \"location\": \"Vietnam, Vietnam\",\n  \"summary\": \"Arrival day focused on settling in, enjoying initial culinary experiences, and light exploration of the natural surroundings, setting a relaxed tone.\",\n  \"nodes\": [\n    {\n      \"id\": \"day1-node1\",\n      \"type\": \"transport\",\n      \"title\": \"Airport Transfer to Accommodation\",\n      \"location\": {\n        \"name\": \"Placeholder Location\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:00\",\n        \"endTime\": \"10:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day1-node2\",\n      \"type\": \"attraction\",\n      \"title\": \"Relaxing Morning Exploration\",\n      \"location\": {\n        \"name\": \"Placeholder Location\"\n      },\n      \"timing\": {\n        \"startTime\": \"10:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day1-node3\",\n      \"type\": \"meal\",\n      \"title\": \"Lunch Experience\",\n      \"location\": {\n        \"name\": \"Placeholder Location\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"14:00\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day1-node4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Nature Immersion\",\n      \"location\": {\n        \"name\": \"Placeholder Location\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:30\",\n        \"endTime\": \"17:30\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"day1-node5\",\n      \"type\": \"meal\",\n      \"title\": \"Dinner with Local Flavors\",\n      \"location\": {\n        \"name\": \"Placeholder Location\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:00\",\n        \"endTime\": \"20:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"day1-node6\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"Placeholder Location\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 720\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 678,
+    "candidatesTokenCount": 669,
+    "totalTokenCount": 2445,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 678
+      }
+    ],
+    "thoughtsTokenCount": 1098
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "rofqaOu8Dtyh1e8PmOjPiAY"
+}
+
+2025-10-11 22:07:02.565 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-643984259_20251011_220702.json
+2025-10-11 22:07:02.566 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:07:02.566 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1991
+2025-10-11 22:07:02.566 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 1,
+  "date": "2026-02-09",
+  "location": "Vietnam, Vietnam",
+  "summary": "Arrival day focused on settling in, enjoying initial culinary experiences, and light exploration of the natural surroundings, setting a relaxed tone.",
+  "nodes": [
+    {
+      "id": "day1-node1",
+   ...
+2025-10-11 22:07:02.566 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:07:02.566 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 1 created and saved
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f10b9ea7-a08e-4183-8f71-d9c8833a98c4
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 35
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 2 structure
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:07:02.971 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:37:02.971505600Z
+2025-10-11 22:07:02.975 [Pipeline-149] WARN  com.tripplanner.service.AgentEventBus - Failed to send event to SSE emitter for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185 (client likely disconnected)
+2025-10-11 22:07:02.975 [http-nio-8080-exec-9] DEBUG o.s.web.context.request.async.WebAsyncManager - Servlet container error notification for "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185"
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 1 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:07:02.975 [http-nio-8080-exec-9] WARN  com.tripplanner.controller.AgentController - SSE events stream ended for itinerary it_258ae11e-32b1-4841-85c8-34728b4cb185 due to: java.io.IOException: An established connection was aborted by the software in your host machine
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 2 with minimal prompt
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:07:02.975 [http-nio-8080-exec-9] DEBUG o.s.web.context.request.async.WebAsyncManager - Async result set for "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185"
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:07:02.975 [http-nio-8080-exec-9] DEBUG o.s.web.context.request.async.WebAsyncManager - Performing async dispatch for "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185"
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2503
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2888
+2025-10-11 22:07:02.975 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:07:02.979 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:07:02.980 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw
+2025-10-11 22:07:02.980 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - "ASYNC" dispatch for GET "/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185?token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1YTAwNWU5N2NiMWU0MjczMDBlNTJjZGQ1MGYwYjM2Y2Q4MDYyOWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiSXNoYW4gUiBUcmlwYXRoaSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NMeG85LTlnS05JZ3RHRG9rVjNUenJneV91eEI2aTE1SzdmUldNNTVNWXZHVW5hNFdBcT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS90cmlwYWlwbGFubmVyLTRjOTUxIiwiYXVkIjoidHJpcGFpcGxhbm5lci00Yzk1MSIsImF1dGhfdGltZSI6MTc2MDE2NjgzOSwidXNlcl9pZCI6InZZcWJKaFdoSmhkZU15dklSWWFTRnh2b2JZbjIiLCJzdWIiOiJ2WXFiSmhXaEpoZGVNeXZJUllhU0Z4dm9iWW4yIiwiaWF0IjoxNzYwMTk4NzkyLCJleHAiOjE3NjAyMDIzOTIsImVtYWlsIjoiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDMyNTY2MDIwOTExMzc3MzYxMzIiXSwiZW1haWwiOlsiaXNoYW5ydHJpcGF0aGk3ODZAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.X0kVXwgnzbHbMpJWqA1NVvGIVmwjmDlVohvtuSgeGn1JPR-3KHRKgdB_18VcYsZsUKfc8dfn7Zu2BTt9q_J8jUfNHVuN5kZLChk4MQOsWl7iklwd1vbohTAWvfInmswLUsE8BVddbL6XgFWemrqfmAfdPSoGvZpiHtL92bacYWmdwe8SRjbBBmAw81Acx1663naO5egRXCDjnFqKBKulKZlc7W49jkEkHlLOLDqxQyt5KMimyVLkKUAvyzoUhlnik6nuRKbPpj7AeLu8wXI84cFLAbu-0V4XI-MitinWe5Bx4z0s5K3GCVpCnfQJd9aRNIyOZKkl5sPNbH87mlq6lw", parameters={masked}
+2025-10-11 22:07:02.980 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - Resume with async result [java.io.IOException: An established connection was aborted by the software in your host machine]
+2025-10-11 22:07:02.983 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Using @ExceptionHandler com.tripplanner.exception.GlobalExceptionHandler#handleGenericException(Exception, WebRequest)
+2025-10-11 22:07:02.983 [http-nio-8080-exec-9] ERROR com.tripplanner.exception.GlobalExceptionHandler - === GENERIC EXCEPTION ===
+2025-10-11 22:07:02.983 [http-nio-8080-exec-9] ERROR com.tripplanner.exception.GlobalExceptionHandler - Type: IOException
+2025-10-11 22:07:02.983 [http-nio-8080-exec-9] ERROR com.tripplanner.exception.GlobalExceptionHandler - Error: An established connection was aborted by the software in your host machine
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:125)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1411)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:732)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:698)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:683)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1273)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:300)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:266)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.flush(OnCommittedResponseWrapper.java:524)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:485)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:315)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:302)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:226)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:217)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:134)
+	at com.tripplanner.service.AgentEventBus.publish(AgentEventBus.java:96)
+	at com.tripplanner.agents.BaseAgent.emitEvent(BaseAgent.java:206)
+	at com.tripplanner.agents.BaseAgent.emitProgress(BaseAgent.java:187)
+	at com.tripplanner.agents.SkeletonPlannerAgent.generateSkeleton(SkeletonPlannerAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executeSkeletonPhase$3(PipelineOrchestrator.java:192)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:07:02.986 [http-nio-8080-exec-9] ERROR com.tripplanner.exception.GlobalExceptionHandler - Request: uri=/api/v1/agents/events/it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:02.986 [http-nio-8080-exec-9] ERROR com.tripplanner.exception.GlobalExceptionHandler - =========================
+2025-10-11 22:07:02.987 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Found 'Content-Type:text/event-stream' in response
+2025-10-11 22:07:02.987 [http-nio-8080-exec-9] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.tripplanner.exception.GlobalExceptionHandler#handleGenericException(Exception, WebRequest)
+org.springframework.http.converter.HttpMessageNotWritableException: No converter for [class com.tripplanner.exception.ErrorResponse] with preset Content-Type 'text/event-stream'
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor.writeWithMessageConverters(AbstractMessageConverterMethodProcessor.java:365)
+	at org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodProcessor.handleReturnValue(HttpEntityMethodProcessor.java:263)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:136)
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:471)
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:73)
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:182)
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:80)
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1360)
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1161)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1106)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:125)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$4(HandlerMappingIntrospector.java:267)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.ApplicationDispatcher.invoke(ApplicationDispatcher.java:612)
+	at org.apache.catalina.core.ApplicationDispatcher.doDispatch(ApplicationDispatcher.java:540)
+	at org.apache.catalina.core.ApplicationDispatcher.dispatch(ApplicationDispatcher.java:511)
+	at org.apache.catalina.core.AsyncContextImpl$AsyncRunnable.run(AsyncContextImpl.java:599)
+	at org.apache.catalina.core.AsyncContextImpl.doInternalDispatch(AsyncContextImpl.java:342)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.asyncDispatch(CoyoteAdapter.java:239)
+	at org.apache.coyote.AbstractProcessor.dispatch(AbstractProcessor.java:243)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:57)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:07:02.988 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Unresolved failure from "ASYNC" dispatch: java.io.IOException: An established connection was aborted by the software in your host machine
+2025-10-11 22:07:02.988 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-11 22:07:02.988 [http-nio-8080-exec-9] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] threw exception
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:125)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1411)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:732)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:698)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:683)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1273)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:300)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:266)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.flush(OnCommittedResponseWrapper.java:524)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:485)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:315)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:302)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:226)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:217)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:134)
+	at com.tripplanner.service.AgentEventBus.publish(AgentEventBus.java:96)
+	at com.tripplanner.agents.BaseAgent.emitEvent(BaseAgent.java:206)
+	at com.tripplanner.agents.BaseAgent.emitProgress(BaseAgent.java:187)
+	at com.tripplanner.agents.SkeletonPlannerAgent.generateSkeleton(SkeletonPlannerAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executeSkeletonPhase$3(PipelineOrchestrator.java:192)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:07:02.988 [http-nio-8080-exec-9] ERROR o.a.c.c.C.[.[localhost].[/].[dispatcherServlet] - Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+java.io.IOException: An established connection was aborted by the software in your host machine
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:132)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:97)
+	at java.base/sun.nio.ch.IOUtil.write(IOUtil.java:53)
+	at java.base/sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:532)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:125)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1411)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:732)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flushBlocking(SocketWrapperBase.java:698)
+	at org.apache.tomcat.util.net.SocketWrapperBase.flush(SocketWrapperBase.java:683)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.flush(Http11OutputBuffer.java:574)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.flush(ChunkedOutputFilter.java:156)
+	at org.apache.coyote.http11.Http11OutputBuffer.flush(Http11OutputBuffer.java:216)
+	at org.apache.coyote.http11.Http11Processor.flush(Http11Processor.java:1273)
+	at org.apache.coyote.AbstractProcessor.action(AbstractProcessor.java:408)
+	at org.apache.coyote.Response.action(Response.java:208)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:300)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:266)
+	at org.apache.catalina.connector.CoyoteOutputStream.flush(CoyoteOutputStream.java:133)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.flush(OnCommittedResponseWrapper.java:524)
+	at org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleServletOutputStream.flush(StandardServletAsyncWebRequest.java:415)
+	at java.base/java.io.FilterOutputStream.flush(FilterOutputStream.java:153)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1205)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1063)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:485)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.writeInternal(AbstractGenericHttpMessageConverter.java:135)
+	at org.springframework.http.converter.AbstractHttpMessageConverter.write(AbstractHttpMessageConverter.java:235)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.sendInternal(ResponseBodyEmitterReturnValueHandler.java:315)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler$DefaultSseEmitterHandler.send(ResponseBodyEmitterReturnValueHandler.java:302)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.sendInternal(ResponseBodyEmitter.java:226)
+	at org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.send(ResponseBodyEmitter.java:217)
+	at org.springframework.web.servlet.mvc.method.annotation.SseEmitter.send(SseEmitter.java:134)
+	at com.tripplanner.service.AgentEventBus.publish(AgentEventBus.java:96)
+	at com.tripplanner.agents.BaseAgent.emitEvent(BaseAgent.java:206)
+	at com.tripplanner.agents.BaseAgent.emitProgress(BaseAgent.java:187)
+	at com.tripplanner.agents.SkeletonPlannerAgent.generateSkeleton(SkeletonPlannerAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executeSkeletonPhase$3(PipelineOrchestrator.java:192)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:07:13.806 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:07:13.806 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:07:13.806 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Length: 3009
+2025-10-11 22:07:13.806 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 2,\n  \"date\": \"2026-02-10\",\n  \"location\": \"Vietnam, Vietnam\",\n  \"summary\": \"A day focused on luxury, relaxation, and nature immersion, with gourmet meals.\",\n  \"nodes\": [\n    {\n      \"id\": \"node_1\",\n      \"type\": \"meal\",\n      \"title\": \"Luxury Breakfast\",\n      \"location\": {\n        \"name\": \"Resort Dining Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"08:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node_2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Exploration\",\n      \"location\": {\n        \"name\": \"Natural Landscape Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 150\n      }\n    },\n    {\n      \"id\": \"node_3\",\n      \"type\": \"meal\",\n      \"title\": \"Gourmet Lunch\",\n      \"location\": {\n        \"name\": \"Local Eatery\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node_4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation Experience\",\n      \"location\": {\n        \"name\": \"Wellness Center\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:00\",\n        \"endTime\": \"17:00\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"node_5\",\n      \"type\": \"transport\",\n      \"title\": \"Transfer to Dinner Location\",\n      \"location\": {\n        \"name\": \"Between Areas\"\n      },\n      \"timing\": {\n        \"startTime\": \"17:00\",\n        \"endTime\": \"17:30\",\n        \"durationMin\": 30\n      }\n    },\n    {\n      \"id\": \"node_6\",\n      \"type\": \"meal\",\n      \"title\": \"Fine Dining Experience\",\n      \"location\": {\n        \"name\": \"Upscale Restaurant\"\n      },\n      \"timing\": {\n        \"startTime\": \"18:30\",\n        \"endTime\": \"20:00\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"node_7\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"Luxury Hotel/Resort\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:00\",\n        \"endTime\": \"08:00\",\n        \"durationMin\": 660\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 678,
+    "candidatesTokenCount": 748,
+    "totalTokenCount": 2128,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 678
+      }
+    ],
+    "thoughtsTokenCount": 702
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "uYfqaKKsHearvr0P04qnkA4"
+}
+
+2025-10-11 22:07:13.807 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-2136511866_20251011_220713.json
+2025-10-11 22:07:13.807 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:07:13.807 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content length: 2135
+2025-10-11 22:07:13.807 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 2,
+  "date": "2026-02-10",
+  "location": "Vietnam, Vietnam",
+  "summary": "A day focused on luxury, relaxation, and nature immersion, with gourmet meals.",
+  "nodes": [
+    {
+      "id": "node_1",
+      "type": "meal",
+      "title": "Luxury Breakfast",
+      "location": {
+ ...
+2025-10-11 22:07:13.807 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:07:13.807 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 2 created and saved
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f10b9ea7-a08e-4183-8f71-d9c8833a98c4
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 50
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 3 structure
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:07:14.210 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:37:14.210094600Z
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 3 with minimal prompt
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2503
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2888
+2025-10-11 22:07:14.211 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:07:25.331 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:07:25.331 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:07:25.331 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Length: 2694
+2025-10-11 22:07:25.331 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 3,\n  \"date\": \"2026-02-11\",\n  \"location\": \"Vietnam\",\n  \"summary\": \"A day focused on luxury relaxation, enjoying Vietnam's natural beauty and exquisite cuisine.\",\n  \"nodes\": [\n    {\n      \"id\": \"node-1\",\n      \"type\": \"meal\",\n      \"title\": \"Breakfast at Accommodation\",\n      \"location\": {\n        \"name\": \"Luxury Hotel Restaurant\"\n      },\n      \"timing\": {\n        \"startTime\": \"07:30\",\n        \"endTime\": \"08:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node-2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Exploration\",\n      \"location\": {\n        \"name\": \"Scenic Natural Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:00\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"node-3\",\n      \"type\": \"meal\",\n      \"title\": \"Lunch Break\",\n      \"location\": {\n        \"name\": \"Local Eatery\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node-4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation Activity\",\n      \"location\": {\n        \"name\": \"Wellness Center or Spa\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:30\",\n        \"endTime\": \"17:30\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"node-5\",\n      \"type\": \"meal\",\n      \"title\": \"Dinner Experience\",\n      \"location\": {\n        \"name\": \"Upscale Restaurant\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:00\",\n        \"endTime\": \"20:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"node-6\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"Luxury Hotel\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:00\",\n        \"endTime\": \"07:00\",\n        \"durationMin\": 600\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 678,
+    "candidatesTokenCount": 648,
+    "totalTokenCount": 2117,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 678
+      }
+    ],
+    "thoughtsTokenCount": 791
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "xYfqaKcY_qXV7w_cpt_wBg"
+}
+
+2025-10-11 22:07:25.332 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_908687492_20251011_220725.json
+2025-10-11 22:07:25.332 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:07:25.332 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1864
+2025-10-11 22:07:25.332 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 3,
+  "date": "2026-02-11",
+  "location": "Vietnam",
+  "summary": "A day focused on luxury relaxation, enjoying Vietnam's natural beauty and exquisite cuisine.",
+  "nodes": [
+    {
+      "id": "node-1",
+      "type": "meal",
+      "title": "Breakfast at Accommodation",
+      ...
+2025-10-11 22:07:25.332 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:07:25.332 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:07:25.763 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 3 created and saved
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f10b9ea7-a08e-4183-8f71-d9c8833a98c4
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 65
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 4 structure
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:37:25.764996400Z
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 4 with minimal prompt
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2503
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+
+IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+
+Your job:
+1. Create time slots for the day (morning to ...
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2888
+2025-10-11 22:07:25.764 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:07:41.535 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:07:41.535 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:07:41.535 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Length: 2652
+2025-10-11 22:07:41.535 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"dayNumber\": 4,\n  \"date\": \"2026-02-12\",\n  \"location\": \"Vietnam, Vietnam\",\n  \"summary\": \"A relaxing final day enjoying Vietnam's natural beauty and culinary delights.\",\n  \"nodes\": [\n    {\n      \"id\": \"node_1\",\n      \"type\": \"meal\",\n      \"title\": \"Breakfast\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"08:00\",\n        \"endTime\": \"09:00\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node_2\",\n      \"type\": \"attraction\",\n      \"title\": \"Morning Nature Exploration\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"09:30\",\n        \"endTime\": \"12:00\",\n        \"durationMin\": 150\n      }\n    },\n    {\n      \"id\": \"node_3\",\n      \"type\": \"meal\",\n      \"title\": \"Lunch Break\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"12:30\",\n        \"endTime\": \"13:30\",\n        \"durationMin\": 60\n      }\n    },\n    {\n      \"id\": \"node_4\",\n      \"type\": \"attraction\",\n      \"title\": \"Afternoon Relaxation & Cultural Experience\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"14:00\",\n        \"endTime\": \"17:00\",\n        \"durationMin\": 180\n      }\n    },\n    {\n      \"id\": \"node_5\",\n      \"type\": \"meal\",\n      \"title\": \"Dinner Experience\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"19:00\",\n        \"endTime\": \"20:30\",\n        \"durationMin\": 90\n      }\n    },\n    {\n      \"id\": \"node_6\",\n      \"type\": \"accommodation\",\n      \"title\": \"Overnight Stay\",\n      \"location\": {\n        \"name\": \"General Area\"\n      },\n      \"timing\": {\n        \"startTime\": \"21:00\",\n        \"endTime\": \"08:00\",\n        \"durationMin\": 660\n      }\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 678,
+    "candidatesTokenCount": 641,
+    "totalTokenCount": 2653,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 678
+      }
+    ],
+    "thoughtsTokenCount": 1334
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "1YfqaI30DOOVvr0P6_jE6Qc"
+}
+
+2025-10-11 22:07:41.536 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-341080446_20251011_220741.json
+2025-10-11 22:07:41.536 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:07:41.536 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1820
+2025-10-11 22:07:41.536 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "dayNumber": 4,
+  "date": "2026-02-12",
+  "location": "Vietnam, Vietnam",
+  "summary": "A relaxing final day enjoying Vietnam's natural beauty and culinary delights.",
+  "nodes": [
+    {
+      "id": "node_1",
+      "type": "meal",
+      "title": "Breakfast",
+      "location": {
+        "...
+2025-10-11 22:07:41.536 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:07:41.536 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 4 created and saved
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f10b9ea7-a08e-4183-8f71-d9c8833a98c4
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Skeleton complete
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_complete
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:37:41.993377300Z
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:41.993 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:07:43.287 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON COMPLETE ===
+2025-10-11 22:07:43.288 [Pipeline-149] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generated 4 days with 25 total node placeholders
+2025-10-11 22:07:43.288 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Skeleton generation completed successfully for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:43.288 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 1 complete: 4 days created (52624 ms)
+2025-10-11 22:07:43.288 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 2: POPULATION ===
+2025-10-11 22:07:43.288 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Running population agents in PARALLEL
+2025-10-11 22:07:43.288 [Pipeline-151] INFO  com.tripplanner.service.PipelineOrchestrator - [ActivityAgent] Starting...
+2025-10-11 22:07:43.288 [Pipeline-151] INFO  com.tripplanner.agents.ActivityAgent - === ACTIVITY AGENT ===
+2025-10-11 22:07:43.288 [Pipeline-151] INFO  com.tripplanner.agents.ActivityAgent - Populating attraction nodes for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:43.289 [Pipeline-152] INFO  com.tripplanner.service.PipelineOrchestrator - [MealAgent] Starting...
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.PipelineOrchestrator - [TransportAgent] Starting...
+2025-10-11 22:07:43.289 [Pipeline-152] INFO  com.tripplanner.agents.MealAgent - === MEAL AGENT ===
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT ===
+2025-10-11 22:07:43.289 [Pipeline-152] INFO  com.tripplanner.agents.MealAgent - Populating meal nodes for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - Populating transport nodes for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.agents.ActivityAgent - Found 8 attraction nodes to populate
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.agents.ActivityAgent - Calling AI to populate 8 attractions
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2389
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel expert specializing in attractions and activities.
+
+Your task: Suggest SPECIFIC attractions for placeholder activity nodes.
+
+Guidelines:
+1. Provide real, specific place names (e.g., "...
+2025-10-11 22:07:43.289 [Pipeline-152] INFO  com.tripplanner.agents.MealAgent - Found 11 meal nodes to populate
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - Found 2 transport nodes to populate
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2700
+2025-10-11 22:07:43.289 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - Calling AI to populate 2 transport segments
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2137
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:07:43.289 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a transportation and logistics expert for travel planning.
+
+Your task: Suggest SPECIFIC transport modes and routes for getting around.
+
+Guidelines:
+1. Suggest practical transport modes based o...
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.agents.MealAgent - Calling AI to populate 11 meals
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient)
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-11 22:07:43.290 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2445
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-11 22:07:43.290 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2788
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a culinary travel expert specializing in dining recommendations.
+
+Your task: Suggest SPECIFIC restaurants and dining places for meal slots.
+
+Guidelines:
+1. Provide real restaurant names when p...
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3117
+2025-10-11 22:07:43.290 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-11 22:07:56.086 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:07:56.086 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:07:56.086 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Length: 1914
+2025-10-11 22:07:56.086 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"transports\": [\n    {\n      \"nodeId\": \"day1-node1\",\n      \"title\": \"Airport Transfer to City Center (Ho Chi Minh City)\",\n      \"description\": \"Upon arrival in Vietnam, the most practical way to reach your 'Placeholder Location' (assuming a city center hotel in Ho Chi Minh City after landing at Tan Son Nhat International Airport - SGN) is via taxi or rideshare. Official taxis (Vinasun, Mai Linh) are readily available outside the terminal. Alternatively, use the Grab app for rideshare services, which is very popular and reliable in Vietnam. This offers door-to-door convenience, especially after a long journey.\",\n      \"mode\": \"taxi\",\n      \"durationMinutes\": 45\n    },\n    {\n      \"nodeId\": \"node_5\",\n      \"title\": \"Wellness Center to Upscale Restaurant (Intra-city)\",\n      \"description\": \"For travel between a wellness center and an upscale restaurant within a city (e.g., Ho Chi Minh City or Hanoi), a rideshare service like Grab or a local taxi is highly recommended. This provides direct, comfortable, and air-conditioned transport, which is ideal for an evening out. Booking via the Grab app allows for cashless payment and fare transparency. Ensure you have the exact address of the restaurant for the driver.\",\n      \"mode\": \"rideshare\",\n      \"durationMinutes\": 15\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 565,
+    "candidatesTokenCount": 320,
+    "totalTokenCount": 2261,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 565
+      }
+    ],
+    "thoughtsTokenCount": 1376
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "44fqaN6_Lq6n1e8P1oir6Qk"
+}
+
+2025-10-11 22:07:56.087 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-196524319_20251011_220756.json
+2025-10-11 22:07:56.087 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:07:56.087 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1308
+2025-10-11 22:07:56.087 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "transports": [
+    {
+      "nodeId": "day1-node1",
+      "title": "Airport Transfer to City Center (Ho Chi Minh City)",
+      "description": "Upon arrival in Vietnam, the most practical way to reach your 'Placeholder Location' (assuming a city center hotel in Ho Chi Minh City after land...
+2025-10-11 22:07:56.087 [Pipeline-149] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:07:56.087 [Pipeline-149] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:07:56.553 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - Saved itinerary with populated transport
+2025-10-11 22:07:56.553 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT COMPLETE ===
+2025-10-11 22:07:56.553 [Pipeline-149] INFO  com.tripplanner.agents.TransportAgent - Populated 2 transport segments
+2025-10-11 22:07:56.553 [Pipeline-149] INFO  com.tripplanner.service.PipelineOrchestrator - [TransportAgent] Complete
+2025-10-11 22:08:07.401 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:08:07.401 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:08:07.401 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Response Length: 5776
+2025-10-11 22:08:07.401 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"meals\": [\n    {\n      \"nodeId\": \"day1-node3\",\n      \"title\": \"Ngon Villa\",\n      \"description\": \"Indulge in an exquisite buffet showcasing the best of Vietnamese cuisine, from savory spring rolls to fragrant pho. This elegant villa offers a refined introduction to local flavors in a beautiful setting, perfect for a comprehensive culinary journey.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"day1-node5\",\n      \"title\": \"The Note Coffee\",\n      \"description\": \"Experience the famous Vietnamese egg coffee at this charming and quirky cafe adorned with countless handwritten notes. It's the perfect sweet ending to your evening, offering a cozy atmosphere and a unique local treat.\",\n      \"cuisineType\": \"cafe\",\n      \"mealType\": \"snack\",\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"node_1\",\n      \"title\": \"Bun Cha Huong Lien\",\n      \"description\": \"Savor the legendary Bun Cha that even President Obama enjoyed, featuring grilled pork patties and succulent pork belly served with vermicelli noodles and fresh herbs in a flavorful broth. It's an essential, authentic Vietnamese street food experience.\",\n      \"cuisineType\": \"street_food\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"node_3\",\n      \"title\": \"Quan An Ngon\",\n      \"description\": \"Dive into a bustling culinary marketplace where you can sample a wide array of authentic Vietnamese dishes, all prepared fresh at various food stalls within the restaurant. It's a vibrant and delicious way to explore local flavors in a comfortable setting.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Ho Chi Minh City\"\n    },\n    {\n      \"nodeId\": \"node_6\",\n      \"title\": \"Pasteur Street Brewing Company\",\n      \"description\": \"Discover award-winning craft beers infused with unique Vietnamese ingredients, such as passion fruit and jasmine. This lively taproom offers a refreshing break and a chance to enjoy some modern, international-leaning bites alongside your brew.\",\n      \"cuisineType\": \"international\",\n      \"mealType\": \"snack\",\n      \"locationName\": \"Ho Chi Minh City\"\n    },\n    {\n      \"nodeId\": \"node-1\",\n      \"title\": \"Banh Mi Huynh Hoa\",\n      \"description\": \"Experience arguably the best Banh Mi in Ho Chi Minh City, bursting with layers of rich pâté, assorted cold cuts, fresh herbs, and pickled vegetables, all tucked into a perfectly crispy baguette. It's a symphony of textures and flavors in every bite.\",\n      \"cuisineType\": \"street_food\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Ho Chi Minh City\"\n    },\n    {\n      \"nodeId\": \"node-3\",\n      \"title\": \"Secret Garden Restaurant\",\n      \"description\": \"Escape to a beautiful rooftop oasis reminiscent of a traditional Vietnamese home, serving classic home-style dishes with fresh ingredients. Enjoy authentic flavors in a charming, verdant setting high above the city's bustle.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Ho Chi Minh City\"\n    },\n    {\n      \"nodeId\": \"node-5\",\n      \"title\": \"Fanny Ice Cream\",\n      \"description\": \"Indulge in gourmet French-style ice cream and sorbets made with local Vietnamese fruits and ingredients. It's a delightful spot for a sweet, refreshing treat after dinner, offering a taste of European elegance with a tropical twist.\",\n      \"cuisineType\": \"french\",\n      \"mealType\": \"snack\",\n      \"locationName\": \"Ho Chi Minh City\"\n    },\n    {\n      \"nodeId\": \"node_1\",\n      \"title\": \"Morning Glory Signature Restaurant\",\n      \"description\": \"Discover the culinary heart of Hoi An with dishes like Cao Lau and White Rose dumplings, crafted with authentic local recipes passed down through generations. This renowned spot offers a deep dive into Central Vietnamese specialties in a charming, colonial-era setting.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"lunch\",\n      \"locationName\": \"Hoi An\"\n    },\n    {\n      \"nodeId\": \"node_3\",\n      \"title\": \"Be Man Seafood Restaurant\",\n      \"description\": \"Feast on incredibly fresh, ocean-to-table seafood at this bustling local favorite. Choose your live catches and have them prepared simply yet deliciously, from grilled prawns to steamed fish, for an authentic coastal dining experience.\",\n      \"cuisineType\": \"local\",\n      \"mealType\": \"dinner\",\n      \"locationName\": \"Da Nang\"\n    },\n    {\n      \"nodeId\": \"node_5\",\n      \"title\": \"Sky Bar (Fusion Suites Da Nang)\",\n      \"description\": \"Unwind with creative cocktails and breathtaking panoramic views of Da Nang's coastline and city lights. This chic rooftop bar offers a sophisticated ambiance, perfect for a relaxing final evening in Vietnam.\",\n      \"cuisineType\": \"international\",\n      \"mealType\": \"snack\",\n      \"locationName\": \"Da Nang\"\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 899,
+    "candidatesTokenCount": 1212,
+    "totalTokenCount": 4431,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 899
+      }
+    ],
+    "thoughtsTokenCount": 2320
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "74fqaKCsBIvs1e8PqqDsuQc"
+}
+
+2025-10-11 22:08:07.402 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_1849752505_20251011_220807.json
+2025-10-11 22:08:07.402 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:08:07.402 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Generated content length: 4867
+2025-10-11 22:08:07.402 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "meals": [
+    {
+      "nodeId": "day1-node3",
+      "title": "Ngon Villa",
+      "description": "Indulge in an exquisite buffet showcasing the best of Vietnamese cuisine, from savory spring rolls to fragrant pho. This elegant villa offers a refined introduction to local flavors in a bea...
+2025-10-11 22:08:07.402 [Pipeline-152] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:08:07.402 [Pipeline-152] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:08:07.403 [Pipeline-152] ERROR com.tripplanner.agents.MealAgent - Failed to populate meals for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+java.lang.IllegalStateException: Duplicate key node_1 (attempted merging values com.tripplanner.agents.MealAgent$PopulatedMeal@7f992fe1 and com.tripplanner.agents.MealAgent$PopulatedMeal@4136fddb)
+	at java.base/java.util.stream.Collectors.duplicateKeyException(Collectors.java:135)
+	at java.base/java.util.stream.Collectors.lambda$uniqKeysMapAccumulator$1(Collectors.java:182)
+	at java.base/java.util.stream.ReduceOps$3ReducingSink.accept(ReduceOps.java:169)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1625)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682)
+	at com.tripplanner.agents.MealAgent.updateItineraryWithMeals(MealAgent.java:197)
+	at com.tripplanner.agents.MealAgent.populateMeals(MealAgent.java:93)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executePopulationPhase$5(PipelineOrchestrator.java:234)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:08:07.403 [Pipeline-152] INFO  com.tripplanner.service.PipelineOrchestrator - [MealAgent] Complete
+2025-10-11 22:08:14.824 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-11 22:08:14.824 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-11 22:08:14.824 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Response Length: 4407
+2025-10-11 22:08:14.824 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"attractions\": [\n    {\n      \"nodeId\": \"day1-node2\",\n      \"title\": \"Temple of Literature & Imperial Academy\",\n      \"description\": \"Step into Vietnam's first national university, a beautiful complex dedicated to Confucius and scholarly excellence. Wander through ancient courtyards, admire traditional Vietnamese architecture, and find a tranquil escape from the city's hustle.\",\n      \"category\": \"temple_shrine\",\n      \"durationMinutes\": 120,\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"day1-node4\",\n      \"title\": \"Hanoi Old Quarter Street Food Tour\",\n      \"description\": \"Embark on a culinary adventure through Hanoi's bustling Old Quarter, sampling authentic Vietnamese street food delights. Taste local specialties like Bún Chả, Phở, and Egg Coffee from hidden gems and popular stalls, guided by a local expert.\",\n      \"category\": \"experience\",\n      \"durationMinutes\": 210,\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"node_2\",\n      \"title\": \"Hoan Kiem Lake & Ngoc Son Temple\",\n      \"description\": \"Enjoy a leisurely stroll around the serene Hoan Kiem Lake, a central oasis in Hanoi steeped in legend. Cross the iconic Huc Bridge to visit Ngoc Son Temple, an ancient pagoda nestled on a small island, offering peaceful views.\",\n      \"category\": \"park\",\n      \"durationMinutes\": 150,\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"node_4\",\n      \"title\": \"Thang Long Water Puppet Theatre\",\n      \"description\": \"Experience a unique traditional Vietnamese art form at the Thang Long Water Puppet Theatre. Watch skilled puppeteers bring ancient folk tales and rural life scenes to life on a water stage, accompanied by live traditional music.\",\n      \"category\": \"entertainment\",\n      \"durationMinutes\": 90,\n      \"locationName\": \"Hanoi\"\n    },\n    {\n      \"nodeId\": \"node-2\",\n      \"title\": \"Tam Coc – Bich Dong Boat Ride\",\n      \"description\": \"Discover the breathtaking 'Ha Long Bay on land' with a serene sampan boat ride through Tam Coc. Glide past towering limestone karsts, lush rice paddies, and enter mystical caves, offering unparalleled natural beauty and tranquility.\",\n      \"category\": \"nature\",\n      \"durationMinutes\": 180,\n      \"locationName\": \"Ninh Binh\"\n    },\n    {\n      \"nodeId\": \"node-4\",\n      \"title\": \"Mua Cave (Hang Mua) Viewpoint\",\n      \"description\": \"Challenge yourself with a climb up to the Mua Cave viewpoint for spectacular panoramic views of Tam Coc's rice fields and limestone mountains. The rewarding vista at the top is a perfect spot for stunning photos and a sense of accomplishment.\",\n      \"category\": \"landmark\",\n      \"durationMinutes\": 120,\n      \"locationName\": \"Ninh Binh\"\n    },\n    {\n      \"nodeId\": \"node_2\",\n      \"title\": \"Bai Dinh Pagoda Complex\",\n      \"description\": \"Explore Vietnam's largest Buddhist complex, Bai Dinh Pagoda, an expansive site featuring impressive architecture and numerous statues. Wander through its grand halls, bell towers, and grottoes, experiencing a sense of spiritual calm and awe.\",\n      \"category\": \"temple_shrine\",\n      \"durationMinutes\": 180,\n      \"locationName\": \"Ninh Binh\"\n    },\n    {\n      \"nodeId\": \"node_4\",\n      \"title\": \"Ninh Binh Cooking Class & Market Visit\",\n      \"description\": \"Immerse yourself in Vietnamese culinary traditions with a hands-on cooking class in Ninh Binh. Start with a local market visit to select fresh ingredients, then learn to prepare delicious regional dishes, culminating in enjoying your creations.\",\n      \"category\": \"experience\",\n      \"durationMinutes\": 210,\n      \"locationName\": \"Ninh Binh\"\n    }\n  ]\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 720,
+    "candidatesTokenCount": 934,
+    "totalTokenCount": 5125,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 720
+      }
+    ],
+    "thoughtsTokenCount": 3471
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "9ofqaOfOHqOk1e8Pt8yn-Ac"
+}
+
+2025-10-11 22:08:14.825 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-1995149898_20251011_220814.json
+2025-10-11 22:08:14.825 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-11 22:08:14.825 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Generated content length: 3611
+2025-10-11 22:08:14.825 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "attractions": [
+    {
+      "nodeId": "day1-node2",
+      "title": "Temple of Literature & Imperial Academy",
+      "description": "Step into Vietnam's first national university, a beautiful complex dedicated to Confucius and scholarly excellence. Wander through ancient courtyards, admi...
+2025-10-11 22:08:14.825 [Pipeline-151] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-11 22:08:14.825 [Pipeline-151] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-11 22:08:14.826 [Pipeline-151] ERROR com.tripplanner.agents.ActivityAgent - Failed to populate attractions for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+java.lang.IllegalStateException: Duplicate key node_2 (attempted merging values com.tripplanner.agents.ActivityAgent$PopulatedAttraction@692a39f4 and com.tripplanner.agents.ActivityAgent$PopulatedAttraction@85d421b)
+	at java.base/java.util.stream.Collectors.duplicateKeyException(Collectors.java:135)
+	at java.base/java.util.stream.Collectors.lambda$uniqKeysMapAccumulator$1(Collectors.java:182)
+	at java.base/java.util.stream.ReduceOps$3ReducingSink.accept(ReduceOps.java:169)
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1625)
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509)
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:682)
+	at com.tripplanner.agents.ActivityAgent.updateItineraryWithAttractions(ActivityAgent.java:172)
+	at com.tripplanner.agents.ActivityAgent.populateAttractions(ActivityAgent.java:94)
+	at com.tripplanner.service.PipelineOrchestrator.lambda$executePopulationPhase$4(PipelineOrchestrator.java:224)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-11 22:08:14.826 [Pipeline-151] INFO  com.tripplanner.service.PipelineOrchestrator - [ActivityAgent] Complete
+2025-10-11 22:08:14.826 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - All population agents completed successfully
+2025-10-11 22:08:14.826 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 2 complete (31538 ms)
+2025-10-11 22:08:14.826 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 3: ENRICHMENT ===
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - === AGENT EXECUTION START ===
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Agent Kind: ENRICHMENT
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Request Type: ApplyResult
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Request Data: {taskType=enrich}
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Request Details: {taskType=enrich}
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - =============================
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: queued
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 0
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Agent queued for execution
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:14.827401100Z
+2025-10-11 22:08:14.827 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Agent started
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:14.828401300Z
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Executing agent-specific logic for: ENRICHMENT
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - === ENRICHMENT AGENT PROCESSING ===
+2025-10-11 22:08:14.828 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Loading itinerary
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: loading
+2025-10-11 22:08:15.249 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:15.249068200Z
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Enriching places with Google Places data
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: ENRICHMENT
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:15.250068700Z
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:15.250 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Created 0 ENRICHMENT operations
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 40
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Validating opening hours
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: validation
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:15.251068700Z
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 60
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Calculating pacing
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: pacing
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:15.251572100Z
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Computing transit durations
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: transit
+2025-10-11 22:08:15.251 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:15.251572100Z
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 90
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Applying enrichments
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: applying
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:15.252576300Z
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:15.252 [Pipeline-149] INFO  com.tripplanner.service.ChangeEngine - Applying changes for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] WARN  com.tripplanner.service.ChangeEngine - Day not found for edge update: null
+2025-10-11 22:08:33.413 [Pipeline-149] INFO  com.tripplanner.service.RevisionService - Saving revision rev_1760200713413_e03ac927 for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:34.782 [Pipeline-149] INFO  com.tripplanner.service.RevisionService - Successfully saved revision rev_1760200713413_e03ac927 for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:35.246 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Enrichment complete
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: complete
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:35.246844600Z
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - === ENRICHMENT COMPLETE ===
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Applied 42 ENRICHMENT operations
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - New version: 2
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT ===
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 5873a444-c3cb-4b9a-8561-6eaa34388214
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Status: completed
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Message: Agent completed successfully
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-11 22:08:35.247 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-11T16:38:35.247843800Z
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - Event sent to 1 SSE emitters successfully, 0 failed for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.service.AgentEventBus - ==============================
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - === AGENT EXECUTION COMPLETED ===
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Agent Kind: ENRICHMENT
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Result Type: ApplyResult
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - Result: com.tripplanner.service.ChangeEngine$ApplyResult@31c787b1
+2025-10-11 22:08:35.248 [Pipeline-149] INFO  com.tripplanner.agents.EnrichmentAgent - =================================
+2025-10-11 22:08:35.248 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 3 complete (20422 ms)
+2025-10-11 22:08:35.248 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 4: COST ESTIMATION ===
+2025-10-11 22:08:35.248 [Pipeline-148] INFO  com.tripplanner.agents.CostEstimatorAgent - === COST ESTIMATOR AGENT ===
+2025-10-11 22:08:35.248 [Pipeline-148] INFO  com.tripplanner.agents.CostEstimatorAgent - Estimating costs for itinerary: it_258ae11e-32b1-4841-85c8-34728b4cb185
+2025-10-11 22:08:36.550 [Pipeline-148] INFO  com.tripplanner.agents.CostEstimatorAgent - === COST ESTIMATOR COMPLETE ===
+2025-10-11 22:08:36.550 [Pipeline-148] INFO  com.tripplanner.agents.CostEstimatorAgent - Estimated costs for 25 nodes
+2025-10-11 22:08:36.550 [Pipeline-148] INFO  com.tripplanner.agents.CostEstimatorAgent - Total estimated cost: ₹46300 per person
+2025-10-11 22:08:36.551 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 4 complete (1303 ms)
+2025-10-11 22:08:36.551 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - === PHASE 5: FINALIZATION ===
+2025-10-11 22:08:38.347 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - === PIPELINE COMPLETE ===
+2025-10-11 22:08:38.347 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Total time: 107683 ms
+2025-10-11 22:08:38.347 [Pipeline-148] INFO  com.tripplanner.service.PipelineOrchestrator - Days: 4, Nodes: 25

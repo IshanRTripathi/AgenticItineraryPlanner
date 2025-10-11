@@ -1,0 +1,456 @@
+package com.tripplanner.testing.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tripplanner.controller.ItinerariesController;
+import com.tripplanner.dto.ChatRequest;
+import com.tripplanner.dto.ChatResponse;
+import com.tripplanner.model.NormalizedItinerary;
+import com.tripplanner.service.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.*;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+/**
+ * Test cases for chat endpoints in ItinerariesController
+ */
+public class ChatEndpointsTest {
+    
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+    
+    @Mock private ItineraryService itineraryService;
+    @Mock private ItineraryJsonService itineraryJsonService;
+    @Mock private ChangeEngine changeEngine;
+    @Mock private UserDataService userDataService;
+    @Mock private AgentRegistry agentRegistry;
+    @Mock private RevisionService revisionService;
+    @Mock private OrchestratorService orchestratorService;
+    @Mock private WebSocketBroadcastService webSocketBroadcastService;
+    @Mock private SseConnectionManager sseConnectionManager;
+    @Mock private ChatHistoryService chatHistoryService;
+    
+    private ItinerariesController controller;
+    
+    private static final String TEST_USER_ID = "test-user";
+    private static final String TEST_ITINERARY_ID = "it_test-123";
+    
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        objectMapper = new ObjectMapper();
+        
+        controller = new ItinerariesController(
+            itineraryService,
+            itineraryJsonService,
+            changeEngine,
+            userDataService,
+            agentRegistry,
+            revisionService,
+            orchestratorService,
+            webSocketBroadcastService,
+            sseConnectionManager,
+            chatHistoryService
+        );
+        
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+            .addFilter((request, response, chain) -> {
+                // Simulate auth filter setting userId
+                request.setAttribute("userId", TEST_USER_ID);
+                chain.doFilter(request, response);
+            })
+            .build();
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should send chat message successfully")
+    void shouldSendChatMessageSuccessfully() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Move lunch to 2pm");
+        chatRequest.setScope("trip");
+        chatRequest.setAutoApply(false);
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("I'll move your lunch to 2pm");
+        chatResponse.setIntent("MODIFY_ACTIVITY");
+        
+        when(orchestratorService.route(any(ChatRequest.class))).thenReturn(chatResponse);
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("I'll move your lunch to 2pm"))
+                .andExpect(jsonPath("$.intent").value("MODIFY_ACTIVITY"));
+        
+        verify(orchestratorService).route(argThat(req -> 
+            req.getText().equals("Move lunch to 2pm") &&
+            req.getItineraryId().equals(TEST_ITINERARY_ID) &&
+            req.getUserId().equals(TEST_USER_ID)
+        ));
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should return 401 without userId")
+    void shouldReturn401WithoutUserId() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Test message");
+        
+        MockMvc mockMvcNoAuth = MockMvcBuilders.standaloneSetup(controller).build();
+        
+        // When & Then
+        mockMvcNoAuth.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isUnauthorized());
+    }
+    
+    @Test
+    @DisplayName("GET /api/v1/itineraries/{id}/chat/history - Should retrieve chat history")
+    void shouldRetrieveChatHistory() throws Exception {
+        // Given
+        NormalizedItinerary itinerary = new NormalizedItinerary();
+        itinerary.setId(TEST_ITINERARY_ID);
+        
+        List<Map<String, Object>> chatHistory = List.of(
+            Map.of("message", "Hello", "sender", "user", "timestamp", System.currentTimeMillis()),
+            Map.of("message", "Hi there!", "sender", "assistant", "timestamp", System.currentTimeMillis())
+        );
+        
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.of(itinerary));
+        when(chatHistoryService.getChatHistory(TEST_ITINERARY_ID))
+            .thenReturn(chatHistory);
+        
+        // When & Then
+        mockMvc.perform(get("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].message").value("Hello"))
+                .andExpect(jsonPath("$[1].message").value("Hi there!"));
+        
+        verify(chatHistoryService).getChatHistory(TEST_ITINERARY_ID);
+    }
+    
+    @Test
+    @DisplayName("GET /api/v1/itineraries/{id}/chat/history - Should return 404 for non-existent itinerary")
+    void shouldReturn404ForNonExistentItinerary() throws Exception {
+        // Given
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.empty());
+        
+        // When & Then
+        mockMvc.perform(get("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID))
+                .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat/history - Should save chat message")
+    void shouldSaveChatMessage() throws Exception {
+        // Given
+        NormalizedItinerary itinerary = new NormalizedItinerary();
+        itinerary.setId(TEST_ITINERARY_ID);
+        
+        Map<String, Object> message = Map.of(
+            "message", "Test message",
+            "sender", "user",
+            "timestamp", System.currentTimeMillis()
+        );
+        
+        Map<String, Object> savedMessage = new HashMap<>(message);
+        savedMessage.put("id", "msg_123");
+        
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.of(itinerary));
+        when(chatHistoryService.saveChatMessage(eq(TEST_ITINERARY_ID), any(), eq(TEST_USER_ID)))
+            .thenReturn(savedMessage);
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(message)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("msg_123"));
+        
+        verify(chatHistoryService).saveChatMessage(eq(TEST_ITINERARY_ID), any(), eq(TEST_USER_ID));
+    }
+    
+    @Test
+    @DisplayName("DELETE /api/v1/itineraries/{id}/chat/history - Should clear chat history")
+    void shouldClearChatHistory() throws Exception {
+        // Given
+        NormalizedItinerary itinerary = new NormalizedItinerary();
+        itinerary.setId(TEST_ITINERARY_ID);
+        
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.of(itinerary));
+        doNothing().when(chatHistoryService).clearChatHistory(TEST_ITINERARY_ID);
+        
+        // When & Then
+        mockMvc.perform(delete("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID))
+                .andExpect(status().isNoContent());
+        
+        verify(chatHistoryService).clearChatHistory(TEST_ITINERARY_ID);
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should handle orchestrator errors gracefully")
+    void shouldHandleOrchestratorErrorsGracefully() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Invalid request");
+        
+        when(orchestratorService.route(any())).thenThrow(new RuntimeException("Orchestrator error"));
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("I'm sorry, I encountered an error processing your request. Please try again."));
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should broadcast changes when applied")
+    void shouldBroadcastChangesWhenApplied() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Move lunch to 2pm");
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("Done!");
+        chatResponse.setChangeSet(Map.of("operation", "modify"));
+        chatResponse.setApplied(true);
+        
+        when(orchestratorService.route(any())).thenReturn(chatResponse);
+        
+        // When
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk());
+        
+        // Then
+        verify(webSocketBroadcastService).broadcastUpdate(
+            eq(TEST_ITINERARY_ID),
+            eq("chat_update"),
+            argThat(data -> 
+                data.get("chatResponse") == chatResponse &&
+                data.get("changes") == chatResponse.getChangeSet()
+            ),
+            eq(TEST_USER_ID)
+        );
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should handle empty message")
+    void shouldHandleEmptyMessage() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("");
+        
+        when(orchestratorService.route(any())).thenThrow(new IllegalArgumentException("Empty message"));
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isInternalServerError());
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should set itineraryId and userId")
+    void shouldSetItineraryIdAndUserId() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Test");
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("OK");
+        
+        when(orchestratorService.route(any())).thenReturn(chatResponse);
+        
+        // When
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk());
+        
+        // Then
+        verify(orchestratorService).route(argThat(req ->
+            req.getItineraryId().equals(TEST_ITINERARY_ID) &&
+            req.getUserId().equals(TEST_USER_ID)
+        ));
+    }
+    
+    @Test
+    @DisplayName("GET /api/v1/itineraries/{id}/chat/history - Should handle empty history")
+    void shouldHandleEmptyHistory() throws Exception {
+        // Given
+        NormalizedItinerary itinerary = new NormalizedItinerary();
+        itinerary.setId(TEST_ITINERARY_ID);
+        
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.of(itinerary));
+        when(chatHistoryService.getChatHistory(TEST_ITINERARY_ID))
+            .thenReturn(Collections.emptyList());
+        
+        // When & Then
+        mockMvc.perform(get("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat/history - Should validate message structure")
+    void shouldValidateMessageStructure() throws Exception {
+        // Given
+        NormalizedItinerary itinerary = new NormalizedItinerary();
+        itinerary.setId(TEST_ITINERARY_ID);
+        
+        Map<String, Object> invalidMessage = Map.of(); // Empty message
+        
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.of(itinerary));
+        when(chatHistoryService.saveChatMessage(eq(TEST_ITINERARY_ID), any(), eq(TEST_USER_ID)))
+            .thenThrow(new IllegalArgumentException("Invalid message"));
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidMessage)))
+                .andExpect(status().isInternalServerError());
+    }
+    
+    @Test
+    @DisplayName("DELETE /api/v1/itineraries/{id}/chat/history - Should handle service errors")
+    void shouldHandleServiceErrors() throws Exception {
+        // Given
+        NormalizedItinerary itinerary = new NormalizedItinerary();
+        itinerary.setId(TEST_ITINERARY_ID);
+        
+        when(itineraryJsonService.getItinerary(TEST_ITINERARY_ID))
+            .thenReturn(Optional.of(itinerary));
+        doThrow(new RuntimeException("Database error"))
+            .when(chatHistoryService).clearChatHistory(TEST_ITINERARY_ID);
+        
+        // When & Then
+        mockMvc.perform(delete("/api/v1/itineraries/{id}/chat/history", TEST_ITINERARY_ID))
+                .andExpect(status().isInternalServerError());
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should handle scope and day parameters")
+    void shouldHandleScopeAndDayParameters() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Test");
+        chatRequest.setScope("day");
+        chatRequest.setDay(2);
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("OK");
+        
+        when(orchestratorService.route(any())).thenReturn(chatResponse);
+        
+        // When
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk());
+        
+        // Then
+        verify(orchestratorService).route(argThat(req ->
+            "day".equals(req.getScope()) &&
+            req.getDay() != null &&
+            req.getDay() == 2
+        ));
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should handle autoApply flag")
+    void shouldHandleAutoApplyFlag() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Move lunch");
+        chatRequest.setAutoApply(true);
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("Applied!");
+        chatResponse.setApplied(true);
+        
+        when(orchestratorService.route(any())).thenReturn(chatResponse);
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.applied").value(true));
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should include warnings in response")
+    void shouldIncludeWarningsInResponse() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Test");
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("Done with warnings");
+        chatResponse.setWarnings(List.of("May conflict with dinner"));
+        
+        when(orchestratorService.route(any())).thenReturn(chatResponse);
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.warnings").isArray())
+                .andExpect(jsonPath("$.warnings[0]").value("May conflict with dinner"));
+    }
+    
+    @Test
+    @DisplayName("POST /api/v1/itineraries/{id}/chat - Should include candidates in response")
+    void shouldIncludeCandidatesInResponse() throws Exception {
+        // Given
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setText("Test");
+        
+        ChatResponse chatResponse = new ChatResponse();
+        chatResponse.setMessage("Which one?");
+        chatResponse.setCandidates(List.of(
+            Map.of("id", "1", "title", "Lunch A", "day", 2),
+            Map.of("id", "2", "title", "Lunch B", "day", 2)
+        ));
+        
+        when(orchestratorService.route(any())).thenReturn(chatResponse);
+        
+        // When & Then
+        mockMvc.perform(post("/api/v1/itineraries/{id}/chat", TEST_ITINERARY_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chatRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.candidates").isArray())
+                .andExpect(jsonPath("$.candidates.length()").value(2));
+    }
+}
+

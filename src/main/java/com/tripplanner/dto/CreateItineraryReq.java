@@ -26,13 +26,14 @@ public class CreateItineraryReq {
     private String language = "en";
     
     /**
-     * Calculate trip duration in days.
+     * Calculate trip duration in days (inclusive of both start and end dates).
      */
     public int getDurationDays() {
         if (startDate == null || endDate == null) {
             return 0;
         }
-        return (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate);
+        // Add 1 to include both start and end dates
+        return (int) java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
     }
     
     /**
