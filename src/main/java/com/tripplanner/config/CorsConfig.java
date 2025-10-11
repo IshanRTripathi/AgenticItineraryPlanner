@@ -19,18 +19,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns(
-                    "https://agentic-itinerary-planner-frontend-*.run.app",
-                    "https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app",
-                    "https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app",
-                    "http://localhost:3000",
-                    "http://localhost:5173",
-                    "http://127.0.0.1:3000",
-                    "http://127.0.0.1:5173"
-                )
+                .allowedOriginPatterns("*")  // Allow all origins temporarily
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true)
+                .allowCredentials(true)  // Allow credentials for authenticated requests
                 .maxAge(3600);
     }
 
@@ -38,16 +30,8 @@ public class CorsConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow specific origins
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-            "https://agentic-itinerary-planner-frontend-*.run.app",
-            "https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app",
-            "https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app",
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173"
-        ));
+        // Allow all origins temporarily
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         
         // Allow all HTTP methods
         configuration.setAllowedMethods(Arrays.asList(
@@ -57,7 +41,7 @@ public class CorsConfig implements WebMvcConfigurer {
         // Allow all headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
         
-        // Allow credentials (cookies, authorization headers)
+        // Allow credentials for authenticated requests
         configuration.setAllowCredentials(true);
         
         // Cache preflight response for 1 hour

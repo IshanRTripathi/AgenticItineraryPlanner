@@ -12,15 +12,10 @@ steps:
     args: [
       'build',
       '-f', 'Dockerfile.backend',
-      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest',
       '.'
     ]
     id: 'build-backend'
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA']
-    id: 'push-backend-sha'
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest']
@@ -31,7 +26,7 @@ steps:
     entrypoint: 'gcloud'
     args: [
       'run', 'deploy', 'agentic-itinerary-planner-backend',
-      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA',
+      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest',
       '--region', '${_REGION}',
       '--platform', 'managed',
       '--allow-unauthenticated',
@@ -62,7 +57,7 @@ steps:
       '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}'
     ]
     id: 'deploy-backend'
-    waitFor: ['push-backend-sha']
+    waitFor: ['push-backend-latest']
 
   # Build and deploy frontend
   - name: 'gcr.io/cloud-builders/docker'
@@ -72,18 +67,12 @@ steps:
       '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
       '--build-arg', 'VITE_WS_BASE_URL=${_BACKEND_URL}',
       '--build-arg', 'VITE_GOOGLE_MAPS_BROWSER_KEY=$$VITE_GOOGLE_MAPS_BROWSER_KEY',
-      '--build-arg', 'VITE_OPENWEATHER_API_KEY=$$VITE_OPENWEATHER_API_KEY',
-      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '.'
     ]
     secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY']
     id: 'build-frontend'
     waitFor: ['build-backend']
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA']
-    id: 'push-frontend-sha'
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest']
@@ -94,7 +83,7 @@ steps:
     entrypoint: 'gcloud'
     args: [
       'run', 'deploy', 'agentic-itinerary-planner-frontend',
-      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
+      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '--region', '${_REGION}',
       '--platform', 'managed',
       '--allow-unauthenticated',
@@ -107,14 +96,14 @@ steps:
       '--timeout', '300'
     ]
     id: 'deploy-frontend'
-    waitFor: ['push-frontend-sha']
+    waitFor: ['push-frontend-latest']
 
   
 
 # Substitution variables (hardcoded for mock setup)
 substitutions:
   _REGION: 'us-south1'
-  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-7cbftguaga-vp.a.run.app'
+  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app'
   _FRONTEND_URL: 'https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app'
   _GCP_PROJECT_ID: 'tripaiplanner'
 
