@@ -11,8 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.Arrays;
 
 /**
- * CORS configuration to allow frontend access to backend APIs.
- * Enables cross-origin requests from the React frontend.
+ * CORS configuration for allowing cross-origin requests from the frontend
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
@@ -20,20 +19,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
-                    "http://localhost:3000",  // React dev server
-                    "http://localhost:5173",  // Vite dev server
-                    "http://127.0.0.1:3000",
-                    "http://127.0.0.1:5173"
-                )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
-        
-        // Also allow CORS for WebSocket endpoints
-        registry.addMapping("/ws/**")
-                .allowedOrigins(
+                .allowedOriginPatterns(
+                    "https://agentic-itinerary-planner-frontend-*.run.app",
+                    "https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app",
+                    "https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app",
                     "http://localhost:3000",
                     "http://localhost:5173",
                     "http://127.0.0.1:3000",
@@ -41,31 +30,32 @@ public class CorsConfig implements WebMvcConfigurer {
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
-    /**
-     * Additional CORS configuration bean for more complex scenarios.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Allow specific origins
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:*",
-            "http://127.0.0.1:*",
-            "https://localhost:*",
-            "https://127.0.0.1:*"
+            "https://agentic-itinerary-planner-frontend-*.run.app",
+            "https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app",
+            "https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app",
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173"
+        ));
+        
+        // Allow all HTTP methods
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
         ));
         
         // Allow all headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        
-        // Allow all HTTP methods
-        configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"
-        ));
         
         // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
@@ -73,8 +63,9 @@ public class CorsConfig implements WebMvcConfigurer {
         // Cache preflight response for 1 hour
         configuration.setMaxAge(3600L);
         
+        // Apply to all API endpoints
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/**", configuration);
         
         return source;
     }

@@ -50,12 +50,15 @@ public class FirebaseAuthConfig {
             
             // Allow OPTIONS requests (CORS preflight) to bypass authentication
             if ("OPTIONS".equals(method)) {
-                filterChain.doFilter(request, response);
+                addCorsHeaders(request, response);
+                response.setStatus(HttpServletResponse.SC_OK);
                 return;
             }
             
             // Skip authentication for public endpoints
             if (isPublicEndpoint(path)) {
+                // Add CORS headers for public endpoints
+                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -78,6 +81,8 @@ public class FirebaseAuthConfig {
                         // Continue without authentication for /json endpoints
                     }
                 }
+                // Add CORS headers for /json endpoints
+                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -100,6 +105,8 @@ public class FirebaseAuthConfig {
                 } else {
                     logger.debug("No auth header for lock endpoint: {}, allowing anonymous access for testing", path);
                 }
+                // Add CORS headers for lock endpoints
+                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -176,6 +183,9 @@ public class FirebaseAuthConfig {
                 request.setAttribute("userName", decodedToken.getName());
                 
                 logger.debug("Authenticated user: {} for path: {}", userId, path);
+                
+                // Add CORS headers for successful authentication
+                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 
             } catch (Exception e) {
@@ -207,6 +217,31 @@ public class FirebaseAuthConfig {
                    path.startsWith("/actuator") ||
                    path.equals("/") ||
                    path.equals("/favicon.ico");
+        }
+
+        /**
+         * Add CORS headers to the response
+         */
+        private void addCorsHeaders(HttpServletRequest request, HttpServletResponse response) {
+            String origin = request.getHeader("Origin");
+            
+            // Allow specific origins
+            if (origin != null && (
+                origin.startsWith("https://agentic-itinerary-planner-frontend-") && origin.endsWith(".run.app") ||
+                origin.equals("https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app") ||
+                origin.startsWith("http://localhost:") ||
+                origin.startsWith("http://127.0.0.1:")
+            )) {
+                response.setHeader("Access-Control-Allow-Origin", origin);
+            } else {
+                // Fallback to allow all origins for development
+                response.setHeader("Access-Control-Allow-Origin", "*");
+            }
+            
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+            response.setHeader("Access-Control-Max-Age", "3600");
         }
     }
 
