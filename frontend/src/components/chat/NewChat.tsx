@@ -7,6 +7,7 @@ import { DiffViewer } from '../diff/DiffViewer';
 import { convertItineraryDiffToSections, createChangeSetDiff } from '../../utils/diffUtils';
 import { useUnifiedItinerary } from '../../contexts/UnifiedItineraryContext';
 import { userChangeTracker } from '../../services/userChangeTracker';
+import { PromptBox } from '../ui/chatgpt-prompt-input';
 
 type ChatState = {
   itineraryId: string;
@@ -67,9 +68,33 @@ function reducer(state: ChatState, action: Action): ChatState {
   }
 }
 
-export const NewChat: React.FC = () => {
-  const { state: uix, loadItinerary } = useUnifiedItinerary() as any;
-  const itineraryId = uix.itinerary?.id;
+interface NewChatProps {
+  itineraryId?: string;
+  onItineraryUpdate?: (updatedItinerary: any) => void;
+}
+
+export const NewChat: React.FC<NewChatProps> = ({ 
+  itineraryId: propItineraryId, 
+  onItineraryUpdate: propOnItineraryUpdate 
+}) => {
+  // Try to use context, but fallback to props if context is not available
+  let contextItineraryId: string | undefined;
+  let loadItinerary: any;
+  let contextState: any = null;
+  
+  try {
+    const { state: uix, loadItinerary: contextLoadItinerary } = useUnifiedItinerary() as any;
+    contextItineraryId = uix.itinerary?.id;
+    loadItinerary = contextLoadItinerary;
+    contextState = uix;
+  } catch (error) {
+    // Context not available, use props instead
+    contextItineraryId = undefined;
+    loadItinerary = null;
+    contextState = null;
+  }
+  
+  const itineraryId = propItineraryId || contextItineraryId;
   const [state, dispatch] = useReducer(reducer, {
     itineraryId: itineraryId ?? '',
     messages: [],
@@ -107,9 +132,9 @@ export const NewChat: React.FC = () => {
       await chatApi.persist(itineraryId, userMsg);
       const req: ChatRequest = {
         itineraryId,
-        scope: uix.selectedDay ? 'day' : 'trip',
-        day: uix.selectedDay || undefined,
-        selectedNodeId: uix.selectedNodeId || undefined,
+        scope: contextState?.selectedDay ? 'day' : 'trip',
+        day: contextState?.selectedDay || undefined,
+        selectedNodeId: contextState?.selectedNodeId || undefined,
         text,
         autoApply: false,
       };
@@ -142,6 +167,10 @@ export const NewChat: React.FC = () => {
       // Reload itinerary to reflect changes
       if (loadItinerary) {
         await loadItinerary(itineraryId);
+      } else if (propOnItineraryUpdate) {
+        // If no context loadItinerary, use the prop callback
+        // Note: This is a simplified approach - in a real app you might want to fetch the updated itinerary
+        propOnItineraryUpdate({ id: itineraryId });
       }
     } catch (e: any) {
       dispatch({ type: 'APPLY_ERROR', error: e.message || 'Failed to apply changes' });
@@ -180,16 +209,16 @@ export const NewChat: React.FC = () => {
     
     return (
       <div key={messageId} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
-        <div className={`max-w-[85%] rounded-xl px-4 py-3 shadow-sm transition-all ${
+        <div className={`max-w-[85%] rounded-xl px-3 py-2 shadow-sm transition-all ${
           isUser 
-            ? 'bg-blue-600 text-white' 
+            ? 'bg-gray-100 text-gray-900 border border-gray-200' 
             : 'bg-white text-gray-900 border border-gray-200'
         }`}>
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <span className="text-xs font-medium opacity-80">
-              {isUser ? '👤 You' : '🤖 Assistant'}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-xs font-medium text-gray-600">
+              {isUser ? 'You' : 'AI Assistant'}
             </span>
-            <span className="text-[10px] opacity-70">
+            <span className="text-xs text-gray-500">
               {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
@@ -197,74 +226,55 @@ export const NewChat: React.FC = () => {
           <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.message}</p>
 
           {m.intent && (
-            <div className={`mt-2 text-xs rounded px-2 py-1 border ${
-              isUser ? 'bg-blue-500/30 border-blue-400' : 'bg-indigo-50 text-indigo-800 border-indigo-100'
-            }`}>
-              <span className="font-semibold">Intent:</span> {m.intent}
+            <div className="mt-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+              <span className="font-medium text-gray-700">Intent:</span> {m.intent}
             </div>
           )}
 
           {Array.isArray(m.warnings) && m.warnings.length > 0 && (
-            <div className={`mt-2 text-xs rounded px-2 py-1 border flex items-start gap-1 ${
-              isUser ? 'bg-yellow-500/20 border-yellow-400' : 'bg-yellow-50 text-yellow-900 border-yellow-200'
-            }`}>
-              <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+            <div className="mt-2 text-xs bg-yellow-50 text-yellow-800 rounded-lg px-3 py-2 border border-yellow-200 flex items-start gap-2">
+              <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0 text-yellow-600" />
               <div className="flex-1">
-                <span className="font-semibold">Warnings</span>
-                <ul className="list-disc ml-4 mt-1">{m.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>
+                <span className="font-medium">Warnings</span>
+                <ul className="list-disc ml-4 mt-1 space-y-1">{m.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>
               </div>
             </div>
           )}
 
           {Array.isArray(m.errors) && m.errors.length > 0 && (
-            <div className={`mt-2 text-xs rounded px-2 py-1 border flex items-start gap-1 ${
-              isUser ? 'bg-red-500/20 border-red-400' : 'bg-red-50 text-red-900 border-red-200'
-            }`}>
-              <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+            <div className="mt-2 text-xs bg-red-50 text-red-800 rounded-lg px-3 py-2 border border-red-200 flex items-start gap-2">
+              <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0 text-red-600" />
               <div className="flex-1">
-                <span className="font-semibold">Errors</span>
-                <ul className="list-disc ml-4 mt-1">{m.errors.map((e, i) => <li key={i}>{e}</li>)}</ul>
+                <span className="font-medium">Errors</span>
+                <ul className="list-disc ml-4 mt-1 space-y-1">{m.errors.map((e, i) => <li key={i}>{e}</li>)}</ul>
               </div>
             </div>
           )}
 
           {m.applied && (
-            <div className="mt-2">
-              <div className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-800 rounded px-2 py-1 border border-green-200 mb-2">
-                <CheckCircle2 className="h-3 w-3" />
-                <span className="font-semibold">Changes Applied</span>
+            <div className="mt-3">
+              {/* Simple success indicator */}
+              <div className="inline-flex items-center gap-2 text-sm bg-green-50 text-green-700 rounded-lg px-3 py-2 border border-green-200">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span className="font-medium">Changes Applied Successfully</span>
               </div>
               
-              {/* Show applied changes details */}
-              {m.diff && (
-                <div className="border rounded-lg overflow-hidden bg-green-50/50">
-                  <div className="px-3 py-2 border-b bg-green-100 text-xs font-medium text-green-800">
-                    Applied Changes
+              {/* Collapsible details */}
+              {(m.diff || m.changeSet) && (
+                <details className="mt-2">
+                  <summary className="text-xs text-gray-600 cursor-pointer hover:text-gray-800 transition-colors">
+                    View Details
+                  </summary>
+                  <div className="mt-2 border rounded-lg overflow-hidden bg-gray-50">
+                    <div className="overflow-auto" style={{ maxHeight: '200px' }}>
+                      <DiffViewer
+                        sections={m.diff ? convertItineraryDiffToSections(m.diff) : createChangeSetDiff(m.changeSet)}
+                        viewMode={'unified'}
+                        showUnchanged={false}
+                      />
+                    </div>
                   </div>
-                  <div className="overflow-auto" style={{ maxHeight: '300px' }}>
-                    <DiffViewer
-                      sections={convertItineraryDiffToSections(m.diff)}
-                      viewMode={'unified'}
-                      showUnchanged={false}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {/* Show changeSet details if no diff available */}
-              {!m.diff && m.changeSet && (
-                <div className="border rounded-lg overflow-hidden bg-green-50/50">
-                  <div className="px-3 py-2 border-b bg-green-100 text-xs font-medium text-green-800">
-                    Applied Changes
-                  </div>
-                  <div className="overflow-auto" style={{ maxHeight: '300px' }}>
-                    <DiffViewer
-                      sections={createChangeSetDiff(m.changeSet)}
-                      viewMode={'unified'}
-                      showUnchanged={false}
-                    />
-                  </div>
-                </div>
+                </details>
               )}
             </div>
           )}
@@ -382,7 +392,7 @@ export const NewChat: React.FC = () => {
           <MessageSquare className="h-5 w-5 text-blue-600" />
           <span className="text-lg font-semibold">AI Travel Assistant</span>
           <div style={{ width: 56, height: 22 }} className="inline-flex items-center">
-            {uix.isConnected ? (
+            {contextState?.isConnected ? (
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live
               </Badge>
@@ -485,34 +495,16 @@ export const NewChat: React.FC = () => {
             Loading itinerary... Please wait before sending a message.
           </div>
         )}
-        <div className="flex gap-2">
-          <textarea
-            className="flex-1 min-h-[44px] max-h-32 resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            placeholder={itineraryId ? "Ask me about your trip…" : "Loading..."}
-            value={state.input}
-            onChange={(e) => dispatch({ type: 'INPUT_SET', value: e.target.value })}
-            onKeyDown={(e) => { 
-              if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); 
-                void onSend(); 
-              } 
-            }}
-            disabled={!itineraryId || state.status === 'sending' || state.status === 'applying'}
-          />
-          <Button 
-            onClick={onSend} 
-            disabled={!state.input.trim() || !itineraryId || state.status === 'sending' || state.status === 'applying'} 
-            className="min-h-[44px] px-6"
-            aria-label="Send"
-            title="Send"
-          >
-            {state.status === 'sending' ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        <PromptBox
+          value={state.input}
+          onChange={(value) => dispatch({ type: 'INPUT_SET', value })}
+          onSubmit={onSend}
+          disabled={!itineraryId || state.status === 'sending' || state.status === 'applying'}
+          placeholder={itineraryId ? "Ask me about your trip…" : "Loading..."}
+          maxLength={1000}
+          showCharacterCount={true}
+          showEncodingWarning={true}
+        />
       </div>
     </div>
   );

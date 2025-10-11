@@ -36,7 +36,7 @@ export function MobileChatDetailView({
 
       {/* Chat Interface */}
       <div className="flex-1 overflow-hidden">
-        <ChatInterface
+        <NewChat
           itineraryId={itineraryId}
           onItineraryUpdate={onItineraryUpdate}
         />

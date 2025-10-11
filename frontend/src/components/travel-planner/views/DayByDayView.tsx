@@ -163,13 +163,39 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
   
   const { centerOnDayComponent, setHoveredCard } = useMapContext();
   
-  const {
-    state,
-    processWithAgents,
-    setSelectedDay,
-    setSelectedNodes,
-    updateNode
-  } = useUnifiedItinerary();
+  // Try to use context, but fallback gracefully if not available
+  let contextState: any = null;
+  let processWithAgents: any = null;
+  let setSelectedDay: any = null;
+  let setSelectedNodes: any = null;
+  let updateNode: any = null;
+  
+  try {
+    const context = useUnifiedItinerary();
+    contextState = context.state;
+    processWithAgents = context.processWithAgents;
+    setSelectedDay = context.setSelectedDay;
+    setSelectedNodes = context.setSelectedNodes;
+    updateNode = context.updateNode;
+  } catch (error) {
+    // Context not available, use fallback with tripData
+    console.warn('DayByDayView: UnifiedItinerary context not available, using fallback mode with tripData');
+    contextState = { 
+      itinerary: tripData?.itinerary ? {
+        id: tripData.id,
+        itinerary: tripData.itinerary
+      } : null,
+      loading: false,
+      error: null,
+      syncStatus: 'idle',
+      activeAgents: [],
+      selectedNodeIds: []
+    };
+    processWithAgents = () => Promise.resolve();
+    setSelectedDay = () => {};
+    setSelectedNodes = () => {};
+    updateNode = () => {};
+  }
 
   const handleDayToggle = (dayNumber: number, dayData: any) => {
     if (expandedDay === dayNumber) {
@@ -226,18 +252,18 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
   }, [tripData]);
 
   const handleNodeLockToggle = useCallback(async (nodeId: string, locked: boolean) => {
-    if (!state.itinerary?.id) return;
+    if (!contextState.itinerary?.id) return;
     
     try {
       setSyncStatus(prev => ({ ...prev, syncing: true, error: null }));
       
-      const result = await itineraryApi.toggleNodeLock(state.itinerary.id, nodeId, locked);
+      const result = await itineraryApi.toggleNodeLock(contextState.itinerary.id, nodeId, locked);
       if (!result.success) {
         throw new Error(`Failed to ${locked ? 'lock' : 'unlock'} node`);
       }
       
-      if (state.itinerary?.itinerary?.days) {
-        const updatedItinerary = { ...state.itinerary };
+      if (contextState.itinerary?.itinerary?.days) {
+        const updatedItinerary = { ...contextState.itinerary };
         if (updatedItinerary.itinerary) {
           updatedItinerary.itinerary.days.forEach(day => {
           day.components.forEach(component => {
@@ -257,15 +283,15 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       setSyncStatus(prev => ({ ...prev, syncing: false, error: 'Failed to sync lock state' }));
       throw error;
     }
-  }, [state.itinerary, onRefresh]);
+  }, [contextState.itinerary, onRefresh]);
 
   const handleComponentUpdate = useCallback(async (componentId: string, updates: any) => {
-    if (!state.itinerary?.id) return;
+    if (!contextState.itinerary?.id) return;
     
     try {
       setSyncStatus(prev => ({ ...prev, syncing: true, error: null }));
       
-      await workflowSyncService.syncNodeData(state.itinerary.id, componentId, updates);
+      await workflowSyncService.syncNodeData(contextState.itinerary.id, componentId, updates);
       
       setSyncStatus({ syncing: false, lastSync: Date.now(), error: null });
       
@@ -274,7 +300,7 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       console.error('Failed to sync component update:', error);
       setSyncStatus(prev => ({ ...prev, syncing: false, error: 'Failed to sync changes' }));
     }
-  }, [state.itinerary, onRefresh]);
+  }, [contextState.itinerary, onRefresh]);
 
   const handleCardHover = async (component: any, dayNumber: number) => {
     // Keep hover for visual feedback but don't trigger map
@@ -304,7 +330,7 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
 
       <div className="border-b px-4 py-2">
         <SyncStatusIndicator
-          status={syncStatus.syncing || state.syncStatus === 'syncing' ? 'syncing' : syncStatus.error ? 'error' : 'synced'}
+          status={syncStatus.syncing || contextState.syncStatus === 'syncing' ? 'syncing' : syncStatus.error ? 'error' : 'synced'}
           lastSyncTime={syncStatus.lastSync ? new Date(syncStatus.lastSync) : undefined}
           onManualSync={() => setSyncStatus({ syncing: false, lastSync: null, error: null })}
         />
@@ -312,11 +338,11 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="space-y-4">
-        {state.itinerary?.itinerary?.days?.map((day: any, index: number) => {
+        {contextState.itinerary?.itinerary?.days?.map((day: any, index: number) => {
           const dayNumber = day.dayNumber || index + 1;
           const isExpanded = expandedDay === dayNumber;
-          const isUpdating = state.syncStatus === 'syncing';
-          const hasActiveAgents = state.activeAgents.length > 0;
+          const isUpdating = contextState.syncStatus === 'syncing';
+          const hasActiveAgents = contextState.activeAgents.length > 0;
           
           return (
             <Collapsible 
@@ -361,7 +387,7 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
                 {day.components.map((component: any, compIndex: number) => {
                   const nodeId = component.id || `${dayNumber}-${compIndex}`;
                   const isProcessing = processingNodes.has(nodeId);
-                  const isSelected = state.selectedNodeIds.includes(nodeId);
+                  const isSelected = contextState.selectedNodeIds.includes(nodeId);
                   
                   // Simple lock state verification (only for debugging)
                   if (component.locked === true) {
@@ -426,17 +452,17 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
           );
         }) || (
           <AutoRefreshEmptyState
-            title={state.loading ? "Loading itinerary..." : "No itinerary data available yet"}
+            title={contextState.loading ? "Loading itinerary..." : "No itinerary data available yet"}
             description={
-              state.error 
-                ? `Error: ${state.error}` 
+              contextState.error 
+                ? `Error: ${contextState.error}` 
                 : "Your personalized itinerary will appear here once planning is complete."
             }
             onRefresh={() => {
               console.log('DayByDayView: Manual refresh triggered');
               onRefresh?.();
             }}
-            showRefreshButton={!state.loading}
+            showRefreshButton={!contextState.loading}
             icon={<Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />}
           />
         )}
