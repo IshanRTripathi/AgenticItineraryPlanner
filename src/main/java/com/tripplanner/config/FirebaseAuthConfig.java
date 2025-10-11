@@ -50,15 +50,12 @@ public class FirebaseAuthConfig {
             
             // Allow OPTIONS requests (CORS preflight) to bypass authentication
             if ("OPTIONS".equals(method)) {
-                addCorsHeaders(request, response);
-                response.setStatus(HttpServletResponse.SC_OK);
+                filterChain.doFilter(request, response);
                 return;
             }
             
             // Skip authentication for public endpoints
             if (isPublicEndpoint(path)) {
-                // Add CORS headers for public endpoints
-                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -81,8 +78,6 @@ public class FirebaseAuthConfig {
                         // Continue without authentication for /json endpoints
                     }
                 }
-                // Add CORS headers for /json endpoints
-                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -105,8 +100,6 @@ public class FirebaseAuthConfig {
                 } else {
                     logger.debug("No auth header for lock endpoint: {}, allowing anonymous access for testing", path);
                 }
-                // Add CORS headers for lock endpoints
-                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -160,11 +153,6 @@ public class FirebaseAuthConfig {
             
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 logger.warn("Missing or invalid Authorization header for path: {}", path);
-                // Add CORS headers before returning error
-                response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-                response.setHeader("Access-Control-Allow-Credentials", "true");
-                response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-                response.setHeader("Access-Control-Allow-Headers", "*");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\":\"Missing or invalid Authorization header\"}");
@@ -183,18 +171,10 @@ public class FirebaseAuthConfig {
                 request.setAttribute("userName", decodedToken.getName());
                 
                 logger.debug("Authenticated user: {} for path: {}", userId, path);
-                
-                // Add CORS headers for successful authentication
-                addCorsHeaders(request, response);
                 filterChain.doFilter(request, response);
                 
             } catch (Exception e) {
                 logger.error("Firebase token verification failed for path: {}", path, e);
-                // Add CORS headers before returning error
-                response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-                response.setHeader("Access-Control-Allow-Credentials", "true");
-                response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-                response.setHeader("Access-Control-Allow-Headers", "*");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\":\"Invalid or expired token\"}");
@@ -205,7 +185,6 @@ public class FirebaseAuthConfig {
             // Define public endpoints that don't require authentication
             return path.startsWith("/api/v1/health") ||
                    path.startsWith("/api/v1/public") ||
-                   path.equals("/api/v1/itineraries") ||  // Allow GET /api/v1/itineraries for listing
                    path.matches("/api/v1/itineraries/[^/]+/json") ||  // Allow GET /api/v1/itineraries/{id}/json
                    path.startsWith("/api/v1/agents/stream") ||  // Allow SSE stream endpoint
                    path.startsWith("/api/v1/agents/events/") ||  // Allow SSE events endpoint
@@ -219,30 +198,6 @@ public class FirebaseAuthConfig {
                    path.equals("/favicon.ico");
         }
 
-        /**
-         * Add CORS headers to the response
-         */
-        private void addCorsHeaders(HttpServletRequest request, HttpServletResponse response) {
-            String origin = request.getHeader("Origin");
-            
-            // Allow specific origins
-            if (origin != null && (
-                origin.startsWith("https://agentic-itinerary-planner-frontend-") && origin.endsWith(".run.app") ||
-                origin.equals("https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app") ||
-                origin.startsWith("http://localhost:") ||
-                origin.startsWith("http://127.0.0.1:")
-            )) {
-                response.setHeader("Access-Control-Allow-Origin", origin);
-            } else {
-                // Fallback to allow all origins for development
-                response.setHeader("Access-Control-Allow-Origin", "*");
-            }
-            
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-            response.setHeader("Access-Control-Allow-Headers", "*");
-            response.setHeader("Access-Control-Max-Age", "3600");
-        }
     }
 
     /**
