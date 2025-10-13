@@ -37,16 +37,17 @@ steps:
       '--min-instances', '0',
       '--concurrency', '100',
       '--timeout', '900',
+      '--clear-secrets',
       '--set-env-vars', 'SPRING_PROFILES_ACTIVE=cloud',
-      '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
-      '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
       '--set-env-vars', 'GEMINI_MOCK_MODE=false',
       '--set-env-vars', 'AI_PROVIDER=gemini',
-      '--set-env-vars', 'AI_MODEL=gemini',
+      '--set-env-vars', 'AI_MODEL=gemini-2.5-flash',
       '--set-env-vars', 'FIREBASE_AUTH_ENABLED=true',
       '--set-env-vars', 'FIRESTORE_PROJECT_ID=${_FIREBASE_PROJECT_ID}',
       '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
       '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
+      '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
+      '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
       '--set-secrets', 'firestore.credentials=_FIRESTORE_CREDENTIALS:latest'
     ]
     id: 'deploy-backend'
