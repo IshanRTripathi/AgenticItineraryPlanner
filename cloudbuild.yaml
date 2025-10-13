@@ -41,20 +41,13 @@ steps:
       '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
       '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
       '--set-env-vars', 'GEMINI_MOCK_MODE=false',
-      '--set-env-vars', 'AI_PROVIDER=openrouter',
-      '--set-secrets', 'AI_MODEL=_AI_MODEL:latest',
-      '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_ID=dummy-oauth-client-id',
-      '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_SECRET=dummy-oauth-client-secret',
-      '--set-env-vars', 'RAZORPAY_KEY_ID=dummy-razorpay-key-id',
-      '--set-env-vars', 'RAZORPAY_KEY_SECRET=dummy-razorpay-key-secret',
-      '--set-env-vars', 'SMTP_USERNAME=dummy-smtp-username',
-      '--set-env-vars', 'SMTP_PASSWORD=dummy-smtp-password',
-      '--set-env-vars', 'EMAIL_FROM=noreply@agenticitineraryplanner.com',
+      '--set-env-vars', 'AI_PROVIDER=gemini',
+      '--set-env-vars', 'AI_MODEL=gemini',
+      '--set-env-vars', 'FIREBASE_AUTH_ENABLED=true',
+      '--set-env-vars', 'FIRESTORE_PROJECT_ID=${_FIREBASE_PROJECT_ID}',
+      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
       '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
-      '--set-env-vars', 'APP_DATABASE_TYPE=firestore',
-      '--set-env-vars', 'FIRESTORE_USE_EMULATOR=false',
-      '--set-secrets', 'FIRESTORE_CREDENTIALS=_FIRESTORE_CREDENTIALS:latest',
-      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}'
+      '--set-secrets', 'firestore.credentials=_FIRESTORE_CREDENTIALS:latest'
     ]
     id: 'deploy-backend'
     waitFor: ['push-backend-latest']
@@ -98,14 +91,13 @@ steps:
     id: 'deploy-frontend'
     waitFor: ['push-frontend-latest']
 
-  
-
-# Substitution variables (hardcoded for mock setup)
+# Substitution variables
 substitutions:
   _REGION: 'us-south1'
   _BACKEND_URL: 'https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app'
   _FRONTEND_URL: 'https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app'
   _GCP_PROJECT_ID: 'tripaiplanner'
+  _FIREBASE_PROJECT_ID: 'tripaiplanner-4c951'
 
 # Build options
 options:

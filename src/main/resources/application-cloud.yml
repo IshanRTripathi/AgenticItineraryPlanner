@@ -19,9 +19,9 @@ spring:
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
   cloud:
     gcp:
-      project-id: tripplanner-bdd3c
+      project-id: tripaiplanner
       firestore:
-        project-id: tripplanner-bdd3c
+        project-id: tripaiplanner-4c951
         host: ${FIRESTORE_HOST:firestore.googleapis.com:443}
         emulator:
           enabled: false
@@ -56,9 +56,6 @@ spring:
       roles: DISABLED
 
 google:
-  oauth:
-    client-id: ${GOOGLE_OAUTH_CLIENT_ID:dummy-oauth-client-id}
-    client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:dummy-oauth-client-secret}
   ai:
     api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-1.5-pro}
@@ -82,7 +79,7 @@ openrouter:
 
 # Firestore Configuration
 firestore:
-  project-id: tripplanner-bdd3c
+  project-id: tripaiplanner-4c951
   credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
   database-id: ${FIRESTORE_DATABASE_ID:(default)}
   enabled: true

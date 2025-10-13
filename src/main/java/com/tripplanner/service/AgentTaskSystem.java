@@ -327,7 +327,7 @@ public class AgentTaskSystem {
             } catch (Exception indexError) {
                 // Fallback to simpler query if index doesn't exist
                 logger.warn("Firestore compound index not available, using fallback query. " +
-                           "Create index at: https://console.firebase.google.com/project/tripplanner-bdd3c/firestore/indexes");
+                           "Create index at: https://console.firebase.google.com/project/tripaiplanner-4c951/firestore/indexes");
                 logger.warn("Index error: {}", indexError.getMessage());
                 
                 try {

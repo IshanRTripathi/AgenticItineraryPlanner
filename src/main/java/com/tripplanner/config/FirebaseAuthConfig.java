@@ -185,8 +185,6 @@ public class FirebaseAuthConfig {
             // Define public endpoints that don't require authentication
             return path.startsWith("/api/v1/health") ||
                    path.startsWith("/api/v1/public") ||
-                   path.equals("/api/v1/itineraries") ||  // Temporarily allow GET /api/v1/itineraries for listing
-                   path.matches("/api/v1/itineraries/[^/]+/json") ||  // Allow GET /api/v1/itineraries/{id}/json
                    path.startsWith("/api/v1/agents/stream") ||  // Allow SSE stream endpoint
                    path.startsWith("/api/v1/agents/events/") ||  // Allow SSE events endpoint
                    path.startsWith("/api/v1/chat/route") ||  // Allow chat route endpoint

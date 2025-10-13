@@ -38,9 +38,6 @@ spring:
       roles: DISABLED
 
 google:
-  oauth:
-    client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
-    client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:}
   ai:
     api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-2.5-flash}
@@ -70,12 +67,17 @@ openrouter:
 
 # Firestore Configuration
 firestore:
-  project-id: ${FIRESTORE_PROJECT_ID:}
+  project-id: ${FIRESTORE_PROJECT_ID:tripaiplanner-4c951}
   credentials: ${FIRESTORE_CREDENTIALS:}
   credentials-file: ${FIRESTORE_CREDENTIALS_FILE:}
   emulator-host: ${FIRESTORE_EMULATOR_HOST:localhost:8080}
   use-emulator: ${FIRESTORE_USE_EMULATOR:false}
   enabled: ${FIRESTORE_ENABLED:true}
+
+# Firebase Authentication Configuration
+firebase:
+  auth:
+    enabled: ${FIREBASE_AUTH_ENABLED:true}
 
 # Application Database Configuration moved under single app block below
 
