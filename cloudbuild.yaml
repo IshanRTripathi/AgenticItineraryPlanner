@@ -37,7 +37,6 @@ steps:
       '--min-instances', '0',
       '--concurrency', '100',
       '--timeout', '900',
-      '--clear-secrets',
       '--set-env-vars', 'SPRING_PROFILES_ACTIVE=cloud',
       '--set-env-vars', 'GEMINI_MOCK_MODE=false',
       '--set-env-vars', 'AI_PROVIDER=gemini',
