@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(user);
       setLoading(false);
       console.log('[AuthContext] Auth state changed:', user ? `User: ${user.email}` : 'No user');
-      
+
       // Set or clear auth token in API clients
       if (user) {
         try {
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             apiClient.setAuthToken(token);
             itineraryApi.setAuthToken(token);
             console.log('[AuthContext] Auth token set for API requests');
-            
+
             // Queries will be enabled automatically when components re-render with user state
           }
         } catch (error) {
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         apiClient.clearAuthToken();
         itineraryApi.setAuthToken(null);
         console.log('[AuthContext] Auth token cleared');
-        
+
         // Clear authenticated data
         queryClient.removeQueries({ queryKey: queryKeys.itineraries });
       }
@@ -71,19 +71,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!user) return;
 
-    // Refresh token every 45 minutes (tokens expire after 1 hour)
+    // Refresh token every 50 minutes (tokens expire after 1 hour)
+    // This gives us a 10-minute buffer before expiration
     const refreshInterval = setInterval(async () => {
+      try {
+        console.log('[AuthContext] Proactively refreshing token...');
+        const newToken = await authService.getIdTokenForceRefresh();
+        if (newToken) {
+          apiClient.setAuthToken(newToken);
+          itineraryApi.setAuthToken(newToken);
+          console.log('[AuthContext] Token refreshed proactively at', new Date().toISOString());
+        } else {
+          console.error('[AuthContext] Failed to get refreshed token');
+        }
+      } catch (error) {
+        console.error('[AuthContext] Failed to refresh token proactively:', error);
+      }
+    }, 24 * 60 * 60 * 1000); // 1 day
+
+    // Also do an immediate refresh on mount to ensure we have a fresh token
+    const refreshImmediately = async () => {
       try {
         const newToken = await authService.getIdTokenForceRefresh();
         if (newToken) {
           apiClient.setAuthToken(newToken);
           itineraryApi.setAuthToken(newToken);
-          console.log('[AuthContext] Token refreshed proactively');
+          console.log('[AuthContext] Token refreshed on mount');
         }
       } catch (error) {
-        console.error('[AuthContext] Failed to refresh token proactively:', error);
+        console.error('[AuthContext] Failed to refresh token on mount:', error);
       }
-    }, 45 * 60 * 1000); // 45 minutes
+    };
+    refreshImmediately();
 
     return () => clearInterval(refreshInterval);
   }, [user]);

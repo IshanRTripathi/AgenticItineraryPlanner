@@ -51,30 +51,19 @@ public class AgentController {
     
     /**
      * Stream agent events for an itinerary via SSE.
+     * Token validation is handled by FirebaseSseAuthFilter.
      */
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@RequestParam String itineraryId, 
-                           @RequestParam(required = false) String token,
+    public SseEmitter stream(@RequestParam String itineraryId,
                            HttpServletRequest request) {
+        // User ID is set by FirebaseSseAuthFilter if token is valid
+        String userId = (String) request.getAttribute("userId");
+        
         logger.info("=== SSE STREAM REQUEST ===");
         logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("User ID: {}", userId != null ? userId : "anonymous");
         logger.info("Request Time: {}", now());
         logger.info("Client requesting SSE connection");
-        
-        // Validate token if provided
-        String userId = null;
-        if (token != null && !token.isEmpty()) {
-            try {
-                FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
-                userId = decodedToken.getUid();
-                logger.info("Token validated for SSE connection, user: {}", userId);
-            } catch (Exception e) {
-                logger.error("Invalid token for SSE connection", e);
-                throw new RuntimeException("Invalid authentication token");
-            }
-        } else {
-            logger.warn("No token provided for SSE connection");
-        }
         
         // Create SSE emitter with 30 minute timeout to prevent hanging connections
         SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
@@ -146,11 +135,17 @@ public class AgentController {
     
     /**
      * Stream agent events for an itinerary via SSE (alternative endpoint).
+     * Token validation is handled by FirebaseSseAuthFilter.
      */
     @GetMapping(path = "/events/{itineraryId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamEvents(@PathVariable String itineraryId) {
+    public SseEmitter streamEvents(@PathVariable String itineraryId,
+                                  HttpServletRequest request) {
+        // User ID is set by FirebaseSseAuthFilter if token is valid
+        String userId = (String) request.getAttribute("userId");
+        
         logger.info("=== SSE EVENTS REQUEST ===");
         logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("User ID: {}", userId != null ? userId : "anonymous");
         logger.info("Request Time: {}", now());
         logger.info("Client requesting SSE events connection");
         

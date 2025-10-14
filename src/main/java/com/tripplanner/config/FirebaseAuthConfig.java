@@ -26,6 +26,8 @@ import java.io.IOException;
 @ConditionalOnProperty(name = "firebase.auth.enabled", havingValue = "true", matchIfMissing = false)
 public class FirebaseAuthConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(FirebaseAuthConfig.class);
+
     @Autowired
     private FirebaseAuth firebaseAuth;
 
@@ -50,6 +52,12 @@ public class FirebaseAuthConfig {
             
             // Allow OPTIONS requests (CORS preflight) to bypass authentication
             if ("OPTIONS".equals(method)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
+            // Skip SSE endpoints - let FirebaseSseAuthFilter handle them
+            if (isSseEndpoint(path)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -185,8 +193,6 @@ public class FirebaseAuthConfig {
             // Define public endpoints that don't require authentication
             return path.startsWith("/api/v1/health") ||
                    path.startsWith("/api/v1/public") ||
-                   path.startsWith("/api/v1/agents/stream") ||  // Allow SSE stream endpoint
-                   path.startsWith("/api/v1/agents/events/") ||  // Allow SSE events endpoint
                    path.startsWith("/api/v1/chat/route") ||  // Allow chat route endpoint
                    path.matches(".*/nodes/.*/lock") ||  // Allow node lock endpoint for testing
                    path.matches(".*/lock-states") ||  // Allow lock states endpoint for debugging
@@ -197,11 +203,82 @@ public class FirebaseAuthConfig {
                    path.equals("/favicon.ico");
         }
 
+        private boolean isSseEndpoint(String path) {
+            // SSE endpoints use query parameter tokens, not Authorization headers
+            return path.startsWith("/api/v1/agents/stream") ||
+                   path.startsWith("/api/v1/agents/events/") ||
+                   path.startsWith("/api/v1/itineraries/patches");
+        }
+
+    }
+
+    /**
+     * Filter to validate Firebase ID tokens from query parameters for SSE endpoints
+     * EventSource doesn't support custom headers, so we use query parameters
+     */
+    public static class FirebaseSseAuthFilter extends OncePerRequestFilter {
+
+        private static final Logger logger = LoggerFactory.getLogger(FirebaseSseAuthFilter.class);
+        private final FirebaseAuth firebaseAuth;
+
+        public FirebaseSseAuthFilter(FirebaseAuth firebaseAuth) {
+            this.firebaseAuth = firebaseAuth;
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                      FilterChain filterChain) throws ServletException, IOException {
+            
+            String path = request.getRequestURI();
+            
+            // Only process SSE endpoints
+            if (!isSseEndpoint(path)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String token = request.getParameter("token");
+            
+            if (token != null && !token.isEmpty()) {
+                try {
+                    FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
+                    String userId = decodedToken.getUid();
+                    
+                    // Add user info to request attributes
+                    request.setAttribute("userId", userId);
+                    request.setAttribute("userEmail", decodedToken.getEmail());
+                    request.setAttribute("userName", decodedToken.getName());
+                    
+                    logger.debug("SSE token validated for user: {} on path: {}", userId, path);
+                    filterChain.doFilter(request, response);
+                    
+                } catch (com.google.firebase.auth.FirebaseAuthException e) {
+                    logger.error("Firebase token verification failed for SSE endpoint: {}", path, e);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Firebase ID token has expired. Get a fresh ID token and try again\"}");
+                } catch (Exception e) {
+                    logger.error("Token validation error for SSE endpoint: {}", path, e);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Invalid authentication token\"}");
+                }
+            } else {
+                // For backward compatibility, allow SSE without token but log warning
+                logger.warn("SSE connection without token for path: {}", path);
+                filterChain.doFilter(request, response);
+            }
+        }
+
+        private boolean isSseEndpoint(String path) {
+            return path.startsWith("/api/v1/agents/stream") ||
+                   path.startsWith("/api/v1/agents/events/") ||
+                   path.startsWith("/api/v1/itineraries/patches");
+        }
     }
 
     /**
      * Register Firebase Auth Filter in the filter chain
-     * Temporarily disabled for development
      */
     @Bean
     public FilterRegistrationBean<FirebaseAuthFilter> firebaseAuthFilterRegistration() {
@@ -210,6 +287,20 @@ public class FirebaseAuthConfig {
         registration.addUrlPatterns("/api/v1/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registration.setName("firebaseAuthFilter");
+        return registration;
+    }
+
+    /**
+     * Register Firebase SSE Auth Filter for SSE endpoints
+     * Runs after the main auth filter to handle query parameter tokens
+     */
+    @Bean
+    public FilterRegistrationBean<FirebaseSseAuthFilter> firebaseSseAuthFilterRegistration() {
+        FilterRegistrationBean<FirebaseSseAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new FirebaseSseAuthFilter(firebaseAuth));
+        registration.addUrlPatterns("/api/v1/agents/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        registration.setName("firebaseSseAuthFilter");
         return registration;
     }
 

@@ -97,6 +97,13 @@ public class ItineraryJsonService {
      */
     public void saveRevision(String itineraryId, NormalizedItinerary itinerary) {
         try {
+            // CRITICAL: Validate userId is not null
+            if (itinerary.getUserId() == null || itinerary.getUserId().trim().isEmpty()) {
+                logger.error("Attempted to save revision for itinerary {} with null or empty userId", itineraryId);
+                logger.error("Stack trace for null userId:", new Exception("UserId is null"));
+                throw new IllegalStateException("Cannot save itinerary revision without userId. Itinerary: " + itineraryId);
+            }
+            
             String json = objectMapper.writeValueAsString(itinerary);
             FirestoreItinerary entity = new FirestoreItinerary(itinerary.getItineraryId(), itinerary.getVersion(), json);
             databaseService.saveRevision(itineraryId, entity);
@@ -146,6 +153,13 @@ public class ItineraryJsonService {
             }
             if (itinerary == null) {
                 throw new IllegalArgumentException("Itinerary cannot be null");
+            }
+            
+            // CRITICAL: Validate userId is not null
+            if (itinerary.getUserId() == null || itinerary.getUserId().trim().isEmpty()) {
+                logger.error("Attempted to save itinerary {} with null or empty userId", itineraryId);
+                logger.error("Stack trace for null userId:", new Exception("UserId is null"));
+                throw new IllegalStateException("Cannot save itinerary without userId. Itinerary: " + itineraryId);
             }
             
             // Initialize unified structure if not already done

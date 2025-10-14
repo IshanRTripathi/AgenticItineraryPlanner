@@ -1084,10 +1084,25 @@ public class ChangeEngine {
      * This method is a placeholder for future edge functionality.
      */
     private boolean updateEdge(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
+        // VALIDATE: Check if day number is null
+        if (day == null) {
+            logger.error("Edge update has null day number");
+            logger.error("Edge operation details: id={}, op={}", 
+                op.getId(), 
+                op.getOp());
+            if (op.getNode() != null) {
+                logger.error("Edge node: {}", op.getNode());
+            }
+            return false;
+        }
+        
         // Find the target day
         NormalizedDay targetDay = findDayByNumber(itinerary, day);
         if (targetDay == null) {
-            logger.warn("Day not found for edge update: {}", day);
+            logger.warn("Day {} not found for edge update: node={}, op={}", 
+                day, 
+                op.getId(),
+                op.getOp());
             return false;
         }
         

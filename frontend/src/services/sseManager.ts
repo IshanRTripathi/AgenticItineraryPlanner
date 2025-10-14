@@ -531,7 +531,7 @@ export class SseManager {
   /**
    * Handle connection errors with automatic reconnection
    */
-  private handleConnectionError(): void {
+  private async handleConnectionError(): Promise<void> {
     console.warn('[SSE] Connection error occurred');
     this.options.onError?.(new Error('SSE connection error'));
     
@@ -540,6 +540,18 @@ export class SseManager {
       const delay = this.options.reconnectDelay || 1000 * this.reconnectAttempts;
       
       console.log(`[SSE] Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      
+      // Try to refresh the auth token before reconnecting
+      try {
+        const { authService } = await import('./authService');
+        const newToken = await authService.getIdTokenForceRefresh();
+        if (newToken) {
+          console.log('[SSE] Token refreshed before reconnection');
+          apiClient.setAuthToken(newToken);
+        }
+      } catch (error) {
+        console.error('[SSE] Failed to refresh token before reconnection:', error);
+      }
       
       setTimeout(() => {
         if (this.itineraryId) {
