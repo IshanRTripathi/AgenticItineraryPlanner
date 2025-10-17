@@ -515,6 +515,7 @@ public class EnrichmentAgent extends BaseAgent {
 
     /**
      * Enrich nodes with Google Places data including photos, reviews, and ratings.
+     * First searches for places without coordinates, then enriches all nodes with place details.
      */
     private List<ChangeOperation> enrichNodesWithPlacesData(NormalizedItinerary itinerary) {
         List<ChangeOperation> operations = new ArrayList<>();
@@ -534,7 +535,22 @@ public class EnrichmentAgent extends BaseAgent {
                     continue;
                 }
 
-                // Check if node needs ENRICHMENT
+                // First, search for place if node doesn't have coordinates or placeId
+                if (needsPlaceSearch(node)) {
+                    try {
+                        NormalizedNode searchedNode = searchAndSetPlaceId(node, itinerary.getDestination());
+                        if (searchedNode != null) {
+                            ChangeOperation searchOp = createEnrichmentOperation(searchedNode);
+                            operations.add(searchOp);
+                            // Update node reference for further enrichment
+                            node = searchedNode;
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Failed to search place for node {}: {}", node.getId(), e.getMessage());
+                    }
+                }
+
+                // Then, check if node needs ENRICHMENT with photos/reviews
                 if (needsEnrichment(node)) {
                     try {
                         // Enrich the node with Google Places data
@@ -553,6 +569,96 @@ public class EnrichmentAgent extends BaseAgent {
 
         logger.info("Created {} ENRICHMENT operations", operations.size());
         return operations;
+    }
+    
+    /**
+     * Check if a node needs place search (missing coordinates or placeId).
+     */
+    private boolean needsPlaceSearch(NormalizedNode node) {
+        if (node == null) {
+            return false;
+        }
+        
+        // Skip accommodation and transport nodes
+        if ("accommodation".equals(node.getType()) || "transport".equals(node.getType())) {
+            return false;
+        }
+        
+        // Check if node has coordinates
+        boolean hasCoordinates = node.getLocation() != null && 
+                                node.getLocation().getCoordinates() != null &&
+                                node.getLocation().getCoordinates().getLat() != null &&
+                                node.getLocation().getCoordinates().getLng() != null;
+        
+        // Check if node has placeId
+        boolean hasPlaceId = node.getLocation() != null && node.getLocation().getPlaceId() != null;
+        
+        return !hasCoordinates || !hasPlaceId;
+    }
+    
+    /**
+     * Search for a place and set its placeId and coordinates.
+     */
+    private NormalizedNode searchAndSetPlaceId(NormalizedNode node, String destination) {
+        // Get location name
+        String locationName = null;
+        if (node.getLocation() != null && node.getLocation().getName() != null) {
+            locationName = node.getLocation().getName();
+        } else if (node.getTitle() != null) {
+            locationName = node.getTitle();
+        }
+        
+        if (locationName == null || locationName.trim().isEmpty()) {
+            logger.warn("Node {} has no location name for search", node.getId());
+            return null;
+        }
+        
+        try {
+            // Search for place
+            PlaceSearchResult searchResult = googlePlacesService.searchPlace(locationName, destination);
+            
+            if (searchResult != null && searchResult.getGeometry() != null && 
+                searchResult.getGeometry().getLocation() != null) {
+                
+                // Create enriched node
+                NormalizedNode enrichedNode = createNodeCopy(node);
+                
+                // Initialize location if needed
+                if (enrichedNode.getLocation() == null) {
+                    enrichedNode.setLocation(new NodeLocation());
+                }
+                
+                // Set coordinates
+                if (enrichedNode.getLocation().getCoordinates() == null) {
+                    enrichedNode.getLocation().setCoordinates(new Coordinates());
+                }
+                enrichedNode.getLocation().getCoordinates().setLat(
+                    searchResult.getGeometry().getLocation().getLatitude());
+                enrichedNode.getLocation().getCoordinates().setLng(
+                    searchResult.getGeometry().getLocation().getLongitude());
+                
+                // Set place details
+                enrichedNode.getLocation().setName(searchResult.getName());
+                enrichedNode.getLocation().setAddress(searchResult.getFormattedAddress());
+                enrichedNode.getLocation().setPlaceId(searchResult.getPlaceId());
+                
+                // Set rating if available
+                if (searchResult.getRating() != null) {
+                    enrichedNode.getLocation().setRating(searchResult.getRating());
+                }
+                
+                logger.info("Found place for node {} ({}): {} at ({}, {})", 
+                    node.getId(), locationName, searchResult.getName(),
+                    searchResult.getGeometry().getLocation().getLatitude(),
+                    searchResult.getGeometry().getLocation().getLongitude());
+                
+                return enrichedNode;
+            }
+        } catch (Exception e) {
+            logger.error("Failed to search place for node {} ({}): {}", node.getId(), locationName, e.getMessage());
+        }
+        
+        return null;
     }
 
     /**

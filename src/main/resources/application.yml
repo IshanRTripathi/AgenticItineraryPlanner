@@ -54,7 +54,7 @@ google:
 
 ai:
   provider: ${AI_PROVIDER:openrouter}
-  model: ${AI_MODEL:qwen/qwen-2.5-72b-instruct:free }
+  model: ${AI_MODEL:qwen/qwen-2.5-72b-instruct:free}
   temperature: ${AI_TEMPERATURE:0.7}
   max-tokens: ${AI_MAX_TOKENS:8192}
   mock-mode: ${AI_MOCK_MODE:false}
@@ -184,5 +184,10 @@ itinerary:
     ttl-minutes: ${CACHE_TTL_MINUTES:60}
   idempotency:
     ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
+
+# Enrichment Configuration
+enrichment:
+  auto-enrich:
+    enabled: ${ENRICHMENT_AUTO_ENRICH_ENABLED:true}
 
 

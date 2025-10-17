@@ -56,7 +56,7 @@ export class SseManager {
   /**
    * Connect to SSE streams for an itinerary
    */
-  connect(itineraryId: string): void {
+  connect(itineraryId: string, executionId?: string): void {
     if (this.itineraryId === itineraryId && this.isConnected) {
       console.log('[SSE] Already connected to itinerary:', itineraryId);
       return;
@@ -66,7 +66,13 @@ export class SseManager {
     this.disconnect();
 
     this.itineraryId = itineraryId;
-    console.log('[SSE] Connecting to itinerary:', itineraryId);
+    
+    // Store executionId if provided
+    if (executionId) {
+      this.options.executionId = executionId;
+    }
+    
+    console.log('[SSE] Connecting to itinerary:', itineraryId, 'executionId:', executionId);
 
     // Connect to patches stream
     this.connectPatchesStream(itineraryId);
@@ -95,11 +101,6 @@ export class SseManager {
       this.patchesEventSource.onopen = () => {
         console.log('[SSE] Patches stream connected');
         this.reconnectAttempts = 0;
-      };
-
-      this.patchesEventSource.onclose = () => {
-        console.log('[SSE] Patches stream closed');
-        this.handleConnectionClose();
       };
 
       // Handle patch_applied events
@@ -345,11 +346,6 @@ export class SseManager {
       this.agentEventSource.onopen = () => {
         console.log('[SSE] Agent stream connected');
         this.reconnectAttempts = 0;
-      };
-
-      this.agentEventSource.onclose = () => {
-        console.log('[SSE] Agent stream closed');
-        this.handleConnectionClose();
       };
 
       // Handle progress update events

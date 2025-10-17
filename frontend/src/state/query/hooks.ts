@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../services/apiClient';
+import { sseManager } from '../../services/sseManager';
 
 export const queryKeys = {
   user: ['user'] as const,
@@ -67,11 +68,10 @@ export function useCreateItinerary(retryOptions?: { maxRetries?: number; retryDe
       // Invalidate queries for the created itinerary
       qc.invalidateQueries({ queryKey: queryKeys.itinerary(response.itinerary.id) });
       
-      // Establish SSE connection immediately after creation
+      // Establish SSE connection immediately after creation with executionId
       if (response.itinerary.id) {
-        console.log('[useCreateItinerary] Establishing SSE connection for:', response.itinerary.id);
-        const { sseManager } = require('../../services/sseManager');
-        sseManager.connect(response.itinerary.id);
+        console.log('[useCreateItinerary] Establishing SSE connection for:', response.itinerary.id, 'executionId:', response.executionId);
+        sseManager.connect(response.itinerary.id, response.executionId);
       }
     },
     retry: (failureCount, error) => {

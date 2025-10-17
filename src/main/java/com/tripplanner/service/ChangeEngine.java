@@ -6,6 +6,7 @@ import com.tripplanner.dto.*;
 import com.tripplanner.exception.VersionMismatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -42,7 +43,10 @@ public class ChangeEngine {
     private final IdempotencyManager idempotencyManager;
     private final TraceManager traceManager;
     private final NodeIdGenerator nodeIdGenerator;
+    private final EnrichmentService enrichmentService;
     
+    // Primary constructor with enrichment service
+    @Autowired
     public ChangeEngine(ItineraryJsonService itineraryJsonService,
                        UserDataService userDataService,
                        ObjectMapper objectMapper,
@@ -51,7 +55,8 @@ public class ChangeEngine {
                        LockManager lockManager,
                        IdempotencyManager idempotencyManager,
                        TraceManager traceManager,
-                       NodeIdGenerator nodeIdGenerator) {
+                       NodeIdGenerator nodeIdGenerator,
+                       EnrichmentService enrichmentService) {
         this.itineraryJsonService = itineraryJsonService;
         this.userDataService = userDataService;
         this.objectMapper = objectMapper;
@@ -61,6 +66,22 @@ public class ChangeEngine {
         this.idempotencyManager = idempotencyManager;
         this.traceManager = traceManager;
         this.nodeIdGenerator = nodeIdGenerator;
+        this.enrichmentService = enrichmentService;
+    }
+    
+    // Backward compatibility constructor (for tests)
+    public ChangeEngine(ItineraryJsonService itineraryJsonService,
+                       UserDataService userDataService,
+                       ObjectMapper objectMapper,
+                       RevisionService revisionService,
+                       ConflictResolver conflictResolver,
+                       LockManager lockManager,
+                       IdempotencyManager idempotencyManager,
+                       TraceManager traceManager,
+                       NodeIdGenerator nodeIdGenerator) {
+        this(itineraryJsonService, userDataService, objectMapper, revisionService,
+             conflictResolver, lockManager, idempotencyManager, traceManager,
+             nodeIdGenerator, null);
     }
     
     /**
@@ -180,6 +201,9 @@ public class ChangeEngine {
                     "change_application"
                 );
             }
+            
+            // Trigger automatic enrichment for new/modified nodes (async, non-blocking)
+            triggerAutoEnrichment(itineraryId, diff);
             
             return result;
             
@@ -1165,4 +1189,53 @@ public class ChangeEngine {
      * This handles the mapping between semantic IDs and database IDs.
      */
     // Removed mapping to DB ID in Firestore-only mode
+    
+    /**
+     * Trigger automatic enrichment for nodes that were added or modified.
+     * Runs asynchronously to avoid blocking the response.
+     */
+    private void triggerAutoEnrichment(String itineraryId, ItineraryDiff diff) {
+        // Check if enrichment service is available
+        if (enrichmentService == null) {
+            logger.debug("EnrichmentService not available, skipping auto-enrichment");
+            return;
+        }
+        
+        // Check if there are any added or updated nodes
+        boolean hasNewOrModifiedNodes = (diff.getAdded() != null && !diff.getAdded().isEmpty()) ||
+                                       (diff.getUpdated() != null && !diff.getUpdated().isEmpty());
+        
+        if (!hasNewOrModifiedNodes) {
+            logger.debug("No new or modified nodes, skipping auto-enrichment");
+            return;
+        }
+        
+        // Extract node IDs that need enrichment
+        List<String> nodeIdsToEnrich = new ArrayList<>();
+        if (diff.getAdded() != null) {
+            diff.getAdded().forEach(item -> {
+                if (item.getNodeId() != null) {
+                    nodeIdsToEnrich.add(item.getNodeId());
+                }
+            });
+        }
+        if (diff.getUpdated() != null) {
+            diff.getUpdated().forEach(item -> {
+                if (item.getNodeId() != null) {
+                    nodeIdsToEnrich.add(item.getNodeId());
+                }
+            });
+        }
+        
+        if (nodeIdsToEnrich.isEmpty()) {
+            logger.debug("No specific nodes identified for enrichment");
+            return;
+        }
+        
+        logger.info("Triggering auto-enrichment for {} nodes in itinerary {}", 
+            nodeIdsToEnrich.size(), itineraryId);
+        
+        // Trigger enrichment asynchronously (non-blocking)
+        enrichmentService.enrichNodesAsync(itineraryId, nodeIdsToEnrich);
+    }
 }

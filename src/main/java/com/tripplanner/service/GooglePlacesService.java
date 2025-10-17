@@ -428,4 +428,71 @@ public class GooglePlacesService {
                                isOpen, consecutiveFailures, getTimeUntilRetry());
         }
     }
+    
+    /**
+     * Search for a place by name and location.
+     * Returns the first matching place with coordinates.
+     */
+    @Cacheable(value = "placeSearch", key = "#query + '_' + #location")
+    public PlaceSearchResult searchPlace(String query, String location) {
+        logger.debug("Searching for place: {} near {}", query, location);
+        
+        if (query == null || query.trim().isEmpty()) {
+            logger.warn("Empty query provided to searchPlace");
+            return null;
+        }
+        
+        // Check rate limits
+        checkRateLimit();
+        
+        // Check circuit breaker
+        checkCircuitBreaker();
+        
+        try {
+            // Build search query
+            String searchQuery = query;
+            if (location != null && !location.trim().isEmpty()) {
+                searchQuery = query + " " + location;
+            }
+            
+            // Build URL with parameters for Text Search
+            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
+                .queryParam("query", searchQuery)
+                .queryParam("key", apiKey)
+                .toUriString();
+            
+            // Make GET request with retry logic
+            PlaceSearchResponse response = makeRequestWithRetry(url, PlaceSearchResponse.class);
+            
+            // Increment request count
+            incrementRequestCount();
+            
+            // Handle API response
+            if (response != null && "OK".equals(response.getStatus()) && 
+                response.getResults() != null && !response.getResults().isEmpty()) {
+                
+                PlaceSearchResult firstResult = response.getResults().get(0);
+                logger.debug("Found place: {} at ({}, {})", 
+                    firstResult.getName(), 
+                    firstResult.getGeometry().getLocation().getLatitude(),
+                    firstResult.getGeometry().getLocation().getLongitude());
+                recordSuccess();
+                return firstResult;
+                
+            } else if (response != null && "ZERO_RESULTS".equals(response.getStatus())) {
+                logger.debug("No results found for query: {}", searchQuery);
+                return null;
+                
+            } else {
+                logger.warn("Google Places API returned status: {}", response != null ? response.getStatus() : "null");
+                recordFailure();
+                return null;
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to search for place {}: {}", query, e.getMessage());
+            recordFailure();
+            return null; // Return null on error instead of throwing
+        }
+    }
 }
