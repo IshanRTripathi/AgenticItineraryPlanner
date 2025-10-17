@@ -249,8 +249,18 @@ The `agents/` folder contains 15 Java files implementing a sophisticated multi-a
 **Implementation Status**: FULLY IMPLEMENTED with significant gaps
 **Usage Evidence**:
 - Referenced in 5 files across backend and tests
-- Used in AgentOrchestrator for enrichment
+- Used in AgentOrchestrator for manual enrichment
 - Has test coverage
+
+**⚠️ IMPORTANT: Two Enrichment Paths Exist:**
+1. **Auto-Enrichment** (NEW): `ChangeEngine` → `EnrichmentService` → `GooglePlacesService`
+   - Triggered automatically after changes
+   - Lightweight, focused on coordinates only
+   - No circular dependencies
+2. **Manual Enrichment**: `EnrichmentAgent` → `ChangeEngine`
+   - Triggered explicitly by agents/users
+   - Comprehensive enrichment with validation
+   - Separate from auto-enrichment
 
 **Code Quality Assessment**:
 - ✅ **Implementation Completeness**: All methods have full business logic
@@ -329,14 +339,57 @@ The `agents/` folder contains 15 Java files implementing a sophisticated multi-a
 **Critical Assessment:**
 The EnrichmentAgent is functional but limited. It provides basic place enrichment but lacks the depth needed for a comprehensive itinerary planner. The mock implementations and missing real-time data significantly limit its value. For a production itinerary planning system, it needs substantial enhancements to provide the rich, contextual information users expect.
 
+**✅ RECENT IMPROVEMENTS (Verified):**
+1. **Auto-Enrichment Added**: New `EnrichmentService` handles automatic coordinate enrichment after changes
+2. **Circular Dependency Resolved**: Clean architecture with `ChangeEngine` → `EnrichmentService` → `GooglePlacesService`
+3. **Async Support Enabled**: `@EnableAsync` annotation added to `App.java`
+4. **Configuration Added**: `enrichment.auto-enrich.enabled` property in `application.yml`
+
 **Potential Issues**:
 - ⚠️ **Complex Methods**: Several methods exceed 50 lines
 - ⚠️ **Hardcoded Values**: Time parsing logic and validation rules
 - ⚠️ **Magic Numbers**: Various time thresholds and limits
-- ⚠️ **Mock Implementations**: Transit duration and opening hours validation are incomplete
+- ⚠️ **Mock Implementations**: Transit duration (verified still mock) and opening hours validation (verified still hardcoded)
 - ⚠️ **Performance Issues**: Sequential processing, no caching, no rate limiting
 
 **Duplicate Detection**: No significant duplicates found
+
+### 9a. EnrichmentService.java (NEW)
+**Classification**: CRITICAL - Auto-enrichment service
+**Purpose**: Handles automatic enrichment of nodes after changes
+**Implementation Status**: FULLY IMPLEMENTED
+**Usage Evidence**:
+- Called by ChangeEngine after successful apply()
+- Directly uses GooglePlacesService for coordinate lookup
+- Async execution with @Async annotation
+
+**Code Quality Assessment**:
+- ✅ **Implementation Completeness**: Focused, single-responsibility implementation
+- ✅ **Error Handling**: Graceful error handling, doesn't fail main flow
+- ✅ **Input Validation**: Filters nodes needing enrichment
+- ✅ **Logging**: Comprehensive logging with timing metrics
+- ✅ **Documentation**: Well-documented with clear purpose
+- ✅ **Dependencies**: Clean dependencies (no circular references)
+
+**Key Methods Analysis**:
+- `enrichNodesAsync()`: 65 lines - Async node enrichment with filtering
+- `enrichItineraryAsync()`: 60 lines - Bulk itinerary enrichment
+- `filterNodesNeedingEnrichment()`: 28 lines - Smart filtering (skips nodes with coordinates)
+- `enrichNode()`: 63 lines - Direct Google Places API integration
+
+**Architecture Benefits**:
+- ✅ **No Circular Dependencies**: `ChangeEngine` → `EnrichmentService` → `GooglePlacesService`
+- ✅ **Async Execution**: Non-blocking enrichment doesn't slow down responses
+- ✅ **Smart Filtering**: Only enriches nodes without coordinates
+- ✅ **Configurable**: Can be disabled via `enrichment.auto-enrich.enabled`
+- ✅ **Performance Metrics**: Tracks enrichment duration
+
+**Potential Issues**:
+- ⚠️ **Sequential Processing**: Enriches nodes one by one (could batch)
+- ⚠️ **No Retry Logic**: Single attempt per node
+- ⚠️ **No Caching**: Re-fetches data even if recently enriched
+
+**Duplicate Detection**: No duplicates found
 
 ## **CRITICAL ISSUE: UI Progress Tracking Failure**
 
@@ -593,6 +646,9 @@ Progress events are being emitted by agents but need proper routing through `Age
 - **Data Services**: All agents depend on ItineraryJsonService for persistence
 - **Event System**: All agents use AgentEventBus for progress updates
 - **External APIs**: BookingAgent integrates with Booking.com, Expedia, Razorpay
+- **Enrichment Services**: 
+  - `EnrichmentService` (NEW) → Used by ChangeEngine for auto-enrichment
+  - `GooglePlacesService` → Used by both EnrichmentService and EnrichmentAgent
 
 ### Data Flow
 
@@ -601,6 +657,31 @@ Progress events are being emitted by agents but need proper routing through `Age
 2. **ActivityAgent/MealAgent/TransportAgent** → Populate specific node types (parallel)
 3. **EnrichmentAgent** → Adds validation and pacing
 4. **CostEstimatorAgent** → Adds cost estimates
+
+#### **AUTO-ENRICHMENT FLOW (NEW - Automatic)**:
+```
+User makes change (via chat/API)
+    ↓
+ChangeEngine.apply()
+    ↓
+Changes saved to database
+    ↓
+triggerAutoEnrichment() called
+    ↓
+EnrichmentService.enrichNodesAsync() [@Async]
+    ↓
+GooglePlacesService.searchPlace()
+    ↓
+Coordinates added to nodes
+    ↓
+Itinerary updated in database
+```
+
+**Key Features:**
+- ✅ Non-blocking (async execution)
+- ✅ Smart filtering (only enriches nodes without coordinates)
+- ✅ Configurable (`enrichment.auto-enrich.enabled`)
+- ✅ No circular dependencies
 
 #### **MONOLITHIC MODE (Legacy)**:
 1. **PlannerAgent** → Generates complete itinerary (legacy approach)

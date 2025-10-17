@@ -3,11 +3,23 @@
 ## Overview
 The `data/` folder contains 4 Java files implementing the data persistence layer. This folder includes JPA entities, repositories, and Firestore-specific data models for the application's database operations.
 
+**Folder Structure (Verified):**
+```
+data/
+├── entity/          (3 files - JPA entities and Firestore models)
+│   ├── Booking.java
+│   ├── FirestoreItinerary.java
+│   └── Itinerary.java (LEGACY - unused)
+└── repo/            (1 file - JPA repositories)
+    └── BookingRepository.java
+```
+
 ## Folder Purpose
 - **Primary Function**: Data persistence layer with JPA entities and repositories
 - **Architecture Pattern**: Repository pattern with JPA and Firestore integration
 - **Integration**: Heavy integration with services for data access and persistence
 - **Data Flow**: Entity mapping, repository operations, and database transactions
+- **Organization**: Clean separation between entities and repositories
 
 ## File-by-File Analysis
 
@@ -212,6 +224,11 @@ The `data/` folder contains 4 Java files implementing the data persistence layer
 ## Summary
 
 The data folder provides a comprehensive data persistence layer with JPA entities and repositories. Most files are fully implemented and actively used, with one legacy entity that should be removed. The code quality is generally good with proper validation and documentation. The main areas for improvement are legacy code removal, entity size reduction, and pattern consolidation.
+
+**Recent Improvements (Verified):**
+- ✅ **Better Organization**: Files now organized into `entity/` and `repo/` subdirectories
+- ✅ **Clean Separation**: Clear separation between entities and repositories
+- ✅ **No Impact from Enrichment**: Recent auto-enrichment feature doesn't require data layer changes
 
 **Overall Health Score**: 7.0/10
 **Critical Issues**: 1 (legacy entity)

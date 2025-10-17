@@ -1,7 +1,9 @@
 # Backend Code Quality Analysis - Service Folder
 
 ## Overview
-The `service/` folder contains 55 service classes that implement the core business logic of the application. These services handle agent orchestration, change management, AI integration, data persistence, and various utility functions.
+The `service/` folder contains 54 service classes (verified count) that implement the core business logic of the application. These services handle agent orchestration, change management, AI integration, data persistence, and various utility functions.
+
+**Note**: Previous analysis stated 55 services. Actual count is 54 files.
 
 ## File Analysis
 
@@ -34,6 +36,13 @@ The `service/` folder contains 55 service classes that implement the core busine
   - Conflict detection and resolution
   - Lock management and validation
   - Idempotency support
+  - **Auto-enrichment trigger** (NEW) - Automatically enriches new/modified nodes after changes
+
+**Recent Updates (Verified):**
+- ✅ Added `triggerAutoEnrichment()` method
+- ✅ Calls `EnrichmentService.enrichNodesAsync()` after successful apply()
+- ✅ Non-blocking async enrichment for better performance
+- ✅ Smart filtering - only enriches nodes without coordinates
 
 #### 3. `ItineraryJsonService.java` - **CRITICAL**
 - **Purpose**: Manages normalized JSON itineraries using Firestore
@@ -245,7 +254,28 @@ The `service/` folder contains 55 service classes that implement the core busine
 - **Quality**: High - comprehensive place enrichment
 - **Significance**: Required for place data enhancement
 
-#### 28. `MapBoundsCalculator.java` - **REQUIRED**
+#### 28. `EnrichmentService.java` - **CRITICAL** (NEW)
+- **Purpose**: Handles automatic enrichment of nodes after changes
+- **Usage**: Called by ChangeEngine after successful apply() operations
+- **Implementation**: Fully implemented with async execution
+- **Quality**: High - clean, focused implementation with smart filtering
+- **Significance**: **Critical for auto-enrichment feature**
+- **Features**:
+  - Async enrichment with `@Async` annotation
+  - Smart filtering - only enriches nodes without coordinates
+  - Direct Google Places API integration
+  - Configurable via `enrichment.auto-enrich.enabled`
+  - Performance metrics tracking
+  - Graceful error handling (doesn't fail main flow)
+- **Dependencies**: GooglePlacesService, ItineraryJsonService
+- **Architecture**: Clean dependency chain (no circular dependencies)
+- **Recent Addition**: Added for auto-enrichment functionality
+
+**Key Differences from PlaceEnrichmentService:**
+- `EnrichmentService`: Auto-enrichment after changes (new, lightweight)
+- `PlaceEnrichmentService`: Manual enrichment by agents (existing, comprehensive)
+
+#### 29. `MapBoundsCalculator.java` - **REQUIRED**
 - **Purpose**: Calculates map bounds and centroids
 - **Usage**: Used by itinerary service for map calculations
 - **Implementation**: Fully implemented with geographic calculations
@@ -288,6 +318,12 @@ The `service/` folder contains 55 service classes that implement the core busine
 2. **Well-Implemented**: All services are fully implemented with proper functionality
 3. **No Dead Code**: All services serve specific purposes
 4. **Proper Integration**: Well-integrated with the overall architecture
+
+**Recent Improvements (Verified):**
+- ✅ **EnrichmentService.java** added for auto-enrichment
+- ✅ **ChangeEngine** enhanced with auto-enrichment trigger
+- ✅ **Clean Architecture**: No circular dependencies introduced
+- ✅ **Async Support**: Proper async execution for non-blocking enrichment
 
 ## Recommendations
 

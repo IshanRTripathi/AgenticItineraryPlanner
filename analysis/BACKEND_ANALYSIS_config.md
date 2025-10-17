@@ -52,6 +52,8 @@ The `config/` folder contains 8 Java files implementing Spring Boot configuratio
 **Usage Evidence**:
 - Referenced in 1 file (self-referential)
 - Used by Spring's @Async annotation throughout the application
+- **Critical Use Case**: Powers `EnrichmentService.enrichNodesAsync()` for auto-enrichment
+- Requires `@EnableAsync` in `App.java` (verified present)
 - No direct test coverage found
 
 **Code Quality Assessment**:
@@ -333,9 +335,42 @@ The `config/` folder contains 8 Java files implementing Spring Boot configuratio
 2. **Monitoring**: Add configuration validation and monitoring
 3. **Performance**: Optimize configuration loading and initialization
 
+### 9. Application Configuration (application.yml) - NEW SECTION
+**Classification**: CRITICAL - Application properties
+**Purpose**: Centralized configuration for all application components
+**Implementation Status**: FULLY IMPLEMENTED with recent additions
+**Recent Updates (Verified)**:
+
+#### **Enrichment Configuration (NEW)**:
+```yaml
+enrichment:
+  auto-enrich:
+    enabled: ${ENRICHMENT_AUTO_ENRICH_ENABLED:true}
+```
+
+**Purpose**: Controls automatic enrichment of nodes after changes
+**Usage**: Used by `EnrichmentService` to enable/disable auto-enrichment
+**Default**: Enabled (true)
+**Environment Variable**: `ENRICHMENT_AUTO_ENRICH_ENABLED`
+
+**Integration Points**:
+- `EnrichmentService` checks this property via `@Value` annotation
+- `ChangeEngine` triggers enrichment after successful changes
+- `AsyncConfig` provides thread pool for async execution
+
+**Benefits**:
+- ✅ Configurable feature toggle
+- ✅ Environment-specific control
+- ✅ No code changes needed to enable/disable
+
 ## Summary
 
 The config folder provides essential infrastructure configuration for the application. All files are fully implemented and actively used. The code quality is generally good with proper Spring patterns and comprehensive logging. The main areas for improvement are security hardening, method complexity reduction, and configuration externalization.
+
+**Recent Improvements (Verified)**:
+- ✅ Enrichment configuration added to application.yml
+- ✅ @EnableAsync enabled in App.java for async operations
+- ✅ Auto-enrichment feature fully configured
 
 **Overall Health Score**: 7.5/10
 **Critical Issues**: 0

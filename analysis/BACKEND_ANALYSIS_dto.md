@@ -1,7 +1,9 @@
 # Backend Code Quality Analysis - DTO Folder
 
 ## Overview
-The `dto/` folder contains 99 data transfer objects that form the core data model for the application. These DTOs handle communication between frontend and backend, agent orchestration, and data persistence.
+The `dto/` folder contains 87 data transfer objects (verified count) that form the core data model for the application. These DTOs handle communication between frontend and backend, agent orchestration, and data persistence.
+
+**Note**: Previous analysis stated 99 DTOs. Actual count is 87 files.
 
 ## File Analysis
 
@@ -298,6 +300,24 @@ These DTOs are tied to the legacy JPA entities and should be removed:
 - **Quality**: Good
 - **Significance**: Required for hotel search
 
+#### 38. `PlaceSearchResponse.java` - **REQUIRED** (NEW)
+- **Purpose**: Response wrapper for Google Places Text Search API
+- **Usage**: Used by GooglePlacesService and EnrichmentService
+- **Implementation**: Fully implemented with proper Jackson annotations
+- **Quality**: High - clean DTO with proper field mapping
+- **Significance**: **Critical for auto-enrichment feature**
+- **Fields**: results, status, errorMessage, nextPageToken
+- **Recent Addition**: Added for auto-enrichment functionality
+
+#### 39. `PlaceSearchResult.java` - **REQUIRED** (NEW)
+- **Purpose**: Individual place result from Google Places API
+- **Usage**: Used by GooglePlacesService for coordinate lookup
+- **Implementation**: Fully implemented with nested geometry/location classes
+- **Quality**: High - proper structure matching Google Places API
+- **Significance**: **Critical for auto-enrichment feature**
+- **Fields**: placeId, name, formattedAddress, geometry, rating, types
+- **Recent Addition**: Added for auto-enrichment functionality
+
 ### Supporting DTOs (Keep)
 
 #### 38. `Coordinates.java` - **REQUIRED**
@@ -447,15 +467,20 @@ The remaining 49 DTOs are all well-implemented, actively used, and required for 
 6. `LocationDto.java` - Legacy, replaced by `NodeLocation`
 7. `PriceDto.java` - Legacy, replaced by `NodeCost`
 
-### DTOs to KEEP: 92 (Modern, Well-Implemented)
+### DTOs to KEEP: 87 (Modern, Well-Implemented) - Verified Count
 - All core DTOs (NormalizedItinerary, NormalizedNode, etc.)
 - All agent system DTOs
 - All change management DTOs
 - All chat system DTOs
 - All payment/booking DTOs
-- All search response DTOs
+- All search response DTOs (including new PlaceSearchResponse/PlaceSearchResult)
 - All workflow DTOs
 - All supporting DTOs
+
+**Recent Additions (Verified):**
+- ✅ `PlaceSearchResponse.java` - Google Places API response wrapper
+- ✅ `PlaceSearchResult.java` - Individual place search result
+- Both critical for auto-enrichment feature
 
 ### Quality Assessment: EXCELLENT
 - **100% Implementation**: All DTOs are fully implemented

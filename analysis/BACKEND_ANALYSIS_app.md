@@ -15,9 +15,15 @@ The root `App.java` file is the Spring Boot application entry point that initial
 - **Significance**: Required - application cannot start without this file
 - **Features**:
   - `@SpringBootApplication` annotation for auto-configuration
+  - `@EnableAsync` annotation for asynchronous method execution (NEW)
   - Standard `main` method for application startup
   - Minimal and focused implementation
   - Proper package structure
+
+**Recent Updates (Verified):**
+- ✅ `@EnableAsync` added to enable async enrichment
+- ✅ Supports `EnrichmentService.enrichNodesAsync()` execution
+- ✅ Required for auto-enrichment feature
 
 ## Quality Assessment
 
@@ -28,10 +34,12 @@ The root `App.java` file is the Spring Boot application entry point that initial
 4. **Clean Structure**: Simple and maintainable code
 
 ### Areas for Improvement
-1. **Configuration**: Could include additional configuration if needed
+1. ~~**Async Support**: Could add @EnableAsync for async operations~~ ✅ **IMPLEMENTED**
 2. **Profiles**: Could add profile-specific configurations
 3. **Banner**: Could customize application banner
 4. **Startup Hooks**: Could add startup event listeners if needed
+5. **Scheduling**: Could add @EnableScheduling if periodic tasks are needed
+6. **Caching**: Could add @EnableCaching if caching is required
 
 ### Critical Findings
 1. **Essential**: Application cannot start without this file
