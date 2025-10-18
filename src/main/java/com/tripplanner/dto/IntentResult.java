@@ -10,33 +10,36 @@ import java.util.Map;
 public class IntentResult {
     
     private String intent; // "REPLAN_TODAY" | "MOVE_TIME" | "INSERT_PLACE" | "DELETE_NODE" | "REPLACE_NODE" | "BOOK_NODE" | "UNDO" | "EXPLAIN"
+    private String taskType; // "editing" | "booking" | "ENRICHMENT" | "explanation"
     private Integer day;
     private List<String> nodeIds;
-    private Map<String, String> entities;
+    private Map<String, Object> entities; // Changed from Map<String, String> to Map<String, Object>
     private Map<String, Object> constraints;
+    private Double confidence;
     
     // Constructors
     public IntentResult() {}
     
     public IntentResult(String intent, Integer day, List<String> nodeIds, 
-                       Map<String, String> entities, Map<String, Object> constraints) {
+                       Map<String, Object> entities, Map<String, Object> constraints) {
         this.intent = intent;
         this.day = day;
         this.nodeIds = nodeIds;
         this.entities = entities;
         this.constraints = constraints;
+        this.taskType = mapIntentToTaskType(intent);
     }
     
     // Static factory methods for common intents
-    public static IntentResult replanToday(Integer day, Map<String, String> entities) {
+    public static IntentResult replanToday(Integer day, Map<String, Object> entities) {
         return new IntentResult("REPLAN_TODAY", day, List.of(), entities, Map.of());
     }
     
-    public static IntentResult moveTime(List<String> nodeIds, Map<String, String> entities) {
+    public static IntentResult moveTime(List<String> nodeIds, Map<String, Object> entities) {
         return new IntentResult("MOVE_TIME", null, nodeIds, entities, Map.of());
     }
     
-    public static IntentResult insertPlace(Integer day, Map<String, String> entities) {
+    public static IntentResult insertPlace(Integer day, Map<String, Object> entities) {
         return new IntentResult("INSERT_PLACE", day, List.of(), entities, Map.of());
     }
     
@@ -44,7 +47,7 @@ public class IntentResult {
         return new IntentResult("DELETE_NODE", null, nodeIds, Map.of(), Map.of());
     }
     
-    public static IntentResult replaceNode(List<String> nodeIds, Map<String, String> entities) {
+    public static IntentResult replaceNode(List<String> nodeIds, Map<String, Object> entities) {
         return new IntentResult("REPLACE_NODE", null, nodeIds, entities, Map.of());
     }
     
@@ -71,6 +74,15 @@ public class IntentResult {
     
     public void setIntent(String intent) {
         this.intent = intent;
+        this.taskType = mapIntentToTaskType(intent);
+    }
+    
+    public String getTaskType() {
+        return taskType;
+    }
+    
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
     }
     
     public Integer getDay() {
@@ -89,11 +101,11 @@ public class IntentResult {
         this.nodeIds = nodeIds;
     }
     
-    public Map<String, String> getEntities() {
+    public Map<String, Object> getEntities() {
         return entities;
     }
     
-    public void setEntities(Map<String, String> entities) {
+    public void setEntities(Map<String, Object> entities) {
         this.entities = entities;
     }
     
@@ -103,6 +115,14 @@ public class IntentResult {
     
     public void setConstraints(Map<String, Object> constraints) {
         this.constraints = constraints;
+    }
+    
+    public Double getConfidence() {
+        return confidence;
+    }
+    
+    public void setConfidence(Double confidence) {
+        this.confidence = confidence;
     }
     
     // Helper methods
@@ -119,14 +139,43 @@ public class IntentResult {
         return intent != null && (intent.equals("REPLAN_TODAY") || intent.equals("INSERT_PLACE"));
     }
     
+    /**
+     * Map intent type to task type for agent routing.
+     */
+    private String mapIntentToTaskType(String intent) {
+        if (intent == null) {
+            return "general";
+        }
+        
+        switch (intent.toUpperCase()) {
+            case "EDIT":
+            case "MOVE_TIME":
+            case "INSERT_PLACE":
+            case "DELETE_NODE":
+            case "REPLACE_NODE":
+            case "REPLAN_TODAY":
+                return "editing";
+            case "BOOK_NODE":
+                return "booking";
+            case "ENRICH":
+                return "ENRICHMENT";
+            case "EXPLAIN":
+                return "explanation";
+            default:
+                return "general";
+        }
+    }
+    
     @Override
     public String toString() {
         return "IntentResult{" +
                 "intent='" + intent + '\'' +
+                ", taskType='" + taskType + '\'' +
                 ", day=" + day +
                 ", nodeIds=" + nodeIds +
                 ", entities=" + entities +
                 ", constraints=" + constraints +
+                ", confidence=" + confidence +
                 '}';
     }
 }

@@ -9,7 +9,7 @@ import java.util.Objects;
 
 /**
  * Booking entity representing booking transactions.
- * Stored in H2 database table: bookings
+ * Stored in Firestore via BookingRepository
  */
 @Entity
 @Table(name = "bookings")
@@ -18,6 +18,10 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @NotBlank
+    @Column(name = "bookingId", unique = true)
+    private String bookingId;
     
     @NotBlank
     @Column(name = "userId")
@@ -56,6 +60,14 @@ public class Booking {
     public Booking() {
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
+        this.bookingId = generateBookingId();
+    }
+    
+    /**
+     * Generate a unique booking ID.
+     */
+    private String generateBookingId() {
+        return "BK_" + System.currentTimeMillis() + "_" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
     
     public void updateTimestamp() {
@@ -74,6 +86,14 @@ public class Booking {
     
     public void setId(Long id) {
         this.id = id;
+    }
+    
+    public String getBookingId() {
+        return bookingId;
+    }
+    
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
     }
     
     public String getUserId() {

@@ -7,7 +7,7 @@ import java.time.Instant;
 
 /**
  * Node timing information.
- * Uses Long (milliseconds since epoch) for Firestore compatibility.
+ * Uses Long (milliseconds since epoch) for Firestore storage.
  */
 public class NodeTiming {
     

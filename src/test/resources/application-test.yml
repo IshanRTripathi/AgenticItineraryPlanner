@@ -1,21 +1,45 @@
+# Test-specific configuration
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-  h2:
-    console:
-      enabled: true
+  main:
+    allow-bean-definition-overriding: true
 
+# Use Firestore emulator for integration tests
+firestore:
+  use-emulator: true
+  emulator-host: localhost:8080
+  project-id: test-project
+
+# Use mock AI services
+ai:
+  mock-mode: true
+  provider: mock
+
+google:
+  ai:
+    mock-mode: true
+    api-key: test-key
+  places:
+    api:
+      key: test-api-key
+    daily:
+      limit: 1000
+    rate-limit:
+      enabled: false
+
+openrouter:
+  api-key: test-key
+  mock-mode: true
+
+# Test-specific settings
+test:
+  data:
+    reset-between-tests: true
+    use-static-responses: true
+    mock-data-path: "classpath:mock-data"
+
+# Logging for tests
 logging:
   level:
     com.tripplanner: DEBUG
-    org.springframework.web: DEBUG
+    org.springframework.test: INFO
+    org.springframework.boot.test: INFO

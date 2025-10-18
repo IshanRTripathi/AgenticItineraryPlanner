@@ -38,15 +38,19 @@ spring:
       roles: DISABLED
 
 google:
-  oauth:
-    client-id: ${GOOGLE_OAUTH_CLIENT_ID:}
-    client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:}
   ai:
     api-key: ${GEMINI_API_KEY:}
-    model: ${GEMINI_MODEL:gemini-1.5-pro}
+    model: ${GEMINI_MODEL:gemini-2.5-flash}
     temperature: ${GEMINI_TEMPERATURE:0.7}
-    max-tokens: ${GEMINI_MAX_TOKENS:8192}
+    max-tokens: ${GEMINI_MAX_TOKENS:65535}
     mock-mode: ${GEMINI_MOCK_MODE:false}
+  places:
+    api:
+      key: ${GOOGLE_PLACES_API_KEY:}
+    daily:
+      limit: ${GOOGLE_PLACES_DAILY_LIMIT:1000}
+    rate-limit:
+      enabled: ${GOOGLE_PLACES_RATE_LIMIT_ENABLED:true}
 
 ai:
   provider: ${AI_PROVIDER:openrouter}
@@ -55,19 +59,25 @@ ai:
   max-tokens: ${AI_MAX_TOKENS:8192}
   mock-mode: ${AI_MOCK_MODE:false}
 
+
 openrouter:
-  api-key: ${OPENROUTER_API_KEY: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}
+  api-key: ${OPENROUTER_API_KEY:}
   base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
-  timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:60}
+  timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:150}
 
 # Firestore Configuration
 firestore:
-  project-id: tripplanner-bdd3c
+  project-id: ${FIRESTORE_PROJECT_ID:tripaiplanner-4c951}
   credentials: ${FIRESTORE_CREDENTIALS:}
-  credentials-file: ${FIRESTORE_CREDENTIALS_FILE:tripplanner-bdd3c-firebase-adminsdk-fbsvc-633254ef65.json}
+  credentials-file: ${FIRESTORE_CREDENTIALS_FILE:}
   emulator-host: ${FIRESTORE_EMULATOR_HOST:localhost:8080}
   use-emulator: ${FIRESTORE_USE_EMULATOR:false}
   enabled: ${FIRESTORE_ENABLED:true}
+
+# Firebase Authentication Configuration
+firebase:
+  auth:
+    enabled: ${FIREBASE_AUTH_ENABLED:true}
 
 # Application Database Configuration moved under single app block below
 
@@ -77,6 +87,24 @@ razorpay:
   key-secret: ${RAZORPAY_KEY_SECRET:}
   webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
   environment: ${RAZORPAY_ENVIRONMENT:test}
+  rate-limit:
+    enabled: ${RAZORPAY_RATE_LIMIT_ENABLED:true}
+  timeout: ${RAZORPAY_TIMEOUT:30000}
+
+expedia:
+  api:
+    key: ${EXPEDIA_API_KEY:}
+  rate-limit:
+    enabled: ${EXPEDIA_RATE_LIMIT_ENABLED:true}
+  timeout: ${EXPEDIA_TIMEOUT:30000}
+
+booking:
+  com:
+    api:
+      key: ${BOOKING_COM_API_KEY:}
+    partner:
+      id: ${BOOKING_COM_PARTNER_ID:}
+  timeout: ${BOOKING_COM_TIMEOUT:30000}
 
 email:
   smtp:
@@ -91,27 +119,7 @@ pdf:
   base-url: ${PDF_BASE_URL:http://localhost:8080}
   template-path: ${PDF_TEMPLATE_PATH:classpath:/templates/pdf/}
 
-providers:
-  hotels:
-    enabled: ${HOTELS_PROVIDER_ENABLED:true}
-    default: ${HOTELS_DEFAULT_PROVIDER:booking}
-    timeout: ${HOTELS_TIMEOUT:30s}
-  flights:
-    enabled: ${FLIGHTS_PROVIDER_ENABLED:true}
-    default: ${FLIGHTS_DEFAULT_PROVIDER:amadeus}
-    timeout: ${FLIGHTS_TIMEOUT:30s}
-  activities:
-    enabled: ${ACTIVITIES_PROVIDER_ENABLED:true}
-    default: ${ACTIVITIES_DEFAULT_PROVIDER:viator}
-    timeout: ${ACTIVITIES_TIMEOUT:30s}
-  ground:
-    enabled: ${GROUND_PROVIDER_ENABLED:true}
-    default: ${GROUND_DEFAULT_PROVIDER:rome2rio}
-    timeout: ${GROUND_TIMEOUT:30s}
-  public-transport:
-    enabled: ${PT_PROVIDER_ENABLED:true}
-    default: ${PT_DEFAULT_PROVIDER:transitland}
-    timeout: ${PT_TIMEOUT:30s}
+
 
 management:
   endpoints:
@@ -130,10 +138,8 @@ logging:
   level:
     root: ${LOG_LEVEL:INFO}
     com.tripplanner: ${APP_LOG_LEVEL:INFO}
-    com.tripplanner.api: INFO
     com.tripplanner.service: INFO
     com.tripplanner.data: INFO
-    com.tripplanner.security: INFO
     com.tripplanner.service.agents: INFO
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
     org.springframework.web: DEBUG
@@ -147,13 +153,27 @@ logging:
   file:
     name: ${LOG_FILE:logs/application.log}
 
-frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
-  database:
-    type: ${APP_DATABASE_TYPE:firestore}
   max-itinerary-days: ${MAX_ITINERARY_DAYS:30}
+
+itinerary:
+  generation:
+    mode: ${ITINERARY_GENERATION_MODE:pipeline}
+    pipeline:
+      parallel: ${ITINERARY_PIPELINE_PARALLEL:true}
+      skeleton:
+        timeout-ms: ${ITINERARY_SKELETON_TIMEOUT_MS:120000}  # 2 minutes
+      population:
+        timeout-ms: ${ITINERARY_POPULATION_TIMEOUT_MS:180000}  # 3 minutes
+      enrichment:
+        timeout-ms: ${ITINERARY_ENRICHMENT_TIMEOUT_MS:60000}  # 1 minute
+      finalization:
+        timeout-ms: ${ITINERARY_FINALIZATION_TIMEOUT_MS:30000}  # 30 seconds
+    skeleton:
+      batch-size: ${ITINERARY_SKELETON_BATCH_SIZE:1}
   max-party-size: ${MAX_PARTY_SIZE:20}
   default-language: ${DEFAULT_LANGUAGE:en}
   supported-languages: ${SUPPORTED_LANGUAGES:en,es,fr,de,it,pt,ja,ko,zh}
@@ -164,5 +184,10 @@ app:
     ttl-minutes: ${CACHE_TTL_MINUTES:60}
   idempotency:
     ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
+
+# Enrichment Configuration
+enrichment:
+  auto-enrich:
+    enabled: ${ENRICHMENT_AUTO_ENRICH_ENABLED:true}
 
 

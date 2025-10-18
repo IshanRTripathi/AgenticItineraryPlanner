@@ -17,14 +17,10 @@ public class NormalizedDay {
     private Integer dayNumber;
     
     @JsonProperty("date")
-    private String date; // ISO date string for frontend compatibility
+    private String date; // ISO date string format
     
     @JsonProperty("location")
     private String location;
-    
-    @Valid
-    @JsonProperty("pacing")
-    private Pacing pacing;
     
     @JsonProperty("warnings")
     private List<String> warnings;
@@ -32,13 +28,29 @@ public class NormalizedDay {
     @JsonProperty("notes")
     private String notes;
     
-    @Valid
-    @JsonProperty("totals")
-    private DayTotals totals;
+    @JsonProperty("summary")
+    private String summary;
     
-    @Valid
-    @JsonProperty("timeWindow")
-    private TimeWindow timeWindow;
+    @JsonProperty("pace")
+    private String pace; // "relaxed", "balanced", "intense"
+    
+    @JsonProperty("totalDistance")
+    private Double totalDistance;
+    
+    @JsonProperty("totalCost")
+    private Double totalCost;
+    
+    @JsonProperty("totalDuration")
+    private Double totalDuration;
+    
+    @JsonProperty("timeWindowStart")
+    private String timeWindowStart; // e.g., "09:00"
+    
+    @JsonProperty("timeWindowEnd")
+    private String timeWindowEnd; // e.g., "18:00"
+    
+    @JsonProperty("timeZone")
+    private String timeZone; // e.g., "UTC", "IST"
     
     @Valid
     @NotNull
@@ -55,6 +67,9 @@ public class NormalizedDay {
         this.dayNumber = dayNumber;
         this.date = date;
         this.location = location;
+        this.totalDistance = 0.0;
+        this.totalCost = 0.0;
+        this.totalDuration = 0.0;
     }
     
     // Getters and Setters
@@ -82,14 +97,6 @@ public class NormalizedDay {
         this.location = location;
     }
     
-    public Pacing getPacing() {
-        return pacing;
-    }
-    
-    public void setPacing(Pacing pacing) {
-        this.pacing = pacing;
-    }
-    
     public List<String> getWarnings() {
         return warnings;
     }
@@ -106,20 +113,68 @@ public class NormalizedDay {
         this.notes = notes;
     }
     
-    public DayTotals getTotals() {
-        return totals;
+    public String getSummary() {
+        return summary;
     }
     
-    public void setTotals(DayTotals totals) {
-        this.totals = totals;
+    public void setSummary(String summary) {
+        this.summary = summary;
     }
     
-    public TimeWindow getTimeWindow() {
-        return timeWindow;
+    public String getPace() {
+        return pace;
     }
     
-    public void setTimeWindow(TimeWindow timeWindow) {
-        this.timeWindow = timeWindow;
+    public void setPace(String pace) {
+        this.pace = pace;
+    }
+    
+    public Double getTotalDistance() {
+        return totalDistance;
+    }
+    
+    public void setTotalDistance(Double totalDistance) {
+        this.totalDistance = totalDistance;
+    }
+    
+    public Double getTotalCost() {
+        return totalCost;
+    }
+    
+    public void setTotalCost(Double totalCost) {
+        this.totalCost = totalCost;
+    }
+    
+    public Double getTotalDuration() {
+        return totalDuration;
+    }
+    
+    public void setTotalDuration(Double totalDuration) {
+        this.totalDuration = totalDuration;
+    }
+    
+    public String getTimeWindowStart() {
+        return timeWindowStart;
+    }
+    
+    public void setTimeWindowStart(String timeWindowStart) {
+        this.timeWindowStart = timeWindowStart;
+    }
+    
+    public String getTimeWindowEnd() {
+        return timeWindowEnd;
+    }
+    
+    public void setTimeWindowEnd(String timeWindowEnd) {
+        this.timeWindowEnd = timeWindowEnd;
+    }
+    
+    public String getTimeZone() {
+        return timeZone;
+    }
+    
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
     
     public List<NormalizedNode> getNodes() {
@@ -144,11 +199,15 @@ public class NormalizedDay {
                 "dayNumber=" + dayNumber +
                 ", date=" + date +
                 ", location='" + location + '\'' +
-                ", pacing=" + pacing +
                 ", warnings=" + warnings +
                 ", notes='" + notes + '\'' +
-                ", totals=" + totals +
-                ", timeWindow=" + timeWindow +
+                ", pace='" + pace + '\'' +
+                ", totalDistance=" + totalDistance +
+                ", totalCost=" + totalCost +
+                ", totalDuration=" + totalDuration +
+                ", timeWindowStart='" + timeWindowStart + '\'' +
+                ", timeWindowEnd='" + timeWindowEnd + '\'' +
+                ", timeZone='" + timeZone + '\'' +
                 ", nodes=" + nodes +
                 ", edges=" + edges +
                 '}';

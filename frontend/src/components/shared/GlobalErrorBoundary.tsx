@@ -26,7 +26,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
     console.error('GlobalErrorBoundary caught an error:', error, errorInfo);
     
     // Log error to external service in production
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       // TODO: Send to error reporting service (e.g., Sentry, LogRocket)
       console.error('Production error:', {
         error: error.message,

@@ -9,6 +9,8 @@ import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.agents.AgentOrchestrator;
 import com.tripplanner.dto.AgentEvent;
 import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,33 +51,22 @@ public class AgentController {
     
     /**
      * Stream agent events for an itinerary via SSE.
+     * Token validation is handled by FirebaseSseAuthFilter.
      */
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter stream(@RequestParam String itineraryId, 
-                           @RequestParam(required = false) String token,
+    public SseEmitter stream(@RequestParam String itineraryId,
                            HttpServletRequest request) {
+        // User ID is set by FirebaseSseAuthFilter if token is valid
+        String userId = (String) request.getAttribute("userId");
+        
         logger.info("=== SSE STREAM REQUEST ===");
         logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("User ID: {}", userId != null ? userId : "anonymous");
         logger.info("Request Time: {}", now());
         logger.info("Client requesting SSE connection");
         
-        // Validate token if provided
-        String userId = null;
-        if (token != null && !token.isEmpty()) {
-            try {
-                FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
-                userId = decodedToken.getUid();
-                logger.info("Token validated for SSE connection, user: {}", userId);
-            } catch (Exception e) {
-                logger.error("Invalid token for SSE connection", e);
-                throw new RuntimeException("Invalid authentication token");
-            }
-        } else {
-            logger.warn("No token provided for SSE connection");
-        }
-        
-        // Create SSE emitter with no timeout (0L means no timeout)
-        SseEmitter emitter = new SseEmitter(0L);
+        // Create SSE emitter with 30 minute timeout to prevent hanging connections
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
         logger.info("Created SSE emitter: {}", emitter.toString());
         
         // Register emitter with event bus
@@ -106,7 +97,28 @@ public class AgentController {
             logger.info("Initial SSE connection event sent successfully");
             
             // Send available agents list
-            Set<AgentEvent.AgentKind> availableAgents = agentRegistry.getRegisteredAgentKinds();
+            Set<String> availableAgentIds = agentRegistry.getRegisteredAgentIds();
+            // Convert to AgentKind set for backward compatibility
+            Set<AgentEvent.AgentKind> availableAgents = availableAgentIds.stream()
+                .map(id -> {
+                    try {
+                        return AgentEvent.AgentKind.valueOf(id.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        // For agents with unique IDs, try to find their kind
+                        return agentRegistry.getAgent(id)
+                            .map(agent -> {
+                                try {
+                                    java.lang.reflect.Method method = agent.getClass().getMethod("getAgentKind");
+                                    return (AgentEvent.AgentKind) method.invoke(agent);
+                                } catch (Exception ex) {
+                                    return null;
+                                }
+                            })
+                            .orElse(null);
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
             agentEventBus.sendAgentList(itineraryId, availableAgents);
             
         } catch (Exception e) {
@@ -122,17 +134,23 @@ public class AgentController {
     }
     
     /**
-     * Stream agent events for an itinerary via SSE (alternative endpoint for frontend compatibility).
+     * Stream agent events for an itinerary via SSE (alternative endpoint).
+     * Token validation is handled by FirebaseSseAuthFilter.
      */
     @GetMapping(path = "/events/{itineraryId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamEvents(@PathVariable String itineraryId) {
+    public SseEmitter streamEvents(@PathVariable String itineraryId,
+                                  HttpServletRequest request) {
+        // User ID is set by FirebaseSseAuthFilter if token is valid
+        String userId = (String) request.getAttribute("userId");
+        
         logger.info("=== SSE EVENTS REQUEST ===");
         logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("User ID: {}", userId != null ? userId : "anonymous");
         logger.info("Request Time: {}", now());
         logger.info("Client requesting SSE events connection");
         
-        // Create SSE emitter with no timeout (0L means no timeout)
-        SseEmitter emitter = new SseEmitter(0L);
+        // Create SSE emitter with 30 minute timeout to prevent hanging connections
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
         logger.info("Created SSE emitter: {}", emitter.toString());
         
         // Register emitter with event bus
@@ -151,7 +169,11 @@ public class AgentController {
         
         emitter.onError((throwable) -> {
             // Client disconnects often manifest as IOExceptions; treat as normal
-            logger.warn("SSE events stream ended for itinerary {} due to: {}", itineraryId, throwable.toString());
+            if (throwable instanceof java.io.IOException) {
+                logger.debug("SSE events stream ended for itinerary {} due to client disconnect: {}", itineraryId, throwable.getMessage());
+            } else {
+                logger.warn("SSE events stream ended for itinerary {} due to: {}", itineraryId, throwable.toString());
+            }
             agentEventBus.unregister(itineraryId, emitter);
         });
         
@@ -275,8 +297,8 @@ public class AgentController {
     }
     
     /**
-     * Apply a ChangeSet with enrichment.
-     * POST /agents/apply-with-enrichment → 200 → body: {itineraryId, changeSet} → {result, status}
+     * Apply a ChangeSet with ENRICHMENT.
+     * POST /agents/apply-with-ENRICHMENT → 200 → body: {itineraryId, changeSet} → {result, status}
      */
     @PostMapping("/apply-with-enrichment")
     public ResponseEntity<ApplyWithEnrichmentResponse> applyWithEnrichment(@Valid @RequestBody ApplyWithEnrichmentRequest request) {
@@ -285,7 +307,7 @@ public class AgentController {
         logger.info("ChangeSet: {}", request.changeSet());
         
         try {
-            // Apply the ChangeSet with enrichment asynchronously
+            // Apply the ChangeSet with ENRICHMENT asynchronously
             CompletableFuture<ChangeEngine.ApplyResult> future = agentOrchestrator.applyChangeSetWithEnrichment(
                 request.itineraryId(), request.changeSet());
             
@@ -293,7 +315,7 @@ public class AgentController {
             ApplyWithEnrichmentResponse response = new ApplyWithEnrichmentResponse(
                 request.itineraryId(),
                 "applying",
-                "Applying changes with enrichment. Use SSE to track progress.",
+                "Applying changes with ENRICHMENT. Use SSE to track progress.",
                 null // Result will be available via SSE
             );
             
@@ -304,7 +326,7 @@ public class AgentController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            logger.error("Failed to apply with enrichment", e);
+            logger.error("Failed to apply with ENRICHMENT", e);
             return ResponseEntity.status(500).body(new ApplyWithEnrichmentResponse(
                 request.itineraryId(),
                 "failed",
@@ -351,7 +373,7 @@ public class AgentController {
     ) {}
     
     /**
-     * Request DTO for applying with enrichment.
+     * Request DTO for applying with ENRICHMENT.
      */
     public record ApplyWithEnrichmentRequest(
             String itineraryId,
@@ -359,7 +381,7 @@ public class AgentController {
     ) {}
     
     /**
-     * Response DTO for applying with enrichment.
+     * Response DTO for applying with ENRICHMENT.
      */
     public record ApplyWithEnrichmentResponse(
             String itineraryId,

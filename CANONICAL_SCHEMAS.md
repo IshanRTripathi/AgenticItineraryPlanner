@@ -64,7 +64,7 @@ public class NormalizedDay {
     @JsonProperty("location") private String location;
     @JsonProperty("nodes") private List<NormalizedNode> nodes;
     @JsonProperty("edges") private List<Edge> edges;
-    @JsonProperty("pacing") private Pacing pacing;
+    @JsonProperty("intensity") private Pacing intensity;
     @JsonProperty("timeWindow") private TimeWindow timeWindow;
     @JsonProperty("totals") private DayTotals totals;
     @JsonProperty("warnings") private List<String> warnings;
@@ -80,7 +80,7 @@ export interface NormalizedDay {
   location: string;
   nodes: NormalizedNode[];
   edges: Edge[];
-  pacing?: Pacing;
+  intensity?: Pacing;
   timeWindow?: TimeWindow;
   totals?: DayTotals;
   warnings?: string[];

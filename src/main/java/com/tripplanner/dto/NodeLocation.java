@@ -16,12 +16,46 @@ public class NodeLocation {
     @JsonProperty("coordinates")
     private Coordinates coordinates;
     
+    @JsonProperty("placeId")
+    private String placeId;
+    
+    @JsonProperty("googleMapsUri")
+    private String googleMapsUri;
+    
+    @JsonProperty("rating")
+    private Double rating;
+    
+    @JsonProperty("openingHours")
+    private String openingHours; // e.g., "09:00"
+    
+    @JsonProperty("closingHours")
+    private String closingHours; // e.g., "18:00"
+    
     public NodeLocation() {}
     
     public NodeLocation(String name, String address, Coordinates coordinates) {
         this.name = name;
         this.address = address;
         this.coordinates = coordinates;
+    }
+    
+    public NodeLocation(String name, String address, Coordinates coordinates, String placeId) {
+        this.name = name;
+        this.address = address;
+        this.coordinates = coordinates;
+        this.placeId = placeId;
+    }
+    
+    public NodeLocation(String name, String address, Coordinates coordinates, String placeId, 
+                       String googleMapsUri, Double rating, String openingHours, String closingHours) {
+        this.name = name;
+        this.address = address;
+        this.coordinates = coordinates;
+        this.placeId = placeId;
+        this.googleMapsUri = googleMapsUri;
+        this.rating = rating;
+        this.openingHours = openingHours;
+        this.closingHours = closingHours;
     }
     
     // Getters and Setters
@@ -49,12 +83,57 @@ public class NodeLocation {
         this.coordinates = coordinates;
     }
     
+    public String getPlaceId() {
+        return placeId;
+    }
+    
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
+    }
+    
+    public String getGoogleMapsUri() {
+        return googleMapsUri;
+    }
+    
+    public void setGoogleMapsUri(String googleMapsUri) {
+        this.googleMapsUri = googleMapsUri;
+    }
+    
+    public Double getRating() {
+        return rating;
+    }
+    
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+    
+    public String getOpeningHours() {
+        return openingHours;
+    }
+    
+    public void setOpeningHours(String openingHours) {
+        this.openingHours = openingHours;
+    }
+    
+    public String getClosingHours() {
+        return closingHours;
+    }
+    
+    public void setClosingHours(String closingHours) {
+        this.closingHours = closingHours;
+    }
+    
     @Override
     public String toString() {
         return "NodeLocation{" +
                 "name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", coordinates=" + coordinates +
+                ", placeId='" + placeId + '\'' +
+                ", googleMapsUri='" + googleMapsUri + '\'' +
+                ", rating=" + rating +
+                ", openingHours='" + openingHours + '\'' +
+                ", closingHours='" + closingHours + '\'' +
                 '}';
     }
 }

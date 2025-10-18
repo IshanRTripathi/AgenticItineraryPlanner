@@ -31,6 +31,9 @@ public class ChangeOperation {
     @JsonProperty("node")
     private NormalizedNode node; // Node to insert
     
+    @JsonProperty("position")
+    private Integer position; // Position for insert operations
+    
     public ChangeOperation() {}
     
     public ChangeOperation(String op, String id) {
@@ -118,6 +121,14 @@ public class ChangeOperation {
         this.node = node;
     }
     
+    public Integer getPosition() {
+        return position;
+    }
+    
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
+    
     @Override
     public String toString() {
         return "ChangeOperation{" +
@@ -127,6 +138,7 @@ public class ChangeOperation {
                 ", endTime=" + endTime +
                 ", after='" + after + '\'' +
                 ", node=" + node +
+                ", position=" + position +
                 '}';
     }
 }

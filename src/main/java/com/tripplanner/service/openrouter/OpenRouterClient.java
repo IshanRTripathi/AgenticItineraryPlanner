@@ -65,6 +65,11 @@ public class OpenRouterClient implements AiClient {
 
 	@Override
 	public String generateContent(String userPrompt, String systemPrompt) {
+		logger.info("🤖 OpenRouterClient: Starting content generation");
+		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
+		logger.debug("User prompt length: {} chars", userPrompt != null ? userPrompt.length() : 0);
+		logger.debug("System prompt length: {} chars", systemPrompt != null ? systemPrompt.length() : 0);
+		
 		try {
 			if (mockMode) {
 				logger.info("OpenRouter mock mode enabled; returning empty response");
@@ -73,6 +78,10 @@ public class OpenRouterClient implements AiClient {
 
 			String endpoint = baseUrl.endsWith("/") ? baseUrl + "chat/completions" : baseUrl + "/chat/completions";
 			String body = buildChatCompletionsPayload(userPrompt, systemPrompt, false, null);
+			
+			logger.debug("API endpoint: {}", endpoint);
+			logger.debug("Request payload size: {} chars", body.length());
+			
 			HttpRequest.Builder builder = HttpRequest.newBuilder()
 					.uri(URI.create(endpoint))
 					.timeout(Duration.ofSeconds(timeoutSeconds))
@@ -83,37 +92,64 @@ public class OpenRouterClient implements AiClient {
 
 			HttpRequest request = builder.POST(HttpRequest.BodyPublishers.ofString(body)).build();
 
+			logger.debug("Sending request to OpenRouter API...");
+			long startTime = System.currentTimeMillis();
+			
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			
+			long responseTime = System.currentTimeMillis() - startTime;
+			logger.info("OpenRouter API response: {} ({}ms)", response.statusCode(), responseTime);
+			
 			if (response.statusCode() != 200) {
-				logger.error("OpenRouter API error: {} - {}", response.statusCode(), response.body());
+				logger.error("❌ OpenRouter API error: {} - {}", response.statusCode(), response.body());
+				logger.error("Request that failed - endpoint: {}, payload size: {}", endpoint, body.length());
 				throw new RuntimeException("OpenRouter API error: " + response.statusCode());
 			}
 
+			logger.debug("Response body size: {} chars", response.body().length());
+			
 			JsonNode root = objectMapper.readTree(response.body());
 			JsonNode choices = root.get("choices");
 			if (choices != null && choices.isArray() && choices.size() > 0) {
 				JsonNode message = choices.get(0).get("message");
 				if (message != null && message.get("content") != null) {
-					return message.get("content").asText("");
+					String content = message.get("content").asText("");
+					logger.info("✅ OpenRouter content generation successful - {} chars returned", content.length());
+					return content;
 				}
 			}
+			
+			logger.warn("❌ OpenRouter returned empty content - no valid choices found");
+			logger.debug("Response structure: {}", root.toString());
 			return "";
 		} catch (Exception e) {
-			logger.error("Failed to generate content via OpenRouter", e);
+			logger.error("❌ OpenRouter content generation failed: {}", e.getMessage(), e);
+			logger.error("Provider: OpenRouterClient, Model: {}, Available: {}", modelName, isAvailable());
+			logger.error("Configuration - Base URL: {}, Timeout: {}s, Mock mode: {}", baseUrl, timeoutSeconds, mockMode);
 			throw new RuntimeException("Failed to generate content via OpenRouter: " + e.getMessage(), e);
 		}
 	}
 
 	@Override
 	public String generateStructuredContent(String userPrompt, String jsonSchema, String systemPrompt) {
+		logger.info("🤖 OpenRouterClient: Starting structured content generation");
+		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
+		logger.debug("User prompt length: {} chars", userPrompt != null ? userPrompt.length() : 0);
+		logger.debug("System prompt length: {} chars", systemPrompt != null ? systemPrompt.length() : 0);
+		logger.debug("JSON schema length: {} chars", jsonSchema != null ? jsonSchema.length() : 0);
+		
 		try {
-		if (mockMode) {
-			logger.info("OpenRouter mock mode enabled; returning mock itinerary");
-			return getMockItineraryResponse(userPrompt);
-		}
+			if (mockMode) {
+				logger.info("OpenRouter mock mode enabled; returning mock itinerary");
+				return getMockItineraryResponse(userPrompt);
+			}
 
 			String endpoint = baseUrl.endsWith("/") ? baseUrl + "chat/completions" : baseUrl + "/chat/completions";
 			String body = buildChatCompletionsPayload(userPrompt, systemPrompt, true, jsonSchema);
+			
+			logger.debug("API endpoint: {}", endpoint);
+			logger.debug("Request payload size: {} chars", body.length());
+			
 			HttpRequest.Builder builder = HttpRequest.newBuilder()
 					.uri(URI.create(endpoint))
 					.timeout(Duration.ofSeconds(timeoutSeconds))
@@ -124,23 +160,40 @@ public class OpenRouterClient implements AiClient {
 
 			HttpRequest request = builder.POST(HttpRequest.BodyPublishers.ofString(body)).build();
 
+			logger.debug("Sending structured request to OpenRouter API...");
+			long startTime = System.currentTimeMillis();
+			
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+			
+			long responseTime = System.currentTimeMillis() - startTime;
+			logger.info("OpenRouter API structured response: {} ({}ms)", response.statusCode(), responseTime);
+			
 			if (response.statusCode() != 200) {
-				logger.error("OpenRouter API error: {} - {}", response.statusCode(), response.body());
+				logger.error("❌ OpenRouter API structured error: {} - {}", response.statusCode(), response.body());
+				logger.error("Request that failed - endpoint: {}, payload size: {}", endpoint, body.length());
 				throw new RuntimeException("OpenRouter API error: " + response.statusCode());
 			}
 
+			logger.debug("Response body size: {} chars", response.body().length());
+			
 			JsonNode root = objectMapper.readTree(response.body());
 			JsonNode choices = root.get("choices");
 			if (choices != null && choices.isArray() && choices.size() > 0) {
 				JsonNode message = choices.get(0).get("message");
 				if (message != null && message.get("content") != null) {
-					return message.get("content").asText("");
+					String content = message.get("content").asText("");
+					logger.info("✅ OpenRouter structured content generation successful - {} chars returned", content.length());
+					return content;
 				}
 			}
+			
+			logger.warn("❌ OpenRouter returned empty structured content - no valid choices found");
+			logger.debug("Response structure: {}", root.toString());
 			return "";
 		} catch (Exception e) {
-			logger.error("Failed to generate structured content via OpenRouter", e);
+			logger.error("❌ OpenRouter structured content generation failed: {}", e.getMessage(), e);
+			logger.error("Provider: OpenRouterClient, Model: {}, Available: {}", modelName, isAvailable());
+			logger.error("Configuration - Base URL: {}, Timeout: {}s, Mock mode: {}", baseUrl, timeoutSeconds, mockMode);
 			throw new RuntimeException("Failed to generate structured content via OpenRouter: " + e.getMessage(), e);
 		}
 	}
@@ -233,7 +286,8 @@ public class OpenRouterClient implements AiClient {
 			destination = "Tokyo";
 		}
 		
-		// Return a proper mock itinerary structure
+		// Return a proper mock itinerary structure - simplified to avoid format issues
+		long currentTimestamp = System.currentTimeMillis();
 		return String.format("""
 			{
 			  "itineraryId": "it_mock_%s_%d",
@@ -253,7 +307,7 @@ public class OpenRouterClient implements AiClient {
 			          "title": "Arrival at %s",
 			          "location": {
 			            "name": "%s Airport",
-			            "address": "%s",
+			            "address": "%s City Center",
 			            "coordinates": {
 			              "lat": 41.3851,
 			              "lng": 2.1734
@@ -277,117 +331,7 @@ public class OpenRouterClient implements AiClient {
 			          "labels": ["Arrival"],
 			          "status": "planned",
 			          "updatedBy": "system",
-			          "updatedAt": "2025-01-21T19:00:00Z"
-			        },
-			        {
-			          "id": "n_attraction_1",
-			          "type": "attraction",
-			          "title": "Main Attraction in %s",
-			          "location": {
-			            "name": "Main Attraction",
-			            "address": "%s",
-			            "coordinates": {
-			              "lat": 41.3851,
-			              "lng": 2.1734
-			            }
-			          },
-			          "timing": {
-			            "startTime": "2025-06-01T14:00:00Z",
-			            "endTime": "2025-06-01T17:00:00Z",
-			            "durationMin": 180
-			          },
-			          "cost": {
-			            "amount": 25.0,
-			            "currency": "EUR",
-			            "per": "person"
-			          },
-			          "details": {
-			            "rating": 4.5,
-			            "category": "attraction",
-			            "tags": ["sightseeing", "culture"]
-			          },
-			          "labels": ["Must-Visit"],
-			          "status": "planned",
-			          "updatedBy": "system",
-			          "updatedAt": "2025-01-21T19:00:00Z"
-			        }
-			      ]
-			    },
-			    {
-			      "dayNumber": 2,
-			      "date": "2025-06-02",
-			      "location": "%s",
-			      "nodes": [
-			        {
-			          "id": "n_meal_1",
-			          "type": "meal",
-			          "title": "Local Restaurant",
-			          "location": {
-			            "name": "Local Restaurant",
-			            "address": "%s",
-			            "coordinates": {
-			              "lat": 41.3851,
-			              "lng": 2.1734
-			            }
-			          },
-			          "timing": {
-			            "startTime": "2025-06-02T12:00:00Z",
-			            "endTime": "2025-06-02T14:00:00Z",
-			            "durationMin": 120
-			          },
-			          "cost": {
-			            "amount": 30.0,
-			            "currency": "EUR",
-			            "per": "person"
-			          },
-			          "details": {
-			            "rating": 4.2,
-			            "category": "meal",
-			            "tags": ["local", "cuisine"]
-			          },
-			          "labels": ["Local Experience"],
-			          "status": "planned",
-			          "updatedBy": "system",
-			          "updatedAt": "2025-01-21T19:00:00Z"
-			        }
-			      ]
-			    },
-			    {
-			      "dayNumber": 3,
-			      "date": "2025-06-03",
-			      "location": "%s",
-			      "nodes": [
-			        {
-			          "id": "n_departure",
-			          "type": "transport",
-			          "title": "Departure from %s",
-			          "location": {
-			            "name": "%s Airport",
-			            "address": "%s",
-			            "coordinates": {
-			              "lat": 41.3851,
-			              "lng": 2.1734
-			            }
-			          },
-			          "timing": {
-			            "startTime": "2025-06-03T17:00:00Z",
-			            "endTime": "2025-06-03T18:00:00Z",
-			            "durationMin": 60
-			          },
-			          "cost": {
-			            "amount": 0.0,
-			            "currency": "EUR",
-			            "per": "person"
-			          },
-			          "details": {
-			            "rating": 4.0,
-			            "category": "transport",
-			            "tags": ["departure", "airport"]
-			          },
-			          "labels": ["Departure"],
-			          "status": "planned",
-			          "updatedBy": "system",
-			          "updatedAt": "2025-01-21T19:00:00Z"
+			          "updatedAt": %d
 			        }
 			      ]
 			    }
@@ -395,19 +339,13 @@ public class OpenRouterClient implements AiClient {
 			}
 			""", 
 			destination.toLowerCase(), 
-			System.currentTimeMillis(),
+			currentTimestamp,
 			destination,
 			destination,
 			destination,
 			destination,
 			destination,
-			destination,
-			destination,
-			destination,
-			destination,
-			destination,
-			destination,
-			destination
+			currentTimestamp
 		);
 	}
 }

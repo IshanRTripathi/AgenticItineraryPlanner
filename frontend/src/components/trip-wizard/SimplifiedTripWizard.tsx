@@ -303,7 +303,8 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
         };
 
         // Call the backend API via mutation
-        const response = await createItineraryMutation.mutateAsync(createRequest);
+        const creationResponse = await createItineraryMutation.mutateAsync(createRequest);
+        const response = creationResponse.itinerary;
 
         // Convert API response to TripData format for frontend
         const startLocationData: TripLocation = {

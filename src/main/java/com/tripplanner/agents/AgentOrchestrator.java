@@ -27,7 +27,7 @@ public class AgentOrchestrator {
     private final PlannerAgent plannerAgent;
     private final EnrichmentAgent enrichmentAgent;
     private final ItineraryJsonService itineraryJsonService;
-    private final ChangeEngine changeEngine;
+    private final ChangeEngine changeEngine; // todo check significance in terms of logic
     private final UserDataService userDataService;
     private final AgentEventBus agentEventBus;
     
@@ -43,40 +43,67 @@ public class AgentOrchestrator {
         this.agentEventBus = agentEventBus;
     }
     
-    // Old generateItinerary method removed - use generateNormalizedItinerary instead
-    
-    // ===== NEW MVP CONTRACT METHODS =====
-    
     /**
-     * Generate a complete itinerary using the new agent sequence: PlannerAgent → EnrichmentAgent.
-     * This method works with normalized JSON and uses the ChangeEngine.
+     * Create initial itinerary and establish ownership synchronously.
+     * This method must complete before the API response is sent to avoid race conditions.
      */
-    @Async
-    public CompletableFuture<NormalizedItinerary> generateNormalizedItinerary(String itineraryId, CreateItineraryReq request, String userId) {
-        logger.info("=== AGENT ORCHESTRATOR: NORMALIZED ITINERARY GENERATION ===");
+    public NormalizedItinerary createInitialItinerary(String itineraryId, CreateItineraryReq request, String userId) {
+        logger.info("=== AGENT ORCHESTRATOR: CREATING INITIAL ITINERARY ===");
         logger.info("Itinerary ID: {}", itineraryId);
         logger.info("Destination: {}", request.getDestination());
+        logger.info("User ID: {}", userId);
         
         try {
             // Step 1: Create initial normalized itinerary structure
             logger.info("Step 1: Creating initial itinerary structure");
             NormalizedItinerary initialItinerary = createInitialNormalizedItinerary(itineraryId, request, userId);
             
-            // Save initial itinerary to ItineraryJsonService (single source of truth)
+            // Step 2: Save initial itinerary to ItineraryJsonService (single source of truth)
+            logger.info("Step 2: Saving initial itinerary to ItineraryJsonService");
             itineraryJsonService.createItinerary(initialItinerary);
             
-            // Save trip metadata to user-specific storage
+            // Step 3: SYNCHRONOUSLY save trip metadata to establish ownership
+            logger.info("Step 3: Establishing ownership by saving trip metadata");
             TripMetadata tripMetadata = new TripMetadata(request, initialItinerary);
             userDataService.saveUserTripMetadata(userId, tripMetadata);
             
+            logger.info("=== INITIAL ITINERARY CREATED AND OWNERSHIP ESTABLISHED ===");
+            logger.info("Itinerary ID: {}", itineraryId);
+            logger.info("User can now access /itineraries/{}/json endpoint", itineraryId);
+            
+            return initialItinerary;
+            
+        } catch (Exception e) {
+            logger.error("Failed to create initial itinerary for ID: {}", itineraryId, e);
+            throw new RuntimeException("Initial itinerary creation failed: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Generate a complete itinerary using the new agent sequence: PlannerAgent → EnrichmentAgent.
+     * This method works with normalized JSON and uses the ChangeEngine.
+     * This method now runs asynchronously AFTER ownership has been established.
+     */
+    @Async
+    public CompletableFuture<NormalizedItinerary> generateNormalizedItinerary(String itineraryId, CreateItineraryReq request, String userId) {
+        logger.info("=== AGENT ORCHESTRATOR: ASYNC ITINERARY GENERATION ===");
+        logger.info("Itinerary ID: {}", itineraryId);
+        logger.info("Destination: {}", request.getDestination());
+        logger.info("Note: Initial itinerary and ownership should already be established");
+        
+        try {
             // Add a small delay to allow frontend to establish SSE connection
             logger.info("Waiting 3 seconds for frontend to establish SSE connection...");
             Thread.sleep(3000);
             
-            // Step 2: Run PlannerAgent to generate the main itinerary
-            logger.info("Step 2: Running PlannerAgent");
+            // Step 1: Run PlannerAgent to generate the main itinerary
+            logger.info("Step 1: Running PlannerAgent");
             try {
-                BaseAgent.AgentRequest<ItineraryDto> plannerRequest = new BaseAgent.AgentRequest<>(request, ItineraryDto.class);
+                // Add explicit taskType to match agent capabilities
+                Map<String, Object> requestData = new HashMap<>();
+                requestData.put("taskType", "create");  // PlannerAgent supports "create"
+                requestData.put("request", request);
+                BaseAgent.AgentRequest<ItineraryDto> plannerRequest = new BaseAgent.AgentRequest<>(requestData, ItineraryDto.class);
                 plannerAgent.execute(itineraryId, plannerRequest);
                 logger.info("PlannerAgent completed successfully, database already updated");
             } catch (Exception e) {
@@ -93,10 +120,12 @@ public class AgentOrchestrator {
                 throw new RuntimeException("PlannerAgent execution failed: " + e.getMessage(), e);
             }
             
-            // Step 3: Run EnrichmentAgent to add validation and pacing
-            logger.info("Step 3: Running EnrichmentAgent");
+            // Step 2: Run EnrichmentAgent to add validation and pacing
+            logger.info("Step 2: Running EnrichmentAgent");
             try {
-                BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(null, ChangeEngine.ApplyResult.class);
+                Map<String, Object> enrichmentData = new HashMap<>();
+                enrichmentData.put("taskType", "enrich");  // EnrichmentAgent supports "enrich"
+                BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(enrichmentData, ChangeEngine.ApplyResult.class);
                 enrichmentAgent.execute(itineraryId, enrichmentRequest);
                 logger.info("EnrichmentAgent completed successfully");
             } catch (Exception e) {
@@ -113,7 +142,7 @@ public class AgentOrchestrator {
             
             logger.info("Final enriched itinerary retrieved from ItineraryJsonService for user: {}", userId);
             
-            logger.info("=== NORMALIZED ITINERARY GENERATION COMPLETE ===");
+            logger.info("=== ASYNC ITINERARY GENERATION COMPLETE ===");
             logger.info("Final itinerary has {} days", finalItinerary.get().getDays() != null ? finalItinerary.get().getDays().size() : 0);
             
             // Update the itinerary status to completed in the database
@@ -142,6 +171,7 @@ public class AgentOrchestrator {
     
     /**
      * Process a user request to modify an existing itinerary using PlannerAgent.
+     * todo: this needs refinement
      */
     @Async
     public CompletableFuture<ChangeSet> processUserRequest(String itineraryId, String userRequest) {
@@ -180,7 +210,9 @@ public class AgentOrchestrator {
             
             // Step 2: Run EnrichmentAgent to add validation and pacing
             logger.info("Step 2: Running EnrichmentAgent for validation");
-            BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(null, ChangeEngine.ApplyResult.class);
+            Map<String, Object> enrichmentData = new HashMap<>();
+            enrichmentData.put("taskType", "enrich");  // EnrichmentAgent supports "enrich"
+            BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = new BaseAgent.AgentRequest<>(enrichmentData, ChangeEngine.ApplyResult.class);
             enrichmentAgent.execute(itineraryId, enrichmentRequest);
             
             logger.info("=== CHANGESET APPLIED WITH ENRICHMENT ===");
@@ -189,8 +221,8 @@ public class AgentOrchestrator {
             return CompletableFuture.completedFuture(applyResult);
             
         } catch (Exception e) {
-            logger.error("Failed to apply ChangeSet with enrichment for itinerary: {}", itineraryId, e);
-            throw new RuntimeException("ChangeSet application with enrichment failed", e);
+            logger.error("Failed to apply ChangeSet with ENRICHMENT for itinerary: {}", itineraryId, e);
+            throw new RuntimeException("ChangeSet application with ENRICHMENT failed", e);
         }
     }
     
@@ -205,11 +237,12 @@ public class AgentOrchestrator {
         itinerary.setCreatedAt(System.currentTimeMillis());
         itinerary.setUpdatedAt(System.currentTimeMillis());
         itinerary.setSummary("Your personalized itinerary for " + request.getDestination());
-        itinerary.setCurrency("EUR");
+        itinerary.setCurrency("INR");
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
         itinerary.setDays(new ArrayList<>());
 
         // Set explicit trip meta
+        itinerary.setOrigin(request.getStartLocation());
         itinerary.setDestination(request.getDestination());
         if (request.getStartDate() != null) {
             itinerary.setStartDate(request.getStartDate().toString());
@@ -231,263 +264,5 @@ public class AgentOrchestrator {
         itinerary.setAgents(agents);
         
         return itinerary;
-    }
-    
-    /**
-     * Convert ItineraryDto to NormalizedItinerary.
-     */
-    private NormalizedItinerary convertToNormalizedItinerary(String itineraryId, ItineraryDto dto, CreateItineraryReq request) {
-        NormalizedItinerary normalized = new NormalizedItinerary();
-        normalized.setItineraryId(itineraryId);
-        normalized.setVersion(1);
-        normalized.setSummary(dto.getSummary());
-        normalized.setCurrency("EUR");
-        normalized.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
-        
-        // Convert days
-        if (dto.getDays() != null) {
-            List<NormalizedDay> normalizedDays = new ArrayList<>();
-            for (ItineraryDayDto dayDto : dto.getDays()) {
-                NormalizedDay normalizedDay = convertDayToNormalized(dayDto);
-                normalizedDays.add(normalizedDay);
-            }
-            normalized.setDays(normalizedDays);
-        }
-        
-        // Set settings
-        ItinerarySettings settings = new ItinerarySettings();
-        settings.setAutoApply(false);
-        settings.setDefaultScope("trip");
-        normalized.setSettings(settings);
-        
-        // Set agent status
-        Map<String, AgentStatus> agents = new HashMap<>();
-        agents.put("planner", new AgentStatus());
-        agents.put("enrichment", new AgentStatus());
-        normalized.setAgents(agents);
-        
-        return normalized;
-    }
-    
-    /**
-     * Convert ItineraryDayDto to NormalizedDay.
-     */
-    private NormalizedDay convertDayToNormalized(ItineraryDayDto dayDto) {
-        NormalizedDay normalizedDay = new NormalizedDay();
-        normalizedDay.setDayNumber(dayDto.getDay());
-        normalizedDay.setDate(dayDto.getDate().toString());
-        normalizedDay.setNodes(new ArrayList<>());
-        normalizedDay.setEdges(new ArrayList<>());
-        
-        // Convert activities to nodes
-        if (dayDto.getActivities() != null) {
-            for (ActivityDto activity : dayDto.getActivities()) {
-                NormalizedNode node = convertActivityToNode(activity);
-                normalizedDay.getNodes().add(node);
-            }
-        }
-        
-        // Convert meals to nodes
-        if (dayDto.getMeals() != null) {
-            for (MealDto meal : dayDto.getMeals()) {
-                NormalizedNode node = convertMealToNode(meal);
-                normalizedDay.getNodes().add(node);
-            }
-        }
-        
-        // Convert accommodation to node
-        if (dayDto.getAccommodation() != null) {
-            NormalizedNode node = convertAccommodationToNode(dayDto.getAccommodation());
-            normalizedDay.getNodes().add(node);
-        }
-        
-        // Create edges from transportation
-        if (dayDto.getTransportation() != null) {
-            for (TransportationDto transport : dayDto.getTransportation()) {
-                Edge edge = convertTransportationToEdge(transport);
-                normalizedDay.getEdges().add(edge);
-            }
-        }
-        
-        return normalizedDay;
-    }
-    
-    /**
-     * Convert ActivityDto to NormalizedNode.
-     */
-    private NormalizedNode convertActivityToNode(ActivityDto activity) {
-        NormalizedNode node = new NormalizedNode();
-        node.setId("n_" + activity.name().toLowerCase().replaceAll("\\s+", "_"));
-        node.setType("activity");
-        node.setTitle(activity.name());
-        node.setDetails(createNodeDetails(activity.description()));
-        node.setLocked(false);
-        
-        // Set timing
-        NodeTiming timing = new NodeTiming();
-        timing.setStartTime(parseTimeToLong(activity.startTime()));
-        timing.setEndTime(parseTimeToLong(activity.endTime()));
-        timing.setDurationMin(parseDuration(activity.duration()));
-        node.setTiming(timing);
-        
-        // Set location
-        if (activity.location() != null) {
-            NodeLocation location = new NodeLocation();
-            location.setName(activity.location().name());
-            location.setAddress(activity.location().address());
-            Coordinates coords = new Coordinates();
-            coords.setLat(activity.location().lat());
-            coords.setLng(activity.location().lng());
-            location.setCoordinates(coords);
-            node.setLocation(location);
-        }
-        
-        // Set cost
-        if (activity.price() != null) {
-            NodeCost cost = new NodeCost();
-            cost.setAmount(activity.price().amount());
-            cost.setCurrency(activity.price().currency());
-            node.setCost(cost);
-        }
-        
-        return node;
-    }
-    
-    /**
-     * Convert MealDto to NormalizedNode.
-     */
-    private NormalizedNode convertMealToNode(MealDto meal) {
-        NormalizedNode node = new NormalizedNode();
-        node.setId("n_" + meal.name().toLowerCase().replaceAll("\\s+", "_"));
-        node.setType("meal");
-        node.setTitle(meal.name());
-        node.setDetails(createNodeDetails(meal.restaurant() + " - " + meal.cuisine()));
-        node.setLocked(false);
-        
-        // Set timing (meals don't have specific times in the DTO)
-        NodeTiming timing = new NodeTiming();
-        timing.setDurationMin(60);
-        node.setTiming(timing);
-        
-        // Set location
-        if (meal.location() != null) {
-            NodeLocation location = new NodeLocation();
-            location.setName(meal.location().name());
-            location.setAddress(meal.location().address());
-            Coordinates coords = new Coordinates();
-            coords.setLat(meal.location().lat());
-            coords.setLng(meal.location().lng());
-            location.setCoordinates(coords);
-            node.setLocation(location);
-        }
-        
-        // Set cost
-        if (meal.price() != null) {
-            NodeCost cost = new NodeCost();
-            cost.setAmount(meal.price().amount());
-            cost.setCurrency(meal.price().currency());
-            node.setCost(cost);
-        }
-        
-        return node;
-    }
-    
-    /**
-     * Convert AccommodationDto to NormalizedNode.
-     */
-    private NormalizedNode convertAccommodationToNode(AccommodationDto accommodation) {
-        NormalizedNode node = new NormalizedNode();
-        node.setId("n_" + accommodation.name().toLowerCase().replaceAll("\\s+", "_"));
-        node.setType("accommodation");
-        node.setTitle(accommodation.name());
-        node.setDetails(createNodeDetails(accommodation.type()));
-        node.setLocked(false);
-        
-        // Set timing (accommodation is typically overnight)
-        NodeTiming timing = new NodeTiming();
-        timing.setDurationMin(20 * 60); // 20 hours
-        node.setTiming(timing);
-        
-        // Set location
-        if (accommodation.location() != null) {
-            NodeLocation location = new NodeLocation();
-            location.setName(accommodation.location().name());
-            location.setAddress(accommodation.location().address());
-            Coordinates coords = new Coordinates();
-            coords.setLat(accommodation.location().lat());
-            coords.setLng(accommodation.location().lng());
-            location.setCoordinates(coords);
-            node.setLocation(location);
-        }
-        
-        // Set cost
-        if (accommodation.price() != null) {
-            NodeCost cost = new NodeCost();
-            cost.setAmount(accommodation.price().amount());
-            cost.setCurrency(accommodation.price().currency());
-            node.setCost(cost);
-        }
-        
-        return node;
-    }
-    
-    /**
-     * Convert TransportationDto to Edge.
-     */
-    private Edge convertTransportationToEdge(TransportationDto transport) {
-        Edge edge = new Edge();
-        edge.setFrom("n_" + transport.from().name().toLowerCase().replaceAll("\\s+", "_"));
-        edge.setTo("n_" + transport.to().name().toLowerCase().replaceAll("\\s+", "_"));
-        // Note: Edge doesn't have mode/duration/transit methods in current implementation
-        // This is a simplified conversion for now
-        
-        return edge;
-    }
-    
-    private int parseDuration(String duration) {
-        if (duration == null || duration.trim().isEmpty()) {
-            return 0;
-        }
-        
-        try {
-            return Integer.parseInt(duration.trim());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-    
-    private Long parseTimeToLong(String timeString) {
-        if (timeString == null || timeString.trim().isEmpty()) {
-            return null;
-        }
-        
-        try {
-            // If it's already a number (milliseconds), parse it directly
-            if (timeString.matches("^\\d+$")) {
-                return Long.valueOf(timeString);
-            }
-            
-            // If it's an ISO string, convert to milliseconds
-            if (timeString.contains("T") || timeString.contains("Z")) {
-                return java.time.Instant.parse(timeString).toEpochMilli();
-            }
-            
-            // If it's a simple time like "14:00", return null for now
-            // In a real implementation, you'd need to combine with a date
-            return null;
-            
-        } catch (Exception e) {
-            logger.warn("Failed to parse time string: {}", timeString, e);
-            return null;
-        }
-    }
-    
-    /**
-     * Create NodeDetails with category (using description as category for now).
-     */
-    private NodeDetails createNodeDetails(String description) {
-        NodeDetails details = new NodeDetails();
-        details.setCategory(description);
-        return details;
     }
 }

@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,10 +45,15 @@ public class FirestoreConfig {
     @Bean
     public Firestore firestore() {
         try {
-            FirestoreOptions.Builder builder = FirestoreOptions.getDefaultInstance().toBuilder();
+            FirestoreOptions.Builder builder = FirestoreOptions.newBuilder();
 
+            // CRITICAL: Set project ID FIRST, before credentials
+            // This ensures the environment variable overrides any project ID in the credentials file
             if (projectId != null && !projectId.isEmpty()) {
                 builder.setProjectId(projectId);
+                logger.info("Firestore project ID set to: {}", projectId);
+            } else {
+                logger.warn("No project ID configured! Firestore may fail to initialize.");
             }
 
             if (useEmulator) {

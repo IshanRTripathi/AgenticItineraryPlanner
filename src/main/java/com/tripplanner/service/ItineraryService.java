@@ -5,6 +5,8 @@ import com.tripplanner.agents.AgentOrchestrator;
 import com.tripplanner.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,13 +24,19 @@ public class ItineraryService {
     private final AgentOrchestrator agentOrchestrator;
     private final ItineraryJsonService itineraryJsonService;
     private final UserDataService userDataService;
+    private final PipelineOrchestrator pipelineOrchestrator;
+    
+    @Value("${itinerary.generation.mode:monolithic}")
+    private String generationMode;
     
     public ItineraryService(AgentOrchestrator agentOrchestrator,
                             ItineraryJsonService itineraryJsonService,
-                            UserDataService userDataService) {
+                            UserDataService userDataService,
+                            @Autowired(required = false) PipelineOrchestrator pipelineOrchestrator) {
         this.agentOrchestrator = agentOrchestrator;
         this.itineraryJsonService = itineraryJsonService;
         this.userDataService = userDataService;
+        this.pipelineOrchestrator = pipelineOrchestrator;
     }
     
     /**
@@ -58,14 +66,12 @@ public class ItineraryService {
         try {
             String itineraryId = "it_" + java.util.UUID.randomUUID();
             
-            // Generate the itinerary using AgentOrchestrator
-            agentOrchestrator.generateNormalizedItinerary(itineraryId, request, userId);
+            // SYNCHRONOUSLY create initial itinerary and establish ownership
+            // This ensures the user can immediately access the itinerary endpoint
+            logger.info("Creating initial itinerary and establishing ownership synchronously");
+            NormalizedItinerary initialItinerary = agentOrchestrator.createInitialItinerary(itineraryId, request, userId);
             
-            // Save the itinerary to user-specific storage
-            // Note: The actual itinerary data will be saved by AgentOrchestrator
-            // We just need to ensure it's associated with the user
-            logger.info("Itinerary generation started for user: {} with ID: {}", userId, itineraryId);
-
+            // Convert the initial itinerary to DTO for the API response
             ItineraryDto result = ItineraryDto.builder()
                     .id(itineraryId)
                     .destination(request.getDestination())
@@ -76,15 +82,40 @@ public class ItineraryService {
                     .interests(request.getInterests())
                     .constraints(request.getConstraints())
                     .language(request.getLanguage())
-                    .summary("Your personalized itinerary for " + request.getDestination())
+                    .summary(initialItinerary.getSummary())
                     .status("generating")
                     .build();
+            
+            // NOW start async agent processing (after ownership is established)
+            // Add a small delay to allow frontend SSE connection to establish
+            logger.info("Waiting 2 seconds for frontend SSE connection to establish...");
+            try {
+                Thread.sleep(2000); // 2 second delay
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Sleep interrupted while waiting for SSE connection");
+            }
+            
+            logger.info("Starting async itinerary generation for user: {} with ID: {}", userId, itineraryId);
+            logger.info("Generation mode: {}", generationMode);
+            
+            // Choose generation strategy based on configuration
+            if ("pipeline".equalsIgnoreCase(generationMode) && pipelineOrchestrator != null) {
+                logger.info("Using PIPELINE mode for generation");
+                pipelineOrchestrator.generateItinerary(itineraryId, request, userId);
+            } else {
+                logger.info("Using MONOLITHIC mode for generation");
+                agentOrchestrator.generateNormalizedItinerary(itineraryId, request, userId);
+            }
 
             logger.info("=== CREATE ITINERARY RESPONSE ===");
             logger.info("User ID: {}", userId);
             logger.info("Itinerary ID: {}", result.getId());
             logger.info("Status: {}", result.getStatus());
-            logger.info("Orchestration started: {}", itineraryId);
+            logger.info("Mode: {}", generationMode);
+            logger.info("Ownership established: YES");
+            logger.info("Async generation started: YES");
+            logger.info("User can now access /itineraries/{}/json", itineraryId);
             logger.info("=====================================");
 
             return result;
@@ -361,8 +392,7 @@ public class ItineraryService {
         if (activityNode.has("estimatedCost")) {
             price = new PriceDto(
                 activityNode.get("estimatedCost").asDouble(),
-                "EUR",
-                "person"
+                "EUR"
             );
         }
         
@@ -401,8 +431,7 @@ public class ItineraryService {
         if (accNode.has("estimatedCost")) {
             price = new PriceDto(
                 accNode.get("estimatedCost").asDouble(),
-                "EUR",
-                "night"
+                "EUR"
             );
         }
         
@@ -439,8 +468,7 @@ public class ItineraryService {
         if (mealNode.has("estimatedCost")) {
             price = new PriceDto(
                 mealNode.get("estimatedCost").asDouble(),
-                "EUR",
-                "person"
+                "EUR"
             );
         }
         
@@ -480,8 +508,7 @@ public class ItineraryService {
         if (transportNode.has("estimatedCost")) {
             price = new PriceDto(
                 transportNode.get("estimatedCost").asDouble(),
-                "EUR",
-                "trip"
+                "EUR"
             );
         }
         

@@ -33,18 +33,18 @@ import com.tripplanner.service.ai.AiClient;
 public class GeminiClient implements AiClient {
     
     private static final Logger logger = LoggerFactory.getLogger(GeminiClient.class);
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+    private static final String GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
     
     @Value("${google.ai.api-key}")
     private String apiKey;
     
-    @Value("${google.ai.model:gemini-1.5-pro}")
+    @Value("${google.ai.model:gemini-2.5-flash}")
     private String modelName;
     
     @Value("${google.ai.temperature:0.7}")
     private float temperature;
     
-    @Value("${google.ai.max-tokens:8192}")
+    @Value("${google.ai.max-tokens:65535}")
     private int maxTokens;
     
     @Value("${google.ai.mock-mode:false}")
@@ -59,11 +59,12 @@ public class GeminiClient implements AiClient {
         
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
+                .version(HttpClient.Version.HTTP_2)
                 .build();
         
         this.objectMapper = new ObjectMapper();
         
-        logger.info("Gemini client initialized successfully");
+        logger.info("Gemini client initialized successfully with 150s request timeout");
     }
     
     @PreDestroy
@@ -104,11 +105,12 @@ public class GeminiClient implements AiClient {
                 generatedText = getMockResponse(userPrompt, systemPrompt);
                 logger.info("Mock response length: {}", generatedText.length());
             } else {
-                // Make HTTP request to Gemini API
+                // Make HTTP request to Gemini API with 150 second timeout
+                String apiUrl = GEMINI_API_BASE_URL + modelName + ":generateContent";
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(GEMINI_API_URL + "?key=" + apiKey))
+                        .uri(URI.create(apiUrl + "?key=" + apiKey))
                         .header("Content-Type", "application/json")
-                        .timeout(Duration.ofSeconds(60))
+                        .timeout(Duration.ofSeconds(150))
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                         .build();
                 

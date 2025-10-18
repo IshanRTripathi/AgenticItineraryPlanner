@@ -72,8 +72,14 @@ public class NormalizedNode {
     @JsonProperty("updatedAt")
     private Long updatedAt;
     
+    // Agent data for unified structure
+    @Valid
+    @JsonProperty("agentData")
+    private java.util.Map<String, Object> agentData;
+    
     public NormalizedNode() {
         this.updatedAt = System.currentTimeMillis();
+        this.agentData = new java.util.HashMap<>();
     }
     
     public NormalizedNode(String id, String type, String title) {
@@ -210,6 +216,14 @@ public class NormalizedNode {
     
     public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public java.util.Map<String, Object> getAgentData() {
+        return agentData;
+    }
+    
+    public void setAgentData(java.util.Map<String, Object> agentData) {
+        this.agentData = agentData;
     }
     
     // Helper method to get Instant object

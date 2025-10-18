@@ -15,20 +15,17 @@ import java.math.RoundingMode;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PriceDto(
-        @DecimalMin(value = "0.0", message = "Price amount cannot be negative")
-        double amount,
+        @DecimalMin(value = "0.0", message = "Price amountPerPerson cannot be negative")
+        double amountPerPerson,
         
         @NotBlank(message = "Currency is required")
         @Pattern(regexp = "[A-Z]{3}", message = "Currency must be a valid 3-letter ISO code")
-        String currency,
-        
-        @Size(max = 50, message = "Price unit must not exceed 50 characters")
-        String per
+        String currency
 ) {
     
     public PriceDto {
-        // Round amount to 2 decimal places
-        amount = BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        // Round amountPerPerson to 2 decimal places
+        amountPerPerson = BigDecimal.valueOf(amountPerPerson).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
     
     /**
@@ -41,8 +38,7 @@ public record PriceDto(
         
         return new PriceDto(
                 entity.getAmount(),
-                entity.getCurrency(),
-                entity.getPer()
+                entity.getCurrency()
         );
     }
     
@@ -51,113 +47,30 @@ public record PriceDto(
      */
     public Itinerary.Price toEntity() {
         Itinerary.Price entity = new Itinerary.Price();
-        entity.setAmount(amount);
+        entity.setAmount(amountPerPerson);
         entity.setCurrency(currency);
-        entity.setPer(per);
         return entity;
     }
     
     /**
-     * Create a simple price with amount and currency.
+     * Create a simple price with amountPerPerson and currency.
      */
     public static PriceDto of(double amount, String currency) {
-        return new PriceDto(amount, currency, null);
+        return new PriceDto(amount, currency);
     }
     
     /**
      * Create a price per person.
      */
     public static PriceDto perPerson(double amount, String currency) {
-        return new PriceDto(amount, currency, "person");
+        return new PriceDto(amount, currency);
     }
-    
+
     /**
-     * Create a price per group.
-     */
-    public static PriceDto perGroup(double amount, String currency) {
-        return new PriceDto(amount, currency, "group");
-    }
-    
-    /**
-     * Create a price per night.
-     */
-    public static PriceDto perNight(double amount, String currency) {
-        return new PriceDto(amount, currency, "night");
-    }
-    
-    /**
-     * Get formatted price string.
-     */
-    public String getFormattedPrice() {
-        String formatted = String.format("%.2f %s", amount, currency);
-        if (per != null && !per.isEmpty()) {
-            formatted += " per " + per;
-        }
-        return formatted;
-    }
-    
-    /**
-     * Get price symbol based on currency.
-     */
-    public String getCurrencySymbol() {
-        return switch (currency.toUpperCase()) {
-            case "USD" -> "$";
-            case "EUR" -> "€";
-            case "GBP" -> "£";
-            case "JPY" -> "¥";
-            case "INR" -> "₹";
-            case "CNY" -> "¥";
-            case "KRW" -> "₩";
-            default -> currency;
-        };
-    }
-    
-    /**
-     * Convert to different currency (requires exchange rate).
-     */
-    public PriceDto convertTo(String targetCurrency, double exchangeRate) {
-        if (targetCurrency.equals(this.currency)) {
-            return this;
-        }
-        
-        double convertedAmount = amount * exchangeRate;
-        return new PriceDto(convertedAmount, targetCurrency, per);
-    }
-    
-    /**
-     * Calculate total price for multiple units.
-     */
-    public PriceDto multiply(int units) {
-        return new PriceDto(amount * units, currency, per);
-    }
-    
-    /**
-     * Add two prices (must have same currency).
-     */
-    public PriceDto add(PriceDto other) {
-        if (other == null) {
-            return this;
-        }
-        
-        if (!currency.equals(other.currency)) {
-            throw new IllegalArgumentException("Cannot add prices with different currencies");
-        }
-        
-        return new PriceDto(amount + other.amount, currency, per);
-    }
-    
-    /**
-     * Check if price is free.
-     */
-    public boolean isFree() {
-        return amount == 0.0;
-    }
-    
-    /**
-     * Check if price is valid (positive amount, valid currency).
+     * Check if price is valid (positive amountPerPerson, valid currency).
      */
     public boolean isValid() {
-        return amount >= 0 && currency != null && currency.matches("[A-Z]{3}");
+        return amountPerPerson >= 0 && currency != null && currency.matches("[A-Z]{3}");
     }
 }
 

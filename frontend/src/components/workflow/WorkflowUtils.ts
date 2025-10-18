@@ -35,8 +35,8 @@ export const validateWorkflowNode = (
   }
   
   // Check for total day duration (>10 hours)
-  const dayNodes = allNodes.filter(n => n.id.includes(node.id.split('-')[0]));
-  const totalDuration = dayNodes.reduce((sum, n) => sum + n.data.durationMin, 0);
+  const dayNodes = allNodes.filter(n => n.id && node.id && n.id.includes(node.id.split('-')[0]));
+  const totalDuration = dayNodes.reduce((sum, n) => sum + (n.data.durationMin || 0), 0);
   
   if (totalDuration > 600) { // 10 hours
     return {

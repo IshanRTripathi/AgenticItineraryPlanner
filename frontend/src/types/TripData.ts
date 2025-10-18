@@ -128,6 +128,7 @@ export interface TripComponent {
   isCustom?: boolean;
   addedByUser?: boolean;
   priority: 'must-visit' | 'recommended' | 'optional' | 'backup';
+  locked?: boolean; // Whether this component is locked from modifications
 }
 
 export interface DayPlan {

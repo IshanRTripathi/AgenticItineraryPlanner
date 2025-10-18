@@ -132,3 +132,13 @@ export function getTransportModes(tripData: TripData): { [key: string]: number }
 
   return transportCounts;
 }
+
+
+
+
+
+
+
+
+
+

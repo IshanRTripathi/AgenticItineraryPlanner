@@ -100,7 +100,7 @@ public class IntentClassificationService {
         
         // Check for explicit intents in order of specificity
         if (isReplanToday(text)) {
-            Map<String, String> entities = extractEntities(text);
+            Map<String, Object> entities = extractEntities(text);
             return IntentResult.replanToday(day, entities);
         }
         
@@ -120,18 +120,18 @@ public class IntentClassificationService {
         
         if (isReplaceNode(text)) {
             List<String> nodeIds = selectedNodeId != null ? List.of(selectedNodeId) : List.of();
-            Map<String, String> entities = extractEntities(text);
+            Map<String, Object> entities = extractEntities(text);
             return IntentResult.replaceNode(nodeIds, entities);
         }
         
         if (isMoveTime(text)) {
             List<String> nodeIds = selectedNodeId != null ? List.of(selectedNodeId) : List.of();
-            Map<String, String> entities = extractEntities(text);
+            Map<String, Object> entities = extractEntities(text);
             return IntentResult.moveTime(nodeIds, entities);
         }
         
         if (isInsertPlace(text)) {
-            Map<String, String> entities = extractEntities(text);
+            Map<String, Object> entities = extractEntities(text);
             return IntentResult.insertPlace(day, entities);
         }
         
@@ -223,8 +223,8 @@ public class IntentClassificationService {
     /**
      * Extract entities (time, location, etc.) from text.
      */
-    private Map<String, String> extractEntities(String text) {
-        Map<String, String> entities = new HashMap<>();
+    private Map<String, Object> extractEntities(String text) {
+        Map<String, Object> entities = new HashMap<>();
         
         // Extract time
         var timeMatcher = TIME_PATTERN.matcher(text);

@@ -15,11 +15,13 @@ spring:
     exclude:
       - org.springdoc.core.configuration.SpringDocConfiguration
       - org.springdoc.webmvc.ui.SwaggerConfig
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
   cloud:
     gcp:
-      project-id: tripplanner-bdd3c
+      project-id: tripaiplanner
       firestore:
-        project-id: tripplanner-bdd3c
+        project-id: tripaiplanner-4c951
         host: ${FIRESTORE_HOST:firestore.googleapis.com:443}
         emulator:
           enabled: false
@@ -45,24 +47,7 @@ spring:
             enable: true
           ssl:
             trust: "*"
-  # H2 Database Configuration - In-memory mode for Cloud Run
-  datasource:
-    url: jdbc:h2:mem:itinerarydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
-  h2:
-    console:
-      enabled: false  # Disable H2 console in production
-      path: /h2-console
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false  # Disable SQL logging in production
-    properties:
-      hibernate:
-        format_sql: false
+
   # Security completely disabled for development
   security:
     user:
@@ -71,9 +56,6 @@ spring:
       roles: DISABLED
 
 google:
-  oauth:
-    client-id: ${GOOGLE_OAUTH_CLIENT_ID:dummy-oauth-client-id}
-    client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:dummy-oauth-client-secret}
   ai:
     api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-1.5-pro}
@@ -97,7 +79,7 @@ openrouter:
 
 # Firestore Configuration
 firestore:
-  project-id: tripplanner-bdd3c
+  project-id: tripaiplanner-4c951
   credentials-path: ${GOOGLE_APPLICATION_CREDENTIALS:}
   database-id: ${FIRESTORE_DATABASE_ID:(default)}
   enabled: true
@@ -121,27 +103,7 @@ pdf:
   base-url: ${PDF_BASE_URL:}
   template-path: ${PDF_TEMPLATE_PATH:classpath:/templates/pdf/}
 
-providers:
-  hotels:
-    enabled: ${HOTELS_PROVIDER_ENABLED:true}
-    default: ${HOTELS_DEFAULT_PROVIDER:booking}
-    timeout: ${HOTELS_TIMEOUT:30s}
-  flights:
-    enabled: ${FLIGHTS_PROVIDER_ENABLED:true}
-    default: ${FLIGHTS_DEFAULT_PROVIDER:amadeus}
-    timeout: ${FLIGHTS_TIMEOUT:30s}
-  activities:
-    enabled: ${ACTIVITIES_PROVIDER_ENABLED:true}
-    default: ${ACTIVITIES_DEFAULT_PROVIDER:viator}
-    timeout: ${ACTIVITIES_TIMEOUT:30s}
-  ground:
-    enabled: ${GROUND_PROVIDER_ENABLED:true}
-    default: ${GROUND_DEFAULT_PROVIDER:rome2rio}
-    timeout: ${GROUND_TIMEOUT:30s}
-  public-transport:
-    enabled: ${PT_PROVIDER_ENABLED:true}
-    default: ${PT_DEFAULT_PROVIDER:transitland}
-    timeout: ${PT_TIMEOUT:30s}
+
 
 management:
   endpoints:
@@ -160,10 +122,8 @@ logging:
   level:
     root: ${LOG_LEVEL:INFO}
     com.tripplanner: ${APP_LOG_LEVEL:INFO}
-    com.tripplanner.api: INFO
     com.tripplanner.service: INFO
     com.tripplanner.data: INFO
-    com.tripplanner.security: INFO
     com.tripplanner.service.agents: INFO
     org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
     org.springframework.web: WARN
@@ -179,7 +139,6 @@ logging:
 
 app:
   base-url: ${APP_BASE_URL:}
-  frontend-url: ${FRONTEND_URL:}
   max-itinerary-days: ${MAX_ITINERARY_DAYS:30}
   max-party-size: ${MAX_PARTY_SIZE:20}
   default-language: ${DEFAULT_LANGUAGE:en}

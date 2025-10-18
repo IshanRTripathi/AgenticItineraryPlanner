@@ -8,6 +8,8 @@ import com.tripplanner.service.ai.AiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
  * Places Agent - Discovers and analyzes places, areas, and local insights.
  */
@@ -19,14 +21,55 @@ public class PlacesAgent extends BaseAgent {
     private final ObjectMapper objectMapper;
     
     public PlacesAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper) {
-        super(eventBus, AgentEvent.AgentKind.places);
+        super(eventBus, AgentEvent.AgentKind.PLACES);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
     }
     
     @Override
+    public com.tripplanner.dto.AgentCapabilities getCapabilities() {
+        com.tripplanner.dto.AgentCapabilities capabilities = new com.tripplanner.dto.AgentCapabilities();
+        
+        // Helper service task: search (used by other agents)
+        capabilities.addSupportedTask("search");
+        
+        // Set priority (lower = higher priority)
+        capabilities.setPriority(40); // Low priority - helper service
+        
+        // Configuration
+        capabilities.setChatEnabled(false); // Not for direct chat, used by other agents
+        capabilities.setConfigurationValue("helperService", true);
+        capabilities.setConfigurationValue("requiresLLM", true);
+        capabilities.setConfigurationValue("providesInsights", true);
+        capabilities.setConfigurationValue("scopeType", "location_discovery");
+        
+        return capabilities;
+    }
+    
+    @Override
+    public boolean canHandle(String taskType, Object taskContext) {
+        // PlacesAgent handles "search" task type only
+        return super.canHandle(taskType);
+    }
+    
+    @Override
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
-        PlacesRequest placesRequest = (PlacesRequest) request.getData();
+        // Extract PlacesRequest from Map or use directly
+        PlacesRequest placesRequest;
+        Object data = request.getData();
+        if (data instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dataMap = (Map<String, Object>) data;
+            placesRequest = (PlacesRequest) dataMap.get("placesRequest");
+        } else if (data instanceof PlacesRequest) {
+            placesRequest = (PlacesRequest) data;
+        } else {
+            placesRequest = null;
+        }
+        
+        if (placesRequest == null) {
+            throw new IllegalArgumentException("PlacesAgent requires PlacesRequest data");
+        }
         
         logger.info("=== PLACES AGENT PROCESSING ===");
         logger.info("Destination: {}", placesRequest.getDestination());

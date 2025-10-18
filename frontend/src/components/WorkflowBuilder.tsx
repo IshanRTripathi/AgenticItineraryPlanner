@@ -56,6 +56,7 @@ import {
 import { WorkflowNode } from './workflow/WorkflowNode';
 import { NodeInspectorModal } from './workflow/NodeInspectorModal';
 import { TripData } from '../types/TripData';
+import { userChangeTracker } from '../services/userChangeTracker';
 
 // Calculate optimal zoom based on number of nodes
 const calculateOptimalZoom = (nodeCount: number): number => {
@@ -133,6 +134,11 @@ export interface WorkflowNodeData {
     status: 'valid' | 'warning' | 'error';
     message?: string;
   };
+  // User change tracking
+  userModified?: boolean;
+  changeType?: 'added' | 'modified' | 'moved' | 'deleted';
+  changeTimestamp?: string;
+  originalData?: Partial<WorkflowNodeData>;
 }
 
 interface WorkflowBuilderProps {
@@ -630,6 +636,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
       return {};
     }
   });
+  const [userChanges, setUserChanges] = useState<Set<string>>(new Set());
 
   const currentDay = workflowDays[activeDay];
   const [nodes, setNodes, onNodesChangeBase] = useNodesState(currentDay?.nodes || []);
@@ -706,6 +713,20 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
     setNodes(updatedNodes);
     savePositions(newPositions);
   }, [currentDay, savedPositions, setNodes, savePositions, clearBadPositions]);
+
+  // Subscribe to user changes
+  useEffect(() => {
+    const unsubscribe = userChangeTracker.subscribe((changes) => {
+      const modifiedNodeIds = new Set(changes.map(change => change.nodeId));
+      setUserChanges(modifiedNodeIds);
+    });
+    
+    // Load existing changes
+    const modifiedNodeIds = new Set(userChangeTracker.getModifiedNodeIds());
+    setUserChanges(modifiedNodeIds);
+    
+    return unsubscribe;
+  }, []);
 
   // Update workflow days when trip data changes (only on initial load)
   useEffect(() => {
@@ -788,13 +809,34 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
   const validateNodes = useCallback((dayNodes: Node<WorkflowNodeData>[]) => {
     return dayNodes.map(node => {
+      // Skip validation for nodes without proper ID
+      if (!node.id) {
+        console.warn('Node without ID found:', node);
+        return {
+          ...node,
+          data: { 
+            ...node.data, 
+            validation: { status: 'error', message: 'Node missing ID' },
+            userModified: false,
+          },
+        };
+      }
+      
       const validation = validateWorkflowNode(node, dayNodes);
+      const latestChange = userChangeTracker.getLatestChange(node.id);
+      
       return {
         ...node,
-        data: { ...node.data, validation },
+        data: { 
+          ...node.data, 
+          validation,
+          userModified: userChanges.has(node.id),
+          changeType: latestChange?.changeType,
+          changeTimestamp: latestChange?.timestamp,
+        },
       };
     });
-  }, []);
+  }, [userChanges]);
 
   const onConnect = useCallback((params: Connection | Edge) => {
     setEdges((eds) => addEdge(params, eds));
@@ -833,20 +875,37 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
       y: 200 + Math.random() * 300,
     });
 
+    // Track the addition
+    userChangeTracker.processWorkflowChange(newNode.id, 'added', undefined, newNode.data);
+
     setNodes((nds) => [...nds, newNode]);
   }, [activeDay, setNodes]);
 
   const deleteNode = useCallback((nodeId: string) => {
+    // Track the deletion
+    const nodeToDelete = nodes.find(n => n.id === nodeId);
+    if (nodeToDelete) {
+      userChangeTracker.processWorkflowChange(nodeId, 'deleted', nodeToDelete.data, undefined);
+    }
+    
     setNodes((nds) => nds.filter((node) => node.id !== nodeId));
     setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
     if (selectedNode?.id === nodeId) {
       setSelectedNode(null);
       setIsNodeInspectorOpen(false);
     }
-  }, [setNodes, setEdges, selectedNode]);
+  }, [setNodes, setEdges, selectedNode, nodes]);
 
   const updateSelectedNode = useCallback((updates: Partial<WorkflowNodeData>) => {
     if (!selectedNode) return;
+    
+    // Track the change
+    userChangeTracker.processWorkflowChange(
+      selectedNode.id, 
+      'modified', 
+      selectedNode.data, 
+      { ...selectedNode.data, ...updates }
+    );
     
     setNodes((nds) =>
       nds.map((node) =>
@@ -980,25 +1039,46 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({ tripData, onSa
 
           {/* Section 3: Add Node Toolbar */}
           <div className="bg-white border-b px-4 py-4 mb-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-2">
-              <span className="text-sm font-medium mr-4 hidden sm:inline">Add Node:</span>
-              <div className="flex flex-wrap justify-center gap-2">
-                {(['Attraction', 'Meal', 'Transit', 'Hotel', 'FreeTime'] as const).map((type) => {
-                  const Icon = getNodeIcon(type);
-                  return (
-                    <Button
-                      key={type}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => addNewNode(type)}
-                      className="min-h-[44px]"
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">{type}</span>
-                    </Button>
-                  );
-                })}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-center gap-2">
+                <span className="text-sm font-medium mr-4 hidden sm:inline">Add Node:</span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {(['Attraction', 'Meal', 'Transit', 'Hotel', 'FreeTime'] as const).map((type) => {
+                    const Icon = getNodeIcon(type);
+                    return (
+                      <Button
+                        key={type}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addNewNode(type)}
+                        className="min-h-[44px]"
+                      >
+                        <Icon className="h-4 w-4 mr-2" />
+                        <span className="hidden sm:inline">{type}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
               </div>
+              
+              {/* User Changes Summary */}
+              {userChanges.size > 0 && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    <Edit3 className="h-3 w-3 mr-1" />
+                    {userChanges.size} modified
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => userChangeTracker.clearAllChanges()}
+                    className="text-xs text-gray-500 hover:text-gray-700"
+                    title="Clear all change indicators"
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 

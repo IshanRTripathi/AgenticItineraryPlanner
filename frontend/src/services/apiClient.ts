@@ -6,13 +6,13 @@ import { DataTransformer } from './dataTransformer';
 import { NormalizedDataTransformer } from './normalizedDataTransformer';
 import { authService } from './authService';
 import { TripData, Traveler, TravelPreferences, TripSettings } from '../types/TripData';
-import { 
-  NormalizedItinerary, 
-  ChangeSet, 
-  ProposeResponse, 
-  ApplyRequest, 
-  ApplyResponse, 
-  UndoRequest, 
+import {
+  NormalizedItinerary,
+  ChangeSet,
+  ProposeResponse,
+  ApplyRequest,
+  ApplyResponse,
+  UndoRequest,
   UndoResponse,
   ProcessRequestRequest,
   ProcessRequestResponse,
@@ -67,6 +67,48 @@ class ApiClient {
     return false;
   }
 
+  /**
+   * Ensure the auth token is valid before making a request
+   * Proactively refreshes token if it's expiring soon (within 5 minutes)
+   */
+  private async ensureValidToken(): Promise<boolean> {
+    if (!this.authToken) {
+      return false;
+    }
+
+    try {
+      // Decode JWT to check expiry (without verification)
+      const tokenParts = this.authToken.split('.');
+      if (tokenParts.length !== 3) {
+        console.warn('[ApiClient] Invalid token format');
+        return false;
+      }
+
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const expiryTime = payload.exp * 1000; // Convert to milliseconds
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+
+      // If token expires within 5 minutes, refresh it proactively
+      if (expiryTime - now < fiveMinutes) {
+        console.log('[ApiClient] Token expiring soon, refreshing proactively...');
+        const refreshed = await this.refreshAuthToken();
+        if (!refreshed) {
+          console.warn('[ApiClient] Token refresh failed, but continuing with current token');
+          // Don't clear token - let the request try with current token
+          // If it fails with 401, the retry logic will handle it
+        }
+        return refreshed;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('[ApiClient] Error checking token expiry:', error);
+      // If we can't decode the token, assume it's valid and let the server reject it if needed
+      return true;
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -74,16 +116,19 @@ class ApiClient {
   ): Promise<T> {
     const { maxRetries = 3, retryDelay = 1000 } = retryOptions;
     const url = `${this.baseUrl}${endpoint}`;
-    
+
+    // Ensure token is valid before making request
+    await this.ensureValidToken();
+
     // Create a unique key for this request to enable deduplication
     const requestKey = `${options.method || 'GET'}:${endpoint}`;
-    
+
     // Check if there's already a pending request for this endpoint
     if (this.pendingRequests.has(requestKey)) {
       console.log(`[ApiClient] Deduplicating request: ${requestKey}`);
       return this.pendingRequests.get(requestKey)!;
     }
-    
+
     console.log('API Request:', {
       method: options.method || 'GET',
       url,
@@ -91,11 +136,11 @@ class ApiClient {
       endpoint,
       maxRetries
     });
-    
+
     // Create the request promise and store it for deduplication
     const requestPromise = this.executeRequest<T>(url, options, maxRetries, retryDelay);
     this.pendingRequests.set(requestKey, requestPromise);
-    
+
     try {
       const result = await requestPromise;
       return result;
@@ -111,39 +156,50 @@ class ApiClient {
     maxRetries: number,
     retryDelay: number
   ): Promise<T> {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    // Add Authorization header if auth token is available
-    if (this.authToken) {
-      headers['Authorization'] = `Bearer ${this.authToken}`;
-    }
-
-    const config: RequestInit = {
-      ...options,
-      headers,
-      mode: 'cors',
-      credentials: 'include', // Include credentials for authentication
-    };
     let lastError: Error;
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const response = await fetch(url, config);
+        // Recreate headers on each attempt to ensure fresh token
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        };
+
+        // Add Authorization header if auth token is available
+        if (this.authToken) {
+          headers['Authorization'] = `Bearer ${this.authToken}`;
+        }
+
+        const config: RequestInit = {
+          ...options,
+          headers,
+          mode: 'cors',
+          credentials: 'include', // Include credentials for authentication
+        };
+
+        // Create abort controller for timeout (150 seconds to match backend)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 150000);
         
+        const response = await fetch(url, {
+          ...config,
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+
         console.log('API Response:', {
           status: response.status,
           statusText: response.statusText,
           url: response.url,
           attempt: attempt + 1
         });
-        
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API Error Response:', errorText);
-          
+
           let errorData: ApiError;
           try {
             errorData = JSON.parse(errorText);
@@ -155,37 +211,38 @@ class ApiClient {
               path: url
             };
           }
-          
+
           const error = new Error(`API Error: ${errorData.message} (${response.status})`);
-          
+
           // Handle token expiration (401 Unauthorized)
           if (response.status === 401 && this.authToken) {
-            console.log('[ApiClient] Token expired, attempting to refresh...');
+            console.log(`[ApiClient] Token expired (attempt ${attempt + 1}), attempting to refresh...`);
             const tokenRefreshed = await this.refreshAuthToken();
             if (tokenRefreshed) {
-              // Update the Authorization header with the new token
-              headers['Authorization'] = `Bearer ${this.authToken}`;
-              config.headers = headers;
-              console.log('[ApiClient] Retrying request with refreshed token');
-              continue; // Retry the request with the new token
+              console.log('[ApiClient] Token refreshed successfully, retrying request');
+              continue; // Retry the request with the new token (headers will be recreated)
             } else {
-              console.error('[ApiClient] Failed to refresh token, clearing auth');
-              this.clearAuthToken();
-              throw new Error('Authentication failed - please sign in again');
+              console.error('[ApiClient] Failed to refresh token on 401');
+              // DON'T clear token - keep trying with current token
+              // User may need to re-authenticate, but don't force it immediately
+              if (attempt === maxRetries) {
+                throw new Error('Authentication failed - please sign in again');
+              }
+              // Continue to retry logic below
             }
           }
-          
+
           // Don't retry on client errors (4xx) except 401 (handled above), 408, 429
-          if (response.status >= 400 && response.status < 500 && 
-              response.status !== 401 && response.status !== 408 && response.status !== 429) {
+          if (response.status >= 400 && response.status < 500 &&
+            response.status !== 401 && response.status !== 408 && response.status !== 429) {
             throw error;
           }
-          
+
           // Don't retry on last attempt
           if (attempt === maxRetries) {
             throw error;
           }
-          
+
           lastError = error;
           console.log(`Retrying request in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
           await this.delay(retryDelay * Math.pow(2, attempt)); // Exponential backoff
@@ -199,7 +256,7 @@ class ApiClient {
 
         const responseData = await response.json();
         console.log('API Response Data:', responseData);
-        
+
         return responseData;
       } catch (error) {
         console.error('API request failed:', {
@@ -208,12 +265,12 @@ class ApiClient {
           stack: error.stack,
           attempt: attempt + 1
         });
-        
+
         // Don't retry on last attempt
         if (attempt === maxRetries) {
           throw error;
         }
-        
+
         // Don't retry on network errors that are likely permanent
         if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
           // This is likely a network error, retry with exponential backoff
@@ -222,12 +279,12 @@ class ApiClient {
           await this.delay(retryDelay * Math.pow(2, attempt));
           continue;
         }
-        
+
         // For other errors, don't retry
         throw error;
       }
     }
-    
+
     throw lastError!;
   }
 
@@ -236,19 +293,32 @@ class ApiClient {
   }
 
   // Itinerary endpoints
-  async createItinerary(data: CreateItineraryRequest, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
-    const response = await this.request<ItineraryResponse>('/itineraries', {
+  async createItinerary(data: CreateItineraryRequest, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<ItineraryCreationResponse> {
+    const response = await this.request<ItineraryCreationResponse>('/itineraries', {
       method: 'POST',
       body: JSON.stringify(data),
     }, retryOptions);
-    return DataTransformer.transformItineraryResponseToTripData(response);
+    
+    // Validate response
+    if (!response.itinerary) {
+      throw new Error('Invalid response: missing itinerary data');
+    }
+    
+    console.log('[ApiClient] Itinerary creation response:', {
+      itineraryId: response.itinerary.id,
+      executionId: response.executionId,
+      sseEndpoint: response.sseEndpoint,
+      status: response.status
+    });
+    
+    return response;
   }
 
   async getItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
     try {
       console.log('=== API CLIENT GET ITINERARY START ===');
       console.log('Itinerary ID:', id);
-      
+
       const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`, {}, retryOptions);
       console.log('=== API CLIENT GET ITINERARY ===');
       console.log('Itinerary ID:', id);
@@ -256,14 +326,14 @@ class ApiClient {
       console.log('Days Count:', response.days?.length || 0);
       console.log('Days Data:', response.days);
       console.log('================================');
-      
+
       console.log('Starting data transformation...');
       const transformedData = NormalizedDataTransformer.transformNormalizedItineraryToTripData(response);
       console.log('=== API CLIENT GET ITINERARY SUCCESS ===');
       console.log('Transformed Data:', transformedData);
       console.log('========================================');
       return transformedData;
-      
+
     } catch (error) {
       console.error('=== API CLIENT GET ITINERARY ERROR ===');
       console.error('Error:', error);
@@ -271,14 +341,14 @@ class ApiClient {
       console.error('Error stack:', error.stack);
       console.error('Itinerary ID:', id);
       console.error('=====================================');
-      
+
       // If it's a 404 error, it might be that the itinerary is still being generated
       // Just throw the error - let the calling code handle it appropriately
       if (error.message.includes('404')) {
         console.log('404 error detected - itinerary might still be generating');
         throw error;
       }
-      
+
       throw error;
     }
   }
@@ -331,17 +401,21 @@ class ApiClient {
 
   // Agent SSE stream
   createAgentEventStream(itineraryId: string): EventSource {
-    let url = `${this.baseUrl}/agents/stream?itineraryId=${itineraryId}`;
-    
+    let url = `${this.baseUrl}/agents/events/${itineraryId}`;
+
     // Add auth token as query parameter since EventSource doesn't support headers
     if (this.authToken) {
-      url += `&token=${encodeURIComponent(this.authToken)}`;
+      url += `?token=${encodeURIComponent(this.authToken)}`;
     }
-    
+
+    console.log('[ApiClient] Creating SSE connection with token:', this.authToken ? 'present' : 'missing');
+
     const eventSource = new EventSource(url);
-    
+
     eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
+      console.error('[ApiClient] SSE connection error:', error);
+      // Note: EventSource doesn't support token refresh. If token expires during SSE,
+      // the connection will fail and need to be recreated with a fresh token.
     };
 
     return eventSource;
@@ -383,11 +457,11 @@ class ApiClient {
       mode: 'cors',
       credentials: 'omit',
     });
-    
+
     if (!response.ok) {
       throw new Error('Failed to generate PDF');
     }
-    
+
     return response.blob();
   }
 
@@ -429,10 +503,75 @@ class ApiClient {
     });
   }
 
-  async undoChanges(id: string, request: UndoRequest): Promise<UndoResponse> {
+  async undoChanges(id: string, request?: UndoRequest): Promise<UndoResponse> {
     return this.request<UndoResponse>(`/itineraries/${id}:undo`, {
       method: 'POST',
-      body: JSON.stringify(request),
+      body: request ? JSON.stringify(request) : JSON.stringify({}),
+    });
+  }
+
+  async redoChanges(id: string): Promise<UndoResponse> {
+    return this.request<UndoResponse>(`/itineraries/${id}:redo`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
+  async getRevisions(id: string): Promise<{ revisions: any[] }> {
+    return this.request<{ revisions: any[] }>(`/itineraries/${id}/revisions`, {
+      method: 'GET',
+    });
+  }
+
+  async rollbackToVersion(id: string, version: number): Promise<any> {
+    return this.request(`/itineraries/${id}/revisions/${version}/rollback`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
+  async getRevisionDetail(id: string, revisionId: string): Promise<any> {
+    return this.request(`/itineraries/${id}/revisions/${revisionId}`, {
+      method: 'GET',
+    });
+  }
+
+  // Workflow sync endpoints
+  async updateWorkflowPositions(itineraryId: string, positions: Array<{ nodeId: string; x: number; y: number }>): Promise<any> {
+    try {
+      return await this.request(`/itineraries/${itineraryId}/workflow`, {
+        method: 'PUT',
+        body: JSON.stringify({ positions }),
+      });
+    } catch (error: any) {
+      console.error('Failed to update workflow positions:', error);
+      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        throw new Error('Authentication failed. Please sign in again.');
+      }
+      throw error;
+    }
+  }
+
+  async updateNodeData(itineraryId: string, nodeId: string, data: any): Promise<any> {
+    try {
+      return await this.request(`/itineraries/${itineraryId}/nodes/${nodeId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    } catch (error: any) {
+      console.error('Failed to update node data:', error);
+      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        throw new Error('Authentication failed. Please sign in again.');
+      }
+      throw error;
+    }
+  }
+
+  // Lock endpoints
+  async toggleNodeLock(itineraryId: string, nodeId: string, locked: boolean): Promise<{ success: boolean; message?: string }> {
+    return this.request(`/itineraries/${itineraryId}/nodes/${nodeId}/lock`, {
+      method: 'PUT',
+      body: JSON.stringify({ locked }),
     });
   }
 
@@ -460,15 +599,32 @@ class ApiClient {
   }
 
   // SSE for patches
-  createPatchesEventStream(itineraryId: string): EventSource {
-    const url = `${this.baseUrl}/itineraries/patches?itineraryId=${itineraryId}`;
-    const eventSource = new EventSource(url);
+  createPatchesEventStream(itineraryId: string, executionId?: string): EventSource {
+    let url = `${this.baseUrl}/itineraries/patches?itineraryId=${itineraryId}`;
+    if (executionId) {
+      url += `&executionId=${executionId}`;
+    }
     
+    // Add auth token as query parameter since EventSource doesn't support headers
+    if (this.authToken) {
+      url += `&token=${encodeURIComponent(this.authToken)}`;
+    }
+    
+    console.log('[ApiClient] Creating patches SSE connection with token:', this.authToken ? 'present' : 'missing');
+    
+    const eventSource = new EventSource(url);
+
     eventSource.onerror = (error) => {
       console.error('Patches SSE connection error:', error);
+      // Note: EventSource doesn't support token refresh. If token expires during SSE,
+      // the connection will fail and need to be recreated with a fresh token.
     };
 
     return eventSource;
+  }
+
+  async getLockStates(itineraryId: string): Promise<Record<string, boolean>> {
+    return this.request<Record<string, boolean>>(`/itineraries/${itineraryId}/lock-states`);
   }
 
   // Test endpoints
@@ -500,6 +656,20 @@ export interface CreateItineraryRequest {
   interests: string[];
   constraints: string[];
   language: string;
+}
+
+export interface ItineraryCreationResponse {
+  itinerary: ItineraryResponse;
+  executionId?: string;
+  sseEndpoint?: string;
+  estimatedCompletion?: string;
+  status?: 'generating' | 'complete' | 'failed';
+  stages?: Array<{
+    name: string;
+    status: string;
+    progress: number;
+  }>;
+  errorMessage?: string;
 }
 
 export interface ItineraryResponse {

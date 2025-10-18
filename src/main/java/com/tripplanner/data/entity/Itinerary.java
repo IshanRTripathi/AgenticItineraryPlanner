@@ -13,7 +13,7 @@ import java.util.Objects;
 
 /**
  * Itinerary entity representing travel itineraries.
- * Stored in H2 database table: itineraries
+ * Legacy JPA entity - system now uses Firestore with NormalizedItinerary
  */
 @Entity
 @Table(name = "itineraries")
@@ -749,29 +749,24 @@ public class Itinerary {
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
         
-        @Column(name = "amount")
-        private double amount;
+        @Column(name = "amountPerPerson")
+        private double amountPerPerson;
         
         @Column(name = "currency", length = 3)
         private String currency;
         
-        @Column(name = "per_unit", length = 20)
-        private String per; // person, group, night, etc.
-        
         public Price() {}
         
-        public Price(double amount, String currency) {
-            this.amount = amount;
+        public Price(double amountPerPerson, String currency) {
+            this.amountPerPerson = amountPerPerson;
             this.currency = currency;
         }
         
         // Getters and Setters
-        public double getAmount() { return amount; }
-        public void setAmount(double amount) { this.amount = amount; }
+        public double getAmount() { return amountPerPerson; }
+        public void setAmount(double amount) { this.amountPerPerson = amount; }
         public String getCurrency() { return currency; }
         public void setCurrency(String currency) { this.currency = currency; }
-        public String getPer() { return per; }
-        public void setPer(String per) { this.per = per; }
     }
 }
 

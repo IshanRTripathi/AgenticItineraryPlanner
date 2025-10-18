@@ -7,30 +7,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class NodeCost {
     
-    @JsonProperty("amount")
-    private Double amount;
+    @JsonProperty("amountPerPerson")
+    private Double amountPerPerson;
     
     @JsonProperty("currency")
     private String currency;
     
-    @JsonProperty("per")
-    private String per; // "person", "group", "night", etc.
-    
     public NodeCost() {}
     
-    public NodeCost(Double amount, String currency, String per) {
-        this.amount = amount;
+    public NodeCost(Double amountPerPerson, String currency) {
+        this.amountPerPerson = amountPerPerson;
         this.currency = currency;
-        this.per = per;
     }
     
     // Getters and Setters
-    public Double getAmount() {
-        return amount;
+    public Double getAmountPerPerson() {
+        return amountPerPerson;
     }
     
-    public void setAmount(Double amount) {
-        this.amount = amount;
+    public void setAmountPerPerson(Double amountPerPerson) {
+        this.amountPerPerson = amountPerPerson;
     }
     
     public String getCurrency() {
@@ -41,20 +37,11 @@ public class NodeCost {
         this.currency = currency;
     }
     
-    public String getPer() {
-        return per;
-    }
-    
-    public void setPer(String per) {
-        this.per = per;
-    }
-    
     @Override
     public String toString() {
         return "NodeCost{" +
-                "amount=" + amount +
+                "amountPerPerson=" + amountPerPerson +
                 ", currency='" + currency + '\'' +
-                ", per='" + per + '\'' +
                 '}';
     }
 }

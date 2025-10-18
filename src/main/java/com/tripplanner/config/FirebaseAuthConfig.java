@@ -23,8 +23,10 @@ import java.io.IOException;
  * Validates Firebase ID tokens for authenticated requests
  */
 @Configuration
-@ConditionalOnProperty(name = "firebase.auth.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "firebase.auth.enabled", havingValue = "true", matchIfMissing = false)
 public class FirebaseAuthConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(FirebaseAuthConfig.class);
 
     @Autowired
     private FirebaseAuth firebaseAuth;
@@ -50,6 +52,12 @@ public class FirebaseAuthConfig {
             
             // Allow OPTIONS requests (CORS preflight) to bypass authentication
             if ("OPTIONS".equals(method)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
+            // Skip SSE endpoints - let FirebaseSseAuthFilter handle them
+            if (isSseEndpoint(path)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -82,9 +90,79 @@ public class FirebaseAuthConfig {
                 return;
             }
             
+            // Handle optional authentication for lock endpoints (for testing)
+            if (path.matches(".*/nodes/.*/lock") || path.matches(".*/lock-states")) {
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    String idToken = authHeader.substring(7);
+                    try {
+                        FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
+                        String userId = decodedToken.getUid();
+                        request.setAttribute("userId", userId);
+                        request.setAttribute("userEmail", decodedToken.getEmail());
+                        request.setAttribute("userName", decodedToken.getName());
+                        logger.debug("Authenticated user: {} for lock endpoint: {}", userId, path);
+                    } catch (Exception e) {
+                        logger.warn("Invalid token for lock endpoint: {}, continuing without auth", path);
+                        // Continue without authentication for lock endpoints during testing
+                    }
+                } else {
+                    logger.debug("No auth header for lock endpoint: {}, allowing anonymous access for testing", path);
+                }
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
+            // Handle optional authentication for workflow sync endpoints (for development/testing)
+            if (path.matches(".*/workflow") || path.matches(".*/nodes/.*")) {
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    String idToken = authHeader.substring(7);
+                    try {
+                        FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
+                        String userId = decodedToken.getUid();
+                        request.setAttribute("userId", userId);
+                        request.setAttribute("userEmail", decodedToken.getEmail());
+                        request.setAttribute("userName", decodedToken.getName());
+                        logger.debug("Authenticated user: {} for workflow sync endpoint: {}", userId, path);
+                    } catch (Exception e) {
+                        logger.warn("Invalid token for workflow sync endpoint: {}, continuing without auth", path);
+                        // Continue without authentication for workflow sync during development
+                    }
+                } else {
+                    logger.debug("No auth header for workflow sync endpoint: {}, allowing anonymous access for development", path);
+                }
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
+            // Handle optional authentication for chat endpoints (for development/testing)
+            if (path.matches(".*/chat.*")) {
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    String idToken = authHeader.substring(7);
+                    try {
+                        FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
+                        String userId = decodedToken.getUid();
+                        request.setAttribute("userId", userId);
+                        request.setAttribute("userEmail", decodedToken.getEmail());
+                        request.setAttribute("userName", decodedToken.getName());
+                        logger.debug("Authenticated user: {} for chat endpoint: {}", userId, path);
+                    } catch (Exception e) {
+                        logger.warn("Invalid token for chat endpoint: {}, continuing without auth", path);
+                        // Set a test user ID for development when token is invalid
+                        request.setAttribute("userId", "test-user");
+                    }
+                } else {
+                    logger.debug("No auth header for chat endpoint: {}, allowing anonymous access for development", path);
+                    // Set a test user ID for development
+                    request.setAttribute("userId", "test-user");
+                }
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 logger.warn("Missing or invalid Authorization header for path: {}", path);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
                 response.getWriter().write("{\"error\":\"Missing or invalid Authorization header\"}");
                 return;
             }
@@ -106,6 +184,7 @@ public class FirebaseAuthConfig {
             } catch (Exception e) {
                 logger.error("Firebase token verification failed for path: {}", path, e);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
                 response.getWriter().write("{\"error\":\"Invalid or expired token\"}");
             }
         }
@@ -114,13 +193,87 @@ public class FirebaseAuthConfig {
             // Define public endpoints that don't require authentication
             return path.startsWith("/api/v1/health") ||
                    path.startsWith("/api/v1/public") ||
-                   path.startsWith("/api/v1/agents/stream") ||  // Allow SSE stream endpoint
-                   path.startsWith("/api/v1/agents/events/") ||  // Allow SSE events endpoint
+                   path.startsWith("/api/v1/chat/route") ||  // Allow chat route endpoint
+                   path.matches(".*/nodes/.*/lock") ||  // Allow node lock endpoint for testing
+                   path.matches(".*/lock-states") ||  // Allow lock states endpoint for debugging
                    path.startsWith("/swagger") ||
                    path.startsWith("/v3/api-docs") ||
                    path.startsWith("/actuator") ||
                    path.equals("/") ||
                    path.equals("/favicon.ico");
+        }
+
+        private boolean isSseEndpoint(String path) {
+            // SSE endpoints use query parameter tokens, not Authorization headers
+            return path.startsWith("/api/v1/agents/stream") ||
+                   path.startsWith("/api/v1/agents/events/") ||
+                   path.startsWith("/api/v1/itineraries/patches");
+        }
+
+    }
+
+    /**
+     * Filter to validate Firebase ID tokens from query parameters for SSE endpoints
+     * EventSource doesn't support custom headers, so we use query parameters
+     */
+    public static class FirebaseSseAuthFilter extends OncePerRequestFilter {
+
+        private static final Logger logger = LoggerFactory.getLogger(FirebaseSseAuthFilter.class);
+        private final FirebaseAuth firebaseAuth;
+
+        public FirebaseSseAuthFilter(FirebaseAuth firebaseAuth) {
+            this.firebaseAuth = firebaseAuth;
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                      FilterChain filterChain) throws ServletException, IOException {
+            
+            String path = request.getRequestURI();
+            
+            // Only process SSE endpoints
+            if (!isSseEndpoint(path)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String token = request.getParameter("token");
+            
+            if (token != null && !token.isEmpty()) {
+                try {
+                    FirebaseToken decodedToken = firebaseAuth.verifyIdToken(token);
+                    String userId = decodedToken.getUid();
+                    
+                    // Add user info to request attributes
+                    request.setAttribute("userId", userId);
+                    request.setAttribute("userEmail", decodedToken.getEmail());
+                    request.setAttribute("userName", decodedToken.getName());
+                    
+                    logger.debug("SSE token validated for user: {} on path: {}", userId, path);
+                    filterChain.doFilter(request, response);
+                    
+                } catch (com.google.firebase.auth.FirebaseAuthException e) {
+                    logger.error("Firebase token verification failed for SSE endpoint: {}", path, e);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Firebase ID token has expired. Get a fresh ID token and try again\"}");
+                } catch (Exception e) {
+                    logger.error("Token validation error for SSE endpoint: {}", path, e);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Invalid authentication token\"}");
+                }
+            } else {
+                // For backward compatibility, allow SSE without token but log warning
+                logger.warn("SSE connection without token for path: {}", path);
+                filterChain.doFilter(request, response);
+            }
+        }
+
+        private boolean isSseEndpoint(String path) {
+            return path.startsWith("/api/v1/agents/stream") ||
+                   path.startsWith("/api/v1/agents/events/") ||
+                   path.startsWith("/api/v1/itineraries/patches");
         }
     }
 
@@ -134,6 +287,20 @@ public class FirebaseAuthConfig {
         registration.addUrlPatterns("/api/v1/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registration.setName("firebaseAuthFilter");
+        return registration;
+    }
+
+    /**
+     * Register Firebase SSE Auth Filter for SSE endpoints
+     * Runs after the main auth filter to handle query parameter tokens
+     */
+    @Bean
+    public FilterRegistrationBean<FirebaseSseAuthFilter> firebaseSseAuthFilterRegistration() {
+        FilterRegistrationBean<FirebaseSseAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new FirebaseSseAuthFilter(firebaseAuth));
+        registration.addUrlPatterns("/api/v1/agents/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        registration.setName("firebaseSseAuthFilter");
         return registration;
     }
 

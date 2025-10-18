@@ -28,7 +28,8 @@ import { TripOverviewView } from './travel-planner/views/TripOverviewView';
 import { DayByDayView } from './travel-planner/views/DayByDayView';
 import { DestinationsManager } from './travel-planner/views/DestinationsManager';
 import { WorkflowBuilder } from './WorkflowBuilder';
-import { ChatInterface } from './ChatInterface';
+import { NewChat } from './chat/NewChat';
+import { UnifiedItineraryProvider } from '../contexts/UnifiedItineraryContext';
 import { TripMap } from './travel-planner/TripMap';
 // Removed modal-based add flow; use on-map InfoWindow card instead
 import type { MapMarker } from '../types/MapTypes';
@@ -42,10 +43,10 @@ import { LoadingSpinner } from './travel-planner/shared/LoadingSpinner';
 import { ErrorDisplay } from './shared/ErrorDisplay';
 
 // Import types
-import { 
-  TravelPlannerView, 
-  PlanTab, 
-  Destination, 
+import {
+  TravelPlannerView,
+  PlanTab,
+  Destination,
   AgentStatus
 } from './travel-planner/shared/types';
 
@@ -61,25 +62,25 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   console.log('=== TRAVEL PLANNER COMPONENT RENDER ===');
   console.log('Trip Data Props:', tripData);
   console.log('=======================================');
-  
+
   // Device detection
   const { isMobile, isTablet } = useDeviceDetection();
-  
+
   // Map context
-  const { 
-    viewMode, 
-    setViewMode, 
-    center, 
-    setCenter, 
+  const {
+    viewMode,
+    setViewMode,
+    center,
+    setCenter,
     centerOnFirstDestination,
     centerOnDayComponent,
     highlightedMarkers,
     clearHighlightedMarkers
   } = useMapContext();
-  
+
   const { switchToDestinations, switchToDayByDay, switchToWorkflow } = useMapViewMode();
   const { selectNode, clearSelection } = useMapSelection();
-  
+
   // Main state
   const [activeView, setActiveView] = useState<TravelPlannerView>('plan');
   const [activeTab, setActiveTab] = useState<PlanTab>('destinations');
@@ -96,13 +97,13 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
   // Fetch fresh data from API instead of using cached props
   const { data: freshTripData, isLoading, error, refetch } = useItinerary(tripData.id);
-  
+
   // State for showing progress modal
   const [showProgressModal, setShowProgressModal] = useState(false);
-  
+
   // Note: Polling removed - now using SSE-only flow with SimplifiedAgentProgress
   const queryClient = useQueryClient();
-  
+
   // Use fresh data if available, fallback to props
   const currentTripData = (freshTripData as TripData) || tripData;
 
@@ -124,7 +125,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     console.log('Has Itinerary:', !!currentTripData.itinerary);
     console.log('Days:', currentTripData.itinerary?.days);
     console.log('Days Length:', currentTripData.itinerary?.days?.length);
-    
+
     if (currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0) {
       console.log('Processing itinerary days for destinations...');
       const newDestinations = currentTripData.itinerary.days.map((day, index) => {
@@ -155,7 +156,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // Ensure fresh itinerary when days are empty (avoids stale state after generation)
   useEffect(() => {
     if (!isLoading && !error && (!currentTripData.itinerary?.days || currentTripData.itinerary.days.length === 0)) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.itinerary(tripData.id) }).catch(() => {});
+      queryClient.invalidateQueries({ queryKey: queryKeys.itinerary(tripData.id) }).catch(() => { });
     }
   }, [isLoading, error, currentTripData.itinerary?.days?.length, tripData.id]);
 
@@ -165,7 +166,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     console.log('Active Tab:', activeTab);
     console.log('Show Workflow Builder:', showWorkflowBuilder);
     console.log('Show Chat Interface:', showChatInterface);
-    
+
     if (showWorkflowBuilder) {
       console.log('Switching to workflow view mode');
       switchToWorkflow();
@@ -184,16 +185,18 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     console.log('View Mode:', viewMode);
     console.log('Destinations:', destinations);
     console.log('Current Trip Data:', currentTripData);
-    
+
     if (viewMode === 'destinations' && destinations.length > 0) {
       console.log('Centering map on first destination');
       centerOnFirstDestination(destinations);
-    } else if (viewMode === 'day-by-day' && currentTripData.itinerary?.days?.length > 0) {
+    } else if (viewMode === 'day-by-day' && currentTripData.itinerary?.days?.length && currentTripData.itinerary.days.length > 0) {
       console.log('Centering map on first day first component');
       const firstDay = currentTripData.itinerary.days[0];
       const firstComponent = firstDay.components?.[0];
-      
-      if (firstComponent?.location?.coordinates) {
+
+      if (firstComponent?.location?.coordinates &&
+        firstComponent.location.coordinates.lat !== null &&
+        firstComponent.location.coordinates.lng !== null) {
         const coordinates = {
           lat: firstComponent.location.coordinates.lat,
           lng: firstComponent.location.coordinates.lng,
@@ -216,7 +219,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   useEffect(() => {
     console.log('=== AGENT STATUSES UPDATE EFFECT ===');
     console.log('Current Trip Data Agent Progress:', currentTripData.agentProgress);
-    
+
     if (currentTripData.agentProgress) {
       console.log('Processing agent progress data...');
       const newAgentStatuses = Object.entries(currentTripData.agentProgress).map(([agentId, progress]) => {
@@ -250,7 +253,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
   // Destination management functions
   const updateDestination = (id: string, updates: Partial<Destination>) => {
-    setDestinations(prev => prev.map(dest => 
+    setDestinations(prev => prev.map(dest =>
       dest.id === id ? { ...dest, ...updates } : dest
     ));
   };
@@ -276,11 +279,11 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // Handle itinerary updates from chat
   const handleItineraryUpdateFromChat = async (updatedItinerary: any) => {
     console.log('Itinerary updated from chat:', updatedItinerary);
-    
+
     // Invalidate and refetch the itinerary data to reflect changes
     try {
-      await queryClient.invalidateQueries({ 
-        queryKey: queryKeys.itinerary(tripData.id) 
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.itinerary(tripData.id)
       });
       console.log('Itinerary data refreshed successfully');
     } catch (error) {
@@ -343,10 +346,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     console.log('Current Trip Data Days:', currentTripData.itinerary?.days);
     console.log('Has Itinerary Data:', !!(currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0));
     console.log('========================');
-    
+
     // Check if we have actual itinerary data, not just destinations array
     const hasItineraryData = currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0;
-    
+
     // Show loading state while data is being fetched
     if (isLoading) {
       return (
@@ -360,20 +363,20 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
         </div>
       );
     }
-    
+
     if (!hasItineraryData) {
       return (
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
           <Card className="p-4 md:p-6">
             <div className="flex items-center space-x-3 mb-4">
               <Search className="w-5 h-5 text-gray-400" />
-              <Input 
-                placeholder="Search any place in the world.." 
+              <Input
+                placeholder="Search any place in the world.."
                 className="flex-1 border-none text-lg"
               />
             </div>
           </Card>
-          
+
           <AutoRefreshEmptyState
             title="No itinerary data available yet"
             description="Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below."
@@ -416,15 +419,17 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           </TabsContent>
 
           <TabsContent value="day-by-day" className="m-0 flex-1 overflow-y-auto">
-            <DayByDayView 
-              tripData={currentTripData} 
-              onDaySelect={handleDaySelect}
-              isCollapsed={!isLeftPanelExpanded}
-              onRefresh={() => {
-                console.log('TravelPlanner: DayByDayView refresh triggered');
-                refetch();
-              }}
-            />
+            <UnifiedItineraryProvider itineraryId={currentTripData.id}>
+              <DayByDayView
+                tripData={currentTripData}
+                onDaySelect={handleDaySelect}
+                isCollapsed={!isLeftPanelExpanded}
+                onRefresh={() => {
+                  console.log('TravelPlanner: DayByDayView refresh triggered');
+                  refetch();
+                }}
+              />
+            </UnifiedItineraryProvider>
           </TabsContent>
         </div>
       </Tabs>
@@ -434,7 +439,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     const mapMarkers: MapMarker[] = (() => {
       const markers: MapMarker[] = [];
       const days = currentTripData.itinerary?.days || [];
-      
+
       try {
         days.forEach((day, dayIdx) => {
           const comps = day.components || [];
@@ -442,7 +447,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             try {
               const lat = c?.location?.coordinates?.lat;
               const lng = c?.location?.coordinates?.lng;
-              
+
               console.log(`[Maps] Processing component ${c.id}:`, {
                 name: c.name,
                 lat: lat,
@@ -451,26 +456,26 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 lngType: typeof lng,
                 hasValidCoords: lat !== null && lng !== null && lat !== undefined && lng !== undefined
               });
-              
+
               // Validate coordinates - must be valid numbers and not null/undefined
               if (lat !== null && lng !== null && lat !== undefined && lng !== undefined &&
-                  typeof lat === 'number' && typeof lng === 'number' && 
-                  !isNaN(lat) && !isNaN(lng) && 
-                  lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                
+                typeof lat === 'number' && typeof lng === 'number' &&
+                !isNaN(lat) && !isNaN(lng) &&
+                lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+
                 markers.push({
                   id: c.id || `${dayIdx}-${compIdx}`,
                   position: { lat, lng },
                   title: c.name || c.type || `Place ${compIdx + 1}`,
                   type: (c.type === 'restaurant' ? 'meal' :
-                        c.type === 'hotel' ? 'accommodation' :
-                        c.type === 'transport' ? 'transport' : 'attraction'),
+                    c.type === 'hotel' ? 'accommodation' :
+                      c.type === 'transport' ? 'transport' : 'attraction'),
                   status: 'planned',
                   locked: false,
                   rating: c.rating || 0,
                   googleMapsUri: c.googleMapsUri || '',
                 });
-                
+
                 console.log(`[Maps] Added marker for ${c.name} at (${lat}, ${lng})`);
               } else {
                 console.warn('[Maps] Skipping component with invalid coordinates:', {
@@ -478,10 +483,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                   name: c.name,
                   lat: lat,
                   lng: lng,
-                  reason: lat === null || lng === null ? 'null coordinates' : 
-                          lat === undefined || lng === undefined ? 'undefined coordinates' :
-                          typeof lat !== 'number' || typeof lng !== 'number' ? 'non-numeric coordinates' :
-                          isNaN(lat) || isNaN(lng) ? 'NaN coordinates' :
+                  reason: lat === null || lng === null ? 'null coordinates' :
+                    lat === undefined || lng === undefined ? 'undefined coordinates' :
+                      typeof lat !== 'number' || typeof lng !== 'number' ? 'non-numeric coordinates' :
+                        isNaN(lat) || isNaN(lng) ? 'NaN coordinates' :
                           'out of range coordinates'
                 });
               }
@@ -493,7 +498,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
       } catch (error) {
         console.error('[Maps] Error building markers:', error);
       }
-      
+
       console.log('[Maps] Built markers from itinerary:', markers.length, 'valid markers');
       return markers;
     })();
@@ -502,8 +507,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
       <>
         <div className="absolute top-4 left-4 z-20">
           <div className="flex space-x-2">
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant={!showWorkflowBuilder && !showChatInterface ? "default" : "outline"}
               onClick={() => {
                 setShowWorkflowBuilder(false);
@@ -514,8 +519,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               <Globe className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Map</span>
             </Button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant={showWorkflowBuilder && !showChatInterface ? "default" : "outline"}
               onClick={() => {
                 setShowWorkflowBuilder(true);
@@ -526,8 +531,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               <Workflow className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Workflow</span>
             </Button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant={showChatInterface ? "default" : "outline"}
               onClick={() => {
                 setShowWorkflowBuilder(false);
@@ -540,19 +545,18 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             </Button>
           </div>
         </div>
-        
+
         <div className="absolute top-4 right-4 space-y-2 z-20">
           {!showWorkflowBuilder && !showChatInterface && (
             <Button size="sm" onClick={onShare} className="min-h-[44px]">Share trip</Button>
           )}
         </div>
-        
+
         <div className="flex-1 overflow-hidden">
           {showChatInterface ? (
-            <ChatInterface 
-              itineraryId={currentTripData.id}
-              onItineraryUpdate={handleItineraryUpdateFromChat}
-            />
+            <UnifiedItineraryProvider itineraryId={currentTripData.id}>
+              <NewChat />
+            </UnifiedItineraryProvider>
           ) : !showWorkflowBuilder ? (
             <div className="h-full overflow-hidden relative">
               {/* Feature flag: simplest gated render for map MVP */}
@@ -569,12 +573,12 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                       mapBounds={currentTripData.itinerary?.mapBounds}
                       countryCentroid={currentTripData.itinerary?.countryCentroid}
                       nodes={mapMarkers}
-                      days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx+1}`, dayNumber: d.dayNumber || (idx+1), date: d.date, location: d.location }))}
+                      days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
                       onAddPlace={({ dayId, dayNumber, place }) => {
                         console.log('[Maps] Add place to itinerary (InfoWindow)', { dayId, dayNumber, place })
                         console.log('[Maps] Place types:', place.types)
                         console.log('[Maps] Place name:', place.name)
-                        
+
                         try {
                           // 1. Add to day-by-day view
                           const updatedTripData = addPlaceToItineraryDay(currentTripData, {
@@ -582,13 +586,13 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                             dayNumber,
                             place,
                           });
-                          
+
                           // Update the trip data via query client
                           queryClient.setQueryData(
                             queryKeys.itinerary(currentTripData.id),
                             updatedTripData
                           );
-                          
+
                           // 2. Create workflow node if workflow builder is available
                           if (showWorkflowBuilder) {
                             const dayIndex = dayNumber - 1; // Convert to 0-based index
@@ -597,17 +601,17 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                               dayIndex,
                               { x: 200 + Math.random() * 300, y: 200 + Math.random() * 300 }
                             );
-                            
+
                             console.log('[Maps] Created workflow node:', workflowNode);
-                            
+
                             // TODO: Add the workflow node to the workflow builder
                             // This would require access to the workflow builder's state management
                             // For now, we'll just log it
                           }
-                          
+
                           // 3. TODO: Persist via backend mutation; then refresh itinerary
                           // This would involve calling the backend API to save the changes
-                          
+
                           console.log('[Maps] Successfully added place to itinerary');
                         } catch (error) {
                           console.error('[Maps] Failed to add place to itinerary:', error);
@@ -628,20 +632,22 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               )}
             </div>
           ) : (
-             <div className="h-full overflow-hidden relative">
-               <WorkflowBuilder 
-                 tripData={currentTripData}
-                 embedded={true}
-                 onSave={(updatedItinerary) => {
-                   console.log('Workflow saved:', updatedItinerary);
-                   // TODO: Implement save functionality
-                 }}
-                 onCancel={() => {
-                   console.log('Workflow cancelled');
-                   setShowWorkflowBuilder(false);
-                 }}
-               />
-             </div>
+            <div className="h-full overflow-hidden relative">
+              <UnifiedItineraryProvider itineraryId={currentTripData.id}>
+                <WorkflowBuilder
+                  tripData={currentTripData}
+                  embedded={true}
+                  onSave={(updatedItinerary) => {
+                    console.log('Workflow saved:', updatedItinerary);
+                    // TODO: Implement save functionality
+                  }}
+                  onCancel={() => {
+                    console.log('Workflow cancelled');
+                    setShowWorkflowBuilder(false);
+                  }}
+                />
+              </UnifiedItineraryProvider>
+            </div>
           )}
         </div>
       </>
@@ -676,7 +682,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
       case 'plan':
         return renderPlanView();
       case 'packing':
-        return <PackingListView tripData={currentTripData} onUpdate={() => {}} />;
+        return <PackingListView tripData={currentTripData} onUpdate={() => { }} />;
       case 'budget':
         return (
           <BudgetView
@@ -698,7 +704,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   const mapMarkers: MapMarker[] = (() => {
     const markers: MapMarker[] = [];
     const days = currentTripData.itinerary?.days || [];
-    
+
     try {
       days.forEach((day, dayIdx) => {
         const comps = day.components || [];
@@ -706,20 +712,20 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           try {
             const lat = c?.location?.coordinates?.lat;
             const lng = c?.location?.coordinates?.lng;
-            
+
             // Validate coordinates - must be valid numbers and not null/undefined
             if (lat !== null && lng !== null && lat !== undefined && lng !== undefined &&
-                typeof lat === 'number' && typeof lng === 'number' && 
-                !isNaN(lat) && !isNaN(lng) && 
-                lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-              
+              typeof lat === 'number' && typeof lng === 'number' &&
+              !isNaN(lat) && !isNaN(lng) &&
+              lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+
               markers.push({
                 id: c.id || `${dayIdx}-${compIdx}`,
                 position: { lat, lng },
                 title: c.name || c.type || `Place ${compIdx + 1}`,
                 type: (c.type === 'restaurant' ? 'meal' :
-                      c.type === 'hotel' ? 'accommodation' :
-                      c.type === 'transport' ? 'transport' : 'attraction'),
+                  c.type === 'hotel' ? 'accommodation' :
+                    c.type === 'transport' ? 'transport' : 'attraction'),
                 status: 'planned',
                 locked: false,
                 rating: c.rating || 0,
@@ -734,14 +740,14 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     } catch (error) {
       console.error('[Maps] Error building markers:', error);
     }
-    
+
     return markers;
   })();
 
   // Handle place addition for mobile
   const handleAddPlace = ({ dayId, dayNumber, place }: { dayId: string; dayNumber: number; place: any }) => {
     console.log('[Mobile] Add place to itinerary:', { dayId, dayNumber, place });
-    
+
     try {
       // Add to day-by-day view
       const updatedTripData = addPlaceToItineraryDay(currentTripData, {
@@ -749,13 +755,13 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
         dayNumber,
         place,
       });
-      
+
       // Update the trip data via query client
       queryClient.setQueryData(
         queryKeys.itinerary(currentTripData.id),
         updatedTripData
       );
-      
+
       console.log('[Mobile] Successfully added place to itinerary');
     } catch (error) {
       console.error('[Mobile] Failed to add place to itinerary:', error);
@@ -774,7 +780,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           onBack={onBack}
         />
       )}
-      
+
       {/* Main content area */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Sidebar - Desktop: part of layout, Mobile: overlay - only show when not in mobile layout */}
@@ -787,19 +793,19 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             }}
           />
         )}
-        
+
         {/* Content area */}
         <div className="flex-1 min-h-0">
           {/* Show mobile layout for plan tab on mobile/tablet, otherwise show normal view */}
           {(() => {
             const shouldShowMobile = (isMobile || isTablet) && activeView === 'plan';
-            console.log('TravelPlanner render decision:', { 
-              isMobile, 
-              isTablet, 
-              activeView, 
-              shouldShowMobile 
+            console.log('TravelPlanner render decision:', {
+              isMobile,
+              isTablet,
+              activeView,
+              shouldShowMobile
             });
-            
+
             return shouldShowMobile ? (
               <MobileLayout
                 tripData={currentTripData}

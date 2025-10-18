@@ -7,12 +7,12 @@ import { getAuth, GoogleAuthProvider, EmailAuthProvider } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyD8v1WcTJ4U5IbttjI4W9hy-aDAGArVQGk",
-  authDomain: "tripplanner-bdd3c.firebaseapp.com",
-  projectId: "tripplanner-bdd3c",
-  storageBucket: "tripplanner-bdd3c.firebasestorage.app",
-  messagingSenderId: "815103657721",
-  appId: "1:815103657721:web:069d08463b62088d72c428"
+  apiKey: "AIzaSyCSXcYunx1yGwX8L1qog1Zij0iEQnAMP7Q",
+  authDomain: "tripaiplanner-4c951.firebaseapp.com",
+  projectId: "tripaiplanner-4c951",
+  storageBucket: "tripaiplanner-4c951.firebasestorage.app",
+  messagingSenderId: "464825394931",
+  appId: "1:464825394931:web:default"
 };
 
 // Initialize Firebase

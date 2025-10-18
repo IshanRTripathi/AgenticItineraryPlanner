@@ -139,7 +139,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
       setAgents(prev => prev.map(agent => {
         // Direct match by agent kind
         if (agent.task.id === agentEvent.kind) { // todo keep consistent status names across the repo managed by types
-          const newStatus = agentEvent.status === 'succeeded' ? 'completed' : 
+          const newStatus = agentEvent.status === 'completed' ? 'completed' : 
                            agentEvent.status === 'running' ? 'running' : 
                            agentEvent.status === 'failed' ? 'failed' : 'pending';
           
@@ -153,7 +153,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
                                 newStatus === 'completed' ? 100 : 
                                 newStatus === 'failed' ? 0 : agent.lastEmittedProgress,
             startTime: agentEvent.status === 'running' && !agent.startTime ? Date.now() : agent.startTime,
-            endTime: agentEvent.status === 'succeeded' || agentEvent.status === 'failed' ? Date.now() : agent.endTime,
+            endTime: agentEvent.status === 'completed' || agentEvent.status === 'failed' ? Date.now() : agent.endTime,
             error: agentEvent.status === 'failed' ? agentEvent.message || 'Agent failed' : undefined
           };
         }
@@ -202,7 +202,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
       
       // Check if all agents are completed - but don't trigger completion here
       // Let the completion checker handle it to avoid race conditions
-      if (agentEvent.status === 'succeeded') {
+      if (agentEvent.status === 'completed') {
         console.log(`${agentEvent.kind} agent completed, will be handled by completion checker`);
       }
       

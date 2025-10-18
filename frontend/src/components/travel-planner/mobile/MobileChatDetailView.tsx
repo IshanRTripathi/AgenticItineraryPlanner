@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '../../ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ChatInterface } from '../../ChatInterface';
+import { NewChat } from '../../chat/NewChat';
 
 interface MobileChatDetailViewProps {
   itineraryId: string;
@@ -36,7 +36,7 @@ export function MobileChatDetailView({
 
       {/* Chat Interface */}
       <div className="flex-1 overflow-hidden">
-        <ChatInterface
+        <NewChat
           itineraryId={itineraryId}
           onItineraryUpdate={onItineraryUpdate}
         />

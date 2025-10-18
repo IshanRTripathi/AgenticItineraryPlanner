@@ -1006,7 +1006,7 @@ components:
           type: number
           format: double
           minimum: 0
-          description: Price amount
+          description: Price amountPerPerson
           example: 25.50
         currency:
           type: string
@@ -1427,7 +1427,7 @@ components:
         amount:
           type: integer
           format: int64
-          description: Order amount in paise
+          description: Order amountPerPerson in paise
           example: 250000
         currency:
           type: string

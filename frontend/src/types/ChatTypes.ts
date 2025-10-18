@@ -10,6 +10,8 @@ export interface ChatRequest {
   selectedNodeId?: string;
   text: string;
   autoApply: boolean;
+  // Optional; backend can derive from auth
+  userId?: string;
 }
 
 export interface ChatResponse {
@@ -22,6 +24,8 @@ export interface ChatResponse {
   warnings: string[];
   needsDisambiguation: boolean;
   candidates: NodeCandidate[];
+  // Align with backend ChatResponse.errors
+  errors?: string[];
 }
 
 export interface ChangeSet {
@@ -57,6 +61,7 @@ export interface DiffItem {
   nodeId: string;
   day: number;
   fields?: string[];
+  title?: string;
 }
 
 export interface NodeCandidate {
@@ -99,8 +104,9 @@ export interface Coordinates {
 }
 
 export interface NodeTiming {
-  startTime: string;
-  endTime: string;
+  // Accept both ms epoch (backend) and formatted strings (frontend)
+  startTime: number | string;
+  endTime: number | string;
   durationMin: number;
 }
 
@@ -140,7 +146,8 @@ export interface ChatMessage {
   id: string;
   text: string;
   sender: 'user' | 'assistant';
-  timestamp: Date;
+  // Accept Date or raw backend values for flexibility
+  timestamp: Date | number | string;
   intent?: string;
   changeSet?: ChangeSet;
   diff?: ItineraryDiff;

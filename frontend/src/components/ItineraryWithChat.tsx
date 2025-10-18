@@ -3,11 +3,10 @@
  * Combines the normalized itinerary viewer with chat functionality
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useItinerary } from '../state/query/hooks';
-import { NormalizedItinerary } from '../types/NormalizedItinerary';
 import { TripData } from '../types/TripData';
-import { ChatInterface } from './ChatInterface';
+import { NewChat } from './chat/NewChat';
 import { NormalizedItineraryViewer } from './NormalizedItineraryViewer';
 import './ItineraryWithChat.css';
 
@@ -21,6 +20,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
   className = '',
 }) => {
   const { data: tripData, isLoading: loading, error: queryError, refetch } = useItinerary(itineraryId);
+  const typedTripData = tripData as TripData | undefined;
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>();
   const [chatScope, setChatScope] = useState<'trip' | 'day'>('trip');
@@ -71,9 +71,9 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
           <div className="error-icon">⚠️</div>
           <h3>Error Loading Itinerary</h3>
           <p>{error}</p>
-          <button 
+          <button
             className="retry-button"
-            onClick={loadItinerary}
+            onClick={() => refetch()}
           >
             Try Again
           </button>
@@ -82,7 +82,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
     );
   }
 
-  if (!tripData) {
+  if (!typedTripData) {
     return (
       <div className={`itinerary-with-chat ${className}`}>
         <div className="empty-container">
@@ -99,20 +99,20 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
       {/* Header with tabs */}
       <div className="itinerary-header">
         <div className="header-info">
-          <h2 className="itinerary-title">{tripData.destination}</h2>
+          <h2 className="itinerary-title">{typedTripData.destination || typedTripData.endLocation?.name || 'Trip'}</h2>
           <div className="itinerary-meta">
             <span className="meta-item">
-              📅 {tripData.startDate} - {tripData.endDate}
+              📅 {typedTripData.dates?.start} - {typedTripData.dates?.end}
             </span>
             <span className="meta-item">
-              📍 {tripData.days.length} days
+              📍 {typedTripData.itinerary?.days?.length || 0} days
             </span>
             <span className="meta-item">
-              💰 {tripData.currency}
+              💰 {typedTripData.budget?.currency || 'USD'}
             </span>
           </div>
         </div>
-        
+
         <div className="tab-navigation">
           <button
             className={`tab-button ${activeTab === 'itinerary' ? 'active' : ''}`}
@@ -163,7 +163,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
           <div className="itinerary-tab">
             <NormalizedItineraryViewer
               itineraryId={itineraryId}
-              tripData={tripData}
+              tripData={typedTripData}
               onNodeSelect={handleNodeSelect}
               onDaySelect={handleDaySelect}
             />
@@ -172,13 +172,7 @@ export const ItineraryWithChat: React.FC<ItineraryWithChatProps> = ({
 
         {activeTab === 'chat' && (
           <div className="chat-tab">
-            <ChatInterface
-              itineraryId={itineraryId}
-              selectedNodeId={selectedNodeId}
-              selectedDay={selectedDay}
-              scope={chatScope}
-              onItineraryUpdate={handleItineraryUpdate}
-            />
+            <NewChat />
           </div>
         )}
       </div>

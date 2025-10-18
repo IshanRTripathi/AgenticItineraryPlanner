@@ -5,8 +5,6 @@ availableSecrets:
   secretManager:
   - versionName: projects/tripaiplanner/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
     env: 'VITE_GOOGLE_MAPS_BROWSER_KEY'
-  - versionName: projects/tripaiplanner/secrets/OPENWEATHER_API/versions/latest
-    env: 'VITE_OPENWEATHER_API_KEY'
 
 steps:
   # Build and deploy backend
@@ -14,15 +12,10 @@ steps:
     args: [
       'build',
       '-f', 'Dockerfile.backend',
-      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest',
       '.'
     ]
     id: 'build-backend'
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA']
-    id: 'push-backend-sha'
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest']
@@ -33,7 +26,7 @@ steps:
     entrypoint: 'gcloud'
     args: [
       'run', 'deploy', 'agentic-itinerary-planner-backend',
-      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:$COMMIT_SHA',
+      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-backend:latest',
       '--region', '${_REGION}',
       '--platform', 'managed',
       '--allow-unauthenticated',
@@ -45,26 +38,19 @@ steps:
       '--concurrency', '100',
       '--timeout', '900',
       '--set-env-vars', 'SPRING_PROFILES_ACTIVE=cloud',
+      '--set-env-vars', 'GEMINI_MOCK_MODE=false',
+      '--set-env-vars', 'AI_PROVIDER=gemini',
+      '--set-env-vars', 'GEMINI_MODEL=gemini-2.5-flash',
+      '--set-env-vars', 'FIREBASE_AUTH_ENABLED=true',
+      '--set-env-vars', 'FIRESTORE_PROJECT_ID=${_FIREBASE_PROJECT_ID}',
+      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
+      '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
       '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
       '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
-      '--set-env-vars', 'GEMINI_MOCK_MODE=false',
-      '--set-env-vars', 'AI_PROVIDER=openrouter',
-      '--set-secrets', 'AI_MODEL=_AI_MODEL:latest',
-      '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_ID=dummy-oauth-client-id',
-      '--set-env-vars', 'GOOGLE_OAUTH_CLIENT_SECRET=dummy-oauth-client-secret',
-      '--set-env-vars', 'RAZORPAY_KEY_ID=dummy-razorpay-key-id',
-      '--set-env-vars', 'RAZORPAY_KEY_SECRET=dummy-razorpay-key-secret',
-      '--set-env-vars', 'SMTP_USERNAME=dummy-smtp-username',
-      '--set-env-vars', 'SMTP_PASSWORD=dummy-smtp-password',
-      '--set-env-vars', 'EMAIL_FROM=noreply@agenticitineraryplanner.com',
-      '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
-      '--set-env-vars', 'APP_DATABASE_TYPE=firestore',
-      '--set-env-vars', 'FIRESTORE_USE_EMULATOR=false',
-      '--set-secrets', 'FIRESTORE_CREDENTIALS=_FIRESTORE_CREDENTIALS:latest',
-      '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}'
+      '--set-secrets', 'firestore.credentials=_FIRESTORE_CREDENTIALS:latest'
     ]
     id: 'deploy-backend'
-    waitFor: ['push-backend-sha']
+    waitFor: ['push-backend-latest']
 
   # Build and deploy frontend
   - name: 'gcr.io/cloud-builders/docker'
@@ -72,19 +58,14 @@ steps:
       'build',
       '-f', 'Dockerfile.frontend',
       '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
+      '--build-arg', 'VITE_WS_BASE_URL=${_BACKEND_URL}',
       '--build-arg', 'VITE_GOOGLE_MAPS_BROWSER_KEY=$$VITE_GOOGLE_MAPS_BROWSER_KEY',
-      '--build-arg', 'VITE_OPENWEATHER_API_KEY=$$VITE_OPENWEATHER_API_KEY',
-      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '.'
     ]
-    secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY', 'VITE_OPENWEATHER_API_KEY']
+    secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY']
     id: 'build-frontend'
     waitFor: ['build-backend']
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA']
-    id: 'push-frontend-sha'
 
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest']
@@ -95,7 +76,7 @@ steps:
     entrypoint: 'gcloud'
     args: [
       'run', 'deploy', 'agentic-itinerary-planner-frontend',
-      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:$COMMIT_SHA',
+      '--image', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
       '--region', '${_REGION}',
       '--platform', 'managed',
       '--allow-unauthenticated',
@@ -108,16 +89,15 @@ steps:
       '--timeout', '300'
     ]
     id: 'deploy-frontend'
-    waitFor: ['push-frontend-sha']
+    waitFor: ['push-frontend-latest']
 
-  
-
-# Substitution variables (hardcoded for mock setup)
+# Substitution variables
 substitutions:
   _REGION: 'us-south1'
-  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-7cbftguaga-vp.a.run.app'
+  _BACKEND_URL: 'https://agentic-itinerary-planner-backend-342690752571.us-south1.run.app'
   _FRONTEND_URL: 'https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app'
   _GCP_PROJECT_ID: 'tripaiplanner'
+  _FIREBASE_PROJECT_ID: 'tripaiplanner-4c951'
 
 # Build options
 options:
