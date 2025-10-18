@@ -260,9 +260,10 @@ public class SummarizationService {
     private String summarizeForEditorAgent(NormalizedItinerary itinerary, int maxTokens) {
         StringBuilder summary = new StringBuilder();
         
-        // Reserve tokens for header and structure info
+        // Reserve tokens for header, structure info, and instructions
         int headerTokens = maxTokens / 4;
-        int remainingTokens = maxTokens - headerTokens;
+        int instructionTokens = maxTokens / 10;
+        int remainingTokens = maxTokens - headerTokens - instructionTokens;
         
         // Add structural information
         summary.append("ITINERARY STRUCTURE FOR EDITING\\n");
@@ -279,6 +280,21 @@ public class SummarizationService {
             for (NormalizedDay day : itinerary.getDays()) {
                 summary.append(summarizeDayForEditor(day, tokensPerDay)).append("\\n");
             }
+            
+            // Add explicit instructions for LLM
+            summary.append("\\nIMPORTANT INSTRUCTIONS:\\n");
+            summary.append("- Use the EXACT node IDs shown above (e.g., day1_node1, day2_node3)\\n");
+            summary.append("- For insert operations, use 'after': 'day{N}_node{M}' format\\n");
+            summary.append("- For replace operations, use 'id': 'day{N}_node{M}' format\\n");
+            summary.append("- For delete operations, use 'id': 'day{N}_node{M}' format\\n");
+            summary.append("- Do NOT generate your own node IDs\\n");
+            
+            // Log context statistics
+            int totalNodes = itinerary.getDays().stream()
+                    .mapToInt(d -> d.getNodes() != null ? d.getNodes().size() : 0)
+                    .sum();
+            logger.debug("Built LLM context with {} days and {} total nodes", 
+                        itinerary.getDays().size(), totalNodes);
         }
         
         return truncateToTokenLimit(summary.toString(), maxTokens);
@@ -351,7 +367,8 @@ public class SummarizationService {
     
     /**
      * Summarize day for editor agent - focus on structure and timing.
-     * CRITICAL: Includes node IDs so LLM can reference them in changes.
+     * CRITICAL: Shows node IDs in clear format so LLM can reference them in changes.
+     * Format: day{N}_node{M}: {title} ({type}) [{startTime}-{endTime}]
      */
     private String summarizeDayForEditor(NormalizedDay day, int maxTokens) {
         StringBuilder summary = new StringBuilder();
@@ -364,8 +381,8 @@ public class SummarizationService {
         
         if (day.getNodes() != null && !day.getNodes().isEmpty()) {
             for (NormalizedNode node : day.getNodes()) {
-                // CRITICAL: Include node ID first so LLM can reference it
-                summary.append("  - [ID: ").append(node.getId()).append("] ");
+                // CRITICAL: Show node ID in clear format: day{N}_node{M}: {title}
+                summary.append("  ").append(node.getId()).append(": ");
                 summary.append(node.getTitle());
                 
                 // Show type for better context
@@ -373,9 +390,13 @@ public class SummarizationService {
                     summary.append(" (").append(node.getType()).append(")");
                 }
                 
-                // Show timing for editing context
-                if (node.getTiming() != null && node.getTiming().getStartTime() != null) {
-                    summary.append(" @ ").append(node.getTiming().getStartTime());
+                // Show timing for editing context in bracket format
+                if (node.getTiming() != null) {
+                    String startTime = node.getTiming().getStartTime() != null ? 
+                                      String.valueOf(node.getTiming().getStartTime()) : "?";
+                    String endTime = node.getTiming().getEndTime() != null ? 
+                                    String.valueOf(node.getTiming().getEndTime()) : "?";
+                    summary.append(" [").append(startTime).append("-").append(endTime).append("]");
                 }
                 
                 // Show location for context
@@ -391,7 +412,7 @@ public class SummarizationService {
                 summary.append("\\n");
             }
         } else {
-            summary.append("  No activities planned.\\n");
+            summary.append("  No nodes\\n");
         }
         
         return truncateToTokenLimit(summary.toString(), maxTokens);

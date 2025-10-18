@@ -180,7 +180,9 @@ public class SkeletonPlannerAgent extends BaseAgent {
                 for (int i = 0; i < day.getNodes().size(); i++) {
                     NormalizedNode node = day.getNodes().get(i);
                     if (node.getId() == null || node.getId().isEmpty()) {
-                        node.setId(nodeIdGenerator.generateSkeletonNodeId(dayNumber, i + 1, node.getType()));
+                        String nodeId = nodeIdGenerator.generateSkeletonNodeId(dayNumber, i + 1, node.getType());
+                        node.setId(nodeId);
+                        logger.debug("Assigned ID {} to node: {}", nodeId, node.getTitle());
                     }
                     
                     // Set placeholder values

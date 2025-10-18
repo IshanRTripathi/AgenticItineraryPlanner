@@ -1,7 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,30 +22,6 @@ public class ItineraryDayDto {
     private List<TransportationDto> transportation;
     private List<MealDto> meals;
     private String notes;
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static ItineraryDayDto fromEntity(Itinerary.ItineraryDay entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return ItineraryDayDto.builder()
-                .day(entity.getDay())
-                .date(entity.getDate())
-                .location(entity.getLocation())
-                .activities(entity.getActivities() != null ? 
-                        entity.getActivities().stream().map(ActivityDto::fromEntity).toList() : null)
-                .accommodation(entity.getAccommodation() != null ? 
-                        AccommodationDto.fromEntity(entity.getAccommodation()) : null)
-                .transportation(entity.getTransportation() != null ? 
-                        entity.getTransportation().stream().map(TransportationDto::fromEntity).toList() : null)
-                .meals(entity.getMeals() != null ? 
-                        entity.getMeals().stream().map(MealDto::fromEntity).toList() : null)
-                .notes(entity.getNotes())
-                .build();
-    }
     
     /**
      * Get total activities count.

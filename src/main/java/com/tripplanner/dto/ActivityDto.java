@@ -1,7 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
 
 /**
  * DTO for activity information.
@@ -20,28 +19,5 @@ public record ActivityDto(
         String bookingUrl,
         String tips
 ) {
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static ActivityDto fromEntity(Itinerary.Activity entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return new ActivityDto(
-                entity.getName(),
-                entity.getDescription(),
-                LocationDto.fromEntity(entity.getLocation()),
-                entity.getStartTime(),
-                entity.getEndTime(),
-                String.valueOf(entity.getDuration()),
-                entity.getCategory(),
-                PriceDto.fromEntity(entity.getPrice()),
-                entity.isBookingRequired(),
-                entity.getBookingUrl(),
-                entity.getTips()
-        );
-    }
 }
 

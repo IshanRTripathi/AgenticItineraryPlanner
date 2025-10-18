@@ -160,8 +160,9 @@ app:
   max-itinerary-days: ${MAX_ITINERARY_DAYS:30}
 
 itinerary:
+  # Pipeline mode is now the only generation mode
+  # Monolithic mode removed in migration (2025-10-18)
   generation:
-    mode: ${ITINERARY_GENERATION_MODE:pipeline}
     pipeline:
       parallel: ${ITINERARY_PIPELINE_PARALLEL:true}
       skeleton:

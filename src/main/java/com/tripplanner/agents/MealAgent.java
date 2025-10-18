@@ -208,7 +208,8 @@ public class MealAgent extends BaseAgent {
             
             for (NormalizedNode node : day.getNodes()) {
                 // Ensure node has ID
-                nodeIdGenerator.ensureNodeHasId(node, day.getDayNumber());
+                nodeIdGenerator.ensureNodeHasId(node, day.getDayNumber(), skeleton);
+                logger.debug("Ensuring node {} has ID for day {}", node.getTitle(), day.getDayNumber());
                 
                 if ("meal".equals(node.getType())) {
                     PopulatedMeal populated = mealMap.get(node.getId());

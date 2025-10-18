@@ -119,6 +119,103 @@ public class ChangeEngine {
     }
     
     /**
+     * Apply changes to the database using a pre-loaded itinerary object.
+     * This ensures consistency between context building and change application.
+     * 
+     * @param itinerary The itinerary object to apply changes to
+     * @param changeSet The changes to apply
+     * @return ApplyResult containing version and diff
+     */
+    public ApplyResult apply(NormalizedItinerary itinerary, ChangeSet changeSet) {
+        if (itinerary == null) {
+            throw new IllegalArgumentException("Itinerary cannot be null");
+        }
+        
+        String itineraryId = itinerary.getItineraryId();
+        logger.info("Applying changes for itinerary: {} (using provided object)", itineraryId);
+        
+        // Check for idempotency
+        String idempotencyKey = changeSet.getIdempotencyKey();
+        if (idempotencyKey != null) {
+            if (!idempotencyManager.isValidIdempotencyKey(idempotencyKey)) {
+                throw new IllegalArgumentException("Invalid idempotency key format: " + idempotencyKey);
+            }
+            
+            Optional<IdempotencyManager.IdempotencyRecord> existingRecord = 
+                idempotencyManager.getExistingOperation(idempotencyKey);
+            
+            if (existingRecord.isPresent()) {
+                logger.info("Returning cached result for idempotent operation: {}", idempotencyKey);
+                return (ApplyResult) existingRecord.get().getResult();
+            }
+        }
+        
+        try {
+            // Use the provided itinerary object instead of loading from database
+            NormalizedItinerary current = itinerary;
+            
+            // Validate version if baseVersion is specified
+            if (changeSet.getBaseVersion() != null) {
+                validateVersion(current, changeSet);
+            }
+            
+            // Create a copy for changes
+            NormalizedItinerary updated = deepCopy(current);
+            
+            // Apply changes
+            ItineraryDiff diff = applyChangesToItinerary(updated, changeSet);
+            
+            // If no changes detected, skip version bump and revision
+            boolean hasChanges = (diff.getAdded() != null && !diff.getAdded().isEmpty())
+                    || (diff.getRemoved() != null && !diff.getRemoved().isEmpty())
+                    || (diff.getUpdated() != null && !diff.getUpdated().isEmpty());
+            if (!hasChanges) {
+                logger.info("No-op ChangeSet: skipping version bump and revision save");
+                return new ApplyResult(current.getVersion(), diff);
+            }
+            
+            // Create revision record before applying changes
+            RevisionRecord revisionRecord = createRevisionRecord(current, changeSet);
+            
+            try {
+                // Save revision using RevisionService
+                revisionService.saveRevision(itineraryId, revisionRecord);
+                
+                // Increment version only after successful revision save
+                updated.setVersion(current.getVersion() + 1);
+                updated.setUpdatedAt(System.currentTimeMillis());
+                
+                // Update main record
+                itineraryJsonService.updateItinerary(updated);
+                
+            } catch (Exception revisionError) {
+                logger.error("Failed to save revision, rolling back changes", revisionError);
+                throw new RuntimeException("Failed to save revision: " + revisionError.getMessage(), revisionError);
+            }
+            
+            ApplyResult result = new ApplyResult(updated.getVersion(), diff);
+            
+            // Store result in idempotency manager if key provided
+            if (idempotencyKey != null) {
+                idempotencyManager.storeOperationResult(
+                    idempotencyKey, 
+                    result, 
+                    "change_application"
+                );
+            }
+            
+            // Trigger automatic enrichment for new/modified nodes (async, non-blocking)
+            triggerAutoEnrichment(itineraryId, diff);
+            
+            return result;
+            
+        } catch (Exception e) {
+            logger.error("Failed to apply changes", e);
+            throw new RuntimeException("Failed to apply changes", e);
+        }
+    }
+    
+    /**
      * Apply changes to the database.
      * Increments version, persists JSON, and creates revision.
      */
@@ -149,6 +246,18 @@ public class ChangeEngine {
             }
             
             NormalizedItinerary current = currentOpt.get();
+            
+            // LOG: Itinerary state in ChangeEngine
+            logger.info("=== ITINERARY STATE IN CHANGE ENGINE ===");
+            for (NormalizedDay day : current.getDays()) {
+                logger.info("Day {}: {} nodes - IDs: {}", 
+                           day.getDayNumber(),
+                           day.getNodes() != null ? day.getNodes().size() : 0,
+                           day.getNodes() != null ? 
+                               day.getNodes().stream().map(node -> node.getId()).collect(java.util.stream.Collectors.toList()) : 
+                               "null");
+            }
+            logger.info("=========================================");
             
             // Validate version if baseVersion is specified
             if (changeSet.getBaseVersion() != null) {
@@ -371,7 +480,7 @@ public class ChangeEngine {
         
         // Generate ID for new node if not provided
         if (op.getNode().getId() == null || op.getNode().getId().trim().isEmpty()) {
-            String generatedId = nodeIdGenerator.generateNodeId(op.getNode().getType(), day);
+            String generatedId = nodeIdGenerator.generateNodeId(op.getNode().getType(), day, itinerary);
             op.getNode().setId(generatedId);
             logger.info("Generated ID for new node: {} -> {}", op.getNode().getTitle(), generatedId);
         }
@@ -409,6 +518,8 @@ public class ChangeEngine {
      * Delete a node.
      */
     private boolean deleteNode(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
+        logger.debug("Applying delete operation for node: {}", op.getId());
+        
         // Find the day
         NormalizedDay targetDay = findDayByNumber(itinerary, day);
         if (targetDay == null) {
@@ -416,11 +527,16 @@ public class ChangeEngine {
             return false;
         }
         
-        // Find and remove the node
+        // Find and remove the node - STRICT VALIDATION
         List<NormalizedNode> nodes = targetDay.getNodes();
         NormalizedNode nodeToRemove = findNodeById(itinerary, op.getId());
         if (nodeToRemove == null) {
-            logger.warn("Node not found for delete operation: {}", op.getId());
+            String availableIds = getAvailableNodeIds(itinerary);
+            String errorMsg = String.format(
+                "Node with ID '%s' not found for deletion. Available node IDs: %s",
+                op.getId(), availableIds);
+            
+            logger.error(errorMsg);
             return false;
         }
         
@@ -449,6 +565,8 @@ public class ChangeEngine {
      * Replace a node with a new one.
      */
     private boolean replaceNode(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
+        logger.debug("Applying replace operation for node: {}", op.getId());
+        
         // Find the day
         NormalizedDay targetDay = findDayByNumber(itinerary, day);
         if (targetDay == null) {
@@ -456,23 +574,17 @@ public class ChangeEngine {
             return false;
         }
         
-        // Find the node to replace
+        // Find the node to replace - STRICT VALIDATION, NO FALLBACK
         NormalizedNode nodeToReplace = findNodeById(itinerary, op.getId());
         if (nodeToReplace == null) {
-            logger.warn("Node not found for replace operation: {}, attempting fallback strategy", op.getId());
+            String availableIds = getAvailableNodeIds(itinerary);
+            String errorMsg = String.format(
+                "Node with ID '%s' not found. Available node IDs: %s. " +
+                "This may indicate an LLM context issue or stale node reference.",
+                op.getId(), availableIds);
             
-            // Fallback: if we can't find the exact node, try to find a node that matches the pattern
-            // This handles cases where the LLM provides a generic ID like "day1_node1"
-            List<NormalizedNode> nodes = targetDay.getNodes();
-            if (nodes != null && !nodes.isEmpty()) {
-                // For now, use the first node as a fallback
-                // In a more sophisticated implementation, we could use fuzzy matching or position-based lookup
-                nodeToReplace = nodes.get(0);
-                logger.warn("Using fallback node '{}' for replace operation", nodeToReplace.getId());
-            } else {
-                logger.warn("No nodes found in day {} for replace operation", day);
-                return false;
-            }
+            logger.error(errorMsg);
+            return false; // Fail fast, no fallback
         }
         
         // Check if node is locked (both node-level and system-level locks)
@@ -496,7 +608,7 @@ public class ChangeEngine {
         } else {
             // Generate ID for replacement node if not provided
             if (replacementNode.getId() == null || replacementNode.getId().trim().isEmpty()) {
-                String generatedId = nodeIdGenerator.generateNodeId(replacementNode.getType(), day);
+                String generatedId = nodeIdGenerator.generateNodeId(replacementNode.getType(), day, itinerary);
                 replacementNode.setId(generatedId);
                 logger.info("Generated ID for replacement node: {} -> {}", replacementNode.getTitle(), generatedId);
             }
@@ -606,6 +718,26 @@ public class ChangeEngine {
             }
         }
         return -1;
+    }
+    
+    /**
+     * Get all available node IDs in the itinerary for error messages.
+     * Helps with debugging when a node is not found.
+     * 
+     * @param itinerary The itinerary to scan
+     * @return Comma-separated list of all node IDs
+     */
+    private String getAvailableNodeIds(NormalizedItinerary itinerary) {
+        if (itinerary == null || itinerary.getDays() == null) {
+            return "none";
+        }
+        
+        return itinerary.getDays().stream()
+                .filter(day -> day.getNodes() != null)
+                .flatMap(day -> day.getNodes().stream())
+                .map(NormalizedNode::getId)
+                .filter(id -> id != null)
+                .collect(java.util.stream.Collectors.joining(", "));
     }
     
     /**

@@ -44,9 +44,6 @@ public class PipelineOrchestrator {
     private final AgentEventPublisher agentEventPublisher;
     private final ExecutorService pipelineExecutor;
     
-    @Value("${itinerary.generation.mode:pipeline}")
-    private String generationMode;
-    
     @Value("${itinerary.generation.pipeline.parallel:true}")
     private boolean enableParallel;
     
@@ -99,7 +96,7 @@ public class PipelineOrchestrator {
         logger.info("=== PIPELINE ORCHESTRATOR: STARTING ===");
         logger.info("Itinerary ID: {}", itineraryId);
         logger.info("Destination: {}, Duration: {} days", request.getDestination(), request.getDurationDays());
-        logger.info("Mode: {}, Parallel: {}", generationMode, enableParallel);
+        logger.info("Parallel: {}", enableParallel);
         
         long startTime = System.currentTimeMillis();
         String executionId = "exec_" + System.currentTimeMillis();
@@ -358,13 +355,6 @@ public class PipelineOrchestrator {
             logger.error("Finalization failed: {}", e.getMessage(), e);
             throw new RuntimeException("Finalization failed", e);
         }
-    }
-    
-    /**
-     * Check if pipeline mode is enabled.
-     */
-    public boolean isPipelineEnabled() {
-        return "pipeline".equalsIgnoreCase(generationMode);
     }
     
     // Event publishing methods

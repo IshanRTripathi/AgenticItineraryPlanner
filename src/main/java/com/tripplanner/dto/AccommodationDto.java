@@ -1,8 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,26 +19,5 @@ public record AccommodationDto(
         List<String> amenities,
         String bookingUrl
 ) {
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static AccommodationDto fromEntity(Itinerary.Accommodation entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return new AccommodationDto(
-                entity.getName(),
-                entity.getType(),
-                LocationDto.fromEntity(entity.getLocation()),
-                entity.getCheckIn(),
-                entity.getCheckOut(),
-                PriceDto.fromEntity(entity.getPrice()),
-                entity.getRating(),
-                entity.getAmenities(),
-                entity.getBookingUrl()
-        );
-    }
 }
 

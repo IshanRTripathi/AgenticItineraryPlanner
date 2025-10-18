@@ -1,7 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
@@ -28,36 +27,6 @@ public record LocationDto(
         @Size(max = 100, message = "Place ID must not exceed 100 characters")
         String placeId
 ) {
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static LocationDto fromEntity(Itinerary.Location entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return new LocationDto(
-                entity.getName(),
-                entity.getAddress(),
-                entity.getLat(),
-                entity.getLng(),
-                entity.getPlaceId()
-        );
-    }
-    
-    /**
-     * Convert to entity.
-     */
-    public Itinerary.Location toEntity() {
-        Itinerary.Location entity = new Itinerary.Location();
-        entity.setName(name);
-        entity.setAddress(address);
-        entity.setLat(lat);
-        entity.setLng(lng);
-        entity.setPlaceId(placeId);
-        return entity;
-    }
     
     /**
      * Create a simple location with just name and coordinates.

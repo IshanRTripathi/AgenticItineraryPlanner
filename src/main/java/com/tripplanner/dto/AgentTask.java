@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 /**
  * Represents a durable agent task that can survive system restarts and be retried on failure.
- * Tasks are persisted in Firestore and processed by the AgentTaskSystem.
+ * Tasks are persisted in Firestore for future task processing implementations.
  */
 public class AgentTask {
     

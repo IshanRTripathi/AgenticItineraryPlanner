@@ -1,46 +1,67 @@
 package com.tripplanner.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.tripplanner.agents.AgentOrchestrator;
 import com.tripplanner.dto.*;
+import com.tripplanner.dto.ErrorEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Service for itinerary operations using Firestore-backed normalized JSON only.
+ * 
+ * This service now uses only the pipeline flow for itinerary generation.
+ * The monolithic flow has been removed as part of the dual-flow migration (2025-10-18).
  */
 @Service
 public class ItineraryService {
     
     private static final Logger logger = LoggerFactory.getLogger(ItineraryService.class);
     
-    private final AgentOrchestrator agentOrchestrator;
+    private final ItineraryInitializationService initService;
     private final ItineraryJsonService itineraryJsonService;
     private final UserDataService userDataService;
     private final PipelineOrchestrator pipelineOrchestrator;
+    private final AgentEventPublisher agentEventPublisher;
+    private final ItineraryMigrationService migrationService;
     
-    @Value("${itinerary.generation.mode:monolithic}")
-    private String generationMode;
-    
-    public ItineraryService(AgentOrchestrator agentOrchestrator,
+    public ItineraryService(ItineraryInitializationService initService,
                             ItineraryJsonService itineraryJsonService,
                             UserDataService userDataService,
-                            @Autowired(required = false) PipelineOrchestrator pipelineOrchestrator) {
-        this.agentOrchestrator = agentOrchestrator;
+                            PipelineOrchestrator pipelineOrchestrator,
+                            AgentEventPublisher agentEventPublisher,
+                            ItineraryMigrationService migrationService) {
+        this.initService = initService;
         this.itineraryJsonService = itineraryJsonService;
         this.userDataService = userDataService;
         this.pipelineOrchestrator = pipelineOrchestrator;
+        this.agentEventPublisher = agentEventPublisher;
+        this.migrationService = migrationService;
     }
     
     /**
      * Create a new itinerary for a specific user.
+     * 
+     * <p>This method creates an initial itinerary synchronously to establish ownership,
+     * then starts async generation in the background. Progress events are published
+     * via SSE to connected clients.</p>
+     * 
+     * <p>The method returns immediately with status="generating". Clients should
+     * establish an SSE connection to receive real-time progress updates.</p>
+     * 
+     * <p>Error handling: If async generation fails, an error event is published
+     * to SSE subscribers. The error is logged but does not affect the API response.</p>
+     * 
+     * @param request The itinerary creation request with destination, dates, preferences
+     * @param userId The authenticated user ID from Firebase token
+     * @return ItineraryDto with status="generating" and initial metadata
+     * @throws RuntimeException if initial itinerary creation fails
+     * @throws IllegalStateException if no orchestrator is available for the configured mode
      */
     public ItineraryDto create(CreateItineraryReq request, String userId) {
         logger.info("=== CREATE ITINERARY REQUEST ===");
@@ -69,7 +90,7 @@ public class ItineraryService {
             // SYNCHRONOUSLY create initial itinerary and establish ownership
             // This ensures the user can immediately access the itinerary endpoint
             logger.info("Creating initial itinerary and establishing ownership synchronously");
-            NormalizedItinerary initialItinerary = agentOrchestrator.createInitialItinerary(itineraryId, request, userId);
+            NormalizedItinerary initialItinerary = initService.createInitialItinerary(itineraryId, request, userId);
             
             // Convert the initial itinerary to DTO for the API response
             ItineraryDto result = ItineraryDto.builder()
@@ -97,24 +118,56 @@ public class ItineraryService {
             }
             
             logger.info("Starting async itinerary generation for user: {} with ID: {}", userId, itineraryId);
-            logger.info("Generation mode: {}", generationMode);
+            logger.info("Starting pipeline generation");
             
-            // Choose generation strategy based on configuration
-            if ("pipeline".equalsIgnoreCase(generationMode) && pipelineOrchestrator != null) {
-                logger.info("Using PIPELINE mode for generation");
+            // Generate unique execution ID for tracking this generation attempt
+            String executionId = "exec_" + System.currentTimeMillis();
+            logger.info("Generated executionId: {} for itinerary: {}", executionId, itineraryId);
+            
+            // Start pipeline generation (always use pipeline flow)
+            CompletableFuture<NormalizedItinerary> future = 
                 pipelineOrchestrator.generateItinerary(itineraryId, request, userId);
-            } else {
-                logger.info("Using MONOLITHIC mode for generation");
-                agentOrchestrator.generateNormalizedItinerary(itineraryId, request, userId);
-            }
+            
+            // Attach completion callback for error handling and tracking
+            future.whenComplete((pipelineResult, throwable) -> {
+                if (throwable != null) {
+                    // Log the error with full context
+                    logger.error("Pipeline generation failed for itinerary: {}, executionId: {}", 
+                        itineraryId, executionId, throwable);
+                    
+                    // Publish error event to SSE subscribers so UI can show error message
+                    try {
+                        agentEventPublisher.publishErrorFromException(
+                            itineraryId,
+                            executionId,
+                            (Exception) throwable,
+                            "itinerary generation",
+                            ErrorEvent.ErrorSeverity.ERROR
+                        );
+                        logger.info("Error event published for itinerary: {}, executionId: {}", 
+                            itineraryId, executionId);
+                    } catch (Exception e) {
+                        // Don't let event publishing failures affect the main flow
+                        logger.error("Failed to publish error event for itinerary: {}, executionId: {}", 
+                            itineraryId, executionId, e);
+                    }
+                } else {
+                    // Log successful completion
+                    logger.info("Pipeline generation completed successfully for itinerary: {}, executionId: {}", 
+                        itineraryId, executionId);
+                    // Note: Completion event is already published by PipelineOrchestrator.publishPipelineComplete()
+                }
+            });
 
             logger.info("=== CREATE ITINERARY RESPONSE ===");
             logger.info("User ID: {}", userId);
             logger.info("Itinerary ID: {}", result.getId());
+            logger.info("ExecutionId: {}", executionId);
             logger.info("Status: {}", result.getStatus());
-            logger.info("Mode: {}", generationMode);
             logger.info("Ownership established: YES");
             logger.info("Async generation started: YES");
+            logger.info("Async callbacks attached: YES");
+            logger.info("Error handling enabled: YES");
             logger.info("User can now access /itineraries/{}/json", itineraryId);
             logger.info("=====================================");
 
@@ -155,6 +208,10 @@ public class ItineraryService {
                 );
             }
             NormalizedItinerary ni = niOpt.get();
+            
+            // Automatically migrate if needed
+            ni = migrationService.migrateIfNeeded(ni);
+            logger.debug("Loaded itinerary {} (version {})", id, ni.getVersion());
             ItineraryDto result = ItineraryDto.builder()
                     .id(ni.getItineraryId())
                     .summary(ni.getSummary())

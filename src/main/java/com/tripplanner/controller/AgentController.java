@@ -1,34 +1,28 @@
 package com.tripplanner.controller;
 
-import com.tripplanner.dto.ChangeSet;
-import com.tripplanner.dto.CreateItineraryReq;
-import com.tripplanner.dto.NormalizedItinerary;
+import com.tripplanner.dto.AgentEvent;
 import com.tripplanner.service.AgentEventBus;
 import com.tripplanner.service.AgentRegistry;
-import com.tripplanner.service.ChangeEngine;
-import com.tripplanner.agents.AgentOrchestrator;
-import com.tripplanner.dto.AgentEvent;
-import java.util.Set;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseToken;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.time.LocalTime.now;
 
 /**
  * REST controller for agent events via Server-Sent Events (SSE).
+ * 
+ * This controller provides SSE endpoints for real-time agent progress updates.
+ * The main itinerary creation flow is handled by ItineraryController.
  */
 @RestController
 @RequestMapping("/api/v1/agents")
@@ -37,15 +31,13 @@ public class AgentController {
     private static final Logger logger = LoggerFactory.getLogger(AgentController.class);
     
     private final AgentEventBus agentEventBus;
-    private final AgentOrchestrator agentOrchestrator;
     private final AgentRegistry agentRegistry;
     
     @Autowired
     private FirebaseAuth firebaseAuth;
     
-    public AgentController(AgentEventBus agentEventBus, AgentOrchestrator agentOrchestrator, AgentRegistry agentRegistry) {
+    public AgentController(AgentEventBus agentEventBus, AgentRegistry agentRegistry) {
         this.agentEventBus = agentEventBus;
-        this.agentOrchestrator = agentOrchestrator;
         this.agentRegistry = agentRegistry;
     }
     
@@ -197,6 +189,9 @@ public class AgentController {
     
     /**
      * Get agent status for an itinerary (alternative to SSE for polling).
+     * 
+     * Note: The main itinerary creation flow is handled by ItineraryController.
+     * This endpoint provides status information for monitoring purposes.
      */
     @GetMapping("/{itineraryId}/status")
     public AgentStatusResponse getStatus(@PathVariable String itineraryId) {
@@ -207,135 +202,6 @@ public class AgentController {
         return new AgentStatusResponse(itineraryId, "active", "Processing itinerary...");
     }
     
-    // ===== NEW MVP CONTRACT ENDPOINTS =====
-    
-    /**
-     * Execute agents to generate a normalized itinerary.
-     * POST /agents/run → 200 → body: CreateItineraryReq → {itineraryId, status}
-     */
-    @PostMapping("/run")
-    public ResponseEntity<AgentRunResponse> runAgents(@Valid @RequestBody CreateItineraryReq request, HttpServletRequest httpRequest) {
-        logger.info("=== AGENT CONTROLLER: RUNNING AGENTS ===");
-        logger.info("Destination: {}", request.getDestination());
-        logger.info("Duration: {} days", request.getDurationDays());
-        
-        try {
-            // Extract userId from request attributes (set by FirebaseAuthConfig)
-            String userId = (String) httpRequest.getAttribute("userId");
-            if (userId == null) {
-                logger.error("User ID not found in request");
-                return ResponseEntity.status(401).build();
-            }
-            
-            // Generate a unique itinerary ID
-            String itineraryId = "it_" + request.getDestination().toLowerCase().replaceAll("\\s+", "_") + "_" + System.currentTimeMillis();
-            
-            // Run the agent orchestration asynchronously
-            CompletableFuture<NormalizedItinerary> future = agentOrchestrator.generateNormalizedItinerary(itineraryId, request, userId);
-            
-            // Return immediately with the itinerary ID
-            AgentRunResponse response = new AgentRunResponse(
-                itineraryId,
-                "running",
-                "Agents are processing your itinerary. Use SSE to track progress."
-            );
-            
-            logger.info("=== AGENT EXECUTION STARTED ===");
-            logger.info("Itinerary ID: {}", itineraryId);
-            logger.info("Status: {}", response.status());
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            logger.error("Failed to run agents", e);
-            return ResponseEntity.status(500).body(new AgentRunResponse(
-                null,
-                "failed",
-                "Failed to start agent execution: " + e.getMessage()
-            ));
-        }
-    }
-    
-    /**
-     * Process a user request to modify an existing itinerary.
-     * POST /agents/process-request → 200 → body: {itineraryId, userRequest} → {changeSet, status}
-     */
-    @PostMapping("/process-request")
-    public ResponseEntity<ProcessRequestResponse> processUserRequest(@Valid @RequestBody ProcessRequestRequest request) {
-        logger.info("=== AGENT CONTROLLER: PROCESSING USER REQUEST ===");
-        logger.info("Itinerary ID: {}", request.itineraryId());
-        logger.info("User Request: {}", request.userRequest());
-        
-        try {
-            // Process the user request asynchronously
-            CompletableFuture<ChangeSet> future = agentOrchestrator.processUserRequest(request.itineraryId(), request.userRequest());
-            
-            // For now, we'll return a placeholder response
-            // In a real implementation, you might want to wait for the result or return a job ID
-            ProcessRequestResponse response = new ProcessRequestResponse(
-                request.itineraryId(),
-                "processing",
-                "Processing your request. Use SSE to track progress.",
-                null // ChangeSet will be available via SSE
-            );
-            
-            logger.info("=== USER REQUEST PROCESSING STARTED ===");
-            logger.info("Itinerary ID: {}", request.itineraryId());
-            logger.info("Status: {}", response.status());
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            logger.error("Failed to process user request", e);
-            return ResponseEntity.status(500).body(new ProcessRequestResponse(
-                request.itineraryId(),
-                "failed",
-                "Failed to process request: " + e.getMessage(),
-                null
-            ));
-        }
-    }
-    
-    /**
-     * Apply a ChangeSet with ENRICHMENT.
-     * POST /agents/apply-with-ENRICHMENT → 200 → body: {itineraryId, changeSet} → {result, status}
-     */
-    @PostMapping("/apply-with-enrichment")
-    public ResponseEntity<ApplyWithEnrichmentResponse> applyWithEnrichment(@Valid @RequestBody ApplyWithEnrichmentRequest request) {
-        logger.info("=== AGENT CONTROLLER: APPLYING WITH ENRICHMENT ===");
-        logger.info("Itinerary ID: {}", request.itineraryId());
-        logger.info("ChangeSet: {}", request.changeSet());
-        
-        try {
-            // Apply the ChangeSet with ENRICHMENT asynchronously
-            CompletableFuture<ChangeEngine.ApplyResult> future = agentOrchestrator.applyChangeSetWithEnrichment(
-                request.itineraryId(), request.changeSet());
-            
-            // Return immediately with status
-            ApplyWithEnrichmentResponse response = new ApplyWithEnrichmentResponse(
-                request.itineraryId(),
-                "applying",
-                "Applying changes with ENRICHMENT. Use SSE to track progress.",
-                null // Result will be available via SSE
-            );
-            
-            logger.info("=== APPLY WITH ENRICHMENT STARTED ===");
-            logger.info("Itinerary ID: {}", request.itineraryId());
-            logger.info("Status: {}", response.status());
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            logger.error("Failed to apply with ENRICHMENT", e);
-            return ResponseEntity.status(500).body(new ApplyWithEnrichmentResponse(
-                request.itineraryId(),
-                "failed",
-                "Failed to apply changes: " + e.getMessage(),
-                null
-            ));
-        }
-    }
-    
     /**
      * Response DTO for agent status.
      */
@@ -343,51 +209,6 @@ public class AgentController {
             String itineraryId,
             String status,
             String message
-    ) {}
-    
-    /**
-     * Response DTO for agent run.
-     */
-    public record AgentRunResponse(
-            String itineraryId,
-            String status,
-            String message
-    ) {}
-    
-    /**
-     * Request DTO for processing user request.
-     */
-    public record ProcessRequestRequest(
-            String itineraryId,
-            String userRequest
-    ) {}
-    
-    /**
-     * Response DTO for processing user request.
-     */
-    public record ProcessRequestResponse(
-            String itineraryId,
-            String status,
-            String message,
-            ChangeSet changeSet
-    ) {}
-    
-    /**
-     * Request DTO for applying with ENRICHMENT.
-     */
-    public record ApplyWithEnrichmentRequest(
-            String itineraryId,
-            ChangeSet changeSet
-    ) {}
-    
-    /**
-     * Response DTO for applying with ENRICHMENT.
-     */
-    public record ApplyWithEnrichmentResponse(
-            String itineraryId,
-            String status,
-            String message,
-            ChangeEngine.ApplyResult result
     ) {}
 }
 

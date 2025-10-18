@@ -1,7 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,30 +25,6 @@ public record PriceDto(
     public PriceDto {
         // Round amountPerPerson to 2 decimal places
         amountPerPerson = BigDecimal.valueOf(amountPerPerson).setScale(2, RoundingMode.HALF_UP).doubleValue();
-    }
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static PriceDto fromEntity(Itinerary.Price entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return new PriceDto(
-                entity.getAmount(),
-                entity.getCurrency()
-        );
-    }
-    
-    /**
-     * Convert to entity.
-     */
-    public Itinerary.Price toEntity() {
-        Itinerary.Price entity = new Itinerary.Price();
-        entity.setAmount(amountPerPerson);
-        entity.setCurrency(currency);
-        return entity;
     }
     
     /**

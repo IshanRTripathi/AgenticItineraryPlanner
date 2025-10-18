@@ -24,6 +24,7 @@ public class EditorAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final ObjectMapper objectMapper;
     private final LLMResponseHandler llmResponseHandler;
+    private final ItineraryMigrationService migrationService;
     
     public EditorAgent(AgentEventBus eventBus,
                       SummarizationService summarizationService,
@@ -31,7 +32,8 @@ public class EditorAgent extends BaseAgent {
                       GeminiClient geminiClient,
                       ItineraryJsonService itineraryJsonService,
                       ObjectMapper objectMapper,
-                      LLMResponseHandler llmResponseHandler) {
+                      LLMResponseHandler llmResponseHandler,
+                      ItineraryMigrationService migrationService) {
         super(eventBus, AgentEvent.AgentKind.EDITOR);
         this.summarizationService = summarizationService;
         this.changeEngine = changeEngine;
@@ -39,6 +41,7 @@ public class EditorAgent extends BaseAgent {
         this.itineraryJsonService = itineraryJsonService;
         this.objectMapper = objectMapper;
         this.llmResponseHandler = llmResponseHandler;
+        this.migrationService = migrationService;
     }
     
     @Override
@@ -88,6 +91,25 @@ public class EditorAgent extends BaseAgent {
             
             NormalizedItinerary itinerary = itineraryOpt.get();
             
+            // Migrate if needed before building context
+            itinerary = migrationService.migrateIfNeeded(itinerary);
+            logger.debug("Itinerary {} migrated (if needed), version: {}", itineraryId, itinerary.getVersion());
+            
+            // LOG: Itinerary state after migration
+            logger.info("=== ITINERARY STATE AFTER MIGRATION (EditorAgent) ===");
+            for (NormalizedDay day : itinerary.getDays()) {
+                logger.info("Day {}: {} nodes - IDs: {}", 
+                           day.getDayNumber(),
+                           day.getNodes() != null ? day.getNodes().size() : 0,
+                           day.getNodes() != null ? 
+                               day.getNodes().stream().map(node -> node.getId()).collect(java.util.stream.Collectors.toList()) : 
+                               "null");
+            }
+            logger.info("=======================================================");
+            
+            // Validate itinerary data consistency
+            validateItineraryDataConsistency(itinerary);
+            
             // Validate itinerary before processing
             validateItineraryForEditing(itinerary);
             
@@ -123,8 +145,8 @@ public class EditorAgent extends BaseAgent {
             
             emitProgress(itineraryId, 80, "Applying changes", "apply");
             
-            // Apply changes using changeEngine
-            ChangeEngine.ApplyResult applyResult = changeEngine.apply(itineraryId, changeSet);
+            // Apply changes using changeEngine with the itinerary object to ensure consistency
+            ChangeEngine.ApplyResult applyResult = changeEngine.apply(itinerary, changeSet);
             
             emitProgress(itineraryId, 100, "Changes applied successfully", "complete");
             
@@ -703,6 +725,90 @@ public class EditorAgent extends BaseAgent {
         }
         
         logger.debug("Itinerary validation passed for {}", itinerary.getItineraryId());
+    }
+    
+    /**
+     * Validate itinerary data consistency before processing.
+     * Detects phantom nodes, invalid data, and inconsistencies.
+     */
+    private void validateItineraryDataConsistency(NormalizedItinerary itinerary) {
+        if (itinerary == null || itinerary.getDays() == null) {
+            return;
+        }
+        
+        java.util.List<String> errors = new java.util.ArrayList<>();
+        java.util.List<String> warnings = new java.util.ArrayList<>();
+        
+        for (NormalizedDay day : itinerary.getDays()) {
+            if (day.getNodes() == null) {
+                continue;
+            }
+            
+            // Track node IDs to detect duplicates
+            java.util.Set<String> seenIds = new java.util.HashSet<>();
+            
+            for (int i = 0; i < day.getNodes().size(); i++) {
+                NormalizedNode node = day.getNodes().get(i);
+                
+                // Check for missing ID
+                if (node.getId() == null || node.getId().trim().isEmpty()) {
+                    errors.add(String.format("Day %d, position %d: Node without ID (title: %s)", 
+                                            day.getDayNumber(), i, node.getTitle()));
+                }
+                
+                // Check for duplicate IDs
+                if (node.getId() != null && !seenIds.add(node.getId())) {
+                    errors.add(String.format("Day %d: Duplicate node ID '%s'", 
+                                            day.getDayNumber(), node.getId()));
+                }
+                
+                // Check for missing title
+                if (node.getTitle() == null || node.getTitle().trim().isEmpty()) {
+                    errors.add(String.format("Day %d: Node without title (ID: %s)", 
+                                            day.getDayNumber(), node.getId()));
+                }
+                
+                // Check for invalid timing
+                if (node.getTiming() != null) {
+                    if (node.getTiming().getStartTime() != null && 
+                        node.getTiming().getEndTime() != null &&
+                        node.getTiming().getStartTime() > node.getTiming().getEndTime()) {
+                        warnings.add(String.format("Day %d: Node %s has invalid timing (start > end)", 
+                                                  day.getDayNumber(), node.getId()));
+                    }
+                }
+                
+                // Check for suspicious node IDs (non-sequential)
+                if (node.getId() != null && node.getId().matches("day\\d+_node\\d+")) {
+                    String expectedId = String.format("day%d_node%d", day.getDayNumber(), i + 1);
+                    if (!node.getId().equals(expectedId)) {
+                        warnings.add(String.format("Day %d, position %d: Non-sequential node ID '%s' (expected '%s')", 
+                                                  day.getDayNumber(), i, node.getId(), expectedId));
+                    }
+                }
+            }
+        }
+        
+        // Log warnings
+        if (!warnings.isEmpty()) {
+            logger.warn("Itinerary data validation warnings for {}:", itinerary.getItineraryId());
+            warnings.forEach(warning -> logger.warn("  - {}", warning));
+        }
+        
+        // Fail on errors
+        if (!errors.isEmpty()) {
+            logger.error("Itinerary data validation failed for {}:", itinerary.getItineraryId());
+            errors.forEach(error -> logger.error("  - {}", error));
+            throw new IllegalStateException("Invalid itinerary data: " + errors.size() + " errors found. " +
+                                          "First error: " + errors.get(0));
+        }
+        
+        if (warnings.isEmpty()) {
+            logger.debug("Itinerary data consistency validation passed for {}", itinerary.getItineraryId());
+        } else {
+            logger.info("Itinerary data consistency validation passed with {} warnings for {}", 
+                       warnings.size(), itinerary.getItineraryId());
+        }
     }
     
     /**

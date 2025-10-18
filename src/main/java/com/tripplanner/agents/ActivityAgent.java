@@ -184,7 +184,8 @@ public class ActivityAgent extends BaseAgent {
             
             for (NormalizedNode node : day.getNodes()) {
                 // Ensure node has ID
-                nodeIdGenerator.ensureNodeHasId(node, day.getDayNumber());
+                nodeIdGenerator.ensureNodeHasId(node, day.getDayNumber(), skeleton);
+                logger.debug("Ensuring node {} has ID for day {}", node.getTitle(), day.getDayNumber());
                 
                 if ("attraction".equals(node.getType())) {
                     PopulatedAttraction populated = attractionMap.get(node.getId());

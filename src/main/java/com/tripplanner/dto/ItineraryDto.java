@@ -1,7 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
 import lombok.Builder;
 import lombok.Data;
 
@@ -53,68 +52,6 @@ public class ItineraryDto {
     @com.fasterxml.jackson.annotation.JsonProperty("public")
     private boolean isPublic = false;
     private String shareToken;
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static ItineraryDto fromEntity(Itinerary entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return ItineraryDto.builder()
-                .id(entity.getId().toString())
-                .destination(entity.getDestination())
-                .startDate(entity.getStartDate())
-                .endDate(entity.getEndDate())
-                .party(entity.getParty() != null ? PartyDto.fromEntity(entity.getParty()) : null)
-                .budgetTier(entity.getBudgetTier())
-                .interests(entity.getInterests())
-                .constraints(entity.getConstraints())
-                .language(entity.getLanguage())
-                .summary(entity.getSummary())
-                .map(null) // Map data not implemented in JPA version yet
-                .days(entity.getDays() != null ? 
-                        entity.getDays().stream().map(ItineraryDayDto::fromEntity).toList() : null)
-                .agentResults(null) // will be populated separately
-                .status(entity.getStatus())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .isPublic(entity.isPublic())
-                .shareToken(entity.getShareToken())
-                .build();
-    }
-    
-    /**
-     * Create public DTO (for sharing) - excludes sensitive information.
-     */
-    public static ItineraryDto createPublicDto(Itinerary entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return ItineraryDto.builder()
-                .id(entity.getId().toString())
-                .destination(entity.getDestination())
-                .startDate(entity.getStartDate())
-                .endDate(entity.getEndDate())
-                .party(entity.getParty() != null ? PartyDto.fromEntity(entity.getParty()) : null)
-                .budgetTier(entity.getBudgetTier())
-                .interests(entity.getInterests())
-                .constraints(entity.getConstraints())
-                .language(entity.getLanguage())
-                .summary(entity.getSummary())
-                .map(null) // Map data not implemented in JPA version yet
-                .days(entity.getDays() != null ? 
-                        entity.getDays().stream().map(ItineraryDayDto::fromEntity).toList() : null)
-                .agentResults(null) // will be populated separately
-                .status(entity.getStatus())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .isPublic(true) // Always true for public DTOs
-                .shareToken(null) // Don't expose share token in public view
-                .build();
-    }
     
     /**
      * Get trip duration in days.

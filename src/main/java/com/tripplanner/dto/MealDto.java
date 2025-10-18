@@ -1,7 +1,6 @@
 package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.tripplanner.data.entity.Itinerary;
 
 /**
  * DTO for meal information.
@@ -17,25 +16,5 @@ public record MealDto(
         String cuisine,
         String notes
 ) {
-    
-    /**
-     * Create DTO from entity.
-     */
-    public static MealDto fromEntity(Itinerary.Meal entity) {
-        if (entity == null) {
-            return null;
-        }
-        
-        return new MealDto(
-                entity.getType(),
-                entity.getName(),
-                entity.getRestaurant(),
-                LocationDto.fromEntity(entity.getLocation()),
-                entity.getTime(),
-                PriceDto.fromEntity(entity.getPrice()),
-                entity.getCuisine(),
-                entity.getNotes()
-        );
-    }
 }
 
