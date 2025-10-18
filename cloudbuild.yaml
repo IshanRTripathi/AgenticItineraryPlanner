@@ -40,6 +40,7 @@ steps:
       '--set-env-vars', 'SPRING_PROFILES_ACTIVE=cloud',
       '--set-env-vars', 'GEMINI_MOCK_MODE=false',
       '--set-env-vars', 'AI_PROVIDER=gemini',
+      '--set-env-vars', 'GEMINI_MODEL=gemini-2.5-flash',
       '--set-env-vars', 'FIREBASE_AUTH_ENABLED=true',
       '--set-env-vars', 'FIRESTORE_PROJECT_ID=${_FIREBASE_PROJECT_ID}',
       '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
