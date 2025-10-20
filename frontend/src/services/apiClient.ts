@@ -5,7 +5,7 @@
 import { DataTransformer } from './dataTransformer';
 import { NormalizedDataTransformer } from './normalizedDataTransformer';
 import { authService } from './authService';
-import { TripData, Traveler, TravelPreferences, TripSettings } from '../types/TripData';
+import { TripData } from '../types/TripData';
 import {
   NormalizedItinerary,
   ChangeSet,
@@ -21,6 +21,7 @@ import {
   MockBookingRequest,
   MockBookingResponse
 } from '../types/NormalizedItinerary';
+import { logger } from '../utils/logger';
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -58,11 +59,11 @@ class ApiClient {
       const newToken = await authService.getIdTokenForceRefresh();
       if (newToken) {
         this.authToken = newToken;
-        console.log('[ApiClient] Auth token refreshed successfully');
+        logger.info('Auth token refreshed successfully', { component: 'ApiClient', action: 'token_refresh' });
         return true;
       }
     } catch (error) {
-      console.error('[ApiClient] Failed to refresh auth token:', error);
+      logger.error('Failed to refresh auth token', { component: 'ApiClient', action: 'token_refresh_failed' }, error);
     }
     return false;
   }
@@ -80,7 +81,7 @@ class ApiClient {
       // Decode JWT to check expiry (without verification)
       const tokenParts = this.authToken.split('.');
       if (tokenParts.length !== 3) {
-        console.warn('[ApiClient] Invalid token format');
+        logger.warn('Invalid token format', { component: 'ApiClient', action: 'token_validation' });
         return false;
       }
 
@@ -91,10 +92,17 @@ class ApiClient {
 
       // If token expires within 5 minutes, refresh it proactively
       if (expiryTime - now < fiveMinutes) {
-        console.log('[ApiClient] Token expiring soon, refreshing proactively...');
+        logger.info('Token expiring soon, refreshing proactively', { 
+          component: 'ApiClient', 
+          action: 'token_proactive_refresh',
+          expiresIn: expiryTime - now
+        });
         const refreshed = await this.refreshAuthToken();
         if (!refreshed) {
-          console.warn('[ApiClient] Token refresh failed, but continuing with current token');
+          logger.warn('Token refresh failed, continuing with current token', { 
+            component: 'ApiClient', 
+            action: 'token_refresh_fallback' 
+          });
           // Don't clear token - let the request try with current token
           // If it fails with 401, the retry logic will handle it
         }
@@ -103,7 +111,7 @@ class ApiClient {
 
       return true;
     } catch (error) {
-      console.error('[ApiClient] Error checking token expiry:', error);
+      logger.error('Error checking token expiry', { component: 'ApiClient', action: 'token_expiry_check' }, error);
       // If we can't decode the token, assume it's valid and let the server reject it if needed
       return true;
     }
@@ -125,14 +133,18 @@ class ApiClient {
 
     // Check if there's already a pending request for this endpoint
     if (this.pendingRequests.has(requestKey)) {
-      console.log(`[ApiClient] Deduplicating request: ${requestKey}`);
+      logger.debug('Deduplicating request', { 
+        component: 'ApiClient', 
+        action: 'request_deduplication',
+        requestKey 
+      });
       return this.pendingRequests.get(requestKey)!;
     }
 
-    console.log('API Request:', {
+    logger.debug('API Request starting', {
+      component: 'ApiClient',
+      action: 'api_request_start',
       method: options.method || 'GET',
-      url,
-      baseUrl: this.baseUrl,
       endpoint,
       maxRetries
     });
@@ -189,16 +201,22 @@ class ApiClient {
         
         clearTimeout(timeoutId);
 
-        console.log('API Response:', {
+        logger.debug('API Response received', {
+          component: 'ApiClient',
+          action: 'api_response',
           status: response.status,
           statusText: response.statusText,
-          url: response.url,
           attempt: attempt + 1
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('API Error Response:', errorText);
+          logger.error('API Error Response', {
+            component: 'ApiClient',
+            action: 'api_error_response',
+            status: response.status,
+            url
+          }, { errorText });
 
           let errorData: ApiError;
           try {
@@ -216,13 +234,23 @@ class ApiClient {
 
           // Handle token expiration (401 Unauthorized)
           if (response.status === 401 && this.authToken) {
-            console.log(`[ApiClient] Token expired (attempt ${attempt + 1}), attempting to refresh...`);
+            logger.warn('Token expired, attempting to refresh', {
+              component: 'ApiClient',
+              action: 'token_expired_401',
+              attempt: attempt + 1
+            });
             const tokenRefreshed = await this.refreshAuthToken();
             if (tokenRefreshed) {
-              console.log('[ApiClient] Token refreshed successfully, retrying request');
+              logger.info('Token refreshed successfully, retrying request', {
+                component: 'ApiClient',
+                action: 'token_refresh_retry'
+              });
               continue; // Retry the request with the new token (headers will be recreated)
             } else {
-              console.error('[ApiClient] Failed to refresh token on 401');
+              logger.error('Failed to refresh token on 401', {
+                component: 'ApiClient',
+                action: 'token_refresh_failed_401'
+              });
               // DON'T clear token - keep trying with current token
               // User may need to re-authenticate, but don't force it immediately
               if (attempt === maxRetries) {
@@ -244,7 +272,13 @@ class ApiClient {
           }
 
           lastError = error;
-          console.log(`Retrying request in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
+          logger.info('Retrying request', {
+            component: 'ApiClient',
+            action: 'api_retry',
+            retryDelay,
+            attempt: attempt + 1,
+            maxRetries: maxRetries + 1
+          });
           await this.delay(retryDelay * Math.pow(2, attempt)); // Exponential backoff
           continue;
         }
@@ -255,16 +289,21 @@ class ApiClient {
         }
 
         const responseData = await response.json();
-        console.log('API Response Data:', responseData);
+        logger.debug('API Response Data received', {
+          component: 'ApiClient',
+          action: 'api_response_data',
+          dataSize: JSON.stringify(responseData).length
+        });
 
         return responseData;
       } catch (error) {
-        console.error('API request failed:', {
+        logger.error('API request failed', {
+          component: 'ApiClient',
+          action: 'api_request_failed',
           url,
-          error: error.message,
-          stack: error.stack,
-          attempt: attempt + 1
-        });
+          attempt: attempt + 1,
+          errorMessage: error.message
+        }, error);
 
         // Don't retry on last attempt
         if (attempt === maxRetries) {
@@ -275,7 +314,13 @@ class ApiClient {
         if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
           // This is likely a network error, retry with exponential backoff
           lastError = error;
-          console.log(`Network error, retrying in ${retryDelay}ms (attempt ${attempt + 1}/${maxRetries + 1})`);
+          logger.warn('Network error, retrying', {
+            component: 'ApiClient',
+            action: 'network_error_retry',
+            retryDelay,
+            attempt: attempt + 1,
+            maxRetries: maxRetries + 1
+          });
           await this.delay(retryDelay * Math.pow(2, attempt));
           continue;
         }
@@ -304,10 +349,11 @@ class ApiClient {
       throw new Error('Invalid response: missing itinerary data');
     }
     
-    console.log('[ApiClient] Itinerary creation response:', {
+    logger.info('Itinerary creation response received', {
+      component: 'ApiClient',
+      action: 'itinerary_created',
       itineraryId: response.itinerary.id,
       executionId: response.executionId,
-      sseEndpoint: response.sseEndpoint,
       status: response.status
     });
     
@@ -315,40 +361,54 @@ class ApiClient {
   }
 
   async getItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
+    const timer = logger.startTimer('getItinerary', { component: 'ApiClient', itineraryId: id });
+    
     try {
-      console.log('=== API CLIENT GET ITINERARY START ===');
-      console.log('Itinerary ID:', id);
+      logger.debug('Getting itinerary', { component: 'ApiClient', action: 'get_itinerary_start', itineraryId: id });
 
       const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`, {}, retryOptions);
-      console.log('=== API CLIENT GET ITINERARY ===');
-      console.log('Itinerary ID:', id);
-      console.log('Raw API Response:', response);
-      console.log('Days Count:', response.days?.length || 0);
-      console.log('Days Data:', response.days);
-      console.log('================================');
+      
+      logger.debug('Itinerary data received', {
+        component: 'ApiClient',
+        action: 'get_itinerary_received',
+        itineraryId: id,
+        daysCount: response.days?.length || 0
+      });
 
-      console.log('Starting data transformation...');
+      logger.debug('Starting data transformation', { component: 'ApiClient', action: 'transform_start', itineraryId: id });
       const transformedData = NormalizedDataTransformer.transformNormalizedItineraryToTripData(response);
-      console.log('=== API CLIENT GET ITINERARY SUCCESS ===');
-      console.log('Transformed Data:', transformedData);
-      console.log('========================================');
+      
+      logger.info('Itinerary retrieved successfully', {
+        component: 'ApiClient',
+        action: 'get_itinerary_success',
+        itineraryId: id,
+        daysCount: transformedData.itinerary?.days?.length || 0
+      });
+      
+      timer();
       return transformedData;
 
     } catch (error) {
-      console.error('=== API CLIENT GET ITINERARY ERROR ===');
-      console.error('Error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Itinerary ID:', id);
-      console.error('=====================================');
+      logger.error('Failed to get itinerary', {
+        component: 'ApiClient',
+        action: 'get_itinerary_error',
+        itineraryId: id,
+        errorMessage: error.message,
+        is404: error.message.includes('404')
+      }, error);
 
       // If it's a 404 error, it might be that the itinerary is still being generated
       // Just throw the error - let the calling code handle it appropriately
       if (error.message.includes('404')) {
-        console.log('404 error detected - itinerary might still be generating');
+        logger.debug('404 error - itinerary might still be generating', {
+          component: 'ApiClient',
+          action: 'get_itinerary_404',
+          itineraryId: id
+        });
         throw error;
       }
 
+      timer();
       throw error;
     }
   }
@@ -408,12 +468,21 @@ class ApiClient {
       url += `?token=${encodeURIComponent(this.authToken)}`;
     }
 
-    console.log('[ApiClient] Creating SSE connection with token:', this.authToken ? 'present' : 'missing');
+    logger.info('Creating SSE connection', {
+      component: 'ApiClient',
+      action: 'sse_create',
+      itineraryId,
+      hasToken: !!this.authToken
+    });
 
     const eventSource = new EventSource(url);
 
     eventSource.onerror = (error) => {
-      console.error('[ApiClient] SSE connection error:', error);
+      logger.error('SSE connection error', {
+        component: 'ApiClient',
+        action: 'sse_error',
+        itineraryId
+      }, error);
       // Note: EventSource doesn't support token refresh. If token expires during SSE,
       // the connection will fail and need to be recreated with a fresh token.
     };
@@ -544,7 +613,12 @@ class ApiClient {
         body: JSON.stringify({ positions }),
       });
     } catch (error: any) {
-      console.error('Failed to update workflow positions:', error);
+      logger.error('Failed to update workflow positions', {
+        component: 'ApiClient',
+        action: 'update_workflow_positions_failed',
+        itineraryId,
+        positionsCount: positions.length
+      }, error);
       if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
         throw new Error('Authentication failed. Please sign in again.');
       }
@@ -559,7 +633,12 @@ class ApiClient {
         body: JSON.stringify(data),
       });
     } catch (error: any) {
-      console.error('Failed to update node data:', error);
+      logger.error('Failed to update node data', {
+        component: 'ApiClient',
+        action: 'update_node_data_failed',
+        itineraryId,
+        nodeId
+      }, error);
       if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
         throw new Error('Authentication failed. Please sign in again.');
       }
@@ -610,12 +689,23 @@ class ApiClient {
       url += `&token=${encodeURIComponent(this.authToken)}`;
     }
     
-    console.log('[ApiClient] Creating patches SSE connection with token:', this.authToken ? 'present' : 'missing');
+    logger.info('Creating patches SSE connection', {
+      component: 'ApiClient',
+      action: 'patches_sse_create',
+      itineraryId,
+      executionId,
+      hasToken: !!this.authToken
+    });
     
     const eventSource = new EventSource(url);
 
     eventSource.onerror = (error) => {
-      console.error('Patches SSE connection error:', error);
+      logger.error('Patches SSE connection error', {
+        component: 'ApiClient',
+        action: 'patches_sse_error',
+        itineraryId,
+        executionId
+      }, error);
       // Note: EventSource doesn't support token refresh. If token expires during SSE,
       // the connection will fail and need to be recreated with a fresh token.
     };

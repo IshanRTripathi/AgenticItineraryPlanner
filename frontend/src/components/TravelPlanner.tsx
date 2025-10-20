@@ -39,7 +39,8 @@ import { createWorkflowNodeFromPlace } from '../utils/placeToWorkflowNode';
 
 // Import error handling and loading components
 import { ErrorBoundary, withErrorBoundary } from './travel-planner/shared/ErrorBoundary';
-import { LoadingSpinner } from './travel-planner/shared/LoadingSpinner';
+import { LoadingState } from './shared/LoadingState';
+import { DayCardSkeleton } from './loading/SkeletonLoader';
 import { ErrorDisplay } from './shared/ErrorDisplay';
 
 // Import types
@@ -293,7 +294,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
   // Show loading state while fetching fresh data
   if (isLoading) {
-    return <LoadingSpinner message="Loading planner..." fullScreen />;
+    return <LoadingState variant="fullPage" message="Loading your travel planner..." size="lg" />;
   }
 
   // Show error state if API call failed
@@ -354,12 +355,17 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     if (isLoading) {
       return (
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-          <Card className="p-4 md:p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span className="text-gray-600">Loading your itinerary...</span>
-            </div>
-          </Card>
+          <LoadingState 
+            variant="inline" 
+            message="Loading your itinerary..." 
+            size="md"
+          />
+          {/* Show skeleton loaders for better UX */}
+          <div className="space-y-4">
+            <DayCardSkeleton />
+            <DayCardSkeleton />
+            <DayCardSkeleton />
+          </div>
         </div>
       );
     }

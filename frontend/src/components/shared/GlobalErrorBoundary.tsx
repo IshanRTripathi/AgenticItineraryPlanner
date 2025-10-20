@@ -1,5 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { ErrorDisplay } from './ErrorDisplay';
+import { logger } from '../../utils/logger';
+import { ErrorHandler } from '../../utils/errorHandler';
 
 interface Props {
   children: ReactNode;
@@ -23,19 +25,22 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('GlobalErrorBoundary caught an error:', error, errorInfo);
+    // Handle and log error using centralized error handler
+    const appError = ErrorHandler.handle(error, {
+      component: 'GlobalErrorBoundary',
+      action: 'component_error',
+      componentStack: errorInfo.componentStack
+    });
     
-    // Log error to external service in production
-    if (import.meta.env.PROD) {
-      // TODO: Send to error reporting service (e.g., Sentry, LogRocket)
-      console.error('Production error:', {
-        error: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString()
-      });
-    }
+    // Log additional error info
+    logger.error('React component error caught', {
+      component: 'GlobalErrorBoundary',
+      action: 'component_did_catch',
+      errorType: appError.type,
+      componentStack: errorInfo.componentStack?.split('\n').slice(0, 5).join('\n') // First 5 lines
+    }, error);
     
+    // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
@@ -44,10 +49,18 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   }
 
   handleRetry = () => {
+    logger.info('User retrying after error', {
+      component: 'GlobalErrorBoundary',
+      action: 'retry'
+    });
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
   handleReload = () => {
+    logger.info('User reloading page after error', {
+      component: 'GlobalErrorBoundary',
+      action: 'reload'
+    });
     window.location.reload();
   };
 

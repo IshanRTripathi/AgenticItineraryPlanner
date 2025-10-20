@@ -5,6 +5,7 @@
 
 import { NormalizedItinerary, NormalizedDay, NormalizedNode } from '../types/NormalizedItinerary';
 import { TripData, TripItinerary, DayPlan, TripComponent } from '../types/TripData';
+import { logger } from '../utils/logger';
 
 export class NormalizedDataTransformer {
   
@@ -12,11 +13,17 @@ export class NormalizedDataTransformer {
    * Transform normalized itinerary to frontend TripData
    */
   static transformNormalizedItineraryToTripData(normalized: NormalizedItinerary): TripData {
-    console.log('=== NORMALIZED DATA TRANSFORMER ===');
-    console.log('Input Normalized:', normalized);
-    console.log('Days Count:', normalized.days?.length || 0);
-    console.log('Days Data:', normalized.days);
-    console.log('===================================');
+    const timer = logger.startTimer('transformNormalizedItineraryToTripData', {
+      component: 'NormalizedDataTransformer',
+      action: 'transform_start'
+    });
+    
+    logger.debug('Starting transformation', {
+      component: 'NormalizedDataTransformer',
+      action: 'transform_itinerary',
+      itineraryId: normalized.itineraryId,
+      daysCount: normalized.days?.length || 0
+    });
     
     try {
       const result = {
@@ -56,18 +63,24 @@ export class NormalizedDataTransformer {
       isPublic: false
     };
     
-    console.log('=== TRANSFORMATION SUCCESS ===');
-    console.log('Result:', result);
-    console.log('==============================');
+    logger.info('Transformation successful', {
+      component: 'NormalizedDataTransformer',
+      action: 'transform_success',
+      itineraryId: result.id,
+      daysCount: result.itinerary?.days?.length || 0
+    });
+    
+    timer();
     return result;
     
     } catch (error) {
-      console.error('=== TRANSFORMATION ERROR ===');
-      console.error('Error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Input data:', normalized);
-      console.error('============================');
+      logger.error('Transformation failed', {
+        component: 'NormalizedDataTransformer',
+        action: 'transform_error',
+        itineraryId: normalized.itineraryId,
+        errorMessage: error.message
+      }, error);
+      timer();
       throw error;
     }
   }
@@ -76,20 +89,22 @@ export class NormalizedDataTransformer {
    * Transform NormalizedItinerary to TripItinerary
    */
   private static transformNormalizedItinerary(normalized: NormalizedItinerary): TripItinerary {
-    console.log('=== TRANSFORM NORMALIZED ITINERARY ===');
-    console.log('Input Days:', normalized.days);
-    console.log('Days Length:', normalized.days?.length || 0);
+    logger.debug('Transforming normalized itinerary', {
+      component: 'NormalizedDataTransformer',
+      action: 'transform_itinerary_start',
+      daysCount: normalized.days?.length || 0
+    });
     
     try {
-      console.log('Mapping days...');
       const mappedDays = (normalized.days || []).map((day, index) => {
-        console.log(`Mapping day ${index + 1}:`, day);
-        const transformedDay = this.transformNormalizedDay(day);
-        console.log(`Transformed day ${index + 1}:`, transformedDay);
-        return transformedDay;
+        logger.debug(`Transforming day ${index + 1}`, {
+          component: 'NormalizedDataTransformer',
+          action: 'transform_day',
+          dayNumber: day.dayNumber,
+          nodesCount: day.nodes?.length || 0
+        });
+        return this.transformNormalizedDay(day);
       });
-      console.log('Mapped Days:', mappedDays);
-      console.log('=====================================');
       
       return {
         id: normalized.itineraryId,
@@ -119,12 +134,12 @@ export class NormalizedDataTransformer {
         countryCentroid: normalized.countryCentroid
       };
     } catch (error) {
-      console.error('=== TRANSFORM NORMALIZED ITINERARY ERROR ===');
-      console.error('Error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Input normalized:', normalized);
-      console.error('===========================================');
+      logger.error('Failed to transform normalized itinerary', {
+        component: 'NormalizedDataTransformer',
+        action: 'transform_itinerary_error',
+        itineraryId: normalized.itineraryId,
+        errorMessage: error.message
+      }, error);
       throw error;
     }
   }
@@ -134,11 +149,12 @@ export class NormalizedDataTransformer {
    */
   private static transformNormalizedDay(day: NormalizedDay): DayPlan {
     try {
-      console.log('=== TRANSFORM NORMALIZED DAY ===');
-      console.log('Input Day:', day);
-      console.log('Day Number:', day.dayNumber);
-      console.log('Nodes Count:', day.nodes?.length || 0);
-      console.log('Nodes:', day.nodes);
+      logger.debug('Transforming day', {
+        component: 'NormalizedDataTransformer',
+        action: 'transform_day_start',
+        dayNumber: day.dayNumber,
+        nodesCount: day.nodes?.length || 0
+      });
       
       const result = {
       id: day.id || `day-${day.dayNumber}`,
@@ -162,18 +178,22 @@ export class NormalizedDataTransformer {
       notes: day.notes || ''
     };
     
-    console.log('=== TRANSFORM NORMALIZED DAY SUCCESS ===');
-    console.log('Result:', result);
-    console.log('========================================');
+    logger.debug('Day transformation successful', {
+      component: 'NormalizedDataTransformer',
+      action: 'transform_day_success',
+      dayNumber: day.dayNumber,
+      componentsCount: result.components.length
+    });
+    
     return result;
     
     } catch (error) {
-      console.error('=== TRANSFORM NORMALIZED DAY ERROR ===');
-      console.error('Error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Input day:', day);
-      console.error('=====================================');
+      logger.error('Failed to transform day', {
+        component: 'NormalizedDataTransformer',
+        action: 'transform_day_error',
+        dayNumber: day.dayNumber,
+        errorMessage: error.message
+      }, error);
       throw error;
     }
   }
@@ -183,17 +203,22 @@ export class NormalizedDataTransformer {
    */
   private static transformNormalizedNode(node: NormalizedNode): TripComponent {
     try {
-      console.log('=== TRANSFORM NORMALIZED NODE ===');
-      console.log('Input Node:', node);
-      console.log('Node ID:', node.id);
-      console.log('Node Type:', node.type);
-      console.log('Node Title:', node.title);
-      console.log('Node Timing:', node.timing);
-      console.log('Node Locked (raw):', node.locked, 'Type:', typeof node.locked);
+      logger.debug('Transforming node', {
+        component: 'NormalizedDataTransformer',
+        action: 'transform_node_start',
+        nodeId: node.id,
+        nodeType: node.type,
+        locked: node.locked
+      });
       
       // Warn if node.id is null/undefined (should not happen with centralized ID generation)
       if (!node.id) {
-        console.warn('Node missing ID - this should not happen with centralized ID generation:', node);
+        logger.warn('Node missing ID', {
+          component: 'NormalizedDataTransformer',
+          action: 'node_missing_id',
+          nodeTitle: node.title,
+          nodeType: node.type
+        });
       }
       
       const result = {
@@ -263,18 +288,23 @@ export class NormalizedDataTransformer {
       priority: this.mapLabelsToPriority(node.labels || [], node)
     };
     
-    console.log('=== TRANSFORM NORMALIZED NODE SUCCESS ===');
-    console.log('Result:', result);
-    console.log('=========================================');
+    logger.debug('Node transformation successful', {
+      component: 'NormalizedDataTransformer',
+      action: 'transform_node_success',
+      nodeId: node.id,
+      componentType: result.type
+    });
+    
     return result;
     
     } catch (error) {
-      console.error('=== TRANSFORM NORMALIZED NODE ERROR ===');
-      console.error('Error:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Input node:', node);
-      console.error('======================================');
+      logger.error('Failed to transform node', {
+        component: 'NormalizedDataTransformer',
+        action: 'transform_node_error',
+        nodeId: node.id,
+        nodeTitle: node.title,
+        errorMessage: error.message
+      }, error);
       throw error;
     }
   }
@@ -668,7 +698,11 @@ export class NormalizedDataTransformer {
       const minutes = date.getMinutes().toString().padStart(2, '0');
       return `${hours}:${minutes}`;
     } catch (error) {
-      console.warn('Failed to convert milliseconds to time string:', milliseconds, error);
+      logger.warn('Failed to convert milliseconds to time string', {
+        component: 'NormalizedDataTransformer',
+        action: 'time_conversion_failed',
+        milliseconds
+      }, error);
       return null;
     }
   }

@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './apiClient';
+import { logger } from '../utils/logger';
 
 export type ChangeEventType = 
   | 'patch_applied'
@@ -58,7 +59,11 @@ export class SseManager {
    */
   connect(itineraryId: string, executionId?: string): void {
     if (this.itineraryId === itineraryId && this.isConnected) {
-      console.log('[SSE] Already connected to itinerary:', itineraryId);
+      logger.debug('Already connected to itinerary', {
+        component: 'SseManager',
+        action: 'connect_skip',
+        itineraryId
+      });
       return;
     }
 
@@ -72,7 +77,12 @@ export class SseManager {
       this.options.executionId = executionId;
     }
     
-    console.log('[SSE] Connecting to itinerary:', itineraryId, 'executionId:', executionId);
+    logger.info('Connecting to SSE streams', {
+      component: 'SseManager',
+      action: 'connect_start',
+      itineraryId,
+      executionId
+    });
 
     // Connect to patches stream
     this.connectPatchesStream(itineraryId);
@@ -94,12 +104,20 @@ export class SseManager {
 
       // Handle connection errors
       this.patchesEventSource.onerror = (error) => {
-        console.warn('[SSE] Patches stream error:', error);
+        logger.warn('Patches stream error', {
+          component: 'SseManager',
+          action: 'patches_stream_error',
+          itineraryId
+        }, error);
         this.handleConnectionError();
       };
 
       this.patchesEventSource.onopen = () => {
-        console.log('[SSE] Patches stream connected');
+        logger.info('Patches stream connected', {
+          component: 'SseManager',
+          action: 'patches_stream_connected',
+          itineraryId
+        });
         this.reconnectAttempts = 0;
       };
 
@@ -116,10 +134,19 @@ export class SseManager {
             userId: data.userId,
           };
           
-          console.log('[SSE] Patch applied:', changeEvent);
+          logger.debug('Patch applied', {
+            component: 'SseManager',
+            action: 'patch_applied',
+            itineraryId,
+            version: data.version
+          });
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing patch_applied event:', error);
+          logger.error('Error parsing patch_applied event', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'patch_applied'
+          }, error);
         }
       });
 
@@ -135,10 +162,19 @@ export class SseManager {
             version: data.version,
           };
           
-          console.log('[SSE] Version updated:', changeEvent);
+          logger.debug('Version updated', {
+            component: 'SseManager',
+            action: 'version_updated',
+            itineraryId,
+            version: data.version
+          });
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing version_updated event:', error);
+          logger.error('Error parsing version_updated event', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'version_updated'
+          }, error);
         }
       });
 
@@ -146,7 +182,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('progress_update', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Progress update:', data);
+          logger.debug('Progress update (patches stream)', {
+            component: 'SseManager',
+            action: 'progress_update_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for progress updates
@@ -158,7 +198,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing progress update:', error);
+          logger.error('Error parsing progress update (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'progress_update_patches'
+          }, error);
         }
       });
 
@@ -166,7 +210,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('generation_complete', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Generation complete:', data);
+          logger.info('Generation complete (patches stream)', {
+            component: 'SseManager',
+            action: 'generation_complete_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for completion
@@ -178,7 +226,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing generation complete:', error);
+          logger.error('Error parsing generation complete (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'generation_complete_patches'
+          }, error);
         }
       });
 
@@ -186,7 +238,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('agent_started', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Agent started:', data);
+          logger.info('Agent started (patches stream)', {
+            component: 'SseManager',
+            action: 'agent_started_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for agent started
@@ -198,7 +254,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing agent started:', error);
+          logger.error('Error parsing agent started (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'agent_started_patches'
+          }, error);
         }
       });
 
@@ -206,7 +266,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('agent_completed', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Agent completed:', data);
+          logger.info('Agent completed (patches stream)', {
+            component: 'SseManager',
+            action: 'agent_completed_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for agent completed
@@ -218,7 +282,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing agent completed:', error);
+          logger.error('Error parsing agent completed (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'agent_completed_patches'
+          }, error);
         }
       });
 
@@ -226,7 +294,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('agent_failed', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Agent failed:', data);
+          logger.warn('Agent failed (patches stream)', {
+            component: 'SseManager',
+            action: 'agent_failed_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for agent failed
@@ -238,7 +310,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing agent failed:', error);
+          logger.error('Error parsing agent failed (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'agent_failed_patches'
+          }, error);
         }
       });
 
@@ -246,7 +322,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('day_completed', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Day completed:', data);
+          logger.debug('Day completed (patches stream)', {
+            component: 'SseManager',
+            action: 'day_completed_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for day completed
@@ -258,7 +338,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing day completed:', error);
+          logger.error('Error parsing day completed (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'day_completed_patches'
+          }, error);
         }
       });
 
@@ -266,7 +350,11 @@ export class SseManager {
       this.patchesEventSource.addEventListener('node_enhanced', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Node enhanced:', data);
+          logger.debug('Node enhanced (patches stream)', {
+            component: 'SseManager',
+            action: 'node_enhanced_patches',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for node enhanced
@@ -278,7 +366,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing node enhanced:', error);
+          logger.error('Error parsing node enhanced (patches)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'node_enhanced_patches'
+          }, error);
         }
       });
 
@@ -293,10 +385,18 @@ export class SseManager {
             data,
           };
           
-          console.log('[SSE] Node locked:', changeEvent);
+          logger.debug('Node locked', {
+            component: 'SseManager',
+            action: 'node_locked',
+            itineraryId
+          });
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing node_locked event:', error);
+          logger.error('Error parsing node_locked event', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'node_locked'
+          }, error);
         }
       });
 
@@ -310,22 +410,42 @@ export class SseManager {
             data,
           };
           
-          console.log('[SSE] Node unlocked:', changeEvent);
+          logger.debug('Node unlocked', {
+            component: 'SseManager',
+            action: 'node_unlocked',
+            itineraryId
+          });
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing node_unlocked event:', error);
+          logger.error('Error parsing node_unlocked event', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'node_unlocked'
+          }, error);
         }
       });
 
       // Handle errors
       this.patchesEventSource.onerror = (error) => {
-        console.error('[SSE] Patches stream error:', error);
+        logger.error('Patches stream error', {
+          component: 'SseManager',
+          action: 'patches_stream_error',
+          itineraryId
+        }, error);
         this.handleError(new Error('Patches SSE connection error'));
       };
 
-      console.log('[SSE] Patches stream connected');
+      logger.info('Patches stream connected', {
+        component: 'SseManager',
+        action: 'patches_stream_ready',
+        itineraryId
+      });
     } catch (error) {
-      console.error('[SSE] Failed to connect patches stream:', error);
+      logger.error('Failed to connect patches stream', {
+        component: 'SseManager',
+        action: 'patches_connect_failed',
+        itineraryId
+      }, error);
       this.handleError(error as Error);
     }
   }
@@ -339,12 +459,20 @@ export class SseManager {
 
       // Handle connection errors
       this.agentEventSource.onerror = (error) => {
-        console.warn('[SSE] Agent stream error:', error);
+        logger.warn('Agent stream error', {
+          component: 'SseManager',
+          action: 'agent_stream_error',
+          itineraryId
+        }, error);
         this.handleConnectionError();
       };
 
       this.agentEventSource.onopen = () => {
-        console.log('[SSE] Agent stream connected');
+        logger.info('Agent stream connected', {
+          component: 'SseManager',
+          action: 'agent_stream_connected',
+          itineraryId
+        });
         this.reconnectAttempts = 0;
       };
 
@@ -352,7 +480,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('progress_update', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Progress update:', data);
+          logger.debug('Progress update (agent stream)', {
+            component: 'SseManager',
+            action: 'progress_update_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for progress updates
@@ -364,7 +496,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing progress update:', error);
+          logger.error('Error parsing progress update (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'progress_update_agent'
+          }, error);
         }
       });
 
@@ -372,7 +508,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('generation_complete', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Generation complete:', data);
+          logger.info('Generation complete (agent stream)', {
+            component: 'SseManager',
+            action: 'generation_complete_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for completion
@@ -384,7 +524,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing generation complete:', error);
+          logger.error('Error parsing generation complete (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'generation_complete_agent'
+          }, error);
         }
       });
 
@@ -392,7 +536,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('agent_started', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Agent started:', data);
+          logger.info('Agent started (agent stream)', {
+            component: 'SseManager',
+            action: 'agent_started_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for agent started
@@ -404,7 +552,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing agent started:', error);
+          logger.error('Error parsing agent started (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'agent_started_agent'
+          }, error);
         }
       });
 
@@ -412,7 +564,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('agent_completed', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Agent completed:', data);
+          logger.info('Agent completed (agent stream)', {
+            component: 'SseManager',
+            action: 'agent_completed_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for agent completed
@@ -424,7 +580,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing agent completed:', error);
+          logger.error('Error parsing agent completed (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'agent_completed_agent'
+          }, error);
         }
       });
 
@@ -432,7 +592,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('agent_failed', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Agent failed:', data);
+          logger.warn('Agent failed (agent stream)', {
+            component: 'SseManager',
+            action: 'agent_failed_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for agent failed
@@ -444,7 +608,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing agent failed:', error);
+          logger.error('Error parsing agent failed (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'agent_failed_agent'
+          }, error);
         }
       });
 
@@ -452,7 +620,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('day_completed', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Day completed:', data);
+          logger.debug('Day completed (agent stream)', {
+            component: 'SseManager',
+            action: 'day_completed_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for day completed
@@ -464,7 +636,11 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing day completed:', error);
+          logger.error('Error parsing day completed (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'day_completed_agent'
+          }, error);
         }
       });
 
@@ -472,7 +648,11 @@ export class SseManager {
       this.agentEventSource.addEventListener('node_enhanced', (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('[SSE] Node enhanced:', data);
+          logger.debug('Node enhanced (agent stream)', {
+            component: 'SseManager',
+            action: 'node_enhanced_agent',
+            itineraryId
+          });
           this.options.onAgentEvent?.(data);
 
           // Emit as change event for node enhanced
@@ -484,19 +664,35 @@ export class SseManager {
           };
           this.options.onChangeEvent?.(changeEvent);
         } catch (error) {
-          console.error('[SSE] Error parsing node enhanced:', error);
+          logger.error('Error parsing node enhanced (agent)', {
+            component: 'SseManager',
+            action: 'parse_error',
+            eventType: 'node_enhanced_agent'
+          }, error);
         }
       });
 
       // Handle errors
       this.agentEventSource.onerror = (error) => {
-        console.error('[SSE] Agent stream error:', error);
+        logger.error('Agent stream error', {
+          component: 'SseManager',
+          action: 'agent_stream_error',
+          itineraryId
+        }, error);
         this.handleError(new Error('Agent SSE connection error'));
       };
 
-      console.log('[SSE] Agent stream connected');
+      logger.info('Agent stream connected', {
+        component: 'SseManager',
+        action: 'agent_stream_ready',
+        itineraryId
+      });
     } catch (error) {
-      console.error('[SSE] Failed to connect agent stream:', error);
+      logger.error('Failed to connect agent stream', {
+        component: 'SseManager',
+        action: 'agent_connect_failed',
+        itineraryId
+      }, error);
       this.handleError(error as Error);
     }
   }
@@ -511,7 +707,13 @@ export class SseManager {
       this.reconnectAttempts++;
       const delay = this.options.reconnectDelay! * this.reconnectAttempts;
       
-      console.log(`[SSE] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      logger.info('Reconnecting SSE', {
+        component: 'SseManager',
+        action: 'reconnect',
+        delay,
+        attempt: this.reconnectAttempts,
+        maxAttempts: this.maxReconnectAttempts
+      });
       
       setTimeout(() => {
         if (this.itineraryId) {
@@ -519,7 +721,11 @@ export class SseManager {
         }
       }, delay);
     } else {
-      console.error('[SSE] Max reconnect attempts reached or auto-reconnect disabled');
+      logger.error('Max reconnect attempts reached', {
+        component: 'SseManager',
+        action: 'reconnect_failed',
+        attempts: this.reconnectAttempts
+      });
       this.isConnected = false;
     }
   }
@@ -528,25 +734,40 @@ export class SseManager {
    * Handle connection errors with automatic reconnection
    */
   private async handleConnectionError(): Promise<void> {
-    console.warn('[SSE] Connection error occurred');
+    logger.warn('SSE connection error occurred', {
+      component: 'SseManager',
+      action: 'connection_error'
+    });
     this.options.onError?.(new Error('SSE connection error'));
     
     if (this.options.autoReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = this.options.reconnectDelay || 1000 * this.reconnectAttempts;
       
-      console.log(`[SSE] Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      logger.info('Attempting to reconnect SSE', {
+        component: 'SseManager',
+        action: 'reconnect_attempt',
+        delay,
+        attempt: this.reconnectAttempts,
+        maxAttempts: this.maxReconnectAttempts
+      });
       
       // Try to refresh the auth token before reconnecting
       try {
         const { authService } = await import('./authService');
         const newToken = await authService.getIdTokenForceRefresh();
         if (newToken) {
-          console.log('[SSE] Token refreshed before reconnection');
+          logger.info('Token refreshed before reconnection', {
+            component: 'SseManager',
+            action: 'token_refresh_success'
+          });
           apiClient.setAuthToken(newToken);
         }
       } catch (error) {
-        console.error('[SSE] Failed to refresh token before reconnection:', error);
+        logger.error('Failed to refresh token before reconnection', {
+          component: 'SseManager',
+          action: 'token_refresh_failed'
+        }, error);
       }
       
       setTimeout(() => {
@@ -555,7 +776,11 @@ export class SseManager {
         }
       }, delay);
     } else {
-      console.error('[SSE] Max reconnection attempts reached, giving up');
+      logger.error('Max reconnection attempts reached', {
+        component: 'SseManager',
+        action: 'reconnect_give_up',
+        attempts: this.reconnectAttempts
+      });
       this.disconnect();
     }
   }
@@ -564,7 +789,10 @@ export class SseManager {
    * Handle connection close events
    */
   private handleConnectionClose(): void {
-    console.log('[SSE] Connection closed');
+    logger.info('SSE connection closed', {
+      component: 'SseManager',
+      action: 'connection_closed'
+    });
     if (this.options.autoReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
       this.handleConnectionError();
     }
@@ -574,7 +802,11 @@ export class SseManager {
    * Disconnect from all SSE streams
    */
   disconnect(): void {
-    console.log('[SSE] Disconnecting...');
+    logger.info('Disconnecting SSE streams', {
+      component: 'SseManager',
+      action: 'disconnect',
+      itineraryId: this.itineraryId
+    });
 
     if (this.patchesEventSource) {
       this.patchesEventSource.close();

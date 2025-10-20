@@ -6,7 +6,7 @@
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LoadingSpinner } from './travel-planner/shared/LoadingSpinner';
+import { LoadingState } from './shared/LoadingState';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Show loading spinner while checking authentication
   if (loading) {
-    return <LoadingSpinner message="Checking authentication..." fullScreen />;
+    return <LoadingState variant="fullPage" message="Checking authentication..." size="md" />;
   }
 
   // If authentication is required but user is not authenticated

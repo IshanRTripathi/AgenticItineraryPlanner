@@ -1184,7 +1184,11 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
       const revisions = await Promise.resolve([]);
       dispatch({ type: 'SET_REVISIONS', payload: revisions });
     } catch (error) {
-      console.error('Failed to load revisions:', error);
+      logger.error('Failed to load revisions', {
+        component: 'UnifiedItineraryContext',
+        action: 'load_revisions_failed',
+        itineraryId
+      }, error);
     }
   }, [itineraryId]);
   
@@ -1195,7 +1199,12 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
       dispatch({ type: 'SET_ITINERARY', payload: itinerary });
       dispatch({ type: 'SET_CURRENT_REVISION', payload: revisionId });
     } catch (error) {
-      console.error('Failed to switch to revision:', error);
+      logger.error('Failed to switch to revision', {
+        component: 'UnifiedItineraryContext',
+        action: 'switch_revision_failed',
+        revisionId,
+        itineraryId
+      }, error);
     }
   }, [itineraryId]);
   
@@ -1214,7 +1223,12 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
       dispatch({ type: 'SET_REVISIONS', payload: [...state.revisions, revision] });
       dispatch({ type: 'SET_CURRENT_REVISION', payload: revision.id });
     } catch (error) {
-      console.error('Failed to create revision:', error);
+      logger.error('Failed to create revision', {
+        component: 'UnifiedItineraryContext',
+        action: 'create_revision_failed',
+        description,
+        itineraryId
+      }, error);
     }
   }, [itineraryId, state.revisions]);
 
@@ -1242,10 +1256,20 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
       dispatch({ type: 'SET_SYNC_STATUS', payload: 'idle' });
       dispatch({ type: 'SET_LAST_SYNC_TIME', payload: new Date() });
       
-      console.log(`Successfully rolled back to revision: ${revisionId}`);
+      logger.info('Successfully rolled back to revision', {
+        component: 'UnifiedItineraryContext',
+        action: 'rollback_success',
+        revisionId,
+        itineraryId
+      });
       
     } catch (error) {
-      console.error('Rollback failed:', error);
+      logger.error('Rollback failed', {
+        component: 'UnifiedItineraryContext',
+        action: 'rollback_failed',
+        revisionId,
+        itineraryId
+      }, error);
       dispatch({ type: 'SET_SYNC_STATUS', payload: 'error' });
       
       // Optionally revert to previous state on failure

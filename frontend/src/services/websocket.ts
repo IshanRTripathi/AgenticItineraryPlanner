@@ -4,6 +4,7 @@
 
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { logger } from '../utils/logger';
 
 export interface WebSocketMessage {
   type: 'itinerary_updated' | 'agent_progress' | 'chat_response' | 'error' | 'connection_status';
@@ -49,7 +50,12 @@ class WebSocketService {
       heartbeatInterval: config.heartbeatInterval || 30000,
     };
 
-    console.log('[WebSocketService] Initialized with config:', this.config);
+    logger.info('WebSocket service initialized', {
+      component: 'WebSocketService',
+      action: 'init',
+      url: this.config.url,
+      reconnectInterval: this.config.reconnectInterval
+    });
   }
 
   private getWebSocketUrl(): string {
@@ -67,20 +73,31 @@ class WebSocketService {
   connect(itineraryId: string): Promise<void> {
     // Check if already connected to the same itinerary
     if (this.client && this.client.connected && this.currentItineraryId === itineraryId) {
-      console.log('[WebSocket] Already connected to itinerary:', itineraryId);
+      logger.debug('Already connected to itinerary', {
+        component: 'WebSocketService',
+        action: 'connect_skip',
+        itineraryId
+      });
       return Promise.resolve();
     }
 
     // Connection deduplication - prevent multiple connections to same itinerary
     const existingConnection = this.connectionDeduplicationMap.get(itineraryId);
     if (existingConnection) {
-      console.log('[WebSocket] Reusing existing connection promise for:', itineraryId);
+      logger.debug('Reusing existing connection promise', {
+        component: 'WebSocketService',
+        action: 'connect_reuse',
+        itineraryId
+      });
       return existingConnection;
     }
 
     // Prevent multiple simultaneous connection attempts
     if (this.isConnecting) {
-      console.log('[WebSocket] Connection already in progress, returning existing promise');
+      logger.debug('Connection already in progress', {
+        component: 'WebSocketService',
+        action: 'connect_in_progress'
+      });
       return this.connectionPromise || Promise.resolve();
     }
 
@@ -88,7 +105,11 @@ class WebSocketService {
     const now = Date.now();
     if (now - this.lastConnectionAttempt < this.minConnectionInterval) {
       const waitTime = this.minConnectionInterval - (now - this.lastConnectionAttempt);
-      console.log(`[WebSocket] Throttling connection attempt, waiting ${waitTime}ms`);
+      logger.debug('Throttling connection attempt', {
+        component: 'WebSocketService',
+        action: 'connect_throttle',
+        waitTime
+      });
       return new Promise((resolve) => {
         setTimeout(() => {
           this.connect(itineraryId).then(resolve);
@@ -109,7 +130,10 @@ class WebSocketService {
       try {
         this.client.deactivate();
       } catch (error) {
-        console.warn('[WebSocket] Error deactivating existing client:', error);
+        logger.warn('Error deactivating existing client', {
+          component: 'WebSocketService',
+          action: 'deactivate_error'
+        }, error);
       }
       this.client = null;
     }
@@ -124,7 +148,11 @@ class WebSocketService {
     this.connectionPromise = new Promise<void>((resolve, reject) => {
       // Set overall connection timeout
       this.connectionTimeout = setTimeout(() => {
-        console.error('[WebSocket] Connection timeout after 15 seconds');
+        logger.error('Connection timeout', {
+          component: 'WebSocketService',
+          action: 'connect_timeout',
+          itineraryId
+        });
         this.isConnecting = false;
         this.connectionState = 'error';
         this.notifyConnectionHandlers(false);
@@ -132,10 +160,19 @@ class WebSocketService {
       }, 15000);
 
       // Create new STOMP client
-      console.log('[WebSocket] Creating STOMP client with URL:', this.config.url);
+      logger.info('Creating STOMP client', {
+        component: 'WebSocketService',
+        action: 'create_client',
+        url: this.config.url,
+        itineraryId
+      });
       this.client = new Client({
         webSocketFactory: () => {
-          console.log('[WebSocket] Creating SockJS connection to:', this.config.url);
+          logger.debug('Creating SockJS connection', {
+            component: 'WebSocketService',
+            action: 'create_sockjs',
+            url: this.config.url
+          });
           return new SockJS(this.config.url, null, {
             transports: ['websocket', 'xhr-polling'],
             timeout: 10000
@@ -149,7 +186,10 @@ class WebSocketService {
             str.includes('CONNECTED') ||
             str.includes('ERROR') ||
             str.includes('DISCONNECT')) {
-            console.log('[STOMP Debug]', str);
+            logger.debug('STOMP event', {
+              component: 'WebSocketService',
+              action: 'stomp_debug'
+            }, { message: str });
           }
         },
         reconnectDelay: 0, // Disable automatic reconnection - we'll handle it manually
@@ -160,7 +200,11 @@ class WebSocketService {
 
       // Set up event handlers
       this.client.onConnect = (frame) => {
-        console.log('[WebSocket] Connected successfully:', frame);
+        logger.info('WebSocket connected successfully', {
+          component: 'WebSocketService',
+          action: 'connected',
+          itineraryId
+        });
         this.connectionState = 'connected';
         this.reconnectAttempts = 0;
         this.isConnecting = false;
@@ -178,7 +222,11 @@ class WebSocketService {
       };
 
       this.client.onDisconnect = (frame) => {
-        console.log('[WebSocket] Disconnected:', frame);
+        logger.info('WebSocket disconnected', {
+          component: 'WebSocketService',
+          action: 'disconnected',
+          itineraryId
+        });
         this.connectionState = 'disconnected';
         this.isConnecting = false;
         this.notifyConnectionHandlers(false);
@@ -186,7 +234,12 @@ class WebSocketService {
       };
 
       this.client.onStompError = (frame) => {
-        console.error('[WebSocket] STOMP error:', frame);
+        logger.error('STOMP error', {
+          component: 'WebSocketService',
+          action: 'stomp_error',
+          itineraryId,
+          errorMessage: frame.headers?.message
+        }, frame);
         this.connectionState = 'error';
         this.isConnecting = false;
 
@@ -202,7 +255,11 @@ class WebSocketService {
       };
 
       this.client.onWebSocketError = (event) => {
-        console.error('[WebSocket] WebSocket error:', event);
+        logger.error('WebSocket error', {
+          component: 'WebSocketService',
+          action: 'websocket_error',
+          itineraryId
+        }, event);
         this.connectionState = 'error';
         this.isConnecting = false;
 
@@ -218,7 +275,11 @@ class WebSocketService {
       };
 
       this.client.onWebSocketClose = (event) => {
-        console.log('[WebSocket] WebSocket closed:', event);
+        logger.info('WebSocket closed', {
+          component: 'WebSocketService',
+          action: 'websocket_closed',
+          itineraryId
+        });
         this.connectionState = 'disconnected';
         this.isConnecting = false;
         this.notifyConnectionHandlers(false);
@@ -228,7 +289,11 @@ class WebSocketService {
       try {
         this.client.activate();
       } catch (error) {
-        console.error('[WebSocket] Error activating client:', error);
+        logger.error('Error activating client', {
+          component: 'WebSocketService',
+          action: 'activate_error',
+          itineraryId
+        }, error);
         this.isConnecting = false;
         this.connectionState = 'error';
         this.connectionDeduplicationMap.delete(itineraryId);
@@ -283,7 +348,12 @@ class WebSocketService {
     });
     this.subscriptions.set('chat', chatSubscription);
 
-    console.log('[WebSocket] Subscribed to topics for itinerary:', this.currentItineraryId);
+    logger.info('Subscribed to topics', {
+      component: 'WebSocketService',
+      action: 'subscribed',
+      itineraryId: this.currentItineraryId,
+      topicsCount: this.subscriptions.size
+    });
   }
 
   /**
@@ -292,7 +362,11 @@ class WebSocketService {
   private handleMessage(message: IMessage): void {
     try {
       const data = JSON.parse(message.body);
-      console.log('[WebSocket] Message received:', data);
+      logger.debug('Message received', {
+        component: 'WebSocketService',
+        action: 'message_received',
+        messageType: data.type
+      });
 
       const wsMessage: WebSocketMessage = {
         type: data.type || 'connection_status',
@@ -309,7 +383,10 @@ class WebSocketService {
         this.emit(wsMessage.type, wsMessage);
       }
     } catch (error) {
-      console.error('[WebSocket] Failed to parse message:', error, message.body);
+      logger.error('Failed to parse message', {
+        component: 'WebSocketService',
+        action: 'parse_error'
+      }, error);
       this.emit('error', error);
     }
   }
@@ -319,7 +396,11 @@ class WebSocketService {
    */
   sendMessage(destination: string, body: any, headers: any = {}): void {
     if (!this.client || !this.client.connected) {
-      console.warn('[WebSocket] Cannot send message - not connected');
+      logger.warn('Cannot send message - not connected', {
+        component: 'WebSocketService',
+        action: 'send_message_not_connected',
+        destination
+      });
       return;
     }
 
@@ -329,9 +410,17 @@ class WebSocketService {
         body: JSON.stringify(body),
         headers
       });
-      console.log('[WebSocket] Message sent:', { destination, body });
+      logger.debug('Message sent', {
+        component: 'WebSocketService',
+        action: 'message_sent',
+        destination
+      });
     } catch (error) {
-      console.error('[WebSocket] Failed to send message:', error);
+      logger.error('Failed to send message', {
+        component: 'WebSocketService',
+        action: 'send_message_error',
+        destination
+      }, error);
       this.emit('error', error);
     }
   }
@@ -341,7 +430,10 @@ class WebSocketService {
    */
   sendChatMessage(message: string, context?: any): void {
     if (!this.currentItineraryId) {
-      console.warn('[WebSocket] Cannot send chat message - no itinerary ID');
+      logger.warn('Cannot send chat message - no itinerary ID', {
+        component: 'WebSocketService',
+        action: 'send_chat_no_itinerary'
+      });
       return;
     }
 
@@ -357,7 +449,11 @@ class WebSocketService {
    * Disconnect from WebSocket
    */
   disconnect(): void {
-    console.log('[WebSocket] Disconnecting...');
+    logger.info('Disconnecting WebSocket', {
+      component: 'WebSocketService',
+      action: 'disconnect_start',
+      itineraryId: this.currentItineraryId
+    });
 
     if (this.client) {
       // Unsubscribe from all topics
@@ -365,7 +461,10 @@ class WebSocketService {
         try {
           subscription.unsubscribe();
         } catch (error) {
-          console.warn('[WebSocket] Error unsubscribing:', error);
+          logger.warn('Error unsubscribing', {
+            component: 'WebSocketService',
+            action: 'unsubscribe_error'
+          }, error);
         }
       });
       this.subscriptions.clear();
@@ -374,7 +473,10 @@ class WebSocketService {
       try {
         this.client.deactivate();
       } catch (error) {
-        console.warn('[WebSocket] Error deactivating client:', error);
+        logger.warn('Error deactivating client', {
+          component: 'WebSocketService',
+          action: 'deactivate_error'
+        }, error);
       }
       this.client = null;
     }
@@ -383,14 +485,20 @@ class WebSocketService {
     this.currentItineraryId = null;
     this.reconnectAttempts = 0;
     this.notifyConnectionHandlers(false);
-    console.log('[WebSocket] Disconnected');
+    logger.info('WebSocket disconnected', {
+      component: 'WebSocketService',
+      action: 'disconnect_complete'
+    });
   }
 
   /**
    * Force disconnect and reset connection state
    */
   forceDisconnect(): void {
-    console.log('[WebSocket] Force disconnecting...');
+    logger.info('Force disconnecting WebSocket', {
+      component: 'WebSocketService',
+      action: 'force_disconnect'
+    });
     this.disconnect();
 
     // Clear any pending reconnection attempts
@@ -446,7 +554,11 @@ class WebSocketService {
         try {
           listener(data);
         } catch (error) {
-          console.error('[WebSocket] Error in event listener:', error);
+          logger.error('Error in event listener', {
+            component: 'WebSocketService',
+            action: 'event_listener_error',
+            event
+          }, error);
         }
       });
     }
@@ -474,7 +586,10 @@ class WebSocketService {
       try {
         handler(connected);
       } catch (error) {
-        console.error('[WebSocket] Error in connection handler:', error);
+        logger.error('Error in connection handler', {
+          component: 'WebSocketService',
+          action: 'connection_handler_error'
+        }, error);
       }
     });
   }

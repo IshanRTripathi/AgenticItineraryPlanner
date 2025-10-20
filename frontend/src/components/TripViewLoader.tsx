@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useItinerary } from '../state/query/hooks';
 import { TripData } from '../types/TripData';
-import { LoadingSpinner } from './travel-planner/shared/LoadingSpinner';
+import { LoadingState } from './shared/LoadingState';
+import { DayCardSkeleton } from './loading/SkeletonLoader';
 import { ErrorDisplay } from './shared/ErrorDisplay';
 import { TravelPlanner } from './TravelPlanner';
 import { useAuth } from '../contexts/AuthContext';
@@ -75,11 +76,12 @@ export function TripViewLoader({
   // Show loading state while fetching data
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner message="Loading trip data..." fullScreen />
-          <p className="text-gray-600 mt-4">Preparing your itinerary...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <LoadingState 
+          variant="fullPage" 
+          message="Loading trip data... Preparing your itinerary..." 
+          size="lg"
+        />
       </div>
     );
   }

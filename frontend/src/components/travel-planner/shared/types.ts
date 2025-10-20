@@ -116,6 +116,7 @@ export const CURRENCIES = ['EUR', 'USD', 'GBP', 'CAD', 'AUD', 'NZD', 'HKD', 'CHF
 
 // Re-export shared components for convenience
 export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
+// Legacy exports - use new components from shared/LoadingState and loading/SkeletonLoader
 export { LoadingSpinner, SkeletonCard, SkeletonTable } from './LoadingSpinner';
 
 // View types
