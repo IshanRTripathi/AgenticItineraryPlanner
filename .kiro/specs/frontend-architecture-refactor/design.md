@@ -5,11 +5,21 @@
 This document provides the technical design for refactoring the Travel Planner frontend application. The design addresses critical architectural issues while maintaining backward compatibility during migration.
 
 **Design Principles:**
-1. **Incremental Migration** - Changes are applied gradually with feature flags
-2. **Single Source of Truth** - Data flows from one authoritative source
-3. **Separation of Concerns** - Clear boundaries between layers
-4. **Performance First** - Optimize for user experience
-5. **Type Safety** - Leverage TypeScript for reliability
+1. **Zero Code Duplication** - Every piece of logic exists in exactly ONE place
+2. **Reusability First** - Extract common patterns to shared modules before writing new code
+3. **Incremental Migration** - Changes are applied gradually with feature flags
+4. **Single Source of Truth** - Data flows from one authoritative source
+5. **Separation of Concerns** - Clear boundaries between layers
+6. **Performance First** - Optimize for user experience
+7. **Type Safety** - Leverage TypeScript for reliability
+
+**Reusability Guidelines:**
+- Before writing new code, search for existing implementations
+- Extract state logic to custom hooks
+- Extract event handlers to helper functions
+- Extract UI patterns to shared components
+- Extract types to dedicated type files
+- See `CODE_REUSABILITY_GUIDE.md` for detailed patterns
 
 ---
 

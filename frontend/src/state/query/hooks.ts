@@ -1,6 +1,21 @@
+/**
+ * React Query Hooks - Single Source of Truth for Server Data
+ * 
+ * IMPORTANT: React Query is the single source of truth for all server data.
+ * - Do NOT persist server data (trips, itineraries) to LocalStorage
+ * - Use React Query cache for data persistence
+ * - Zustand store should only contain UI state
+ * 
+ * State Management Strategy:
+ * - Server Data: React Query (this file)
+ * - UI State: Zustand (useAppStore)
+ * - Real-time Updates: SSE/WebSocket → React Query cache invalidation
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../../services/apiClient';
+import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
 import { sseManager } from '../../services/sseManager';
+import { logger } from '../../utils/logger';
 
 export const queryKeys = {
   user: ['user'] as const,
@@ -33,7 +48,7 @@ export function useItinerary(id: string, retryOptions?: { maxRetries?: number; r
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff, max 30s
     // Cache configuration to reduce unnecessary requests
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (renamed from cacheTime in v5)
     refetchOnWindowFocus: false, // Don't refetch when window regains focus
     refetchOnReconnect: false, // Don't refetch when network reconnects
     // Add initial delay to prevent immediate API calls after creation
@@ -65,14 +80,34 @@ export function useCreateItinerary(retryOptions?: { maxRetries?: number; retryDe
   return useMutation({
     mutationFn: (payload: CreateItineraryRequest) => apiClient.createItinerary(payload, retryOptions),
     onSuccess: (response) => {
-      // Invalidate queries for the created itinerary
-      qc.invalidateQueries({ queryKey: queryKeys.itinerary(response.itinerary.id) });
+      logger.info('Itinerary created successfully', {
+        component: 'useCreateItinerary',
+        action: 'create_success',
+        itineraryId: response.itinerary.id
+      });
+      
+      // Update React Query cache with new itinerary
+      qc.setQueryData(queryKeys.itinerary(response.itinerary.id), response.itinerary);
+      
+      // Invalidate itineraries list to include new item
+      qc.invalidateQueries({ queryKey: queryKeys.itineraries });
       
       // Establish SSE connection immediately after creation with executionId
       if (response.itinerary.id) {
-        console.log('[useCreateItinerary] Establishing SSE connection for:', response.itinerary.id, 'executionId:', response.executionId);
+        logger.info('Establishing SSE connection after itinerary creation', {
+          component: 'useCreateItinerary',
+          action: 'sse_connect',
+          itineraryId: response.itinerary.id,
+          executionId: response.executionId
+        });
         sseManager.connect(response.itinerary.id, response.executionId);
       }
+    },
+    onError: (error) => {
+      logger.error('Failed to create itinerary', {
+        component: 'useCreateItinerary',
+        action: 'create_error'
+      }, error);
     },
     retry: (failureCount, error) => {
       // Don't retry on 4xx errors except 408, 429

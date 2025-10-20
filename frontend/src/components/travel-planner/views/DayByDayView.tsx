@@ -163,39 +163,14 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
   
   const { centerOnDayComponent, setHoveredCard } = useMapContext();
   
-  // Try to use context, but fallback gracefully if not available
-  let contextState: any = null;
-  let processWithAgents: any = null;
-  let setSelectedDay: any = null;
-  let setSelectedNodes: any = null;
-  let updateNode: any = null;
-  
-  try {
-    const context = useUnifiedItinerary();
-    contextState = context.state;
-    processWithAgents = context.processWithAgents;
-    setSelectedDay = context.setSelectedDay;
-    setSelectedNodes = context.setSelectedNodes;
-    updateNode = context.updateNode;
-  } catch (error) {
-    // Context not available, use fallback with tripData
-    console.warn('DayByDayView: UnifiedItinerary context not available, using fallback mode with tripData');
-    contextState = { 
-      itinerary: tripData?.itinerary ? {
-        id: tripData.id,
-        itinerary: tripData.itinerary
-      } : null,
-      loading: false,
-      error: null,
-      syncStatus: 'idle',
-      activeAgents: [],
-      selectedNodeIds: []
-    };
-    processWithAgents = () => Promise.resolve();
-    setSelectedDay = () => {};
-    setSelectedNodes = () => {};
-    updateNode = () => {};
-  }
+  // Use UnifiedItinerary context (must be wrapped with UnifiedItineraryProvider)
+  const {
+    state: contextState,
+    processWithAgents,
+    setSelectedDay,
+    setSelectedNodes,
+    updateNode
+  } = useUnifiedItinerary();
 
   const handleDayToggle = (dayNumber: number, dayData: any) => {
     if (expandedDay === dayNumber) {

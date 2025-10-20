@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DestinationsManager } from '../views/DestinationsManager';
 import { DayByDayView } from '../views/DayByDayView';
+import { UnifiedItineraryProvider } from '../../../contexts/UnifiedItineraryContext';
 import { TripData } from '../../../types/TripData';
 import { Destination } from '../shared/types';
 
@@ -120,11 +121,13 @@ export function MobilePlanDetailView({
             onUpdateTransport={onUpdateTransport}
           />
         ) : (
-          <DayByDayView
-            tripData={tripData}
-            onDaySelect={onDaySelect}
-            isCollapsed={false}
-          />
+          <UnifiedItineraryProvider itineraryId={tripData.id}>
+            <DayByDayView
+              tripData={tripData}
+              onDaySelect={onDaySelect}
+              isCollapsed={false}
+            />
+          </UnifiedItineraryProvider>
         )}
       </div>
 

@@ -18,7 +18,8 @@ export const useAppStore = create<AppStore>()(
     setAuthToken: (token?: string) => set({ authToken: token }),
     clearAuth: () => set({ isAuthenticated: false, authToken: undefined }),
 
-    // Trip
+    // Trip - NOTE: Server data should come from React Query, not persisted here
+    // These are kept for backward compatibility but not persisted to LocalStorage
     currentTrip: null,
     trips: [],
     setCurrentTrip: (trip: TripData | null) => set({ currentTrip: trip }),
@@ -95,20 +96,20 @@ export const useAppStore = create<AppStore>()(
         isAuthenticated: state.isAuthenticated,
         authToken: state.authToken,
         currentScreen: state.currentScreen,
-        currentTrip: state.currentTrip,
-        trips: state.trips
+        // Note: currentTrip and trips are no longer persisted
       };
       localStorage.setItem('app-store', JSON.stringify(dataToSave));
     }
   }), {
     name: 'app-store',
     storage: createJSONStorage(() => localStorage),
+    // Only persist UI state, not server data
+    // Server data should come from React Query cache
     partialize: (state) => ({
       isAuthenticated: state.isAuthenticated,
       authToken: state.authToken,
       currentScreen: state.currentScreen,
-      currentTrip: state.currentTrip,
-      trips: state.trips
+      // Removed: currentTrip and trips (server data)
     })
   })
 );
