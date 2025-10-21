@@ -28,6 +28,9 @@ export interface WorkflowNodeData {
   changeType?: 'added' | 'modified' | 'moved' | 'deleted';
   changeTimestamp?: string;
   originalData?: Partial<WorkflowNodeData>;
+  // Lock state
+  isLocked?: boolean;
+  itineraryId?: string;
 }
 
 /**

@@ -191,7 +191,12 @@ function RoutedApp() {
             trips={trips}
             onCreateTrip={() => navigateToScreen('/wizard')}
             onViewTrip={(trip) => {
-              setCurrentTrip(trip);
+              // Ensure trip has itinerary structure
+              const tripWithItinerary = {
+                ...trip,
+                itinerary: trip.itinerary || { days: [] }
+              } as any;
+              setCurrentTrip(tripWithItinerary);
               navigate('/planner');
             }}
             onBack={() => navigateToScreen('/')}

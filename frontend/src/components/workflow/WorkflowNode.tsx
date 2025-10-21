@@ -18,7 +18,7 @@ import {
   Move,
   Trash2
 } from 'lucide-react';
-import { WorkflowNodeData } from '../WorkflowBuilder';
+import { WorkflowNodeData } from '../workflow-builder/WorkflowBuilderTypes';
 import { NodeLockToggle } from '../locks/NodeLockToggle';
 
 const getNodeIcon = (type: WorkflowNodeData['type']) => {
@@ -140,46 +140,66 @@ export function WorkflowNode({ data, selected }: NodeProps<WorkflowNodeData>) {
       
       {/* Content */}
       <div className="p-3">
-        <h3 className="font-semibold text-sm mb-2 line-clamp-2">{data.title}</h3>
+        <h3 className="font-semibold text-sm mb-2 line-clamp-2">{data.title || 'Untitled'}</h3>
         
         {/* Time and Duration */}
-        <div className="flex items-center gap-2 mb-2">
-          <Clock className="h-3 w-3 text-gray-500" />
-          <span className="text-xs text-gray-600">{data.start}</span>
-          <Badge variant="outline" className="text-xs">
-            {formatTime(data.durationMin)}
-          </Badge>
-        </div>
+        {(data.start || data.durationMin) && (
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="h-3 w-3 text-gray-500" />
+            <span className="text-xs text-gray-600">{data.start || 'TBD'}</span>
+            {data.durationMin && (
+              <Badge variant="outline" className="text-xs">
+                {formatTime(data.durationMin)}
+              </Badge>
+            )}
+          </div>
+        )}
         
         {/* Cost */}
-        <div className="flex items-center gap-2 mb-2">
-          <DollarSign className="h-3 w-3 text-gray-500" />
-          <span className="text-xs text-gray-600">₹{data.costINR.toLocaleString()}</span>
-          {data.meta.rating && (
-            <div className="flex items-center gap-1 ml-auto">
-              <Star className="h-3 w-3 text-yellow-500 fill-current" />
-              <span className="text-xs text-gray-600">{data.meta.rating}</span>
-            </div>
-          )}
-        </div>
+        {(data.costINR || data.meta?.rating) && (
+          <div className="flex items-center gap-2 mb-2">
+            {data.costINR > 0 && (
+              <>
+                <DollarSign className="h-3 w-3 text-gray-500" />
+                <span className="text-xs text-gray-600">₹{data.costINR.toLocaleString()}</span>
+              </>
+            )}
+            {data.meta?.rating && (
+              <div className="flex items-center gap-1 ml-auto">
+                <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                <span className="text-xs text-gray-600">{data.meta.rating}</span>
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Tags */}
-        <div className="flex flex-wrap gap-1">
-          {data.tags.slice(0, 3).map((tag, index) => (
-            <Badge 
-              key={index} 
-              variant="secondary" 
-              className="text-xs px-1 py-0 h-5"
-            >
-              {tag}
-            </Badge>
-          ))}
-          {data.tags.length > 3 && (
-            <Badge variant="secondary" className="text-xs px-1 py-0 h-5">
-              +{data.tags.length - 3}
-            </Badge>
-          )}
-        </div>
+        {data.tags && data.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {data.tags.slice(0, 3).map((tag, index) => (
+              <Badge 
+                key={index} 
+                variant="secondary" 
+                className="text-xs px-1 py-0 h-5"
+              >
+                {tag}
+              </Badge>
+            ))}
+            {data.tags.length > 3 && (
+              <Badge variant="secondary" className="text-xs px-1 py-0 h-5">
+                +{data.tags.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+        
+        {/* Address/Location */}
+        {data.meta?.address && data.meta.address !== 'Unknown' && (
+          <div className="flex items-center gap-2 mt-2">
+            <MapPin className="h-3 w-3 text-gray-500" />
+            <span className="text-xs text-gray-600 line-clamp-1">{data.meta.address}</span>
+          </div>
+        )}
         
         {/* User Change Indicator */}
         {data.userModified && (

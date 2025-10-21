@@ -43,7 +43,6 @@ export const getGridPosition = (
     savedPositions[nodeId].x < 2000 &&
     savedPositions[nodeId].y < 2000
   ) {
-    console.log(`📍 Using saved position for ${nodeId}:`, savedPositions[nodeId]);
     return savedPositions[nodeId];
   }
 
@@ -57,20 +56,10 @@ export const getGridPosition = (
   const row = Math.floor(index / colsPerRow);
   const col = index % colsPerRow;
 
-  const position = {
+  return {
     x: startX + col * colWidth,
     y: startY + row * rowHeight,
   };
-
-  console.log(`🎯 Grid position for ${nodeId || 'unknown'}:`, {
-    nodeId,
-    index,
-    row,
-    col,
-    position,
-  });
-
-  return position;
 };
 
 /**
@@ -153,27 +142,32 @@ export const createWorkflowDaysFromTripData = (
   }
 
   return tripData.itinerary.days.map((day, dayIndex) => {
-    const nodes: Node<WorkflowNodeData>[] = day.components.map((component, componentIndex) => {
+    const dayComponents = (day as any).nodes || day.components || [];
+    
+    const nodes: Node<WorkflowNodeData>[] = dayComponents.map((component, componentIndex) => {
+      const nodeData = {
+        id: component.id,
+        type: mapComponentType(component.type),
+        // Support both backend formats: NormalizedNode (title) and TripComponent (name)
+        title: component.title || component.name || 'Untitled',
+        tags: component.details?.tags || [component.type],
+        start: parseStartTime(component.timing?.startTime || '09:00'),
+        durationMin: parseDuration(component.timing?.duration || component.timing?.durationMin || '2h'),
+        costINR: component.cost?.pricePerPerson || component.cost?.amountPerPerson || 0,
+        meta: {
+          rating: component.details?.rating || 4.0,
+          open: '09:00',
+          close: '18:00',
+          address: component.location?.address || component.location?.name || 'Unknown',
+          distanceKm: component.travel?.distanceFromPrevious || 0,
+        },
+      };
+      
       return {
         id: component.id,
         type: 'workflow',
-        position: getGridPosition(componentIndex, component.id, savedPositions, day.components.length),
-        data: {
-          id: component.id,
-          type: mapComponentType(component.type),
-          title: component.name,
-          tags: component.details?.tags || [component.type],
-          start: parseStartTime(component.timing?.startTime || '09:00'),
-          durationMin: parseDuration(component.timing?.duration || '2h'),
-          costINR: component.cost?.pricePerPerson || 0,
-          meta: {
-            rating: component.details?.rating || 4.0,
-            open: '09:00',
-            close: '18:00',
-            address: component.location?.address || component.location?.name || 'Unknown',
-            distanceKm: component.travel?.distanceFromPrevious || 0,
-          },
-        },
+        position: getGridPosition(componentIndex, component.id, savedPositions, dayComponents.length),
+        data: nodeData,
       };
     });
 

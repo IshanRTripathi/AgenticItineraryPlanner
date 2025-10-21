@@ -1,4 +1,4 @@
-﻿import React from 'react';
+﻿import React, { useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -130,8 +130,78 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   const { data: freshTripData, isLoading, error, refetch } = useItinerary(tripData.id);
   const queryClient = useQueryClient();
 
-  // Use fresh data if available, fallback to props
-  const currentTripData = (freshTripData as TripData) || tripData;
+  // Convert NormalizedItinerary to TripData format if needed
+  const convertedTripData = useMemo(() => {
+    console.log('[TravelPlanner] Converting data:', { 
+      hasFreshData: !!freshTripData, 
+      freshDataType: freshTripData ? ('id' in freshTripData ? 'TripData' : 'NormalizedItinerary') : 'none',
+      tripDataId: tripData?.id 
+    });
+    
+    if (!freshTripData) return null;
+    
+    // If it's already TripData format (has 'id' field), return as is
+    if ('id' in freshTripData) {
+      console.log('[TravelPlanner] Using freshTripData as-is (TripData format)');
+      return freshTripData as any;
+    }
+    
+    // Convert NormalizedItinerary to TripData format
+    const normalized = freshTripData as any;
+    
+    // Ensure days is always an array
+    const days = Array.isArray(normalized.days) ? normalized.days : [];
+    console.log('[TravelPlanner] Converting NormalizedItinerary:', { 
+      daysCount: days.length,
+      hasItineraryId: !!normalized.itineraryId 
+    });
+    
+    const converted = {
+      ...tripData, // Keep original tripData fields as base
+      id: normalized.itineraryId || tripData.id,
+      itinerary: {
+        ...(tripData.itinerary || {}),
+        days: days,
+      },
+      summary: normalized.summary || tripData.summary,
+      themes: Array.isArray(normalized.themes) ? normalized.themes : (tripData.themes || []),
+      destination: normalized.destination || tripData.destination,
+      dates: {
+        start: normalized.startDate || days[0]?.date || tripData.dates?.start,
+        end: normalized.endDate || days[days.length - 1]?.date || tripData.dates?.end
+      }
+    };
+    
+    console.log('[TravelPlanner] Converted data:', { 
+      id: converted.id, 
+      hasDays: !!converted.itinerary?.days,
+      daysCount: converted.itinerary?.days?.length 
+    });
+    
+    return converted;
+  }, [freshTripData, tripData]);
+
+  // Use converted data if available, fallback to props
+  // Ensure currentTripData always has itinerary.days as an array
+  const currentTripData = convertedTripData || tripData;
+  
+  console.log('[TravelPlanner] Current trip data:', { 
+    hasData: !!currentTripData,
+    hasItinerary: !!currentTripData?.itinerary,
+    hasDays: !!currentTripData?.itinerary?.days,
+    daysIsArray: Array.isArray(currentTripData?.itinerary?.days),
+    daysCount: currentTripData?.itinerary?.days?.length 
+  });
+  
+  // Safety check: ensure itinerary.days exists
+  if (currentTripData && !currentTripData.itinerary) {
+    console.log('[TravelPlanner] Adding missing itinerary object');
+    currentTripData.itinerary = { days: [] } as any;
+  }
+  if (currentTripData && currentTripData.itinerary && !Array.isArray(currentTripData.itinerary.days)) {
+    console.log('[TravelPlanner] Fixing non-array days');
+    currentTripData.itinerary.days = [];
+  }
 
   // Log data fetching status
   console.log('===  TRAVEL PLANNER DATA FETCH ===');
@@ -213,7 +283,9 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     console.log('========================');
 
     // Check if we have actual itinerary data, not just destinations array
-    const hasItineraryData = currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0;
+    // Support both TripData format (itinerary.days) and NormalizedItinerary format (days)
+    const hasItineraryData = (currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0) ||
+                             ((currentTripData as any).days && (currentTripData as any).days.length > 0);
 
     // Show loading state while data is being fetched
     if (isLoading) {
@@ -365,7 +437,12 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           ) : !showWorkflowBuilder ? (
             <div className="h-full overflow-hidden relative">
               {/* Feature flag: simplest gated render for map MVP */}
-              {Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY) ? (
+              {(() => {
+                const hasMapKey = Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY);
+                const hasDays = currentTripData?.itinerary?.days;
+                console.log('[TravelPlanner] Map render check:', { hasMapKey, hasDays, daysType: typeof hasDays, isArray: Array.isArray(hasDays) });
+                return hasMapKey && hasDays;
+              })() ? (
                 <div className="h-full">
                   {/* TripMap integration with error boundary */}
                   <MapErrorBoundary
@@ -373,12 +450,20 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                       console.error('Map error:', error);
                     }}
                   >
+                    {(() => {
+                      console.log('[TravelPlanner] About to map days:', { 
+                        days: currentTripData.itinerary.days,
+                        isArray: Array.isArray(currentTripData.itinerary.days),
+                        length: currentTripData.itinerary.days?.length 
+                      });
+                      return null;
+                    })()}
                     <TripMap
                       itineraryId={currentTripData.id}
                       mapBounds={currentTripData.itinerary?.mapBounds}
                       countryCentroid={currentTripData.itinerary?.countryCentroid}
                       nodes={mapMarkers}
-                      days={(currentTripData.itinerary?.days || []).map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
+                      days={currentTripData.itinerary.days.map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
                       onAddPlace={({ dayId, dayNumber, place }) => {
                         console.log('[Maps] Add place to itinerary (InfoWindow)', { dayId, dayNumber, place })
                         console.log('[Maps] Place types:', place.types)

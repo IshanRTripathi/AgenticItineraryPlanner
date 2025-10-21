@@ -63,6 +63,9 @@ export function useItineraries(enabled: boolean = true, retryOptions?: { maxRetr
     queryKey: queryKeys.itineraries,
     queryFn: () => apiClient.getAllItineraries(retryOptions),
     enabled: enabled,
+    // Cache configuration to prevent multiple calls
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
     retry: (failureCount, error) => {
       // Don't retry on 4xx errors except 408, 429
       if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {

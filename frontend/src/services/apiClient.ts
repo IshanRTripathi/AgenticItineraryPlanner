@@ -2,10 +2,7 @@
  * API Client for communicating with the backend
  */
 
-import { DataTransformer } from './dataTransformer';
-import { NormalizedDataTransformer } from './normalizedDataTransformer';
 import { authService } from './authService';
-import { TripData } from '../types/TripData';
 import {
   NormalizedItinerary,
   ChangeSet,
@@ -360,7 +357,7 @@ class ApiClient {
     return response;
   }
 
-  async getItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData> {
+  async getItinerary(id: string, retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<NormalizedItinerary> {
     const timer = logger.startTimer('getItinerary', { component: 'ApiClient', itineraryId: id });
     
     try {
@@ -368,25 +365,15 @@ class ApiClient {
 
       const response = await this.request<NormalizedItinerary>(`/itineraries/${id}/json`, {}, retryOptions);
       
-      logger.debug('Itinerary data received', {
-        component: 'ApiClient',
-        action: 'get_itinerary_received',
-        itineraryId: id,
-        daysCount: response.days?.length || 0
-      });
-
-      logger.debug('Starting data transformation', { component: 'ApiClient', action: 'transform_start', itineraryId: id });
-      const transformedData = NormalizedDataTransformer.transformNormalizedItineraryToTripData(response);
-      
       logger.info('Itinerary retrieved successfully', {
         component: 'ApiClient',
         action: 'get_itinerary_success',
         itineraryId: id,
-        daysCount: transformedData.itinerary?.days?.length || 0
+        daysCount: response.days?.length || 0
       });
       
       timer();
-      return transformedData;
+      return response;
 
     } catch (error) {
       logger.error('Failed to get itinerary', {
@@ -422,9 +409,10 @@ class ApiClient {
     return this.request<ItineraryResponse[]>(`/itineraries?page=${page}&size=${size}`);
   }
 
-  async getAllItineraries(retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<TripData[]> {
-    const responses = await this.request<ItineraryResponse[]>('/itineraries', {}, retryOptions);
-    return responses.map(response => DataTransformer.transformItineraryResponseToTripData(response));
+  async getAllItineraries(retryOptions?: { maxRetries?: number; retryDelay?: number }): Promise<ItineraryResponse[]> {
+    // Returns lightweight summary data only - NOT full itineraries
+    // Use getItinerary(id) to fetch full itinerary when user clicks on one
+    return this.request<ItineraryResponse[]>('/itineraries', {}, retryOptions);
   }
 
   async reviseItinerary(id: string, data: ReviseRequest): Promise<ReviseResponse> {
