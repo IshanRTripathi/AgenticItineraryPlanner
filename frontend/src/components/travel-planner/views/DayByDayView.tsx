@@ -305,9 +305,39 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
 
   const handleCardClick = async (component: any, dayNumber: number) => {
     try {
-      const coordinates = await geocodingUtils.getCoordinatesForComponent(component);
+      console.log('[DayByDayView] Card clicked:', {
+        componentId: component.id,
+        componentName: component.name,
+        hasLocation: !!component.location,
+        locationName: component.location?.name,
+        locationAddress: component.location?.address
+      });
+
+      let coordinates = await geocodingUtils.getCoordinatesForComponent(component);
+      
+      console.log('[DayByDayView] Coordinates result:', {
+        coordinates,
+        hasCoordinates: !!coordinates
+      });
+
       if (coordinates) {
+        console.log('[DayByDayView] ✅ Centering map on component:', {
+          dayNumber,
+          componentId: component.id,
+          coordinates
+        });
         centerOnDayComponent(dayNumber, component.id, coordinates);
+      } else {
+        console.warn('[DayByDayView] ⚠️ No coordinates available - locations need enrichment', {
+          componentId: component.id,
+          componentName: component.name,
+          locationName: component.location?.name,
+          locationAddress: component.location?.address,
+          suggestion: 'Run enrichment agent to populate coordinates'
+        });
+        
+        // Show a user-friendly message
+        alert(`This location hasn't been enriched with coordinates yet.\n\nLocation: ${component.name}\n\nPlease run the Enrichment agent to add map coordinates to all locations.`);
       }
       setHoveredCard({ dayNumber, componentId: component.id });
     } catch (error) {

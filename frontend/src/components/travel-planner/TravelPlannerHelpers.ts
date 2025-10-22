@@ -85,6 +85,7 @@ export function buildMapMarkers(currentTripData: TripData): MapMarker[] {
   try {
     days.forEach((day, dayIdx) => {
       const comps = day.components || [];
+      
       comps.forEach((c: any, compIdx: number) => {
         try {
           const lat = c?.location?.coordinates?.lat;
@@ -96,18 +97,20 @@ export function buildMapMarkers(currentTripData: TripData): MapMarker[] {
             !isNaN(lat) && !isNaN(lng) &&
             lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
 
-            markers.push({
+            const marker: MapMarker = {
               id: c.id || `${dayIdx}-${compIdx}`,
               position: { lat, lng },
               title: c.name || c.type || `Place ${compIdx + 1}`,
               type: (c.type === 'restaurant' ? 'meal' :
                 c.type === 'hotel' ? 'accommodation' :
-                  c.type === 'transport' ? 'transport' : 'attraction'),
-              status: 'planned',
+                  c.type === 'transport' ? 'transport' : 'attraction') as 'meal' | 'accommodation' | 'transport' | 'attraction',
+              status: 'planned' as const,
               locked: false,
               rating: c.rating || 0,
               googleMapsUri: c.googleMapsUri || '',
-            });
+            };
+            
+            markers.push(marker);
           }
         } catch (error) {
           console.error('[Maps] Error processing component:', c, error);

@@ -5,6 +5,8 @@ import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { useGenerationStatus } from '../../hooks/useGenerationStatus';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SimplifiedAgentProgressProps {
   tripData: TripData;
@@ -28,6 +30,8 @@ export function SimplifiedAgentProgress({
   retryAttempt = 0, 
   maxRetries = 3 
 }: SimplifiedAgentProgressProps) {
+  const queryClient = useQueryClient();
+  
   const [agents, setAgents] = useState<AgentStatus[]>([
     // Initialize with default agents to show something immediately
     { kind: 'planner', status: 'queued', progress: 0 },
@@ -46,8 +50,41 @@ export function SimplifiedAgentProgress({
   
   const eventSourceRef = useRef<EventSource | null>(null);
   const startTimeRef = useRef<number>(Date.now());
-  const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const messageIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  
+  // Add status polling as fallback for when SSE connection is lost (e.g., page refresh)
+  const { status: polledStatus, isPolling } = useGenerationStatus(
+    tripData.id,
+    tripData.status || 'generating',
+    {
+      pollingInterval: 5000, // Poll every 5 seconds
+      enabled: !isCompleted && !hasError, // Only poll while generating
+      onComplete: () => {
+        // Generation completed! Refresh data and trigger completion
+        if (!onCompleteCalledRef.current) {
+          setCurrentMessage('Generation completed! Loading your itinerary...');
+          setOverallProgress(100);
+          setIsCompleted(true);
+          
+          // Invalidate queries to fetch fresh data
+          queryClient.invalidateQueries({ queryKey: ['itinerary', tripData.id] });
+          
+          // Trigger completion callback
+          setTimeout(() => {
+            if (!onCompleteCalledRef.current) {
+              onCompleteCalledRef.current = true;
+              onComplete();
+            }
+          }, 1000);
+        }
+      },
+      onError: (error) => {
+        console.error('Status polling error:', error);
+        // Don't show error to user - SSE might still work
+      }
+    }
+  );
   
   // Rotating status messages
   const statusMessages = [

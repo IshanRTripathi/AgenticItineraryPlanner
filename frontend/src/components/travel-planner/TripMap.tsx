@@ -37,9 +37,48 @@ export function TripMap({
   useEffect(() => {
     if (!api || !mapRef.current || mapInstanceRef.current) return
 
-    // Use context center and zoom if available, otherwise use defaults
-    const initialCenter = center || { lat: 0, lng: 0 }
-    const initialZoom = center ? zoom : 2
+    // Calculate initial center and zoom based on nodes
+    let initialCenter = center
+    let initialZoom = zoom
+
+    if (!initialCenter && nodes.length > 0) {
+      // Calculate bounds from all nodes
+      const validNodes = nodes.filter(n => n.position &&
+        typeof n.position.lat === 'number' &&
+        typeof n.position.lng === 'number')
+
+      if (validNodes.length > 0) {
+        // Calculate center as average of all positions
+        const sumLat = validNodes.reduce((sum, n) => sum + n.position.lat, 0)
+        const sumLng = validNodes.reduce((sum, n) => sum + n.position.lng, 0)
+        initialCenter = {
+          lat: sumLat / validNodes.length,
+          lng: sumLng / validNodes.length
+        }
+
+        // Calculate appropriate zoom based on spread of markers
+        const lats = validNodes.map(n => n.position.lat)
+        const lngs = validNodes.map(n => n.position.lng)
+        const latSpread = Math.max(...lats) - Math.min(...lats)
+        const lngSpread = Math.max(...lngs) - Math.min(...lngs)
+        const maxSpread = Math.max(latSpread, lngSpread)
+
+        // Zoom levels: 0.001 = ~13, 0.01 = ~11, 0.1 = ~9, 1 = ~7
+        if (maxSpread < 0.01) initialZoom = 13
+        else if (maxSpread < 0.05) initialZoom = 11
+        else if (maxSpread < 0.2) initialZoom = 9
+        else if (maxSpread < 1) initialZoom = 7
+        else initialZoom = 5
+
+        console.log('[TripMap] Calculated initial view:', { initialCenter, initialZoom, nodeCount: validNodes.length, maxSpread })
+      }
+    }
+
+    // Fallback to world view if still no center
+    if (!initialCenter) {
+      initialCenter = { lat: 0, lng: 0 }
+      initialZoom = 2
+    }
 
     const map = new api.maps.Map(mapRef.current, {
       center: initialCenter,
@@ -225,6 +264,7 @@ export function TripMap({
     map.markers = []
 
     // Create new markers
+    const createdMarkers: any[] = []
     nodes.forEach((node) => {
       if (!node.position || typeof node.position.lat !== 'number' || typeof node.position.lng !== 'number') {
         return
@@ -277,11 +317,27 @@ export function TripMap({
         })
       })
 
-      // Store marker reference
-      map.markers = map.markers || []
-      map.markers.push(marker)
+      createdMarkers.push(marker)
     })
-  }, [api, nodes, highlightedMarkers, selectedNodeId, setCenter, setZoom, setSelectedNode, addHighlightedMarker, clearHighlightedMarkers, onPlaceSelected])
+
+    // Store marker references
+    map.markers = createdMarkers
+
+    // Fit bounds to show all markers if we have multiple markers and no specific center set
+    if (createdMarkers.length > 1 && !center) {
+      const bounds = new api.maps.LatLngBounds()
+      createdMarkers.forEach((marker: any) => {
+        bounds.extend(marker.getPosition())
+      })
+      map.fitBounds(bounds)
+
+      // Add padding to bounds
+      const padding = { top: 50, right: 50, bottom: 50, left: 50 }
+      map.fitBounds(bounds, padding)
+
+      console.log('[TripMap] Fitted bounds to show all', createdMarkers.length, 'markers')
+    }
+  }, [api, nodes, highlightedMarkers, selectedNodeId, center, setCenter, setZoom, setSelectedNode, addHighlightedMarker, clearHighlightedMarkers, onPlaceSelected])
 
   return (
     <div className={className} style={{ width: '100%', height: '100%' }}>

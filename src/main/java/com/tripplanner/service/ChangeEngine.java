@@ -1204,23 +1204,16 @@ public class ChangeEngine {
                 node.setTitle(updateData.getTitle());
             }
             if (updateData.getLocation() != null) {
-                node.setLocation(updateData.getLocation());
+                // Merge location data instead of replacing to preserve existing fields
+                mergeLocationData(node, updateData.getLocation());
             }
             if (updateData.getDetails() != null) {
-                NodeDetails updateDetails = updateData.getDetails();
-                NodeDetails currentDetails = node.getDetails();
-                if (currentDetails == null) {
-                    currentDetails = new NodeDetails();
-                    node.setDetails(currentDetails);
-                }
-                
-                // Update description and category from details
-                if (updateDetails.getDescription() != null) {
-                    currentDetails.setDescription(updateDetails.getDescription());
-                }
-                if (updateDetails.getCategory() != null) {
-                    currentDetails.setCategory(updateDetails.getCategory());
-                }
+                // Merge details instead of replacing
+                mergeNodeDetails(node, updateData.getDetails());
+            }
+            if (updateData.getAgentData() != null) {
+                // Merge agent data instead of replacing
+                mergeAgentData(node, updateData.getAgentData());
             }
             
             // Update audit trail
@@ -1232,6 +1225,114 @@ public class ChangeEngine {
         
         logger.warn("No update data provided for node: {}", op.getId());
         return false;
+    }
+    
+    /**
+     * Merge agent data from update into existing node agent data.
+     * This preserves existing fields while updating only the provided fields.
+     */
+    private void mergeAgentData(NormalizedNode node, Map<String, Object> updateAgentData) {
+        // Initialize agent data if it doesn't exist
+        if (node.getAgentData() == null) {
+            node.setAgentData(new HashMap<>());
+        }
+        
+        // Merge the maps - new values override existing ones
+        node.getAgentData().putAll(updateAgentData);
+        
+        logger.debug("Merged agent data for node: {}", node.getId());
+    }
+    
+    /**
+     * Merge node details from update into existing node details.
+     * This preserves existing fields while updating only the provided fields.
+     */
+    private void mergeNodeDetails(NormalizedNode node, NodeDetails updateDetails) {
+        // Initialize details if it doesn't exist
+        if (node.getDetails() == null) {
+            node.setDetails(new NodeDetails());
+        }
+        
+        NodeDetails currentDetails = node.getDetails();
+        
+        // Merge each field individually
+        if (updateDetails.getDescription() != null) {
+            currentDetails.setDescription(updateDetails.getDescription());
+        }
+        if (updateDetails.getCategory() != null) {
+            currentDetails.setCategory(updateDetails.getCategory());
+        }
+        if (updateDetails.getRating() != null) {
+            currentDetails.setRating(updateDetails.getRating());
+        }
+        if (updateDetails.getTags() != null) {
+            currentDetails.setTags(updateDetails.getTags());
+        }
+        if (updateDetails.getReviews() != null) {
+            // Merge reviews - avoid duplicates
+            if (currentDetails.getReviews() == null) {
+                currentDetails.setReviews(new ArrayList<>());
+            }
+            for (Review newReview : updateDetails.getReviews()) {
+                boolean isDuplicate = currentDetails.getReviews().stream()
+                    .anyMatch(existing -> existing.getAuthorName() != null &&
+                            existing.getAuthorName().equals(newReview.getAuthorName()));
+                if (!isDuplicate) {
+                    currentDetails.getReviews().add(newReview);
+                }
+            }
+        }
+        
+        logger.debug("Merged node details for node: {}", node.getId());
+    }
+    
+    /**
+     * Merge location data from update into existing node location.
+     * This preserves existing fields while updating only the provided fields.
+     */
+    private void mergeLocationData(NormalizedNode node, NodeLocation updateLocation) {
+        // Initialize location if it doesn't exist
+        if (node.getLocation() == null) {
+            node.setLocation(new NodeLocation());
+        }
+        
+        NodeLocation currentLocation = node.getLocation();
+        
+        // Merge each field individually
+        if (updateLocation.getName() != null) {
+            currentLocation.setName(updateLocation.getName());
+        }
+        if (updateLocation.getAddress() != null) {
+            currentLocation.setAddress(updateLocation.getAddress());
+        }
+        if (updateLocation.getPlaceId() != null) {
+            currentLocation.setPlaceId(updateLocation.getPlaceId());
+        }
+        if (updateLocation.getRating() != null) {
+            currentLocation.setRating(updateLocation.getRating());
+        }
+        if (updateLocation.getGoogleMapsUri() != null) {
+            currentLocation.setGoogleMapsUri(updateLocation.getGoogleMapsUri());
+        }
+        
+        // Merge coordinates carefully
+        if (updateLocation.getCoordinates() != null) {
+            if (currentLocation.getCoordinates() == null) {
+                currentLocation.setCoordinates(new Coordinates());
+            }
+            
+            Coordinates updateCoords = updateLocation.getCoordinates();
+            Coordinates currentCoords = currentLocation.getCoordinates();
+            
+            if (updateCoords.getLat() != null) {
+                currentCoords.setLat(updateCoords.getLat());
+            }
+            if (updateCoords.getLng() != null) {
+                currentCoords.setLng(updateCoords.getLng());
+            }
+        }
+        
+        logger.debug("Merged location data for node: {}", node.getId());
     }
     
     /**

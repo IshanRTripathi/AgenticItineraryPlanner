@@ -270,12 +270,64 @@ export const geocodingUtils = {
    * Extract coordinates from a component's location data
    */
   extractCoordinates(component: any): MapCoordinates | null {
-    if (component?.location?.coordinates?.lat && component?.location?.coordinates?.lng) {
-      return {
-        lat: component.location.coordinates.lat,
-        lng: component.location.coordinates.lng,
-      };
+    const coords = component?.location?.coordinates;
+    console.log('[GeocodingUtils] Extracting coordinates from component:', {
+      componentId: component?.id,
+      componentName: component?.name,
+      location: component?.location,
+      coordinates: coords,
+      coordsType: typeof coords,
+      coordsIsNull: coords === null,
+      coordsIsUndefined: coords === undefined,
+      coordsKeys: coords ? Object.keys(coords) : 'N/A',
+      coordsLat: coords?.lat,
+      coordsLng: coords?.lng
+    });
+
+    // Try multiple possible paths for coordinates
+    const paths = [
+      // Standard path: component.location.coordinates
+      () => component?.location?.coordinates,
+      // Direct on component
+      () => component?.coordinates,
+      // Position property (used by TripMap)
+      () => component?.position,
+      // Nested in data
+      () => component?.data?.location?.coordinates,
+    ];
+
+    for (const getCoords of paths) {
+      try {
+        const coords = getCoords();
+        console.log('[GeocodingUtils] Checking path, coords:', coords);
+        
+        if (coords?.lat != null && coords?.lng != null) {
+          const lat = typeof coords.lat === 'function' ? coords.lat() : coords.lat;
+          const lng = typeof coords.lng === 'function' ? coords.lng() : coords.lng;
+          
+          console.log('[GeocodingUtils] Extracted lat/lng:', { lat, lng, latType: typeof lat, lngType: typeof lng });
+          
+          if (typeof lat === 'number' && typeof lng === 'number' && 
+              !isNaN(lat) && !isNaN(lng)) {
+            console.log('[GeocodingUtils] ✅ Found valid coordinates:', { lat, lng });
+            return { lat, lng };
+          }
+        }
+      } catch (e) {
+        console.log('[GeocodingUtils] Error checking path:', e);
+        // Continue to next path
+      }
     }
+
+    console.warn('[GeocodingUtils] ❌ No valid coordinates found in component:', {
+      componentId: component?.id,
+      componentName: component?.name,
+      hasLocation: !!component?.location,
+      locationKeys: component?.location ? Object.keys(component.location) : [],
+      componentKeys: Object.keys(component || {}),
+      rawCoordinates: component?.location?.coordinates
+    });
+    
     return null;
   },
 
@@ -284,6 +336,34 @@ export const geocodingUtils = {
    */
   getAddress(component: any): string | null {
     return component?.location?.address || component?.location?.name || null;
+  },
+
+  /**
+   * Get the best search query for geocoding a component
+   */
+  getSearchQuery(component: any): string | null {
+    // Priority order:
+    // 1. Full address if available
+    if (component?.location?.address && component.location.address.trim()) {
+      return component.location.address;
+    }
+    
+    // 2. Component name + location name (e.g., "Paprika Vendéglő, Budapest")
+    if (component?.name && component?.location?.name) {
+      return `${component.name}, ${component.location.name}`;
+    }
+    
+    // 3. Just component name
+    if (component?.name) {
+      return component.name;
+    }
+    
+    // 4. Location name as fallback
+    if (component?.location?.name) {
+      return component.location.name;
+    }
+    
+    return null;
   },
 
   /**
@@ -307,16 +387,26 @@ export const geocodingUtils = {
     // First try to get existing coordinates
     const existingCoords = this.extractCoordinates(component);
     if (existingCoords) {
+      console.log('[GeocodingUtils] Using existing coordinates:', existingCoords);
       return existingCoords;
     }
 
-    // Try to geocode the address
-    const address = this.getAddress(component);
-    if (address) {
-      const result = await geocodingService.geocodeAddress(address);
-      return result?.coordinates || null;
+    // Try to geocode using the best search query
+    const searchQuery = this.getSearchQuery(component);
+    if (searchQuery) {
+      console.log('[GeocodingUtils] Geocoding search query:', searchQuery);
+      const result = await geocodingService.geocodeAddress(searchQuery);
+      if (result?.coordinates) {
+        console.log('[GeocodingUtils] Geocoding successful:', result.coordinates);
+        return result.coordinates;
+      }
     }
 
+    console.warn('[GeocodingUtils] Could not get coordinates for component:', {
+      componentId: component?.id,
+      componentName: component?.name,
+      searchQuery
+    });
     return null;
   },
 };
