@@ -207,29 +207,40 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   }
 
   // Show progress modal if itinerary is still being generated
-  if (currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
+  // Don't show if showProgressModal is explicitly false
+  if (!showProgressModal && currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
+    // Progress was dismissed, show empty state instead
+  } else if (currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
     return (
       <SimplifiedAgentProgress
         tripData={currentTripData}
         onComplete={async () => {
-
+          console.log('[TravelPlanner] Progress onComplete called');
           setShowProgressModal(false);
-          // Fetch the completed itinerary from ItineraryJsonService
+          
+          // Fetch the completed itinerary
           try {
+            console.log('[TravelPlanner] Fetching completed itinerary');
             const completedItinerary = await apiClient.getItinerary(currentTripData.id);
-            // Update the trip data via query client
+            console.log('[TravelPlanner] Completed itinerary fetched:', completedItinerary);
+            
+            // Update query cache
             queryClient.setQueryData(
               queryKeys.itinerary(currentTripData.id),
               completedItinerary
             );
+            
+            // Force a refetch to ensure UI updates
+            await refetch();
+            console.log('[TravelPlanner] Refetch complete, should show planner now');
           } catch (error) {
-
-            refetch(); // Fallback to refetch
+            console.error('[TravelPlanner] Error fetching completed itinerary:', error);
+            refetch();
           }
         }}
         onCancel={() => {
           setShowProgressModal(false);
-          onBack(); // Go back to dashboard
+          onBack();
         }}
       />
     );

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { useGenerationStatus } from '../../hooks/useGenerationStatus';
 import { useQueryClient } from '@tanstack/react-query';
+import { useProgressWithStages } from '../../hooks/useSmoothProgress';
 
 interface SimplifiedAgentProgressProps {
   tripData: TripData;
@@ -38,10 +39,39 @@ export function SimplifiedAgentProgress({
     { kind: 'enrichment', status: 'queued', progress: 0 },
     { kind: 'places', status: 'queued', progress: 0 },
   ]);
-  const [overallProgress, setOverallProgress] = useState(0);
+  const [actualProgress, setActualProgress] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const onCompleteCalledRef = useRef(false);
   const [hasError, setHasError] = useState(false);
+  
+  // Use smooth progress animation
+  const { progress: smoothProgress, stage } = useProgressWithStages(
+    !isCompleted && !hasError,
+    actualProgress
+  );
+  
+  // Use the higher of smooth or actual progress
+  const overallProgress = Math.max(smoothProgress, actualProgress);
+  
+  // Auto-complete when smooth progress reaches 100% (after 1 minute)
+  useEffect(() => {
+    if (overallProgress >= 100 && !isCompleted && !hasError && !onCompleteCalledRef.current) {
+      console.log('[SimplifiedAgentProgress] Progress reached 100%, auto-completing');
+      onCompleteCalledRef.current = true;
+      setIsCompleted(true);
+      setActualProgress(100);
+      setCurrentMessage('Generation complete! Loading your itinerary...');
+      
+      // Invalidate queries to fetch fresh data
+      queryClient.invalidateQueries({ queryKey: ['itinerary', tripData.id] });
+      
+      // Trigger completion callback
+      setTimeout(() => {
+        console.log('[SimplifiedAgentProgress] Calling onComplete callback');
+        onComplete();
+      }, 1000);
+    }
+  }, [overallProgress, isCompleted, hasError, onComplete, queryClient, tripData.id]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [currentMessage, setCurrentMessage] = useState<string>('Processing with AI models...');
   const [remainingTime, setRemainingTime] = useState<number>(120); // 2 minutes in seconds
@@ -64,7 +94,7 @@ export function SimplifiedAgentProgress({
         // Generation completed! Refresh data and trigger completion
         if (!onCompleteCalledRef.current) {
           setCurrentMessage('Generation completed! Loading your itinerary...');
-          setOverallProgress(100);
+          setActualProgress(100);
           setIsCompleted(true);
           
           // Invalidate queries to fetch fresh data
@@ -105,7 +135,7 @@ export function SimplifiedAgentProgress({
   
   const [messageIndex, setMessageIndex] = useState(0);
 
-  // Calculate overall progress whenever agents change
+  // Calculate actual progress whenever agents change
   useEffect(() => {
     // Don't recalculate progress if already completed
     if (isCompleted) {
@@ -113,14 +143,14 @@ export function SimplifiedAgentProgress({
     }
     
     if (agents.length === 0) {
-      setOverallProgress(0);
+      setActualProgress(0);
       return;
     }
     
     const totalProgress = agents.reduce((sum, agent) => sum + agent.progress, 0);
     const averageProgress = totalProgress / agents.length;
     
-    setOverallProgress(Math.round(averageProgress));
+    setActualProgress(Math.round(averageProgress));
   }, [agents, isCompleted]);
 
   // Start intervals immediately on mount - only run once
@@ -264,7 +294,7 @@ export function SimplifiedAgentProgress({
         }
         
         setIsCompleted(true);
-        setOverallProgress(100); // Set to 100% and keep it there
+        setActualProgress(100); // Set to 100% and keep it there
         setCurrentMessage('All agents completed successfully!');
         
         // Clean up and call onComplete with a small delay to ensure backend has saved the data
@@ -411,8 +441,9 @@ export function SimplifiedAgentProgress({
             <Progress value={overallProgress} className="w-full" />
           </div>
           
-          <div className="text-sm text-gray-600">
-            {getDisplayMessage()}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="text-2xl">{stage.icon}</span>
+            <span className={stage.color}>{stage.message}</span>
           </div>
           
           <div className="flex justify-between text-xs text-gray-500">

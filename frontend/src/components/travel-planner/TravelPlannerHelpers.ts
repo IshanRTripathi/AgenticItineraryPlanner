@@ -77,10 +77,21 @@ export function createItineraryUpdateHandler(
 
 /**
  * Build map markers from trip data
+ * Now handles components without coordinates by skipping them gracefully
  */
 export function buildMapMarkers(currentTripData: TripData): MapMarker[] {
   const markers: MapMarker[] = [];
   const days = currentTripData.itinerary?.days || [];
+  let skippedCount = 0;
+  let addedCount = 0;
+
+  console.log('[Maps] Building markers from trip data:', {
+    hasTripData: !!currentTripData,
+    hasItinerary: !!currentTripData.itinerary,
+    hasDays: !!currentTripData.itinerary?.days,
+    daysCount: days.length,
+    daysData: days
+  });
 
   try {
     days.forEach((day, dayIdx) => {
@@ -92,13 +103,17 @@ export function buildMapMarkers(currentTripData: TripData): MapMarker[] {
           const lng = c?.location?.coordinates?.lng;
 
           // Validate coordinates - must be valid numbers and not null/undefined
-          if (lat !== null && lng !== null && lat !== undefined && lng !== undefined &&
+          const hasValidCoordinates = 
+            lat !== null && lng !== null && 
+            lat !== undefined && lng !== undefined &&
             typeof lat === 'number' && typeof lng === 'number' &&
             !isNaN(lat) && !isNaN(lng) &&
-            lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            lat >= -90 && lat <= 90 && 
+            lng >= -180 && lng <= 180;
 
+          if (hasValidCoordinates) {
             const marker: MapMarker = {
-              id: c.id || `${dayIdx}-${compIdx}`,
+              id: c.id || `day${dayIdx + 1}_node${compIdx}`,
               position: { lat, lng },
               title: c.name || c.type || `Place ${compIdx + 1}`,
               type: (c.type === 'restaurant' ? 'meal' :
@@ -111,12 +126,35 @@ export function buildMapMarkers(currentTripData: TripData): MapMarker[] {
             };
             
             markers.push(marker);
+            addedCount++;
+          } else {
+            // Skip components without valid coordinates
+            skippedCount++;
+            console.debug('[Maps] Skipping component without valid coordinates:', {
+              id: c.id,
+              name: c.name,
+              hasLocation: !!c.location,
+              hasCoordinates: !!c.location?.coordinates,
+              lat,
+              lng
+            });
           }
         } catch (error) {
           console.error('[Maps] Error processing component:', c, error);
+          skippedCount++;
         }
       });
     });
+
+    console.log('[Maps] Marker building complete:', {
+      totalComponents: addedCount + skippedCount,
+      markersAdded: addedCount,
+      componentsSkipped: skippedCount,
+      message: skippedCount > 0 ? 
+        'Some locations are missing coordinates. Run Enrichment agent to add them.' : 
+        'All locations have coordinates'
+    });
+
   } catch (error) {
     console.error('[Maps] Error building markers:', error);
   }

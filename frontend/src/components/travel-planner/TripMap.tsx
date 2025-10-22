@@ -258,6 +258,12 @@ export function TripMap({
     const map = mapInstanceRef.current
     if (!api || !map) return
 
+    console.log('[TripMap] Updating markers:', {
+      totalNodes: nodes.length,
+      highlightedMarkers,
+      selectedNodeId
+    })
+
     // Clear existing markers
     const existingMarkers = map.markers || []
     existingMarkers.forEach((marker: any) => marker.setMap(null))
@@ -265,8 +271,21 @@ export function TripMap({
 
     // Create new markers
     const createdMarkers: any[] = []
+    let skippedNodes = 0
+
     nodes.forEach((node) => {
-      if (!node.position || typeof node.position.lat !== 'number' || typeof node.position.lng !== 'number') {
+      // Validate node has position with valid coordinates
+      if (!node.position ||
+        typeof node.position.lat !== 'number' ||
+        typeof node.position.lng !== 'number' ||
+        isNaN(node.position.lat) ||
+        isNaN(node.position.lng)) {
+        skippedNodes++
+        console.debug('[TripMap] Skipping node without valid position:', {
+          nodeId: node.id,
+          nodeTitle: node.title,
+          position: node.position
+        })
         return
       }
 
@@ -299,6 +318,8 @@ export function TripMap({
 
       // Add click listener
       marker.addListener('click', () => {
+        console.log('[TripMap] Marker clicked:', node.id)
+
         // Update map context
         setCenter(node.position)
         setZoom(15)
@@ -323,6 +344,12 @@ export function TripMap({
     // Store marker references
     map.markers = createdMarkers
 
+    console.log('[TripMap] Markers created:', {
+      created: createdMarkers.length,
+      skipped: skippedNodes,
+      total: nodes.length
+    })
+
     // Fit bounds to show all markers if we have multiple markers and no specific center set
     if (createdMarkers.length > 1 && !center) {
       const bounds = new api.maps.LatLngBounds()
@@ -336,6 +363,8 @@ export function TripMap({
       map.fitBounds(bounds, padding)
 
       console.log('[TripMap] Fitted bounds to show all', createdMarkers.length, 'markers')
+    } else if (createdMarkers.length === 0) {
+      console.warn('[TripMap] No markers to display. Locations may need enrichment.')
     }
   }, [api, nodes, highlightedMarkers, selectedNodeId, center, setCenter, setZoom, setSelectedNode, addHighlightedMarker, clearHighlightedMarkers, onPlaceSelected])
 
