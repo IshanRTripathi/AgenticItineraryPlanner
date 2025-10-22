@@ -38,10 +38,10 @@ export function ChangeHistoryPanelExample() {
         <h3 className="text-lg font-semibold mb-3">With Event Callbacks</h3>
         <ChangeHistoryPanel
           onRevisionSelect={(revision) => {
-            console.log('Selected revision:', revision);
+            
           }}
           onJumpToVersion={(version) => {
-            console.log('Jumping to version:', version);
+            
           }}
         />
       </div>
@@ -64,3 +64,4 @@ export function ChangeHistoryPanelExample() {
     </div>
   );
 }
+

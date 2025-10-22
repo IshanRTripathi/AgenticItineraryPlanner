@@ -26,10 +26,10 @@ export function LockStateDebugPanel({ itineraryId, className = '' }: LockStateDe
     try {
       const states = await apiClient.getLockStates(itineraryId);
       setLockStates(states);
-      console.log('Lock states loaded:', states);
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load lock states');
-      console.error('Failed to load lock states:', err);
+      
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export function LockStateDebugPanel({ itineraryId, className = '' }: LockStateDe
       alert(`Unlocked ${lockedNodes.length} nodes`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to unlock all');
-      console.error('Failed to unlock all:', err);
+      
     } finally {
       setLoading(false);
     }
@@ -63,7 +63,7 @@ export function LockStateDebugPanel({ itineraryId, className = '' }: LockStateDe
       await apiClient.toggleNodeLock(itineraryId, nodeId, !currentState);
       await loadLockStates();
     } catch (err) {
-      console.error('Failed to toggle node:', err);
+      
       alert('Failed to toggle lock state');
     }
   };
@@ -151,3 +151,4 @@ export function LockStateDebugPanel({ itineraryId, className = '' }: LockStateDe
     </Card>
   );
 }
+

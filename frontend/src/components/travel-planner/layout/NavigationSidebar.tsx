@@ -22,7 +22,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
   const mountedRef = useRef(true);
 
   // Debug: Log component render
-  console.log('NavigationSidebar: Component render, sidebarOpen:', sidebarOpen, 'isMobile:', isMobile, 'isTablet:', isTablet);
+  
 
   useEffect(() => {
     return () => { mountedRef.current = false; }
@@ -30,7 +30,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
 
   // Debug: Track sidebarOpen state changes
   useEffect(() => {
-    console.log('NavigationSidebar: sidebarOpen state changed to:', sidebarOpen);
+    
   }, [sidebarOpen]);
 
   const navigationItems = [
@@ -44,21 +44,21 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
 
   const handleItemClick = (itemId: string) => {
     // Debug logging
-    console.log('NavigationSidebar: handleItemClick', itemId);
+    
     onViewChange(itemId);
 
     // Close the sidebar on mobile/tablet — but guard against updating state after unmount
     if ((isMobile || isTablet) && mountedRef.current) {
-      console.log('NavigationSidebar: will close sidebar on mobile');
+      
       setSidebarOpen(false);
     }
   };
 
   const handleSidebarToggle = (e?: React.MouseEvent) => {
-    console.log('NavigationSidebar: toggle sidebar, sidebarOpen before:', sidebarOpen);
+    
     e?.stopPropagation();
     setSidebarOpen(prev => {
-      console.log('NavigationSidebar: setSidebarOpen called, prev:', prev, 'new:', !prev);
+      
       return !prev;
     });
   };
@@ -114,7 +114,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
         <div 
           className="absolute top-0 bottom-0 w-1 bg-gray-300 hover:bg-gray-400 transition-colors cursor-pointer"
           onClick={(e) => {
-            console.log('NavigationSidebar: thin overlay clicked, current sidebarOpen:', sidebarOpen);
+            
             handleSidebarToggle(e);
           }}
         />
@@ -122,7 +122,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
         {/* Middle button with bulge */}
         <button
           onClick={(e) => {
-            console.log('NavigationSidebar: sidebar toggle button clicked, current sidebarOpen:', sidebarOpen);
+            
             handleSidebarToggle(e);
           }}
           aria-expanded={sidebarOpen}
@@ -144,7 +144,7 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
           className="fixed inset-0 z-[45]"
           onClick={(e) => { 
             e.stopPropagation(); 
-            console.log('NavigationSidebar: outside area clicked, closing sidebar, event target:', e.target);
+            
             setSidebarOpen(false); 
           }}
           onKeyDown={(e) => { if (e.key === 'Escape') setSidebarOpen(false); }}
@@ -174,9 +174,9 @@ export function NavigationSidebar({ activeView, onViewChange }: NavigationSideba
           </div>
           <button
             onClick={() => {
-              console.log('NavigationSidebar: close button clicked, current sidebarOpen:', sidebarOpen);
+              
               setSidebarOpen(false);
-              console.log('NavigationSidebar: setSidebarOpen(false) called');
+              
             }}
             aria-label="Close navigation"
             className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"

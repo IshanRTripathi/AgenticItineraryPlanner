@@ -51,7 +51,7 @@ export function NodeLockToggle({
         throw new Error(result.message || 'Failed to toggle lock');
       }
     } catch (error) {
-      console.error('Failed to toggle node lock:', error);
+      
       onError?.(error as Error);
       
       // Show error feedback
@@ -126,3 +126,4 @@ export function NodeLockToggle({
     </TooltipProvider>
   );
 }
+

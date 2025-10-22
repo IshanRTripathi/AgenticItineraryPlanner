@@ -46,7 +46,7 @@ export function KeyboardShortcuts({ children }: KeyboardShortcutsProps) {
           case 'k':
             event.preventDefault();
             // Focus search or open command palette (future feature)
-            console.log('Command palette shortcut triggered');
+            
             break;
         }
       }
@@ -83,3 +83,4 @@ export function useKeyboardShortcuts() {
 
   return shortcuts;
 }
+

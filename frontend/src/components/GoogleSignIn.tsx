@@ -29,7 +29,7 @@ export const GoogleSignIn: React.FC<GoogleSignInProps> = ({
       await signInWithGoogle();
       onSuccess?.();
     } catch (error) {
-      console.error('[GoogleSignIn] Sign-in failed:', error);
+      
       // You could add a toast notification here
     } finally {
       setIsSigningIn(false);
@@ -133,3 +133,4 @@ export const GoogleSignIn: React.FC<GoogleSignInProps> = ({
 };
 
 export default GoogleSignIn;
+

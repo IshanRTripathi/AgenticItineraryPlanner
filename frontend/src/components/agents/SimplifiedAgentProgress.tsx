@@ -136,19 +136,19 @@ export function SimplifiedAgentProgress({
 
     // Prevent multiple connections for the same trip
     if (eventSourceRef.current) {
-      console.log('SSE connection already exists, skipping new connection');
+      
       return;
     }
 
-    console.log('=== SIMPLIFIED AGENT PROGRESS INITIALIZATION ===');
-    console.log('Trip ID:', tripData.id);
+    
+    
 
     // Connect to SSE stream
     const eventSource = apiClient.createAgentEventStream(tripData.id);
     eventSourceRef.current = eventSource;
 
     eventSource.onopen = () => {
-      console.log('SSE connection opened');
+      
       // Don't override the rotating message - let it continue
     };
 
@@ -156,7 +156,7 @@ export function SimplifiedAgentProgress({
     eventSource.addEventListener('agent-list', (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log('Received agent list:', data);
+        
         
         if (data.agents && Array.isArray(data.agents)) {
           const initialAgents: AgentStatus[] = data.agents.map((agentKind: string) => ({
@@ -169,7 +169,7 @@ export function SimplifiedAgentProgress({
           // Don't override the rotating message - let it continue
         }
       } catch (error) {
-        console.error('Error parsing agent list event:', error);
+        
       }
     });
 
@@ -177,7 +177,7 @@ export function SimplifiedAgentProgress({
     eventSource.addEventListener('agent-event', (event) => {
       try {
         const agentEvent = JSON.parse(event.data);
-        console.log('Received agent event:', agentEvent);
+        
 
         setAgents(prev => prev.map(agent => {
           if (agent.kind === agentEvent.kind) {
@@ -199,7 +199,7 @@ export function SimplifiedAgentProgress({
           return agent;
         }));
       } catch (error) {
-        console.error('Error parsing agent event:', error);
+        
       }
     });
 
@@ -207,11 +207,11 @@ export function SimplifiedAgentProgress({
     eventSource.addEventListener('completion', (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log('Received completion event:', data);
+        
         
         // Prevent multiple onComplete calls
         if (onCompleteCalledRef.current) {
-          console.log('onComplete already called, skipping');
+          
           return;
         }
         onCompleteCalledRef.current = true;
@@ -241,12 +241,12 @@ export function SimplifiedAgentProgress({
           onComplete();
         }, 500);
       } catch (error) {
-        console.error('Error parsing completion event:', error);
+        
       }
     });
 
     eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
+      
       
       // If we haven't exceeded max retries, attempt to retry
       if (retryAttempt < maxRetries) {
@@ -277,7 +277,7 @@ export function SimplifiedAgentProgress({
 
     // Cleanup function
     return () => {
-      console.log('Cleaning up SSE connection');
+      
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
         eventSourceRef.current = null;

@@ -43,7 +43,7 @@ export const RevisionTimeline: React.FC<RevisionTimelineProps> = ({
       const data = await apiClient.getRevisions(itineraryId);
       setRevisions(data);
     } catch (error) {
-      console.error('Failed to load revisions:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -149,3 +149,4 @@ export const RevisionTimeline: React.FC<RevisionTimelineProps> = ({
     </Card>
   );
 };
+

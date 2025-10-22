@@ -86,11 +86,11 @@ export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps>
       };
       
       const result = await apiClient.proposeChanges(itineraryId, changeSet);
-      console.log('Propose result:', result);
+      
       alert('Changes proposed successfully! Check console for details.');
       
     } catch (err) {
-      console.error('Failed to propose changes:', err);
+      
       alert('Failed to propose changes: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
@@ -119,14 +119,14 @@ export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps>
       const result = await apiClient.applyChanges(itineraryId, {
         changeSet: changeSet
       });
-      console.log('Apply result:', result);
+      
       alert('Changes applied successfully! Check console for details.');
       
       // Reload itinerary to see changes
       await loadItinerary();
       
     } catch (err) {
-      console.error('Failed to apply changes:', err);
+      
       alert('Failed to apply changes: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
@@ -138,14 +138,14 @@ export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps>
       const result = await apiClient.undoChanges(itineraryId, {
         toVersion: normalizedItinerary.version - 1
       });
-      console.log('Undo result:', result);
+      
       alert('Changes undone successfully! Check console for details.');
       
       // Reload itinerary to see changes
       await loadItinerary();
       
     } catch (err) {
-      console.error('Failed to undo changes:', err);
+      
       alert('Failed to undo changes: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
@@ -164,14 +164,14 @@ export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps>
         itineraryId: itineraryId,
         nodeId: day.nodes[0].id
       });
-      console.log('Booking result:', result);
+      
       alert(`Booking completed! Reference: ${result.bookingRef}`);
       
       // Reload itinerary to see changes
       await loadItinerary();
       
     } catch (err) {
-      console.error('Failed to book:', err);
+      
       alert('Failed to book: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
@@ -401,3 +401,4 @@ export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps>
     </div>
   );
 };
+

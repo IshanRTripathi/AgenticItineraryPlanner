@@ -33,7 +33,7 @@ export function UserProfileButton({ className }: UserProfileButtonProps) {
     try {
       await signOut();
     } catch (error) {
-      console.error('Sign out failed:', error);
+      
     }
   };
 
@@ -187,3 +187,4 @@ export function UserProfileButton({ className }: UserProfileButtonProps) {
     </>
   );
 }
+

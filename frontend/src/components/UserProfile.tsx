@@ -43,9 +43,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   const handleSignOut = async () => {
     try {
       await signOut();
-      console.log('[UserProfile] User signed out successfully');
+      
     } catch (error) {
-      console.error('[UserProfile] Sign out failed:', error);
+      
     }
   };
 
@@ -210,3 +210,4 @@ export const UserProfile: React.FC<UserProfileProps> = ({
 };
 
 export default UserProfile;
+

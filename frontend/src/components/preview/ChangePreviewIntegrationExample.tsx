@@ -35,21 +35,7 @@ export function EditWithPreviewWrapper() {
   return (
     <ChangePreviewWrapper
       itineraryId={itineraryId}
-      onChangeApplied={() => console.log('Changes applied!')}
-      onChangeCancelled={() => console.log('Changes cancelled')}
-    >
-      {({ previewChange, isPreviewOpen }) => (
-        <div>
-          <Button
-            onClick={() => handleEdit(previewChange)}
-            disabled={isPreviewOpen}
-          >
-            Edit Activity
-          </Button>
-        </div>
-      )}
-    </ChangePreviewWrapper>
-  );
+      onChangeApplied={() => 
 }
 
 /**
@@ -64,11 +50,11 @@ export function EditWithPreviewHook() {
   const { proposeChanges, applyChanges, isLoading } = useChangePreview({
     itineraryId,
     onSuccess: () => {
-      console.log('Changes applied successfully');
+      
       setShowPreview(false);
     },
     onError: (error) => {
-      console.error('Failed to apply changes:', error);
+      
     },
   });
 
@@ -133,7 +119,7 @@ export function DayByDayViewIntegrationExample() {
       itineraryId={itineraryId}
       onChangeApplied={() => {
         // Refresh the itinerary data
-        console.log('Refresh itinerary');
+        
       }}
     >
       {({ previewChange }) => (
@@ -177,7 +163,7 @@ export function WorkflowBuilderIntegrationExample() {
       itineraryId={itineraryId}
       onChangeApplied={() => {
         // Sync workflow with itinerary
-        console.log('Sync workflow');
+        
       }}
     >
       {({ previewChange }) => (
@@ -208,3 +194,4 @@ export function WorkflowBuilderIntegrationExample() {
     </ChangePreviewWrapper>
   );
 }
+

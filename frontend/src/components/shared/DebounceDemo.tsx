@@ -18,7 +18,7 @@ export const DebounceDemo: React.FC = () => {
       setLastSubmissionTime(new Date());
     },
     onError: (error) => {
-      console.error('Demo submission error:', error);
+      
     }
   });
 
@@ -103,3 +103,4 @@ export const DebounceDemo: React.FC = () => {
     </Card>
   );
 };
+

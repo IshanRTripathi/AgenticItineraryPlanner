@@ -194,7 +194,7 @@ export const NewChat: React.FC<NewChatProps> = ({
         dispatch({ type: 'LOAD_SUCCESS', messages });
       })
       .catch(e => {
-        console.error('[NewChat] Failed to load chat history:', e);
+        
         dispatch({ type: 'LOAD_ERROR', error: e.message });
       });
   }, [itineraryId]);
@@ -251,7 +251,7 @@ export const NewChat: React.FC<NewChatProps> = ({
       await chatApi.persist(itineraryId, { ...res, sender: 'assistant', message: res.message, timestamp: Date.now() });
       dispatch({ type: 'SEND_SUCCESS', message: { ...userMsg }, assistant: { ...res, sender: 'assistant' } });
     } catch (e: any) {
-      console.error('[NewChat] Send message failed:', e);
+      
       dispatch({ type: 'SEND_ERROR', error: e.message || 'Failed to send message' });
     }
   };
@@ -485,5 +485,6 @@ export const NewChat: React.FC<NewChatProps> = ({
     </div>
   );
 };
+
 
 

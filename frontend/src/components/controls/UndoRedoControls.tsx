@@ -60,7 +60,7 @@ export function UndoRedoControls({
         setRedoStackDepth(0);
       }
     } catch (error) {
-      console.error('Failed to fetch revision info:', error);
+      
     }
   }, [state.itinerary?.id]);
 
@@ -82,7 +82,7 @@ export function UndoRedoControls({
       // Reload to show changes
       setTimeout(() => window.location.reload(), 500);
     } catch (error) {
-      console.error('Undo failed:', error);
+      
       onError?.(error as Error);
     } finally {
       setIsUndoing(false);
@@ -102,7 +102,7 @@ export function UndoRedoControls({
       // Reload to show changes
       setTimeout(() => window.location.reload(), 500);
     } catch (error) {
-      console.error('Redo failed:', error);
+      
       onError?.(error as Error);
     } finally {
       setIsRedoing(false);
@@ -224,3 +224,4 @@ export function UndoRedoControls({
     </div>
   );
 }
+

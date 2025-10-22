@@ -49,7 +49,7 @@ export const RevisionDiffViewer: React.FC<RevisionDiffViewerProps> = ({
       const modified = sections.reduce((sum, s) => sum + s.changes.filter(c => c.type === 'modified').length, 0);
       setStats({ added, removed, modified });
     } catch (error) {
-      console.error('Failed to load diff:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -150,3 +150,4 @@ export const RevisionDiffViewer: React.FC<RevisionDiffViewerProps> = ({
     </Card>
   );
 };
+

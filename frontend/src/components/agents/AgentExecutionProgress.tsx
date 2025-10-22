@@ -62,7 +62,7 @@ export const AgentExecutionProgress: React.FC<AgentExecutionProgressProps> = ({
           }
         }
       } catch (error) {
-        console.error('Failed to parse agent event:', error);
+        
       }
     };
 
@@ -127,3 +127,4 @@ export const AgentExecutionProgress: React.FC<AgentExecutionProgressProps> = ({
     </Card>
   );
 };
+

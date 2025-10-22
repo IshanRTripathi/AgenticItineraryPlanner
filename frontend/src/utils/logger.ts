@@ -1,6 +1,29 @@
 /**
  * Centralized logging utility for the unified itinerary system
  * Provides structured logging with different levels and contexts
+ * 
+ * Configuration:
+ * - Development: DEBUG level (all logs shown)
+ * - Production: ERROR level (only errors shown)
+ * - Override: Set VITE_LOG_LEVEL=DEBUG|INFO|WARN|ERROR in .env
+ * 
+ * Runtime control:
+ * - window.logger.setLogLevel(LogLevel.DEBUG) - Enable debug logs
+ * - window.logger.getLogLevel() - Check current level
+ * 
+ * Usage:
+ * ```typescript
+ * import { logger } from '@/utils/logger';
+ * 
+ * logger.debug('Debug message', { component: 'MyComponent', action: 'init' });
+ * logger.info('Info message', { component: 'MyComponent' });
+ * logger.warn('Warning message', { component: 'MyComponent' });
+ * logger.error('Error message', { component: 'MyComponent' }, error);
+ * 
+ * const timer = logger.startTimer('operation');
+ * // ... do work
+ * timer(); // Logs duration
+ * ```
  */
 
 export enum LogLevel {
@@ -25,12 +48,36 @@ class Logger {
   private sessionId: string;
 
   constructor() {
-    this.logLevel = import.meta.env.DEV ? LogLevel.DEBUG : LogLevel.INFO;
+    // Environment-based log level configuration
+    // Priority: VITE_LOG_LEVEL env var > development mode > production mode
+    const envLogLevel = import.meta.env.VITE_LOG_LEVEL?.toUpperCase();
+    if (envLogLevel && envLogLevel in LogLevel) {
+      this.logLevel = LogLevel[envLogLevel as keyof typeof LogLevel];
+    } else {
+      // Default: DEBUG in development, ERROR in production
+      this.logLevel = import.meta.env.DEV ? LogLevel.DEBUG : LogLevel.ERROR;
+    }
     this.sessionId = this.generateSessionId();
   }
 
   private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Set log level at runtime
+   * Useful for debugging in production
+   */
+  setLogLevel(level: LogLevel): void {
+    this.logLevel = level;
+    this.info('Log level changed', { action: 'set_log_level', newLevel: LogLevel[level] });
+  }
+
+  /**
+   * Get current log level
+   */
+  getLogLevel(): LogLevel {
+    return this.logLevel;
   }
 
   private formatMessage(level: string, message: string, context?: LogContext, data?: any): void {
@@ -248,6 +295,12 @@ class Logger {
 }
 
 export const logger = new Logger();
+
+// Expose logger globally for runtime debugging in browser console
+if (typeof window !== 'undefined') {
+  (window as any).logger = logger;
+  (window as any).LogLevel = LogLevel;
+}
 
 // Export convenience functions
 export const logDebug = logger.debug.bind(logger);

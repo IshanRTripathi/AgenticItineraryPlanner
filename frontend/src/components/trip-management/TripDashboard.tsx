@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -43,18 +43,45 @@ interface TripDashboardProps {
   onBack: () => void;
 }
 
-function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: TripDashboardProps) {
+function TripDashboardComponent({ trips = [], onCreateTrip, onViewTrip, onBack }: TripDashboardProps) {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState('all');
   const [sortBy, setSortBy] = useState('date');
 
-  // Fetch fresh data from API only when user is authenticated
-  const { data: freshTrips, isLoading, error } = useItineraries(!!user);
-  
-  // Use fresh data if available, fallback to props
-  const allTrips = freshTrips || trips;
+  // Fetch itineraries from API - returns lightweight ItineraryResponse[]
+  // We'll need to convert to TripData format for compatibility
+  const { data: itineraryList, isLoading: isLoadingItineraries, error: fetchError } = useItineraries(!!user);
+
+  // Convert ItineraryResponse[] to TripData[] format
+  const convertedTrips: TripData[] = React.useMemo(() => {
+    // Ensure we always return an array
+    if (!itineraryList || !Array.isArray(itineraryList)) {
+      return Array.isArray(trips) ? trips : [];
+    }
+
+    return itineraryList.map((itinerary: any) => ({
+      id: itinerary.id,
+      destination: itinerary.destination || itinerary.title,
+      summary: itinerary.title,
+      dates: {
+        start: itinerary.startDate,
+        end: itinerary.endDate
+      },
+      themes: [],
+      startLocation: { city: '', country: '' },
+      endLocation: { city: itinerary.destination || '', country: '' },
+      isRoundTrip: false,
+      partySize: 1,
+      budget: { total: 0, currency: 'USD' },
+      itinerary: { days: [], destinations: [] }
+    } as unknown as TripData));
+  }, [itineraryList, trips]);
+
+  const allTrips: TripData[] = Array.isArray(convertedTrips) ? convertedTrips : [];
+  const isLoading = isLoadingItineraries;
+  const error = fetchError;
 
   const getStartDateString = (trip: TripData): string | undefined => {
     return trip.dates?.start || (trip as any)?.createdAt;
@@ -64,12 +91,12 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
     return trip.dates?.end || (trip as any)?.updatedAt || (trip as any)?.createdAt;
   };
 
-  const upcomingTrips = allTrips.filter(trip => {
+  const upcomingTrips = (allTrips || []).filter(trip => {
     const startStr = getStartDateString(trip);
     return startStr ? new Date(startStr) > new Date() : false;
   });
 
-  const pastTrips = allTrips.filter(trip => {
+  const pastTrips = (allTrips || []).filter(trip => {
     const endStr = getEndDateString(trip);
     return endStr ? new Date(endStr) < new Date() : false;
   });
@@ -85,12 +112,12 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
     return 'Unknown';
   };
 
-  const filteredTrips = allTrips.filter(trip => {
+  const filteredTrips = (allTrips || []).filter(trip => {
     const destination = getDisplayDestination(trip);
     const themes = trip.themes || [];
     const matchesSearch = destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+      themes.some(theme => theme.toLowerCase().includes(searchQuery.toLowerCase()));
+
     if (filterBy === 'upcoming') return matchesSearch && upcomingTrips.includes(trip);
     if (filterBy === 'past') return matchesSearch && pastTrips.includes(trip);
     return matchesSearch;
@@ -154,7 +181,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
     const endStr = getEndDateString(trip);
     const start = startStr ? new Date(startStr) : null;
     const end = endStr ? new Date(endStr) : null;
-    
+
     if (start && now < start) return { status: 'upcoming', color: 'bg-blue-500' };
     if (start && end && now >= start && now <= end) return { status: 'ongoing', color: 'bg-green-500' };
     return { status: 'completed', color: 'bg-gray-500' };
@@ -162,7 +189,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
 
   const duplicateTrip = (trip: TripData) => {
     // Would create a new trip based on existing one
-    console.log('Duplicating trip:', trip.destination);
+    
   };
 
   const shareTrip = (trip: TripData) => {
@@ -176,7 +203,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
       // Refresh list
       qc.invalidateQueries({ queryKey: ['itineraries'] });
     } catch (e) {
-      console.error('Failed to delete trip', e);
+      
     }
   };
 
@@ -223,7 +250,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                 <h1 className="text-xl sm:text-2xl font-semibold truncate">My Trips</h1>
               </div>
             </div>
-            
+
             {/* Right Section - User Profile Only */}
             <div className="flex items-center">
               <UserProfileButton />
@@ -253,7 +280,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-2">
@@ -265,7 +292,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-2">
@@ -282,13 +309,13 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-3 sm:p-4">
               <div className="flex items-center gap-2">
                 <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-semibold">₹{(allTrips.reduce((sum, trip) => sum + trip.budget.total, 0) / 100000).toFixed(1)}L</p>
+                  <p className="text-lg sm:text-2xl font-semibold">₹{((allTrips || []).reduce((sum, trip) => sum + (trip.budget?.total || 0), 0) / 100000).toFixed(1)}L</p>
                   <p className="text-xs sm:text-sm text-gray-600 truncate">Total Spent</p>
                 </div>
               </div>
@@ -310,7 +337,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
               />
             </div>
           </div>
-          
+
           {/* Filters Row */}
           <div className="flex gap-2 sm:gap-4">
             <Select value={filterBy} onValueChange={setFilterBy}>
@@ -323,7 +350,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                 <SelectItem value="past">Past Trips</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="flex-1 sm:w-40 h-10 sm:h-auto">
                 <SelectValue placeholder="Sort by" />
@@ -396,7 +423,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                               </span>
                             </CardDescription>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <div className={`w-2 h-2 rounded-full ${status.color}`} />
                             <div className="relative">
@@ -405,7 +432,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                           </div>
                         </div>
                       </CardHeader>
-                      
+
                       <CardContent className="p-4 sm:p-6 pt-0">
                         <div className="space-y-2 sm:space-y-3">
                           <div className="flex flex-wrap gap-1">
@@ -420,14 +447,14 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                               </Badge>
                             )}
                           </div>
-                          
+
                           {typeof trip.budget?.total === 'number' && (
-                          <div className="flex items-center justify-between text-xs sm:text-sm">
+                            <div className="flex items-center justify-between text-xs sm:text-sm">
                               <span className="text-gray-600">Budget</span>
                               <span className="font-medium">₹{trip.budget.total.toLocaleString('en-IN')}</span>
                             </div>
                           )}
-                          
+
                           {trip.summary && (
                             <div className="text-xs sm:text-sm text-gray-700 line-clamp-2">
                               {trip.summary}
@@ -442,7 +469,7 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
                               </Badge>
                             </div>
                           )}
-                          
+
                           <div className="flex gap-2 pt-2">
                             <Button size="sm" className="flex-1 h-8 sm:h-9" onClick={() => onViewTrip(trip)}>
                               <Eye className="h-3 w-3 mr-1" />
@@ -463,58 +490,65 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
 
           <TabsContent value="upcoming">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {upcomingTrips.map((trip) => (
-                <Card key={trip.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              {upcomingTrips.map((trip) => {
+                const startStr = getStartDateString(trip);
+                const daysToGo = startStr ? Math.ceil((new Date(startStr).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
+                return (
+                  <Card key={trip.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm sm:text-base truncate">{getDisplayDestination(trip)}</h4>
+                          <p className="text-xs sm:text-sm text-gray-600">
+                            {daysToGo !== null ? `${daysToGo} days to go` : 'Upcoming'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm sm:text-base truncate">{trip.destination}</h4>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          {Math.ceil((new Date(trip.dates.start).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days to go
-                        </p>
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full h-8 sm:h-9" onClick={() => onViewTrip(trip)}>
-                      View Itinerary
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                      <Button size="sm" className="w-full h-8 sm:h-9" onClick={() => onViewTrip(trip)}>
+                        View Itinerary
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
           <TabsContent value="past">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {pastTrips.map((trip) => (
-                <Card key={trip.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
+              {pastTrips.map((trip) => {
+                const endStr = getEndDateString(trip);
+                return (
+                  <Card key={trip.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm sm:text-base truncate">{getDisplayDestination(trip)}</h4>
+                          <p className="text-xs sm:text-sm text-gray-600">
+                            {endStr ? `Completed ${formatDate(endStr)}` : 'Completed'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm sm:text-base truncate">{trip.destination}</h4>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          Completed {formatDate(trip.dates.end)}
-                        </p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="flex-1 h-8 sm:h-9" onClick={() => onViewTrip(trip)}>
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8 sm:h-9 px-3" onClick={() => duplicateTrip(trip)}>
+                          <Copy className="h-3 w-3 mr-1" />
+                          Rebook
+                        </Button>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1 h-8 sm:h-9" onClick={() => onViewTrip(trip)}>
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-8 sm:h-9 px-3" onClick={() => duplicateTrip(trip)}>
-                        <Copy className="h-3 w-3 mr-1" />
-                        Rebook
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
         </Tabs>
@@ -525,5 +559,6 @@ function TripDashboardComponent({ trips, onCreateTrip, onViewTrip, onBack }: Tri
 
 // Export with error boundary
 export const TripDashboard = withErrorBoundary(TripDashboardComponent);
+
 
 

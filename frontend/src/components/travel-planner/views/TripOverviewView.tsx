@@ -61,29 +61,29 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
         // Extract unique city names to avoid duplicate API calls
         const uniqueCities = new Set(destinations.map(dest => dest.name));
         cities = Array.from(uniqueCities);
-        console.log('Using destinations for weather:', destinations.map(dest => dest.name));
-        console.log('Unique cities after deduplication:', cities);
+        
+        
       } else {
         // Fallback to extracting from itinerary data if no destinations available
         cities = extractCitiesFromItinerary(tripData);
-        console.log('Fallback: extracting cities from itinerary:', cities);
+        
       }
       
       if (cities.length === 0) {
-        console.warn('No cities found in destinations or itinerary data');
+        
         setWeatherData([]);
         return;
       }
 
-      console.log('Fetching weather for unique cities:', cities);
+      
       
       // Fetch weather data for all cities
       const weatherResults = await weatherService.getWeatherForCities(cities);
       setWeatherData(weatherResults);
       
-      console.log('Weather data fetched successfully:', weatherResults);
+      
     } catch (error) {
-      console.error('Failed to fetch weather data:', error);
+      
       setWeatherError('Failed to load weather data');
       // Set empty array on error
       setWeatherData([]);
@@ -153,7 +153,7 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
       await new Promise(resolve => setTimeout(resolve, 500));
       setTripAnalytics(generateTripAnalytics());
     } catch (error) {
-      console.error('Error refreshing data:', error);
+      
     } finally {
       setIsRefreshing(false);
     }
@@ -455,3 +455,4 @@ export function TripOverviewView({ tripData, agentStatuses, onShare, onExportPDF
     </div>
   );
 }
+

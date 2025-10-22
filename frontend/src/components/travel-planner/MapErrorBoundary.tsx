@@ -34,7 +34,7 @@ export class MapErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log the error to console in development
     if (import.meta.env.DEV) {
-      console.error('Map Error Boundary caught an error:', error, errorInfo);
+      
     }
 
     // Update state with error info
@@ -193,3 +193,4 @@ export class MapErrorBoundary extends Component<Props, State> {
 }
 
 export default MapErrorBoundary;
+

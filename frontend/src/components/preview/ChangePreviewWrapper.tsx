@@ -50,7 +50,7 @@ export function ChangePreviewWrapper({
       setPendingChange(null);
       onChangeApplied?.();
     } catch (error) {
-      console.error('Failed to apply changes:', error);
+      
       // Error handling will be done by the parent component
     } finally {
       setIsApplying(false);
@@ -137,3 +137,4 @@ export function ChangePreviewWrapper({
     </>
   );
 }
+

@@ -141,7 +141,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({
     (dayNodes: typeof nodes) => {
       return dayNodes.map((node) => {
         if (!node.id) {
-          console.warn('Node without ID found:', node);
+          
           return {
             ...node,
             data: {
@@ -180,9 +180,9 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({
 
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: typeof nodes[0]) => {
-      console.log('=== WORKFLOW NODE CLICK ===');
-      console.log('Node:', node);
-      console.log('Node ID:', node.id);
+      
+      
+      
 
       setSelectedNode(node);
       setIsNodeInspectorOpen(true);
@@ -191,13 +191,13 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({
       setMapSelectedNode(node.id);
       addHighlightedMarker(node.id);
 
-      console.log('Node selected and highlighted on map');
+      
     },
     [setSelectedNode, setIsNodeInspectorOpen, setMapSelectedNode, addHighlightedMarker]
   );
 
   const onPaneClick = useCallback(() => {
-    console.log('=== WORKFLOW PANE CLICK ===');
+    
     setSelectedNode(null);
     setIsNodeInspectorOpen(false);
 
@@ -205,7 +205,7 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({
     setMapSelectedNode(null);
     clearHighlightedMarkers();
 
-    console.log('Node deselected and map highlighting cleared');
+    
   }, [setSelectedNode, setIsNodeInspectorOpen, setMapSelectedNode, clearHighlightedMarkers]);
 
   // Node handlers
@@ -439,3 +439,4 @@ export function WorkflowBuilder(props: WorkflowBuilderProps) {
 
 // Re-export types for backward compatibility
 export type { WorkflowNodeData, WorkflowDay } from './workflow-builder/WorkflowBuilderTypes';
+

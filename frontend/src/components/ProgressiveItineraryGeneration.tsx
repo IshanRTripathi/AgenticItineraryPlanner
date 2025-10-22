@@ -41,7 +41,7 @@ export const ProgressiveItineraryGeneration: React.FC<ProgressiveItineraryGenera
 
   // Handle SSE events
   const handleAgentEvent = useCallback((event: any) => {
-    console.log('[ProgressiveItineraryGeneration] Agent event received:', event);
+    
     
     if (event.status === 'failed') {
       const errorMessage = event.message || 'Generation failed';
@@ -70,7 +70,7 @@ export const ProgressiveItineraryGeneration: React.FC<ProgressiveItineraryGenera
   }, [itineraryId, onComplete, onError]);
 
   const handleChangeEvent = useCallback((event: any) => {
-    console.log('[ProgressiveItineraryGeneration] Change event received:', event);
+    
     
     if (event.type === 'agent_completed' && event.data?.status === 'completed') {
       setIsComplete(true);
@@ -226,5 +226,6 @@ export const ProgressiveItineraryGeneration: React.FC<ProgressiveItineraryGenera
 };
 
 export default ProgressiveItineraryGeneration;
+
 
 

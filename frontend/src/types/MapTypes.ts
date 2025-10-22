@@ -55,13 +55,7 @@ export interface TerrainControlProps {
 }
 
 export interface TripMapProps {
-  itineraryId: string;
-  mapBounds?: MapBounds;
-  countryCentroid?: Coordinates;
   nodes: MapMarker[];
-  selectedNodeId?: string;
-  selectedDay?: number;
-  onMarkerClick?: (nodeId: string) => void;
   onMapReady?: (map: any) => void;
   days?: Array<{ id: string; dayNumber: number; date?: string; location?: string }>;
   onAddPlace?: (args: { 

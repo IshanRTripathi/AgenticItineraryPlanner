@@ -49,23 +49,23 @@ export function MobileLayout({
 
   // Reset currentCard when activeView changes (this ensures we always show cards when sidebar is opened)
   useEffect(() => {
-    console.log('MobileLayout: activeView changed to', activeView);
+    
     setCurrentCard(null);
   }, [activeView]);
 
   // Handle card selection from the 3-card view
   const handleCardSelect = (cardType: 'plan' | 'map' | 'chat') => {
-    console.log('MobileLayout: card selected', cardType);
+    
     setCurrentCard(cardType);
   };
 
   // Handle back navigation
   const handleBack = () => {
-    console.log('MobileLayout: back navigation');
+    
     setCurrentCard(null);
   };
 
-  console.log('MobileLayout render:', { activeView, currentCard });
+  
 
   // Show 3-card selection view when no card is selected
   if (activeView === 'plan' && !currentCard) {
@@ -131,3 +131,4 @@ export function MobileLayout({
   // This should not be reached since MobileLayout is only used for plan tab
   return null;
 }
+

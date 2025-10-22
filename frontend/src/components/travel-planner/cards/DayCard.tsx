@@ -174,7 +174,7 @@ export function DayCard({
       // Reset local state after successful toggle
       setTimeout(() => setLocalLocked(null), 1000);
     } catch (error) {
-      console.error(`Failed to ${willSetTo ? 'lock' : 'unlock'} "${title}":`, error);
+      
       // Revert on error
       setLocalLocked(effectiveLocked);
     } finally {

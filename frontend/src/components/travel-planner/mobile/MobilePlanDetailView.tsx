@@ -59,7 +59,7 @@ export function MobilePlanDetailView({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              console.log('Mobile detail view empty state back button clicked');
+              
               onBack();
             }}
             className="flex items-center space-x-2"
@@ -94,7 +94,7 @@ export function MobilePlanDetailView({
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
-            console.log('Mobile detail view back button clicked');
+            
             onBack();
           }}
           className="flex items-center space-x-2"
@@ -144,3 +144,4 @@ export function MobilePlanDetailView({
     </div>
   );
 }
+

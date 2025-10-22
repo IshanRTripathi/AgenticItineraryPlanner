@@ -41,7 +41,7 @@ export const EmailShareForm: React.FC<EmailShareFormProps> = ({
       setError(null);
 
       // Placeholder - API method needs to be implemented
-      console.log('Email share:', { to: emailList, subject, itineraryId, message, includePdf });
+      
 
       setSuccess(true);
       setTimeout(() => {
@@ -155,3 +155,4 @@ export const EmailShareForm: React.FC<EmailShareFormProps> = ({
     </Dialog>
   );
 };
+

@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -33,6 +33,7 @@ import { UnifiedItineraryProvider } from '../contexts/UnifiedItineraryContext';
 import { TripMap } from './travel-planner/TripMap';
 import type { MapMarker } from '../types/MapTypes';
 import MapErrorBoundary from './travel-planner/MapErrorBoundary';
+import { logger } from '../utils/logger';
 import { addPlaceToItineraryDay } from '../utils/addPlaceToItinerary';
 import { createWorkflowNodeFromPlace } from '../utils/placeToWorkflowNode';
 
@@ -76,9 +77,11 @@ interface TravelPlannerProps {
 }
 
 function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
-  console.log('=== TRAVEL PLANNER COMPONENT RENDER ===');
-  console.log('Trip Data Props:', tripData);
-  console.log('=======================================');
+  logger.debug('TravelPlanner component render', {
+    component: 'TravelPlanner',
+    action: 'render',
+    tripId: tripData.id
+  });
 
   // Device detection
   const { isMobile, isTablet } = useDeviceDetection();
@@ -130,32 +133,16 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   const { data: freshTripData, isLoading, error, refetch } = useItinerary(tripData.id);
   const queryClient = useQueryClient();
 
-  // Convert NormalizedItinerary to TripData format if needed
+  // Convert NormalizedItinerary to TripData format
   const convertedTripData = useMemo(() => {
-    console.log('[TravelPlanner] Converting data:', { 
-      hasFreshData: !!freshTripData, 
-      freshDataType: freshTripData ? ('id' in freshTripData ? 'TripData' : 'NormalizedItinerary') : 'none',
-      tripDataId: tripData?.id 
-    });
-    
     if (!freshTripData) return null;
-    
-    // If it's already TripData format (has 'id' field), return as is
-    if ('id' in freshTripData) {
-      console.log('[TravelPlanner] Using freshTripData as-is (TripData format)');
-      return freshTripData as any;
-    }
-    
-    // Convert NormalizedItinerary to TripData format
+
+    // API returns NormalizedItinerary, convert to TripData format
     const normalized = freshTripData as any;
-    
+
     // Ensure days is always an array
     const days = Array.isArray(normalized.days) ? normalized.days : [];
-    console.log('[TravelPlanner] Converting NormalizedItinerary:', { 
-      daysCount: days.length,
-      hasItineraryId: !!normalized.itineraryId 
-    });
-    
+
     const converted = {
       ...tripData, // Keep original tripData fields as base
       id: normalized.itineraryId || tripData.id,
@@ -171,48 +158,25 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
         end: normalized.endDate || days[days.length - 1]?.date || tripData.dates?.end
       }
     };
-    
-    console.log('[TravelPlanner] Converted data:', { 
-      id: converted.id, 
-      hasDays: !!converted.itinerary?.days,
-      daysCount: converted.itinerary?.days?.length 
-    });
-    
+
+
+
     return converted;
   }, [freshTripData, tripData]);
 
   // Use converted data if available, fallback to props
   // Ensure currentTripData always has itinerary.days as an array
   const currentTripData = convertedTripData || tripData;
-  
-  console.log('[TravelPlanner] Current trip data:', { 
-    hasData: !!currentTripData,
-    hasItinerary: !!currentTripData?.itinerary,
-    hasDays: !!currentTripData?.itinerary?.days,
-    daysIsArray: Array.isArray(currentTripData?.itinerary?.days),
-    daysCount: currentTripData?.itinerary?.days?.length 
-  });
-  
+
+
+
   // Safety check: ensure itinerary.days exists
   if (currentTripData && !currentTripData.itinerary) {
-    console.log('[TravelPlanner] Adding missing itinerary object');
     currentTripData.itinerary = { days: [] } as any;
   }
   if (currentTripData && currentTripData.itinerary && !Array.isArray(currentTripData.itinerary.days)) {
-    console.log('[TravelPlanner] Fixing non-array days');
     currentTripData.itinerary.days = [];
   }
-
-  // Log data fetching status
-  console.log('===  TRAVEL PLANNER DATA FETCH ===');
-  console.log('Trip ID:', tripData.id);
-  console.log('Is Loading:', isLoading);
-  console.log('Error:', error);
-  console.log('Fresh Trip Data:', freshTripData);
-  console.log('Current Trip Data:', currentTripData);
-  console.log('Has Itinerary:', !!currentTripData.itinerary);
-  console.log('Days Count:', currentTripData.itinerary?.days?.length || 0);
-  console.log('================================');
 
   // Use extracted hooks for side effects
   useDestinationsSync(currentTripData, setDestinations);
@@ -248,7 +212,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
       <SimplifiedAgentProgress
         tripData={currentTripData}
         onComplete={async () => {
-          console.log('Itinerary generation completed!');
+
           setShowProgressModal(false);
           // Fetch the completed itinerary from ItineraryJsonService
           try {
@@ -259,7 +223,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               completedItinerary
             );
           } catch (error) {
-            console.error('Failed to fetch completed itinerary:', error);
+
             refetch(); // Fallback to refetch
           }
         }}
@@ -274,18 +238,18 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
   // Render plan view with resizable panels
   const renderPlanView = () => {
-    console.log('=== RENDER PLAN VIEW ===');
-    console.log('Destinations Length:', destinations.length);
-    console.log('Destinations:', destinations);
-    console.log('Current Trip Data Itinerary:', currentTripData.itinerary);
-    console.log('Current Trip Data Days:', currentTripData.itinerary?.days);
-    console.log('Has Itinerary Data:', !!(currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0));
-    console.log('========================');
+
+
+
+
+
+
+
 
     // Check if we have actual itinerary data, not just destinations array
     // Support both TripData format (itinerary.days) and NormalizedItinerary format (days)
     const hasItineraryData = (currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0) ||
-                             ((currentTripData as any).days && (currentTripData as any).days.length > 0);
+      ((currentTripData as any).days && (currentTripData as any).days.length > 0);
 
     // Show loading state while data is being fetched
     if (isLoading) {
@@ -323,7 +287,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             title="No itinerary data available yet"
             description="Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below."
             onRefresh={() => {
-              console.log('TravelPlanner: Manual refresh triggered');
+
               refetch();
             }}
             showRefreshButton={true}
@@ -353,9 +317,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               onRemove={removeDestination}
               onCurrencyChange={setCurrency}
               onToggleNotes={() => setShowNotes(!showNotes)}
-              onUpdateTransport={(fromId, toId, transports) => {
-                console.log(`Transport from ${fromId} to ${toId}:`, transports);
-                // TODO: Implement transport update logic
+              onUpdateTransport={() => {
+                // Transport update not implemented yet
               }}
             />
           </TabsContent>
@@ -367,7 +330,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 onDaySelect={handleDaySelect}
                 isCollapsed={!isLeftPanelExpanded}
                 onRefresh={() => {
-                  console.log('TravelPlanner: DayByDayView refresh triggered');
+
                   refetch();
                 }}
               />
@@ -440,50 +403,26 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               {(() => {
                 const hasMapKey = Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY);
                 const hasDays = currentTripData?.itinerary?.days;
-                console.log('[TravelPlanner] Map render check:', { hasMapKey, hasDays, daysType: typeof hasDays, isArray: Array.isArray(hasDays) });
+
                 return hasMapKey && hasDays;
               })() ? (
                 <div className="h-full">
                   {/* TripMap integration with error boundary */}
                   <MapErrorBoundary
                     onError={(error) => {
-                      console.error('Map error:', error);
+
                     }}
                   >
                     {(() => {
-                      console.log('[TravelPlanner] About to map days:', { 
-                        days: currentTripData.itinerary.days,
-                        isArray: Array.isArray(currentTripData.itinerary.days),
-                        length: currentTripData.itinerary.days?.length 
-                      });
+
                       return null;
                     })()}
                     <TripMap
-                      itineraryId={currentTripData.id}
-                      mapBounds={currentTripData.itinerary?.mapBounds}
-                      countryCentroid={currentTripData.itinerary?.countryCentroid}
                       nodes={mapMarkers}
                       days={currentTripData.itinerary.days.map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
                       onAddPlace={({ dayId, dayNumber, place }) => {
-                        console.log('[Maps] Add place to itinerary (InfoWindow)', { dayId, dayNumber, place })
-                        console.log('[Maps] Place types:', place.types)
-                        console.log('[Maps] Place name:', place.name)
-
                         try {
-                          // 1. Add to day-by-day view
-                          const updatedTripData = addPlaceToItineraryDay(currentTripData, {
-                            dayId,
-                            dayNumber,
-                            place,
-                          });
-
-                          // Update the trip data via query client
-                          queryClient.setQueryData(
-                            queryKeys.itinerary(currentTripData.id),
-                            updatedTripData
-                          );
-
-                          // 2. Create workflow node if workflow builder is available
+                          // Create workflow node if workflow builder is available
                           if (showWorkflowBuilder) {
                             const dayIndex = dayNumber - 1; // Convert to 0-based index
                             const workflowNode = createWorkflowNodeFromPlace(
@@ -491,20 +430,10 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                               dayIndex,
                               { x: 200 + Math.random() * 300, y: 200 + Math.random() * 300 }
                             );
-
-                            console.log('[Maps] Created workflow node:', workflowNode);
-
                             // TODO: Add the workflow node to the workflow builder
-                            // This would require access to the workflow builder's state management
-                            // For now, we'll just log it
                           }
-
-                          // 3. TODO: Persist via backend mutation; then refresh itinerary
-                          // This would involve calling the backend API to save the changes
-
-                          console.log('[Maps] Successfully added place to itinerary');
                         } catch (error) {
-                          console.error('[Maps] Failed to add place to itinerary:', error);
+                          // Error adding place to itinerary
                         }
                       }}
                       className="w-full h-full"
@@ -527,12 +456,11 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 <WorkflowBuilder
                   tripData={currentTripData}
                   embedded={true}
-                  onSave={(updatedItinerary) => {
-                    console.log('Workflow saved:', updatedItinerary);
-                    // TODO: Implement save functionality
+                  onSave={() => {
+                    // Save functionality not implemented yet
                   }}
                   onCancel={() => {
-                    console.log('Workflow cancelled');
+
                     setShowWorkflowBuilder(false);
                   }}
                 />
@@ -614,7 +542,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           <NavigationSidebar
             activeView={activeView}
             onViewChange={(view) => {
-              console.log('TravelPlanner: onViewChange called with', view);
+
               setActiveView(view as TravelPlannerView);
             }}
           />
@@ -625,12 +553,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           {/* Show mobile layout for plan tab on mobile/tablet, otherwise show normal view */}
           {(() => {
             const shouldShowMobile = (isMobile || isTablet) && activeView === 'plan';
-            console.log('TravelPlanner render decision:', {
-              isMobile,
-              isTablet,
-              activeView,
-              shouldShowMobile
-            });
+
 
             return shouldShowMobile ? (
               <MobileLayout
@@ -644,15 +567,14 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                 onRemoveDestination={removeDestination}
                 onCurrencyChange={setCurrency}
                 onToggleNotes={() => setShowNotes(!showNotes)}
-                onUpdateTransport={(fromId, toId, transports) => {
-                  console.log(`Transport from ${fromId} to ${toId}:`, transports);
-                  // TODO: Implement transport update logic
+                onUpdateTransport={() => {
+                  // Transport update not implemented yet
                 }}
                 onDaySelect={handleDaySelect}
                 onAddPlace={handleAddPlace}
                 onItineraryUpdate={handleItineraryUpdateFromChat}
                 onViewChange={(view) => {
-                  console.log('TravelPlanner: MobileLayout onViewChange called with', view);
+
                   setActiveView(view as TravelPlannerView);
                 }}
                 activeView={activeView}
@@ -669,3 +591,4 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
 // Export with error boundary
 export const TravelPlanner = withErrorBoundary(TravelPlannerComponent);
+

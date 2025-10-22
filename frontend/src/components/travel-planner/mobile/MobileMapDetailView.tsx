@@ -72,7 +72,7 @@ export function MobileMapDetailView({
             {Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY) ? (
               <MapErrorBoundary
                 onError={(error) => {
-                  console.error('Map error:', error);
+                  
                 }}
               >
                 <TripMap
@@ -108,11 +108,11 @@ export function MobileMapDetailView({
               tripData={tripData}
               embedded={true}
               onSave={(updatedItinerary) => {
-                console.log('Workflow saved:', updatedItinerary);
+                
                 // TODO: Implement save functionality
               }}
               onCancel={() => {
-                console.log('Workflow cancelled');
+                
                 setActiveView('map');
               }}
             />
@@ -133,3 +133,4 @@ export function MobileMapDetailView({
     </div>
   );
 }
+

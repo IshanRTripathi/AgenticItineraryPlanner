@@ -14,6 +14,7 @@ import { NormalizedNode } from '../../../types/NormalizedItinerary';
 import { DayCard } from '../cards/DayCard';
 import { workflowSyncService } from '../../../services/workflowSyncService';
 import { SyncStatusIndicator } from '../../sync/SyncStatusIndicator';
+import { logger } from '../../../utils/logger';
 import { 
   Clock, 
   MapPin, 
@@ -191,8 +192,12 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
     try {
       await processWithAgents(nodeId, [agentId]);
     } catch (error) {
-      console.error('Agent processing failed:', error);
-      // Could show a toast notification here
+      logger.error('Agent processing failed', {
+        component: 'DayByDayView',
+        action: 'process_with_agent',
+        nodeId,
+        agentId
+      }, error as Error);
     } finally {
       setProcessingNodes(prev => {
         const newSet = new Set(prev);
@@ -221,7 +226,12 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       });
       
       if (lockedItems.length > 0) {
-        console.log('🔒 Manually locked items:', lockedItems.join(', '));
+        logger.debug('Manually locked items detected', {
+          component: 'DayByDayView',
+          action: 'check_locked_items',
+          lockedCount: lockedItems.length,
+          lockedItems
+        });
       }
     }
   }, [tripData]);
@@ -254,7 +264,11 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       setTimeout(() => onRefresh?.(), 500);
       
     } catch (error) {
-      console.error(`Failed to toggle lock for node ${nodeId}:`, error);
+      logger.error('Failed to toggle lock', {
+        component: 'DayByDayView',
+        action: 'toggle_lock',
+        nodeId
+      }, error as Error);
       setSyncStatus(prev => ({ ...prev, syncing: false, error: 'Failed to sync lock state' }));
       throw error;
     }
@@ -272,7 +286,10 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       
       setTimeout(() => onRefresh?.(), 300);
     } catch (error) {
-      console.error('Failed to sync component update:', error);
+      logger.error('Failed to sync component update', {
+        component: 'DayByDayView',
+        action: 'sync_component_update'
+      }, error as Error);
       setSyncStatus(prev => ({ ...prev, syncing: false, error: 'Failed to sync changes' }));
     }
   }, [contextState.itinerary, onRefresh]);
@@ -294,7 +311,12 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
       }
       setHoveredCard({ dayNumber, componentId: component.id });
     } catch (error) {
-      console.error('Error handling card click:', error);
+      logger.error('Error handling card click', {
+        component: 'DayByDayView',
+        action: 'handle_card_click',
+        dayNumber,
+        componentId: component.id
+      }, error as Error);
       setHoveredCard({ dayNumber, componentId: component.id });
     }
   };
@@ -364,9 +386,14 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
                   const isProcessing = processingNodes.has(nodeId);
                   const isSelected = contextState.selectedNodeIds.includes(nodeId);
                   
-                  // Simple lock state verification (only for debugging)
+                  // Simple lock state verification
                   if (component.locked === true) {
-                    console.log(`🔒 LOCKED: "${component.name}" (ID: ${nodeId}) - User manually locked`);
+                    logger.debug('Locked component detected', {
+                      component: 'DayByDayView',
+                      action: 'render_locked_component',
+                      nodeId,
+                      componentName: component.name
+                    });
                   }
                   
                   return (
@@ -434,7 +461,10 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
                 : "Your personalized itinerary will appear here once planning is complete."
             }
             onRefresh={() => {
-              console.log('DayByDayView: Manual refresh triggered');
+              logger.info('Manual refresh triggered', {
+                component: 'DayByDayView',
+                action: 'manual_refresh'
+              });
               onRefresh?.();
             }}
             showRefreshButton={!contextState.loading}

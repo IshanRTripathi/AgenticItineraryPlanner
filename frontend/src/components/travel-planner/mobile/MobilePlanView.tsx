@@ -12,7 +12,7 @@ interface MobilePlanViewProps {
 export function MobilePlanView({ onCardSelect, onBack }: MobilePlanViewProps) {
   const { t } = useTranslation();
   
-  console.log('MobilePlanView rendering');
+  
 
   const cards = [
     {
@@ -65,7 +65,7 @@ export function MobilePlanView({ onCardSelect, onBack }: MobilePlanViewProps) {
                 key={card.id}
                 className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95 bg-white border border-gray-200 rounded-xl p-6"
                 onClick={() => {
-                  console.log('Card clicked:', card.id);
+                  
                   onCardSelect(card.id);
                 }}
                 style={{ 
@@ -102,3 +102,4 @@ export function MobilePlanView({ onCardSelect, onBack }: MobilePlanViewProps) {
     </div>
   );
 }
+

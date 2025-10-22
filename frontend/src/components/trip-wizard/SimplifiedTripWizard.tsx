@@ -50,7 +50,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   // Redirect to generation page when trip is created
   useEffect(() => {
     if (isGenerating && generatedTripData) {
-      console.log('Redirecting to generation page for trip:', generatedTripData.id);
+      
       navigate('/generating');
     }
   }, [isGenerating, generatedTripData, navigate]);
@@ -59,7 +59,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
   const { isSubmitting, submit: submitForm, error: submissionError } = useFormSubmission({
     debounceMs: 2000, // 2 second debounce
     onError: (error) => {
-      console.error('Form submission error:', error);
+      
       alert(`Failed to create itinerary: ${error.message}`);
     }
   });
@@ -379,10 +379,10 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
         if ((response.status as string) === 'planning') {
           // The itinerary is being generated asynchronously
           // Keep the progress modal open and don't set isGenerating to false
-          console.log('Itinerary is being generated asynchronously, showing progress modal');
+          
         } else {
           // The itinerary is complete
-          console.log('Itinerary is complete, proceeding to next screen');
+          
           setIsGenerating(false);
           onComplete(tripData);
         }
@@ -936,6 +936,7 @@ export function SimplifiedTripWizard({ onComplete, onBack }: SimplifiedTripWizar
     </div>
   );
 }
+
 
 
 

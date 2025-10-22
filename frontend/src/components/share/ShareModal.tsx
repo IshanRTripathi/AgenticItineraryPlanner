@@ -40,7 +40,7 @@ export function ShareModal({ itineraryId, isOpen, onClose }: ShareModalProps) {
       const link = `${window.location.origin}/shared/${data.shareId}`;
       setShareLink(link);
     } catch (error) {
-      console.error('Failed to generate share link:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ export function ShareModal({ itineraryId, isOpen, onClose }: ShareModalProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      
     }
   };
 
@@ -101,3 +101,4 @@ export function ShareModal({ itineraryId, isOpen, onClose }: ShareModalProps) {
     </div>
   );
 }
+

@@ -6,6 +6,7 @@ import { DayCardSkeleton } from './loading/SkeletonLoader';
 import { ErrorDisplay } from './shared/ErrorDisplay';
 import { TravelPlanner } from './TravelPlanner';
 import { useAuth } from '../contexts/AuthContext';
+import { logger } from '../utils/logger';
 
 interface TripViewLoaderProps {
   itineraryId: string;
@@ -59,11 +60,11 @@ export function TripViewLoader({
           setIsRegenerating(false);
         }, 2000);
       } else {
-        console.error('Failed to regenerate itinerary:', response.statusText);
+        
         setIsRegenerating(false);
       }
     } catch (error) {
-      console.error('Error regenerating itinerary:', error);
+      
       setIsRegenerating(false);
     }
   };
@@ -101,27 +102,27 @@ export function TripViewLoader({
   const currentTripData = freshTripData as TripData;
 
   // Debug logging
-  console.log('=== TRIP VIEW LOADER DEBUG ===');
-  console.log('Itinerary ID:', itineraryId);
-  console.log('Fresh Trip Data:', freshTripData);
-  console.log('Current Trip Data:', currentTripData);
-  console.log('Trip Status:', currentTripData?.status);
-  console.log('Has Itinerary:', !!currentTripData?.itinerary);
-  console.log('Days Count:', currentTripData?.itinerary?.days?.length || 0);
-  console.log('Days Data:', currentTripData?.itinerary?.days);
-  console.log('Full Itinerary Object:', currentTripData?.itinerary);
-  console.log('Is Loading:', isLoading);
-  console.log('Error:', error);
-  console.log('================================');
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   // Additional error logging
   if (error) {
-    console.error('=== TRIP VIEW LOADER ERROR DETAILS ===');
-    console.error('Error object:', error);
-    console.error('Error message:', (error as Error).message);
-    console.error('Error stack:', (error as Error).stack);
-    console.error('Error name:', (error as Error).name);
-    console.error('=====================================');
+    
+    
+    
+    
+    
+    
   }
 
   // Check if we have valid itinerary data
@@ -199,7 +200,7 @@ export function TripViewLoader({
             </details>
             <button
               onClick={() => {
-                console.log('Force refreshing data...');
+                
                 refetch();
               }}
               className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -229,3 +230,4 @@ export function TripViewLoader({
     />
   );
 }
+

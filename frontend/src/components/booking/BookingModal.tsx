@@ -60,7 +60,7 @@ export function BookingModal({
       onSuccess?.(data.bookingReference);
       onClose();
     } catch (error) {
-      console.error('Booking failed:', error);
+      
       alert('Booking failed. Please try again.');
     } finally {
       setLoading(false);
@@ -170,3 +170,4 @@ export function BookingModal({
     </div>
   );
 }
+

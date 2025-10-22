@@ -62,17 +62,17 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
 
     // Only animate if target is higher than current AND we haven't exceeded the last emitted progress
     if (targetProgress > overallProgress && overallProgress < lastEmittedProgress) {
-      console.log(`Starting progress animation: current=${overallProgress}%, target=${targetProgress}%, boundary=${lastEmittedProgress}%`);
+      
       progressAnimationRef.current = setInterval(() => {
         setOverallProgress(prev => {
           // Don't exceed the last emitted progress - this is our boundary
           const maxAllowedProgress = Math.min(targetProgress, lastEmittedProgress);
           const newProgress = Math.min(prev + 2, maxAllowedProgress);
           
-          console.log(`Progress animation: ${prev}% → ${newProgress}% (boundary: ${lastEmittedProgress}%)`);
+          
           
           if (newProgress >= maxAllowedProgress) {
-            console.log(`Progress animation stopped at boundary: ${maxAllowedProgress}%`);
+            
             if (progressAnimationRef.current) {
               clearInterval(progressAnimationRef.current);
               progressAnimationRef.current = null;
@@ -82,7 +82,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
         });
       }, 1000); // Update every 1 second (2% per second)
     } else {
-      console.log(`Progress animation skipped: current=${overallProgress}%, target=${targetProgress}%, boundary=${lastEmittedProgress}%`);
+      
     }
 
     return () => {
@@ -99,7 +99,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
       // Only animate if agent is running and current progress is below the boundary
       if (agent.status === 'running' && agent.progress < agent.lastEmittedProgress) {
         const newProgress = Math.min(agent.progress + 2, agent.lastEmittedProgress);
-        console.log(`Agent ${agent.task.name} progress animation: ${agent.progress}% → ${newProgress}% (boundary: ${agent.lastEmittedProgress}%)`);
+        
         return { ...agent, progress: newProgress };
       }
       return agent;
@@ -117,23 +117,19 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
 
   const handleSSEEvent = (event: MessageEvent) => {
     try {
-      console.log('Processing SSE event:', {
-        type: event.type,
-        data: event.data,
-        dataType: typeof event.data
-      });
+      
       
       // Handle connection messages
       if (event.data && typeof event.data === 'string' && event.data.includes('Connected to agent stream')) {
-        console.log('SSE connection confirmed:', event.data);
+        
         setSseConnectionStatus('connected');
         return;
       }
       
       // Parse agent events
       const agentEvent: AgentEvent = JSON.parse(event.data);
-      console.log('Parsed agent event:', agentEvent);
-      console.log('Available agent tasks:', AGENT_TASKS.map(t => t.id));
+      
+      
       
       // Update agent status based on event
       setAgents(prev => prev.map(agent => {
@@ -143,7 +139,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
                            agentEvent.status === 'running' ? 'running' : 
                            agentEvent.status === 'failed' ? 'failed' : 'pending';
           
-          console.log(`Updating agent ${agent.task.name} from ${agent.status} to ${newStatus}`);
+          
           
           return {
             ...agent,
@@ -188,8 +184,8 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
         // Update last emitted progress as the boundary
         setLastEmittedProgress(Math.round(totalProgress));
         
-        console.log(`Progress update: ${completedCount}/${AGENT_TASKS.length} completed, ${failedCount} failed, ${Math.round(totalProgress)}% total`);
-        console.log(`Boundary set: lastEmittedProgress = ${Math.round(totalProgress)}%`);
+        
+        
         
         // Check if any agent failed
         if (failedCount > 0 && !hasError) {
@@ -203,18 +199,18 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
       // Check if all agents are completed - but don't trigger completion here
       // Let the completion checker handle it to avoid race conditions
       if (agentEvent.status === 'completed') {
-        console.log(`${agentEvent.kind} agent completed, will be handled by completion checker`);
+        
       }
       
       // Check if any agent failed
       if (agentEvent.status === 'failed') {
-        console.log(`${agentEvent.kind} agent failed`);
+        
         setHasError(true);
         setErrorMessage(`Trip generation failed: ${agentEvent.message || 'Unknown error occurred'}`);
       }
       
     } catch (error) {
-      console.error('Error processing SSE event:', error);
+      
       setSseConnectionStatus('error');
     }
   };
@@ -250,18 +246,18 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
 
   useEffect(() => {
     if (!tripData.id) {
-      console.error('No trip data ID available for SSE connection');
+      
       setHasError(true);
       setErrorMessage('No trip data available. Please try again.');
       return;
     }
 
-    console.log('Starting SSE connection for itinerary:', tripData.id);
+    
 
     // Set maximum timeout (5 minutes)
     const maxTimeout = setTimeout(() => {
       if (!hasCompleted && !hasError) {
-        console.log('Maximum timeout reached');
+        
         setHasError(true);
         setErrorMessage('Trip generation is taking longer than expected. You can retry or cancel the operation.');
       }
@@ -275,8 +271,8 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
           const result = await refetchItinerary();
           if (result.data) {
             const responseData = result.data as TripData;
-            console.log('Checking completion status:', responseData.status);
-            console.log('Days count:', responseData.itinerary?.days?.length || 0);
+            
+            
             
             // Check if we have actual itinerary content (not just placeholder data)
             const hasActualContent = responseData.itinerary?.days && 
@@ -288,7 +284,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
             
             // Only consider completed if all agents are done AND has actual content
             if (allAgentsCompleted && hasActualContent) {
-              console.log('All agents completed with actual content, proceeding to next screen');
+              
               setHasCompleted(true);
               setTargetProgress(100); // Set target to 100% - animation will handle the smooth transition
               setLastEmittedProgress(100); // Set boundary to 100% for completion
@@ -312,14 +308,14 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
               onComplete();
               return;
             } else if (responseData.status === 'planning' && hasActualContent) {
-              console.log('Itinerary has content but agents still running, updating current trip data');
+              
               setCurrentTrip(responseData);
             } else if (responseData.status === 'planning' && !hasActualContent) {
-              console.log('Itinerary is still generating with no content yet');
+              
             }
           }
         } catch (e) {
-          console.warn('Completion check failed:', e);
+          
           // Don't set error on completion check failure, just continue
         }
         
@@ -339,36 +335,36 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
     completionTimeoutRef.current = setTimeout(checkCompletion, 30000);
     
     eventSource.onopen = () => {
-      console.log('SSE connection opened for itinerary:', tripData.id);
+      
       setSseConnectionStatus('connected');
     };
     
     // Handle all SSE events
     eventSource.onmessage = (event) => {
-      console.log('SSE message received:', event);
+      
       handleSSEEvent(event);
     };
     
     // Handle named events (like 'agent-event')
     eventSource.addEventListener('agent-event', (event) => {
-      console.log('SSE agent-event received:', event);
+      
       handleSSEEvent(event);
     });
     
     eventSource.addEventListener('connected', (event) => {
-      console.log('SSE connected event:', event.data);
+      
       setSseConnectionStatus('connected');
     });
     
     eventSource.onerror = (error) => {
-      console.error('SSE connection error:', error);
+      
       setSseConnectionStatus('error');
       // Don't immediately set error state, let the completion checker handle it
     };
     
     // Cleanup function to close SSE connection
     return () => {
-      console.log('Closing SSE connection for itinerary:', tripData.id);
+      
       if (completionTimeoutRef.current) {
         clearTimeout(completionTimeoutRef.current);
       }
@@ -633,6 +629,7 @@ export function AgentProgressModal({ tripData, onComplete, onCancel }: AgentProg
     </div>
   );
 }
+
 
 
 

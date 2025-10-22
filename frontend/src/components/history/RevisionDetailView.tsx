@@ -88,7 +88,7 @@ export function RevisionDetailView({
 
         setRevision(detail);
       } catch (err) {
-        console.error('Failed to fetch revision detail:', err);
+        
         setError('Failed to load revision details');
       } finally {
         setLoading(false);
@@ -116,7 +116,7 @@ export function RevisionDetailView({
       // Reload page to show changes
       setTimeout(() => window.location.reload(), 500);
     } catch (err) {
-      console.error('Failed to restore revision:', err);
+      
       alert('Failed to restore version. Please try again.');
     } finally {
       setRestoring(false);
@@ -318,3 +318,4 @@ export function RevisionDetailView({
     </Card>
   );
 }
+

@@ -84,7 +84,7 @@ export function ChangeHistoryPanel({
 
       setRevisions(transformedRevisions);
     } catch (err) {
-      console.error('Failed to fetch revisions:', err);
+      
       setError('Failed to load change history');
     } finally {
       setLoading(false);
@@ -131,7 +131,7 @@ export function ChangeHistoryPanel({
       // Reload page to show changes
       setTimeout(() => window.location.reload(), 500);
     } catch (err) {
-      console.error('Failed to jump to version:', err);
+      
       alert('Failed to restore version. Please try again.');
     }
   };
@@ -349,3 +349,4 @@ export function ChangeHistoryPanel({
     </Card>
   );
 }
+

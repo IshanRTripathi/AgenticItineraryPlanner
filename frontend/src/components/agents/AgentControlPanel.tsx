@@ -117,7 +117,7 @@ export function AgentControlPanel({
         onAgentExecute?.(agentId);
       }
     } catch (error: any) {
-      console.error('Agent execution error:', error);
+      
       setAgentErrors(prev => new Map(prev).set(agentId, {
         message: error.message || 'Failed to execute agent. Please try again.',
         timestamp: new Date()
@@ -244,3 +244,4 @@ export function AgentControlPanel({
     </Card>
   );
 }
+

@@ -49,7 +49,7 @@ export function PdfExportButton({
 
       onSuccess?.();
     } catch (error) {
-      console.error('PDF export failed:', error);
+      
       onError?.(error as Error);
     } finally {
       setLoading(false);
@@ -73,3 +73,4 @@ export function PdfExportButton({
     </Button>
   );
 }
+

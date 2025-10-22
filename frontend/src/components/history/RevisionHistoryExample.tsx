@@ -44,7 +44,7 @@ export function RevisionHistoryExample() {
               itineraryId={state.itinerary.id}
               onClose={() => setSelectedRevisionId(null)}
               onRestore={() => {
-                console.log('Revision restored');
+                
                 setSelectedRevisionId(null);
               }}
             />
@@ -85,3 +85,4 @@ export function RevisionHistoryExample() {
     </div>
   );
 }
+

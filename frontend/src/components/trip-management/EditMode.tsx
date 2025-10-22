@@ -278,14 +278,14 @@ export function EditMode({ tripData, onSave, onCancel }: EditModeProps) {
   const undo = () => {
     if (undoStack.length > 0) {
       // Implementation for undo functionality
-      console.log('Undo action');
+      
     }
   };
 
   const redo = () => {
     if (redoStack.length > 0) {
       // Implementation for redo functionality
-      console.log('Redo action');
+      
     }
   };
 
@@ -509,6 +509,7 @@ export function EditMode({ tripData, onSave, onCancel }: EditModeProps) {
     </div>
   );
 }
+
 
 
 
