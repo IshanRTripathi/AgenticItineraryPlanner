@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useItinerary } from '../state/query/hooks';
-import { TripData } from '../types/TripData';
+import { NormalizedItinerary } from '../types/NormalizedItinerary';
 import { LoadingState } from './shared/LoadingState';
 import { DayCardSkeleton } from './loading/SkeletonLoader';
 import { ErrorDisplay } from './shared/ErrorDisplay';
@@ -10,7 +10,7 @@ import { logger } from '../utils/logger';
 
 interface TripViewLoaderProps {
   itineraryId: string;
-  onSave: (updatedTrip: TripData) => void;
+  onSave: (updatedItinerary: NormalizedItinerary) => void;
   onBack: () => void;
   onShare: () => void;
   onExportPDF: () => void;
@@ -98,8 +98,8 @@ export function TripViewLoader({
     );
   }
 
-  // Use fresh data from API
-  const currentTripData = freshTripData as TripData;
+  // Use fresh data from API (it's actually NormalizedItinerary, not TripData)
+  const currentItinerary = freshTripData;
 
   // Debug logging
   
@@ -126,12 +126,12 @@ export function TripViewLoader({
   }
 
   // Check if we have valid itinerary data
-  if (!currentTripData?.itinerary?.days || currentTripData.itinerary.days.length === 0) {
-    const tripStatus = currentTripData?.status || 'unknown';
+  if (!currentItinerary?.itinerary?.days || currentItinerary.itinerary.days.length === 0) {
+    const tripStatus = currentItinerary?.status || 'unknown';
     const isGenerating = tripStatus === 'planning' || tripStatus === 'draft';
     
     // If we have a trip but no days, and it's not generating, it might be a failed generation
-    const isFailedGeneration = !isGenerating && currentTripData && (!currentTripData.itinerary?.days || currentTripData.itinerary.days.length === 0);
+    const isFailedGeneration = !isGenerating && currentItinerary && (!currentItinerary.itinerary?.days || currentItinerary.itinerary.days.length === 0);
     
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -187,14 +187,14 @@ export function TripViewLoader({
               </summary>
               <div className="mt-2 p-3 bg-gray-100 rounded text-xs text-gray-600 max-h-40 overflow-y-auto">
                 <div><strong>Itinerary ID:</strong> {itineraryId}</div>
-                <div><strong>Status:</strong> {currentTripData?.status || 'unknown'}</div>
-                <div><strong>Has Itinerary:</strong> {!!currentTripData?.itinerary ? 'Yes' : 'No'}</div>
-                <div><strong>Days Count:</strong> {currentTripData?.itinerary?.days?.length || 0}</div>
-                <div><strong>Created:</strong> {new Date(currentTripData?.createdAt || 0).toLocaleString()}</div>
-                <div><strong>Updated:</strong> {new Date(currentTripData?.updatedAt || 0).toLocaleString()}</div>
+                <div><strong>Status:</strong> {currentItinerary?.status || 'unknown'}</div>
+                <div><strong>Has Itinerary:</strong> {!!currentItinerary?.itinerary ? 'Yes' : 'No'}</div>
+                <div><strong>Days Count:</strong> {currentItinerary?.itinerary?.days?.length || 0}</div>
+                <div><strong>Created:</strong> {new Date(currentItinerary?.createdAt || 0).toLocaleString()}</div>
+                <div><strong>Updated:</strong> {new Date(currentItinerary?.updatedAt || 0).toLocaleString()}</div>
                 <div><strong>Raw Data:</strong></div>
                 <pre className="text-xs mt-1 whitespace-pre-wrap">
-                  {JSON.stringify(currentTripData, null, 2)}
+                  {JSON.stringify(currentItinerary, null, 2)}
                 </pre>
               </div>
             </details>
@@ -219,10 +219,23 @@ export function TripViewLoader({
     );
   }
 
+  // Check if we have valid data
+  if (!currentItinerary) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <LoadingState 
+          variant="fullPage" 
+          message="Loading itinerary data..." 
+          size="lg"
+        />
+      </div>
+    );
+  }
+
   // Data is loaded and valid, render the TravelPlanner
   return (
     <TravelPlanner
-      tripData={currentTripData}
+      itinerary={currentItinerary}
       onSave={onSave}
       onBack={onBack}
       onShare={onShare}
@@ -230,4 +243,5 @@ export function TripViewLoader({
     />
   );
 }
+
 

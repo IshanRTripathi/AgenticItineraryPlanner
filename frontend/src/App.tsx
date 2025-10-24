@@ -24,6 +24,8 @@ import { KeyboardShortcuts } from './components/shared/KeyboardShortcuts';
 import { TripViewLoader } from './components/TripViewLoader';
 import { AppProviders } from './contexts/AppProviders';
 import './i18n'; // Initialize i18n
+import { NormalizedItinerary } from './types/NormalizedItinerary';
+import { NormalizedItinerary } from './types/NormalizedItinerary';
 // Data transformation will be handled by the backend
 
 export type AppScreen = 
@@ -141,9 +143,9 @@ function RoutedApp() {
         } />
         <Route path="/planner" element={
           <TravelPlanner
-            tripData={currentTrip as TripData}
-            onSave={(updatedTrip) => {
-              updateCurrentTrip(updatedTrip);
+            itinerary={currentTrip as NormalizedItinerary}
+            onSave={(updatedItinerary) => {
+              updateCurrentTrip(updatedItinerary);
               navigateToScreen('/dashboard');
             }}
             onBack={() => navigateToScreen('/dashboard')}

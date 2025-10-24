@@ -6,6 +6,7 @@ export interface NormalizedItinerary {
   userId?: string;
   createdAt?: number; // milliseconds since epoch
   updatedAt?: number; // milliseconds since epoch
+  status?: 'planning' | 'complete' | 'failed'; // Generation status
   summary: string;
   currency: string;
   themes: string[];

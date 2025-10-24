@@ -6,8 +6,11 @@ import { Input } from './ui/input';
 import { Search, Globe, Workflow, Video, Share2, MessageSquare } from 'lucide-react';
 import { useItinerary, queryKeys } from '../state/query/hooks';
 import { useQueryClient } from '@tanstack/react-query';
+import { NormalizedItinerary } from '../types/NormalizedItinerary';
 import { TripData } from '../types/TripData';
 import { apiClient } from '../services/apiClient';
+import { ItineraryAdapter } from '../utils/itineraryAdapter';
+import { convertNormalizedToTripData } from '../utils/normalizedToTripDataAdapter';
 import { useTranslation } from 'react-i18next';
 import { SimplifiedAgentProgress } from './agents/SimplifiedAgentProgress';
 import { AutoRefreshEmptyState } from './shared/AutoRefreshEmptyState';
@@ -69,18 +72,18 @@ import {
 } from './travel-planner/shared/types';
 
 interface TravelPlannerProps {
-  tripData: TripData;
-  onSave: (updatedTrip: TripData) => void;
+  itinerary: NormalizedItinerary;
+  onSave: (updatedItinerary: NormalizedItinerary) => void;
   onBack: () => void;
   onShare: () => void;
   onExportPDF: () => void;
 }
 
-function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
+function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPDF }: TravelPlannerProps) {
   logger.debug('TravelPlanner component render', {
     component: 'TravelPlanner',
     action: 'render',
-    tripId: tripData.id
+    itineraryId: itinerary.itineraryId
   });
 
   // Device detection
@@ -129,58 +132,29 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     setShowProgressModal
   } = state;
 
+  // Handle both NormalizedItinerary (itineraryId) and TripData (id) formats
+  // This handles cases where routes pass different data formats
+  const actualItineraryId = itinerary?.itineraryId || (itinerary as any)?.id;
+
   // Fetch fresh data from API
-  const { data: freshTripData, isLoading, error, refetch } = useItinerary(tripData.id);
+  const { data: freshItinerary, isLoading, error, refetch } = useItinerary(actualItineraryId);
   const queryClient = useQueryClient();
 
-  // Convert NormalizedItinerary to TripData format
-  const convertedTripData = useMemo(() => {
-    if (!freshTripData) return null;
+  // Use fresh data if available, fallback to props
+  const currentItinerary = freshItinerary || itinerary;
 
-    // API returns NormalizedItinerary, convert to TripData format
-    const normalized = freshTripData as any;
+  // Convert NormalizedItinerary to TripData format for components that still expect it
+  const currentTripData = useMemo(() => {
+    return convertNormalizedToTripData(currentItinerary);
+  }, [currentItinerary]);
 
-    // Ensure days is always an array
-    const days = Array.isArray(normalized.days) ? normalized.days : [];
-
-    const converted = {
-      ...tripData, // Keep original tripData fields as base
-      id: normalized.itineraryId || tripData.id,
-      itinerary: {
-        ...(tripData.itinerary || {}),
-        days: days,
-      },
-      summary: normalized.summary || tripData.summary,
-      themes: Array.isArray(normalized.themes) ? normalized.themes : (tripData.themes || []),
-      destination: normalized.destination || tripData.destination,
-      dates: {
-        start: normalized.startDate || days[0]?.date || tripData.dates?.start,
-        end: normalized.endDate || days[days.length - 1]?.date || tripData.dates?.end
-      }
-    };
-
-
-
-    return converted;
-  }, [freshTripData, tripData]);
-
-  // Use converted data if available, fallback to props
-  // Ensure currentTripData always has itinerary.days as an array
-  const currentTripData = convertedTripData || tripData;
-
-
-
-  // Safety check: ensure itinerary.days exists
-  if (currentTripData && !currentTripData.itinerary) {
-    currentTripData.itinerary = { days: [] } as any;
-  }
-  if (currentTripData && currentTripData.itinerary && !Array.isArray(currentTripData.itinerary.days)) {
-    currentTripData.itinerary.days = [];
-  }
+  // Ensure days is always an array
+  const days = Array.isArray(currentItinerary.days) ? currentItinerary.days : [];
 
   // Use extracted hooks for side effects
+  // TODO: Update these hooks to accept NormalizedItinerary instead of TripData
   useDestinationsSync(currentTripData, setDestinations);
-  useFreshItineraryCheck(isLoading, error, currentTripData, tripData.id);
+  useFreshItineraryCheck(isLoading, error, currentTripData, itinerary.itineraryId);
   useMapViewModeSync(activeTab, showWorkflowBuilder, showChatInterface);
   useMapCenterSync(viewMode, destinations, currentTripData, centerOnFirstDestination, centerOnDayComponent);
   useAgentStatusesSync(currentTripData, setAgentStatuses);
@@ -188,7 +162,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
   // Use extracted handlers
   const { updateDestination, addDestination, removeDestination } = createDestinationHandlers(setDestinations);
   const handleDaySelect = createDaySelectHandler(setSelectedDay);
-  const handleItineraryUpdateFromChat = createItineraryUpdateHandler(queryClient, tripData.id);
+  const handleItineraryUpdateFromChat = createItineraryUpdateHandler(queryClient, itinerary.itineraryId);
 
   // Show loading state while fetching fresh data
   if (isLoading) {
@@ -208,28 +182,28 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
   // Show progress modal if itinerary is still being generated
   // Don't show if showProgressModal is explicitly false
-  if (!showProgressModal && currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
+  if (!showProgressModal && currentItinerary.status === 'planning' && (!currentItinerary || !currentItinerary.days || currentItinerary.days.length === 0)) {
     // Progress was dismissed, show empty state instead
-  } else if (currentTripData.status === 'planning' && (!currentTripData.itinerary || !currentTripData.itinerary.days || currentTripData.itinerary.days.length === 0)) {
+  } else if (currentItinerary.status === 'planning' && (!currentItinerary || !currentItinerary.days || currentItinerary.days.length === 0)) {
     return (
       <SimplifiedAgentProgress
         tripData={currentTripData}
         onComplete={async () => {
           console.log('[TravelPlanner] Progress onComplete called');
           setShowProgressModal(false);
-          
+
           // Fetch the completed itinerary
           try {
             console.log('[TravelPlanner] Fetching completed itinerary');
-            const completedItinerary = await apiClient.getItinerary(currentTripData.id);
+            const completedItinerary = await apiClient.getItinerary(currentItinerary.itineraryId);
             console.log('[TravelPlanner] Completed itinerary fetched:', completedItinerary);
-            
+
             // Update query cache
             queryClient.setQueryData(
-              queryKeys.itinerary(currentTripData.id),
+              queryKeys.itinerary(currentItinerary.itineraryId),
               completedItinerary
             );
-            
+
             // Force a refetch to ensure UI updates
             await refetch();
             console.log('[TravelPlanner] Refetch complete, should show planner now');
@@ -257,10 +231,8 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
 
 
-    // Check if we have actual itinerary data, not just destinations array
-    // Support both TripData format (itinerary.days) and NormalizedItinerary format (days)
-    const hasItineraryData = (currentTripData.itinerary?.days && currentTripData.itinerary.days.length > 0) ||
-      ((currentTripData as any).days && (currentTripData as any).days.length > 0);
+    // Check if we have actual itinerary data
+    const hasItineraryData = days.length > 0;
 
     // Show loading state while data is being fetched
     if (isLoading) {
@@ -282,6 +254,9 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
     }
 
     if (!hasItineraryData) {
+      // Don't show refresh button if still generating
+      const isGenerating = currentItinerary.status === 'planning';
+
       return (
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
           <Card className="p-4 md:p-6">
@@ -295,13 +270,16 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           </Card>
 
           <AutoRefreshEmptyState
-            title="No itinerary data available yet"
-            description="Your personalized itinerary will appear here once planning is complete. In the meantime, you can collect your research links below."
+            title={isGenerating ? "Generating your itinerary..." : "No itinerary data available yet"}
+            description={isGenerating
+              ? "Please wait while we create your personalized travel plan."
+              : "Your personalized itinerary will appear here once planning is complete."}
             onRefresh={() => {
-
-              refetch();
+              if (currentItinerary.itineraryId) {
+                refetch();
+              }
             }}
-            showRefreshButton={true}
+            showRefreshButton={!isGenerating && !!currentItinerary.itineraryId}
             icon={<Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />}
           />
         </div>
@@ -335,7 +313,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
           </TabsContent>
 
           <TabsContent value="day-by-day" className="m-0 flex-1 overflow-y-auto">
-            <UnifiedItineraryProvider itineraryId={currentTripData.id}>
+            <UnifiedItineraryProvider itineraryId={currentItinerary.itineraryId}>
               <DayByDayView
                 tripData={currentTripData}
                 onDaySelect={handleDaySelect}
@@ -351,8 +329,11 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
       </Tabs>
     );
 
-    // Build map markers using helper function
-    const mapMarkers = buildMapMarkers(currentTripData);
+    // Build map markers only if generation is complete and we have itinerary data
+    const isGenerating = currentItinerary.status === 'planning';
+    const mapMarkers = (!isGenerating && hasItineraryData)
+      ? buildMapMarkers(currentTripData)
+      : [];
 
     const rightContent = (
       <>
@@ -405,7 +386,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
         <div className="flex-1 overflow-hidden">
           {showChatInterface ? (
-            <UnifiedItineraryProvider itineraryId={currentTripData.id}>
+            <UnifiedItineraryProvider itineraryId={currentItinerary.itineraryId}>
               <NewChat />
             </UnifiedItineraryProvider>
           ) : !showWorkflowBuilder ? (
@@ -413,7 +394,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
               {/* Feature flag: simplest gated render for map MVP */}
               {(() => {
                 const hasMapKey = Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY);
-                const hasDays = currentTripData?.itinerary?.days;
+                const hasDays = currentItinerary?.days;
 
                 return hasMapKey && hasDays;
               })() ? (
@@ -430,7 +411,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
                     })()}
                     <TripMap
                       nodes={mapMarkers}
-                      days={currentTripData.itinerary.days.map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
+                      days={currentItinerary.days.map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
                       onAddPlace={({ dayId, dayNumber, place }) => {
                         try {
                           // Create workflow node if workflow builder is available
@@ -463,7 +444,7 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
             </div>
           ) : (
             <div className="h-full overflow-hidden relative">
-              <UnifiedItineraryProvider itineraryId={currentTripData.id}>
+              <UnifiedItineraryProvider itineraryId={currentItinerary.itineraryId}>
                 <WorkflowBuilder
                   tripData={currentTripData}
                   embedded={true}
@@ -602,4 +583,9 @@ function TravelPlannerComponent({ tripData, onSave, onBack, onShare, onExportPDF
 
 // Export with error boundary
 export const TravelPlanner = withErrorBoundary(TravelPlannerComponent);
+
+
+
+
+
 
