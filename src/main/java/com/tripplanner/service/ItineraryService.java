@@ -328,6 +328,50 @@ public class ItineraryService {
     }
     
     /**
+     * Calculate the current status of an itinerary based on agent states and content.
+     * 
+     * Priority-based logic:
+     * 1. If any agent is running → "generating"
+     * 2. If days exist with components → "completed"
+     * 3. If all agents are idle with no days → "planning"
+     * 4. Default → "planning" (safe fallback)
+     * 
+     * @param itinerary The normalized itinerary to check
+     * @return Status string: "planning", "generating", "completed", or "failed"
+     */
+    public String calculateItineraryStatus(NormalizedItinerary itinerary) {
+        // Priority 1: Check for running agents
+        if (itinerary.getAgents() != null) {
+            boolean anyRunning = itinerary.getAgents().values().stream()
+                .anyMatch(agent -> "running".equals(agent.getStatus()));
+            if (anyRunning) {
+                return "generating";
+            }
+        }
+        
+        // Priority 2: Check for completed content
+        if (itinerary.getDays() != null && !itinerary.getDays().isEmpty()) {
+            boolean hasContent = itinerary.getDays().stream()
+                .anyMatch(day -> day.getNodes() != null && !day.getNodes().isEmpty());
+            if (hasContent) {
+                return "completed";
+            }
+        }
+        
+        // Priority 3: Check for all idle agents with no content
+        if (itinerary.getAgents() != null) {
+            boolean allIdle = itinerary.getAgents().values().stream()
+                .allMatch(agent -> "idle".equals(agent.getStatus()));
+            if (allIdle && (itinerary.getDays() == null || itinerary.getDays().isEmpty())) {
+                return "planning";
+            }
+        }
+        
+        // Default fallback
+        return "planning";
+    }
+    
+    /**
      * Share an itinerary (make it public).
      */
     public ShareResponse share(String id) {
