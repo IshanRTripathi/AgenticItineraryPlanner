@@ -1,12 +1,14 @@
 // Types for the new normalized JSON structure from the backend
 
+export type ItineraryStatus = 'planning' | 'generating' | 'completed' | 'failed';
+
 export interface NormalizedItinerary {
   itineraryId: string;
   version: number;
   userId?: string;
   createdAt?: number; // milliseconds since epoch
   updatedAt?: number; // milliseconds since epoch
-  status?: 'planning' | 'complete' | 'failed'; // Generation status
+  status?: ItineraryStatus; // Generation status
   summary: string;
   currency: string;
   themes: string[];

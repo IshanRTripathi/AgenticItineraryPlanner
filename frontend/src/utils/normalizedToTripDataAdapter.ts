@@ -23,7 +23,7 @@ export function convertNormalizedToTripData(normalized: NormalizedItinerary): Tr
   // Create minimal TripData with only the fields components actually use
   const tripData: Partial<TripData> = {
     id: normalized.itineraryId,
-    status: (normalized.status as any) || 'planning',
+    status: normalized.status || 'planning', // Fallback to planning if missing
     summary: normalized.summary,
     destination: normalized.destination,
     themes: normalized.themes,
@@ -248,7 +248,7 @@ function createMinimalTripData(normalized?: Partial<NormalizedItinerary>): TripD
 
   return {
     id: normalized?.itineraryId || 'unknown',
-    status: (normalized?.status as any) || 'planning',
+    status: normalized?.status || 'planning', // Fallback to planning if missing
     summary: normalized?.summary || '',
     destination: destination,
     themes: normalized?.themes || [],

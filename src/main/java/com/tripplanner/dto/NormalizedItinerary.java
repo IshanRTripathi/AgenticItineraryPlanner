@@ -68,6 +68,9 @@ public class NormalizedItinerary {
     @JsonProperty("settings")
     private ItinerarySettings settings;
     
+    @JsonProperty("status")
+    private String status; // "planning", "generating", "completed", "failed"
+    
     @Valid
     @JsonProperty("agents")
     private Map<String, AgentStatus> agents;
@@ -223,6 +226,14 @@ public class NormalizedItinerary {
         this.settings = settings;
     }
     
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
     public Map<String, AgentStatus> getAgents() {
         return agents;
     }
@@ -312,6 +323,7 @@ public class NormalizedItinerary {
                 ", destination='" + destination + '\'' +
                 ", startDate='" + startDate + '\'' +
                 ", endDate='" + endDate + '\'' +
+                ", status='" + status + '\'' +
                 ", days=" + days +
                 ", settings=" + settings +
                 ", agents=" + agents +

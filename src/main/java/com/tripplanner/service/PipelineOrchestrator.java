@@ -390,9 +390,23 @@ public class PipelineOrchestrator {
     }
     
     private void publishPipelineComplete(String itineraryId, String executionId, long totalTimeMs) {
+        logger.info("Pipeline complete in {} ms", totalTimeMs);
+        
+        // Update itinerary status to "completed" in Firestore
+        try {
+            var itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+            if (itineraryOpt.isPresent()) {
+                NormalizedItinerary itinerary = itineraryOpt.get();
+                itinerary.setStatus("completed");
+                itineraryJsonService.saveMasterItinerary(itineraryId, itinerary);
+                logger.info("Updated itinerary status to 'completed' for: {}", itineraryId);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update itinerary status to completed: {}", e.getMessage(), e);
+        }
+        
+        // Publish SSE events if there are active connections
         if (agentEventPublisher.hasActiveConnections(itineraryId)) {
-            logger.info("Pipeline complete in {} ms", totalTimeMs);
-            
             // Get the final itinerary to publish completion event
             try {
                 var finalItinerary = itineraryJsonService.getItinerary(itineraryId);

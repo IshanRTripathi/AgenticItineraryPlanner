@@ -86,13 +86,14 @@ export function SimplifiedAgentProgress({
   // Add status polling as fallback for when SSE connection is lost (e.g., page refresh)
   const { status: polledStatus, isPolling } = useGenerationStatus(
     tripData.id,
-    tripData.status || 'generating',
+    'planning', // Always start with 'planning', let polling determine actual status
     {
       pollingInterval: 5000, // Poll every 5 seconds
       enabled: !isCompleted && !hasError, // Only poll while generating
       onComplete: () => {
         // Generation completed! Refresh data and trigger completion
         if (!onCompleteCalledRef.current) {
+          console.log('[SimplifiedAgentProgress] Polling detected completion');
           setCurrentMessage('Generation completed! Loading your itinerary...');
           setActualProgress(100);
           setIsCompleted(true);
@@ -100,18 +101,23 @@ export function SimplifiedAgentProgress({
           // Invalidate queries to fetch fresh data
           queryClient.invalidateQueries({ queryKey: ['itinerary', tripData.id] });
           
-          // Trigger completion callback
+          // Increased delay to 2 seconds to ensure data is ready
           setTimeout(() => {
             if (!onCompleteCalledRef.current) {
               onCompleteCalledRef.current = true;
               onComplete();
             }
-          }, 1000);
+          }, 2000);
         }
       },
       onError: (error) => {
-        console.error('Status polling error:', error);
-        // Don't show error to user - SSE might still work
+        console.error('[SimplifiedAgentProgress] Status polling error:', error);
+        
+        // Show error if SSE also failed
+        if (!eventSourceRef.current) {
+          setHasError(true);
+          setErrorMessage('Failed to connect to generation service. Please try again.');
+        }
       }
     }
   );

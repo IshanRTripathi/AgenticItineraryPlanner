@@ -172,9 +172,12 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
 
   // Show progress modal if itinerary is still being generated
   // Don't show if showProgressModal is explicitly false
-  if (!showProgressModal && currentItinerary.status === 'planning' && (!currentItinerary || !currentItinerary.days || currentItinerary.days.length === 0)) {
+  const isGenerating = currentItinerary.status === 'planning' || currentItinerary.status === 'generating';
+  const hasContent = currentItinerary.days && currentItinerary.days.length > 0;
+  
+  if (!showProgressModal && isGenerating && !hasContent) {
     // Progress was dismissed, show empty state instead
-  } else if (currentItinerary.status === 'planning' && (!currentItinerary || !currentItinerary.days || currentItinerary.days.length === 0)) {
+  } else if (isGenerating && !hasContent) {
     return (
       <SimplifiedAgentProgress
         tripData={currentTripData}
@@ -245,7 +248,7 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
 
     if (!hasItineraryData) {
       // Don't show refresh button if still generating
-      const isGenerating = currentItinerary.status === 'planning';
+      const isGenerating = currentItinerary.status === 'planning' || currentItinerary.status === 'generating';
 
       return (
         <div className="p-4 md:p-6 space-y-4 md:space-y-6">
@@ -321,7 +324,7 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
     );
 
     // Build map markers only if generation is complete and we have itinerary data
-    const isGenerating = currentItinerary.status === 'planning';
+    const isGenerating = currentItinerary.status === 'planning' || currentItinerary.status === 'generating';
     const mapMarkers = (!isGenerating && hasItineraryData)
       ? buildMapMarkers(currentTripData)
       : [];

@@ -241,7 +241,7 @@ export interface TripData {
   itinerary?: TripItinerary;
   
   // Booking and status
-  status: 'draft' | 'planning' | 'booked' | 'completed' | 'cancelled';
+  status: 'draft' | 'planning' | 'generating' | 'completed' | 'failed' | 'booked' | 'cancelled';
   createdAt: string;
   updatedAt: string;
   

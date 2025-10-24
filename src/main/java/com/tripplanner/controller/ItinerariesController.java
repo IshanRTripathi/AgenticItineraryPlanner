@@ -316,8 +316,14 @@ public class ItinerariesController {
             var itinerary = itineraryJsonService.getItinerary(id);
             
             if (itinerary.isPresent()) {
-                logger.info("Normalized itinerary found: {}", id);
-                return ResponseEntity.ok(itinerary.get());
+                NormalizedItinerary normalizedItinerary = itinerary.get();
+                
+                // Calculate and set status based on current state
+                String status = itineraryService.calculateItineraryStatus(normalizedItinerary);
+                normalizedItinerary.setStatus(status);
+                
+                logger.info("Normalized itinerary found: {}, status: {}", id, status);
+                return ResponseEntity.ok(normalizedItinerary);
             } else {
                 logger.warn("Normalized itinerary not found: {}", id);
                 return ResponseEntity.notFound().build();
