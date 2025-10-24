@@ -6,11 +6,8 @@ import { NormalizedItinerary } from '../types/NormalizedItinerary';
 import { TripData } from '../types/TripData';
 import { ChatRequest, ChatResponse } from '../types/ChatTypes';
 import { logger, logInfo, logError, logWarn } from '../utils/logger';
-import { 
-  normalizedItineraryToTripData, 
-  tripDataToNormalizedItinerary,
-  isNormalizedItinerary 
-} from '../utils/dataTransformers';
+import { convertNormalizedToTripData } from '../utils/normalizedToTripDataAdapter';
+import { isNormalizedItinerary } from '../utils/typeGuards';
 
 // Retry configuration
 interface RetryConfig {
@@ -377,7 +374,7 @@ class ApiService {
         config
       );
       
-      const tripData = normalizedItineraryToTripData(normalized);
+      const tripData = convertNormalizedToTripData(normalized);
       
       logInfo(`Successfully fetched itinerary: ${itineraryId}`, {
         component: 'ApiService',

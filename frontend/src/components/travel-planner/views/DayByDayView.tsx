@@ -6,7 +6,7 @@ import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
 import { ViewComponentProps, ErrorBoundary } from '../shared/types';
 import { AutoRefreshEmptyState } from '../../shared/AutoRefreshEmptyState';
-import { useMapContext } from '../../../contexts/MapContext';
+import { useMapState } from '../../../hooks/useMapState';
 import { useUnifiedItinerary } from '../../../contexts/UnifiedItineraryContext';
 import { geocodingService, geocodingUtils } from '../../../services/geocodingService';
 import { itineraryApi } from '../../../services/api';
@@ -148,7 +148,11 @@ const getPlaceholderImage = (category: string, name: string) => {
   return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop';
 };
 
-export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRefresh }: ViewComponentProps) {
+interface DayByDayViewProps extends ViewComponentProps {
+  mapState?: ReturnType<typeof useMapState>;
+}
+
+export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRefresh, mapState }: DayByDayViewProps) {
   const { t } = useTranslation();
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
   const [processingNodes, setProcessingNodes] = useState<Set<string>>(new Set());
@@ -162,7 +166,11 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
     error: null
   });
   
-  const { centerOnDayComponent, setHoveredCard } = useMapContext();
+  // Use with optional chaining since map might not be available
+  const centerOnDayComponent = mapState?.centerOnDayComponent || (() => {
+    console.log('[DayByDayView] Map not available');
+  });
+  const setHoveredCard = mapState?.setHoveredCard || (() => {});
   
   // Use UnifiedItinerary context (must be wrapped with UnifiedItineraryProvider)
   const {

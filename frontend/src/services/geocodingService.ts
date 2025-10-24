@@ -1,4 +1,4 @@
-import { MapCoordinates } from '../contexts/MapContext';
+import { MapCoordinates } from '../hooks/useMapState';
 
 export interface GeocodingResult {
   coordinates: MapCoordinates;

@@ -1,30 +1,32 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { LoadingState } from './components/shared/LoadingState';
+
+// Eager load critical components
 import { LandingPage } from './components/LandingPage';
-import { SimplifiedTripWizard } from './components/trip-wizard/SimplifiedTripWizard';
-import { SimplifiedAgentProgress } from './components/agents/SimplifiedAgentProgress';
-import { TravelPlanner } from './components/TravelPlanner';
-import { CostAndCart } from './components/booking/CostAndCart';
-import { Checkout } from './components/booking/Checkout';
-import { BookingConfirmation } from './components/booking/BookingConfirmation';
-import { ShareView } from './components/trip-management/ShareView';
-import { TripDashboard } from './components/trip-management/TripDashboard';
-import { ItineraryWithChat } from './components/ItineraryWithChat';
+import { LoginPage } from './components/LoginPage';
+import { GoogleSignIn } from './components/GoogleSignIn';
+
+// Lazy load heavy components for better initial load performance
+const SimplifiedTripWizard = lazy(() => import('./components/trip-wizard/SimplifiedTripWizard').then(m => ({ default: m.SimplifiedTripWizard })));
+const SimplifiedAgentProgress = lazy(() => import('./components/agents/SimplifiedAgentProgress').then(m => ({ default: m.SimplifiedAgentProgress })));
+const TravelPlanner = lazy(() => import('./components/TravelPlanner').then(m => ({ default: m.TravelPlanner })));
+const CostAndCart = lazy(() => import('./components/booking/CostAndCart').then(m => ({ default: m.CostAndCart })));
+const Checkout = lazy(() => import('./components/booking/Checkout').then(m => ({ default: m.Checkout })));
+const BookingConfirmation = lazy(() => import('./components/booking/BookingConfirmation').then(m => ({ default: m.BookingConfirmation })));
+const ShareView = lazy(() => import('./components/trip-management/ShareView').then(m => ({ default: m.ShareView })));
+const TripDashboard = lazy(() => import('./components/trip-management/TripDashboard').then(m => ({ default: m.TripDashboard })));
+const ItineraryWithChat = lazy(() => import('./components/ItineraryWithChat').then(m => ({ default: m.ItineraryWithChat })));
 import { TripData } from './types/TripData';
 import { useAppStore } from './state/hooks';
 import { useItinerary } from './state/query/hooks';
 import { apiClient } from './services/apiClient';
 import { Routes, Route, useNavigate, useParams, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { MapProvider } from './contexts/MapContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { GoogleSignIn } from './components/GoogleSignIn';
-import { LoginPage } from './components/LoginPage';
 import { GlobalErrorBoundary } from './components/shared/GlobalErrorBoundary';
 import { KeyboardShortcuts } from './components/shared/KeyboardShortcuts';
 import { TripViewLoader } from './components/TripViewLoader';
-import { AppProviders } from './contexts/AppProviders';
 import './i18n'; // Initialize i18n
-import { NormalizedItinerary } from './types/NormalizedItinerary';
 import { NormalizedItinerary } from './types/NormalizedItinerary';
 // Data transformation will be handled by the backend
 
@@ -98,8 +100,9 @@ function RoutedApp() {
   const authenticate = () => setAuthenticated(true);
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
+    <Suspense fallback={<LoadingState variant="fullPage" message="Loading..." />}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={
         <ProtectedRoute requireAuth={false}>
           <LandingPage
@@ -210,7 +213,8 @@ function RoutedApp() {
       <Route path="/itinerary/:id" element={<ItineraryRouteLoader />} />
       <Route path="/itinerary/:id/chat" element={<ItineraryChatRouteLoader />} />
       <Route path="*" element={<div>Not found</div>} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -307,15 +311,11 @@ export default function App() {
   return (
     <GlobalErrorBoundary onError={errorHandler}>
       <AuthProvider>
-        <AppProviders>
-          <MapProvider>
-            <KeyboardShortcuts>
-              <div className="size-full min-h-screen bg-background">
-                <RoutedApp />
-              </div>
-            </KeyboardShortcuts>
-          </MapProvider>
-        </AppProviders>
+        <KeyboardShortcuts>
+          <div className="size-full min-h-screen bg-background">
+            <RoutedApp />
+          </div>
+        </KeyboardShortcuts>
       </AuthProvider>
     </GlobalErrorBoundary>
   );

@@ -8,6 +8,7 @@ import { ChatInterface } from '../../ChatInterface';
 import { TripData } from '../../../types/TripData';
 import type { MapMarker } from '../../../types/MapTypes';
 import MapErrorBoundary from '../MapErrorBoundary';
+import { useMapState } from '../../../hooks/useMapState';
 
 interface MobileMapDetailViewProps {
   tripData: TripData;
@@ -24,6 +25,7 @@ export function MobileMapDetailView({
 }: MobileMapDetailViewProps) {
   const { t } = useTranslation();
   const [activeView, setActiveView] = useState<'map' | 'workflow'>('map');
+  const mapState = useMapState();
 
   const handleSwitch = () => {
     setActiveView(activeView === 'map' ? 'workflow' : 'map');
@@ -87,9 +89,10 @@ export function MobileMapDetailView({
                     location: d.location 
                   }))}
                   onAddPlace={onAddPlace}
+                  mapState={mapState}
                   className="w-full h-full"
-                />
-              </MapErrorBoundary>
+              />
+            </MapErrorBoundary>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-500">
                 <div className="text-center">

@@ -11,7 +11,7 @@ import ReactFlow, {
   MiniMap,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { useMapContext } from '../contexts/MapContext';
+import { useMapState } from '../hooks/useMapState';
 import { validateWorkflowNode } from './workflow/WorkflowUtils';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -66,14 +66,15 @@ const WorkflowBuilderContent: React.FC<WorkflowBuilderProps> = ({
   onCancel,
   embedded = false,
 }) => {
-  // Map context for highlighting associated nodes
+  // Map state for highlighting associated nodes
+  const mapState = useMapState();
   const {
     viewMode,
     selectedNodeId,
     addHighlightedMarker,
     clearHighlightedMarkers,
     setSelectedNode: setMapSelectedNode,
-  } = useMapContext();
+  } = mapState;
 
   // State management
   const {

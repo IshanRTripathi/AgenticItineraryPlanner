@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DestinationsManager } from '../views/DestinationsManager';
 import { DayByDayView } from '../views/DayByDayView';
 import { UnifiedItineraryProvider } from '../../../contexts/UnifiedItineraryContext';
+import { useMapState } from '../../../hooks/useMapState';
 import { TripData } from '../../../types/TripData';
 import { Destination } from '../shared/types';
 
@@ -39,6 +40,7 @@ export function MobilePlanDetailView({
 }: MobilePlanDetailViewProps) {
   const { t } = useTranslation();
   const [activeView, setActiveView] = useState<'destinations' | 'day-by-day'>('destinations');
+  const mapState = useMapState();
 
   const handleSwitch = () => {
     setActiveView(activeView === 'destinations' ? 'day-by-day' : 'destinations');
@@ -126,6 +128,7 @@ export function MobilePlanDetailView({
               tripData={tripData}
               onDaySelect={onDaySelect}
               isCollapsed={false}
+              mapState={mapState}
             />
           </UnifiedItineraryProvider>
         )}

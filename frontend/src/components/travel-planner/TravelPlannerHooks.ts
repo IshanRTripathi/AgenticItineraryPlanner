@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { TripData } from '../../types/TripData';
 import { queryKeys } from '../../state/query/hooks';
 import { TravelPlannerView, PlanTab, Destination, AgentStatus } from './shared/types';
-import { useMapViewMode } from '../../contexts/MapContext';
 
 /**
  * Custom hooks for TravelPlanner
@@ -144,35 +143,21 @@ export function useFreshItineraryCheck(
 
 /**
  * Hook for map view mode switching
+ * DISABLED: Map functionality removed
  */
 export function useMapViewModeSync(
   activeTab: PlanTab,
   showWorkflowBuilder: boolean,
   showChatInterface: boolean
 ) {
-  const { switchToDestinations, switchToDayByDay, switchToWorkflow } = useMapViewMode();
-
-  useEffect(() => {
-    console.log('=== MAP VIEW MODE SWITCHING ===');
-    console.log('Active Tab:', activeTab);
-    console.log('Show Workflow Builder:', showWorkflowBuilder);
-    console.log('Show Chat Interface:', showChatInterface);
-
-    if (showWorkflowBuilder) {
-      console.log('Switching to workflow view mode');
-      switchToWorkflow();
-    } else if (activeTab === 'day-by-day') {
-      console.log('Switching to day-by-day view mode');
-      switchToDayByDay();
-    } else {
-      console.log('Switching to destinations view mode');
-      switchToDestinations();
-    }
-  }, [activeTab, showWorkflowBuilder, showChatInterface, switchToWorkflow, switchToDayByDay, switchToDestinations]);
+  // Map functionality disabled - no-op
+  // const { switchToDestinations, switchToDayByDay, switchToWorkflow } = useMapViewMode();
+  // useEffect(() => { ... }, [activeTab, showWorkflowBuilder, showChatInterface]);
 }
 
 /**
  * Hook for map center handling
+ * DISABLED: Map functionality removed
  */
 export function useMapCenterSync(
   viewMode: string,
@@ -181,42 +166,8 @@ export function useMapCenterSync(
   centerOnFirstDestination: (destinations: Array<{ lat: number; lng: number }>) => void,
   centerOnDayComponent: (dayNumber: number, componentId: string, coordinates: { lat: number; lng: number }) => void
 ) {
-  useEffect(() => {
-    console.log('=== MAP CENTER HANDLING ===');
-    console.log('View Mode:', viewMode);
-    console.log('Destinations:', destinations);
-    console.log('Current Trip Data:', currentTripData);
-
-    if (viewMode === 'destinations' && destinations.length > 0) {
-      console.log('Centering map on first destination');
-      // Convert destinations to simple coordinate array
-      const coords = destinations.map(d => ({ lat: d.lat || 0, lng: d.lng || 0 }));
-      centerOnFirstDestination(coords);
-    } else if (viewMode === 'day-by-day' && currentTripData.itinerary?.days?.length && currentTripData.itinerary.days.length > 0) {
-      console.log('Centering map on first day first component');
-      const firstDay = currentTripData.itinerary.days[0];
-      const firstComponent = firstDay.components?.[0];
-
-      if (firstComponent?.location?.coordinates &&
-        firstComponent.location.coordinates.lat !== null &&
-        firstComponent.location.coordinates.lng !== null) {
-        const coordinates = {
-          lat: firstComponent.location.coordinates.lat,
-          lng: firstComponent.location.coordinates.lng,
-        };
-        centerOnDayComponent(1, firstComponent.id, coordinates);
-      } else if (firstComponent?.location?.address) {
-        // Try to geocode the address
-        import('../../services/geocodingService').then(({ geocodingService }) => {
-          geocodingService.geocodeAddress(firstComponent.location.address).then((result) => {
-            if (result?.coordinates) {
-              centerOnDayComponent(1, firstComponent.id, result.coordinates);
-            }
-          });
-        });
-      }
-    }
-  }, [viewMode, destinations, currentTripData, centerOnFirstDestination, centerOnDayComponent]);
+  // Map functionality disabled - no-op
+  // useEffect(() => { ... }, [viewMode, destinations, currentTripData, centerOnFirstDestination, centerOnDayComponent]);
 }
 
 /**

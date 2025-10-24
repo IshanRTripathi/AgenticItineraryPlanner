@@ -2,8 +2,12 @@ import React, { useEffect, useRef } from 'react'
 import { useGoogleMaps } from '../../hooks/useGoogleMaps'
 import type { TripMapProps } from '../../types/MapTypes'
 import { createRoot, Root } from 'react-dom/client'
-import { useMapContext } from '../../contexts/MapContext'
+import { useMapState } from '../../hooks/useMapState'
 import { PlaceInfoCard } from './cards/PlaceInfoCard'
+
+interface ExtendedTripMapProps extends TripMapProps {
+  mapState?: ReturnType<typeof useMapState>;
+}
 
 export function TripMap({
   nodes,
@@ -12,7 +16,8 @@ export function TripMap({
   onPlaceSelected,
   onMapReady,
   className,
-}: TripMapProps) {
+  mapState,
+}: ExtendedTripMapProps) {
   const { error, api } = useGoogleMaps()
   const {
     center,
@@ -24,7 +29,17 @@ export function TripMap({
     setSelectedNode,
     addHighlightedMarker,
     clearHighlightedMarkers
-  } = useMapContext()
+  } = mapState || {
+    center: null,
+    zoom: 12,
+    highlightedMarkers: [],
+    selectedNodeId: null,
+    setCenter: () => {},
+    setZoom: () => {},
+    setSelectedNode: () => {},
+    addHighlightedMarker: () => {},
+    clearHighlightedMarkers: () => {}
+  }
 
   const mapRef = useRef<HTMLDivElement | null>(null)
   const mapInstanceRef = useRef<any | null>(null)

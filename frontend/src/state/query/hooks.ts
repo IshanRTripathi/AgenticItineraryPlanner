@@ -14,7 +14,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, CreateItineraryRequest } from '../../services/apiClient';
-import { sseManager } from '../../services/sseManager';
+// SSE manager removed - using WebSocket only
+// import { sseManager } from '../../services/sseManager';
 import { logger } from '../../utils/logger';
 
 export const queryKeys = {
@@ -97,13 +98,13 @@ export function useCreateItinerary(retryOptions?: { maxRetries?: number; retryDe
       
       // Establish SSE connection immediately after creation with executionId
       if (response.itinerary.id) {
-        logger.info('Establishing SSE connection after itinerary creation', {
+        logger.info('Real-time updates via WebSocket', {
           component: 'useCreateItinerary',
-          action: 'sse_connect',
+          action: 'websocket_active',
           itineraryId: response.itinerary.id,
           executionId: response.executionId
         });
-        sseManager.connect(response.itinerary.id, response.executionId);
+        // SSE removed - WebSocket handles real-time updates via UnifiedItineraryContext
       }
     },
     onError: (error) => {

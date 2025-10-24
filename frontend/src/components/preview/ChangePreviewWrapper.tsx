@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { usePreviewSettings } from '../../contexts/PreviewSettingsContext';
 import { ChangePreview } from '../ChangePreview';
 import { DiffViewer, DiffSection } from '../diff/DiffViewer';
 import { convertItineraryDiffToSections, createObjectDiff } from '../../utils/diffUtils';
@@ -27,7 +26,16 @@ export function ChangePreviewWrapper({
   onChangeCancelled,
   children,
 }: ChangePreviewWrapperProps) {
-  const { settings } = usePreviewSettings();
+  // Use local state for settings
+  const [settings] = useState(() => {
+    const saved = localStorage.getItem('previewSettings');
+    return saved ? JSON.parse(saved) : {
+      useAdvancedDiff: false,
+      defaultViewMode: 'side-by-side',
+      showUnchanged: false,
+      cachePreferences: true
+    };
+  });
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [pendingChange, setPendingChange] = useState<{
     changeSet: any;

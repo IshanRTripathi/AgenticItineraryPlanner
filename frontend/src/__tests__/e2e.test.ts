@@ -174,8 +174,8 @@ describe('End-to-End User Workflows', () => {
       expect(normalizedItinerary).toBeDefined();
 
       // Step 2: Transform to frontend format
-      const { NormalizedDataTransformer } = await import('../services/normalizedDataTransformer');
-      const frontendData = NormalizedDataTransformer.transformNormalizedItineraryToTripData(normalizedItinerary);
+      const { convertNormalizedToTripData } = await import('../utils/normalizedToTripDataAdapter');
+      const frontendData = convertNormalizedToTripData(normalizedItinerary);
       
       expect(frontendData).toBeDefined();
       expect(frontendData.id).toBe(normalizedItinerary.itineraryId);

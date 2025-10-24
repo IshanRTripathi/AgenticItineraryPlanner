@@ -3,8 +3,7 @@
  * Allows users to configure change preview preferences
  */
 
-import React from 'react';
-import { usePreviewSettings } from '../../contexts/PreviewSettingsContext';
+import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Switch } from '../ui/switch';
@@ -18,7 +17,35 @@ interface PreviewSettingsModalProps {
 }
 
 export function PreviewSettingsModal({ isOpen, onClose }: PreviewSettingsModalProps) {
-  const { settings, updateSettings, resetSettings } = usePreviewSettings();
+  // Local state with localStorage persistence
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('previewSettings');
+    return saved ? JSON.parse(saved) : {
+      useAdvancedDiff: false,
+      defaultViewMode: 'side-by-side',
+      showUnchanged: false,
+      cachePreferences: true
+    };
+  });
+
+  const updateSettings = (updates: Partial<typeof settings>) => {
+    const newSettings = { ...settings, ...updates };
+    setSettings(newSettings);
+    if (newSettings.cachePreferences) {
+      localStorage.setItem('previewSettings', JSON.stringify(newSettings));
+    }
+  };
+
+  const resetSettings = () => {
+    const defaults = {
+      useAdvancedDiff: false,
+      defaultViewMode: 'side-by-side' as const,
+      showUnchanged: false,
+      cachePreferences: true
+    };
+    setSettings(defaults);
+    localStorage.removeItem('previewSettings');
+  };
 
   if (!isOpen) return null;
 

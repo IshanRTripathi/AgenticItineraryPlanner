@@ -17,7 +17,6 @@ import { AutoRefreshEmptyState } from './shared/AutoRefreshEmptyState';
 import { LanguageSelector } from './shared/LanguageSelector';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { MobileLayout } from './travel-planner/mobile/MobileLayout';
-import { useMapContext, useMapViewMode, useMapSelection } from '../contexts/MapContext';
 
 // Import extracted components
 import { NavigationSidebar } from './travel-planner/layout/NavigationSidebar';
@@ -33,6 +32,7 @@ import { DestinationsManager } from './travel-planner/views/DestinationsManager'
 import { WorkflowBuilder } from './WorkflowBuilder';
 import { NewChat } from './chat/NewChat';
 import { UnifiedItineraryProvider } from '../contexts/UnifiedItineraryContext';
+import { useMapState } from '../hooks/useMapState';
 import { TripMap } from './travel-planner/TripMap';
 import type { MapMarker } from '../types/MapTypes';
 import MapErrorBoundary from './travel-planner/MapErrorBoundary';
@@ -89,19 +89,8 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
   // Device detection
   const { isMobile, isTablet } = useDeviceDetection();
 
-  // Map context
-  const {
-    viewMode,
-    setViewMode,
-    center,
-    setCenter,
-    centerOnFirstDestination,
-    centerOnDayComponent,
-    highlightedMarkers,
-    clearHighlightedMarkers
-  } = useMapContext();
-
-  const { selectNode, clearSelection } = useMapSelection();
+  // Map state management
+  const mapState = useMapState();
 
   // Use extracted state management hook
   const state = useTravelPlannerState();
@@ -155,8 +144,9 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
   // TODO: Update these hooks to accept NormalizedItinerary instead of TripData
   useDestinationsSync(currentTripData, setDestinations);
   useFreshItineraryCheck(isLoading, error, currentTripData, itinerary.itineraryId);
-  useMapViewModeSync(activeTab, showWorkflowBuilder, showChatInterface);
-  useMapCenterSync(viewMode, destinations, currentTripData, centerOnFirstDestination, centerOnDayComponent);
+  // Map hooks disabled - map functionality temporarily unavailable
+  // useMapViewModeSync(activeTab, showWorkflowBuilder, showChatInterface);
+  // useMapCenterSync(viewMode, destinations, currentTripData, centerOnFirstDestination, centerOnDayComponent);
   useAgentStatusesSync(currentTripData, setAgentStatuses);
 
   // Use extracted handlers
@@ -322,6 +312,7 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
 
                   refetch();
                 }}
+                mapState={mapState}
               />
             </UnifiedItineraryProvider>
           </TabsContent>
@@ -400,37 +391,38 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
               })() ? (
                 <div className="h-full">
                   {/* TripMap integration with error boundary */}
-                  <MapErrorBoundary
-                    onError={(error) => {
+                    <MapErrorBoundary
+                      onError={(error) => {
 
-                    }}
-                  >
-                    {(() => {
-
-                      return null;
-                    })()}
-                    <TripMap
-                      nodes={mapMarkers}
-                      days={currentItinerary.days.map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
-                      onAddPlace={({ dayId, dayNumber, place }) => {
-                        try {
-                          // Create workflow node if workflow builder is available
-                          if (showWorkflowBuilder) {
-                            const dayIndex = dayNumber - 1; // Convert to 0-based index
-                            const workflowNode = createWorkflowNodeFromPlace(
-                              place,
-                              dayIndex,
-                              { x: 200 + Math.random() * 300, y: 200 + Math.random() * 300 }
-                            );
-                            // TODO: Add the workflow node to the workflow builder
-                          }
-                        } catch (error) {
-                          // Error adding place to itinerary
-                        }
                       }}
-                      className="w-full h-full"
-                    />
-                  </MapErrorBoundary>
+                    >
+                      {(() => {
+
+                        return null;
+                      })()}
+                      <TripMap
+                        nodes={mapMarkers}
+                        days={currentItinerary.days.map((d: any, idx: number) => ({ id: d.id || `day-${idx + 1}`, dayNumber: d.dayNumber || (idx + 1), date: d.date, location: d.location }))}
+                        onAddPlace={({ dayId, dayNumber, place }) => {
+                          try {
+                            // Create workflow node if workflow builder is available
+                            if (showWorkflowBuilder) {
+                              const dayIndex = dayNumber - 1; // Convert to 0-based index
+                              const workflowNode = createWorkflowNodeFromPlace(
+                                place,
+                                dayIndex,
+                                { x: 200 + Math.random() * 300, y: 200 + Math.random() * 300 }
+                              );
+                              // TODO: Add the workflow node to the workflow builder
+                            }
+                          } catch (error) {
+                            // Error adding place to itinerary
+                          }
+                        }}
+                        mapState={mapState}
+                        className="w-full h-full"
+                      />
+                    </MapErrorBoundary>
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-gray-500">

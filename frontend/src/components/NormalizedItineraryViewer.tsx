@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../services/apiClient';
-import { NormalizedDataTransformer } from '../services/normalizedDataTransformer';
+import { convertNormalizedToTripData } from '../utils/normalizedToTripDataAdapter';
 import { NormalizedItinerary, ChangeSet } from '../types/NormalizedItinerary';
 import { TripData } from '../types/TripData';
 
@@ -54,7 +54,7 @@ export const NormalizedItineraryViewer: React.FC<NormalizedItineraryViewerProps>
       const normalized = await apiClient.getItineraryJson(itineraryId);
       setNormalizedItinerary(normalized);
       
-      const transformed = NormalizedDataTransformer.transformNormalizedItineraryToTripData(normalized);
+      const transformed = convertNormalizedToTripData(normalized);
       setTripData(transformed);
       
     } catch (err) {
