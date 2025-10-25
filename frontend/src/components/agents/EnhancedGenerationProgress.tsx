@@ -3,6 +3,7 @@ import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { X, Loader2 } from 'lucide-react';
 import { useProgressWithStages } from '../../hooks/useSmoothProgress';
+import { logger } from '../../utils/logger';
 
 interface EnhancedGenerationProgressProps {
   tripName: string;
@@ -22,9 +23,13 @@ export function EnhancedGenerationProgress({
   // Auto-complete when progress reaches 100
   React.useEffect(() => {
     if (progress >= 100 && onComplete) {
-      console.log('[EnhancedGenerationProgress] Progress reached 100%, triggering completion');
+      logger.info('Progress reached 100%, triggering completion', { 
+        component: 'EnhancedGenerationProgress' 
+      });
       const timer = setTimeout(() => {
-        console.log('[EnhancedGenerationProgress] Calling onComplete callback');
+        logger.info('Calling onComplete callback', { 
+          component: 'EnhancedGenerationProgress' 
+        });
         onComplete();
       }, 1000); // Give user 1 second to see 100%
       return () => clearTimeout(timer);

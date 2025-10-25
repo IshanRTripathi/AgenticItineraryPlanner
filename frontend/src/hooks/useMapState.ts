@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { logger } from '../utils/logger';
 
 export interface MapCoordinates {
   lat: number;
@@ -25,7 +26,12 @@ export function useMapState() {
     componentId: string,
     coordinates: MapCoordinates
   ) => {
-    console.log('[useMapState] Centering on component', { dayNumber, componentId, coordinates });
+    logger.debug('Centering on component', { 
+      component: 'useMapState',
+      dayNumber, 
+      componentId, 
+      coordinates 
+    });
     setCenter(coordinates);
     setZoom(15);
     setSelectedNode(componentId);

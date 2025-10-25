@@ -3,7 +3,7 @@ import { NormalizedDay, NormalizedNode } from '../types/NormalizedItinerary';
 import { ChatRequest } from '../types/ChatTypes';
 import { itineraryApi } from '../services/api';
 import { webSocketService } from '../services/websocket';
-import { logInfo, logError, logWarn, logDebug, startTimer } from '../utils/logger';
+import { logger, logInfo, logError, logWarn, logDebug, startTimer } from '../utils/logger';
 import { 
   UnifiedItineraryState,
   UnifiedItineraryAction,
@@ -185,22 +185,34 @@ export const createRemoveNode = (
   dispatch: Dispatch<UnifiedItineraryAction>
 ) => {
   return (dayIndex: number, nodeIndex: number) => {
-    console.log('🔄 UnifiedItineraryContext.removeNode called:', { dayIndex, nodeIndex });
+    logger.debug('removeNode called', { 
+      component: 'UnifiedItineraryContext',
+      dayIndex, 
+      nodeIndex 
+    });
     
     if (!state.itinerary?.itinerary?.days) {
-      console.error('❌ No itinerary days data found');
+      logger.error('No itinerary days data found', { 
+        component: 'UnifiedItineraryContext' 
+      });
       return;
     }
     
     const day = state.itinerary.itinerary.days[dayIndex];
     if (!day) {
-      console.error('❌ Day not found at index:', dayIndex);
+      logger.error('Day not found at index', { 
+        component: 'UnifiedItineraryContext',
+        dayIndex 
+      });
       return;
     }
     
     const component = day.components[nodeIndex];
     if (component) {
-      console.log('✅ Component found, dispatching REMOVE_NODE action');
+      logger.debug('Component found, dispatching REMOVE_NODE action', { 
+        component: 'UnifiedItineraryContext',
+        componentId: component.id 
+      });
       dispatch({ type: 'REMOVE_NODE', payload: { dayIndex, nodeIndex } });
       dispatch({ type: 'ADD_PENDING_CHANGE', payload: {
         id: `remove_node_${dayIndex}_${nodeIndex}_${Date.now()}`,
@@ -211,9 +223,15 @@ export const createRemoveNode = (
         timestamp: new Date(),
         data: component
       }});
-      console.log('✅ REMOVE_NODE action dispatched successfully');
+      logger.debug('REMOVE_NODE action dispatched successfully', { 
+        component: 'UnifiedItineraryContext' 
+      });
     } else {
-      console.error('❌ Component not found at dayIndex:', dayIndex, 'nodeIndex:', nodeIndex);
+      logger.error('Component not found', { 
+        component: 'UnifiedItineraryContext',
+        dayIndex, 
+        nodeIndex 
+      });
     }
   };
 };

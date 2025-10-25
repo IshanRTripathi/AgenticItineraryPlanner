@@ -4,6 +4,7 @@ import { WorkflowDay, WorkflowNodeData } from './WorkflowBuilderTypes';
 import { TripData } from '../../types/TripData';
 import { createWorkflowDaysFromTripData, calculateOptimalZoom, getGridPosition } from './WorkflowBuilderHelpers';
 import { userChangeTracker } from '../../services/userChangeTracker';
+import { logger } from '../../utils/logger';
 
 /**
  * Hook to subscribe to user changes
@@ -77,7 +78,8 @@ export const useActiveDaySync = (
 ) => {
   useEffect(() => {
     if (currentDay) {
-      console.log(`📅 SWITCHING TO DAY ${activeDay + 1}:`, {
+      logger.debug(`Switching to day ${activeDay + 1}`, {
+        component: 'WorkflowBuilderHooks',
         dayNumber: currentDay.day,
         nodeCount: currentDay.nodes.length,
         nodePositions: currentDay.nodes.map((n) => ({
@@ -140,16 +142,23 @@ export const useMapViewModeSync = (
 ) => {
   useEffect(() => {
     if (viewMode === 'workflow' && selectedNodeId) {
-      console.log('=== WORKFLOW VIEW MODE SYNC ===');
-      console.log('Selected Node ID from map:', selectedNodeId);
+      logger.debug('Workflow view mode sync', {
+        component: 'WorkflowBuilderHooks',
+        selectedNodeId
+      });
 
       // Find the node in the current day's nodes
       const node = currentDay?.nodes.find((n) => n.id === selectedNodeId);
       if (node) {
-        console.log('Found node in workflow, selecting it:', node);
+        logger.debug('Found node in workflow, selecting it', {
+          component: 'WorkflowBuilderHooks',
+          nodeId: node.id
+        });
         setSelectedNode(node);
       } else {
-        console.log('Node not found in current day, clearing selection');
+        logger.debug('Node not found in current day, clearing selection', {
+          component: 'WorkflowBuilderHooks'
+        });
         setSelectedNode(null);
       }
     }

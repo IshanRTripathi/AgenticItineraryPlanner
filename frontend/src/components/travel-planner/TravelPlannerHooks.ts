@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { TripData } from '../../types/TripData';
 import { queryKeys } from '../../state/query/hooks';
 import { TravelPlannerView, PlanTab, Destination, AgentStatus } from './shared/types';
+import { logger } from '../../utils/logger';
 
 /**
  * Custom hooks for TravelPlanner

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { logger } from '../utils/logger';
 
 interface UseFormSubmissionOptions {
   debounceMs?: number;
@@ -32,7 +33,9 @@ export function useFormSubmission<T = any>({
     
     // Prevent multiple submissions within the debounce period
     if (isSubmitting || (now - lastSubmissionTime.current < debounceMs)) {
-      console.log('Form submission blocked - too soon or already submitting');
+      logger.debug('Form submission blocked - too soon or already submitting', { 
+        component: 'useFormSubmission' 
+      });
       return null;
     }
 

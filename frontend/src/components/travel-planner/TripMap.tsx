@@ -4,6 +4,7 @@ import type { TripMapProps } from '../../types/MapTypes'
 import { createRoot, Root } from 'react-dom/client'
 import { useMapState } from '../../hooks/useMapState'
 import { PlaceInfoCard } from './cards/PlaceInfoCard'
+import { logger } from '../../utils/logger'
 
 interface ExtendedTripMapProps extends TripMapProps {
   mapState?: ReturnType<typeof useMapState>;
@@ -85,7 +86,13 @@ export function TripMap({
         else if (maxSpread < 1) initialZoom = 7
         else initialZoom = 5
 
-        console.log('[TripMap] Calculated initial view:', { initialCenter, initialZoom, nodeCount: validNodes.length, maxSpread })
+        logger.debug('Calculated initial view', { 
+          component: 'TripMap',
+          initialCenter, 
+          initialZoom, 
+          nodeCount: validNodes.length, 
+          maxSpread 
+        });
       }
     }
 
@@ -273,11 +280,12 @@ export function TripMap({
     const map = mapInstanceRef.current
     if (!api || !map) return
 
-    console.log('[TripMap] Updating markers:', {
+    logger.debug('Updating markers', {
+      component: 'TripMap',
       totalNodes: nodes.length,
       highlightedMarkers,
       selectedNodeId
-    })
+    });
 
     // Clear existing markers
     const existingMarkers = map.markers || []
@@ -296,11 +304,12 @@ export function TripMap({
         isNaN(node.position.lat) ||
         isNaN(node.position.lng)) {
         skippedNodes++
-        console.debug('[TripMap] Skipping node without valid position:', {
+        logger.debug('Skipping node without valid position', {
+          component: 'TripMap',
           nodeId: node.id,
           nodeTitle: node.title,
           position: node.position
-        })
+        });
         return
       }
 
@@ -333,7 +342,7 @@ export function TripMap({
 
       // Add click listener
       marker.addListener('click', () => {
-        console.log('[TripMap] Marker clicked:', node.id)
+        logger.debug('Marker clicked', { component: 'TripMap', nodeId: node.id });
 
         // Update map context
         setCenter(node.position)
@@ -359,11 +368,12 @@ export function TripMap({
     // Store marker references
     map.markers = createdMarkers
 
-    console.log('[TripMap] Markers created:', {
+    logger.debug('Markers created', {
+      component: 'TripMap',
       created: createdMarkers.length,
       skipped: skippedNodes,
       total: nodes.length
-    })
+    });
 
     // Fit bounds to show all markers if we have multiple markers and no specific center set
     if (createdMarkers.length > 1 && !center) {
@@ -377,9 +387,14 @@ export function TripMap({
       const padding = { top: 50, right: 50, bottom: 50, left: 50 }
       map.fitBounds(bounds, padding)
 
-      console.log('[TripMap] Fitted bounds to show all', createdMarkers.length, 'markers')
+      logger.debug('Fitted bounds to show all markers', { 
+        component: 'TripMap',
+        markerCount: createdMarkers.length 
+      });
     } else if (createdMarkers.length === 0) {
-      console.warn('[TripMap] No markers to display. Locations may need enrichment.')
+      logger.warn('No markers to display. Locations may need enrichment.', { 
+        component: 'TripMap' 
+      });
     }
   }, [api, nodes, highlightedMarkers, selectedNodeId, center, setCenter, setZoom, setSelectedNode, addHighlightedMarker, clearHighlightedMarkers, onPlaceSelected])
 

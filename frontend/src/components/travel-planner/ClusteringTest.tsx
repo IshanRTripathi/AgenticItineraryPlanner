@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { TripMap } from './TripMap';
 import type { MapMarker } from '../../types/MapTypes';
+import { logger } from '../../utils/logger';
 
 // Test component to verify marker clustering works
 export const ClusteringTest: React.FC = () => {
@@ -36,7 +37,7 @@ export const ClusteringTest: React.FC = () => {
   }, [markerCount]);
 
   const handleMarkerClick = (nodeId: string) => {
-    console.log('Marker clicked:', nodeId);
+    logger.debug('Marker clicked', { component: 'ClusteringTest', nodeId });
   };
 
   return (

@@ -3,6 +3,7 @@ import { Node } from 'reactflow';
 import { WorkflowDay, WorkflowNodeData } from './WorkflowBuilderTypes';
 import { TripData } from '../../types/TripData';
 import { createWorkflowDaysFromTripData, createSeedData } from './WorkflowBuilderHelpers';
+import { logger } from '../../utils/logger';
 
 /**
  * Custom hook for managing WorkflowBuilder state
@@ -38,7 +39,8 @@ export const useWorkflowBuilderState = (tripData: TripData) => {
   const savePositions = useCallback(
     (positions: Record<string, { x: number; y: number }>) => {
       try {
-        console.log(`💾 SAVING POSITIONS:`, {
+        logger.debug('Saving positions', {
+          component: 'WorkflowBuilderState',
           tripId: tripData.id,
           positionCount: Object.keys(positions).length,
           positions: Object.entries(positions).map(([nodeId, pos]) => ({

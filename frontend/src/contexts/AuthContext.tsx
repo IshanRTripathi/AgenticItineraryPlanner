@@ -9,6 +9,7 @@ import { apiClient } from '../services/apiClient';
 import { itineraryApi } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../state/query/hooks';
+import { logger } from '../utils/logger';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -35,7 +36,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
       setUser(user);
       setLoading(false);
-      console.log('[AuthContext] Auth state changed:', user ? `User: ${user.email}` : 'No user');
+      logger.info('Auth state changed', {
+        component: 'AuthContext',
+        hasUser: !!user,
+        userEmail: user?.email
+      });
 
       // Set or clear auth token in API clients
       if (user) {
@@ -44,19 +49,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (token) {
             apiClient.setAuthToken(token);
             itineraryApi.setAuthToken(token);
-            console.log('[AuthContext] Auth token set for API requests');
+            logger.info('Auth token set for API requests', {
+              component: 'AuthContext'
+            });
 
             // Queries will be enabled automatically when components re-render with user state
           }
         } catch (error) {
-          console.error('[AuthContext] Failed to get ID token:', error);
+          logger.error('Failed to get ID token', {
+            component: 'AuthContext'
+          }, error as Error);
           apiClient.clearAuthToken();
           itineraryApi.setAuthToken(null);
         }
       } else {
         apiClient.clearAuthToken();
         itineraryApi.setAuthToken(null);
-        console.log('[AuthContext] Auth token cleared');
+        logger.info('Auth token cleared', {
+          component: 'AuthContext'
+        });
 
         // Clear authenticated data
         queryClient.removeQueries({ queryKey: queryKeys.itineraries });
@@ -75,17 +86,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // This gives us a 10-minute buffer before expiration
     const refreshInterval = setInterval(async () => {
       try {
-        console.log('[AuthContext] Proactively refreshing token...');
+        logger.info('Proactively refreshing token', {
+          component: 'AuthContext'
+        });
         const newToken = await authService.getIdTokenForceRefresh();
         if (newToken) {
           apiClient.setAuthToken(newToken);
           itineraryApi.setAuthToken(newToken);
-          console.log('[AuthContext] Token refreshed proactively at', new Date().toISOString());
+          logger.info('Token refreshed proactively at ' + new Date().toISOString(), {
+            component: 'AuthContext'
+          });
         } else {
-          console.error('[AuthContext] Failed to get refreshed token');
+          logger.error('Failed to get refreshed token', {
+            component: 'AuthContext'
+          });
         }
       } catch (error) {
-        console.error('[AuthContext] Failed to refresh token proactively:', error);
+        logger.error('Failed to refresh token proactively', {
+          component: 'AuthContext'
+        }, error as Error);
       }
     }, 24 * 60 * 60 * 1000); // 1 day
 
@@ -96,10 +115,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (newToken) {
           apiClient.setAuthToken(newToken);
           itineraryApi.setAuthToken(newToken);
-          console.log('[AuthContext] Token refreshed on mount');
+          logger.info('Token refreshed on mount', {
+            component: 'AuthContext'
+          });
         }
       } catch (error) {
-        console.error('[AuthContext] Failed to refresh token on mount:', error);
+        logger.error('Failed to refresh token on mount', {
+          component: 'AuthContext'
+        }, error as Error);
       }
     };
     refreshImmediately();

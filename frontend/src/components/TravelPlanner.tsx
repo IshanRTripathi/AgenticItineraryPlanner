@@ -182,14 +182,20 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
       <SimplifiedAgentProgress
         tripData={currentTripData}
         onComplete={async () => {
-          console.log('[TravelPlanner] Progress onComplete called');
+          logger.info('Progress onComplete called', { component: 'TravelPlanner' });
           setShowProgressModal(false);
 
           // Fetch the completed itinerary
           try {
-            console.log('[TravelPlanner] Fetching completed itinerary');
+            logger.info('Fetching completed itinerary', { 
+              component: 'TravelPlanner',
+              itineraryId: currentItinerary.itineraryId 
+            });
             const completedItinerary = await apiClient.getItinerary(currentItinerary.itineraryId);
-            console.log('[TravelPlanner] Completed itinerary fetched:', completedItinerary);
+            logger.info('Completed itinerary fetched', { 
+              component: 'TravelPlanner',
+              itineraryId: completedItinerary.itineraryId 
+            });
 
             // Update query cache
             queryClient.setQueryData(
@@ -199,9 +205,12 @@ function TravelPlannerComponent({ itinerary, onSave, onBack, onShare, onExportPD
 
             // Force a refetch to ensure UI updates
             await refetch();
-            console.log('[TravelPlanner] Refetch complete, should show planner now');
+            logger.info('Refetch complete, showing planner', { component: 'TravelPlanner' });
           } catch (error) {
-            console.error('[TravelPlanner] Error fetching completed itinerary:', error);
+            logger.error('Error fetching completed itinerary', { 
+              component: 'TravelPlanner',
+              itineraryId: currentItinerary.itineraryId 
+            }, error as Error);
             refetch();
           }
         }}

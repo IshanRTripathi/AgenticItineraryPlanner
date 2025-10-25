@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react';
 import { apiClient } from '../services/apiClient';
 import { PreviewCache } from '../components/preview/PreviewCache';
 import { ItineraryDiff } from '../types/ChatTypes';
+import { logger } from '../utils/logger';
 
 interface UseChangePreviewOptions {
   itineraryId: string;
@@ -26,7 +27,9 @@ export function useChangePreview({ itineraryId, onSuccess, onError }: UseChangeP
       // Check cache first
       const cached = PreviewCache.get(changeSet);
       if (cached) {
-        console.log('Using cached preview');
+        logger.debug('Using cached preview', { 
+          component: 'useChangePreview' 
+        });
         return cached;
       }
 

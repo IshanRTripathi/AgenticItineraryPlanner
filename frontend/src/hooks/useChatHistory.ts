@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../services/apiClient';
+import { logger } from '../utils/logger';
 
 interface ChatMessage {
   id: string;
@@ -47,7 +48,10 @@ export const useChatHistory = (itineraryId: string): UseChatHistoryReturn => {
       setLoading(true);
       setError(null);
       // Placeholder - API method needs to be implemented
-      console.log('Clear chat history:', itineraryId);
+      logger.info('Clear chat history', { 
+        component: 'useChatHistory',
+        itineraryId 
+      });
       setMessages([]);
     } catch (err: any) {
       setError(err.message || 'Failed to clear chat history');

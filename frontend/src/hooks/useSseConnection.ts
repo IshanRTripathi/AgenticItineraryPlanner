@@ -5,6 +5,7 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { sseManager, ChangeEvent, SseManagerOptions } from '../services/sseManager';
+import { logger } from '../utils/logger';
 
 interface UseSseConnectionOptions extends Omit<SseManagerOptions, 'onConnect' | 'onDisconnect'> {
   enabled?: boolean;
@@ -34,11 +35,11 @@ export function useSseConnection(
       executionId,
       onConnect: () => {
         setIsConnected(true);
-        console.log('[useSseConnection] Connected');
+        logger.info('SSE Connected', { component: 'useSseConnection' });
       },
       onDisconnect: () => {
         setIsConnected(false);
-        console.log('[useSseConnection] Disconnected');
+        logger.info('SSE Disconnected', { component: 'useSseConnection' });
       },
     });
 
@@ -109,7 +110,10 @@ export function useOptimisticUpdates(
 ): UseSseConnectionReturn {
   const handleChangeEvent = useCallback((event: ChangeEvent) => {
     if (event.type === 'patch_applied' || event.type === 'version_updated') {
-      console.log('[useOptimisticUpdates] Applying update:', event);
+      logger.debug('Applying update', { 
+        component: 'useOptimisticUpdates',
+        eventType: event.type 
+      });
       onUpdate(event.data);
     }
   }, [onUpdate]);

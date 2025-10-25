@@ -168,7 +168,7 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
   
   // Use with optional chaining since map might not be available
   const centerOnDayComponent = mapState?.centerOnDayComponent || (() => {
-    console.log('[DayByDayView] Map not available');
+    logger.debug('Map not available', { component: 'DayByDayView' });
   });
   const setHoveredCard = mapState?.setHoveredCard || (() => {});
   
@@ -313,7 +313,8 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
 
   const handleCardClick = async (component: any, dayNumber: number) => {
     try {
-      console.log('[DayByDayView] Card clicked:', {
+      logger.debug('Card clicked', {
+        component: 'DayByDayView',
         componentId: component.id,
         componentName: component.name,
         hasLocation: !!component.location,
@@ -323,20 +324,23 @@ export function DayByDayView({ tripData, onDaySelect, isCollapsed = false, onRef
 
       let coordinates = await geocodingUtils.getCoordinatesForComponent(component);
       
-      console.log('[DayByDayView] Coordinates result:', {
+      logger.debug('Coordinates result', {
+        component: 'DayByDayView',
         coordinates,
         hasCoordinates: !!coordinates
       });
 
       if (coordinates) {
-        console.log('[DayByDayView] ✅ Centering map on component:', {
+        logger.debug('Centering map on component', {
+          component: 'DayByDayView',
           dayNumber,
           componentId: component.id,
           coordinates
         });
         centerOnDayComponent(dayNumber, component.id, coordinates);
       } else {
-        console.warn('[DayByDayView] ⚠️ No coordinates available - locations need enrichment', {
+        logger.warn('No coordinates available - locations need enrichment', {
+          component: 'DayByDayView',
           componentId: component.id,
           componentName: component.name,
           locationName: component.location?.name,
