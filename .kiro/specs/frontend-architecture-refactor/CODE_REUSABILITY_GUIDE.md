@@ -228,7 +228,7 @@ const { destinations, updateDestination } = useDestinations();
 
 ## 📊 Current Reusable Modules
 
-### Hooks (18 total)
+### Hooks (22 total)
 
 **UnifiedItinerary Hooks:**
 - `useUnifiedItinerary()` - Context hook
@@ -254,7 +254,13 @@ const { destinations, updateDestination } = useDestinations();
 - `useNodePositionTracking()` - Node position tracking
 - `useClearBadPositions()` - Position cleanup
 
-### Helpers (12 total)
+**NormalizedItinerary Hooks (NEW - Phase 2):**
+- `useNormalizedItinerary()` - Main hook with accessors and computed values
+- `useNormalizedDay()` - Day-specific hook with filtered nodes
+- `useItineraryStatistics()` - Statistics hook
+- `useNodesByType()` - Node filtering hook
+
+### Helpers (42 total)
 
 **TravelPlanner Helpers:**
 - `createDestinationHandlers()` - Destination CRUD
@@ -271,6 +277,42 @@ const { destinations, updateDestination } = useDestinations();
 - `createSeedData()` - Fallback data
 - `createNodeHandlers()` - Node event handlers
 - `createWorkflowActionHandlers()` - Workflow actions
+
+**ItineraryAdapter Helpers (NEW - Phase 2):**
+- `getId()` - Get itinerary ID
+- `getDateRange()` - Get date range
+- `getDuration()` - Get duration in days
+- `getTotalCost()` - Calculate total cost
+- `getDayCost()` - Get day cost
+- `getTotalDistance()` - Calculate total distance
+- `getDayDistance()` - Get day distance
+- `getDayById()` - Get day by ID
+- `getDayByNumber()` - Get day by number
+- `getSortedDays()` - Get sorted days
+- `getNodeById()` - Get node by ID
+- `getNodesByType()` - Get nodes by type
+- `getMealNodes()` - Get meal nodes
+- `getAccommodationNode()` - Get accommodation node
+- `getAttractionNodes()` - Get attraction nodes
+- `getLockedNodes()` - Get locked nodes
+- `getComponentType()` - Convert node type
+- `getPriceRange()` - Get price range
+- `millisecondsToTimeString()` - Convert time
+- `timeStringToMilliseconds()` - Convert time
+- `hasDays()` - Check if has days
+- `hasNodes()` - Check if has nodes
+- `hasValidCoordinates()` - Check coordinates
+- `findNodeById()` - Find node across days
+- `getAllNodes()` - Get all nodes
+- `getAllNodesByType()` - Get all nodes by type
+- `getUniqueLocations()` - Get unique locations
+- `getStatistics()` - Get statistics
+
+**TypeGuard Helpers (NEW - Phase 2):**
+- `isNormalizedItinerary()` - Check format
+- `isTripData()` - Check legacy format
+- `getItineraryFormat()` - Get format type
+- `isValidItineraryFormat()` - Validate format
 
 ### Components (5 total)
 - `LoadingState` - Loading indicators (4 variants)

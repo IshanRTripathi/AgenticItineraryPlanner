@@ -1,185 +1,31 @@
-2025-10-20 15:55:18.043 [main] INFO  com.tripplanner.App - Starting App using Java 17.0.15 with PID 20496 (C:\Users\rites\Documents\AgenticItineraryPlanner\build\classes\java\main started by rites in C:\Users\rites\Documents\AgenticItineraryPlanner)
-2025-10-20 15:55:18.064 [main] INFO  com.tripplanner.App - No active profile set, falling back to 1 default profile: "default"
-2025-10-20 15:55:22.208 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
-2025-10-20 15:55:22.244 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-10-20 15:55:22.245 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.44]
-2025-10-20 15:55:22.477 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-10-20 15:55:22.478 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4294 ms
-2025-10-20 15:55:22.743 [main] INFO  com.tripplanner.config.FirestoreConfig - Firebase initialized for project: tripaiplanner-4c951
-2025-10-20 15:55:22.973 [main] DEBUG o.springframework.web.filter.ForwardedHeaderFilter - Filter 'forwardedHeaderFilter' configured for use
-2025-10-20 15:55:23.029 [main] INFO  com.tripplanner.config.AiClientConfig - === AI CLIENT CONFIGURATION ===
-2025-10-20 15:55:23.030 [main] INFO  com.tripplanner.config.AiClientConfig - AI provider: gemini
-2025-10-20 15:55:23.030 [main] INFO  com.tripplanner.config.AiClientConfig - OpenRouter API key configured: false
-2025-10-20 15:55:23.030 [main] INFO  com.tripplanner.config.AiClientConfig - Gemini API key configured: false
-2025-10-20 15:55:23.484 [main] INFO  c.tripplanner.service.openrouter.OpenRouterClient - Initialized OpenRouter client with model: qwen/qwen-2.5-72b-instruct:free | apiKey=MISSING
-2025-10-20 15:55:23.491 [main] INFO  com.tripplanner.service.GeminiClient - Initializing Gemini client with model: gemini-2.5-flash
-2025-10-20 15:55:23.495 [main] INFO  com.tripplanner.service.GeminiClient - Gemini client initialized successfully with 150s request timeout
-2025-10-20 15:55:23.496 [main] INFO  com.tripplanner.config.AiClientConfig - OpenRouter client available: false
-2025-10-20 15:55:23.497 [main] INFO  com.tripplanner.config.AiClientConfig - Gemini client available: true
-2025-10-20 15:55:23.497 [main] INFO  com.tripplanner.config.AiClientConfig - Creating ResilientAiClient with Gemini as primary, OpenRouter as fallback
-2025-10-20 15:55:23.497 [main] INFO  com.tripplanner.config.AiClientConfig - Creating ResilientAiClient with 2 providers
-2025-10-20 15:55:23.503 [main] INFO  com.tripplanner.service.ai.ResilientAiClient - ResilientAiClient initialized with 2 providers
-2025-10-20 15:55:23.504 [main] INFO  com.tripplanner.service.ai.ResilientAiClient -   Provider 1: GeminiClient (available: true)
-2025-10-20 15:55:23.504 [main] INFO  com.tripplanner.service.ai.ResilientAiClient -   Provider 2: OpenRouterClient (available: false)
-2025-10-20 15:55:23.504 [main] INFO  com.tripplanner.config.AiClientConfig - ResilientAiClient created successfully
-2025-10-20 15:55:23.694 [main] INFO  com.tripplanner.config.FirestoreConfig - Firestore project ID set to: tripaiplanner-4c951
-2025-10-20 15:55:23.701 [main] INFO  com.tripplanner.config.FirestoreConfig - Configured Firestore credentials from firestore_credentials.json
-2025-10-20 15:55:25.919 [main] INFO  com.tripplanner.config.FirestoreConfig - Firestore initialized for project: tripaiplanner-4c951 (emulator: false)
-2025-10-20 15:55:26.271 [main] INFO  com.tripplanner.service.AgentRegistry - === AGENT REGISTRY INITIALIZATION ===
-2025-10-20 15:55:26.272 [main] INFO  com.tripplanner.service.AgentRegistry - Found 11 agents to register
-2025-10-20 15:55:26.275 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: activityagent -> ActivityAgent with capabilities: [populate_attractions]
-2025-10-20 15:55:26.276 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: bookingagent -> BookingAgent with capabilities: [book]
-2025-10-20 15:55:26.276 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: costestimatoragent -> CostEstimatorAgent with capabilities: [estimate_costs]
-2025-10-20 15:55:26.277 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: daybydayplanneragent -> DayByDayPlannerAgent with capabilities: [plan]
-2025-10-20 15:55:26.277 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: editoragent -> EditorAgent with capabilities: [edit]
-2025-10-20 15:55:26.278 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: enrichmentagent -> EnrichmentAgent with capabilities: [enrich]
-2025-10-20 15:55:26.278 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: explainagent -> ExplainAgent with capabilities: [explain]
-2025-10-20 15:55:26.278 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: mealagent -> MealAgent with capabilities: [populate_meals]
-2025-10-20 15:55:26.278 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: placesagent -> PlacesAgent with capabilities: [search]
-2025-10-20 15:55:26.279 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: skeletonplanneragent -> SkeletonPlannerAgent with capabilities: [skeleton]
-2025-10-20 15:55:26.279 [main] INFO  com.tripplanner.service.AgentRegistry - Registered agent: transportagent -> TransportAgent with capabilities: [populate_transport]
-2025-10-20 15:55:26.279 [main] INFO  com.tripplanner.service.AgentRegistry - Total registered agents: 11
-2025-10-20 15:55:26.279 [main] INFO  com.tripplanner.service.AgentRegistry - =====================================
-2025-10-20 15:55:26.296 [main] INFO  com.tripplanner.service.AiClientLLMProvider - Initialized AiClientLLMProvider with AI client: ResilientAiClient [Model: gemini-2.5-flash, Temperature: 0.70, Max Tokens: 65535, Provider: OpenRouter, Model: qwen/qwen-2.5-72b-instruct:free, Temperature: 0.70, Max Tokens: 8192]
-2025-10-20 15:55:26.298 [main] INFO  com.tripplanner.service.GeminiLLMProvider - Initialized GeminiLLMProvider with AI client: ResilientAiClient [Model: gemini-2.5-flash, Temperature: 0.70, Max Tokens: 65535, Provider: OpenRouter, Model: qwen/qwen-2.5-72b-instruct:free, Temperature: 0.70, Max Tokens: 8192]
-2025-10-20 15:55:26.300 [main] INFO  com.tripplanner.service.LLMService - Registered LLM provider: ai-client
-2025-10-20 15:55:26.300 [main] INFO  com.tripplanner.service.LLMService - Registered LLM provider: gemini
-2025-10-20 15:55:26.300 [main] INFO  com.tripplanner.service.LLMService - LLMService initialized with 2 providers
-2025-10-20 15:55:26.353 [main] INFO  com.tripplanner.config.WebSocketConfig - === WEBSOCKET CONFIG: CREATING DEDICATED TASK EXECUTOR ===
-2025-10-20 15:55:26.359 [main] INFO  com.tripplanner.config.WebSocketConfig - WebSocket TaskExecutor configured:
-2025-10-20 15:55:26.360 [main] INFO  com.tripplanner.config.WebSocketConfig -   Core Pool Size: 2
-2025-10-20 15:55:26.360 [main] INFO  com.tripplanner.config.WebSocketConfig -   Max Pool Size: 10
-2025-10-20 15:55:26.360 [main] INFO  com.tripplanner.config.WebSocketConfig -   Queue Capacity: 50
-2025-10-20 15:55:26.360 [main] INFO  com.tripplanner.config.WebSocketConfig -   Thread Name Prefix: WebSocket-
-2025-10-20 15:55:26.395 [main] INFO  com.tripplanner.config.WebSocketConfig - === WEBSOCKET CONFIG: CONFIGURING MESSAGE BROKER ===
-2025-10-20 15:55:26.397 [main] INFO  com.tripplanner.config.WebSocketConfig - Message broker configured successfully
-2025-10-20 15:55:26.482 [main] INFO  com.tripplanner.config.AsyncConfig - === ASYNC CONFIG: CREATING PRIMARY TASK EXECUTOR ===
-2025-10-20 15:55:26.482 [main] INFO  com.tripplanner.config.AsyncConfig - Primary TaskExecutor configured:
-2025-10-20 15:55:26.482 [main] INFO  com.tripplanner.config.AsyncConfig -   Core Pool Size: 5
-2025-10-20 15:55:26.483 [main] INFO  com.tripplanner.config.AsyncConfig -   Max Pool Size: 20
-2025-10-20 15:55:26.483 [main] INFO  com.tripplanner.config.AsyncConfig -   Queue Capacity: 100
-2025-10-20 15:55:26.483 [main] INFO  com.tripplanner.config.AsyncConfig -   Thread Name Prefix: AsyncTask-
-2025-10-20 15:55:26.483 [main] INFO  com.tripplanner.config.AsyncConfig -   Keep Alive Seconds: 60
-2025-10-20 15:55:26.723 [main] INFO  com.tripplanner.config.WebSocketConfig - === WEBSOCKET CONFIG: REGISTERING STOMP ENDPOINTS ===
-2025-10-20 15:55:26.735 [main] INFO  com.tripplanner.config.WebSocketConfig - STOMP endpoints registered successfully
-2025-10-20 15:55:26.800 [main] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Patterns [/ws/**] in 'stompWebSocketHandlerMapping'
-2025-10-20 15:55:27.052 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - 42 mappings in 'requestMappingHandlerMapping'
-2025-10-20 15:55:27.150 [main] DEBUG o.s.web.servlet.handler.SimpleUrlHandlerMapping - Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
-2025-10-20 15:55:27.235 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
-2025-10-20 15:55:27.494 [main] DEBUG o.s.security.web.DefaultSecurityFilterChain - Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, ExceptionTranslationFilter, AuthorizationFilter
-2025-10-20 15:55:27.645 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.AgentController:
-	
-2025-10-20 15:55:27.646 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.ChatController:
-	
-2025-10-20 15:55:27.646 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.DocumentationController:
-	
-2025-10-20 15:55:27.646 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.HealthController:
-	
-2025-10-20 15:55:27.647 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.ItinerariesController:
-	
-2025-10-20 15:55:27.647 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.PingController:
-	
-2025-10-20 15:55:27.647 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.ToolsController:
-	
-2025-10-20 15:55:27.655 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	c.t.c.WebSocketController:
-	{[MESSAGE],[/chat]}: handleChatMessage(Map)
-	{[SUBSCRIBE],[/topic/itinerary/{itineraryId}]}: handleSubscription(String)
-	{[MESSAGE],[/itinerary/{itineraryId}]}: handleItineraryUpdate(String,Map)
-2025-10-20 15:55:27.657 [main] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - 
-	o.s.b.a.w.s.e.BasicErrorController:
-	
-2025-10-20 15:55:27.835 [main] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerAdapter - ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-10-20 15:55:27.981 [main] DEBUG o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-10-20 15:55:28.377 [main] DEBUG org.springframework.web.SimpLogging - clientOutboundChannel added SubProtocolWebSocketHandler[StompSubProtocolHandler[v10.stomp, v11.stomp, v12.stomp]]
-2025-10-20 15:55:28.378 [main] DEBUG org.springframework.web.SimpLogging - clientInboundChannel added WebSocketAnnotationMethodMessageHandler[prefixes=[/app/]]
-2025-10-20 15:55:28.379 [main] INFO  o.s.m.simp.broker.SimpleBrokerMessageHandler - Starting...
-2025-10-20 15:55:28.380 [main] DEBUG org.springframework.web.SimpLogging - clientInboundChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1dce481b]
-2025-10-20 15:55:28.380 [main] DEBUG org.springframework.web.SimpLogging - brokerChannel added SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1dce481b]
-2025-10-20 15:55:28.381 [main] INFO  o.s.m.simp.broker.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@1dce481b]]
-2025-10-20 15:55:28.383 [main] INFO  o.s.m.simp.broker.SimpleBrokerMessageHandler - Started.
-2025-10-20 15:55:28.384 [main] DEBUG org.springframework.web.SimpLogging - clientInboundChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
-2025-10-20 15:55:28.384 [main] DEBUG org.springframework.web.SimpLogging - brokerChannel added UserDestinationMessageHandler[DefaultUserDestinationResolver[prefix=/user/]]
-2025-10-20 15:55:28.416 [main] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
-2025-10-20 15:55:28.440 [main] INFO  com.tripplanner.App - Started App in 12.05 seconds (process running for 14.29)
-2025-10-20 15:55:28.579 [http-nio-8080-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-10-20 15:55:28.579 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
-2025-10-20 15:55:28.580 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected StandardServletMultipartResolver
-2025-10-20 15:55:28.581 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected AcceptHeaderLocaleResolver
-2025-10-20 15:55:28.581 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected FixedThemeResolver
-2025-10-20 15:55:28.584 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@6abd8bcd
-2025-10-20 15:55:28.585 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Detected org.springframework.web.servlet.support.SessionFlashMapManager@5981f2c6
-2025-10-20 15:55:28.586 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-10-20 15:55:28.586 [http-nio-8080-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 6 ms
-2025-10-20 15:55:28.646 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries
-2025-10-20 15:55:30.060 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
-2025-10-20 15:55:30.076 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
-2025-10-20 15:55:30.085 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
-2025-10-20 15:55:30.094 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll(HttpServletRequest)
-2025-10-20 15:55:30.137 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
-2025-10-20 15:55:30.137 [http-nio-8080-exec-2] INFO  com.tripplanner.service.UserDataService - Fetching trip metadata for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
-2025-10-20 15:55:33.956 [http-nio-8080-exec-2] INFO  com.tripplanner.service.UserDataService - Found 12 trip metadata entries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
-2025-10-20 15:55:33.962 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Found 12 itineraries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
-2025-10-20 15:55:34.050 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2025-10-20 15:55:34.080 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[ItineraryDto(id=it_ba231c6a-0791-4520-b86f-c60fb598125b, destination=Poland, Poland, startDate=2026 (truncated)...]
-2025-10-20 15:55:34.183 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
-2025-10-20 15:55:34.187 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-10-20 15:55:46.579 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json
-2025-10-20 15:55:46.587 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json
-2025-10-20 15:55:46.589 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json
-2025-10-20 15:55:46.590 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json", parameters={}
-2025-10-20 15:55:46.591 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
-2025-10-20 15:55:46.623 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82
-2025-10-20 15:55:46.623 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
-2025-10-20 15:55:48.943 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82
-2025-10-20 15:55:48.955 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2025-10-20 15:55:49.041 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82', version=1, userId='null', (truncated)...]
-2025-10-20 15:55:49.092 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
-2025-10-20 15:55:49.093 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-10-20 15:55:49.239 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/chat/history
-2025-10-20 15:55:49.242 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json
-2025-10-20 15:55:49.244 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json
-2025-10-20 15:55:49.244 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/json", parameters={}
-2025-10-20 15:55:49.245 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
-2025-10-20 15:55:49.246 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82
-2025-10-20 15:55:49.246 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
-2025-10-20 15:55:49.248 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/chat/history
-2025-10-20 15:55:49.250 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/chat/history
-2025-10-20 15:55:49.250 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82/chat/history", parameters={}
-2025-10-20 15:55:49.251 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
-2025-10-20 15:55:50.257 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1760955950250
-2025-10-20 15:55:50.262 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1760955950250
-2025-10-20 15:55:50.263 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1760955950250", parameters={masked}
-2025-10-20 15:55:50.264 [http-nio-8080-exec-1] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@23e9dd78
-2025-10-20 15:55:50.270 [http-nio-8080-exec-1] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1760955950250
-2025-10-20 15:55:50.271 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
-2025-10-20 15:55:50.272 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-10-20 15:55:50.281 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/791/oenchded/websocket
-2025-10-20 15:55:50.282 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/791/oenchded/websocket
-2025-10-20 15:55:50.283 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/791/oenchded/websocket", parameters={}
-2025-10-20 15:55:50.283 [http-nio-8080-exec-6] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@23e9dd78
-2025-10-20 15:55:50.286 [http-nio-8080-exec-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/791/oenchded/websocket
-2025-10-20 15:55:50.304 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-10-20 15:55:50.358 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
-2025-10-20 15:55:50.399 [http-nio-8080-exec-6] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=oenchded]
-2025-10-20 15:55:50.446 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=oenchded
-2025-10-20 15:55:50.457 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82 id=sub-0 session=oenchded
-2025-10-20 15:55:50.457 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82 id=sub-1 session=oenchded
-2025-10-20 15:55:50.461 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82 id=sub-2 session=oenchded
-2025-10-20 15:55:51.355 [http-nio-8080-exec-4] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82
-2025-10-20 15:55:51.356 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2025-10-20 15:55:51.360 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82', version=1, userId='null', (truncated)...]
-2025-10-20 15:55:51.366 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
-2025-10-20 15:55:51.366 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2025-10-20 15:55:51.732 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 0 chat messages for itinerary it_2b3c5f43-4ff3-43a3-ba6f-56b6839c3c82
-2025-10-20 15:55:51.733 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2025-10-20 15:55:51.734 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[]]
-2025-10-20 15:55:51.735 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
-2025-10-20 15:55:51.736 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 01:16:32.281 [MessageBroker-6] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 8 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(8)-CONNECTED(8)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 0, completed tasks = 508]
+2025-10-25 03:18:11.137 [MessageBroker-3] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 8 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(8)-CONNECTED(8)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 1, completed tasks = 2322]
+2025-10-25 07:33:50.228 [MessageBroker-8] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 8 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(8)-CONNECTED(8)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 0, completed tasks = 3425]
+2025-10-25 07:34:02.369 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries
+2025-10-25 07:34:02.670 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
+2025-10-25 07:34:02.671 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
+2025-10-25 07:34:02.671 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
+2025-10-25 07:34:02.671 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll(HttpServletRequest)
+2025-10-25 07:34:02.671 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-10-25 07:34:02.672 [http-nio-8080-exec-10] INFO  com.tripplanner.service.UserDataService - Fetching trip metadata for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 07:34:04.891 [http-nio-8080-exec-10] INFO  com.tripplanner.service.UserDataService - Found 5 trip metadata entries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 07:34:04.891 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Found 5 itineraries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 07:34:04.892 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 07:34:04.892 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[ItineraryDto(id=it_c0322c0f-eb92-4ca6-af5d-8c7345b2531f, destination=Turkey, Turkey, startDate=2026 (truncated)...]
+2025-10-25 07:34:04.894 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 07:34:04.894 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 07:57:03.175 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
+2025-10-25 07:57:03.177 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
+2025-10-25 07:57:03.177 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
+2025-10-25 07:57:03.177 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll(HttpServletRequest)
+2025-10-25 07:57:03.178 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-10-25 07:57:03.178 [http-nio-8080-exec-6] INFO  com.tripplanner.service.UserDataService - Fetching trip metadata for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 07:57:05.265 [http-nio-8080-exec-6] INFO  com.tripplanner.service.UserDataService - Found 5 trip metadata entries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 07:57:05.266 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Found 5 itineraries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 07:57:05.266 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 07:57:05.267 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[ItineraryDto(id=it_c0322c0f-eb92-4ca6-af5d-8c7345b2531f, destination=Turkey, Turkey, startDate=2026 (truncated)...]
+2025-10-25 07:57:05.269 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 07:57:05.269 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 08:03:50.228 [MessageBroker-8] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 8 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(8)-CONNECTED(8)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 1, completed tasks = 6854]
+2025-10-25 08:33:50.246 [MessageBroker-4] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 8 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(8)-CONNECTED(8)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 1, completed tasks = 7215]
+2025-10-25 09:03:50.259 [MessageBroker-2] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[0 current WS(0)-HttpStream(0)-HttpPoll(0), 8 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(8)-CONNECTED(8)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 240], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 1, completed tasks = 7576]
