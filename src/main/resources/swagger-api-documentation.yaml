@@ -205,89 +205,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  # Agent Endpoints
-  /agents/stream:
-    get:
-      tags:
-        - Agents
-      summary: Stream agent events (SSE)
-      description: |
-        Establishes a Server-Sent Events connection to receive real-time updates
-        about AI agent progress for itinerary generation.
-      parameters:
-        - name: itineraryId
-          in: query
-          required: true
-          description: Itinerary ID to track
-          schema:
-            type: string
-            example: "3"
-      responses:
-        '200':
-          description: SSE connection established
-          content:
-            text/event-stream:
-              schema:
-                type: string
-                example: |
-                  event: connected
-                  data: Connected to agent stream for itinerary: 3
-                  
-                  event: agent-progress
-                  data: {"kind":"planner","status":"running","progress":45,"message":"Generating activities..."}
-
-  /agents/events/{itineraryId}:
-    get:
-      tags:
-        - Agents
-      summary: Stream agent events by ID (SSE)
-      description: |
-        Alternative SSE endpoint for streaming agent events for a specific itinerary.
-        This endpoint provides the same functionality as /agents/stream but uses
-        path parameter instead of query parameter.
-      parameters:
-        - name: itineraryId
-          in: path
-          required: true
-          description: Itinerary ID to track
-          schema:
-            type: string
-            example: "3"
-      responses:
-        '200':
-          description: SSE connection established
-          content:
-            text/event-stream:
-              schema:
-                type: string
-                example: |
-                  event: connected
-                  data: Connected to agent stream for itinerary: 3
-                  
-                  event: agent-progress
-                  data: {"kind":"planner","status":"running","progress":45,"message":"Generating activities..."}
-
-  /agents/{itineraryId}/status:
-    get:
-      tags:
-        - Agents
-      summary: Get agent status
-      description: Get current status of agents for a specific itinerary (polling alternative to SSE)
-      parameters:
-        - name: itineraryId
-          in: path
-          required: true
-          description: Itinerary ID
-          schema:
-            type: string
-            example: "3"
-      responses:
-        '200':
-          description: Agent status retrieved
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgentStatusResponse'
+  # Agent Endpoints - Real-time updates via WebSocket
+  # WebSocket endpoint: ws://localhost:8080/ws
+  # Subscribe to: /topic/agent/{itineraryId} for agent progress updates
 
   # Tools Endpoints
   /tools/weather:

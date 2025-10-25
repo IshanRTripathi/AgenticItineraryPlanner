@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TripData } from '../../types/TripData';
-import { apiClient } from '../../services/apiClient';
+import { webSocketService } from '../../services/websocket';
 import { Progress } from '../ui/progress';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -78,7 +78,7 @@ export function SimplifiedAgentProgress({
   const [isRetrying, setIsRetrying] = useState(false);
   const [retryCountdown, setRetryCountdown] = useState<number>(0);
   
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const wsConnectedRef = useRef<boolean>(false);
   const startTimeRef = useRef<number>(Date.now());
   const messageIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -113,8 +113,8 @@ export function SimplifiedAgentProgress({
       onError: (error) => {
         console.error('[SimplifiedAgentProgress] Status polling error:', error);
         
-        // Show error if SSE also failed
-        if (!eventSourceRef.current) {
+        // Show error if WebSocket also failed
+        if (!wsConnectedRef.current) {
           setHasError(true);
           setErrorMessage('Failed to connect to generation service. Please try again.');
         }
@@ -203,88 +203,66 @@ export function SimplifiedAgentProgress({
     }
   }, [isCompleted, hasError]);
 
-  // Main SSE connection effect
+  // Main WebSocket connection effect
   useEffect(() => {
     if (!tripData.id) return;
 
     // Prevent multiple connections for the same trip
-    if (eventSourceRef.current) {
-      
+    if (wsConnectedRef.current) {
+      console.log('[SimplifiedAgentProgress] WebSocket already connected, skipping');
       return;
     }
 
-    
-    
+    console.log('[SimplifiedAgentProgress] Connecting to WebSocket for itinerary:', tripData.id);
 
-    // Connect to SSE stream
-    const eventSource = apiClient.createAgentEventStream(tripData.id);
-    eventSourceRef.current = eventSource;
-
-    eventSource.onopen = () => {
-      
-      // Don't override the rotating message - let it continue
-    };
-
-    // Handle agent list event
-    eventSource.addEventListener('agent-list', (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        
-        if (data.agents && Array.isArray(data.agents)) {
-          const initialAgents: AgentStatus[] = data.agents.map((agentKind: string) => ({
-            kind: agentKind,
-            status: 'queued',
-            progress: 0
-          }));
-          
-          setAgents(initialAgents);
-          // Don't override the rotating message - let it continue
-        }
-      } catch (error) {
-        
-      }
+    // Connect to WebSocket
+    webSocketService.connect(tripData.id).then(() => {
+      wsConnectedRef.current = true;
+      console.log('[SimplifiedAgentProgress] WebSocket connected successfully');
+    }).catch((error) => {
+      console.error('[SimplifiedAgentProgress] WebSocket connection failed:', error);
+      setHasError(true);
+      setErrorMessage('Failed to connect to generation service. Please try again.');
     });
 
-    // Handle agent events
-    eventSource.addEventListener('agent-event', (event) => {
-      try {
-        const agentEvent = JSON.parse(event.data);
-        
+    // Handle WebSocket messages
+    const handleMessage = (message: any) => {
+      console.log('[SimplifiedAgentProgress] WebSocket message received:', message);
 
+      if (message.type === 'agent_progress') {
+        // Handle agent progress updates
+        const { agentId, progress, data } = message;
+        
         setAgents(prev => prev.map(agent => {
-          if (agent.kind === agentEvent.kind) {
+          if (agent.kind === agentId || agent.kind === data?.status) {
             const updatedAgent = {
               ...agent,
-              status: agentEvent.status,
-              progress: agentEvent.progress || agent.progress,
-              message: agentEvent.message
+              status: data?.status || 'running',
+              progress: progress || agent.progress,
+              message: data?.message
             };
             
-            // Don't update current message for individual agent events - let rotating messages handle it
+            // Update actual progress based on agent progress
+            if (progress) {
+              setActualProgress(progress);
+            }
+            
             // Only update for failures
-            if (agentEvent.status === 'failed') {
-              setCurrentMessage(`${agentEvent.kind} agent failed: ${agentEvent.message}`);
+            if (data?.status === 'failed') {
+              setCurrentMessage(`${agentId} agent failed: ${data?.message}`);
             }
             
             return updatedAgent;
           }
           return agent;
         }));
-      } catch (error) {
-        
-      }
-    });
-
-    // Handle completion event
-    eventSource.addEventListener('completion', (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
+      } else if (message.type === 'generation_complete' || message.type === 'itinerary_updated') {
+        // Handle completion
+        console.log('[SimplifiedAgentProgress] Generation complete message received');
         
         // Prevent multiple onComplete calls
         if (onCompleteCalledRef.current) {
-          
+          console.log('[SimplifiedAgentProgress] onComplete already called, skipping');
           return;
         }
         onCompleteCalledRef.current = true;
@@ -300,26 +278,25 @@ export function SimplifiedAgentProgress({
         }
         
         setIsCompleted(true);
-        setActualProgress(100); // Set to 100% and keep it there
+        setActualProgress(100);
         setCurrentMessage('All agents completed successfully!');
-        
-        // Clean up and call onComplete with a small delay to ensure backend has saved the data
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close();
-          eventSourceRef.current = null;
-        }
         
         // Small delay to ensure backend has fully saved the itinerary
         setTimeout(() => {
           onComplete();
         }, 500);
-      } catch (error) {
-        
       }
-    });
+    };
 
-    eventSource.onerror = (error) => {
-      
+    // Listen for WebSocket messages
+    webSocketService.on('message', handleMessage);
+    webSocketService.on('agent_progress', handleMessage);
+    webSocketService.on('generation_complete', handleMessage);
+    webSocketService.on('itinerary_updated', handleMessage);
+
+    // Handle WebSocket errors
+    const handleError = (error: any) => {
+      console.error('[SimplifiedAgentProgress] WebSocket error:', error);
       
       // If we haven't exceeded max retries, attempt to retry
       if (retryAttempt < maxRetries) {
@@ -348,13 +325,22 @@ export function SimplifiedAgentProgress({
       }
     };
 
+    webSocketService.on('error', handleError);
+
     // Cleanup function
     return () => {
+      console.log('[SimplifiedAgentProgress] Cleaning up WebSocket connection');
+      wsConnectedRef.current = false;
       
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
+      webSocketService.off('message', handleMessage);
+      webSocketService.off('agent_progress', handleMessage);
+      webSocketService.off('generation_complete', handleMessage);
+      webSocketService.off('itinerary_updated', handleMessage);
+      webSocketService.off('error', handleError);
+      
+      // Don't disconnect - let other components use the connection
+      // webSocketService.disconnect();
+      
       if (messageIntervalRef.current) {
         clearInterval(messageIntervalRef.current);
         messageIntervalRef.current = null;

@@ -447,36 +447,7 @@ class ApiClient {
     }, retryOptions);
   }
 
-  // Agent SSE stream
-  createAgentEventStream(itineraryId: string): EventSource {
-    let url = `${this.baseUrl}/agents/events/${itineraryId}`;
-
-    // Add auth token as query parameter since EventSource doesn't support headers
-    if (this.authToken) {
-      url += `?token=${encodeURIComponent(this.authToken)}`;
-    }
-
-    logger.info('Creating SSE connection', {
-      component: 'ApiClient',
-      action: 'sse_create',
-      itineraryId,
-      hasToken: !!this.authToken
-    });
-
-    const eventSource = new EventSource(url);
-
-    eventSource.onerror = (error) => {
-      logger.error('SSE connection error', {
-        component: 'ApiClient',
-        action: 'sse_error',
-        itineraryId
-      }, error);
-      // Note: EventSource doesn't support token refresh. If token expires during SSE,
-      // the connection will fail and need to be recreated with a fresh token.
-    };
-
-    return eventSource;
-  }
+  // SSE removed - WebSocket handles real-time communication
 
   // Tools endpoints
   async generatePackingList(data: PackingListRequest): Promise<PackingListResponse> {
@@ -665,41 +636,7 @@ class ApiClient {
     });
   }
 
-  // SSE for patches
-  createPatchesEventStream(itineraryId: string, executionId?: string): EventSource {
-    let url = `${this.baseUrl}/itineraries/patches?itineraryId=${itineraryId}`;
-    if (executionId) {
-      url += `&executionId=${executionId}`;
-    }
-    
-    // Add auth token as query parameter since EventSource doesn't support headers
-    if (this.authToken) {
-      url += `&token=${encodeURIComponent(this.authToken)}`;
-    }
-    
-    logger.info('Creating patches SSE connection', {
-      component: 'ApiClient',
-      action: 'patches_sse_create',
-      itineraryId,
-      executionId,
-      hasToken: !!this.authToken
-    });
-    
-    const eventSource = new EventSource(url);
-
-    eventSource.onerror = (error) => {
-      logger.error('Patches SSE connection error', {
-        component: 'ApiClient',
-        action: 'patches_sse_error',
-        itineraryId,
-        executionId
-      }, error);
-      // Note: EventSource doesn't support token refresh. If token expires during SSE,
-      // the connection will fail and need to be recreated with a fresh token.
-    };
-
-    return eventSource;
-  }
+  // SSE patches removed - WebSocket handles real-time updates
 
   async getLockStates(itineraryId: string): Promise<Record<string, boolean>> {
     return this.request<Record<string, boolean>>(`/itineraries/${itineraryId}/lock-states`);

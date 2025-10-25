@@ -772,8 +772,29 @@ interface FeatureMapping {
 
 ## Summary
 
-This design outlines a comprehensive approach to documenting the entire frontend application for a UI redesign. The resulting specification will be a single, authoritative markdown document that catalogs every component, API, state management pattern, and UI/UX pattern in the application.
+This design outlines a comprehensive approach to documenting the entire frontend application for a UI redesign. The resulting specification will be a modular documentation system with a main index document that references detailed section documents.
 
-The documentation will be created through systematic code analysis, manual verification, and structured documentation generation. The final document will serve as the complete reference for designers and developers undertaking the UI redesign, ensuring that all existing functionality is preserved and backend compatibility is maintained.
+### Documentation Structure
 
-Key deliverable: `FRONTEND_UI_REDESIGN_SPECIFICATION.md` - a comprehensive, accurate, and well-organized technical specification of the entire frontend application.
+**IMPORTANT: Multi-Document Approach**
+
+Due to the comprehensive nature of this specification, the documentation is split into multiple files to maintain readability and manageability:
+
+- **Main Document**: `analysis/FRONTEND_UI_REDESIGN_SPECIFICATION.md` - Index and overview with links to all sections
+- **Section Documents**: `analysis/frontend-spec/[section-name].md` - Detailed documentation for each major section
+
+This modular approach:
+- Keeps individual files manageable (< 1000 lines each)
+- Allows parallel work on different sections
+- Makes it easier to update specific areas
+- Improves navigation and searchability
+- Enables better version control and collaboration
+
+**For Future Sessions**: Always check the main specification document first to understand the structure, then navigate to the appropriate section document for detailed information.
+
+The documentation will be created through systematic code analysis, manual verification, and structured documentation generation. The final document set will serve as the complete reference for designers and developers undertaking the UI redesign, ensuring that all existing functionality is preserved and backend compatibility is maintained.
+
+Key deliverables:
+1. `FRONTEND_UI_REDESIGN_SPECIFICATION.md` - Main index and navigation document
+2. `analysis/frontend-spec/*.md` - Detailed section documents (13 sections)
+3. Component inventories, API mappings, and implementation guides

@@ -9,7 +9,6 @@ import com.tripplanner.service.AgentRegistry;
 import com.tripplanner.service.RevisionService;
 import com.tripplanner.service.OrchestratorService;
 import com.tripplanner.service.WebSocketBroadcastService;
-import com.tripplanner.service.SseConnectionManager;
 import com.tripplanner.service.ChatHistoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +45,9 @@ public class ItinerariesController {
     private final RevisionService revisionService;
     private final OrchestratorService orchestratorService;
     private final WebSocketBroadcastService webSocketBroadcastService;
-    private final SseConnectionManager sseConnectionManager;
     private final ChatHistoryService chatHistoryService;
     
-    // Real-time updates managed by SseConnectionManager
+    // Real-time updates managed by WebSocket
     
     public ItinerariesController(ItineraryService itineraryService, 
                                ItineraryJsonService itineraryJsonService,
@@ -60,7 +57,6 @@ public class ItinerariesController {
                                RevisionService revisionService,
                                OrchestratorService orchestratorService,
                                WebSocketBroadcastService webSocketBroadcastService,
-                               SseConnectionManager sseConnectionManager,
                                ChatHistoryService chatHistoryService) {
         this.itineraryService = itineraryService;
         this.itineraryJsonService = itineraryJsonService;
@@ -70,7 +66,6 @@ public class ItinerariesController {
         this.revisionService = revisionService;
         this.orchestratorService = orchestratorService;
         this.webSocketBroadcastService = webSocketBroadcastService;
-        this.sseConnectionManager = sseConnectionManager;
         this.chatHistoryService = chatHistoryService;
     }
     
@@ -112,18 +107,13 @@ public class ItinerariesController {
             // Calculate estimated completion time based on duration
             LocalDateTime estimatedCompletion = calculateEstimatedCompletion(request);
             
-            // Build SSE endpoint URL
-            String sseEndpoint = "/api/v1/itineraries/patches?itineraryId=" + initialItinerary.getId() + 
-                               "&executionId=" + executionId;
-            
             // Create execution stages for progress tracking
             List<AgentExecutionStage> stages = buildExecutionStages(request);
             
-            // Build enhanced response
+            // Build enhanced response (WebSocket handles real-time updates)
             ItineraryCreationResponse response = ItineraryCreationResponse.builder()
                 .itinerary(initialItinerary)
                 .executionId(executionId)
-                .sseEndpoint(sseEndpoint)
                 .estimatedCompletion(estimatedCompletion)
                 .status(CreationStatus.PROCESSING)
                 .stages(stages)
@@ -131,8 +121,8 @@ public class ItinerariesController {
             
             logger.info("Enhanced itinerary creation response prepared: {} for user: {}", 
                        initialItinerary.getId(), userId);
-            logger.info("SSE endpoint: {}", sseEndpoint);
             logger.info("Execution ID: {}", executionId);
+            logger.info("Real-time updates will be sent via WebSocket");
             logger.info("Estimated completion: {}", estimatedCompletion);
             
             return ResponseEntity.ok(response);
@@ -384,9 +374,7 @@ public class ItinerariesController {
                 result.getDiff()
             );
             
-            // Send SSE event
-            sendPatchEvent(id, result.getToVersion() - 1, result.getToVersion(), result.getDiff(), "user");
-            
+            // WebSocket handles real-time updates automatically
             logger.info("Changes applied successfully for itinerary: {}", id);
             return ResponseEntity.ok(response);
             
@@ -413,9 +401,7 @@ public class ItinerariesController {
                 result.getDiff()
             );
             
-            // Send SSE event
-            sendPatchEvent(id, request.getToVersion() + 1, result.getToVersion(), result.getDiff(), "user");
-            
+            // WebSocket handles real-time updates automatically
             logger.info("Changes undone successfully for itinerary: {}", id);
             return ResponseEntity.ok(response);
             
@@ -425,76 +411,7 @@ public class ItinerariesController {
         }
     }
     
-    /**
-     * Enhanced SSE endpoint for real-time itinerary generation updates.
-     * GET /itineraries/patches?itineraryId=…&executionId=… → 200 text/event-stream → emits ItineraryUpdateEvent
-     */
-    @GetMapping(value = "/patches", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter getPatches(@RequestParam String itineraryId,
-                               @RequestParam(required = false) String executionId) {
-        logger.info("Opening enhanced SSE connection for itinerary: {}, execution: {}", itineraryId, executionId);
-        
-        // Create emitter with 5-minute timeout for long-running generation processes
-        SseEmitter emitter = new SseEmitter(300000L); // 5 minutes
-        
-        // Register with connection manager for proper handling
-        sseConnectionManager.registerConnection(itineraryId, executionId, emitter);
-        
-        logger.info("Enhanced SSE connection established for itinerary: {}, execution: {}", itineraryId, executionId);
-        
-        return emitter;
-    }
-    
-    /**
-     * Send patch event to SSE subscribers via connection manager.
-     */
-    private void sendPatchEvent(String itineraryId, Integer fromVersion, Integer toVersion,
-                                ItineraryDiff diff, String updatedBy) {
-        try {
-            ItineraryUpdateEvent updateEvent = ItineraryUpdateEvent.builder()
-                .eventType("patch_applied")
-                .itineraryId(itineraryId)
-                .data(new PatchEvent(itineraryId, fromVersion, toVersion, diff, "Changes applied", updatedBy))
-                .message("Changes applied: " + (diff != null ? diff.toString() : ""))
-                .agentType(updatedBy)
-                .build();
-                
-            sseConnectionManager.broadcastUpdate(itineraryId, updateEvent);
-            logger.info("Patch event sent for itinerary: {}", itineraryId);
-            
-        } catch (Exception e) {
-            logger.error("Failed to send patch event for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
-     * Send real-time update event to SSE subscribers.
-     */
-    public void sendUpdateEvent(String itineraryId, ItineraryUpdateEvent event) {
-        try {
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            logger.debug("Real-time update event sent for itinerary: {}, type: {}", 
-                        itineraryId, event.getEventType());
-        } catch (Exception e) {
-            logger.error("Failed to send update event for itinerary: {}, type: {}", 
-                        itineraryId, event.getEventType(), e);
-        }
-    }
-    
-    /**
-     * Get SSE connection statistics.
-     */
-    @GetMapping("/patches/stats")
-    public ResponseEntity<Map<String, Object>> getSseStats() {
-        try {
-            Map<String, Object> stats = sseConnectionManager.getConnectionStats();
-            return ResponseEntity.ok(stats);
-        } catch (Exception e) {
-            logger.error("Failed to get SSE stats", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to get connection statistics"));
-        }
-    }
+    // SSE endpoints removed - WebSocket handles all real-time communication
     
     /**
      * Lock or unlock a specific node in an itinerary.

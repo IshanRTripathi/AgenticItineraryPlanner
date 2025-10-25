@@ -4,24 +4,23 @@ import com.tripplanner.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * Service for publishing agent events to real-time subscribers via SSE.
+ * Service for publishing agent events to real-time subscribers via WebSocket.
  * Provides a clean interface for agents to publish progress, completion, and error events.
+ * 
+ * Replaces the old SSE-based implementation.
  */
 @Component
 public class AgentEventPublisher {
     
     private static final Logger logger = LoggerFactory.getLogger(AgentEventPublisher.class);
     
-    private final SseConnectionManager sseConnectionManager;
-    
-    // WebSocketEventPublisher removed to break circular dependency
-    
-    public AgentEventPublisher(SseConnectionManager sseConnectionManager) {
-        this.sseConnectionManager = sseConnectionManager;
-    }
+    @Autowired
+    @Lazy
+    private WebSocketEventPublisher webSocketEventPublisher;
     
     /**
      * Publish day completed event.
@@ -33,23 +32,20 @@ public class AgentEventPublisher {
         }
         
         try {
-            // Calculate progress based on day number (assuming sequential planning)
             int progress = calculateDayProgress(completedDay.getDayNumber());
+            String message = String.format("Day %d planning completed with %d activities", 
+                                         completedDay.getDayNumber(), 
+                                         completedDay.getNodes() != null ? completedDay.getNodes().size() : 0);
             
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.dayCompleted(
-                itineraryId,
-                executionId,
-                completedDay.getDayNumber(),
-                completedDay,
-                progress,
-                String.format("Day %d planning completed with %d activities", 
-                             completedDay.getDayNumber(), 
-                             completedDay.getNodes() != null ? completedDay.getNodes().size() : 0)
-            );
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "day_completed", 
+                java.util.Map.of(
+                    "dayNumber", completedDay.getDayNumber(),
+                    "progress", progress,
+                    "message", message,
+                    "day", completedDay
+                ));
             
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.info("Published day completed event: itinerary={}, day={}, activities={}", 
+            logger.info("Published day completed event via WebSocket: itinerary={}, day={}, activities={}", 
                        itineraryId, completedDay.getDayNumber(), 
                        completedDay.getNodes() != null ? completedDay.getNodes().size() : 0);
                        
@@ -60,58 +56,14 @@ public class AgentEventPublisher {
     }
     
     /**
-     * Publish node enhanced event.
-     */
-    public void publishNodeEnhanced(String itineraryId, String executionId, String nodeId, 
-                                   NormalizedNode enhancedNode, String enhancementType) {
-        if (enhancedNode == null || nodeId == null) {
-            logger.warn("Cannot publish node enhanced event: node data or ID is null for itinerary {}", itineraryId);
-            return;
-        }
-        
-        try {
-            String message = buildEnhancementMessage(enhancedNode, enhancementType);
-            
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.nodeEnhanced(
-                itineraryId,
-                executionId,
-                nodeId,
-                enhancedNode,
-                message,
-                determineAgentType(enhancementType)
-            );
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.debug("Published node enhanced event: itinerary={}, node={}, type={}", 
-                        itineraryId, nodeId, enhancementType);
-                        
-        } catch (Exception e) {
-            logger.error("Failed to publish node enhanced event for itinerary: {}, node: {}", 
-                        itineraryId, nodeId, e);
-        }
-    }
-    
-    /**
      * Publish progress update event.
      */
     public void publishProgress(String itineraryId, String executionId, int progress, 
                                String message, String agentType) {
         try {
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.progressUpdate(
-                itineraryId,
-                executionId,
-                progress,
-                message,
-                agentType
-            );
+            webSocketEventPublisher.publishAgentProgress(itineraryId, agentType, progress, message);
             
-            // WebSocket publishing removed to break circular dependency
-            
-            // Also send to SSE (for backward compatibility)
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.debug("Published progress update: itinerary={}, progress={}%, agent={}, message={}", 
+            logger.debug("Published progress update via WebSocket: itinerary={}, progress={}%, agent={}, message={}", 
                         itineraryId, progress, agentType, message);
                         
         } catch (Exception e) {
@@ -132,19 +84,14 @@ public class AgentEventPublisher {
         try {
             String message = buildCompletionMessage(finalItinerary);
             
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.generationComplete(
-                itineraryId,
-                executionId,
-                finalItinerary
-            );
-            event.setMessage(message);
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "generation_complete", 
+                java.util.Map.of(
+                    "message", message,
+                    "itinerary", finalItinerary,
+                    "progress", 100
+                ));
             
-            // WebSocket publishing removed to break circular dependency
-            
-            // Also send to SSE (for backward compatibility)
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.info("Published generation complete event: itinerary={}, days={}, total_nodes={}", 
+            logger.info("Published generation complete event via WebSocket: itinerary={}, days={}, total_nodes={}", 
                        itineraryId, 
                        finalItinerary.getDays() != null ? finalItinerary.getDays().size() : 0,
                        calculateTotalNodes(finalItinerary));
@@ -155,86 +102,20 @@ public class AgentEventPublisher {
     }
     
     /**
-     * Publish agent started event.
-     */
-    public void publishAgentStarted(String itineraryId, String executionId, String agentType, 
-                                   String stageName, String description) {
-        try {
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.builder()
-                .eventType("agent_started")
-                .itineraryId(itineraryId)
-                .executionId(executionId)
-                .agentType(agentType)
-                .message(String.format("Started %s: %s", stageName, description))
-                .data(java.util.Map.of(
-                    "stageName", stageName,
-                    "description", description,
-                    "agentType", agentType
-                ))
-                .build();
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.info("Published agent started event: itinerary={}, agent={}, stage={}", 
-                       itineraryId, agentType, stageName);
-                       
-        } catch (Exception e) {
-            logger.error("Failed to publish agent started event for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
-     * Publish agent completed event.
-     */
-    public void publishAgentCompleted(String itineraryId, String executionId, String agentType, 
-                                     String stageName, Object result) {
-        try {
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.builder()
-                .eventType("agent_completed")
-                .itineraryId(itineraryId)
-                .executionId(executionId)
-                .agentType(agentType)
-                .message(String.format("Completed %s successfully", stageName))
-                .data(java.util.Map.of(
-                    "stageName", stageName,
-                    "agentType", agentType,
-                    "result", result != null ? result : "success"
-                ))
-                .build();
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.info("Published agent completed event: itinerary={}, agent={}, stage={}", 
-                       itineraryId, agentType, stageName);
-                       
-        } catch (Exception e) {
-            logger.error("Failed to publish agent completed event for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
      * Publish phase transition event.
      */
     public void publishPhaseTransition(String itineraryId, String executionId, String fromPhase, 
                                       String toPhase, int overallProgress) {
         try {
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.builder()
-                .eventType("phase_transition")
-                .itineraryId(itineraryId)
-                .executionId(executionId)
-                .progress(overallProgress)
-                .message(String.format("Moving from %s to %s phase", fromPhase, toPhase))
-                .agentType("orchestrator")
-                .data(java.util.Map.of(
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "phase_transition", 
+                java.util.Map.of(
                     "fromPhase", fromPhase,
                     "toPhase", toPhase,
-                    "overallProgress", overallProgress
-                ))
-                .build();
+                    "progress", overallProgress,
+                    "message", String.format("Moving from %s to %s phase", fromPhase, toPhase)
+                ));
             
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.info("Published phase transition event: itinerary={}, {}→{}, progress={}%", 
+            logger.info("Published phase transition event via WebSocket: itinerary={}, {}→{}, progress={}%", 
                        itineraryId, fromPhase, toPhase, overallProgress);
                        
         } catch (Exception e) {
@@ -249,48 +130,15 @@ public class AgentEventPublisher {
                                     int totalDays, String currentActivity) {
         try {
             int progress = (int) ((currentDay * 100.0) / totalDays);
+            String message = String.format("Planning day %d of %d: %s", currentDay, totalDays, currentActivity);
             
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.progressUpdate(
-                itineraryId,
-                executionId,
-                progress,
-                String.format("Planning day %d of %d: %s", currentDay, totalDays, currentActivity),
-                "PLANNER"
-            );
+            webSocketEventPublisher.publishAgentProgress(itineraryId, "PLANNER", progress, message);
             
-            event.setData(java.util.Map.of(
-                "currentDay", currentDay,
-                "totalDays", totalDays,
-                "currentActivity", currentActivity,
-                "batchProgress", true
-            ));
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.debug("Published batch progress: itinerary={}, day={}/{}, progress={}%", 
+            logger.debug("Published batch progress via WebSocket: itinerary={}, day={}/{}, progress={}%", 
                         itineraryId, currentDay, totalDays, progress);
                         
         } catch (Exception e) {
             logger.error("Failed to publish batch progress for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
-     * Publish error event.
-     */
-    public void publishError(String itineraryId, String executionId, String errorCode, 
-                            String message, ErrorEvent.ErrorSeverity severity, boolean canRetry) {
-        try {
-            ErrorEvent errorEvent = ErrorEvent.error(itineraryId, executionId, errorCode, message, canRetry);
-            errorEvent.setSeverity(severity);
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, errorEvent);
-            
-            logger.warn("Published error event: itinerary={}, code={}, severity={}, message={}", 
-                       itineraryId, errorCode, severity, message);
-                       
-        } catch (Exception e) {
-            logger.error("Failed to publish error event for itinerary: {}", itineraryId, e);
         }
     }
     
@@ -300,64 +148,19 @@ public class AgentEventPublisher {
     public void publishWarning(String itineraryId, String executionId, String errorCode, 
                               String message, String recoveryAction) {
         try {
-            ErrorEvent warningEvent = ErrorEvent.warning(itineraryId, executionId, errorCode, message, recoveryAction);
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "warning", 
+                java.util.Map.of(
+                    "errorCode", errorCode,
+                    "message", message,
+                    "recoveryAction", recoveryAction,
+                    "severity", "WARNING"
+                ));
             
-            sseConnectionManager.broadcastUpdate(itineraryId, warningEvent);
-            
-            logger.info("Published warning event: itinerary={}, code={}, message={}, recovery={}", 
+            logger.info("Published warning event via WebSocket: itinerary={}, code={}, message={}, recovery={}", 
                        itineraryId, errorCode, message, recoveryAction);
                        
         } catch (Exception e) {
             logger.error("Failed to publish warning event for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
-     * Publish critical error event.
-     */
-    public void publishCriticalError(String itineraryId, String executionId, String errorCode, 
-                                    String message, String recoveryAction) {
-        try {
-            ErrorEvent criticalEvent = ErrorEvent.critical(itineraryId, executionId, errorCode, message, recoveryAction);
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, criticalEvent);
-            
-            logger.error("Published critical error event: itinerary={}, code={}, message={}, recovery={}", 
-                        itineraryId, errorCode, message, recoveryAction);
-                        
-        } catch (Exception e) {
-            logger.error("Failed to publish critical error event for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
-     * Publish partial failure event.
-     */
-    public void publishPartialFailure(String itineraryId, String executionId, String component, 
-                                     String failureReason, String continuationPlan) {
-        try {
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.builder()
-                .eventType("partial_failure")
-                .itineraryId(itineraryId)
-                .executionId(executionId)
-                .message(String.format("Partial failure in %s: %s. Continuing with: %s", 
-                                     component, failureReason, continuationPlan))
-                .agentType("orchestrator")
-                .data(java.util.Map.of(
-                    "component", component,
-                    "failureReason", failureReason,
-                    "continuationPlan", continuationPlan,
-                    "severity", "partial"
-                ))
-                .build();
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.warn("Published partial failure event: itinerary={}, component={}, reason={}", 
-                       itineraryId, component, failureReason);
-                       
-        } catch (Exception e) {
-            logger.error("Failed to publish partial failure event for itinerary: {}", itineraryId, e);
         }
     }
     
@@ -367,22 +170,15 @@ public class AgentEventPublisher {
     public void publishErrorFromException(String itineraryId, String executionId, Exception exception, 
                                          String context, ErrorEvent.ErrorSeverity severity) {
         try {
-            ErrorEvent errorEvent = ErrorEvent.fromException(itineraryId, executionId, exception, severity);
-            errorEvent.setMessage(String.format("Error in %s: %s", context, exception.getMessage()));
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "error", 
+                java.util.Map.of(
+                    "context", context,
+                    "message", exception.getMessage(),
+                    "severity", severity.name(),
+                    "canRetry", isRetryableException(exception)
+                ));
             
-            // Determine if error is retryable based on exception type
-            boolean canRetry = isRetryableException(exception);
-            errorEvent.setCanRetry(canRetry);
-            
-            if (canRetry) {
-                errorEvent.setRecoveryAction("Retrying operation automatically");
-            } else {
-                errorEvent.setRecoveryAction("Manual intervention may be required");
-            }
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, errorEvent);
-            
-            logger.error("Published exception-based error event: itinerary={}, context={}, exception={}", 
+            logger.error("Published exception-based error event via WebSocket: itinerary={}, context={}, exception={}", 
                         itineraryId, context, exception.getClass().getSimpleName(), exception);
                         
         } catch (Exception e) {
@@ -391,89 +187,28 @@ public class AgentEventPublisher {
     }
     
     /**
-     * Publish agent failure event.
-     */
-    public void publishAgentFailure(String itineraryId, String executionId, String agentType, 
-                                   String stageName, String failureReason, boolean willRetry) {
-        try {
-            ItineraryUpdateEvent event = ItineraryUpdateEvent.builder()
-                .eventType("agent_failed")
-                .itineraryId(itineraryId)
-                .executionId(executionId)
-                .agentType(agentType)
-                .message(String.format("Agent %s failed in %s: %s%s", 
-                                     agentType, stageName, failureReason,
-                                     willRetry ? " (will retry)" : ""))
-                .data(java.util.Map.of(
-                    "stageName", stageName,
-                    "agentType", agentType,
-                    "failureReason", failureReason,
-                    "willRetry", willRetry
-                ))
-                .build();
-            
-            sseConnectionManager.broadcastUpdate(itineraryId, event);
-            
-            logger.warn("Published agent failure event: itinerary={}, agent={}, stage={}, retry={}", 
-                       itineraryId, agentType, stageName, willRetry);
-                       
-        } catch (Exception e) {
-            logger.error("Failed to publish agent failure event for itinerary: {}", itineraryId, e);
-        }
-    }
-    
-    /**
      * Check if there are active connections for an itinerary.
+     * Always returns true for WebSocket (connections are managed by WebSocket service).
      */
     public boolean hasActiveConnections(String itineraryId) {
-        return sseConnectionManager.hasActiveConnections(itineraryId);
+        return true; // WebSocket manages connections internally
     }
     
     /**
      * Get connection count for an itinerary.
+     * Returns 1 for WebSocket (actual count managed by WebSocket service).
      */
     public int getConnectionCount(String itineraryId) {
-        return sseConnectionManager.getConnectionCount(itineraryId);
+        return 1; // WebSocket manages connections internally
     }
     
     // Helper methods
     
     /**
      * Calculate progress percentage based on day number.
-     * Assumes planning phase takes 60% of total time.
      */
     private int calculateDayProgress(int dayNumber) {
-        // This is a simple calculation - in reality, you'd want to know total days
-        // For now, assume each day represents incremental progress
-        return Math.min(20 + (dayNumber * 10), 60); // Planning phase: 20-60%
-    }
-    
-    /**
-     * Build enhancement message based on node and enhancement type.
-     */
-    private String buildEnhancementMessage(NormalizedNode node, String enhancementType) {
-        String nodeTitle = node.getTitle() != null ? node.getTitle() : "Activity";
-        
-        return switch (enhancementType.toLowerCase()) {
-            case "photos" -> String.format("Added photos to %s", nodeTitle);
-            case "details" -> String.format("Enhanced details for %s", nodeTitle);
-            case "location" -> String.format("Validated location for %s", nodeTitle);
-            case "booking" -> String.format("Added booking information for %s", nodeTitle);
-            case "rating" -> String.format("Added rating and reviews for %s", nodeTitle);
-            default -> String.format("Enhanced %s", nodeTitle);
-        };
-    }
-    
-    /**
-     * Determine agent type based on enhancement type.
-     */
-    private String determineAgentType(String enhancementType) {
-        return switch (enhancementType.toLowerCase()) {
-            case "photos", "details", "rating" -> "ENRICHMENT";
-            case "location" -> "places";
-            case "booking" -> "booking";
-            default -> "ENRICHMENT";
-        };
+        return Math.min(20 + (dayNumber * 10), 60);
     }
     
     /**
@@ -504,14 +239,12 @@ public class AgentEventPublisher {
      * Determine if an exception is retryable.
      */
     private boolean isRetryableException(Exception exception) {
-        // Network-related exceptions are usually retryable
         if (exception instanceof java.net.SocketTimeoutException ||
             exception instanceof java.net.ConnectException ||
             exception instanceof java.io.IOException) {
             return true;
         }
         
-        // Service unavailable exceptions are retryable
         if (exception.getMessage() != null) {
             String message = exception.getMessage().toLowerCase();
             if (message.contains("timeout") ||
@@ -523,14 +256,12 @@ public class AgentEventPublisher {
             }
         }
         
-        // Validation and parsing errors are usually not retryable
         if (exception instanceof IllegalArgumentException ||
             exception instanceof com.fasterxml.jackson.core.JsonProcessingException ||
             exception instanceof NumberFormatException) {
             return false;
         }
         
-        // Default to retryable for unknown exceptions
         return true;
     }
 }
