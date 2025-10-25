@@ -5485,3 +5485,913 @@ org.springframework.security.web.firewall.RequestRejectedException: The request 
 2025-10-25 10:26:14.640 [Pipeline-75] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
 2025-10-25 10:26:14.640 [Pipeline-75] INFO  com.tripplanner.service.AgentEventPublisher - Published generation complete event via WebSocket: itinerary=it_02ad2629-8022-4b7b-b9fc-02e00555e58a, days=4, total_nodes=25
 2025-10-25 10:26:14.640 [AsyncTask-1] INFO  com.tripplanner.service.ItineraryService - Pipeline generation completed successfully for itinerary: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, executionId: exec_1761368084866
+2025-10-25 10:28:31.429 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=54bnml54
+2025-10-25 10:28:31.429 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=54bnml54
+2025-10-25 10:28:31.429 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=54bnml54
+2025-10-25 10:28:31.430 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=54bnml54
+2025-10-25 10:28:31.440 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:28:31.442 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:28:31.442 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:28:31.442 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:28:31.442 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:28:31.442 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:28:31.442 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:28:31.443 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:28:31.443 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:28:31.443 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:28:31.448 [http-nio-8080-exec-6] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=54bnml54] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:28:31.448 [http-nio-8080-exec-6] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session 54bnml54
+2025-10-25 10:28:31.449 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=54bnml54
+2025-10-25 10:28:31.449 [WebSocket-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=54bnml54}], simpSessionId=54bnml54}]
+2025-10-25 10:28:32.482 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761368312460
+2025-10-25 10:28:32.482 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761368312460
+2025-10-25 10:28:32.482 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761368312460", parameters={masked}
+2025-10-25 10:28:32.483 [http-nio-8080-exec-4] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:28:32.483 [http-nio-8080-exec-4] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761368312460
+2025-10-25 10:28:32.484 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:28:32.484 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:28:32.497 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/618/zq4todmz/websocket
+2025-10-25 10:28:32.498 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/618/zq4todmz/websocket
+2025-10-25 10:28:32.498 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/618/zq4todmz/websocket", parameters={}
+2025-10-25 10:28:32.498 [http-nio-8080-exec-7] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:28:32.498 [http-nio-8080-exec-7] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/618/zq4todmz/websocket
+2025-10-25 10:28:32.498 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:28:32.499 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:28:32.499 [http-nio-8080-exec-7] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=zq4todmz]
+2025-10-25 10:28:32.501 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=zq4todmz
+2025-10-25 10:28:32.505 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=zq4todmz
+2025-10-25 10:28:32.505 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=zq4todmz
+2025-10-25 10:28:32.505 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=zq4todmz
+2025-10-25 10:28:33.182 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 0 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:28:33.183 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:28:33.184 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[]]
+2025-10-25 10:28:33.186 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:28:33.186 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:28:34.371 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:28:34.372 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:28:34.376 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=1, userId='null', (truncated)...]
+2025-10-25 10:28:34.384 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:28:34.384 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:28:34.403 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:28:34.412 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:28:34.412 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:28:34.413 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:28:34.413 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:28:36.116 [http-nio-8080-exec-2] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 0 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:28:36.118 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:28:36.118 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[]]
+2025-10-25 10:28:36.121 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:28:36.122 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:28:40.063 [MessageBroker-3] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [54bnml54]
+2025-10-25 10:29:08.456 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:29:08.458 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:29:08.458 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:29:08.458 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#saveChatMessage(String, Map, HttpServletRequest)
+2025-10-25 10:29:08.460 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{message=remove the stay on day 4, i will travel to the airport to catch my flight, sender=user, tim (truncated)...]
+2025-10-25 10:29:10.189 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ChatHistoryService - Saved chat message for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:10.191 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:29:10.192 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch my (truncated)...]
+2025-10-25 10:29:10.196 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 201 CREATED
+2025-10-25 10:29:10.196 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:29:10.204 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat
+2025-10-25 10:29:10.214 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat
+2025-10-25 10:29:10.215 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat
+2025-10-25 10:29:10.216 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat", parameters={}
+2025-10-25 10:29:10.216 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#sendChatMessage(String, ChatRequest, HttpServletRequest)
+2025-10-25 10:29:10.220 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [ChatRequest{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', scope='trip', day=null, selectedN (truncated)...]
+2025-10-25 10:29:10.221 [http-nio-8080-exec-4] INFO  com.tripplanner.service.OrchestratorService - Routing chat request: ChatRequest{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', scope='trip', day=null, selectedNodeId='null', text='remove the stay on day 4, i will travel to the airport to catch my flight', autoApply=false, userId='PEoULmiNa2dBOZrlBcXs8EZIkXs1'}
+2025-10-25 10:29:12.020 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 1 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting content generation with provider 1 (GeminiClient)
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2496
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-25 10:29:12.021 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are an AI assistant that classifies user intents for travel itinerary management.
+
+Context:
+Itinerary: 4-day trip to Sydney, New South Wales, Australia with 25 activities (estimated ₹49450 per per...
+2025-10-25 10:29:12.022 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2775
+2025-10-25 10:29:12.023 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-25 10:29:14.060 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-25 10:29:14.060 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-25 10:29:14.060 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Response Length: 739
+2025-10-25 10:29:14.060 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"intent\": \"remove_accommodation\",\n  \"taskType\": \"edit\",\n  \"entities\": {\n    \"activity_type\": \"stay\",\n    \"day\": \"Day 4\"\n  },\n  \"confidence\": 0.98\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 699,
+    "candidatesTokenCount": 66,
+    "totalTokenCount": 894,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 699
+      }
+    ],
+    "thoughtsTokenCount": 129
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "IFn8aKrqNpO7vr0P5vmwkQM"
+}
+
+2025-10-25 10:29:14.065 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_2143304020_20251025_102914.json
+2025-10-25 10:29:14.065 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-25 10:29:14.065 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Generated content length: 163
+2025-10-25 10:29:14.065 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "intent": "remove_accommodation",
+  "taskType": "edit",
+  "entities": {
+    "activity_type": "stay",
+    "day": "Day 4"
+  },
+  "confidence": 0.98
+}
+```
+2025-10-25 10:29:14.066 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-25 10:29:14.066 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-10-25 10:29:14.700 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentRegistry - Created execution plan for 'edit': 1 agents, primary: EditorAgent
+2025-10-25 10:29:14.701 [http-nio-8080-exec-4] INFO  com.tripplanner.service.OrchestratorService - Executing agent plan: Task: edit, Agents: 1, Fallback: true, MaxRetries: 2, Timeout: 60000ms
+2025-10-25 10:29:14.701 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - === AGENT EXECUTION START ===
+2025-10-25 10:29:14.701 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Agent Kind: EDITOR
+2025-10-25 10:29:14.701 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:14.701 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:14.701 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Request Type: Map
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Request Data: {chatRequest=ChatRequest{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', scope='trip', day=null, selectedNodeId='null', text='remove the stay on day 4, i will travel to the airport to catch my flight', autoApply=false, userId='PEoULmiNa2dBOZrlBcXs8EZIkXs1'}, taskType=edit, autoApply=false, itineraryId=it_02ad2629-8022-4b7b-b9fc-02e00555e58a, scope=trip, text=remove the stay on day 4, i will travel to the airport to catch my flight, selectedNodeId=null, userId=PEoULmiNa2dBOZrlBcXs8EZIkXs1, day=null}
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Request Details: {chatRequest=ChatRequest{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', scope='trip', day=null, selectedNodeId='null', text='remove the stay on day 4, i will travel to the airport to catch my flight', autoApply=false, userId='PEoULmiNa2dBOZrlBcXs8EZIkXs1'}, taskType=edit, autoApply=false, itineraryId=it_02ad2629-8022-4b7b-b9fc-02e00555e58a, scope=trip, text=remove the stay on day 4, i will travel to the airport to catch my flight, selectedNodeId=null, userId=PEoULmiNa2dBOZrlBcXs8EZIkXs1, day=null}
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - =============================
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: queued
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 0
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Agent queued for execution
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-25 10:29:14.702 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:14.702620900Z
+2025-10-25 10:29:14.704 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:14.704 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Agent started
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-25 10:29:14.705 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:14.705590800Z
+2025-10-25 10:29:14.706 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:14.706 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:14.706 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:14.706 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Executing agent-specific logic for: EDITOR
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - EditorAgent executing for itinerary: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Loading itinerary
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: load
+2025-10-25 10:29:14.707 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:14.707982700Z
+2025-10-25 10:29:14.709 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:14.709 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:14.709 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:16.009 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - === ITINERARY STATE AFTER MIGRATION (EditorAgent) ===
+2025-10-25 10:29:16.009 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Day 1: 7 nodes - IDs: [day1_node1, day1_node2, day1_node3, day1_node4, day1_node5, day1_node6, day1_node7]
+2025-10-25 10:29:16.009 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Day 2: 6 nodes - IDs: [day2_node1, day2_node2, day2_node3, day2_node4, day2_node5, day2_node6]
+2025-10-25 10:29:16.010 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Day 3: 6 nodes - IDs: [day3_node1, day3_node2, day3_node3, day3_node4, day3_node5, day3_node6]
+2025-10-25 10:29:16.010 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Day 4: 6 nodes - IDs: [day4_node1, day4_node2, day4_node3, day4_node4, day4_node5, day4_node6]
+2025-10-25 10:29:16.010 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - =======================================================
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] WARN  com.tripplanner.agents.EditorAgent - Itinerary data validation warnings for it_02ad2629-8022-4b7b-b9fc-02e00555e58a:
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] WARN  com.tripplanner.agents.EditorAgent -   - Day 1: Node day1_node7 has invalid timing (start > end)
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] WARN  com.tripplanner.agents.EditorAgent -   - Day 2: Node day2_node6 has invalid timing (start > end)
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] WARN  com.tripplanner.agents.EditorAgent -   - Day 3: Node day3_node6 has invalid timing (start > end)
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] WARN  com.tripplanner.agents.EditorAgent -   - Day 4: Node day4_node6 has invalid timing (start > end)
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Itinerary data consistency validation passed with 4 warnings for it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:16.011 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 40
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Generating summary
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: summarize
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:16.011754900Z
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:16.012 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:16.013 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 60
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Generating changes
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: llm
+2025-10-25 10:29:16.014 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:16.014754900Z
+2025-10-25 10:29:16.015 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:16.015 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:16.015 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 8272
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
+2025-10-25 10:29:16.780 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are an expert travel itinerary editor.
+
+You must respond with valid JSON that matches this exact schema:
+{
+  "type": "object",
+  "properties": {
+    "ops": {
+      "type": "array",
+      "descript...
+2025-10-25 10:29:16.781 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 8871
+2025-10-25 10:29:16.781 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-10-25 10:29:18.964 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
+2025-10-25 10:29:18.964 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
+2025-10-25 10:29:18.964 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Response Length: 817
+2025-10-25 10:29:18.964 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"ops\": [\n    {\n      \"op\": \"delete\",\n      \"id\": \"day4_node6\"\n    }\n  ],\n  \"day\": 4,\n  \"reason\": \"Removed the overnight stay on Day 4 as the user will be traveling to the airport for a flight.\",\n  \"agent\": \"EditorAgent\"\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 2967,
+    "candidatesTokenCount": 87,
+    "totalTokenCount": 3111,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 2967
+      }
+    ],
+    "thoughtsTokenCount": 57
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "JVn8aKe7Mv3Zvr0P9KfG6AI"
+}
+
+2025-10-25 10:29:18.970 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-16910803_20251025_102918.json
+2025-10-25 10:29:18.971 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-10-25 10:29:18.972 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Generated content length: 237
+2025-10-25 10:29:18.972 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+{
+  "ops": [
+    {
+      "op": "delete",
+      "id": "day4_node6"
+    }
+  ],
+  "day": 4,
+  "reason": "Removed the overnight stay on Day 4 as the user will be traveling to the airport for a flight.",
+  "agent": "EditorAgent"
+}
+```
+2025-10-25 10:29:18.972 [http-nio-8080-exec-4] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-10-25 10:29:18.972 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - === EDITOR AGENT - FULL LLM RESPONSE ===
+2025-10-25 10:29:18.972 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - User Request: remove the stay on day 4, i will travel to the airport to catch my flight
+2025-10-25 10:29:18.972 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Raw Response: ```json
+{
+  "ops": [
+    {
+      "op": "delete",
+      "id": "day4_node6"
+    }
+  ],
+  "day": 4,
+  "reason": "Removed the overnight stay on Day 4 as the user will be traveling to the airport for a flight.",
+  "agent": "EditorAgent"
+}
+```
+2025-10-25 10:29:18.973 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - === END EDITOR AGENT RESPONSE ===
+2025-10-25 10:29:18.982 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Successfully generated ChangeSet with 1 operations
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Applying changes
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: apply
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:18.983085500Z
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:18.983 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:18.984 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:18.984 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ChangeEngine - Applying changes for itinerary: it_02ad2629-8022-4b7b-b9fc-02e00555e58a (using provided object)
+2025-10-25 10:29:19.324 [http-nio-8080-exec-4] INFO  com.tripplanner.service.RevisionService - Saving revision rev_1761368359324_9ecfa160 for itinerary: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:20.716 [http-nio-8080-exec-4] INFO  com.tripplanner.service.RevisionService - Successfully saved revision rev_1761368359324_9ecfa160 for itinerary: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: running
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Changes applied successfully
+2025-10-25 10:29:21.245 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: complete
+2025-10-25 10:29:21.247 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:21.245860900Z
+2025-10-25 10:29:21.247 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3677a86b-914f-429c-9313-1cc601c952b5
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: EDITOR
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Status: completed
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Message: Agent completed successfully
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Step: null
+2025-10-25 10:29:21.248 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-10-25T04:59:21.248285300Z
+2025-10-25 10:29:21.249 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a session=null payload={"updateType":"agent_progress","itineraryId":"it_02ad2629-8022-4b7b-b9fc-02e0055...(truncated)
+2025-10-25 10:29:21.249 [http-nio-8080-exec-4] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-10-25 10:29:21.249 [http-nio-8080-exec-4] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-10-25 10:29:21.250 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - === AGENT EXECUTION COMPLETED ===
+2025-10-25 10:29:21.250 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Agent Kind: EDITOR
+2025-10-25 10:29:21.250 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Itinerary ID: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:21.250 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Result Type: ApplyResult
+2025-10-25 10:29:21.250 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - Result: com.tripplanner.service.ChangeEngine$ApplyResult@743d4e1a
+2025-10-25 10:29:21.250 [http-nio-8080-exec-4] INFO  com.tripplanner.agents.EditorAgent - =================================
+2025-10-25 10:29:21.257 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:29:21.267 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [ChatResponse{intent='Changes applied successfully', message='Your itinerary has been updated.', chan (truncated)...]
+2025-10-25 10:29:21.273 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:29:21.273 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:29:21.281 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:29:21.281 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:29:21.281 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:29:21.282 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#saveChatMessage(String, Map, HttpServletRequest)
+2025-10-25 10:29:21.283 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{intent=Changes applied successfully, message=Your itinerary has been updated., changeSet=null, diff (truncated)...]
+2025-10-25 10:29:23.106 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ChatHistoryService - Saved chat message for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:29:23.107 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:29:23.108 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{applied=true, warnings=[], diff={added=[], removed=[{nodeId=day4_node6, day=4, fields=null, title=n (truncated)...]
+2025-10-25 10:29:23.110 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 201 CREATED
+2025-10-25 10:29:23.110 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:38.628 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=zq4todmz
+2025-10-25 10:32:38.628 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=zq4todmz
+2025-10-25 10:32:38.628 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=zq4todmz
+2025-10-25 10:32:38.629 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=zq4todmz
+2025-10-25 10:32:38.650 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:32:38.650 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:32:38.650 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:32:38.651 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:32:38.651 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:32:38.651 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:32:38.651 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:32:38.651 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:32:38.651 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:32:38.651 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:32:38.698 [http-nio-8080-exec-6] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=zq4todmz] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:32:38.698 [http-nio-8080-exec-6] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session zq4todmz
+2025-10-25 10:32:38.698 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=zq4todmz
+2025-10-25 10:32:38.698 [WebSocket-1] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=zq4todmz}], simpSessionId=zq4todmz}]
+2025-10-25 10:32:39.673 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761368559669
+2025-10-25 10:32:39.675 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761368559669
+2025-10-25 10:32:39.675 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761368559669", parameters={masked}
+2025-10-25 10:32:39.675 [http-nio-8080-exec-4] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:32:39.676 [http-nio-8080-exec-4] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761368559669
+2025-10-25 10:32:39.676 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:39.676 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:39.682 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/406/to1intjl/websocket
+2025-10-25 10:32:39.682 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/406/to1intjl/websocket
+2025-10-25 10:32:39.682 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/406/to1intjl/websocket", parameters={}
+2025-10-25 10:32:39.682 [http-nio-8080-exec-7] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:32:39.683 [http-nio-8080-exec-7] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/406/to1intjl/websocket
+2025-10-25 10:32:39.683 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:39.683 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:32:39.684 [http-nio-8080-exec-7] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=to1intjl]
+2025-10-25 10:32:39.686 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=to1intjl
+2025-10-25 10:32:39.692 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=to1intjl
+2025-10-25 10:32:39.692 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=to1intjl
+2025-10-25 10:32:39.692 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=to1intjl
+2025-10-25 10:32:41.175 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:32:41.175 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:32:41.176 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:32:41.178 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:41.178 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:42.224 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:32:42.224 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:32:42.224 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:32:42.225 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:42.226 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:44.982 [http-nio-8080-exec-5] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=to1intjl] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:32:44.982 [http-nio-8080-exec-5] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session to1intjl
+2025-10-25 10:32:44.982 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=to1intjl
+2025-10-25 10:32:44.982 [WebSocket-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=to1intjl}], simpSessionId=to1intjl}]
+2025-10-25 10:32:45.056 [MessageBroker-1] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [zq4todmz]
+2025-10-25 10:32:48.488 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries
+2025-10-25 10:32:48.489 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries
+2025-10-25 10:32:48.489 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries", parameters={}
+2025-10-25 10:32:48.489 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getAll(HttpServletRequest)
+2025-10-25 10:32:48.490 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting all itineraries
+2025-10-25 10:32:48.490 [http-nio-8080-exec-3] INFO  com.tripplanner.service.UserDataService - Fetching trip metadata for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:32:48.948 [http-nio-8080-exec-3] INFO  com.tripplanner.service.UserDataService - Found 6 trip metadata entries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:32:48.950 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Found 6 itineraries for user: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:32:48.950 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:32:48.950 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[ItineraryDto(id=it_02ad2629-8022-4b7b-b9fc-02e00555e58a, destination=Sydney, New South Wales, Austr (truncated)...]
+2025-10-25 10:32:48.952 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:48.952 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:50.053 [MessageBroker-1] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [to1intjl]
+2025-10-25 10:32:52.645 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:32:52.645 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:32:52.645 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:32:52.646 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:32:52.646 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:32:52.646 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:32:54.670 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:32:54.671 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:32:54.674 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:32:54.680 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:54.680 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:54.755 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:32:54.755 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:32:54.756 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:32:54.756 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:32:54.756 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:32:54.756 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:32:54.757 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:32:54.758 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:32:54.758 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:32:54.758 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:32:55.773 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761368575771
+2025-10-25 10:32:55.774 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761368575771
+2025-10-25 10:32:55.774 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761368575771", parameters={masked}
+2025-10-25 10:32:55.774 [http-nio-8080-exec-7] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:32:55.775 [http-nio-8080-exec-7] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761368575771
+2025-10-25 10:32:55.775 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:55.775 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:55.780 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/794/qbb50cno/websocket
+2025-10-25 10:32:55.780 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/794/qbb50cno/websocket
+2025-10-25 10:32:55.780 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/794/qbb50cno/websocket", parameters={}
+2025-10-25 10:32:55.781 [http-nio-8080-exec-8] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:32:55.781 [http-nio-8080-exec-8] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/794/qbb50cno/websocket
+2025-10-25 10:32:55.781 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:55.781 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:32:55.783 [http-nio-8080-exec-8] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=qbb50cno]
+2025-10-25 10:32:55.785 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=qbb50cno
+2025-10-25 10:32:55.789 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=qbb50cno
+2025-10-25 10:32:55.789 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=qbb50cno
+2025-10-25 10:32:55.789 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=qbb50cno
+2025-10-25 10:32:56.773 [http-nio-8080-exec-6] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:32:56.773 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:32:56.773 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:32:56.775 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:56.775 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:32:57.077 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:32:57.077 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:32:57.077 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:32:57.078 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:32:57.078 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:33:05.254 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=qbb50cno
+2025-10-25 10:33:05.254 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=qbb50cno
+2025-10-25 10:33:05.254 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=qbb50cno
+2025-10-25 10:33:05.254 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=qbb50cno
+2025-10-25 10:33:05.266 [http-nio-8080-exec-3] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=qbb50cno] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:33:05.266 [http-nio-8080-exec-3] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session qbb50cno
+2025-10-25 10:33:05.266 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=qbb50cno
+2025-10-25 10:33:05.267 [WebSocket-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=qbb50cno}], simpSessionId=qbb50cno}]
+2025-10-25 10:33:15.054 [MessageBroker-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [qbb50cno]
+2025-10-25 10:33:24.012 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:33:24.012 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:33:24.013 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:33:24.013 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:33:24.013 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:33:24.013 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:33:24.013 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:33:24.013 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:33:24.013 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:33:24.013 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:33:25.038 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761368605034
+2025-10-25 10:33:25.039 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761368605034
+2025-10-25 10:33:25.039 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761368605034", parameters={masked}
+2025-10-25 10:33:25.040 [http-nio-8080-exec-8] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:33:25.041 [http-nio-8080-exec-8] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761368605034
+2025-10-25 10:33:25.041 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:33:25.042 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:33:25.050 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/392/uklz22fk/websocket
+2025-10-25 10:33:25.050 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/392/uklz22fk/websocket
+2025-10-25 10:33:25.051 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/392/uklz22fk/websocket", parameters={}
+2025-10-25 10:33:25.051 [http-nio-8080-exec-9] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:33:25.052 [http-nio-8080-exec-9] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/392/uklz22fk/websocket
+2025-10-25 10:33:25.052 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:33:25.053 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:33:25.054 [http-nio-8080-exec-9] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=uklz22fk]
+2025-10-25 10:33:25.058 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=uklz22fk
+2025-10-25 10:33:25.062 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=uklz22fk
+2025-10-25 10:33:25.063 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=uklz22fk
+2025-10-25 10:33:25.063 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=uklz22fk
+2025-10-25 10:33:25.822 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:33:25.823 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:33:25.824 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:33:25.826 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:33:25.826 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:33:26.643 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:33:26.644 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:33:26.646 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:33:26.651 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:33:26.651 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:37:49.989 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:37:49.989 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:37:49.990 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:37:49.990 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:37:49.990 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:37:49.990 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:37:49.990 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:37:49.990 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:37:49.990 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:37:49.990 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:37:51.490 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=uklz22fk
+2025-10-25 10:37:51.490 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=uklz22fk
+2025-10-25 10:37:51.490 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=uklz22fk
+2025-10-25 10:37:51.491 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=uklz22fk
+2025-10-25 10:37:51.502 [http-nio-8080-exec-2] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=uklz22fk] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:37:51.502 [http-nio-8080-exec-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session uklz22fk
+2025-10-25 10:37:51.504 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=uklz22fk
+2025-10-25 10:37:51.504 [WebSocket-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=uklz22fk}], simpSessionId=uklz22fk}]
+2025-10-25 10:37:52.505 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:37:52.506 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:37:52.507 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:37:52.509 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:37:52.510 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:37:53.583 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:37:53.583 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:37:53.583 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:37:53.584 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:37:53.584 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:38:00.061 [MessageBroker-3] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [uklz22fk]
+2025-10-25 10:38:56.555 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:38:56.555 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:38:56.555 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:38:56.555 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:38:56.556 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:38:56.556 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:38:56.556 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:38:56.556 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:38:56.556 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:38:56.556 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:38:57.575 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761368937572
+2025-10-25 10:38:57.575 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761368937572
+2025-10-25 10:38:57.575 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761368937572", parameters={masked}
+2025-10-25 10:38:57.575 [http-nio-8080-exec-5] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:38:57.575 [http-nio-8080-exec-5] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761368937572
+2025-10-25 10:38:57.575 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:38:57.576 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:38:57.578 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/232/4h2fqwa1/websocket
+2025-10-25 10:38:57.578 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/232/4h2fqwa1/websocket
+2025-10-25 10:38:57.578 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/232/4h2fqwa1/websocket", parameters={}
+2025-10-25 10:38:57.578 [http-nio-8080-exec-4] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:38:57.579 [http-nio-8080-exec-4] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/232/4h2fqwa1/websocket
+2025-10-25 10:38:57.579 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:38:57.579 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:38:57.581 [http-nio-8080-exec-4] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=4h2fqwa1]
+2025-10-25 10:38:57.582 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=4h2fqwa1
+2025-10-25 10:38:57.585 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=4h2fqwa1
+2025-10-25 10:38:57.585 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=4h2fqwa1
+2025-10-25 10:38:57.585 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=4h2fqwa1
+2025-10-25 10:38:58.643 [http-nio-8080-exec-10] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:38:58.645 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:38:58.646 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:38:58.657 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:38:58.658 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:38:58.894 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:38:58.895 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:38:58.896 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:38:58.898 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:38:58.898 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:38:58.907 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:38:58.909 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:38:58.910 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:38:58.910 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:39:00.755 [http-nio-8080-exec-3] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:39:00.756 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:39:00.757 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:39:00.761 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:39:00.761 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:40:58.088 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=4h2fqwa1
+2025-10-25 10:40:58.088 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=4h2fqwa1
+2025-10-25 10:40:58.089 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=4h2fqwa1
+2025-10-25 10:40:58.089 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=4h2fqwa1
+2025-10-25 10:40:58.100 [http-nio-8080-exec-4] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=4h2fqwa1] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:40:58.100 [http-nio-8080-exec-4] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session 4h2fqwa1
+2025-10-25 10:40:58.100 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=4h2fqwa1
+2025-10-25 10:40:58.100 [WebSocket-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=4h2fqwa1}], simpSessionId=4h2fqwa1}]
+2025-10-25 10:41:05.064 [MessageBroker-4] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [4h2fqwa1]
+2025-10-25 10:42:48.835 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:42:48.836 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:42:48.836 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:42:48.836 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:42:48.836 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:42:48.837 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:42:51.418 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:42:51.418 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:42:51.419 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:42:51.420 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:51.420 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:51.582 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:42:51.583 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:42:51.583 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:42:51.583 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:42:51.583 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:42:51.583 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:42:51.583 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:42:51.584 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:42:51.584 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:42:51.584 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:42:52.607 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761369172603
+2025-10-25 10:42:52.608 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761369172603
+2025-10-25 10:42:52.608 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761369172603", parameters={masked}
+2025-10-25 10:42:52.609 [http-nio-8080-exec-1] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:42:52.610 [http-nio-8080-exec-1] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761369172603
+2025-10-25 10:42:52.610 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:52.610 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:52.616 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/335/y3lgoczs/websocket
+2025-10-25 10:42:52.618 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/335/y3lgoczs/websocket
+2025-10-25 10:42:52.618 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/335/y3lgoczs/websocket", parameters={}
+2025-10-25 10:42:52.618 [http-nio-8080-exec-3] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:42:52.619 [http-nio-8080-exec-3] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/335/y3lgoczs/websocket
+2025-10-25 10:42:52.620 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:52.621 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:42:52.622 [http-nio-8080-exec-3] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=y3lgoczs]
+2025-10-25 10:42:52.625 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=y3lgoczs
+2025-10-25 10:42:52.629 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=y3lgoczs
+2025-10-25 10:42:52.629 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=y3lgoczs
+2025-10-25 10:42:52.630 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=y3lgoczs
+2025-10-25 10:42:53.565 [http-nio-8080-exec-2] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:42:53.567 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:42:53.569 [http-nio-8080-exec-2] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:42:53.575 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:53.575 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:53.588 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:42:53.589 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:42:53.589 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:42:53.589 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:42:53.590 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:42:53.590 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:42:55.256 [http-nio-8080-exec-10] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:42:55.257 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:42:55.257 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:42:55.257 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:55.258 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:55.261 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:42:55.261 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:42:55.261 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:42:55.261 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:42:55.285 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=y3lgoczs
+2025-10-25 10:42:55.285 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=y3lgoczs
+2025-10-25 10:42:55.286 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=y3lgoczs
+2025-10-25 10:42:55.286 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=y3lgoczs
+2025-10-25 10:42:55.310 [http-nio-8080-exec-9] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=y3lgoczs] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:42:55.310 [http-nio-8080-exec-9] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session y3lgoczs
+2025-10-25 10:42:55.310 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=y3lgoczs
+2025-10-25 10:42:55.310 [WebSocket-1] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=y3lgoczs}], simpSessionId=y3lgoczs}]
+2025-10-25 10:42:55.634 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:42:55.635 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:42:55.637 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:42:55.643 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:55.643 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:57.224 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:42:57.225 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:42:57.225 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:42:57.227 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:57.227 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:42:57.237 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:42:57.239 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:42:57.239 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:42:57.240 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:42:59.225 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:42:59.226 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:42:59.227 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:42:59.231 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:42:59.232 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:00.801 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:43:00.801 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:00.802 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:00.802 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:43:00.802 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:43:00.802 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:43:00.802 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:43:00.802 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:43:00.804 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:00.804 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:43:01.807 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761369181804
+2025-10-25 10:43:01.808 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761369181804
+2025-10-25 10:43:01.808 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761369181804", parameters={masked}
+2025-10-25 10:43:01.808 [http-nio-8080-exec-6] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:43:01.809 [http-nio-8080-exec-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761369181804
+2025-10-25 10:43:01.809 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:01.809 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:01.814 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/502/qmpvqe3j/websocket
+2025-10-25 10:43:01.814 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/502/qmpvqe3j/websocket
+2025-10-25 10:43:01.814 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/502/qmpvqe3j/websocket", parameters={}
+2025-10-25 10:43:01.814 [http-nio-8080-exec-2] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:43:01.815 [http-nio-8080-exec-2] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/502/qmpvqe3j/websocket
+2025-10-25 10:43:01.815 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:01.816 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:43:01.816 [http-nio-8080-exec-2] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=qmpvqe3j]
+2025-10-25 10:43:01.819 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=qmpvqe3j
+2025-10-25 10:43:01.821 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=qmpvqe3j
+2025-10-25 10:43:01.821 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=qmpvqe3j
+2025-10-25 10:43:01.821 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=qmpvqe3j
+2025-10-25 10:43:02.244 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=qmpvqe3j
+2025-10-25 10:43:02.244 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=qmpvqe3j
+2025-10-25 10:43:02.245 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=qmpvqe3j
+2025-10-25 10:43:02.245 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=qmpvqe3j
+2025-10-25 10:43:02.276 [http-nio-8080-exec-7] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=qmpvqe3j] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 10:43:02.276 [http-nio-8080-exec-7] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session qmpvqe3j
+2025-10-25 10:43:02.277 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=qmpvqe3j
+2025-10-25 10:43:02.277 [WebSocket-1] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=qmpvqe3j}], simpSessionId=qmpvqe3j}]
+2025-10-25 10:43:02.518 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:02.520 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:02.521 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:43:02.523 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:02.523 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:03.782 [http-nio-8080-exec-3] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:43:03.783 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:03.784 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:43:03.786 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:03.787 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:05.051 [MessageBroker-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [y3lgoczs]
+2025-10-25 10:43:10.064 [MessageBroker-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [qmpvqe3j]
+2025-10-25 10:43:25.408 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:43:25.408 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:25.409 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:43:25.409 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:25.409 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:43:25.409 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:43:25.409 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:43:25.409 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:43:25.410 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:25.410 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:43:26.412 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761369206411
+2025-10-25 10:43:26.413 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761369206411
+2025-10-25 10:43:26.413 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761369206411", parameters={masked}
+2025-10-25 10:43:26.413 [http-nio-8080-exec-6] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:43:26.414 [http-nio-8080-exec-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761369206411
+2025-10-25 10:43:26.414 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:26.414 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:26.420 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/942/bwxu1q00/websocket
+2025-10-25 10:43:26.420 [http-nio-8080-exec-2] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/942/bwxu1q00/websocket
+2025-10-25 10:43:26.420 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/942/bwxu1q00/websocket", parameters={}
+2025-10-25 10:43:26.420 [http-nio-8080-exec-2] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 10:43:26.421 [http-nio-8080-exec-2] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/942/bwxu1q00/websocket
+2025-10-25 10:43:26.421 [http-nio-8080-exec-2] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:26.421 [http-nio-8080-exec-2] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 10:43:26.422 [http-nio-8080-exec-2] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=bwxu1q00]
+2025-10-25 10:43:26.424 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=bwxu1q00
+2025-10-25 10:43:26.426 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=bwxu1q00
+2025-10-25 10:43:26.427 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=bwxu1q00
+2025-10-25 10:43:26.427 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=bwxu1q00
+2025-10-25 10:43:27.445 [http-nio-8080-exec-5] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:43:27.445 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:27.446 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:43:27.447 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:27.448 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:27.454 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:43:27.455 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 10:43:27.455 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 10:43:27.455 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 10:43:27.456 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:27.456 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - User authenticated, checking ownership: PEoULmiNa2dBOZrlBcXs8EZIkXs1
+2025-10-25 10:43:27.704 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:27.704 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:27.704 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:43:27.705 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:27.705 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:27.709 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:27.709 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:27.709 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:43:27.709 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:43:29.717 [http-nio-8080-exec-9] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 10:43:29.718 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:29.720 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 10:43:29.724 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:29.724 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:30.843 [http-nio-8080-exec-7] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:30.844 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:30.844 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:43:30.847 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:30.847 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:43:30.860 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:30.862 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 10:43:30.862 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 10:43:30.862 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 10:43:32.579 [http-nio-8080-exec-8] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 10:43:32.580 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 10:43:32.580 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 10:43:32.582 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 10:43:32.582 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 10:54:19.560 [MessageBroker-2] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 9 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(9)-CONNECTED(9)-DISCONNECT(7)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 409]
+2025-10-25 11:24:19.565 [MessageBroker-6] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 9 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(9)-CONNECTED(9)-DISCONNECT(7)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 842]
+2025-10-25 11:54:19.575 [MessageBroker-6] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 9 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(9)-CONNECTED(9)-DISCONNECT(7)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 1275]
+2025-10-25 12:24:19.588 [MessageBroker-3] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 9 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(9)-CONNECTED(9)-DISCONNECT(7)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 280], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 1708]
+2025-10-25 12:49:29.293 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-0 session=bwxu1q00
+2025-10-25 12:49:29.293 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-1 session=bwxu1q00
+2025-10-25 12:49:29.294 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing UNSUBSCRIBE id=sub-2 session=bwxu1q00
+2025-10-25 12:49:29.294 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT receipt=close-3 session=bwxu1q00
+2025-10-25 12:49:29.321 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 12:49:29.321 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing OPTIONS /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 12:49:29.343 [http-nio-8080-exec-9] WARN  c.t.config.FirebaseAuthConfig$FirebaseAuthFilter - Invalid token for chat endpoint: /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history, continuing without auth
+2025-10-25 12:49:29.344 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 12:49:29.346 [http-nio-8080-exec-9] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history
+2025-10-25 12:49:29.346 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/chat/history", parameters={}
+2025-10-25 12:49:29.347 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getChatHistory(String, HttpServletRequest)
+2025-10-25 12:49:29.343 [http-nio-8080-exec-7] WARN  c.t.config.FirebaseAuthConfig$FirebaseAuthFilter - Invalid token for /json endpoint: /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+com.google.firebase.auth.FirebaseAuthException: Firebase ID token has expired. Get a fresh ID token and try again. See https://firebase.google.com/docs/auth/admin/verify-id-tokens for details on how to retrieve an ID token.
+	at com.google.firebase.auth.FirebaseTokenVerifierImpl.newException(FirebaseTokenVerifierImpl.java:237)
+	at com.google.firebase.auth.FirebaseTokenVerifierImpl.newException(FirebaseTokenVerifierImpl.java:232)
+	at com.google.firebase.auth.FirebaseTokenVerifierImpl.checkContents(FirebaseTokenVerifierImpl.java:227)
+	at com.google.firebase.auth.FirebaseTokenVerifierImpl.verifyToken(FirebaseTokenVerifierImpl.java:100)
+	at com.google.firebase.auth.AbstractFirebaseAuth$3.execute(AbstractFirebaseAuth.java:307)
+	at com.google.firebase.auth.AbstractFirebaseAuth$3.execute(AbstractFirebaseAuth.java:304)
+	at com.google.firebase.internal.CallableOperation.call(CallableOperation.java:36)
+	at com.google.firebase.auth.AbstractFirebaseAuth.verifyIdToken(AbstractFirebaseAuth.java:269)
+	at com.google.firebase.auth.AbstractFirebaseAuth.verifyIdToken(AbstractFirebaseAuth.java:241)
+	at com.tripplanner.config.FirebaseAuthConfig$FirebaseAuthFilter.doFilterInternal(FirebaseAuthConfig.java:72)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1769)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-10-25 12:49:29.348 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 12:49:29.349 [http-nio-8080-exec-7] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json
+2025-10-25 12:49:29.349 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/api/v1/itineraries/it_02ad2629-8022-4b7b-b9fc-02e00555e58a/json", parameters={}
+2025-10-25 12:49:29.349 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#getItineraryJson(String, HttpServletRequest)
+2025-10-25 12:49:29.352 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Getting normalized itinerary JSON: it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 12:49:29.373 [http-nio-8080-exec-8] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - WebSocketServerSockJsSession[id=bwxu1q00] closed with CloseStatus[code=1000, reason=null]
+2025-10-25 12:49:29.373 [http-nio-8080-exec-8] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - Clearing session bwxu1q00
+2025-10-25 12:49:29.373 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing DISCONNECT session=bwxu1q00
+2025-10-25 12:49:29.373 [WebSocket-2] DEBUG o.s.w.socket.messaging.SubProtocolWebSocketHandler - No session for GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT_ACK, simpDisconnectMessage=GenericMessage [payload=byte[0], headers={simpMessageType=DISCONNECT, stompCommand=DISCONNECT, simpSessionAttributes={org.springframework.messaging.simp.SimpAttributes.COMPLETED=true}, simpSessionId=bwxu1q00}], simpSessionId=bwxu1q00}]
+2025-10-25 12:49:30.354 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/info?t=1761376770349
+2025-10-25 12:49:30.355 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/info?t=1761376770349
+2025-10-25 12:49:30.356 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/info?t=1761376770349", parameters={masked}
+2025-10-25 12:49:30.356 [http-nio-8080-exec-3] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 12:49:30.357 [http-nio-8080-exec-3] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/info?t=1761376770349
+2025-10-25 12:49:30.359 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 12:49:30.359 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 12:49:30.367 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing GET /ws/431/g03gymlm/websocket
+2025-10-25 12:49:30.367 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured GET /ws/431/g03gymlm/websocket
+2025-10-25 12:49:30.368 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - GET "/ws/431/g03gymlm/websocket", parameters={}
+2025-10-25 12:49:30.368 [http-nio-8080-exec-6] DEBUG o.s.w.s.server.support.WebSocketHandlerMapping - Mapped to org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler@2e44cb34
+2025-10-25 12:49:30.370 [http-nio-8080-exec-6] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Processing transport request: GET http://localhost:8080/ws/431/g03gymlm/websocket
+2025-10-25 12:49:30.372 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 12:49:30.375 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 101 SWITCHING_PROTOCOLS
+2025-10-25 12:49:30.378 [http-nio-8080-exec-6] DEBUG o.s.w.s.handler.LoggingWebSocketHandlerDecorator - New WebSocketServerSockJsSession[id=g03gymlm]
+2025-10-25 12:49:30.381 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing CONNECT session=g03gymlm
+2025-10-25 12:49:30.386 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-0 session=g03gymlm
+2025-10-25 12:49:30.387 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/agent/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-1 session=g03gymlm
+2025-10-25 12:49:30.387 [WebSocket-2] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/chat/it_02ad2629-8022-4b7b-b9fc-02e00555e58a id=sub-2 session=g03gymlm
+2025-10-25 12:49:31.401 [http-nio-8080-exec-9] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 2 chat messages for itinerary it_02ad2629-8022-4b7b-b9fc-02e00555e58a
+2025-10-25 12:49:31.405 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 12:49:31.406 [http-nio-8080-exec-9] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [[{id=hkvkFuGbglnFjhk4Xhpy, message=remove the stay on day 4, i will travel to the airport to catch m (truncated)...]
+2025-10-25 12:49:31.411 [http-nio-8080-exec-9] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 12:49:31.412 [http-nio-8080-exec-9] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 12:49:31.711 [http-nio-8080-exec-7] INFO  com.tripplanner.controller.ItinerariesController - Normalized itinerary found: it_02ad2629-8022-4b7b-b9fc-02e00555e58a, status: completed
+2025-10-25 12:49:31.712 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-10-25 12:49:31.714 [http-nio-8080-exec-7] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [NormalizedItinerary{itineraryId='it_02ad2629-8022-4b7b-b9fc-02e00555e58a', version=2, userId='null', (truncated)...]
+2025-10-25 12:49:31.718 [http-nio-8080-exec-7] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-10-25 12:49:31.718 [http-nio-8080-exec-7] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-10-25 12:49:35.056 [MessageBroker-4] DEBUG o.s.w.s.s.transport.handler.DefaultSockJsService - Closed 1 sessions: [bwxu1q00]
+2025-10-25 12:54:19.597 [MessageBroker-5] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 10 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(10)-CONNECTED(10)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 310], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 310], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 2140]
+2025-10-25 13:24:19.613 [MessageBroker-4] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 10 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(10)-CONNECTED(10)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 310], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 310], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 2573]
+2025-10-25 13:54:19.624 [MessageBroker-1] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 10 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(10)-CONNECTED(10)-DISCONNECT(8)], stompBrokerRelay[null], inboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 310], outboundChannel[pool size = 2, active threads = 0, queued tasks = 0, completed tasks = 310], sockJsScheduler[pool size = 8, active threads = 1, queued tasks = 2, completed tasks = 3006]
