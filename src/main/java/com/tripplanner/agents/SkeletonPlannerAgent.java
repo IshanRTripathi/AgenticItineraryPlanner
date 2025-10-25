@@ -185,9 +185,11 @@ public class SkeletonPlannerAgent extends BaseAgent {
                         logger.debug("Assigned ID {} to node: {}", nodeId, node.getTitle());
                     }
                     
-                    // Set placeholder values
+                    // Set placeholder values with more descriptive titles
                     if (node.getTitle() == null || node.getTitle().isEmpty()) {
-                        node.setTitle(String.format("%s placeholder", node.getType()));
+                        String placeholderTitle = generatePlaceholderTitle(node.getType(), dayNumber, i + 1);
+                        node.setTitle(placeholderTitle);
+                        logger.debug("Set placeholder title '{}' for node {}", placeholderTitle, node.getId());
                     }
                     
                     // Initialize location if null
@@ -204,6 +206,31 @@ public class SkeletonPlannerAgent extends BaseAgent {
             logger.error("Failed to parse skeleton response", e);
             throw new RuntimeException("Failed to parse skeleton: " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Generate a descriptive placeholder title for a node based on its type and position.
+     */
+    private String generatePlaceholderTitle(String nodeType, int dayNumber, int sequenceNumber) {
+        String timeOfDay = getTimeOfDay(sequenceNumber);
+        
+        return switch (nodeType != null ? nodeType.toLowerCase() : "activity") {
+            case "meal", "restaurant" -> String.format("%s Meal (Day %d)", timeOfDay, dayNumber);
+            case "attraction", "activity" -> String.format("%s Activity (Day %d)", timeOfDay, dayNumber);
+            case "transport", "transportation" -> String.format("Transport (Day %d)", dayNumber);
+            case "accommodation", "hotel" -> String.format("Accommodation (Day %d)", dayNumber);
+            default -> String.format("%s Activity (Day %d)", timeOfDay, dayNumber);
+        };
+    }
+    
+    /**
+     * Determine time of day based on sequence number.
+     */
+    private String getTimeOfDay(int sequenceNumber) {
+        if (sequenceNumber <= 2) return "Morning";
+        if (sequenceNumber <= 4) return "Afternoon";
+        if (sequenceNumber <= 6) return "Evening";
+        return "Late";
     }
     
     private NormalizedItinerary createInitialItinerary(String itineraryId, CreateItineraryReq request) {

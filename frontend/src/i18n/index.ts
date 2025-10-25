@@ -2,24 +2,24 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-// Import translation files - temporarily disabled for deployment
-// import en from './locales/en.json';
-// import hi from './locales/hi.json';
-// import te from './locales/te.json';
-// import bn from './locales/bn.json';
+// Import translation files
+import en from './locales/en.json';
+import hi from './locales/hi.json';
+import te from './locales/te.json';
+import bn from './locales/bn.json';
 
 const resources = {
   en: {
-    translation: {} // Empty translations for now
+    translation: en
   },
   hi: {
-    translation: {}
+    translation: hi
   },
   te: {
-    translation: {}
+    translation: te
   },
   bn: {
-    translation: {}
+    translation: bn
   }
 };
 
