@@ -12,3 +12,6 @@ export function AgentProgressPage() {
     </div>
   );
 }
+
+
+export default AgentProgressPage;

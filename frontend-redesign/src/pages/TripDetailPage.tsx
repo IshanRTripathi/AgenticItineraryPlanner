@@ -1,83 +1,31 @@
 /**
  * Trip Detail Page
- * Shows complete itinerary with day-by-day breakdown
+ * Shows complete itinerary with sidebar navigation
+ * Task 24: Full sidebar implementation
  */
 
 import { useState } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { TripSidebar } from '@/components/trip/TripSidebar';
 import { BookingModal } from '@/components/booking/BookingModal';
-import { BookingCard } from '@/components/booking/BookingCard';
-import { 
-  Calendar, MapPin, Users, DollarSign, Clock, 
-  Plane, Hotel, UtensilsCrossed, Camera, ArrowLeft 
-} from 'lucide-react';
-
-// Mock data - replace with API call
-const MOCK_TRIP = {
-  id: '1',
-  destination: 'Paris, France',
-  startDate: '2025-06-15',
-  endDate: '2025-06-22',
-  status: 'upcoming',
-  imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200',
-  travelers: 2,
-  budget: 'moderate',
-  days: [
-    {
-      day: 1,
-      date: '2025-06-15',
-      title: 'Arrival & Eiffel Tower',
-      activities: [
-        { time: '10:00 AM', title: 'Arrive at Charles de Gaulle Airport', icon: Plane },
-        { time: '12:00 PM', title: 'Check-in at Hotel Le Marais', icon: Hotel },
-        { time: '3:00 PM', title: 'Visit Eiffel Tower', icon: Camera },
-        { time: '7:00 PM', title: 'Dinner at Le Jules Verne', icon: UtensilsCrossed },
-      ],
-    },
-    {
-      day: 2,
-      date: '2025-06-16',
-      title: 'Louvre & Notre-Dame',
-      activities: [
-        { time: '9:00 AM', title: 'Breakfast at hotel', icon: UtensilsCrossed },
-        { time: '10:00 AM', title: 'Louvre Museum Tour', icon: Camera },
-        { time: '2:00 PM', title: 'Lunch at Café Marly', icon: UtensilsCrossed },
-        { time: '4:00 PM', title: 'Notre-Dame Cathedral', icon: Camera },
-      ],
-    },
-  ],
-};
-
-// Mock bookings data
-const MOCK_BOOKINGS = [
-  {
-    id: '1',
-    type: 'flight' as const,
-    name: 'Air France AF123',
-    date: '2025-06-15',
-    location: 'Paris CDG',
-    price: 850,
-    status: 'confirmed' as const,
-    confirmationCode: 'AF123XYZ',
-  },
-  {
-    id: '2',
-    type: 'hotel' as const,
-    name: 'Hotel Le Marais',
-    date: '2025-06-15',
-    location: 'Paris, France',
-    price: 1200,
-    status: 'confirmed' as const,
-    confirmationCode: 'HLM456ABC',
-  },
-];
+import { BudgetTab } from '@/components/trip/tabs/BudgetTab';
+import { PackingTab } from '@/components/trip/tabs/PackingTab';
+import { DocsTab } from '@/components/trip/tabs/DocsTab';
+import { ViewTab } from '@/components/trip/tabs/ViewTab';
+import { PlanTab } from '@/components/trip/tabs/PlanTab';
+import { BookingsTab } from '@/components/trip/tabs/BookingsTab';
+import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
+import { ErrorDisplay } from '@/components/error/ErrorDisplay';
+import { useItinerary } from '@/hooks/useItinerary';
 
 export function TripDetailPage() {
-  const [activeTab, setActiveTab] = useState('itinerary');
+  const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { data: itinerary, isLoading, error, refetch } = useItinerary(id);
+  
+  // Get active tab from URL or default to 'view'
+  const activeTab = searchParams.get('tab') || 'view';
+  
   const [bookingModal, setBookingModal] = useState<{
     isOpen: boolean;
     type: 'flight' | 'hotel' | 'activity';
@@ -88,169 +36,102 @@ export function TripDetailPage() {
     name: '',
   });
 
-  const openBookingModal = (type: 'flight' | 'hotel' | 'activity', name: string) => {
-    setBookingModal({ isOpen: true, type, name });
+  // Handle tab change with URL update
+  const handleTabChange = (tab: string) => {
+    setSearchParams({ tab });
+  };
+
+  // Show loading skeleton while fetching data
+  if (isLoading) {
+    return <TripDetailSkeleton />;
+  }
+
+  // Show error state if fetch failed
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <ErrorDisplay
+          error={error as Error}
+          onRetry={() => refetch()}
+          onGoBack={() => window.history.back()}
+        />
+      </div>
+    );
+  }
+
+  // Show error if no itinerary data
+  if (!itinerary) {
+    return (
+      <div className="min-h-screen bg-background">
+        <ErrorDisplay
+          error={new Error('Itinerary not found')}
+          onGoBack={() => window.history.back()}
+        />
+      </div>
+    );
+  }
+
+  // Extract data from real itinerary
+  const destination = itinerary.days[0]?.location || itinerary.summary || 'Unknown Destination';
+  const startDate = itinerary.days[0]?.date || '';
+  const endDate = itinerary.days[itinerary.days.length - 1]?.date || '';
+  const travelers = 2; // TODO: Get from itinerary metadata when available
+
+  const formatDateRange = (start: string, end: string) => {
+    const startFormatted = new Date(start).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    const endFormatted = new Date(end).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    return `${startFormatted} - ${endFormatted}`;
   };
 
   const closeBookingModal = () => {
     setBookingModal({ ...bookingModal, isOpen: false });
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
+  // Render active tab content
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'view':
+        return <ViewTab itinerary={itinerary} />;
+      case 'plan':
+        return <PlanTab itinerary={itinerary} />;
+      case 'bookings':
+        return <BookingsTab itinerary={itinerary} />;
+      case 'budget':
+        return <BudgetTab tripId={id!} />;
+      case 'packing':
+        return <PackingTab />;
+      case 'docs':
+        return <DocsTab />;
+      default:
+        return <ViewTab itinerary={itinerary} />;
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-1">
-        {/* Hero Section */}
-        <div className="relative h-96 overflow-hidden">
-          <img
-            src={MOCK_TRIP.imageUrl}
-            alt={MOCK_TRIP.destination}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          
-          <div className="absolute inset-0 flex items-end">
-            <div className="container pb-8">
-              <Button
-                variant="ghost"
-                className="text-white hover:bg-white/20 mb-4"
-                onClick={() => window.history.back()}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Trips
-              </Button>
-              
-              <h1 className="text-5xl font-bold text-white mb-4 flex items-center gap-3">
-                <MapPin className="w-10 h-10" />
-                {MOCK_TRIP.destination}
-              </h1>
-              
-              <div className="flex flex-wrap gap-6 text-white/90">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>{formatDate(MOCK_TRIP.startDate)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  <span>{MOCK_TRIP.travelers} travelers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5" />
-                  <span className="capitalize">{MOCK_TRIP.budget} budget</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="flex h-screen overflow-hidden bg-muted">
+      {/* Sidebar */}
+      <TripSidebar
+        tripId={id!}
+        destination={destination}
+        dateRange={formatDateRange(startDate, endDate)}
+        travelerCount={travelers}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+      />
 
-        {/* Content */}
-        <div className="container py-12">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-8">
-              <TabsTrigger value="itinerary">Day-by-Day Itinerary</TabsTrigger>
-              <TabsTrigger value="bookings">Bookings</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="itinerary">
-              <div className="space-y-6">
-                {MOCK_TRIP.days.map((day) => (
-                  <Card key={day.day}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold">
-                          {day.day}
-                        </div>
-                        <div>
-                          <div className="text-xl">{day.title}</div>
-                          <div className="text-sm font-normal text-muted-foreground">
-                            {formatDate(day.date)}
-                          </div>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {day.activities.map((activity, idx) => {
-                          const Icon = activity.icon;
-                          return (
-                            <div
-                              key={idx}
-                              className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors"
-                            >
-                              <div className="flex-shrink-0">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                  <Icon className="w-5 h-5 text-primary" />
-                                </div>
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Clock className="w-4 h-4 text-muted-foreground" />
-                                  <span className="text-sm font-semibold text-muted-foreground">
-                                    {activity.time}
-                                  </span>
-                                </div>
-                                <div className="font-medium">{activity.title}</div>
-                              </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => openBookingModal(
-                                  activity.icon === Plane ? 'flight' : 
-                                  activity.icon === Hotel ? 'hotel' : 'activity',
-                                  activity.title
-                                )}
-                              >
-                                Book Now
-                              </Button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="bookings">
-              {MOCK_BOOKINGS.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {MOCK_BOOKINGS.map((booking) => (
-                    <BookingCard key={booking.id} booking={booking} />
-                  ))}
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">No bookings yet</p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="documents">
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">No documents uploaded</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          {renderTabContent()}
         </div>
       </main>
-
-      <Footer />
 
       {/* Booking Modal */}
       <BookingModal
@@ -262,3 +143,6 @@ export function TripDetailPage() {
     </div>
   );
 }
+
+
+export default TripDetailPage;

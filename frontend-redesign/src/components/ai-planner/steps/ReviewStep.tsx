@@ -16,39 +16,40 @@ export function ReviewStep({ data }: ReviewStepProps) {
 
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-foreground mb-1">
           Review your trip details
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Make sure everything looks good before we create your itinerary
         </p>
       </div>
 
-      <div className="grid gap-4">
+      {/* Two Column Layout for Review */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Destination */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="w-5 h-5 text-primary" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <MapPin className="w-4 h-4 text-primary" />
               Destination
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-semibold">{data.destination || 'Not selected'}</p>
+            <p className="font-semibold">{data.destination || 'Not selected'}</p>
           </CardContent>
         </Card>
 
         {/* Dates */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Calendar className="w-5 h-5 text-primary" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="w-4 h-4 text-primary" />
               Travel Dates
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
+            <div className="space-y-0.5 text-sm">
               <p><span className="text-muted-foreground">From:</span> {data.startDate || 'Not selected'}</p>
               <p><span className="text-muted-foreground">To:</span> {data.endDate || 'Not selected'}</p>
             </div>
@@ -57,14 +58,14 @@ export function ReviewStep({ data }: ReviewStepProps) {
 
         {/* Travelers */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Users className="w-5 h-5 text-primary" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="w-4 h-4 text-primary" />
               Travelers
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
+            <div className="space-y-0.5 text-sm">
               <p><span className="text-muted-foreground">Adults:</span> {data.adults || 0}</p>
               {(data.children || 0) > 0 && (
                 <p><span className="text-muted-foreground">Children:</span> {data.children}</p>
@@ -72,22 +73,24 @@ export function ReviewStep({ data }: ReviewStepProps) {
               {(data.infants || 0) > 0 && (
                 <p><span className="text-muted-foreground">Infants:</span> {data.infants}</p>
               )}
-              <p className="font-semibold mt-2">Total: {totalTravelers} travelers</p>
+              <p className="font-semibold mt-1">Total: {totalTravelers} travelers</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Preferences */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Heart className="w-5 h-5 text-primary" />
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Heart className="w-4 h-4 text-primary" />
               Preferences
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <p><span className="text-muted-foreground">Budget:</span> <span className="capitalize">{data.budget || 'Not selected'}</span></p>
+            <div className="space-y-0.5 text-sm">
+              {data.budgetRange && (
+                <p><span className="text-muted-foreground">Budget:</span> ${data.budgetRange[0]} - ${data.budgetRange[1]}</p>
+              )}
               <p><span className="text-muted-foreground">Pace:</span> <span className="capitalize">{data.pace || 'Not selected'}</span></p>
               {data.interests && data.interests.length > 0 && (
                 <p>
@@ -100,8 +103,8 @@ export function ReviewStep({ data }: ReviewStepProps) {
         </Card>
       </div>
 
-      <div className="bg-muted/50 rounded-lg p-4 text-center">
-        <p className="text-sm text-muted-foreground">
+      <div className="bg-muted/50 rounded-lg p-3 text-center">
+        <p className="text-xs text-muted-foreground">
           Click "Create Itinerary" to let our AI craft your perfect trip
         </p>
       </div>

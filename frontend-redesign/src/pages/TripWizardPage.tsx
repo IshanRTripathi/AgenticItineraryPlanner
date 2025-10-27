@@ -1,14 +1,14 @@
 /**
  * AI Trip Wizard Page
- * Premium multi-step wizard for trip planning
+ * Premium multi-step wizard for trip planning with enhanced UI components
  */
 
-import { TripWizard } from '@/components/ai-planner/TripWizard';
+import { PremiumTripWizard } from '@/components/ai-planner/PremiumTripWizard';
 
-export function TripWizardPage() {
+function TripWizardPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 py-4 md:py-12 px-4">
-      <TripWizard />
-    </div>
+    <PremiumTripWizard />
   );
 }
+
+export default TripWizardPage;

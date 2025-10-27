@@ -1,38 +1,62 @@
 /**
- * Hero Section with Video Loop (Emirates-inspired)
- * Premium hero with glass morphism search widget
+ * Hero Section with Parallax Effect
+ * Premium hero with smooth animations
+ * Design: Emirates.com luxury + Apple.com refinement
  */
 
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
+import { useParallax } from '@/hooks/useScrollAnimation';
 
 export function HeroSection() {
+  const parallaxOffset = useParallax(0.5);
+
   return (
     <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Video Background (placeholder - add actual video) */}
-      <div className="absolute inset-0 gradient-hero">
+      {/* Parallax Background */}
+      <motion.div 
+        className="absolute inset-0 gradient-hero"
+        style={{ y: parallaxOffset }}
+      >
         {/* Animated floating particles */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Content */}
+      {/* Content with Animations */}
       <div className="relative z-10 container text-center text-white">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4 animate-fade-in">
+        <motion.h1 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+          className="text-5xl md:text-6xl font-bold mb-4"
+        >
           Plan Your Perfect Trip
-        </h1>
-        <p className="text-xl md:text-2xl mb-8 text-white/90 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="text-xl md:text-2xl mb-8 text-white/90"
+        >
           Discover amazing destinations with AI-powered itineraries
-        </p>
+        </motion.p>
 
         {/* AI Planner CTA */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: [0.4, 0, 0.2, 1] }}
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+        >
           <Button
             size="lg"
             variant="secondary"
-            className="text-lg px-8 py-6 h-auto"
+            className="text-lg px-8 py-6 h-auto hover:scale-105 transition-transform"
             onClick={() => window.location.href = '/ai-planner'}
           >
             <Sparkles className="mr-2 h-5 w-5" />
@@ -41,7 +65,7 @@ export function HeroSection() {
           <p className="text-sm text-white/80">
             Get a personalized itinerary in minutes
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

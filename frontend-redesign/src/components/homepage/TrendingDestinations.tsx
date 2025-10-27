@@ -1,10 +1,13 @@
 /**
  * Trending Destinations Section
- * Grid of popular destinations with hover effects
+ * Grid of popular destinations with scroll animations
+ * Design: Apple.com refinement + Emirates.com luxury
  */
 
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const MOCK_DESTINATIONS = [
   {
@@ -73,45 +76,77 @@ const MOCK_DESTINATIONS = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.4, 0, 0.2, 1],
+    },
+  },
+};
+
 export function TrendingDestinations() {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
+
   return (
-    <section className="py-16 bg-muted">
+    <section ref={ref as any} className="py-16 bg-muted">
       <div className="container">
-        <h2 className="text-3xl font-bold mb-8">Trending Destinations</h2>
+        <motion.h2 
+          initial={{ opacity: 0, y: -20 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="text-3xl font-bold mb-8"
+        >
+          Trending Destinations
+        </motion.h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isVisible ? "visible" : "hidden"}
+        >
           {MOCK_DESTINATIONS.map((dest) => (
-            <Card
-              key={dest.id}
-              className="overflow-hidden cursor-pointer group hover:-translate-y-1 transition-all duration-normal"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <img
-                  src={dest.image}
-                  alt={dest.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-normal"
-                  loading="lazy"
-                />
-                <Badge
-                  variant="secondary"
-                  className="absolute top-2 right-2"
-                >
-                  {dest.tag}
-                </Badge>
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg">{dest.name}</h3>
-                <p className="text-sm text-muted-foreground">{dest.country}</p>
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Starting from</span>
-                  <span className="text-xl font-bold text-primary">
-                    ₹{dest.price.toLocaleString()}
-                  </span>
+            <motion.div key={dest.id} variants={itemVariants}>
+              <Card className="overflow-hidden cursor-pointer group hover:-translate-y-1 hover:shadow-elevation-3 transition-all duration-300">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <img
+                    src={dest.image}
+                    alt={dest.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <Badge variant="secondary" className="absolute top-2 right-2">
+                    {dest.tag}
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg">{dest.name}</h3>
+                  <p className="text-sm text-muted-foreground">{dest.country}</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Starting from</span>
+                    <span className="text-xl font-bold text-primary">
+                      ₹{dest.price.toLocaleString()}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

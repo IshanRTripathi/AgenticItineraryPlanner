@@ -1,19 +1,28 @@
 /**
  * Header Component
- * Sticky navigation header with mobile menu
+ * Sticky navigation header with scroll animation
+ * Design: Apple.com refinement + Material 3 motion
  */
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
+import { useStickyHeader } from '@/hooks/useScrollAnimation';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isScrolled = useStickyHeader(20);
 
   return (
     <>
-      <header className="sticky top-0 z-sticky bg-white border-b border-border shadow-sm">
+      <header 
+        className={cn(
+          'sticky top-0 z-sticky bg-white border-b border-border transition-all duration-300',
+          isScrolled ? 'shadow-elevation-2' : 'shadow-sm'
+        )}
+      >
         <div className="container">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}

@@ -345,5 +345,156 @@ public class BookingController {
             boolean locked,
             String message
     ) {}
+    
+    // ===== SIMPLIFIED BOOKING ENDPOINTS FOR FRONTEND =====
+    
+    /**
+     * Create a booking record from provider confirmation.
+     * POST /api/bookings/record
+     */
+    @PostMapping("/bookings/record")
+    public ResponseEntity<BookingRecordResponse> createBookingRecord(
+            @Valid @RequestBody com.tripplanner.dto.CreateBookingRecordRequest request,
+            HttpServletRequest httpRequest) {
+        String userId = (String) httpRequest.getAttribute("userId");
+        if (userId == null) {
+            userId = request.getUserId(); // Fallback to request userId
+        }
+        
+        logger.info("=== CREATE BOOKING RECORD ===");
+        logger.info("User ID: {}", userId);
+        logger.info("Itinerary ID: {}", request.getItineraryId());
+        logger.info("Node ID: {}", request.getNodeId());
+        logger.info("Provider: {}", request.getProviderName());
+        logger.info("Confirmation: {}", request.getConfirmationNumber());
+        
+        try {
+            // Create booking entity
+            com.tripplanner.data.entity.Booking booking = new com.tripplanner.data.entity.Booking();
+            booking.setUserId(userId);
+            booking.setItineraryId(request.getItineraryId());
+            booking.setStatus(com.tripplanner.data.entity.Booking.BookingStatus.CONFIRMED);
+            
+            // Set item details
+            com.tripplanner.data.entity.Booking.BookingItem item = new com.tripplanner.data.entity.Booking.BookingItem();
+            item.setType(request.getBookingType() != null ? request.getBookingType() : "general");
+            item.setProvider(request.getProviderName());
+            item.setToken(request.getNodeId()); // Use nodeId as token
+            // Store item name in details JSON
+            item.setDetailsJson("{\"name\":\"" + (request.getItemName() != null ? request.getItemName() : "Booking") + "\"}");
+            booking.setItem(item);
+            
+            // Set price details
+            com.tripplanner.data.entity.Booking.BookingPrice price = new com.tripplanner.data.entity.Booking.BookingPrice();
+            price.setAmount(request.getTotalAmount() != null ? request.getTotalAmount() : 0.0);
+            price.setCurrency(request.getCurrency());
+            booking.setPrice(price);
+            
+            // Set provider details
+            com.tripplanner.data.entity.Booking.ProviderDetails provider = new com.tripplanner.data.entity.Booking.ProviderDetails();
+            provider.setConfirmationId(request.getConfirmationNumber());
+            provider.setStatus("confirmed");
+            provider.setBookingReference(request.getConfirmationNumber());
+            booking.setProvider(provider);
+            
+            // Save booking via service
+            booking = bookingService.saveBookingRecord(booking);
+            
+            // If nodeId provided, update the node with booking reference
+            if (request.getNodeId() != null && !request.getNodeId().isEmpty()) {
+                try {
+                    ChangeSet changeSet = createNodeBookingReferenceChangeSet(
+                        request.getNodeId(), 
+                        booking.getBookingId()
+                    );
+                    changeEngine.apply(request.getItineraryId(), changeSet);
+                    logger.info("Updated node {} with booking reference", request.getNodeId());
+                } catch (Exception e) {
+                    logger.warn("Failed to update node with booking reference", e);
+                    // Don't fail the booking creation if node update fails
+                }
+            }
+            
+            logger.info("=== BOOKING RECORD CREATED ===");
+            logger.info("Booking ID: {}", booking.getBookingId());
+            
+            return ResponseEntity.ok(new BookingRecordResponse(
+                booking.getBookingId(),
+                booking.getStatus().toString(),
+                request.getConfirmationNumber(),
+                booking.getCreatedAt()
+            ));
+            
+        } catch (Exception e) {
+            logger.error("Failed to create booking record", e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
+    /**
+     * Get bookings for an itinerary.
+     * GET /api/bookings/itinerary/{itineraryId}
+     */
+    @GetMapping("/bookings/itinerary/{itineraryId}")
+    public ResponseEntity<java.util.List<BookingRecordResponse>> getItineraryBookings(
+            @PathVariable String itineraryId) {
+        logger.debug("Getting bookings for itinerary: {}", itineraryId);
+        
+        try {
+            java.util.List<com.tripplanner.data.entity.Booking> bookings = 
+                this.bookingService.getBookingsByItineraryId(itineraryId);
+            
+            java.util.List<BookingRecordResponse> response = bookings.stream()
+                .map(booking -> new BookingRecordResponse(
+                    booking.getBookingId(),
+                    booking.getStatus().toString(),
+                    booking.getProvider() != null ? booking.getProvider().getConfirmationId() : null,
+                    booking.getCreatedAt()
+                ))
+                .toList();
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Failed to get itinerary bookings", e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+    
+    /**
+     * Create a ChangeSet to add booking reference to a node.
+     */
+    private ChangeSet createNodeBookingReferenceChangeSet(String nodeId, String bookingRef) {
+        ChangeSet changeSet = new ChangeSet();
+        changeSet.setScope("trip");
+        
+        ChangeOperation op = new ChangeOperation();
+        op.setOp("update");
+        op.setId(nodeId);
+        
+        NormalizedNode node = new NormalizedNode();
+        node.setId(nodeId);
+        node.setBookingRef(bookingRef);
+        
+        op.setNode(node);
+        changeSet.setOps(java.util.List.of(op));
+        
+        ChangePreferences preferences = new ChangePreferences();
+        preferences.setUserFirst(false);
+        preferences.setRespectLocks(false);
+        changeSet.setPreferences(preferences);
+        
+        return changeSet;
+    }
+    
+    /**
+     * Response DTO for booking record operations.
+     */
+    public record BookingRecordResponse(
+            String bookingId,
+            String status,
+            String confirmationNumber,
+            java.time.Instant createdAt
+    ) {}
 }
 

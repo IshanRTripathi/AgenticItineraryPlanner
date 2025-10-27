@@ -1,14 +1,17 @@
 /**
  * AI Agent Progress Component
  * Premium animated progress display with real-time updates
+ * Design: Apple.com refinement + Emirates.com luxury
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import { endpoints } from '@/services/api';
+import { useStompWebSocket } from '@/hooks/useStompWebSocket';
+import { useProgressWithStages } from '@/hooks/useSmoothProgress';
+import { ProgressBar } from './ProgressBar';
+import { api } from '@/services/api';
 import type { AgentProgressEvent } from '@/types/dto';
 
 const PROGRESS_STEPS = [
@@ -28,21 +31,26 @@ const MOTIVATIONAL_MESSAGES = [
 ];
 
 export function AgentProgress() {
-  const [progress, setProgress] = useState(0);
+  const [actualProgress, setActualProgress] = useState<number | undefined>(undefined);
   const [currentStep, setCurrentStep] = useState(0);
-  const [messageIndex, setMessageIndex] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const onCompleteCalledRef = useRef(false);
+  
+  // Use smooth progress with stages (swooshes to 70% quickly)
+  const { progress, stage } = useProgressWithStages(!isCompleted, actualProgress);
 
   // Get executionId from URL params
   const urlParams = new URLSearchParams(window.location.search);
   const executionId = urlParams.get('executionId');
   const itinId = urlParams.get('itineraryId');
 
-  // Connect to WebSocket for real-time updates
-  const wsUrl = executionId ? endpoints.websocketUrl : null;
-  const { isConnected } = useWebSocket(wsUrl, {
+  // Connect to STOMP WebSocket for real-time updates
+  const { isConnected } = useStompWebSocket(executionId, {
     onMessage: (event: AgentProgressEvent) => {
+      console.log('[AgentProgress] Received event:', event);
+      
       if (event.progress !== undefined) {
-        setProgress(event.progress);
+        setActualProgress(event.progress);
       }
       if (event.currentStep) {
         const stepIndex = PROGRESS_STEPS.findIndex(s => 
@@ -53,57 +61,68 @@ export function AgentProgress() {
         }
       }
       if (event.status === 'completed' && event.itineraryId) {
+        setActualProgress(100);
+        setIsCompleted(true);
         // Navigate to trip detail after a short delay
-        setTimeout(() => {
-          window.location.href = `/trip/${event.itineraryId}`;
-        }, 2000);
+        if (!onCompleteCalledRef.current) {
+          onCompleteCalledRef.current = true;
+          setTimeout(() => {
+            window.location.href = `/trip/${event.itineraryId}`;
+          }, 2000);
+        }
       }
     },
   });
 
-  // Fallback: Simulate progress if no WebSocket connection
+  // Poll backend for itinerary status
   useEffect(() => {
-    if (!executionId || isConnected) return;
+    if (!itinId || isCompleted) return;
 
-    const totalDuration = PROGRESS_STEPS.reduce((sum, step) => sum + step.duration, 0);
-    let elapsed = 0;
-
-    const interval = setInterval(() => {
-      elapsed += 100;
-      const newProgress = Math.min((elapsed / totalDuration) * 100, 100);
-      setProgress(newProgress);
-
-      let cumulativeDuration = 0;
-      for (let i = 0; i < PROGRESS_STEPS.length; i++) {
-        cumulativeDuration += PROGRESS_STEPS[i].duration;
-        if (elapsed < cumulativeDuration) {
-          setCurrentStep(i);
-          break;
+    const pollInterval = setInterval(async () => {
+      try {
+        const itinerary = await api.get<any>(`/itineraries/${itinId}/json`);
+        
+        // Check if itinerary is ready (has days with activities)
+        if (itinerary && itinerary.days && itinerary.days.length > 0) {
+          const hasActivities = itinerary.days.some((day: any) => 
+            day.nodes && day.nodes.length > 0
+          );
+          
+          if (hasActivities) {
+            console.log('[AgentProgress] Itinerary is ready!');
+            setActualProgress(100);
+            setIsCompleted(true);
+            
+            if (!onCompleteCalledRef.current) {
+              onCompleteCalledRef.current = true;
+              setTimeout(() => {
+                window.location.href = `/trip/${itinId}`;
+              }, 1000);
+            }
+          }
         }
+      } catch (error) {
+        console.log('[AgentProgress] Polling error (itinerary not ready yet):', error);
       }
+    }, 5000); // Poll every 5 seconds
 
-      if (elapsed >= totalDuration) {
-        clearInterval(interval);
-        setCurrentStep(PROGRESS_STEPS.length);
-        if (itinId) {
-          setTimeout(() => {
-            window.location.href = `/trip/${itinId}`;
-          }, 1000);
-        }
-      }
-    }, 100);
+    return () => clearInterval(pollInterval);
+  }, [itinId, isCompleted]);
 
-    return () => clearInterval(interval);
-  }, [executionId, isConnected, itinId]);
-
+  // Auto-complete when smooth progress reaches 100%
   useEffect(() => {
-    // Rotate motivational messages
-    const messageInterval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % MOTIVATIONAL_MESSAGES.length);
-    }, 3000);
-
-    return () => clearInterval(messageInterval);
-  }, []);
+    if (progress >= 100 && !isCompleted && !onCompleteCalledRef.current) {
+      console.log('[AgentProgress] Progress reached 100%, checking itinerary...');
+      setIsCompleted(true);
+      
+      if (itinId && !onCompleteCalledRef.current) {
+        onCompleteCalledRef.current = true;
+        setTimeout(() => {
+          window.location.href = `/trip/${itinId}`;
+        }, 1000);
+      }
+    }
+  }, [progress, isCompleted, itinId]);
 
   return (
     <Card className="max-w-2xl w-full p-8 shadow-elevation-3 relative overflow-hidden">
@@ -139,23 +158,17 @@ export function AgentProgress() {
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Creating Your Perfect Itinerary
           </h1>
-          <p className="text-muted-foreground animate-fade-in">
-            {MOTIVATIONAL_MESSAGES[messageIndex]}
-          </p>
+          <div className="flex items-center justify-center gap-2 text-muted-foreground animate-fade-in">
+            <span className="text-2xl">{stage.icon}</span>
+            <p className={stage.color}>{stage.message}</p>
+          </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="h-3 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary via-primary-600 to-secondary transition-all duration-300 ease-out relative"
-              style={{ width: `${progress}%` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-            </div>
-          </div>
-          <div className="text-center mt-2 text-sm font-semibold text-primary">
-            {Math.round(progress)}%
+        <div className="mb-6">
+          <ProgressBar progress={progress} />
+          <div className="text-center mt-3 text-sm text-muted-foreground animate-fade-in">
+            {Math.round(progress)}% complete
           </div>
         </div>
 

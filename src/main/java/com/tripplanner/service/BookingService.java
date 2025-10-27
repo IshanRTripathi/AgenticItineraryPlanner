@@ -217,4 +217,20 @@ public class BookingService {
             throw new RuntimeException("Failed to cancel booking", e);
         }
     }
+    
+    /**
+     * Save booking record.
+     */
+    public com.tripplanner.data.entity.Booking saveBookingRecord(com.tripplanner.data.entity.Booking booking) {
+        logger.info("Saving booking record: {}", booking.getBookingId());
+        return bookingRepository.save(booking);
+    }
+    
+    /**
+     * Get bookings by itinerary ID.
+     */
+    public List<com.tripplanner.data.entity.Booking> getBookingsByItineraryId(String itineraryId) {
+        logger.debug("Getting bookings for itinerary: {}", itineraryId);
+        return bookingRepository.findByItineraryId(itineraryId);
+    }
 }

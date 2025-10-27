@@ -8,10 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeftRight, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function FlightSearchForm() {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate('/search-results?type=flights');
+  };
+
   return (
-    <form className="space-y-4">
+    <form className="space-y-4" onSubmit={handleSubmit}>
       {/* Trip Type */}
       <div className="flex gap-4">
         <Select value="roundtrip" onValueChange={() => {}}>

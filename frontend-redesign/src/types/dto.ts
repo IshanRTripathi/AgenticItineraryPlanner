@@ -197,3 +197,102 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
 }
+
+// ============================================================================
+// Complete NormalizedItinerary Types (Backend Contract)
+// ============================================================================
+
+export interface NormalizedItinerary {
+  itineraryId: string;
+  summary: string;
+  version: number;
+  currency: string;
+  themes: string[];
+  days: NormalizedDay[];
+  agents: Record<string, AgentStatus>;
+  updatedAt: number;
+  status: 'planning' | 'ready' | 'failed';
+  userId?: string;
+}
+
+export interface NormalizedDay {
+  dayNumber: number;
+  date: string;
+  location: string;
+  nodes: NormalizedNodeComplete[];
+  edges: Edge[];
+  totals: DayTotals;
+}
+
+export interface NormalizedNodeComplete {
+  id: string;
+  type: 'place' | 'activity' | 'meal' | 'transport' | 'accommodation';
+  title: string;
+  location: NodeLocation;
+  timing: NodeTiming;
+  cost: NodeCost;
+  locked: boolean;
+  bookingRef: string | null;
+  labels: string[];
+  tips: NodeTips;
+}
+
+export interface NodeLocation {
+  name: string;
+  address?: string;
+  coordinates: Coordinates;
+  placeId: string;
+  googleMapsUri?: string;
+  rating?: number;
+  openingHours?: string;
+  closingHours?: string;
+}
+
+export interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface NodeTiming {
+  startTime: string; // ISO 8601
+  endTime: string;   // ISO 8601
+  durationMin: number;
+}
+
+export interface NodeCost {
+  amount: number;
+  currency: string;
+  per: 'person' | 'group' | 'night';
+}
+
+export interface NodeTips {
+  bestTime: string[];
+  warnings: string[];
+  recommendations: string[];
+}
+
+export interface Edge {
+  from: string;
+  to: string;
+  transitInfo: TransitInfo;
+}
+
+export interface TransitInfo {
+  mode: 'walk' | 'drive' | 'transit' | 'flight';
+  durationMin: number;
+  distanceKm: number;
+  provider?: string;
+  cost?: NodeCost;
+}
+
+export interface DayTotals {
+  cost: number;
+  distanceKm: number;
+  durationHr: number;
+}
+
+export interface AgentStatus {
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  lastRunAt: string;
+  error?: string;
+}

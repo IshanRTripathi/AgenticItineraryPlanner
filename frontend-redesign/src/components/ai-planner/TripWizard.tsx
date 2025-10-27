@@ -21,9 +21,22 @@ const STEPS = [
     { id: 4, title: 'Review', component: ReviewStep },
 ];
 
+interface TripFormData {
+    destination?: string;
+    startDate?: string;
+    endDate?: string;
+    adults?: number;
+    children?: number;
+    infants?: number;
+    budget?: string;
+    pace?: string;
+    interests?: string[];
+    [key: string]: any;
+}
+
 export function TripWizard() {
     const [currentStep, setCurrentStep] = useState(1);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState<TripFormData>({});
 
     const CurrentStepComponent = STEPS[currentStep - 1].component;
     const isFirstStep = currentStep === 1;
@@ -48,7 +61,7 @@ export function TripWizard() {
                 adults: formData.adults || 2,
                 children: formData.children || 0,
                 infants: formData.infants || 0,
-                budget: formData.budget || 'moderate',
+                budget: formData.budget || 'mid-range',
                 pace: formData.pace || 'moderate',
                 interests: formData.interests || [],
             });

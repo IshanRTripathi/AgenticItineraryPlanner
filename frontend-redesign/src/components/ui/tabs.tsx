@@ -29,6 +29,12 @@ interface TabsProps {
 }
 
 const Tabs = ({ value, onValueChange, children, className }: TabsProps) => {
+  console.log('[Tabs] Rendering with value:', value);
+  
+  React.useEffect(() => {
+    console.log('[Tabs] Value changed to:', value);
+  }, [value]);
+  
   return (
     <TabsContext.Provider value={{ value, onValueChange }}>
       <div className={cn('w-full', className)}>{children}</div>
@@ -60,11 +66,16 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
     const { value: selectedValue, onValueChange } = useTabs();
     const isActive = value === selectedValue;
 
+    const handleClick = () => {
+      console.log('[TabsTrigger] Clicked:', value, 'Current:', selectedValue);
+      onValueChange(value);
+    };
+
     return (
       <button
         ref={ref}
         type="button"
-        onClick={() => onValueChange(value)}
+        onClick={handleClick}
         className={cn(
           'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all duration-normal ease-standard',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -86,17 +97,37 @@ interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
-  ({ className, value, ...props }, ref) => {
+  ({ className, value, children, ...props }, ref) => {
     const { value: selectedValue } = useTabs();
+    const isVisible = value === selectedValue;
     
-    if (value !== selectedValue) return null;
+    console.log('[TabsContent]', value, '- Selected:', selectedValue, '- Visible:', isVisible);
+    
+    React.useEffect(() => {
+      if (isVisible) {
+        console.log('[TabsContent] Mounted/Visible:', value);
+      }
+      return () => {
+        if (isVisible) {
+          console.log('[TabsContent] Unmounting:', value);
+        }
+      };
+    }, [isVisible, value]);
+    
+    if (!isVisible) {
+      console.log('[TabsContent] Returning null for:', value);
+      return null;
+    }
 
+    console.log('[TabsContent] Rendering content for:', value);
     return (
       <div
         ref={ref}
-        className={cn('mt-2 animate-fade-in', className)}
+        className={cn('mt-2', className)}
         {...props}
-      />
+      >
+        {children}
+      </div>
     );
   }
 );

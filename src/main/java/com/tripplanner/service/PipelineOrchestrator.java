@@ -281,30 +281,46 @@ public class PipelineOrchestrator {
     }
     
     /**
-     * Phase 3: Enrich with external data.
+     * Phase 3: Enrich with external data (coordinates, photos, reviews).
      */
     private void executeEnrichmentPhase(String itineraryId, NormalizedItinerary skeleton, 
                                        String executionId) {
         try {
+            logger.info("Starting enrichment phase for itinerary: {}", itineraryId);
+            logger.info("Enrichment will add: coordinates, place IDs, photos, reviews, ratings");
+            
             // Enrichment is optional - if it fails, we continue with basic data
             CompletableFuture<Void> enrichmentFuture = CompletableFuture.runAsync(() -> {
                 try {
+                    // Call EnrichmentAgent's executeInternal method directly
                     Map<String, Object> enrichmentData = new HashMap<>();
-                    enrichmentData.put("taskType", "enrich");  // EnrichmentAgent supports "enrich"
+                    enrichmentData.put("taskType", "enrich");
                     BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = 
                         new BaseAgent.AgentRequest<>(enrichmentData, ChangeEngine.ApplyResult.class);
-                    enrichmentAgent.execute(itineraryId, enrichmentRequest);
+                    
+                    logger.info("Calling EnrichmentAgent.execute() for itinerary: {}", itineraryId);
+                    ChangeEngine.ApplyResult result = enrichmentAgent.execute(itineraryId, enrichmentRequest);
+                    
+                    if (result != null) {
+                        logger.info("Enrichment completed successfully. Version: {}", result.getToVersion());
+                    } else {
+                        logger.info("Enrichment completed with no changes");
+                    }
                 } catch (Exception e) {
-                    logger.warn("Enrichment failed, continuing with basic data: {}", e.getMessage());
+                    logger.error("Enrichment failed for itinerary: {}", itineraryId, e);
+                    logger.warn("Continuing with basic data (no coordinates/photos)");
                 }
             }, pipelineExecutor);
             
             enrichmentFuture.get(enrichmentTimeoutMs, TimeUnit.MILLISECONDS);
+            logger.info("Enrichment phase completed for itinerary: {}", itineraryId);
             
         } catch (TimeoutException e) {
-            logger.warn("Enrichment timed out after {} ms, continuing...", enrichmentTimeoutMs);
+            logger.warn("Enrichment timed out after {} ms for itinerary: {}, continuing...", 
+                       enrichmentTimeoutMs, itineraryId);
         } catch (Exception e) {
-            logger.warn("Enrichment phase failed, continuing with basic data: {}", e.getMessage());
+            logger.warn("Enrichment phase failed for itinerary: {}, continuing with basic data: {}", 
+                       itineraryId, e.getMessage());
         }
     }
     

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Calendar, Bus, ArrowLeftRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 export function BusSearchForm() {
+  const navigate = useNavigate();
   const [fromCity, setFromCity] = useState('');
   const [toCity, setToCity] = useState('');
   const [journeyDate, setJourneyDate] = useState('');
@@ -18,6 +20,7 @@ export function BusSearchForm() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
+    navigate('/search-results?type=buses');
     e.preventDefault();
     console.log('Searching buses:', { fromCity, toCity, journeyDate, seatType });
     // TODO: Implement search logic

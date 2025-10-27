@@ -10,6 +10,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    // Fix for SockJS/STOMP: global is not defined
+    global: 'globalThis',
+  },
   build: {
     target: 'es2020',
     outDir: 'dist',

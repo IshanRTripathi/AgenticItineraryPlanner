@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Calendar, Users, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 export function HolidaySearchForm() {
+  const navigate = useNavigate();
   const [destination, setDestination] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -15,8 +17,7 @@ export function HolidaySearchForm() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching holidays:', { destination, startDate, endDate, adults, children, packageType });
-    // TODO: Implement search logic
+    navigate('/search-results?type=holidays');
   };
 
   return (

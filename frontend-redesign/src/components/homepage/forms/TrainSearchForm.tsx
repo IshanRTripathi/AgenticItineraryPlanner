@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Calendar, Train, ArrowLeftRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
 export function TrainSearchForm() {
+  const navigate = useNavigate();
   const [fromStation, setFromStation] = useState('');
   const [toStation, setToStation] = useState('');
   const [journeyDate, setJourneyDate] = useState('');
@@ -18,6 +20,7 @@ export function TrainSearchForm() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
+    navigate('/search-results?type=trains');
     e.preventDefault();
     console.log('Searching trains:', { fromStation, toStation, journeyDate, trainClass });
     // TODO: Implement search logic
