@@ -613,9 +613,17 @@ public class EnrichmentAgent extends BaseAgent {
             return null;
         }
         
+        logger.info("========== ENRICHING NODE WITH PLACE SEARCH ==========");
+        logger.info("Node ID: {}", node.getId());
+        logger.info("Node title: {}", node.getTitle());
+        logger.info("Location name: {}", locationName);
+        logger.info("Destination context: {}", destination);
+        
         try {
             // Search for place
+            logger.info("Calling GooglePlacesService.searchPlace()...");
             PlaceSearchResult searchResult = googlePlacesService.searchPlace(locationName, destination);
+            logger.info("GooglePlacesService returned: {}", searchResult != null ? "result found" : "null");
             
             if (searchResult != null && searchResult.getGeometry() != null && 
                 searchResult.getGeometry().getLocation() != null) {

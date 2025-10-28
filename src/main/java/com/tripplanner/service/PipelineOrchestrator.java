@@ -417,17 +417,19 @@ public class PipelineOrchestrator {
                 
                 // Ensure userId is set (it should already be set from initial creation)
                 if (itinerary.getUserId() == null || itinerary.getUserId().trim().isEmpty()) {
-                    logger.warn("UserId not found in itinerary {}, attempting to retrieve from metadata", itineraryId);
-                    // Try to get userId from the itinerary metadata or skip save
-                    // For now, just log and skip the save to avoid blocking completion
-                    logger.error("Cannot save itinerary {} without userId - skipping status update", itineraryId);
+                    logger.warn("UserId not found in itinerary {}, this should not happen", itineraryId);
+                    logger.warn("Itinerary was likely not properly initialized. Status update will be skipped.");
+                    // Don't throw exception, just skip the status update to avoid blocking completion
                 } else {
                     itineraryJsonService.saveMasterItinerary(itineraryId, itinerary);
                     logger.info("Updated itinerary status to 'completed' for: {}", itineraryId);
                 }
+            } else {
+                logger.warn("Itinerary {} not found when trying to update status to completed", itineraryId);
             }
         } catch (Exception e) {
             logger.error("Failed to update itinerary status to completed: {}", e.getMessage(), e);
+            // Don't throw exception, just log and continue
         }
         
         // Publish SSE events if there are active connections

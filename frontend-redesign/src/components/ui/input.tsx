@@ -9,15 +9,19 @@ import { cn } from '@/lib/utils';
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   glass?: boolean;
+  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, glass, ...props }, ref) => {
+  ({ className, type, glass, inputMode, ...props }, ref) => {
     return (
       <input
         type={type}
+        inputMode={inputMode}
         className={cn(
           'input',
+          'h-12 md:h-10', // Larger on mobile
+          'text-base md:text-sm', // Prevent iOS zoom
           glass && 'input-glass',
           className
         )}

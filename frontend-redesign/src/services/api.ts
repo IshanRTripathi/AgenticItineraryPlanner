@@ -111,7 +111,7 @@ class ApiService {
       // Network errors are retryable
       return true;
     }
-    
+
     if (error.message && error.message.includes('HTTP ')) {
       const statusMatch = error.message.match(/HTTP (\d+):/);
       if (statusMatch) {
@@ -119,7 +119,7 @@ class ApiService {
         return this.retryConfig.retryableStatusCodes.includes(status);
       }
     }
-    
+
     return false;
   }
 
@@ -142,7 +142,7 @@ class ApiService {
       const statusMatch = error.message.match(/HTTP (\d+):/);
       if (statusMatch) {
         const status = parseInt(statusMatch[1]);
-        
+
         switch (status) {
           case 404:
             if (context === 'itinerary') {
@@ -210,13 +210,13 @@ class ApiService {
     attempt: number = 0
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     // Build headers with auth token if available
     const headers: HeadersInit = { ...this.defaultHeaders, ...options.headers };
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
-    
+
     const config: RequestInit = {
       ...options,
       headers,
@@ -246,11 +246,11 @@ class ApiService {
 
       const response = await fetch(url, config);
       const duration = performance.now() - startTime;
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const technicalError = new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-        
+
         // Log detailed error information
         logError(`API request failed with status ${response.status}`, {
           component: 'ApiService',
@@ -263,11 +263,11 @@ class ApiService {
           hasAuthToken: !!this.authToken,
           authTokenPreview: this.authToken ? `${this.authToken.substring(0, 20)}...` : 'none'
         }, technicalError);
-        
+
         // Check if we should retry
         if (attempt < this.retryConfig.maxRetries && this.isRetryableError(technicalError)) {
           const delay = this.calculateDelay(attempt);
-          
+
           logWarn(`API request failed, retrying in ${delay}ms: ${options.method || 'GET'} ${endpoint}`, {
             component: 'ApiService',
             action: 'api_request_retry',
@@ -279,11 +279,11 @@ class ApiService {
             status: response.status,
             retryReason: 'retryable_error'
           }, technicalError);
-          
+
           await this.sleep(delay);
           return this.requestWithRetry<T>(endpoint, options, attempt + 1);
         }
-        
+
         // Create user-friendly error for final failure
         const userFriendlyError = this.createUserFriendlyError(technicalError);
         apiLogger.error(userFriendlyError, duration);
@@ -292,7 +292,7 @@ class ApiService {
 
       const contentType = response.headers.get('content-type');
       let result: T;
-      
+
       if (contentType && contentType.includes('application/json')) {
         result = await response.json();
       } else {
@@ -300,7 +300,7 @@ class ApiService {
       }
 
       apiLogger.success(response, duration);
-      
+
       logInfo(`API request completed: ${options.method || 'GET'} ${endpoint} (attempt ${attempt + 1})`, {
         component: 'ApiService',
         action: 'api_request_success',
@@ -318,11 +318,11 @@ class ApiService {
       return result;
     } catch (error) {
       const duration = performance.now() - startTime;
-      
+
       // Check if we should retry
       if (attempt < this.retryConfig.maxRetries && this.isRetryableError(error)) {
         const delay = this.calculateDelay(attempt);
-        
+
         logWarn(`API request failed, retrying in ${delay}ms: ${options.method || 'GET'} ${endpoint}`, {
           component: 'ApiService',
           action: 'api_request_retry',
@@ -333,15 +333,15 @@ class ApiService {
           delay,
           retryReason: 'network_error'
         }, error);
-        
+
         await this.sleep(delay);
         return this.requestWithRetry<T>(endpoint, options, attempt + 1);
       }
-      
+
       // Create user-friendly error for final failure
-      const userFriendlyError = this.createUserFriendlyError(error);
+      const userFriendlyError = this.createUserFriendlyError(error as Error);
       apiLogger.error(userFriendlyError, duration);
-      
+
       logError(`API request failed after ${attempt + 1} attempts: ${options.method || 'GET'} ${endpoint}`, {
         component: 'ApiService',
         action: 'api_request_error',
@@ -352,14 +352,14 @@ class ApiService {
         totalAttempts: attempt + 1,
         maxRetries: this.retryConfig.maxRetries + 1
       }, userFriendlyError);
-      
+
       throw userFriendlyError;
     }
   }
 
   async getItinerary(itineraryId: string, retryConfig?: Partial<RetryConfig>): Promise<TripData> {
     const config = { ...this.retryConfig, ...retryConfig };
-    
+
     try {
       logInfo(`Fetching itinerary: ${itineraryId}`, {
         component: 'ApiService',
@@ -373,16 +373,16 @@ class ApiService {
         { method: 'GET' },
         config
       );
-      
+
       const tripData = convertNormalizedToTripData(normalized);
-      
+
       logInfo(`Successfully fetched itinerary: ${itineraryId}`, {
         component: 'ApiService',
         action: 'get_itinerary_success',
         itineraryId,
-        daysCount: tripData.days?.length || 0
+        daysCount: (tripData as any).days?.length || 0
       });
-      
+
       return tripData;
     } catch (error) {
       logError(`Failed to fetch itinerary: ${itineraryId}`, {
@@ -405,13 +405,13 @@ class ApiService {
     attempt: number = 0
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     // Build headers with auth token if available
     const headers: HeadersInit = { ...this.defaultHeaders, ...options.headers };
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
-    
+
     const requestConfig: RequestInit = {
       ...options,
       headers,
@@ -419,15 +419,15 @@ class ApiService {
 
     try {
       const response = await fetch(url, requestConfig);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const error = new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-        
+
         // Special handling for 404 errors during itinerary generation
         if (response.status === 404 && attempt < config.maxRetries) {
           const delay = this.calculateDelay(attempt);
-          
+
           logWarn(`Itinerary not ready yet, retrying in ${delay}ms (attempt ${attempt + 1}/${config.maxRetries + 1})`, {
             component: 'ApiService',
             action: 'itinerary_generation_retry',
@@ -437,11 +437,11 @@ class ApiService {
             status: response.status,
             retryReason: 'itinerary_generation_in_progress'
           });
-          
+
           await this.sleep(delay);
           return this.requestWithRetryForItinerary<T>(endpoint, options, config, attempt + 1);
         }
-        
+
         // Create user-friendly error with itinerary context
         const userFriendlyError = this.createUserFriendlyError(error, 'itinerary');
         throw userFriendlyError;
@@ -449,7 +449,7 @@ class ApiService {
 
       const contentType = response.headers.get('content-type');
       let result: T;
-      
+
       if (contentType && contentType.includes('application/json')) {
         result = await response.json();
       } else {
@@ -461,7 +461,7 @@ class ApiService {
       // Check if we should retry for network errors
       if (attempt < config.maxRetries && this.isRetryableError(error)) {
         const delay = this.calculateDelay(attempt);
-        
+
         logWarn(`Network error, retrying in ${delay}ms (attempt ${attempt + 1}/${config.maxRetries + 1})`, {
           component: 'ApiService',
           action: 'itinerary_network_retry',
@@ -470,13 +470,13 @@ class ApiService {
           delay,
           retryReason: 'network_error'
         }, error);
-        
+
         await this.sleep(delay);
         return this.requestWithRetryForItinerary<T>(endpoint, options, config, attempt + 1);
       }
-      
+
       // Create user-friendly error with itinerary context
-      const userFriendlyError = this.createUserFriendlyError(error, 'itinerary');
+      const userFriendlyError = this.createUserFriendlyError(error as Error, 'itinerary');
       throw userFriendlyError;
     }
   }
@@ -504,7 +504,7 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(itinerary),
     });
-    
+
     // Convert back to TripData for frontend
     return convertNormalizedToTripData(createdNormalized);
   }

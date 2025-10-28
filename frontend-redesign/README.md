@@ -46,6 +46,48 @@ All design tokens are defined in `src/styles/tokens.css`:
 - **Motion**: 300ms cubic-bezier(0.4,0,0.2,1)
 - **Radius**: Max 12px (no over-rounding)
 
+## Mobile-First Development
+
+### Responsive Breakpoints
+- **Mobile**: < 768px (base styles)
+- **Tablet**: 768px - 1024px (md: prefix)
+- **Desktop**: > 1024px (lg: prefix)
+
+### Touch Target Guidelines
+- **Minimum Size**: 44x44px (iOS) / 48x48dp (Android)
+- **Spacing**: 8px minimum between targets
+- **Feedback**: Active state with `active:scale-95`
+
+### Mobile Patterns
+- **Navigation**: Bottom nav (5 items max) + slide-out menu
+- **Modals**: Bottom sheets on mobile, dialogs on desktop
+- **Tabs**: Horizontal scrollable on mobile, sidebar on desktop
+- **Cards**: Horizontal layout on mobile, vertical on desktop
+- **Inputs**: 48px height, 16px font (prevents iOS zoom)
+
+### Responsive Utilities
+```tsx
+// Touch targets
+className="h-12 md:h-10 min-h-touch"
+
+// Layouts
+className="flex md:block" // Horizontal mobile, vertical desktop
+
+// Conditional rendering
+const isMobile = useMediaQuery('(max-width: 768px)');
+```
+
+### Pull-to-Refresh
+```tsx
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+
+const { isPulling, pullDistance, isRefreshing } = usePullToRefresh({
+  onRefresh: async () => {
+    await refetchData();
+  },
+});
+```
+
 ## Component Library
 
 Premium UI components in `src/components/ui/`:

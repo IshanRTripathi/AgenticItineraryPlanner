@@ -76,15 +76,18 @@ export function PremiumTripWizard() {
                 interests: formData.interests || [],
             });
 
-            // Response is the data directly, not wrapped in { success, data }
-            if (response && (response.executionId || response.id)) {
-                // Navigate to progress page with executionId
-                const executionId = response.executionId || response.id;
-                const itineraryId = response.itineraryId || response.id;
-                window.location.href = `/ai-progress?executionId=${executionId}&itineraryId=${itineraryId}`;
+            console.log('[PremiumTripWizard] Create itinerary response:', response);
+
+            // Response is direct from backend: { itinerary, executionId, status, stages }
+            const { executionId, itinerary } = response;
+            const itineraryId = itinerary?.id;
+
+            if (executionId && itineraryId) {
+                console.log('[PremiumTripWizard] Navigating to trip detail:', { executionId, itineraryId });
+                window.location.href = `/trip/${itineraryId}`;
             } else {
-                console.error('Invalid response from server:', response);
-                alert('Received an unexpected response from the server. Please try again.');
+                console.error('Missing executionId or itineraryId in response:', response);
+                alert('Failed to create itinerary. Missing required data.');
             }
         } catch (error) {
             console.error('Error creating itinerary:', error);

@@ -66,11 +66,23 @@ export function TripWizard() {
                 interests: formData.interests || [],
             });
 
-            if (response.success && response.executionId) {
-                // Navigate to progress page with executionId
-                window.location.href = `/ai-progress?executionId=${response.executionId}&itineraryId=${response.itineraryId}`;
+            console.log('[TripWizard] Create itinerary response:', response);
+
+            // Check if response has the expected structure
+            if (response.success && response.data) {
+                const { executionId, itinerary } = response.data;
+                const itineraryId = itinerary?.id;
+
+                if (executionId && itineraryId) {
+                    console.log('[TripWizard] Navigating to progress:', { executionId, itineraryId });
+                    // Navigate to progress page with executionId and itineraryId
+                    window.location.href = `/ai-progress?executionId=${executionId}&itineraryId=${itineraryId}`;
+                } else {
+                    console.error('Missing executionId or itineraryId in response:', response.data);
+                    alert('Failed to create itinerary. Missing required data.');
+                }
             } else {
-                console.error('Failed to create itinerary:', response.error);
+                console.error('Failed to create itinerary:', response.error || 'Unknown error');
                 alert('Failed to create itinerary. Please try again.');
             }
         } catch (error) {

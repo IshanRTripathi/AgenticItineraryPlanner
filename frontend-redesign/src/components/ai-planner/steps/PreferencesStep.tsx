@@ -14,8 +14,8 @@ interface PreferencesStepProps {
 }
 
 const BUDGET_TIERS = [
-  { id: 'budget', label: 'Budget', icon: DollarSign, range: '$500-1500' },
-  { id: 'moderate', label: 'Moderate', icon: Sparkles, range: '$1500-3000' },
+  { id: 'economy', label: 'Economy', icon: DollarSign, range: '$500-1500' },
+  { id: 'mid-range', label: 'Mid-Range', icon: Sparkles, range: '$1500-3000' },
   { id: 'luxury', label: 'Luxury', icon: Zap, range: '$3000+' },
 ];
 
@@ -34,7 +34,7 @@ const INTERESTS = [
 ];
 
 export function PreferencesStep({ data, onDataChange }: PreferencesStepProps) {
-  const [budget, setBudget] = useState(data.budget || 'moderate');
+  const [budget, setBudget] = useState(data.budget || 'mid-range');
   const [pace, setPace] = useState(data.pace || 'moderate');
   const [interests, setInterests] = useState<string[]>(data.interests || []);
 

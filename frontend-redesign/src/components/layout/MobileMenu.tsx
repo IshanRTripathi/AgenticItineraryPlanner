@@ -4,7 +4,7 @@
  */
 
 import { Button } from '@/components/ui/button';
-import { X, Home, Compass, Calendar, User, LogIn } from 'lucide-react';
+import { X, Home, Compass, Calendar, User, LogIn, Plane, Hotel, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MobileMenuProps {
@@ -15,8 +15,11 @@ interface MobileMenuProps {
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const menuItems = [
     { icon: Home, label: 'Home', href: '/' },
-    { icon: Compass, label: 'My Trips', href: '/dashboard' },
+    { icon: Search, label: 'Search', href: '/search-results' },
+    { icon: Plane, label: 'Flights', href: '/search-results?type=flight' },
+    { icon: Hotel, label: 'Hotels', href: '/search-results?type=hotel' },
     { icon: Calendar, label: 'Plan Trip', href: '/ai-planner' },
+    { icon: Compass, label: 'My Trips', href: '/dashboard' },
     { icon: User, label: 'Profile', href: '/profile' },
   ];
 

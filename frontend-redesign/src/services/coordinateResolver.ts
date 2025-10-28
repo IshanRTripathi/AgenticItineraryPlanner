@@ -66,9 +66,15 @@ export class SmartCoordinateResolver {
     location: NodeLocation | undefined,
     cityName: string
   ): Promise<CoordinateResolutionResult> {
+    console.log('[CoordinateResolver] ===== RESOLVING COORDINATES =====');
+    console.log('[CoordinateResolver] Location:', location);
+    console.log('[CoordinateResolver] City context:', cityName);
+
     // Strategy 1: Use provided coordinates if valid
     if (location?.coordinates && this.isValidCoordinates(location.coordinates)) {
-      console.log('[CoordinateResolver] Using provided coordinates:', location.name);
+      console.log('[CoordinateResolver] ✓ Strategy 1: Using provided coordinates');
+      console.log('[CoordinateResolver]   Name:', location.name);
+      console.log('[CoordinateResolver]   Coords:', location.coordinates);
       return {
         coordinates: location.coordinates,
         confidence: 'exact',
@@ -79,8 +85,10 @@ export class SmartCoordinateResolver {
 
     // Strategy 2: Check if location is generic (skip API call)
     if (location?.name && this.isGenericLocation(location.name)) {
-      console.log('[CoordinateResolver] Generic location detected, using city center:', location.name);
+      console.log('[CoordinateResolver] ✓ Strategy 2: Generic location detected');
+      console.log('[CoordinateResolver]   Using city center for:', location.name);
       const cityCoords = await this.getCityCoordinates(cityName);
+      console.log('[CoordinateResolver]   City coords:', cityCoords);
       return {
         coordinates: cityCoords,
         confidence: 'city',
@@ -96,7 +104,9 @@ export class SmartCoordinateResolver {
       // Check if cache is still valid
       const isExpired = Date.now() - cached.timestamp > this.CACHE_EXPIRY_MS;
       if (!isExpired) {
-        console.log('[CoordinateResolver] Using cached result:', location?.name);
+        console.log('[CoordinateResolver] ✓ Strategy 3: Using cached result');
+        console.log('[CoordinateResolver]   Cache key:', cacheKey);
+        console.log('[CoordinateResolver]   Cached coords:', cached.coordinates);
         return { ...cached, cached: true };
       } else {
         // Remove expired entry

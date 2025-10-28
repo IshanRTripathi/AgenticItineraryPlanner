@@ -127,9 +127,16 @@ public class ItinerariesController {
             
             return ResponseEntity.ok(response);
             
+        } catch (IllegalArgumentException e) {
+            // Bad request errors (validation failures)
+            logger.error("Invalid request for itinerary creation: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ItineraryCreationResponse.error(e.getMessage()));
         } catch (Exception e) {
+            // Internal server errors
             logger.error("Failed to create itinerary", e);
-            return ResponseEntity.ok(ItineraryCreationResponse.error(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ItineraryCreationResponse.error("Failed to create itinerary: " + e.getMessage()));
         }
     }
     

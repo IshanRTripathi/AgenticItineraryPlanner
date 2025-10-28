@@ -1341,9 +1341,19 @@ public class ChangeEngine {
      * This method is a placeholder for future edge functionality.
      */
     private boolean updateEdge(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
-        // VALIDATE: Check if day number is null
-        if (day == null) {
-            logger.error("Edge update has null day number");
+        // Extract day number from edge ID if day parameter is null
+        Integer effectiveDay = day;
+        if (effectiveDay == null && op.getId() != null) {
+            // Try to extract day number from edge ID (format: dayX_nodeY_to_dayX_nodeZ)
+            effectiveDay = extractDayNumberFromEdgeId(op.getId());
+            if (effectiveDay != null) {
+                logger.debug("Extracted day number {} from edge ID: {}", effectiveDay, op.getId());
+            }
+        }
+        
+        // VALIDATE: Check if day number is still null after extraction
+        if (effectiveDay == null) {
+            logger.error("Edge update has null day number and could not extract from edge ID");
             logger.error("Edge operation details: id={}, op={}", 
                 op.getId(), 
                 op.getOp());
@@ -1354,34 +1364,46 @@ public class ChangeEngine {
         }
         
         // Find the target day
-        NormalizedDay targetDay = findDayByNumber(itinerary, day);
+        NormalizedDay targetDay = findDayByNumber(itinerary, effectiveDay);
         if (targetDay == null) {
             logger.warn("Day {} not found for edge update: node={}, op={}", 
-                day, 
+                effectiveDay, 
                 op.getId(),
                 op.getOp());
             return false;
         }
         
-        // Check if the node exists
-        NormalizedNode node = findNodeById(itinerary, op.getId());
-        if (node == null) {
-            logger.warn("Node not found for edge update: {}", op.getId());
-            return false;
-        }
+        // For edge updates, we don't need to check if the node exists
+        // since edges connect nodes and may be created before nodes are fully populated
         
-        // Check if node is locked
-        if (Boolean.TRUE.equals(node.getLocked()) && 
-            Boolean.TRUE.equals(preferences != null ? preferences.getRespectLocks() : true)) {
-            logger.warn("Cannot update edges for locked node: {}", op.getId());
-            return false;
-        }
-        
-        // For now, just update the node's audit trail since edges are not implemented
-        updateNodeAudit(node, "user");
-        
-        logger.debug("Edge update operation acknowledged for node: {} (edges not yet implemented)", op.getId());
+        // For now, just log the edge update since edges are not fully implemented
+        logger.debug("Edge update operation acknowledged for edge: {} on day {}", op.getId(), effectiveDay);
         return true;
+    }
+    
+    /**
+     * Extract day number from edge ID.
+     * Edge IDs follow the format: dayX_nodeY_to_dayX_nodeZ
+     * 
+     * @param edgeId The edge ID to parse
+     * @return The day number, or null if it cannot be extracted
+     */
+    private Integer extractDayNumberFromEdgeId(String edgeId) {
+        if (edgeId == null || edgeId.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // Try to extract day number from edge ID (format: dayX_nodeY_to_dayX_nodeZ)
+            if (edgeId.startsWith("day") && edgeId.contains("_")) {
+                String dayPart = edgeId.substring(3, edgeId.indexOf("_"));
+                return Integer.parseInt(dayPart);
+            }
+        } catch (Exception e) {
+            logger.debug("Could not extract day number from edge ID: {}", edgeId);
+        }
+        
+        return null;
     }
     
     /**

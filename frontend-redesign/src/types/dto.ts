@@ -211,8 +211,9 @@ export interface NormalizedItinerary {
   days: NormalizedDay[];
   agents: Record<string, AgentStatus>;
   updatedAt: number;
-  status: 'planning' | 'ready' | 'failed';
+  status: 'planning' | 'generating' | 'ready' | 'completed' | 'failed';
   userId?: string;
+  destination?: string;
 }
 
 export interface NormalizedDay {

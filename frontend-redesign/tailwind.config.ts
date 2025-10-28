@@ -102,6 +102,14 @@ const config: Config = {
         '10': 'var(--space-10)',
         '12': 'var(--space-12)',
       },
+      minHeight: {
+        'touch': '44px',
+        'touch-lg': '48px',
+      },
+      minWidth: {
+        'touch': '44px',
+        'touch-lg': '48px',
+      },
       borderRadius: {
         sm: 'var(--radius-sm)',
         DEFAULT: 'var(--radius-md)',

@@ -80,8 +80,19 @@ public class SkeletonPlannerAgent extends BaseAgent {
         logger.info("Destination: {}", request.getDestination());
         
         try {
-            // Create initial itinerary
-            NormalizedItinerary itinerary = createInitialItinerary(itineraryId, request);
+            // Load the existing itinerary (which was created by ItineraryInitializationService with userId)
+            Optional<NormalizedItinerary> existingOpt = itineraryJsonService.getItinerary(itineraryId);
+            NormalizedItinerary itinerary;
+            
+            if (existingOpt.isPresent()) {
+                // Use existing itinerary to preserve userId and other metadata
+                itinerary = existingOpt.get();
+                logger.info("Loaded existing itinerary with userId: {}", itinerary.getUserId());
+            } else {
+                // Fallback: create new itinerary (shouldn't happen in normal flow)
+                logger.warn("Itinerary {} not found, creating new one (userId will be missing)", itineraryId);
+                itinerary = createInitialItinerary(itineraryId, request);
+            }
             
             // Generate days in small batches
             int totalDays = request.getDurationDays();

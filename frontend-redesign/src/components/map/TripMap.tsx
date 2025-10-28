@@ -55,20 +55,32 @@ export function TripMap({ itinerary }: TripMapProps) {
   useEffect(() => {
     async function resolveCoordinates() {
       setIsResolving(true);
-      console.log('[TripMap] Starting coordinate resolution for', itinerary.days.length, 'days');
+      console.log('[TripMap] ========== MAP COORDINATE RESOLUTION START ==========');
+      console.log('[TripMap] Itinerary ID:', itinerary.itineraryId);
+      console.log('[TripMap] Total days:', itinerary.days.length);
+      console.log('[TripMap] Destination city:', destinationCity);
 
       const allNodes: MapNode[] = [];
       const stats = { total: 0, exact: 0, approximate: 0, city: 0, fallback: 0 };
 
       for (const day of itinerary.days) {
+        console.log(`[TripMap] Processing Day ${day.dayNumber} with ${day.nodes.length} nodes`);
+        
         for (const node of day.nodes) {
           stats.total++;
+          
+          console.log(`[TripMap] Resolving node: ${node.id} - ${node.title}`);
+          console.log(`[TripMap]   Location data:`, node.location);
           
           // Resolve coordinates using smart resolver
           const result = await coordinateResolver.resolve(
             node.location,
             destinationCity
           );
+
+          console.log(`[TripMap]   Resolved: (${result.coordinates.lat}, ${result.coordinates.lng})`);
+          console.log(`[TripMap]   Confidence: ${result.confidence}`);
+          console.log(`[TripMap]   Source: ${result.source}`);
 
           // Track statistics
           stats[result.confidence]++;
@@ -98,11 +110,11 @@ export function TripMap({ itinerary }: TripMapProps) {
       setResolutionStats(stats);
       setIsResolving(false);
 
-      console.log('[TripMap] Coordinate resolution complete:', {
-        totalNodes: allNodes.length,
-        stats,
-        cacheStats: coordinateResolver.getCacheStats(),
-      });
+      console.log('[TripMap] ========== COORDINATE RESOLUTION COMPLETE ==========');
+      console.log('[TripMap] Total nodes resolved:', allNodes.length);
+      console.log('[TripMap] Resolution stats:', stats);
+      console.log('[TripMap] Cache stats:', coordinateResolver.getCacheStats());
+      console.log('[TripMap] Success rate:', `${((stats.exact + stats.approximate) / stats.total * 100).toFixed(1)}%`);
     }
 
     resolveCoordinates();
@@ -112,7 +124,11 @@ export function TripMap({ itinerary }: TripMapProps) {
   useEffect(() => {
     if (!api || !mapRef.current || nodes.length === 0 || isResolving) return;
 
-    console.log('[TripMap] Initializing map with', nodes.length, 'nodes');
+    console.log('[TripMap] ========== MAP INITIALIZATION START ==========');
+    console.log('[TripMap] Google Maps API loaded:', !!api);
+    console.log('[TripMap] Map container ready:', !!mapRef.current);
+    console.log('[TripMap] Nodes to display:', nodes.length);
+    console.log('[TripMap] Is resolving:', isResolving);
 
     // Calculate initial center from nodes
     const sumLat = nodes.reduce((sum, n) => sum + n.position.lat, 0);

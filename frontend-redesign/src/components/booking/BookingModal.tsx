@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
@@ -38,13 +38,12 @@ export function BookingModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="capitalize">
-            Book {bookingType}: {itemName}
-          </DialogTitle>
-        </DialogHeader>
+    <BottomSheet 
+      open={isOpen} 
+      onOpenChange={handleClose}
+      title={`Book ${bookingType}: ${itemName}`}
+      className="max-w-4xl"
+    >
 
         {showIframe && !bookingStatus && (
           <div className="space-y-4">
@@ -144,7 +143,6 @@ export function BookingModal({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+    </BottomSheet>
   );
 }

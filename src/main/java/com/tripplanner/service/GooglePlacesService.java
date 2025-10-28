@@ -173,12 +173,26 @@ public class GooglePlacesService {
         
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                ResponseEntity<T> response = restTemplate.getForEntity(url, responseType);
+                // First get as String to see raw response
+                ResponseEntity<String> rawResponse = restTemplate.getForEntity(url, String.class);
                 
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    return response.getBody();
+                if (rawResponse.getStatusCode().is2xxSuccessful()) {
+                    String rawBody = rawResponse.getBody();
+                    logger.debug("Raw API response (first 500 chars): {}", 
+                        rawBody != null && rawBody.length() > 500 ? rawBody.substring(0, 500) + "..." : rawBody);
+                    
+                    // Now parse it properly
+                    try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        T parsedResponse = mapper.readValue(rawBody, responseType);
+                        return parsedResponse;
+                    } catch (Exception parseEx) {
+                        logger.error("Failed to parse response: {}", parseEx.getMessage());
+                        logger.error("Raw response body: {}", rawBody);
+                        throw new RuntimeException("Failed to parse API response", parseEx);
+                    }
                 } else {
-                    throw new RuntimeException("HTTP " + response.getStatusCode() + " response from Google Places API");
+                    throw new RuntimeException("HTTP " + rawResponse.getStatusCode() + " response from Google Places API");
                 }
                 
             } catch (HttpClientErrorException e) {
@@ -435,7 +449,11 @@ public class GooglePlacesService {
      */
     @Cacheable(value = "placeSearch", key = "#query + '_' + #location")
     public PlaceSearchResult searchPlace(String query, String location) {
-        logger.debug("Searching for place: {} near {}", query, location);
+        logger.info("========== GOOGLE PLACES API SEARCH ==========");
+        logger.info("Query: {}", query);
+        logger.info("Location: {}", location);
+        logger.info("API Key configured: {}", apiKey != null && !apiKey.isEmpty());
+        logger.info("API Key length: {}", apiKey != null ? apiKey.length() : 0);
         
         if (query == null || query.trim().isEmpty()) {
             logger.warn("Empty query provided to searchPlace");
@@ -443,10 +461,14 @@ public class GooglePlacesService {
         }
         
         // Check rate limits
+        logger.debug("Checking rate limits...");
         checkRateLimit();
+        logger.debug("Rate limit check passed");
         
         // Check circuit breaker
+        logger.debug("Checking circuit breaker...");
         checkCircuitBreaker();
+        logger.debug("Circuit breaker check passed");
         
         try {
             // Build search query
@@ -461,8 +483,23 @@ public class GooglePlacesService {
                 .queryParam("key", apiKey)
                 .toUriString();
             
+            logger.info("Making request to Google Places API");
+            logger.info("URL: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
+            logger.info("Search query: {}", searchQuery);
+            
             // Make GET request with retry logic
             PlaceSearchResponse response = makeRequestWithRetry(url, PlaceSearchResponse.class);
+            
+            logger.info("Received response from Google Places API");
+            logger.info("Response object: {}", response != null ? "not null" : "NULL");
+            logger.info("Response status: {}", response != null ? response.getStatus() : "null");
+            logger.info("Results: {}", response != null ? response.getResults() : "null");
+            logger.info("Results count: {}", response != null && response.getResults() != null ? response.getResults().size() : 0);
+            
+            // Debug: Log raw response if parsing seems wrong
+            if (response != null && response.getStatus() != null && !response.getStatus().equals("OK") && !response.getStatus().equals("ZERO_RESULTS")) {
+                logger.warn("Unexpected status from Google Places API: {}", response.getStatus());
+            }
             
             // Increment request count
             incrementRequestCount();
@@ -472,19 +509,22 @@ public class GooglePlacesService {
                 response.getResults() != null && !response.getResults().isEmpty()) {
                 
                 PlaceSearchResult firstResult = response.getResults().get(0);
-                logger.debug("Found place: {} at ({}, {})", 
-                    firstResult.getName(), 
+                logger.info("✓ Successfully found place: {}", firstResult.getName());
+                logger.info("  Coordinates: ({}, {})", 
                     firstResult.getGeometry().getLocation().getLatitude(),
                     firstResult.getGeometry().getLocation().getLongitude());
+                logger.info("  Place ID: {}", firstResult.getPlaceId());
                 recordSuccess();
                 return firstResult;
                 
             } else if (response != null && "ZERO_RESULTS".equals(response.getStatus())) {
-                logger.debug("No results found for query: {}", searchQuery);
+                logger.info("No results found for query: {}", searchQuery);
                 return null;
                 
             } else {
-                logger.warn("Google Places API returned status: {}", response != null ? response.getStatus() : "null");
+                logger.error("✗ Google Places API error");
+                logger.error("  Status: {}", response != null ? response.getStatus() : "null");
+                logger.error("  Error message: {}", response != null ? response.getErrorMessage() : "null");
                 recordFailure();
                 return null;
             }

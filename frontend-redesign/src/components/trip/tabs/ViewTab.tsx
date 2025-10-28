@@ -39,7 +39,24 @@ const MOCK_WEATHER = [
 ];
 
 export function ViewTab({ itinerary }: ViewTabProps) {
-  const destination = itinerary.days[0]?.location || itinerary.summary || 'Unknown';
+  // Extract just the city name from destination (e.g., "Sydney, New South Wales, Australia" -> "Sydney")
+  // Use destination field first, then fallback to first day's location, then extract from summary
+  const getDestinationCity = () => {
+    if (itinerary.destination) {
+      return itinerary.destination.split(',')[0].trim();
+    }
+    if (itinerary.days?.[0]?.location) {
+      return itinerary.days[0].location.split(',')[0].trim();
+    }
+    // Last resort: extract from summary "Your personalized itinerary for Sydney, Australia"
+    if (itinerary.summary) {
+      const match = itinerary.summary.match(/for\s+([^,]+)/);
+      if (match) return match[1].trim();
+    }
+    return 'Unknown';
+  };
+  
+  const destination = getDestinationCity();
   const startDate = itinerary.days[0]?.date || '';
   const endDate = itinerary.days[itinerary.days.length - 1]?.date || '';
   const dayCount = itinerary.days.length;

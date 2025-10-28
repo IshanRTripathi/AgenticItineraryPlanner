@@ -19,7 +19,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, DollarSign, MapPin, MoreVertical, Trash2, Eye } from 'lucide-react';
+import { Calendar, Users, DollarSign, MapPin, MoreVertical, Trash2, Eye, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -101,49 +101,56 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-elevation-3 hover:-translate-y-0.5 transition-all duration-300 group">
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden">
-          {trip.imageUrl ? (
-            <img
-              src={trip.imageUrl}
-              alt={trip.destination}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className={cn(
-              'w-full h-full bg-gradient-to-br',
-              getPlaceholderImage(),
-              'transition-transform duration-300 group-hover:scale-105'
-            )} />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          
-          {/* Status Badge */}
-          <div className="absolute top-3 right-3">
-            <span
-              className={cn(
-                'px-3 py-1 rounded-full text-xs font-semibold shadow-sm',
-                trip.status === 'upcoming'
-                  ? 'bg-primary text-white'
-                  : 'bg-white/90 text-muted-foreground'
-              )}
-            >
-              {trip.status === 'upcoming' ? 'Upcoming' : 'Completed'}
-            </span>
-          </div>
+      <Card className={cn(
+        "overflow-hidden transition-all duration-300 group",
+        "hover:shadow-elevation-3 md:hover:-translate-y-0.5",
+        "active:scale-[0.98] md:active:scale-100"
+      )}>
+        {/* Mobile: Horizontal layout, Desktop: Vertical */}
+        <div className="flex md:block">
+          {/* Image */}
+          <div className="relative w-32 md:w-full aspect-square md:aspect-video overflow-hidden flex-shrink-0">
+            {trip.imageUrl ? (
+              <img
+                src={trip.imageUrl}
+                alt={trip.destination}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className={cn(
+                'w-full h-full bg-gradient-to-br',
+                getPlaceholderImage(),
+                'transition-transform duration-300 group-hover:scale-105'
+              )} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            
+            {/* Status Badge */}
+            <div className="absolute top-3 right-3">
+              <span
+                className={cn(
+                  'px-3 py-1 rounded-full text-xs font-semibold shadow-sm',
+                  trip.status === 'upcoming'
+                    ? 'bg-primary text-white'
+                    : 'bg-white/90 text-muted-foreground'
+                )}
+              >
+                {trip.status === 'upcoming' ? 'Upcoming' : 'Completed'}
+              </span>
+            </div>
 
-          {/* Destination */}
-          <div className="absolute bottom-3 left-3 right-3">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
-              <MapPin className="w-5 h-5" />
-              {trip.destination}
-            </h3>
+            {/* Destination */}
+            <div className="absolute bottom-3 left-3 right-3">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
+                <MapPin className="w-5 h-5" />
+                {trip.destination}
+              </h3>
+            </div>
           </div>
         </div>
 
         {/* Content */}
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="flex-1 p-3 md:p-4 space-y-2 md:space-y-3">
           {/* Dates */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4" />
@@ -209,10 +216,10 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
               Cancel
             </Button>
             <Button
-              variant="destructive"
+              variant="primary"
               onClick={handleConfirmDelete}
               disabled={isDeleting}
-              className="gap-2"
+              className="gap-2 bg-red-600 hover:bg-red-700 text-white"
             >
               {isDeleting ? (
                 <>

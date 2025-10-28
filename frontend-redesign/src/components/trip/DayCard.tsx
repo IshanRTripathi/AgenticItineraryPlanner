@@ -74,14 +74,18 @@ export function DayCard({ day, isExpanded, onToggle }: DayCardProps) {
     };
 
     return (
-        <Card
-            className={cn(
-                'transition-all duration-300 cursor-pointer hover:shadow-md',
-                isExpanded && 'shadow-lg'
-            )}
-            onClick={onToggle}
-        >
-            <CardContent className="p-4">
+        <Card className="overflow-hidden">
+            <button
+                onClick={onToggle}
+                className={cn(
+                    'w-full text-left p-4 md:p-6',
+                    'flex items-center justify-between',
+                    'min-h-[60px] md:min-h-auto',
+                    'active:bg-muted transition-colors',
+                    'cursor-pointer hover:bg-muted/50'
+                )}
+            >
+                <CardContent className="flex-1 p-0">
                 {/* Collapsed View - Summary */}
                 <div className="flex items-center justify-between gap-4">
                     {/* Day Number Badge */}

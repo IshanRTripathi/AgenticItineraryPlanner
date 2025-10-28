@@ -35,14 +35,14 @@ export function Header() {
               <a href="/" className="text-sm font-medium hover:text-primary transition-colors">
                 Home
               </a>
+              <a href="/ai-planner" className="text-sm font-medium hover:text-primary transition-colors">
+                Plan Trip
+              </a>
               <a href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
                 My Trips
               </a>
-              <a href="#flights" className="text-sm font-medium hover:text-primary transition-colors">
-                Flights
-              </a>
-              <a href="#hotels" className="text-sm font-medium hover:text-primary transition-colors">
-                Hotels
+              <a href="/search-results" className="text-sm font-medium hover:text-primary transition-colors">
+                Search
               </a>
             </nav>
 
