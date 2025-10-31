@@ -28,7 +28,6 @@ interface CalendarDayProps {
   isStart: boolean;
   isEnd: boolean;
   isDisabled: boolean;
-  priceLevel: 'low' | 'medium' | 'high' | null;
   onClick: () => void;
   onHover: () => void;
 }
@@ -40,15 +39,9 @@ function CalendarDay({
   isStart,
   isEnd,
   isDisabled,
-  priceLevel,
   onClick,
   onHover,
 }: CalendarDayProps) {
-  const priceDotColors = {
-    low: 'bg-green-500',
-    medium: 'bg-yellow-500',
-    high: 'bg-red-500',
-  };
 
   return (
     <motion.button
@@ -68,9 +61,6 @@ function CalendarDay({
       transition={{ duration: 0.15 }}
     >
       <div className="relative z-10">{format(date, 'd')}</div>
-      {priceLevel && !isDisabled && !isSelected && (
-        <div className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${priceDotColors[priceLevel]}`} />
-      )}
     </motion.button>
   );
 }
@@ -82,7 +72,7 @@ interface CalendarMonthProps {
   hoveredDate: Date | null;
   onDateClick: (date: Date) => void;
   onDateHover: (date: Date) => void;
-  getPriceLevel: (date: Date) => 'low' | 'medium' | 'high' | null;
+  isDateBeyondLimit: (date: Date) => boolean;
 }
 
 function CalendarMonth({
@@ -92,7 +82,7 @@ function CalendarMonth({
   hoveredDate,
   onDateClick,
   onDateHover,
-  getPriceLevel,
+  isDateBeyondLimit,
 }: CalendarMonthProps) {
   const days = getMonthDays(month);
   const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -135,7 +125,9 @@ function CalendarMonth({
             (startDate && hoveredDate && !endDate && isDateInRange(normalizedDate, startDate, hoveredDate)));
           const isStart = !!(startDate && isSameDay(normalizedDate, startDate));
           const isEnd = !!(endDate && isSameDay(normalizedDate, endDate));
-          const isDisabled = isDateDisabled(normalizedDate);
+          const isBasicallyDisabled = isDateDisabled(normalizedDate);
+          const isBeyondLimit = isDateBeyondLimit(normalizedDate);
+          const isDisabled = isBasicallyDisabled || isBeyondLimit;
 
           return (
             <CalendarDay
@@ -146,7 +138,6 @@ function CalendarMonth({
               isStart={isStart}
               isEnd={isEnd}
               isDisabled={isDisabled}
-              priceLevel={getPriceLevel(normalizedDate)}
               onClick={() => !isDisabled && onDateClick(normalizedDate)}
               onHover={() => !isDisabled && onDateHover(normalizedDate)}
             />
@@ -165,34 +156,49 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
+  const [showMaxDaysWarning, setShowMaxDaysWarning] = useState(false);
 
   const handleDateClick = (date: Date) => {
     if (!startDate || (startDate && endDate)) {
       // Start new selection
       onChange(date, null);
+      setShowMaxDaysWarning(false);
     } else {
       // Complete selection
-      if (date < startDate) {
-        onChange(date, startDate);
-      } else {
-        onChange(startDate, date);
+      const earlierDate = date < startDate ? date : startDate;
+      const laterDate = date < startDate ? startDate : date;
+      
+      // Check if duration exceeds 7 days
+      const daysDiff = getDaysBetween(earlierDate, laterDate);
+      if (daysDiff > 7) {
+        // Show warning banner
+        setShowMaxDaysWarning(true);
+        setTimeout(() => setShowMaxDaysWarning(false), 3000);
+        return;
       }
+      
+      setShowMaxDaysWarning(false);
+      onChange(earlierDate, laterDate);
     }
   };
-
-  const getPriceLevel = (date: Date): 'low' | 'medium' | 'high' | null => {
-    const dateKey = format(date, 'yyyy-MM-dd');
-    const price = priceData[dateKey];
-    if (!price) return null;
-    if (price < 100) return 'low';
-    if (price < 200) return 'medium';
-    return 'high';
+  
+  // Check if a date should be disabled based on 7-day limit
+  const isDateBeyondLimit = (date: Date): boolean => {
+    if (!startDate || endDate) return false;
+    const daysDiff = Math.abs(getDaysBetween(startDate, date));
+    return daysDiff > 7;
   };
 
   // Calculate duration only when both dates are selected (not on hover)
   const duration = startDate && endDate 
     ? getDaysBetween(startDate, endDate)
     : null;
+
+  // Calculate potential duration on hover
+  const potentialDuration = startDate && hoveredDate && !endDate
+    ? getDaysBetween(startDate, hoveredDate)
+    : null;
+  const wouldExceedLimit = potentialDuration !== null && potentialDuration > 7;
 
   return (
     <motion.div
@@ -201,6 +207,30 @@ export function DateRangePicker({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.25 }}
     >
+      {/* Warning Banner */}
+      <AnimatePresence>
+        {showMaxDaysWarning && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2"
+          >
+            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold mt-0.5">
+              !
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-900">Maximum 7 days</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Please select a trip duration of 7 days or less
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+
       {/* Dual Calendar Grid - More Compact */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Current Month */}
@@ -221,7 +251,7 @@ export function DateRangePicker({
             hoveredDate={hoveredDate}
             onDateClick={handleDateClick}
             onDateHover={setHoveredDate}
-            getPriceLevel={getPriceLevel}
+            isDateBeyondLimit={isDateBeyondLimit}
           />
         </div>
 
@@ -243,7 +273,7 @@ export function DateRangePicker({
             hoveredDate={hoveredDate}
             onDateClick={handleDateClick}
             onDateHover={setHoveredDate}
-            getPriceLevel={getPriceLevel}
+            isDateBeyondLimit={isDateBeyondLimit}
           />
         </div>
       </div>

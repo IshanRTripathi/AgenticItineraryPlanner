@@ -46,19 +46,6 @@ export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTr
     });
   };
 
-  // Mock price data for calendar
-  const mockPriceData: Record<string, number> = {};
-  const today = new Date();
-  for (let i = 0; i < 90; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-    const dateKey = date.toISOString().split('T')[0];
-    // Generate random prices with some pattern
-    const basePrice = 100 + Math.random() * 200;
-    const weekendMultiplier = date.getDay() === 0 || date.getDay() === 6 ? 1.3 : 1;
-    mockPriceData[dateKey] = Math.round(basePrice * weekendMultiplier);
-  }
-
   return (
     <div className="space-y-6">
       {/* Compact Header */}
@@ -75,7 +62,7 @@ export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTr
           When are you traveling?
         </h2>
         <p className="text-sm text-muted-foreground">
-          Select your travel dates and number of travelers
+          Select your travel dates (maximum 7 days)
         </p>
       </motion.div>
 
@@ -93,36 +80,12 @@ export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTr
             startDate={startDate}
             endDate={endDate}
             onChange={handleDateChange}
-            priceData={mockPriceData}
           />
         </div>
 
-        {/* Traveler Selector - Compact */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Travelers
-            </span>
-          </div>
+        {/* Traveler Selector */}
+        <div>
           <TravelerSelector value={travelers} onChange={handleTravelersChange} />
-          
-          {/* Summary */}
-          {startDate && endDate && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 bg-primary/5 rounded-xl border border-primary/20"
-            >
-              <div className="text-xs text-muted-foreground mb-1">Your trip</div>
-              <div className="font-semibold text-sm text-foreground">
-                {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} nights
-                {' • '}
-                {travelers.adults + travelers.children + travelers.infants} traveler
-                {travelers.adults + travelers.children + travelers.infants > 1 ? 's' : ''}
-              </div>
-            </motion.div>
-          )}
         </div>
       </motion.div>
     </div>

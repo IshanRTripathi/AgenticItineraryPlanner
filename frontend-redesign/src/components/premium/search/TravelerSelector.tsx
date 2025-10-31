@@ -41,37 +41,37 @@ function TravelerRow({
   const canIncrement = count < maxCount;
 
   return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-      <div>
-        <div className="font-medium text-sm text-gray-900">{label}</div>
-        <div className="text-xs text-gray-500">{description}</div>
+    <div className="flex items-center justify-between">
+      <div className="flex-1">
+        <div className="font-semibold text-sm text-gray-900">{label}</div>
+        <div className="text-xs text-gray-500 mt-0.5">{description}</div>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {/* Decrement Button */}
         <motion.button
           onClick={onDecrement}
           disabled={!canDecrement}
           className={`
-            w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors
+            w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm
             ${canDecrement 
-              ? 'border-primary-500 text-primary-500 hover:bg-primary-50' 
-              : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              ? 'bg-white border-2 border-gray-300 text-gray-700 hover:border-primary hover:text-primary hover:shadow-md' 
+              : 'bg-gray-100 border-2 border-gray-200 text-gray-300 cursor-not-allowed'
             }
           `}
           whileHover={canDecrement ? { scale: 1.1 } : {}}
           whileTap={canDecrement ? { scale: 0.9 } : {}}
         >
-          <Minus className="w-3 h-3" />
+          <Minus className="w-4 h-4" />
         </motion.button>
 
         {/* Count Display with Animation */}
         <motion.div
           key={count}
-          initial={{ scale: 1.2 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="w-7 text-center font-semibold text-sm text-gray-900"
+          initial={{ scale: 1.3, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="min-w-[2rem] text-center font-bold text-lg text-gray-900"
         >
           {count}
         </motion.div>
@@ -81,16 +81,16 @@ function TravelerRow({
           onClick={onIncrement}
           disabled={!canIncrement}
           className={`
-            w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors
+            w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-sm
             ${canIncrement 
-              ? 'border-primary-500 text-primary-500 hover:bg-primary-50' 
-              : 'border-gray-200 text-gray-300 cursor-not-allowed'
+              ? 'bg-white border-2 border-gray-300 text-gray-700 hover:border-primary hover:text-primary hover:shadow-md' 
+              : 'bg-gray-100 border-2 border-gray-200 text-gray-300 cursor-not-allowed'
             }
           `}
           whileHover={canIncrement ? { scale: 1.1 } : {}}
           whileTap={canIncrement ? { scale: 0.9 } : {}}
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-4 h-4" />
         </motion.button>
       </div>
     </div>
@@ -98,8 +98,6 @@ function TravelerRow({
 }
 
 export function TravelerSelector({ value, onChange }: TravelerSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
   const updateCount = (type: keyof TravelerCounts, delta: number) => {
     const newCounts = { ...value };
     const newValue = newCounts[type] + delta;
@@ -114,105 +112,55 @@ export function TravelerSelector({ value, onChange }: TravelerSelectorProps) {
     onChange(newCounts);
   };
 
-  const getSummaryText = (): string => {
-    const parts: string[] = [];
-    
-    if (value.adults > 0) {
-      parts.push(`${value.adults} adult${value.adults !== 1 ? 's' : ''}`);
-    }
-    if (value.children > 0) {
-      parts.push(`${value.children} child${value.children !== 1 ? 'ren' : ''}`);
-    }
-    if (value.infants > 0) {
-      parts.push(`${value.infants} infant${value.infants !== 1 ? 's' : ''}`);
-    }
-    
-    return parts.length > 0 ? parts.join(', ') : 'Add travelers';
-  };
-
   const totalTravelers = value.adults + value.children + value.infants;
-  const isAtMaxLimit = totalTravelers >= 27; // 9 per category
 
   return (
-    <div className="relative">
-      {/* Trigger Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 px-4 py-2.5 border-2 border-gray-300 rounded-lg hover:border-primary-400 transition-colors w-full text-left bg-white"
-      >
-        <Users className="w-4 h-4 text-gray-400" />
-        <span className="flex-1 text-sm font-medium text-gray-900">
-          {getSummaryText()}
-        </span>
-        <svg className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+      {/* Header with total */}
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <Users className="w-5 h-5 text-gray-600" />
+          <span className="font-semibold text-sm text-gray-900">Travelers</span>
+        </div>
+        <div className="px-2.5 py-1 bg-primary/10 rounded-full">
+          <span className="text-xs font-bold text-primary">
+            {totalTravelers} {totalTravelers === 1 ? 'person' : 'people'}
+          </span>
+        </div>
+      </div>
 
-      {/* Dropdown Modal */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-50 mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-200 p-3"
-          >
-            {/* Traveler Rows */}
-            <TravelerRow
-              label="Adults"
-              description="18+ years"
-              count={value.adults}
-              onIncrement={() => updateCount('adults', 1)}
-              onDecrement={() => updateCount('adults', -1)}
-              minCount={1}
-              maxCount={9}
-            />
-            
-            <TravelerRow
-              label="Children"
-              description="2-17 years"
-              count={value.children}
-              onIncrement={() => updateCount('children', 1)}
-              onDecrement={() => updateCount('children', -1)}
-              minCount={0}
-              maxCount={9}
-            />
-            
-            <TravelerRow
-              label="Infants"
-              description="0-2 years"
-              count={value.infants}
-              onIncrement={() => updateCount('infants', 1)}
-              onDecrement={() => updateCount('infants', -1)}
-              minCount={0}
-              maxCount={9}
-            />
-
-            {/* Maximum Limit Message */}
-            {isAtMaxLimit && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xs text-gray-500 mt-2"
-              >
-                Maximum travelers reached
-              </motion.div>
-            )}
-
-            {/* Apply Button */}
-            <motion.button
-              onClick={() => setIsOpen(false)}
-              className="w-full mt-3 px-4 py-2 bg-primary-500 text-white rounded-lg font-semibold text-sm"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Done
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Traveler Rows - Always visible */}
+      <div className="space-y-4">
+        <TravelerRow
+          label="Adults"
+          description="Age 18+"
+          count={value.adults}
+          onIncrement={() => updateCount('adults', 1)}
+          onDecrement={() => updateCount('adults', -1)}
+          minCount={1}
+          maxCount={9}
+        />
+        
+        <TravelerRow
+          label="Children"
+          description="Age 2-17"
+          count={value.children}
+          onIncrement={() => updateCount('children', 1)}
+          onDecrement={() => updateCount('children', -1)}
+          minCount={0}
+          maxCount={9}
+        />
+        
+        <TravelerRow
+          label="Infants"
+          description="Under 2"
+          count={value.infants}
+          onIncrement={() => updateCount('infants', 1)}
+          onDecrement={() => updateCount('infants', -1)}
+          minCount={0}
+          maxCount={9}
+        />
+      </div>
     </div>
   );
 }

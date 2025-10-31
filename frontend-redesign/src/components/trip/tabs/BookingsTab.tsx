@@ -1,287 +1,133 @@
 /**
- * Bookings Tab - Provider Booking Interface
- * Task 31: Enhanced with provider sidebar + Real data integration
+ * Bookings Tab - Intelligent Booking Interface
+ * Enhanced with smart categorization and modern UI
  */
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { BookingCard } from '@/components/booking/BookingCard';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { BookingModal } from '@/components/booking/BookingModal';
-import { getProvidersByVertical } from '@/config/providers';
-import { bookingService, Booking } from '@/services/bookingService';
+import { BookingCategoryCard } from '@/components/booking/BookingCategoryCard';
+import { categorizeBookings, CategorizedBooking } from '@/utils/categorizeBookings';
+import { slideUp, staggerChildren } from '@/utils/animations';
 import { useToast } from '@/components/ui/use-toast';
-import {
-  Plane,
-  Hotel,
-  Car,
-  Train,
-  Bus,
-  Check,
-  ExternalLink,
-  Loader2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface BookingsTabProps {
   itinerary: any; // NormalizedItinerary type
 }
 
-const PROVIDER_CATEGORIES = [
-  {
-    id: 'flights',
-    label: 'Flights',
-    icon: Plane,
-    vertical: 'flight' as const,
-  },
-  {
-    id: 'hotels',
-    label: 'Hotels',
-    icon: Hotel,
-    vertical: 'hotel' as const,
-  },
-  {
-    id: 'transport',
-    label: 'Transport',
-    icon: Car,
-    vertical: 'activity' as const,
-  },
-];
-
 export function BookingsTab({ itinerary }: BookingsTabProps) {
-  const [selectedCategory, setSelectedCategory] = useState('flights');
-  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [bookingModal, setBookingModal] = useState({
     isOpen: false,
     type: 'flight' as 'flight' | 'hotel' | 'activity',
     name: '',
+    booking: null as CategorizedBooking | null,
   });
-  const [realBookings, setRealBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Fetch real bookings from API
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!itinerary?.itineraryId) return;
-      
-      setIsLoading(true);
-      try {
-        const bookings = await bookingService.getBookings(itinerary.itineraryId);
-        setRealBookings(bookings);
-      } catch (error) {
-        console.error('Failed to fetch bookings:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load bookings',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Categorize all bookings
+  const categoryGroups = categorizeBookings(itinerary);
+  
+  // Calculate summary stats
+  const totalItems = categoryGroups.reduce((sum, g) => sum + g.items.length, 0);
+  const totalBooked = categoryGroups.reduce((sum, g) => sum + g.bookedCount, 0);
+  const totalAvailable = categoryGroups.reduce((sum, g) => sum + g.availableCount, 0);
 
-    fetchBookings();
-  }, [itinerary?.itineraryId, toast]);
-
-  // Safe access to days - handle nested structure
-  const days = itinerary?.itinerary?.days || itinerary?.days || [];
-
-  // Merge real bookings with itinerary components
-  const bookings = [
-    ...realBookings.map(b => ({
-      id: b.id,
-      title: b.bookingDetails?.name || 'Booking',
-      type: b.type,
-      bookingRef: b.confirmationNumber,
-      timing: { startTime: b.bookingDetails?.date },
-      location: { address: b.bookingDetails?.location },
-      cost: { amount: b.cost.amount },
-      status: b.status,
-    })),
-    ...days.flatMap((day: any) =>
-      // TripData uses 'components', not 'nodes'
-      day.components?.filter((comp: any) => comp.bookingRef) || []
-    ),
-  ];
-
-  const currentCategory = PROVIDER_CATEGORIES.find(c => c.id === selectedCategory);
-  const providers = currentCategory ? getProvidersByVertical(currentCategory.vertical) : [];
-
-  const handleProviderClick = (providerId: string) => {
-    setSelectedProvider(providerId);
-    // Open booking modal
+  const handleBook = (booking: CategorizedBooking) => {
     setBookingModal({
       isOpen: true,
-      type: currentCategory?.vertical || 'flight',
-      name: providers.find(p => p.id === providerId)?.name || '',
+      type: booking.category === 'accommodation' ? 'hotel' : 
+            booking.category === 'transport' ? 'flight' : 'activity',
+      name: booking.title,
+      booking,
     });
   };
 
+  const handleViewDetails = (booking: CategorizedBooking) => {
+    toast({
+      title: 'Booking Details',
+      description: `Viewing details for ${booking.title}`,
+    });
+  };
+
+  const handleMarkBooked = (booking: CategorizedBooking, confirmationCode: string) => {
+    // TODO: Update backend with booking status
+    toast({
+      title: 'Booking Marked',
+      description: `${booking.title} marked as booked with code ${confirmationCode}`,
+    });
+    // Trigger refetch or update local state
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      {/* Provider Sidebar */}
-      <div className="lg:col-span-1">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Booking Providers</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {PROVIDER_CATEGORIES.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category.id;
-              const categoryProviders = getProvidersByVertical(category.vertical);
-
-              return (
-                <div key={category.id} className="space-y-2">
-                  {/* Category Header */}
-                  <button
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={cn(
-                      'w-full flex items-center gap-2 px-3 py-2 rounded-lg font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted'
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {category.label}
-                  </button>
-
-                  {/* Provider Buttons */}
-                  {isActive && (
-                    <div className="space-y-1 pl-2">
-                      {categoryProviders.map((provider) => (
-                        <button
-                          key={provider.id}
-                          onClick={() => handleProviderClick(provider.id)}
-                          className={cn(
-                            'w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors',
-                            selectedProvider === provider.id
-                              ? 'bg-primary/10 text-primary font-medium'
-                              : 'hover:bg-muted'
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-xs">
-                              {provider.name.charAt(0)}
-                            </div>
-                            <span>{provider.name}</span>
-                          </div>
-                          {selectedProvider === provider.id && (
-                            <Check className="w-4 h-4" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bookings Content */}
-      <div className="lg:col-span-3 space-y-6">
-        {/* Loading State */}
-        {isLoading && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary mb-4" />
-              <p className="text-sm text-muted-foreground">Loading bookings...</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Existing Bookings */}
-        {!isLoading && bookings.length > 0 ? (
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Your Bookings</h3>
-            {bookings.map((node: any, index: number) => (
-              <BookingCard
-                key={index}
-                booking={{
-                  id: node.id || `booking-${index}`,
-                  type: node.type === 'hotel' ? 'hotel' : node.type === 'attraction' ? 'activity' : 'flight',
-                  name: node.name || node.title,
-                  date: node.timing?.startTime || 'TBD',
-                  location: node.location?.address || '',
-                  price: node.cost?.amount || node.cost?.pricePerPerson || 0,
-                  status: 'confirmed',
-                  confirmationCode: node.bookingRef || '',
-                }}
-              />
-            ))}
+    <div className="space-y-6">
+      {/* Header with Summary */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+      >
+        <h2 className="text-2xl font-bold mb-2">Bookings</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Manage all your trip bookings in one place
+        </p>
+        
+        {/* Summary Stats */}
+        <div className="flex gap-6">
+          <div>
+            <div className="text-2xl font-bold text-gray-900">{totalItems}</div>
+            <div className="text-xs text-muted-foreground">Total Items</div>
           </div>
-        ) : !isLoading ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <div className="space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
-                  <Hotel className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">No Bookings Yet</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Select a provider from the sidebar to start booking
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {/* Available Activities to Book */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold">Available to Book</h3>
-          <div className="grid gap-4">
-            {days.flatMap((day: any) =>
-              // TripData uses 'components', not 'nodes'
-              day.components
-                ?.filter((comp: any) => !comp.bookingRef)
-                .map((node: any, index: number) => (
-                  <Card key={`${day.dayNumber}-${index}`} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-lg mb-1">{node.name || node.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Day {day.dayNumber} • {day.location}
-                          </p>
-                          {(node.cost?.amount || node.cost?.pricePerPerson) && (
-                            <Badge variant="secondary">
-                              ${node.cost?.amount || node.cost?.pricePerPerson}
-                            </Badge>
-                          )}
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setBookingModal({
-                              isOpen: true,
-                              type: node.type === 'hotel' ? 'hotel' : 'activity',
-                              name: node.name || node.title,
-                            });
-                          }}
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Book Now
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-            )}
+          <div>
+            <div className="text-2xl font-bold text-primary">{totalBooked}</div>
+            <div className="text-xs text-muted-foreground">Booked</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-600">{totalAvailable}</div>
+            <div className="text-xs text-muted-foreground">Available</div>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Category Cards */}
+      {categoryGroups.length > 0 ? (
+        <motion.div
+          variants={staggerChildren}
+          initial="initial"
+          animate="animate"
+          className="space-y-4"
+        >
+          {categoryGroups.map((group, index) => (
+            <motion.div key={group.category} variants={slideUp}>
+              <BookingCategoryCard
+                group={group}
+                defaultExpanded={index === 0}
+                onBook={handleBook}
+                onViewDetails={handleViewDetails}
+                onMarkBooked={handleMarkBooked}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center"
+        >
+          <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+            <span className="text-3xl">📋</span>
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No Bookable Items</h3>
+          <p className="text-sm text-muted-foreground">
+            Your itinerary doesn't have any bookable items yet
+          </p>
+        </motion.div>
+      )}
 
       {/* Booking Modal */}
       <BookingModal
         isOpen={bookingModal.isOpen}
-        onClose={() => setBookingModal({ ...bookingModal, isOpen: false })}
+        onClose={() => setBookingModal({ ...bookingModal, isOpen: false, booking: null })}
         bookingType={bookingModal.type}
         itemName={bookingModal.name}
       />

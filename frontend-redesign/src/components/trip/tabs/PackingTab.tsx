@@ -1,19 +1,16 @@
 /**
  * Packing Tab Component
- * AI-generated packing suggestions with categorized checklist
+ * AI-generated packing suggestions with smart categorization
  */
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, Trash2, Sparkles } from 'lucide-react';
-
-interface PackingTabProps {
-  tripId?: string;
-}
+import { motion } from 'framer-motion';
+import { PackingCategoryCard } from '@/components/packing/PackingCategoryCard';
+import { SmartSuggestions } from '@/components/packing/SmartSuggestions';
+import { PackingTemplates } from '@/components/packing/PackingTemplates';
+import { staggerChildren, slideUp } from '@/utils/animations';
+import { Package } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PackingItem {
   id: string;
@@ -34,10 +31,10 @@ const initialPackingList: PackingCategory[] = [
     name: 'Clothing',
     icon: '👕',
     items: [
-      { id: '1', name: 'T-shirts (5)', checked: false, custom: false },
-      { id: '2', name: 'Pants/Jeans (3)', checked: false, custom: false },
-      { id: '3', name: 'Underwear (7)', checked: true, custom: false },
-      { id: '4', name: 'Socks (7 pairs)', checked: true, custom: false },
+      { id: '1', name: 'T-shirts', checked: false, custom: false },
+      { id: '2', name: 'Pants/Jeans', checked: false, custom: false },
+      { id: '3', name: 'Underwear', checked: true, custom: false },
+      { id: '4', name: 'Socks', checked: true, custom: false },
       { id: '5', name: 'Jacket/Sweater', checked: false, custom: false },
       { id: '6', name: 'Sleepwear', checked: false, custom: false },
       { id: '7', name: 'Comfortable shoes', checked: false, custom: false },
@@ -52,7 +49,7 @@ const initialPackingList: PackingCategory[] = [
       { id: '10', name: 'Shampoo & conditioner', checked: false, custom: false },
       { id: '11', name: 'Body wash/soap', checked: false, custom: false },
       { id: '12', name: 'Deodorant', checked: true, custom: false },
-      { id: '13', name: 'Sunscreen (SPF 50+)', checked: false, custom: false },
+      { id: '13', name: 'Sunscreen', checked: false, custom: false },
       { id: '14', name: 'Moisturizer', checked: false, custom: false },
       { id: '15', name: 'Razor & shaving cream', checked: false, custom: false },
     ],
@@ -74,7 +71,7 @@ const initialPackingList: PackingCategory[] = [
     icon: '📄',
     items: [
       { id: '22', name: 'Passport', checked: false, custom: false },
-      { id: '23', name: 'Visa (if required)', checked: false, custom: false },
+      { id: '23', name: 'Visa', checked: false, custom: false },
       { id: '24', name: 'Travel insurance', checked: false, custom: false },
       { id: '25', name: 'Flight tickets', checked: false, custom: false },
       { id: '26', name: 'Hotel confirmations', checked: false, custom: false },
@@ -105,10 +102,21 @@ const initialPackingList: PackingCategory[] = [
   },
 ];
 
-export function PackingTab({ tripId }: PackingTabProps) {
+export function PackingTab() {
   const [packingList, setPackingList] = useState<PackingCategory[]>(initialPackingList);
-  const [newItemName, setNewItemName] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(0);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Record<number, boolean>>({
+    0: true,
+    1: true,
+  });
+  const [addedSuggestionIds, setAddedSuggestionIds] = useState<Set<string>>(new Set());
+
+  // Mock trip context for smart suggestions
+  const tripContext = {
+    destination: 'Paris, France',
+    weather: 'Sunny and warm',
+    activities: ['sightseeing', 'museums', 'dining'],
+  };
 
   const totalItems = packingList.reduce((sum, cat) => sum + cat.items.length, 0);
   const checkedItems = packingList.reduce(
@@ -132,27 +140,6 @@ export function PackingTab({ tripId }: PackingTabProps) {
     );
   };
 
-  const addCustomItem = () => {
-    if (!newItemName.trim()) return;
-
-    const newItem: PackingItem = {
-      id: `custom-${Date.now()}`,
-      name: newItemName,
-      checked: false,
-      custom: true,
-    };
-
-    setPackingList((prev) =>
-      prev.map((cat, idx) =>
-        idx === selectedCategory
-          ? { ...cat, items: [...cat.items, newItem] }
-          : cat
-      )
-    );
-
-    setNewItemName('');
-  };
-
   const deleteCustomItem = (categoryIndex: number, itemId: string) => {
     setPackingList((prev) =>
       prev.map((cat, idx) =>
@@ -166,116 +153,196 @@ export function PackingTab({ tripId }: PackingTabProps) {
     );
   };
 
+  const handleMarkAllComplete = (categoryIndex: number) => {
+    setPackingList((prev) =>
+      prev.map((cat, idx) =>
+        idx === categoryIndex
+          ? {
+              ...cat,
+              items: cat.items.map((item) => ({ ...item, checked: true })),
+            }
+          : cat
+      )
+    );
+  };
+
+  const handleAddSuggestion = (suggestion: any) => {
+    const categoryIndex = packingList.findIndex(
+      (cat) => cat.name === suggestion.category
+    );
+
+    if (categoryIndex === -1) return;
+
+    const newItem: PackingItem = {
+      id: `sug-${Date.now()}`,
+      name: suggestion.name,
+      checked: false,
+      custom: true,
+    };
+
+    setPackingList((prev) =>
+      prev.map((cat, idx) =>
+        idx === categoryIndex
+          ? { ...cat, items: [...cat.items, newItem] }
+          : cat
+      )
+    );
+
+    // Mark this suggestion as added
+    setAddedSuggestionIds((prev) => new Set(prev).add(suggestion.id));
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    // In a real app, this would load template-specific items
+    console.log('Selected template:', templateId);
+    setShowTemplates(false);
+    // You could add template-specific items here
+  };
+
   return (
-    <div className="space-y-6 p-6">
-      {/* Progress Overview */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-secondary" />
-              AI-Generated Packing List
-            </CardTitle>
-            <Badge variant="secondary" className="text-lg px-4 py-1">
-              {checkedItems}/{totalItems} packed
-            </Badge>
+    <div className="space-y-6">
+      {/* Templates Toggle - Moved to top */}
+      {!showTemplates && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => setShowTemplates(true)}
+          className="w-full py-3 px-4 bg-white border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+        >
+          Browse Packing Templates
+        </motion.button>
+      )}
+
+      {/* Templates */}
+      {showTemplates && (
+        <PackingTemplates onSelectTemplate={handleSelectTemplate} />
+      )}
+
+      {/* Header with Progress */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">
+              <Package className="w-6 h-6 text-primary" />
+              Packing List
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              AI-generated suggestions for your trip
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Packing Progress</span>
-              <span>{progress.toFixed(0)}%</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-3">
-              <div
-                className="bg-primary rounded-full h-3 transition-all duration-300"
-                style={{ width: `${progress}%` }}
+          
+          {/* Circular Progress */}
+          <div className="relative w-20 h-20">
+            <svg className="w-20 h-20 transform -rotate-90">
+              <circle
+                cx="40"
+                cy="40"
+                r="32"
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="none"
+                className="text-gray-200"
               />
+              <motion.circle
+                cx="40"
+                cy="40"
+                r="32"
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="none"
+                strokeLinecap="round"
+                className={cn(
+                  progress < 30 ? 'text-red-500' :
+                  progress < 70 ? 'text-amber-500' :
+                  'text-green-500'
+                )}
+                initial={{ strokeDasharray: '0 999' }}
+                animate={{ strokeDasharray: `${progress * 2} 999` }}
+                transition={{ duration: 1, ease: 'easeOut' }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-lg font-bold text-gray-900">{progress.toFixed(0)}%</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Add Custom Item */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Add Custom Item</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(Number(e.target.value))}
-              className="px-3 py-2 border rounded-md"
-            >
-              {packingList.map((cat, idx) => (
-                <option key={idx} value={idx}>
-                  {cat.icon} {cat.name}
-                </option>
-              ))}
-            </select>
-            <Input
-              placeholder="Item name..."
-              value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addCustomItem()}
-            />
-            <Button onClick={addCustomItem} size="icon">
-              <Plus className="h-4 w-4" />
-            </Button>
+        {/* Summary Stats */}
+        <div className="flex gap-6">
+          <div>
+            <div className="text-2xl font-bold text-gray-900">{totalItems}</div>
+            <div className="text-xs text-muted-foreground">Total Items</div>
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <div className="text-2xl font-bold text-primary">{checkedItems}</div>
+            <div className="text-xs text-muted-foreground">Packed</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-gray-600">{totalItems - checkedItems}</div>
+            <div className="text-xs text-muted-foreground">Remaining</div>
+          </div>
+        </div>
+      </motion.div>
 
-      {/* Packing Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Smart Suggestions - Only show if there are suggestions */}
+      <SmartSuggestions
+        destination={tripContext.destination}
+        weather={tripContext.weather}
+        activities={tripContext.activities}
+        onAddSuggestion={handleAddSuggestion}
+        addedSuggestionIds={addedSuggestionIds}
+      />
+
+      {/* Category Cards - 2 Column Grid */}
+      <motion.div
+        variants={staggerChildren}
+        initial="initial"
+        animate="animate"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+      >
         {packingList.map((category, categoryIndex) => (
-          <Card key={categoryIndex}>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <span className="text-2xl">{category.icon}</span>
-                {category.name}
-                <Badge variant="outline" className="ml-auto">
-                  {category.items.filter((i) => i.checked).length}/{category.items.length}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {category.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
-                  >
-                    <Checkbox
-                      checked={item.checked}
-                      onCheckedChange={() => toggleItem(categoryIndex, item.id)}
-                    />
-                    <span
-                      className={`flex-1 text-sm ${
-                        item.checked ? 'line-through text-muted-foreground' : ''
-                      }`}
-                    >
-                      {item.name}
-                    </span>
-                    {item.custom && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => deleteCustomItem(categoryIndex, item.id)}
-                      >
-                        <Trash2 className="h-3 w-3 text-error" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div 
+            key={categoryIndex} 
+            variants={slideUp} 
+            className={expandedCategories[categoryIndex] ? "h-[400px]" : "h-auto"}
+          >
+            <PackingCategoryCard
+              name={category.name}
+              icon={category.icon}
+              items={category.items}
+              defaultExpanded={categoryIndex < 2}
+              onToggleItem={(itemId) => toggleItem(categoryIndex, itemId)}
+              onAddItem={(itemName) => {
+                const newItem: PackingItem = {
+                  id: `custom-${Date.now()}`,
+                  name: itemName,
+                  checked: false,
+                  custom: true,
+                };
+                setPackingList((prev) =>
+                  prev.map((cat, idx) =>
+                    idx === categoryIndex
+                      ? { ...cat, items: [...cat.items, newItem] }
+                      : cat
+                  )
+                );
+              }}
+              onDeleteItem={(itemId) => deleteCustomItem(categoryIndex, itemId)}
+              onMarkAllComplete={() => handleMarkAllComplete(categoryIndex)}
+              onExpandChange={(expanded) => {
+                setExpandedCategories(prev => ({
+                  ...prev,
+                  [categoryIndex]: expanded
+                }));
+              }}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
