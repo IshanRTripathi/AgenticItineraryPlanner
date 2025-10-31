@@ -3,6 +3,8 @@
  * Type definitions matching backend Spring Boot DTOs
  */
 
+import type { NormalizedNode } from './NormalizedItinerary';
+
 // ============================================================================
 // Itinerary DTOs
 // ============================================================================
@@ -73,20 +75,7 @@ export interface DayItinerary {
   nodeIds: string[];
 }
 
-export interface NormalizedNode {
-  id: string;
-  type: 'attraction' | 'meal' | 'hotel' | 'transit' | 'activity';
-  title: string;
-  description?: string;
-  location?: Location;
-  timing?: Timing;
-  cost?: Cost;
-  bookingRef?: string;
-  bookingStatus?: 'pending' | 'confirmed' | 'cancelled';
-  provider?: string;
-  metadata?: Record<string, any>;
-  locked?: boolean;
-}
+// NormalizedNode is defined in NormalizedItinerary.ts and imported at the top
 
 export interface Location {
   name?: string;

@@ -187,6 +187,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
     const handleMessage = (message: any) => {
       if (!isActive) return;
 
+      console.log('[UnifiedItineraryProvider] WebSocket message received:', message);
       logInfo(`WebSocket message received: ${message.type}`, {
         component: 'UnifiedItineraryProvider',
         action: 'websocket_message',
@@ -196,6 +197,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
 
       switch (message.type) {
         case 'itinerary_updated':
+          console.log('[UnifiedItineraryProvider] Processing itinerary update:', message.data);
           logInfo('Processing itinerary update from WebSocket', {
             component: 'UnifiedItineraryProvider',
             action: 'itinerary_update',

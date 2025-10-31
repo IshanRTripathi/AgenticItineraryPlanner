@@ -85,7 +85,10 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
     fetchBookings();
   }, [itinerary?.itineraryId, toast]);
 
-  // Merge real bookings with itinerary nodes
+  // Safe access to days - handle nested structure
+  const days = itinerary?.itinerary?.days || itinerary?.days || [];
+
+  // Merge real bookings with itinerary components
   const bookings = [
     ...realBookings.map(b => ({
       id: b.id,
@@ -97,8 +100,9 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
       cost: { amount: b.cost.amount },
       status: b.status,
     })),
-    ...itinerary.days.flatMap((day: any) =>
-      day.nodes?.filter((node: any) => node.bookingRef) || []
+    ...days.flatMap((day: any) =>
+      // TripData uses 'components', not 'nodes'
+      day.components?.filter((comp: any) => comp.bookingRef) || []
     ),
   ];
 
@@ -201,10 +205,10 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
                 booking={{
                   id: node.id || `booking-${index}`,
                   type: node.type === 'hotel' ? 'hotel' : node.type === 'attraction' ? 'activity' : 'flight',
-                  name: node.title,
+                  name: node.name || node.title,
                   date: node.timing?.startTime || 'TBD',
                   location: node.location?.address || '',
-                  price: node.cost?.amount || 0,
+                  price: node.cost?.amount || node.cost?.pricePerPerson || 0,
                   status: 'confirmed',
                   confirmationCode: node.bookingRef || '',
                 }}
@@ -233,21 +237,22 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
         <div className="space-y-4">
           <h3 className="text-xl font-semibold">Available to Book</h3>
           <div className="grid gap-4">
-            {itinerary.days.flatMap((day: any) =>
-              day.nodes
-                ?.filter((node: any) => !node.bookingRef)
+            {days.flatMap((day: any) =>
+              // TripData uses 'components', not 'nodes'
+              day.components
+                ?.filter((comp: any) => !comp.bookingRef)
                 .map((node: any, index: number) => (
                   <Card key={`${day.dayNumber}-${index}`} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-lg mb-1">{node.title}</h4>
+                          <h4 className="font-semibold text-lg mb-1">{node.name || node.title}</h4>
                           <p className="text-sm text-muted-foreground mb-2">
                             Day {day.dayNumber} • {day.location}
                           </p>
-                          {node.cost?.amount && (
+                          {(node.cost?.amount || node.cost?.pricePerPerson) && (
                             <Badge variant="secondary">
-                              ${node.cost.amount}
+                              ${node.cost?.amount || node.cost?.pricePerPerson}
                             </Badge>
                           )}
                         </div>
@@ -257,7 +262,7 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
                             setBookingModal({
                               isOpen: true,
                               type: node.type === 'hotel' ? 'hotel' : 'activity',
-                              name: node.title,
+                              name: node.name || node.title,
                             });
                           }}
                         >

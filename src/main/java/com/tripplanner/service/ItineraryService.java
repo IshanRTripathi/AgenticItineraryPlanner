@@ -29,19 +29,22 @@ public class ItineraryService {
     private final PipelineOrchestrator pipelineOrchestrator;
     private final AgentEventPublisher agentEventPublisher;
     private final ItineraryMigrationService migrationService;
+    private final WebSocketBroadcastService webSocketBroadcastService;
     
     public ItineraryService(ItineraryInitializationService initService,
                             ItineraryJsonService itineraryJsonService,
                             UserDataService userDataService,
                             PipelineOrchestrator pipelineOrchestrator,
                             AgentEventPublisher agentEventPublisher,
-                            ItineraryMigrationService migrationService) {
+                            ItineraryMigrationService migrationService,
+                            WebSocketBroadcastService webSocketBroadcastService) {
         this.initService = initService;
         this.itineraryJsonService = itineraryJsonService;
         this.userDataService = userDataService;
         this.pipelineOrchestrator = pipelineOrchestrator;
         this.agentEventPublisher = agentEventPublisher;
         this.migrationService = migrationService;
+        this.webSocketBroadcastService = webSocketBroadcastService;
     }
     
     /**
@@ -156,6 +159,27 @@ public class ItineraryService {
                     logger.info("Pipeline generation completed successfully for itinerary: {}, executionId: {}", 
                         itineraryId, executionId);
                     // Note: Completion event is already published by PipelineOrchestrator.publishPipelineComplete()
+                    
+                    // Send WebSocket update to notify frontend of completion
+                    try {
+                        logger.info("Sending WebSocket update for completed itinerary: {}", itineraryId);
+                        // Get the completed itinerary
+                        var completedItinerary = itineraryJsonService.getItinerary(itineraryId);
+                        if (completedItinerary.isPresent()) {
+                            // Broadcast itinerary update via WebSocket
+                            webSocketBroadcastService.broadcastUpdate(
+                                itineraryId, 
+                                "itinerary_updated", 
+                                completedItinerary.get(),
+                                userId
+                            );
+                            logger.info("WebSocket update sent successfully for itinerary: {}", itineraryId);
+                        } else {
+                            logger.warn("Could not find completed itinerary to broadcast: {}", itineraryId);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Failed to send WebSocket update for itinerary: {}", itineraryId, e);
+                    }
                 }
             });
 

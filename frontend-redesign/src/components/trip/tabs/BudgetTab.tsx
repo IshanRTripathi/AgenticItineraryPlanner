@@ -23,9 +23,10 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       return { total: 0, spent: 0, remaining: 0, currency: 'USD' };
     }
     
+    // NormalizedItinerary has days with nodes directly
     const total = itinerary.days.reduce((sum, day) => sum + (day.totals?.cost || 0), 0);
     const spent = itinerary.days.reduce((sum, day) => 
-      sum + day.nodes.filter(n => n.bookingRef).reduce((s, n) => s + n.cost.amount, 0), 0
+      sum + (day.nodes || []).filter(n => n.bookingRef).reduce((s, n) => s + (n.cost?.amount || 0), 0), 0
     );
     
     return {
@@ -42,12 +43,12 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
     
     const categories: Record<string, number> = {};
     itinerary.days.forEach(day => {
-      day.nodes.forEach(node => {
-        const category = node.type === 'accommodation' ? 'Accommodation' :
-                        node.type === 'transport' ? 'Transportation' :
+      (day.nodes || []).forEach((node: any) => {
+        const category = (node.type === 'accommodation' || node.type === 'hotel') ? 'Accommodation' :
+                        (node.type === 'transport' || node.type === 'transit') ? 'Transportation' :
                         node.type === 'meal' ? 'Food & Dining' :
-                        node.type === 'activity' || node.type === 'place' ? 'Activities' : 'Other';
-        categories[category] = (categories[category] || 0) + node.cost.amount;
+                        (node.type === 'attraction' || node.type === 'activity') ? 'Activities' : 'Other';
+        categories[category] = (categories[category] || 0) + (node.cost?.amount || 0);
       });
     });
     

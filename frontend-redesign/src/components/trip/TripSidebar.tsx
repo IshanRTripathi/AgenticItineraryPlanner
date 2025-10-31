@@ -21,10 +21,14 @@ import {
   Calendar,
   Users,
   Loader2,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { exportService } from '@/services/exportService';
 import { useToast } from '@/components/ui/use-toast';
+import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
+import { ExportOptionsModal, ExportOptions } from '@/components/export/ExportOptionsModal';
+import { ShareModal } from '@/components/share/ShareModal';
 
 interface TripSidebarProps {
   tripId: string;
@@ -38,6 +42,7 @@ interface TripSidebarProps {
 const NAV_ITEMS = [
   { id: 'view', label: 'View', icon: Eye },
   { id: 'plan', label: 'Plan', icon: Map },
+  { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'bookings', label: 'Bookings', icon: CreditCard },
   { id: 'budget', label: 'Budget', icon: Wallet },
   { id: 'packing', label: 'Packing', icon: Backpack },
@@ -54,8 +59,11 @@ export function TripSidebar({
 }: TripSidebarProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { state } = useUnifiedItinerary();
   const [isExporting, setIsExporting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleBack = () => {
     navigate('/dashboard');
@@ -64,17 +72,20 @@ export function TripSidebar({
   const handleShare = async () => {
     setIsSharing(true);
     try {
-      const result = await exportService.getShareableLink(tripId);
+      const shareLink = await exportService.generateShareLink(tripId);
       
-      if (result.success && result.link) {
-        // Copy to clipboard
-        await navigator.clipboard.writeText(result.link);
-        toast({
-          title: 'Link Copied!',
-          description: 'Shareable link copied to clipboard',
-        });
-      } else {
-        throw new Error(result.error);
+      toast({
+        title: 'Link Copied!',
+        description: 'Shareable link copied to clipboard',
+      });
+
+      // Try Web Share API if available
+      if (navigator.share && state.itinerary) {
+        try {
+          await exportService.shareViaWebAPI(state.itinerary);
+        } catch (e) {
+          // User cancelled or not supported, link already copied
+        }
       }
     } catch (error) {
       toast({
@@ -87,27 +98,26 @@ export function TripSidebar({
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = async (options: ExportOptions) => {
+    if (!state.itinerary) {
+      toast({
+        title: 'Export Failed',
+        description: 'Itinerary not loaded',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsExporting(true);
     try {
-      const result = await exportService.downloadPdf(
-        tripId,
-        `${destination.replace(/\s+/g, '-')}-itinerary.pdf`,
-        {
-          includeImages: true,
-          includeMap: true,
-          includeBookings: true,
-        }
-      );
-
-      if (result.success) {
-        toast({
-          title: 'Export Successful',
-          description: 'Your itinerary has been downloaded',
-        });
-      } else {
-        throw new Error(result.error);
-      }
+      // TODO: Use options for enhanced export
+      await exportService.exportToPDF(state.itinerary);
+      
+      toast({
+        title: 'Export Successful',
+        description: 'Your itinerary is ready to print or save as PDF',
+      });
+      setIsExportModalOpen(false);
     } catch (error) {
       toast({
         title: 'Export Failed',
@@ -186,29 +196,19 @@ export function TripSidebar({
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleShare}
+          onClick={() => setIsShareModalOpen(true)}
           title="Share Trip"
-          disabled={isSharing}
         >
-          {isSharing ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Share2 className="w-5 h-5" />
-          )}
+          <Share2 className="w-5 h-5" />
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleExport}
+          onClick={() => setIsExportModalOpen(true)}
           title="Export PDF"
-          disabled={isExporting}
         >
-          {isExporting ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Download className="w-5 h-5" />
-          )}
+          <Download className="w-5 h-5" />
         </Button>
 
         <Button
@@ -221,6 +221,22 @@ export function TripSidebar({
           <Trash2 className="w-5 h-5" />
         </Button>
       </div>
+
+      {/* Export Options Modal */}
+      <ExportOptionsModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExport}
+        isExporting={isExporting}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        itineraryId={tripId}
+        itinerary={state.itinerary}
+      />
     </aside>
   );
 }

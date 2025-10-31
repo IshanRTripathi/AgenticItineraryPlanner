@@ -389,6 +389,16 @@ public class ChangeEngine {
                         updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("timing")));
                     }
                     break;
+                case "reorder":
+                    if (reorderNodes(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
+                        // Mark all reordered nodes as updated
+                        if (op.getNodeIds() != null) {
+                            for (String nodeId : op.getNodeIds()) {
+                                updated.add(new DiffItem(nodeId, changeSet.getDay(), Arrays.asList("position")));
+                            }
+                        }
+                    }
+                    break;
                 case "insert":
                     if (insertNode(itinerary, op, changeSet.getDay())) {
                         added.add(new DiffItem(op.getNode().getId(), changeSet.getDay(), null, op.getNode().getTitle()));
@@ -466,6 +476,99 @@ public class ChangeEngine {
         
         updateNodeAudit(node, "user");
         
+        return true;
+    }
+    
+    /**
+     * Reorder nodes within a day to match the provided order.
+     */
+    private boolean reorderNodes(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
+        if (op.getNodeIds() == null || op.getNodeIds().isEmpty()) {
+            logger.warn("No nodeIds provided for reorder operation");
+            return false;
+        }
+        
+        // Find the day
+        NormalizedDay targetDay = findDayByNumber(itinerary, day);
+        if (targetDay == null) {
+            logger.warn("Day not found: {}", day);
+            return false;
+        }
+        
+        List<NormalizedNode> currentNodes = targetDay.getNodes();
+        if (currentNodes == null || currentNodes.isEmpty()) {
+            logger.warn("No nodes in day {}", day);
+            return false;
+        }
+        
+        // Create a map of node ID to node for quick lookup
+        Map<String, NormalizedNode> nodeMap = new HashMap<>();
+        for (NormalizedNode node : currentNodes) {
+            nodeMap.put(node.getId(), node);
+        }
+        
+        // CRITICAL: Validate that the reorder includes ALL nodes in the day
+        // This prevents accidental deletion of nodes not included in the reorder
+        if (op.getNodeIds().size() != currentNodes.size()) {
+            logger.error("Reorder operation must include ALL nodes in the day. Expected {} nodes, got {}. " +
+                        "Current nodes: {}, Provided nodes: {}", 
+                        currentNodes.size(), op.getNodeIds().size(),
+                        currentNodes.stream().map(NormalizedNode::getId).collect(Collectors.toList()),
+                        op.getNodeIds());
+            return false;
+        }
+        
+        // Validate that all provided IDs exist and no duplicates
+        Set<String> seenIds = new HashSet<>();
+        for (String nodeId : op.getNodeIds()) {
+            if (!nodeMap.containsKey(nodeId)) {
+                logger.error("Node ID {} not found in day {}. Available nodes: {}", 
+                            nodeId, day, nodeMap.keySet());
+                return false;
+            }
+            if (!seenIds.add(nodeId)) {
+                logger.error("Duplicate node ID {} in reorder operation", nodeId);
+                return false;
+            }
+        }
+        
+        // Check if any nodes are locked
+        if (Boolean.TRUE.equals(preferences != null ? preferences.getRespectLocks() : true)) {
+            for (String nodeId : op.getNodeIds()) {
+                NormalizedNode node = nodeMap.get(nodeId);
+                if (Boolean.TRUE.equals(node.getLocked()) || lockManager.isLocked(nodeId)) {
+                    logger.warn("Cannot reorder: node {} is locked", nodeId);
+                    return false;
+                }
+            }
+        }
+        
+        // Log the reorder operation
+        logger.info("=== REORDER OPERATION ===");
+        logger.info("Day {}: Current order: {}", day, 
+                   currentNodes.stream().map(NormalizedNode::getId).collect(Collectors.toList()));
+        logger.info("Day {}: New order: {}", day, op.getNodeIds());
+        
+        // Create new ordered list
+        List<NormalizedNode> newOrder = new ArrayList<>();
+        for (String nodeId : op.getNodeIds()) {
+            newOrder.add(nodeMap.get(nodeId));
+        }
+        
+        // Replace the nodes list with the new order
+        targetDay.setNodes(newOrder);
+        
+        // Verify the order was set correctly
+        logger.info("Day {}: After setNodes: {}", day,
+                   targetDay.getNodes().stream().map(NormalizedNode::getId).collect(Collectors.toList()));
+        
+        // Update audit info for all reordered nodes
+        for (NormalizedNode node : newOrder) {
+            updateNodeAudit(node, "user");
+        }
+        
+        logger.info("Successfully reordered {} nodes in day {}", newOrder.size(), day);
+        logger.info("=========================");
         return true;
     }
     
@@ -876,10 +979,10 @@ public class ChangeEngine {
                 switch (op.getOp()) {
                     case "move":
                         detail.setField("timing");
-                        detail.setNewValue(Map.of(
-                            "startTime", op.getStartTime(),
-                            "endTime", op.getEndTime()
-                        ));
+                        Map<String, Object> timingMap = new HashMap<>();
+                        timingMap.put("startTime", op.getStartTime());
+                        timingMap.put("endTime", op.getEndTime());
+                        detail.setNewValue(timingMap);
                         break;
                     case "insert":
                         detail.setOperation("CREATE");

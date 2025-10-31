@@ -62,9 +62,15 @@ class WebSocketService {
     // SockJS expects HTTP/HTTPS URLs, not WebSocket URLs
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
     const hostname = window.location.hostname;
-    const baseUrl = import.meta.env.VITE_WS_BASE_URL || `${protocol}//${hostname}:8080`;
-
-    return `${baseUrl}/ws`;
+    const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL;
+    
+    // If VITE_WS_BASE_URL is provided, use it directly (it should already include /ws)
+    if (wsBaseUrl) {
+      return wsBaseUrl;
+    }
+    
+    // Otherwise, construct the default URL
+    return `${protocol}//${hostname}:8080/ws`;
   }
 
   /**

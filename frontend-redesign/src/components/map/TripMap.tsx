@@ -4,7 +4,7 @@
  * Uses smart coordinate resolution with fallback strategies
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react';
 import type { NormalizedItinerary, Coordinates } from '@/types/dto';
@@ -48,30 +48,38 @@ export function TripMap({ itinerary }: TripMapProps) {
     const parts = location.split(',');
     return parts[0].trim();
   };
-  
-  const destinationCity = extractCityName(itinerary.days[0]?.location || 'Unknown');
+
+  // Safe access to days - memoized to prevent infinite loops
+  // Handle nested structure: itinerary.itinerary.days or itinerary.days
+  const days = useMemo(() => (itinerary as any)?.itinerary?.days || (itinerary as any)?.days || [], [(itinerary as any)?.itinerary?.days, (itinerary as any)?.days]);
+  const destinationCity = useMemo(
+    () => extractCityName(days[0]?.location || 'Unknown'), 
+    [days]
+  );
 
   // Resolve coordinates for all nodes
   useEffect(() => {
     async function resolveCoordinates() {
       setIsResolving(true);
       console.log('[TripMap] ========== MAP COORDINATE RESOLUTION START ==========');
-      console.log('[TripMap] Itinerary ID:', itinerary.itineraryId);
-      console.log('[TripMap] Total days:', itinerary.days.length);
+      console.log('[TripMap] Itinerary ID:', (itinerary as any)?.id || itinerary?.itineraryId);
+      console.log('[TripMap] Total days:', days.length);
       console.log('[TripMap] Destination city:', destinationCity);
 
       const allNodes: MapNode[] = [];
       const stats = { total: 0, exact: 0, approximate: 0, city: 0, fallback: 0 };
 
-      for (const day of itinerary.days) {
-        console.log(`[TripMap] Processing Day ${day.dayNumber} with ${day.nodes.length} nodes`);
-        
-        for (const node of day.nodes) {
+      for (const day of days) {
+        // Handle both TripData (components) and NormalizedItinerary (nodes)
+        const nodes = day.nodes || day.components || [];
+        console.log(`[TripMap] Processing Day ${day.dayNumber} with ${nodes.length} nodes`);
+
+        for (const node of nodes) {
           stats.total++;
-          
+
           console.log(`[TripMap] Resolving node: ${node.id} - ${node.title}`);
           console.log(`[TripMap]   Location data:`, node.location);
-          
+
           // Resolve coordinates using smart resolver
           const result = await coordinateResolver.resolve(
             node.location,
@@ -86,10 +94,11 @@ export function TripMap({ itinerary }: TripMapProps) {
           stats[result.confidence]++;
 
           // Add to nodes array
+          // Handle both TripData (name) and NormalizedItinerary (title)
           allNodes.push({
             id: node.id,
             position: result.coordinates,
-            title: node.title,
+            title: node.title || node.name || 'Unknown',
             type: node.type,
             status: 'planned',
             locked: node.locked || false,
@@ -118,7 +127,7 @@ export function TripMap({ itinerary }: TripMapProps) {
     }
 
     resolveCoordinates();
-  }, [itinerary, destinationCity]);
+  }, [days, destinationCity]);
 
   // Initialize map with resolved coordinates
   useEffect(() => {
@@ -231,7 +240,7 @@ export function TripMap({ itinerary }: TripMapProps) {
 
     // Fit bounds to show all markers
     googleMap.fitBounds(bounds);
-    
+
     console.log('[TripMap] Map initialized successfully');
   }, [api, nodes, isResolving]);
 
@@ -293,8 +302,8 @@ export function TripMap({ itinerary }: TripMapProps) {
             <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No locations to display</p>
             <p className="text-xs mt-2">
-              Total days: {itinerary.days.length}, 
-              Total activities: {itinerary.days.reduce((sum, d) => sum + d.nodes.length, 0)}
+              Total days: {days.length},
+              Total activities: {days.reduce((sum, d) => sum + (d.nodes?.length || 0), 0)}
             </p>
           </div>
         </CardContent>
@@ -318,7 +327,7 @@ export function TripMap({ itinerary }: TripMapProps) {
           ref={mapRef}
           className="w-full h-[500px] rounded-lg overflow-hidden bg-muted"
         />
-        
+
         {/* Resolution statistics */}
         {resolutionStats.total > 0 && (
           <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">

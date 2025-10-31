@@ -34,6 +34,9 @@ public class ChangeOperation {
     @JsonProperty("position")
     private Integer position; // Position for insert operations
     
+    @JsonProperty("nodeIds")
+    private java.util.List<String> nodeIds; // List of node IDs for reorder operations
+    
     public ChangeOperation() {}
     
     public ChangeOperation(String op, String id) {
@@ -129,6 +132,14 @@ public class ChangeOperation {
         this.position = position;
     }
     
+    public java.util.List<String> getNodeIds() {
+        return nodeIds;
+    }
+    
+    public void setNodeIds(java.util.List<String> nodeIds) {
+        this.nodeIds = nodeIds;
+    }
+    
     @Override
     public String toString() {
         return "ChangeOperation{" +
@@ -139,6 +150,7 @@ public class ChangeOperation {
                 ", after='" + after + '\'' +
                 ", node=" + node +
                 ", position=" + position +
+                ", nodeIds=" + nodeIds +
                 '}';
     }
 }

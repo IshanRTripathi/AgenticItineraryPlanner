@@ -2,9 +2,10 @@
  * Trip Detail Page
  * Shows complete itinerary with sidebar navigation
  * Task 24: Full sidebar implementation
+ * Week 11: Integrated with UnifiedItineraryContext for real-time updates
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { TripSidebar } from '@/components/trip/TripSidebar';
 import { MobileTabs } from '@/components/trip/MobileTabs';
@@ -15,19 +16,41 @@ import { DocsTab } from '@/components/trip/tabs/DocsTab';
 import { ViewTab } from '@/components/trip/tabs/ViewTab';
 import { PlanTab } from '@/components/trip/tabs/PlanTab';
 import { BookingsTab } from '@/components/trip/tabs/BookingsTab';
+import { ChatTab } from '@/components/trip/tabs/ChatTab';
 import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
 import { ErrorDisplay } from '@/components/error/ErrorDisplay';
-import { useItinerary } from '@/hooks/useItinerary';
-import { Eye, Map, CreditCard, DollarSign, Package, FileText } from 'lucide-react';
+import { UnifiedItineraryProvider, useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
+import { Eye, Map, CreditCard, DollarSign, Package, FileText, MessageSquare } from 'lucide-react';
 
-export function TripDetailPage() {
+/**
+ * Inner component that uses the UnifiedItineraryContext
+ */
+function TripDetailContent() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: itinerary, isLoading, error, refetch } = useItinerary(id);
-  
+  const { state, loadItinerary } = useUnifiedItinerary();
+  const [wasConnected, setWasConnected] = React.useState(false);
+
+  const { itinerary, loading, error, isConnected } = state;
+
+  // Track if we were ever connected
+  React.useEffect(() => {
+    if (isConnected) {
+      setWasConnected(true);
+    }
+  }, [isConnected]);
+
+  // Track if we've loaded the itinerary at least once
+  const [hasLoadedOnce, setHasLoadedOnce] = React.useState(false);
+  React.useEffect(() => {
+    if (itinerary && !hasLoadedOnce) {
+      setHasLoadedOnce(true);
+    }
+  }, [itinerary, hasLoadedOnce]);
+
   // Get active tab from URL or default to 'view'
   const activeTab = searchParams.get('tab') || 'view';
-  
+
   const [bookingModal, setBookingModal] = useState<{
     isOpen: boolean;
     type: 'flight' | 'hotel' | 'activity';
@@ -47,14 +70,15 @@ export function TripDetailPage() {
   const TABS = [
     { id: 'view', label: 'View', icon: Eye },
     { id: 'plan', label: 'Plan', icon: Map },
+    { id: 'chat', label: 'Chat', icon: MessageSquare },
     { id: 'bookings', label: 'Bookings', icon: CreditCard },
     { id: 'budget', label: 'Budget', icon: DollarSign },
     { id: 'packing', label: 'Packing', icon: Package },
     { id: 'docs', label: 'Docs', icon: FileText },
   ];
 
-  // Show loading skeleton while fetching data
-  if (isLoading) {
+  // Show loading skeleton only on initial load, not during refetch
+  if (loading && !hasLoadedOnce) {
     return <TripDetailSkeleton />;
   }
 
@@ -63,8 +87,8 @@ export function TripDetailPage() {
     return (
       <div className="min-h-screen bg-background">
         <ErrorDisplay
-          error={error as Error}
-          onRetry={() => refetch()}
+          error={new Error(error)}
+          onRetry={() => loadItinerary(id!)}
           onGoBack={() => window.history.back()}
         />
       </div>
@@ -83,31 +107,17 @@ export function TripDetailPage() {
     );
   }
 
-  // If itinerary is still generating, show progress view
-  if (itinerary.status === 'generating' || itinerary.status === 'planning') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Creating Your Perfect Itinerary</h1>
-            <p className="text-muted-foreground">
-              Our AI agents are working on your personalized travel plan...
-            </p>
-          </div>
-          <TripDetailSkeleton />
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            <p>This usually takes 30-60 seconds</p>
-            <p className="mt-2">The page will automatically update when ready</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Check if itinerary is still generating
+  const isGenerating = itinerary.status === 'generating' || itinerary.status === 'planning';
+  
+  // If generating, we'll show the UI with a banner but still render the content
+  // This allows for optimistic updates as data comes in via WebSocket
 
-  // Extract data from real itinerary
-  const destination = itinerary.days[0]?.location || itinerary.summary || 'Unknown Destination';
-  const startDate = itinerary.days[0]?.date || '';
-  const endDate = itinerary.days[itinerary.days.length - 1]?.date || '';
+  // Extract data from real itinerary with safe access
+  const days = (itinerary as any)?.days || [];
+  const destination = days[0]?.location || (itinerary as any)?.summary || 'Unknown Destination';
+  const startDate = days[0]?.date || '';
+  const endDate = days[days.length - 1]?.date || '';
   const travelers = 2; // TODO: Get from itinerary metadata when available
 
   const formatDateRange = (start: string, end: string) => {
@@ -134,6 +144,8 @@ export function TripDetailPage() {
         return <ViewTab itinerary={itinerary} />;
       case 'plan':
         return <PlanTab itinerary={itinerary} />;
+      case 'chat':
+        return <ChatTab />;
       case 'bookings':
         return <BookingsTab itinerary={itinerary} />;
       case 'budget':
@@ -149,6 +161,33 @@ export function TripDetailPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
+      {/* Generation Progress Banner */}
+      {isGenerating && (
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-primary/20">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Creating Your Perfect Itinerary</p>
+                  <p className="text-xs text-muted-foreground">
+                    Our AI agents are working on your personalized travel plan. Updates will appear automatically.
+                  </p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  Live Updates
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile: Horizontal Tabs */}
       <MobileTabs
         tabs={TABS}
@@ -185,9 +224,39 @@ export function TripDetailPage() {
         bookingType={bookingModal.type}
         itemName={bookingModal.name}
       />
+
+      {/* Connection Status Indicator - only show if we were previously connected */}
+      {!isConnected && wasConnected && (
+        <div className="fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+          Reconnecting to server...
+        </div>
+      )}
     </div>
   );
 }
 
+/**
+ * Wrapper component that provides UnifiedItineraryContext
+ */
+export function TripDetailPage() {
+  const { id } = useParams<{ id: string }>();
+
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-background">
+        <ErrorDisplay
+          error={new Error('Invalid trip ID')}
+          onGoBack={() => window.history.back()}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <UnifiedItineraryProvider itineraryId={id}>
+      <TripDetailContent />
+    </UnifiedItineraryProvider>
+  );
+}
 
 export default TripDetailPage;

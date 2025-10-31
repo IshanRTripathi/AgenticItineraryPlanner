@@ -77,12 +77,11 @@ public class GooglePlacesService {
         checkCircuitBreaker();
         
         try {
-            // Build URL with parameters
-            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/details/json")
-                .queryParam("place_id", placeId)
-                .queryParam("fields", "photos,reviews,opening_hours,price_level,rating,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number")
-                .queryParam("key", apiKey)
-                .toUriString();
+            // Build URL manually to avoid encoding issues
+            String encodedPlaceId = java.net.URLEncoder.encode(placeId, "UTF-8");
+            String encodedFields = java.net.URLEncoder.encode("photos,reviews,opening_hours,price_level,rating,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number", "UTF-8");
+            String encodedKey = java.net.URLEncoder.encode(apiKey, "UTF-8");
+            String url = BASE_URL + "/details/json?place_id=" + encodedPlaceId + "&fields=" + encodedFields + "&key=" + encodedKey;
             
             // Make GET request with retry logic
             PlaceDetailsResponse response = makeRequestWithRetry(url, PlaceDetailsResponse.class);
@@ -477,11 +476,10 @@ public class GooglePlacesService {
                 searchQuery = query + " " + location;
             }
             
-            // Build URL with parameters for Text Search
-            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
-                .queryParam("query", searchQuery)
-                .queryParam("key", apiKey)
-                .toUriString();
+            // Build URL manually to avoid encoding issues
+            String encodedQuery = java.net.URLEncoder.encode(searchQuery, "UTF-8");
+            String encodedKey = java.net.URLEncoder.encode(apiKey, "UTF-8");
+            String url = BASE_URL + "/textsearch/json?query=" + encodedQuery + "&key=" + encodedKey;
             
             logger.info("Making request to Google Places API");
             logger.info("URL: {}", url.replace(apiKey, "***KEY_HIDDEN***"));

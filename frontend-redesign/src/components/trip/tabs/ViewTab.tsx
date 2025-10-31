@@ -3,11 +3,16 @@
  * Task 25: Enhanced with statistics, weather, map, and quick actions
  */
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TripMap } from '@/components/map/TripMap';
 import { WeatherWidget } from '@/components/weather/WeatherWidget';
+import { ExportOptionsModal, ExportOptions } from '@/components/export/ExportOptionsModal';
+import { ShareModal } from '@/components/share/ShareModal';
+import { exportService } from '@/services/exportService';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Calendar,
   MapPin,
@@ -39,6 +44,13 @@ const MOCK_WEATHER = [
 ];
 
 export function ViewTab({ itinerary }: ViewTabProps) {
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
+  
+  const isGenerating = itinerary?.status === 'generating' || itinerary?.status === 'planning';
+
   // Extract just the city name from destination (e.g., "Sydney, New South Wales, Australia" -> "Sydney")
   // Use destination field first, then fallback to first day's location, then extract from summary
   const getDestinationCity = () => {
@@ -57,13 +69,16 @@ export function ViewTab({ itinerary }: ViewTabProps) {
   };
   
   const destination = getDestinationCity();
-  const startDate = itinerary.days[0]?.date || '';
-  const endDate = itinerary.days[itinerary.days.length - 1]?.date || '';
-  const dayCount = itinerary.days.length;
+  // Handle nested structure: itinerary.itinerary.days or itinerary.days
+  const days = itinerary?.itinerary?.days || itinerary?.days || [];
+  const startDate = days[0]?.date || '';
+  const endDate = days[days.length - 1]?.date || '';
+  const dayCount = days.length;
   
   // Calculate statistics
-  const activityCount = itinerary.days.reduce((total: number, day: any) => {
-    return total + (day.nodes?.length || 0);
+  const activityCount = days.reduce((total: number, day: any) => {
+    // TripData uses 'components', not 'nodes'
+    return total + (day.components?.length || 0);
   }, 0);
   
   const totalBudget = 5000; // TODO: Get from itinerary metadata
@@ -89,6 +104,28 @@ export function ViewTab({ itinerary }: ViewTabProps) {
   };
 
   const status = getTripStatus();
+
+  const handleExport = async (options: ExportOptions) => {
+    setIsExporting(true);
+    try {
+      // For now, use the existing export service
+      // TODO: Enhance to use options
+      await exportService.exportToPDF(itinerary as any);
+      toast({
+        title: 'Export successful',
+        description: 'Your itinerary is ready to print or save as PDF',
+      });
+      setIsExportModalOpen(false);
+    } catch (error) {
+      toast({
+        title: 'Export failed',
+        description: 'Could not export PDF. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -147,10 +184,24 @@ export function ViewTab({ itinerary }: ViewTabProps) {
             <MapPin className="w-5 h-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{activityCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Planned activities
-            </p>
+            {isGenerating && activityCount === 0 ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="text-2xl font-bold text-muted-foreground">...</div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Generating activities
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-3xl font-bold">{activityCount}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Planned activities
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -243,7 +294,11 @@ export function ViewTab({ itinerary }: ViewTabProps) {
               </div>
             </Button>
 
-            <Button variant="outline" className="justify-start h-auto py-4">
+            <Button 
+              variant="outline" 
+              className="justify-start h-auto py-4"
+              onClick={() => setIsShareModalOpen(true)}
+            >
               <Share2 className="w-5 h-5 mr-3" />
               <div className="text-left">
                 <div className="font-medium">Share Trip</div>
@@ -253,7 +308,11 @@ export function ViewTab({ itinerary }: ViewTabProps) {
               </div>
             </Button>
 
-            <Button variant="outline" className="justify-start h-auto py-4">
+            <Button 
+              variant="outline" 
+              className="justify-start h-auto py-4"
+              onClick={() => setIsExportModalOpen(true)}
+            >
               <Download className="w-5 h-5 mr-3" />
               <div className="text-left">
                 <div className="font-medium">Export PDF</div>
@@ -275,6 +334,22 @@ export function ViewTab({ itinerary }: ViewTabProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Export Options Modal */}
+      <ExportOptionsModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExport}
+        isExporting={isExporting}
+      />
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        itineraryId={itinerary?.id || itinerary?.itineraryId || ''}
+        itinerary={itinerary}
+      />
     </div>
   );
 }
