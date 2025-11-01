@@ -5,14 +5,14 @@ import { getAuth, GoogleAuthProvider, EmailAuthProvider } from "firebase/auth";
 // Firebase products configuration
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyCSXcYunx1yGwX8L1qog1Zij0iEQnAMP7Q",
-  authDomain: "tripaiplanner-4c951.firebaseapp.com",
-  projectId: "tripaiplanner-4c951",
-  storageBucket: "tripaiplanner-4c951.firebasestorage.app",
-  messagingSenderId: "464825394931",
-  appId: "1:464825394931:web:default"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCSXcYunx1yGwX8L1qog1Zij0iEQnAMP7Q",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "tripaiplanner-4c951.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "tripaiplanner-4c951",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "tripaiplanner-4c951.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "464825394931",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:464825394931:web:default"
 };
 
 // Initialize Firebase

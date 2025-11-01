@@ -186,6 +186,11 @@ export function unifiedItineraryReducer(
     
     // Chat actions
     case 'ADD_CHAT_MESSAGE':
+      // Prevent duplicate messages by checking if message ID already exists
+      const messageExists = state.chatMessages.some(m => m.id === action.payload.id);
+      if (messageExists) {
+        return state;
+      }
       return {
         ...state,
         chatMessages: [...state.chatMessages, action.payload]

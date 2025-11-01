@@ -12,7 +12,6 @@ export function loadGoogleMaps(apiKey: string, libraries: string[] = ['places'])
 
     try {
       const masked = key.length > 8 ? `${key.slice(0, 4)}****${key.slice(-4)}` : '****';
-      // Non-sensitive diagnostics
       console.info('[Maps] Starting loader', {
         hostname: typeof window !== 'undefined' ? window.location.hostname : 'n/a',
         keyLen: key.length,
@@ -36,7 +35,7 @@ export function loadGoogleMaps(apiKey: string, libraries: string[] = ['places'])
       resolve((window as any).google);
     };
 
-    // Capture auth failures like InvalidKeyMapError / RefererNotAllowedMapError
+    // Capture auth failures
     (window as any).gm_authFailure = () => {
       console.error('[Maps] Authentication failed: gm_authFailure');
       reject(new Error('Google Maps authentication failed. Check API key, referrer restrictions, and API enablement.'));
@@ -52,7 +51,7 @@ export function loadGoogleMaps(apiKey: string, libraries: string[] = ['places'])
     script.src = `https://maps.googleapis.com/maps/api/js?${params.toString()}`;
     script.async = true;
     script.defer = true;
-    script.onerror = (err) => {
+    script.onerror = () => {
       reject(new Error('Failed to load Google Maps script. Verify network access and script URL.'));
     };
     script.onload = () => {
@@ -70,4 +69,3 @@ export function loadGoogleMaps(apiKey: string, libraries: string[] = ['places'])
 export function resetGoogleMapsLoaderForTests() {
   mapsScriptPromise = null;
 }
-

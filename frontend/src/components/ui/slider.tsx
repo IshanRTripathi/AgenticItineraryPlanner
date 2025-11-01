@@ -1,63 +1,80 @@
-"use client";
+/**
+ * Slider Component
+ * Range slider for filters
+ */
 
-import * as React from "react";
-import * as SliderPrimitive from "@radix-ui/react-slider@1.2.3";
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
-import { cn } from "./utils";
-
-function Slider({
-  className,
-  defaultValue,
-  value,
-  min = 0,
-  max = 100,
-  ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
-  const _values = React.useMemo(
-    () =>
-      Array.isArray(value)
-        ? value
-        : Array.isArray(defaultValue)
-          ? defaultValue
-          : [min, max],
-    [value, defaultValue, min, max],
-  );
-
-  return (
-    <SliderPrimitive.Root
-      data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
-      min={min}
-      max={max}
-      className={cn(
-        "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-        className,
-      )}
-      {...props}
-    >
-      <SliderPrimitive.Track
-        data-slot="slider-track"
-        className={cn(
-          "bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-4 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
-        )}
-      >
-        <SliderPrimitive.Range
-          data-slot="slider-range"
-          className={cn(
-            "bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
-          )}
-        />
-      </SliderPrimitive.Track>
-      {Array.from({ length: _values.length }, (_, index) => (
-        <SliderPrimitive.Thumb
-          data-slot="slider-thumb"
-          key={index}
-          className="border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-        />
-      ))}
-    </SliderPrimitive.Root>
-  );
+interface SliderProps {
+  value: number[];
+  onValueChange: (value: number[]) => void;
+  min: number;
+  max: number;
+  step: number;
+  className?: string;
 }
 
-export { Slider };
+export function Slider({
+  value,
+  onValueChange,
+  min,
+  max,
+  step,
+  className,
+}: SliderProps) {
+  const [localValue, setLocalValue] = React.useState(value);
+
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMin = Number(e.target.value);
+    const newValue = [Math.min(newMin, localValue[1]), localValue[1]];
+    setLocalValue(newValue);
+    onValueChange(newValue);
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMax = Number(e.target.value);
+    const newValue = [localValue[0], Math.max(newMax, localValue[0])];
+    setLocalValue(newValue);
+    onValueChange(newValue);
+  };
+
+  const minPercent = ((localValue[0] - min) / (max - min)) * 100;
+  const maxPercent = ((localValue[1] - min) / (max - min)) * 100;
+
+  return (
+    <div className={cn('relative w-full', className)}>
+      <div className="relative h-2 w-full rounded-full bg-muted">
+        <div
+          className="absolute h-full rounded-full bg-primary"
+          style={{
+            left: `${minPercent}%`,
+            right: `${100 - maxPercent}%`,
+          }}
+        />
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={localValue[0]}
+        onChange={handleMinChange}
+        className="absolute top-0 w-full h-2 opacity-0 cursor-pointer"
+      />
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={localValue[1]}
+        onChange={handleMaxChange}
+        className="absolute top-0 w-full h-2 opacity-0 cursor-pointer"
+      />
+    </div>
+  );
+}

@@ -1,28 +1,23 @@
-"use client";
+/**
+ * Separator Component
+ * Horizontal or vertical divider
+ */
 
-import * as React from "react";
-import * as SeparatorPrimitive from "@radix-ui/react-separator@1.1.2";
+import { cn } from '@/lib/utils';
 
-import { cn } from "./utils";
+interface SeparatorProps {
+  orientation?: 'horizontal' | 'vertical';
+  className?: string;
+}
 
-function Separator({
-  className,
-  orientation = "horizontal",
-  decorative = true,
-  ...props
-}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
+export function Separator({ orientation = 'horizontal', className }: SeparatorProps) {
   return (
-    <SeparatorPrimitive.Root
-      data-slot="separator-root"
-      decorative={decorative}
-      orientation={orientation}
+    <div
       className={cn(
-        "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
-        className,
+        'bg-border',
+        orientation === 'horizontal' ? 'h-px w-full' : 'w-px h-full',
+        className
       )}
-      {...props}
     />
   );
 }
-
-export { Separator };

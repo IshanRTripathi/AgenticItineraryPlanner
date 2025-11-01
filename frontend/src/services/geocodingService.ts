@@ -1,14 +1,21 @@
-import { MapCoordinates } from '../hooks/useMapState';
+import type { Coordinates } from '../types/dto';
+
+// Google Maps type declarations
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 export interface GeocodingResult {
-  coordinates: MapCoordinates;
+  coordinates: Coordinates;
   formattedAddress: string;
   placeId?: string;
   types?: string[];
 }
 
 export interface GeocodingCacheEntry {
-  coordinates: MapCoordinates;
+  coordinates: Coordinates;
   formattedAddress: string;
   placeId?: string;
   types?: string[];
@@ -16,7 +23,7 @@ export interface GeocodingCacheEntry {
 }
 
 export class GeocodingService {
-  private geocoder: google.maps.Geocoder | null = null;
+  private geocoder: any | null = null;
   private cache = new Map<string, GeocodingCacheEntry>();
   private readonly CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -25,13 +32,13 @@ export class GeocodingService {
   }
 
   private initializeGeocoder(): void {
-    if (typeof window !== 'undefined' && window.google?.maps?.Geocoder) {
-      this.geocoder = new google.maps.Geocoder();
+    if (typeof window !== 'undefined' && (window as any).google?.maps?.Geocoder) {
+      this.geocoder = new (window as any).google.maps.Geocoder();
     } else {
       // Wait for Google Maps to load
       const checkGoogleMaps = () => {
-        if (window.google?.maps?.Geocoder) {
-          this.geocoder = new google.maps.Geocoder();
+        if ((window as any).google?.maps?.Geocoder) {
+          this.geocoder = new (window as any).google.maps.Geocoder();
         } else {
           setTimeout(checkGoogleMaps, 100);
         }
@@ -71,8 +78,8 @@ export class GeocodingService {
     try {
       console.log('[GeocodingService] Geocoding address:', address);
       
-      const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-        this.geocoder!.geocode({ address }, (results, status) => {
+      const result = await new Promise<any[]>((resolve, reject) => {
+        this.geocoder!.geocode({ address }, (results: any, status: any) => {
           if (status === 'OK' && results && results.length > 0) {
             resolve(results);
           } else {
@@ -84,7 +91,7 @@ export class GeocodingService {
 
       const firstResult = result[0];
       const location = firstResult.geometry.location;
-      const coordinates: MapCoordinates = {
+      const coordinates: Coordinates = {
         lat: location.lat(),
         lng: location.lng(),
       };
@@ -115,7 +122,7 @@ export class GeocodingService {
   /**
    * Reverse geocode coordinates to address
    */
-  async reverseGeocode(coordinates: MapCoordinates): Promise<GeocodingResult | null> {
+  async reverseGeocode(coordinates: Coordinates): Promise<GeocodingResult | null> {
     if (!this.geocoder) {
       console.error('[GeocodingService] Geocoder not initialized');
       return null;
@@ -138,8 +145,8 @@ export class GeocodingService {
     try {
       console.log('[GeocodingService] Reverse geocoding coordinates:', coordinates);
       
-      const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-        this.geocoder!.geocode({ location: coordinates }, (results, status) => {
+      const result = await new Promise<any[]>((resolve, reject) => {
+        this.geocoder!.geocode({ location: coordinates }, (results: any, status: any) => {
           if (status === 'OK' && results && results.length > 0) {
             resolve(results);
           } else {
@@ -230,7 +237,7 @@ export class GeocodingService {
     
     // Limit cache size
     if (this.cache.size > 1000) {
-      const oldestKey = this.cache.keys().next().value;
+      const oldestKey = this.cache.keys().next().value as string;
       this.cache.delete(oldestKey);
     }
   }
@@ -269,64 +276,34 @@ export const geocodingUtils = {
   /**
    * Extract coordinates from a component's location data
    */
-  extractCoordinates(component: any): MapCoordinates | null {
+  extractCoordinates(component: any): Coordinates | null {
     const coords = component?.location?.coordinates;
-    console.log('[GeocodingUtils] Extracting coordinates from component:', {
-      componentId: component?.id,
-      componentName: component?.name,
-      location: component?.location,
-      coordinates: coords,
-      coordsType: typeof coords,
-      coordsIsNull: coords === null,
-      coordsIsUndefined: coords === undefined,
-      coordsKeys: coords ? Object.keys(coords) : 'N/A',
-      coordsLat: coords?.lat,
-      coordsLng: coords?.lng
-    });
 
     // Try multiple possible paths for coordinates
     const paths = [
-      // Standard path: component.location.coordinates
       () => component?.location?.coordinates,
-      // Direct on component
       () => component?.coordinates,
-      // Position property (used by TripMap)
       () => component?.position,
-      // Nested in data
       () => component?.data?.location?.coordinates,
     ];
 
     for (const getCoords of paths) {
       try {
         const coords = getCoords();
-        console.log('[GeocodingUtils] Checking path, coords:', coords);
         
         if (coords?.lat != null && coords?.lng != null) {
           const lat = typeof coords.lat === 'function' ? coords.lat() : coords.lat;
           const lng = typeof coords.lng === 'function' ? coords.lng() : coords.lng;
           
-          console.log('[GeocodingUtils] Extracted lat/lng:', { lat, lng, latType: typeof lat, lngType: typeof lng });
-          
           if (typeof lat === 'number' && typeof lng === 'number' && 
               !isNaN(lat) && !isNaN(lng)) {
-            console.log('[GeocodingUtils] ✅ Found valid coordinates:', { lat, lng });
             return { lat, lng };
           }
         }
       } catch (e) {
-        console.log('[GeocodingUtils] Error checking path:', e);
         // Continue to next path
       }
     }
-
-    console.warn('[GeocodingUtils] ❌ No valid coordinates found in component:', {
-      componentId: component?.id,
-      componentName: component?.name,
-      hasLocation: !!component?.location,
-      locationKeys: component?.location ? Object.keys(component.location) : [],
-      componentKeys: Object.keys(component || {}),
-      rawCoordinates: component?.location?.coordinates
-    });
     
     return null;
   },
@@ -341,29 +318,24 @@ export const geocodingUtils = {
   /**
    * Get the best search query for geocoding a component
    */
-  getSearchQuery(component: any): string | null {
-    // Priority order:
-    // 1. Full address if available
+  getSearchQuery(component: any): string {
     if (component?.location?.address && component.location.address.trim()) {
       return component.location.address;
     }
     
-    // 2. Component name + location name (e.g., "Paprika Vendéglő, Budapest")
     if (component?.name && component?.location?.name) {
       return `${component.name}, ${component.location.name}`;
     }
     
-    // 3. Just component name
     if (component?.name) {
       return component.name;
     }
     
-    // 4. Location name as fallback
     if (component?.location?.name) {
       return component.location.name;
     }
     
-    return null;
+    return '';
   },
 
   /**
@@ -383,30 +355,22 @@ export const geocodingUtils = {
   /**
    * Get coordinates for a component, geocoding if necessary
    */
-  async getCoordinatesForComponent(component: any): Promise<MapCoordinates | null> {
+  async getCoordinatesForComponent(component: any): Promise<Coordinates | null> {
     // First try to get existing coordinates
     const existingCoords = this.extractCoordinates(component);
     if (existingCoords) {
-      console.log('[GeocodingUtils] Using existing coordinates:', existingCoords);
       return existingCoords;
     }
 
     // Try to geocode using the best search query
     const searchQuery = this.getSearchQuery(component);
     if (searchQuery) {
-      console.log('[GeocodingUtils] Geocoding search query:', searchQuery);
       const result = await geocodingService.geocodeAddress(searchQuery);
       if (result?.coordinates) {
-        console.log('[GeocodingUtils] Geocoding successful:', result.coordinates);
         return result.coordinates;
       }
     }
 
-    console.warn('[GeocodingUtils] Could not get coordinates for component:', {
-      componentId: component?.id,
-      componentName: component?.name,
-      searchQuery
-    });
     return null;
   },
 };

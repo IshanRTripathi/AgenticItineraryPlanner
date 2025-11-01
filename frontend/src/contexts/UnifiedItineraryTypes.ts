@@ -14,6 +14,13 @@ export interface ChatMessage {
   selectedNodeId?: string;
   data?: any;
   type?: 'text' | 'itinerary_update' | 'booking_confirmation' | 'error';
+  intent?: string;
+  changeSet?: any;
+  diff?: any;
+  warnings?: string[];
+  errors?: string[];
+  applied?: boolean;
+  candidates?: any[];
 }
 
 export interface WorkflowNode {

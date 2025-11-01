@@ -1,42 +1,47 @@
-import { useEffect, useState } from 'react'
-import { loadGoogleMaps } from '../utils/googleMapsLoader'
+/**
+ * Google Maps Hook
+ * Manages Google Maps API loading and initialization
+ */
 
-export function useGoogleMaps() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-  const [api, setApi] = useState<any | null>(null)
+import { useState, useEffect } from 'react';
+import { loadGoogleMaps } from '@/utils/googleMapsLoader';
 
-  useEffect(() => {
-    const envKey = ((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY as string | undefined)?.trim() || ''
-    // Temporary hardcoded fallback for production until CI secret substitution is fixed
-    const key = (!envKey || envKey.startsWith('$') || envKey.includes('VITE_GOOGLE_MAPS_BROWSER_KEY'))
-      ? 'AIzaSyAn4A6xyvqZWDk0pLNxxoAO72UvwGVugec'
-      : envKey
-    setIsLoading(true)
-    setError(null)
-    try {
-      const masked = key ? (key.length > 8 ? `${key.slice(0, 4)}****${key.slice(-4)}` : '****') : 'missing';
-      console.info('[Maps] useGoogleMaps init', {
-        hasKey: Boolean(key),
-        keyLen: key.length,
-        keyMasked: masked,
-        envHasKey: Boolean((import.meta as any).env?.VITE_GOOGLE_MAPS_BROWSER_KEY),
-        location: typeof window !== 'undefined' ? window.location.origin : 'n/a',
-      })
-    } catch {}
-    loadGoogleMaps(key)
-      .then(g => {
-        setApi(g)
-        try {
-          console.info('[Maps] useGoogleMaps ready', {
-            version: (g as any)?.maps?.version,
-          })
-        } catch {}
-      })
-      .catch(err => setError(err))
-      .finally(() => setIsLoading(false))
-  }, [])
-
-  return { isLoading, error, api }
+interface GoogleMapsAPI {
+  maps: typeof google.maps;
 }
 
+interface UseGoogleMapsResult {
+  isLoading: boolean;
+  error: Error | null;
+  api: GoogleMapsAPI | null;
+}
+
+export function useGoogleMaps(): UseGoogleMapsResult {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [api, setApi] = useState<GoogleMapsAPI | null>(null);
+
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+
+    if (!apiKey) {
+      setError(new Error('Google Maps API key is not configured'));
+      setIsLoading(false);
+      return;
+    }
+
+    loadGoogleMaps(apiKey, ['places', 'geometry'])
+      .then((google) => {
+        setApi({ maps: google.maps });
+        setIsLoading(false);
+        console.log('[useGoogleMaps] Google Maps API loaded successfully');
+      })
+      .catch((err) => {
+        console.error('[useGoogleMaps] Failed to load Google Maps:', err);
+        setError(err);
+        setIsLoading(false);
+      });
+  }, []);
+
+  return { isLoading, error, api };
+}

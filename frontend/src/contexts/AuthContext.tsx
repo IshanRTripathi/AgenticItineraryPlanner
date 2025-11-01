@@ -7,8 +7,6 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { authService, AuthUser } from '../services/authService';
 import { apiClient } from '../services/apiClient';
 import { itineraryApi } from '../services/api';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../state/query/hooks';
 import { logger } from '../utils/logger';
 
 interface AuthContextType {
@@ -29,7 +27,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Listen to authentication state changes
@@ -52,8 +49,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             logger.info('Auth token set for API requests', {
               component: 'AuthContext'
             });
-
-            // Queries will be enabled automatically when components re-render with user state
           }
         } catch (error) {
           logger.error('Failed to get ID token', {
@@ -68,9 +63,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logger.info('Auth token cleared', {
           component: 'AuthContext'
         });
-
-        // Clear authenticated data
-        queryClient.removeQueries({ queryKey: queryKeys.itineraries });
       }
     });
 

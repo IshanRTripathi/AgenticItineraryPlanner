@@ -1,131 +1,230 @@
 /**
  * Authentication Service
- * Handles user authentication using Firebase Auth
+ * Handles Firebase auth, token refresh, and session management
  */
 
-import {
+import { auth } from '@/config/firebase';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
   signInWithPopup,
-  signOut,
-  onAuthStateChanged,
-  User,
-  UserCredential,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  signOut as firebaseSignOut,
+  onAuthStateChanged as firebaseOnAuthStateChanged,
+  User
 } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
+import { apiClient } from './apiClient';
 
 export interface AuthUser {
   uid: string;
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
-  emailVerified: boolean;
 }
 
-// Removed email/password interfaces - using Google Sign-in only
-
 class AuthService {
-  /**
-   * Sign in with Google
-   */
-  async signInWithGoogle(): Promise<UserCredential> {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log('[Auth] Google sign-in successful:', result.user.email);
-      return result;
-    } catch (error) {
-      console.error('[Auth] Google sign-in failed:', error);
-      throw error;
-    }
+  private tokenRefreshInterval: NodeJS.Timeout | null = null;
+  private readonly TOKEN_REFRESH_INTERVAL = 50 * 60 * 1000; // 50 minutes
+  private googleProvider: GoogleAuthProvider;
+
+  constructor() {
+    this.googleProvider = new GoogleAuthProvider();
   }
 
   /**
-   * Sign out current user
+   * Initialize auth service and set up token refresh
    */
-  async signOut(): Promise<void> {
-    try {
-      await signOut(auth);
-      console.log('[Auth] Sign-out successful');
-    } catch (error) {
-      console.error('[Auth] Sign-out failed:', error);
-      throw error;
-    }
-  }
-
-  // Removed password reset - using Google Sign-in only
-
-  /**
-   * Get current user
-   */
-  getCurrentUser(): User | null {
-    return auth.currentUser;
-  }
-
-  /**
-   * Convert Firebase User to AuthUser interface
-   */
-  convertToAuthUser(user: User): AuthUser {
-    return {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      emailVerified: user.emailVerified
-    };
-  }
-
-  /**
-   * Listen to authentication state changes
-   */
-  onAuthStateChanged(callback: (user: AuthUser | null) => void): () => void {
-    return onAuthStateChanged(auth, (user) => {
+  initialize() {
+    firebaseOnAuthStateChanged(auth, async (user) => {
       if (user) {
-        callback(this.convertToAuthUser(user));
+        await this.setupTokenRefresh(user);
       } else {
-        callback(null);
+        this.clearTokenRefresh();
       }
     });
   }
 
   /**
+   * Listen to auth state changes
+   */
+  onAuthStateChanged(callback: (user: AuthUser | null) => void | Promise<void>) {
+    return firebaseOnAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const authUser: AuthUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+        };
+        await callback(authUser);
+      } else {
+        await callback(null);
+      }
+    });
+  }
+
+  /**
+   * Set up automatic token refresh
+   */
+  private async setupTokenRefresh(user: User) {
+    // Clear any existing interval
+    this.clearTokenRefresh();
+
+    // Get initial token
+    const token = await user.getIdToken();
+    this.updateApiClientToken(token);
+
+    // Set up refresh interval
+    this.tokenRefreshInterval = setInterval(async () => {
+      try {
+        const freshToken = await user.getIdToken(true); // Force refresh
+        this.updateApiClientToken(freshToken);
+        console.log('[Auth] Token refreshed successfully');
+      } catch (error) {
+        console.error('[Auth] Token refresh failed:', error);
+        // If refresh fails, redirect to login
+        this.handleAuthError();
+      }
+    }, this.TOKEN_REFRESH_INTERVAL);
+  }
+
+  /**
+   * Clear token refresh interval
+   */
+  private clearTokenRefresh() {
+    if (this.tokenRefreshInterval) {
+      clearInterval(this.tokenRefreshInterval);
+      this.tokenRefreshInterval = null;
+    }
+  }
+
+  /**
+   * Update API client with new token
+   */
+  private updateApiClientToken(token: string) {
+    // Update axios interceptor with new token
+    apiClient.interceptors.request.use(
+      async (config: any) => {
+        config.headers.Authorization = `Bearer ${token}`;
+        return config;
+      },
+      (error: any) => Promise.reject(error)
+    );
+  }
+
+  /**
+   * Handle authentication errors (401, token expiry)
+   */
+  private handleAuthError() {
+    this.clearTokenRefresh();
+    // Redirect to login
+    window.location.href = '/login?expired=true';
+  }
+
+  /**
+   * Sign in with Google
+   */
+  async signInWithGoogle() {
+    try {
+      const result = await signInWithPopup(auth, this.googleProvider);
+      const token = await result.user.getIdToken();
+      this.updateApiClientToken(token);
+      await this.setupTokenRefresh(result.user);
+      return { success: true, user: result.user };
+    } catch (error: any) {
+      console.error('[Auth] Google sign in failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sign in with email and password
+   */
+  async signIn(email: string, password: string) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken();
+      this.updateApiClientToken(token);
+      await this.setupTokenRefresh(userCredential.user);
+      return { success: true, user: userCredential.user };
+    } catch (error: any) {
+      console.error('[Auth] Sign in failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Sign up with email and password
+   */
+  async signUp(email: string, password: string) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken();
+      this.updateApiClientToken(token);
+      await this.setupTokenRefresh(userCredential.user);
+      return { success: true, user: userCredential.user };
+    } catch (error: any) {
+      console.error('[Auth] Sign up failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Sign out
+   */
+  async signOut() {
+    try {
+      this.clearTokenRefresh();
+      await firebaseSignOut(auth);
+      this.updateApiClientToken('');
+      return { success: true };
+    } catch (error: any) {
+      console.error('[Auth] Sign out failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get current user
+   */
+  getCurrentUser() {
+    return auth.currentUser;
+  }
+
+  /**
+   * Get current auth token
+   */
+  async getCurrentToken() {
+    const user = auth.currentUser;
+    if (!user) return null;
+    return await user.getIdToken();
+  }
+
+  /**
+   * Get ID token (alias for getCurrentToken)
+   */
+  async getIdToken() {
+    return await this.getCurrentToken();
+  }
+
+  /**
+   * Force refresh ID token
+   */
+  async getIdTokenForceRefresh() {
+    const user = auth.currentUser;
+    if (!user) return null;
+    return await user.getIdToken(true);
+  }
+
+  /**
    * Check if user is authenticated
    */
-  isAuthenticated(): boolean {
-    return auth.currentUser !== null;
-  }
-
-  /**
-   * Get user ID token for backend authentication
-   */
-  async getIdToken(): Promise<string | null> {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        return await user.getIdToken();
-      } catch (error) {
-        console.error('[Auth] Failed to get ID token:', error);
-        return null;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Get user ID token with force refresh
-   */
-  async getIdTokenForceRefresh(): Promise<string | null> {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        return await user.getIdToken(true);
-      } catch (error) {
-        console.error('[Auth] Failed to get refreshed ID token:', error);
-        return null;
-      }
-    }
-    return null;
+  isAuthenticated() {
+    return !!auth.currentUser;
   }
 }
 
-// Export singleton instance
 export const authService = new AuthService();
-export default authService;
+
+// Initialize on module load
+authService.initialize();
