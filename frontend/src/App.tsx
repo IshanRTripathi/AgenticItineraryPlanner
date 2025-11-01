@@ -15,7 +15,6 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
-const SignupPage = lazy(() => import('./pages/SignupPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
 // Loading fallback component
@@ -55,7 +54,6 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
           <Route path="/search" element={<SearchPage />} />
           
           {/* Protected Routes */}

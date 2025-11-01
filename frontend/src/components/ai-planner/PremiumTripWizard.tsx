@@ -39,7 +39,9 @@ interface TripFormData {
 
 export function PremiumTripWizard() {
     const [currentStep, setCurrentStep] = useState(1);
-    const [formData, setFormData] = useState<TripFormData>({});
+    const [formData, setFormData] = useState<TripFormData>({
+        origin: 'Bengaluru, Karnataka, India',
+    });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
 
