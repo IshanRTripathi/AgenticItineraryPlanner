@@ -20,7 +20,7 @@ export function BusSearchForm() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
-    navigate('/search-results?type=buses');
+    navigate('/search?type=buses');
     e.preventDefault();
     console.log('Searching buses:', { fromCity, toCity, journeyDate, seatType });
     // TODO: Implement search logic

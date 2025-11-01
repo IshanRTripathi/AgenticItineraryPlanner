@@ -19,13 +19,13 @@ const NAV_ITEMS = [
     id: 'search',
     label: 'Search',
     icon: Search,
-    path: '/search-results',
+    path: '/search',
   },
   {
     id: 'create',
     label: 'Plan',
     icon: PlusCircle,
-    path: '/ai-planner',
+    path: '/planner',
     highlight: true,
   },
   {

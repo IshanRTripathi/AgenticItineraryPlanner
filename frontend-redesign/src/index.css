@@ -787,3 +787,81 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 43, 91, 0.5);
 }
+
+/* ========================================
+   ITINERARY CHANGES ANIMATIONS
+   High-end animations for change display
+   ======================================== */
+
+/* Slide in from top for added items */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-from-top {
+  animation: slide-in-from-top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Highlight flash for modified items */
+@keyframes highlight-flash {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(250, 204, 21, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight-flash {
+  animation: highlight-flash 1s ease-out;
+}
+
+/* Fade out for removed items */
+@keyframes fade-out-collapse {
+  0% {
+    opacity: 1;
+    max-height: 100px;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    max-height: 0;
+    transform: scale(0.9);
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.animate-fade-out-collapse {
+  animation: fade-out-collapse 0.5s ease-out forwards;
+}
+
+/* Scale in for modal/detailed view */
+@keyframes scale-in-modal {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in-modal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

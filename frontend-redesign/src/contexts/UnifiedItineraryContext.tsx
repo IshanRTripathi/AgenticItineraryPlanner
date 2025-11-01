@@ -123,9 +123,18 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
   // Load chat history on mount when itineraryId changes
   useEffect(() => {
     if (!itineraryId) return;
+    
+    let isActive = true;
+    
     (async () => {
       try {
+        // Clear existing messages before loading history to prevent duplicates
+        loggedDispatch({ type: 'CLEAR_CHAT_MESSAGES' });
+        
         const history = await itineraryApi.getChatHistory(itineraryId);
+        
+        if (!isActive) return; // Component unmounted
+        
         // Map backend history to ChatMessage[]
         const mapped = (history || []).map((h: any, idx: number) => ({
           id: h.id || `hist_${idx}_${Date.now()}`,
@@ -139,11 +148,17 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
           applied: h.applied,
           candidates: h.candidates,
         } as ChatMessage));
+        
         mapped.forEach(m => loggedDispatch({ type: 'ADD_CHAT_MESSAGE', payload: m }));
       } catch (e) {
+        if (!isActive) return;
         logWarn('Failed to load chat history', { component: 'UnifiedItineraryProvider', action: 'chat_history_load', itineraryId }, e as any);
       }
     })();
+    
+    return () => {
+      isActive = false;
+    };
   }, [itineraryId]);
 
   // Set up WebSocket connection with proper connection management

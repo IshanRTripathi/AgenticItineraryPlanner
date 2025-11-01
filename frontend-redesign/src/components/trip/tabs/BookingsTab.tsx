@@ -1,6 +1,6 @@
 /**
  * Bookings Tab - Intelligent Booking Interface
- * Enhanced with smart categorization and modern UI
+ * Enhanced with smart categorization and EaseMyTrip integration
  */
 
 import { useState } from 'react';
@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { BookingCategoryCard } from '@/components/booking/BookingCategoryCard';
 import { categorizeBookings, CategorizedBooking } from '@/utils/categorizeBookings';
+import { buildEaseMyTripUrl } from '@/utils/easemytripUrlBuilder';
 import { slideUp, staggerChildren } from '@/utils/animations';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -20,6 +21,7 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
     isOpen: false,
     type: 'flight' as 'flight' | 'hotel' | 'activity',
     name: '',
+    url: '',
     booking: null as CategorizedBooking | null,
   });
   const { toast } = useToast();
@@ -33,13 +35,30 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
   const totalAvailable = categoryGroups.reduce((sum, g) => sum + g.availableCount, 0);
 
   const handleBook = (booking: CategorizedBooking) => {
+    // Build EaseMyTrip URL based on booking type and location
+    const easemytripUrl = buildEaseMyTripUrl(booking, itinerary);
+    
+    console.log('[BookingsTab] Opening booking for:', {
+      title: booking.title,
+      category: booking.category,
+      location: booking.dayLocation,
+      url: easemytripUrl,
+    });
+
     setBookingModal({
       isOpen: true,
       type: booking.category === 'accommodation' ? 'hotel' : 
             booking.category === 'transport' ? 'flight' : 'activity',
       name: booking.title,
+      url: easemytripUrl,
       booking,
     });
+  };
+
+  const handleModalMarkBooked = (bookingRef: string) => {
+    if (bookingModal.booking) {
+      handleMarkBooked(bookingModal.booking, bookingRef);
+    }
   };
 
   const handleViewDetails = (booking: CategorizedBooking) => {
@@ -127,9 +146,11 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
       {/* Booking Modal */}
       <BookingModal
         isOpen={bookingModal.isOpen}
-        onClose={() => setBookingModal({ ...bookingModal, isOpen: false, booking: null })}
+        onClose={() => setBookingModal({ ...bookingModal, isOpen: false, booking: null, url: '' })}
         bookingType={bookingModal.type}
         itemName={bookingModal.name}
+        providerUrl={bookingModal.url}
+        onMarkBooked={handleModalMarkBooked}
       />
     </div>
   );

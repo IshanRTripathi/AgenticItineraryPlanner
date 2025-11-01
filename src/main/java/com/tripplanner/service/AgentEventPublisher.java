@@ -39,6 +39,7 @@ public class AgentEventPublisher {
             
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "day_completed", 
                 java.util.Map.of(
+                    "type", "day_completed",
                     "dayNumber", completedDay.getDayNumber(),
                     "progress", progress,
                     "message", message,
@@ -88,7 +89,9 @@ public class AgentEventPublisher {
                 java.util.Map.of(
                     "message", message,
                     "itinerary", finalItinerary,
-                    "progress", 100
+                    "progress", 100,
+                    "status", "completed",
+                    "type", "generation_complete"
                 ));
             
             logger.info("Published generation complete event via WebSocket: itinerary={}, days={}, total_nodes={}", 
@@ -109,6 +112,7 @@ public class AgentEventPublisher {
         try {
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "phase_transition", 
                 java.util.Map.of(
+                    "type", "phase_transition",
                     "fromPhase", fromPhase,
                     "toPhase", toPhase,
                     "progress", overallProgress,
@@ -150,6 +154,7 @@ public class AgentEventPublisher {
         try {
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "warning", 
                 java.util.Map.of(
+                    "type", "warning",
                     "errorCode", errorCode,
                     "message", message,
                     "recoveryAction", recoveryAction,
@@ -172,6 +177,7 @@ public class AgentEventPublisher {
         try {
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "error", 
                 java.util.Map.of(
+                    "type", "error",
                     "context", context,
                     "message", exception.getMessage(),
                     "severity", severity.name(),

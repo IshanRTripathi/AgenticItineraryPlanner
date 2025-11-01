@@ -15,7 +15,7 @@ export function FlightSearchForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/search-results?type=flights');
+    navigate('/search?type=flights');
   };
 
   return (

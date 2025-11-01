@@ -15,10 +15,10 @@ interface MobileMenuProps {
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const menuItems = [
     { icon: Home, label: 'Home', href: '/' },
-    { icon: Search, label: 'Search', href: '/search-results' },
-    { icon: Plane, label: 'Flights', href: '/search-results?type=flight' },
-    { icon: Hotel, label: 'Hotels', href: '/search-results?type=hotel' },
-    { icon: Calendar, label: 'Plan Trip', href: '/ai-planner' },
+    { icon: Search, label: 'Search', href: '/search' },
+    { icon: Plane, label: 'Flights', href: '/search?type=flight' },
+    { icon: Hotel, label: 'Hotels', href: '/search?type=hotel' },
+    { icon: Calendar, label: 'Plan Trip', href: '/planner' },
     { icon: Compass, label: 'My Trips', href: '/dashboard' },
     { icon: User, label: 'Profile', href: '/profile' },
   ];

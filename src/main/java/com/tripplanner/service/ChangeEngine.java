@@ -45,6 +45,9 @@ public class ChangeEngine {
     private final NodeIdGenerator nodeIdGenerator;
     private final EnrichmentService enrichmentService;
     
+    @Autowired(required = false)
+    private WebSocketEventPublisher webSocketEventPublisher;
+    
     // Primary constructor with enrichment service
     @Autowired
     public ChangeEngine(ItineraryJsonService itineraryJsonService,
@@ -204,8 +207,11 @@ public class ChangeEngine {
                 );
             }
             
+            // Publish itinerary change event via WebSocket for real-time UI updates
+            publishItineraryChangeEvent(itinerary.getItineraryId(), diff, changeSet);
+            
             // Trigger automatic enrichment for new/modified nodes (async, non-blocking)
-            triggerAutoEnrichment(itineraryId, diff);
+            triggerAutoEnrichment(itinerary.getItineraryId(), diff);
             
             return result;
             
@@ -311,6 +317,9 @@ public class ChangeEngine {
                 );
             }
             
+            // Publish itinerary change event via WebSocket for real-time UI updates
+            publishItineraryChangeEvent(itineraryId, diff, changeSet);
+            
             // Trigger automatic enrichment for new/modified nodes (async, non-blocking)
             triggerAutoEnrichment(itineraryId, diff);
             
@@ -385,16 +394,21 @@ public class ChangeEngine {
             
             switch (op.getOp()) {
                 case "move":
+                    // Get node title for move
+                    NormalizedNode nodeToMove = findNodeById(itinerary, op.getId());
+                    String movedNodeTitle = nodeToMove != null ? nodeToMove.getTitle() : op.getId();
                     if (moveNode(itinerary, op, changeSet.getPreferences())) {
-                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("timing")));
+                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("timing"), movedNodeTitle));
                     }
                     break;
                 case "reorder":
                     if (reorderNodes(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
-                        // Mark all reordered nodes as updated
+                        // Mark all reordered nodes as updated with titles
                         if (op.getNodeIds() != null) {
                             for (String nodeId : op.getNodeIds()) {
-                                updated.add(new DiffItem(nodeId, changeSet.getDay(), Arrays.asList("position")));
+                                NormalizedNode reorderedNode = findNodeById(itinerary, nodeId);
+                                String reorderedNodeTitle = reorderedNode != null ? reorderedNode.getTitle() : nodeId;
+                                updated.add(new DiffItem(nodeId, changeSet.getDay(), Arrays.asList("position"), reorderedNodeTitle));
                             }
                         }
                     }
@@ -405,8 +419,11 @@ public class ChangeEngine {
                     }
                     break;
                 case "delete":
+                    // Get node title before deletion
+                    NormalizedNode nodeToDelete = findNodeById(itinerary, op.getId());
+                    String deletedNodeTitle = nodeToDelete != null ? nodeToDelete.getTitle() : op.getId();
                     if (deleteNode(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
-                        removed.add(new DiffItem(op.getId(), changeSet.getDay()));
+                        removed.add(new DiffItem(op.getId(), changeSet.getDay(), null, deletedNodeTitle));
                     }
                     break;
                 case "replace":
@@ -425,8 +442,11 @@ public class ChangeEngine {
                     }
                     break;
                 case "update":
+                    // Get node title for update
+                    NormalizedNode nodeToUpdate = findNodeById(itinerary, op.getId());
+                    String updatedNodeTitle = nodeToUpdate != null ? nodeToUpdate.getTitle() : op.getId();
                     if (updateNode(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
-                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("content")));
+                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("content"), updatedNodeTitle));
                     }
                     break;
                 case "update_edge":
@@ -1595,5 +1615,80 @@ public class ChangeEngine {
         
         // Trigger enrichment asynchronously (non-blocking)
         enrichmentService.enrichNodesAsync(itineraryId, nodeIdsToEnrich);
+    }
+
+    /**
+     * Publish itinerary change event via WebSocket for real-time UI updates.
+     * This enables the chat interface to display changes in a high-end, user-friendly manner.
+     */
+    private void publishItineraryChangeEvent(String itineraryId, ItineraryDiff diff, ChangeSet changeSet) {
+        try {
+            // Only publish if there are actual changes
+            boolean hasChanges = (diff.getAdded() != null && !diff.getAdded().isEmpty())
+                    || (diff.getRemoved() != null && !diff.getRemoved().isEmpty())
+                    || (diff.getUpdated() != null && !diff.getUpdated().isEmpty());
+            
+            if (!hasChanges) {
+                logger.debug("No changes to publish for itinerary: {}", itineraryId);
+                return;
+            }
+            
+            // Build a user-friendly message
+            String message = buildChangeMessage(diff);
+            
+            // Publish via WebSocket
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("type", "itinerary_change");
+            eventData.put("diff", diff);
+            eventData.put("message", message);
+            eventData.put("canUndo", true);
+            eventData.put("timestamp", System.currentTimeMillis());
+            
+            // Include agent info if available
+            if (changeSet.getAgent() != null) {
+                eventData.put("agent", changeSet.getAgent());
+            }
+            
+            // Publish to WebSocket subscribers
+            if (webSocketEventPublisher != null) {
+                webSocketEventPublisher.publishItineraryUpdate(itineraryId, "itinerary_change", eventData);
+                logger.info("Published itinerary change event: itinerary={}, added={}, updated={}, removed={}", 
+                           itineraryId,
+                           diff.getAdded() != null ? diff.getAdded().size() : 0,
+                           diff.getUpdated() != null ? diff.getUpdated().size() : 0,
+                           diff.getRemoved() != null ? diff.getRemoved().size() : 0);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to publish itinerary change event for itinerary: {}", itineraryId, e);
+            // Don't throw - this is a non-critical operation
+        }
+    }
+    
+    /**
+     * Build a user-friendly message describing the changes.
+     */
+    private String buildChangeMessage(ItineraryDiff diff) {
+        List<String> parts = new ArrayList<>();
+        
+        int addedCount = diff.getAdded() != null ? diff.getAdded().size() : 0;
+        int updatedCount = diff.getUpdated() != null ? diff.getUpdated().size() : 0;
+        int removedCount = diff.getRemoved() != null ? diff.getRemoved().size() : 0;
+        
+        if (addedCount > 0) {
+            parts.add(addedCount + " " + (addedCount == 1 ? "item added" : "items added"));
+        }
+        if (updatedCount > 0) {
+            parts.add(updatedCount + " " + (updatedCount == 1 ? "item updated" : "items updated"));
+        }
+        if (removedCount > 0) {
+            parts.add(removedCount + " " + (removedCount == 1 ? "item removed" : "items removed"));
+        }
+        
+        if (parts.isEmpty()) {
+            return "Your itinerary has been updated";
+        }
+        
+        return "Your itinerary has been updated: " + String.join(", ", parts);
     }
 }

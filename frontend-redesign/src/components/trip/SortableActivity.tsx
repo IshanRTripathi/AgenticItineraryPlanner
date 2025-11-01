@@ -41,19 +41,22 @@ export function SortableActivity({ id, children, disabled = false }: SortableAct
         isDragging && 'opacity-50 z-50'
       )}
     >
-      {/* Drag Handle */}
+      {/* Drag Handle - Always visible for discoverability */}
       {!disabled && (
         <div
           {...attributes}
           {...listeners}
           className={cn(
             'absolute left-0 top-1/2 -translate-y-1/2 -translate-x-8',
-            'opacity-0 group-hover:opacity-100 transition-opacity',
+            'opacity-40 group-hover:opacity-100 transition-opacity duration-200',
             'cursor-grab active:cursor-grabbing',
             'p-1 rounded hover:bg-muted',
-            'touch-none' // Prevent touch scrolling on drag handle
+            'touch-none', // Prevent touch scrolling on drag handle
+            'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-primary'
           )}
           title="Drag to reorder"
+          aria-label="Drag to reorder activity"
+          tabIndex={0}
         >
           <GripVertical className="w-5 h-5 text-muted-foreground" />
         </div>

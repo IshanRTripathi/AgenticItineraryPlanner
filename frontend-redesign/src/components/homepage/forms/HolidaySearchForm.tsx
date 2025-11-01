@@ -17,7 +17,7 @@ export function HolidaySearchForm() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/search-results?type=holidays');
+    navigate('/search?type=holidays');
   };
 
   return (

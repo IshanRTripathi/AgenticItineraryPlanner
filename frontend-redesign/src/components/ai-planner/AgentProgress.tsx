@@ -34,6 +34,9 @@ export function AgentProgress() {
   const [actualProgress, setActualProgress] = useState<number | undefined>(undefined);
   const [currentStep, setCurrentStep] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState('Creating your perfect adventure...');
+  const [completedDays, setCompletedDays] = useState<number[]>([]);
+  const [currentPhase, setCurrentPhase] = useState('');
   const onCompleteCalledRef = useRef(false);
   
   // Use smooth progress with stages (swooshes to 70% quickly)
@@ -49,26 +52,96 @@ export function AgentProgress() {
     onMessage: (event: AgentProgressEvent) => {
       console.log('[AgentProgress] Received event:', event);
       
-      if (event.progress !== undefined) {
+      const eventType = (event as any).type || (event as any).updateType;
+      const eventData = (event as any).data || event;
+      
+      // Handle generation_complete event
+      if (eventType === 'generation_complete' || event.status === 'completed') {
+        console.log('[AgentProgress] Generation complete!');
+        setActualProgress(100);
+        setIsCompleted(true);
+        setCurrentMessage('Your itinerary is ready!');
+        
+        if (!onCompleteCalledRef.current) {
+          onCompleteCalledRef.current = true;
+          const targetId = event.itineraryId || itinId;
+          setTimeout(() => {
+            window.location.href = `/trip/${targetId}`;
+          }, 2000);
+        }
+        return;
+      }
+      
+      // Handle day_completed event
+      if (eventType === 'day_completed') {
+        const dayNum = eventData.dayNumber || (event as any).dayNumber;
+        if (dayNum) {
+          setCompletedDays(prev => [...new Set([...prev, dayNum])]);
+          const msg = eventData.message || `Day ${dayNum} completed! Planning next day...`;
+          setCurrentMessage(msg);
+        }
+        // Update progress if provided
+        if (eventData.progress !== undefined) {
+          setActualProgress(eventData.progress);
+        }
+      }
+      
+      // Handle phase_transition event
+      if (eventType === 'phase_transition') {
+        const toPhase = eventData.toPhase || (event as any).toPhase;
+        if (toPhase) {
+          setCurrentPhase(toPhase);
+          const msg = eventData.message || (event as any).message || `Moving to ${toPhase} phase...`;
+          setCurrentMessage(msg);
+        }
+        // Update progress if provided
+        if (eventData.progress !== undefined) {
+          setActualProgress(eventData.progress);
+        }
+      }
+      
+      // Handle agent_progress event (from publishAgentProgress)
+      if (eventType === 'agent_progress' || (event as any).agentId) {
+        if (event.progress !== undefined) {
+          setActualProgress(event.progress);
+        }
+        if (event.message || event.status) {
+          setCurrentMessage(event.message || event.status || '');
+        }
+      }
+      
+      // Handle warning event
+      if (eventType === 'warning') {
+        console.warn('[AgentProgress] Warning:', eventData);
+        const msg = eventData.message || 'Processing...';
+        setCurrentMessage(`⚠️ ${msg}`);
+      }
+      
+      // Handle error event
+      if (eventType === 'error') {
+        console.error('[AgentProgress] Error:', eventData);
+        const msg = eventData.message || 'An error occurred';
+        setCurrentMessage(`❌ ${msg}`);
+        // Don't stop progress, let it continue
+      }
+      
+      // Handle generic progress updates
+      if (event.progress !== undefined && !eventType) {
         setActualProgress(event.progress);
       }
+      
+      // Handle generic message updates
+      if (event.message && !eventType) {
+        setCurrentMessage(event.message);
+      }
+      
+      // Handle step updates
       if (event.currentStep) {
         const stepIndex = PROGRESS_STEPS.findIndex(s => 
           s.label.toLowerCase().includes(event.currentStep!.toLowerCase())
         );
         if (stepIndex >= 0) {
           setCurrentStep(stepIndex);
-        }
-      }
-      if (event.status === 'completed' && event.itineraryId) {
-        setActualProgress(100);
-        setIsCompleted(true);
-        // Navigate to trip detail after a short delay
-        if (!onCompleteCalledRef.current) {
-          onCompleteCalledRef.current = true;
-          setTimeout(() => {
-            window.location.href = `/trip/${event.itineraryId}`;
-          }, 2000);
         }
       }
     },
@@ -156,11 +229,11 @@ export function AgentProgress() {
         {/* Heading */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Creating Your Perfect Itinerary
+            {isCompleted ? 'Your Itinerary is Ready!' : 'Creating Your Perfect Itinerary'}
           </h1>
           <div className="flex items-center justify-center gap-2 text-muted-foreground animate-fade-in">
             <span className="text-2xl">{stage.icon}</span>
-            <p className={stage.color}>{stage.message}</p>
+            <p className={stage.color}>{currentMessage || stage.message}</p>
           </div>
         </div>
 
@@ -171,6 +244,35 @@ export function AgentProgress() {
             {Math.round(progress)}% complete
           </div>
         </div>
+
+        {/* Completed Days */}
+        {completedDays.length > 0 && (
+          <div className="mb-6 p-4 bg-success/10 rounded-lg border border-success/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Check className="w-4 h-4 text-success" />
+              <span className="text-sm font-semibold text-success">Days Completed</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {completedDays.sort((a, b) => a - b).map(day => (
+                <div
+                  key={day}
+                  className="px-3 py-1 bg-success/20 text-success rounded-full text-xs font-medium"
+                >
+                  Day {day}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Current Phase */}
+        {currentPhase && (
+          <div className="mb-6 text-center">
+            <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+              {currentPhase} Phase
+            </span>
+          </div>
+        )}
 
         {/* Steps */}
         <div className="space-y-3">

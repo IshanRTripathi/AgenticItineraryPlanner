@@ -1,6 +1,6 @@
 /**
  * Skeleton Component
- * Loading placeholder with shimmer animation
+ * Loading placeholder with premium shimmer animation
  */
 
 import { cn } from '@/lib/utils';
@@ -14,12 +14,17 @@ export function Skeleton({ className, variant = 'rectangular' }: SkeletonProps) 
   return (
     <div
       className={cn(
-        'animate-pulse bg-muted',
+        'relative overflow-hidden bg-muted',
+        'before:absolute before:inset-0',
+        'before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent',
+        'before:animate-shimmer',
         variant === 'text' && 'h-4 rounded',
         variant === 'circular' && 'rounded-full',
         variant === 'rectangular' && 'rounded-lg',
         className
       )}
+      aria-label="Loading..."
+      role="status"
     />
   );
 }

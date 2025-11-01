@@ -15,7 +15,7 @@ export function HotelSearchForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/search-results?type=hotels');
+    navigate('/search?type=hotels');
   };
 
   return (

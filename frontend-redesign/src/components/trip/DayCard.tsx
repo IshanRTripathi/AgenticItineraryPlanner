@@ -25,6 +25,7 @@ import { SortableActivity } from './SortableActivity';
 import { useDayActivitiesReorder } from '@/hooks/useDayActivitiesReorder';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerChildren, listItem, expandCollapse } from '@/utils/animations';
+import { getDayColor } from '@/constants/dayColors';
 
 interface DayCardProps {
     day: any; // NormalizedDay type
@@ -79,6 +80,16 @@ export function DayCard({
     onRefetchNeeded,
     isGenerating = false 
 }: DayCardProps) {
+    // Get day color from shared palette (matches map markers)
+    const dayColor = getDayColor(day.dayNumber);
+    
+    // Determine day status for visual styling
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+    
+    const dayStatus = dayDate < today ? 'past' : dayDate.getTime() === today.getTime() ? 'current' : 'future';
     // Use drag & drop hook if enabled and itineraryId is provided
     const { 
         activities, 
@@ -120,33 +131,63 @@ export function DayCard({
     };
 
     return (
-        <Card className="overflow-hidden">
-            <button
+        <Card 
+            className={cn(
+                "overflow-hidden transition-all duration-300 border-l-4",
+                dayStatus === 'past' && 'opacity-60',
+                dayStatus === 'current' && 'ring-2 ring-offset-2'
+            )}
+            style={{ 
+                borderLeftColor: dayColor.primary,
+                ...(dayStatus === 'current' && { '--tw-ring-color': dayColor.primary } as any)
+            }}
+        >
+            <div
                 onClick={onToggle}
                 className={cn(
                     'w-full text-left p-4 md:p-6',
-                    'flex items-center justify-between',
-                    'min-h-[60px] md:min-h-auto',
-                    'active:bg-muted transition-colors',
-                    'cursor-pointer hover:bg-muted/50'
+                    'cursor-pointer hover:bg-muted/50 active:bg-muted transition-colors'
                 )}
-            />
+            >
                 <CardContent className="flex-1 p-0">
                 {/* Collapsed View - Summary */}
                 <div className="flex items-center justify-between gap-4">
                     {/* Day Number Badge */}
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                        <div 
+                            className={cn(
+                                "flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all",
+                                dayStatus === 'current' ? 'shadow-lg scale-110 text-white' :
+                                dayStatus === 'past' ? 'bg-muted text-muted-foreground' :
+                                'text-white'
+                            )}
+                            style={{ 
+                                backgroundColor: dayStatus === 'past' ? undefined : dayColor.primary 
+                            }}
+                        >
                             {day.dayNumber}
                         </div>
                         <div>
-                            <h3 className="font-semibold text-base">Day {day.dayNumber}</h3>
+                            <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-base">Day {day.dayNumber}</h3>
+                                {dayStatus === 'current' && (
+                                    <span 
+                                        className="text-xs px-2 py-0.5 rounded-full font-medium"
+                                        style={{ 
+                                            backgroundColor: `${dayColor.primary}20`,
+                                            color: dayColor.primary
+                                        }}
+                                    >
+                                        Today
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-xs text-muted-foreground">{formatDate(day.date)}</p>
                         </div>
                     </div>
 
                     {/* Summary Stats */}
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-4 text-sm flex-wrap">
                         <div className="flex items-center gap-1 text-muted-foreground">
                             <MapPin className="w-4 h-4" />
                             <span className="hidden sm:inline">{day.location || 'Planning...'}</span>
@@ -165,34 +206,88 @@ export function DayCard({
                                 {totalCost > 0 && (
                                     <div className="flex items-center gap-1 text-muted-foreground">
                                         <DollarSign className="w-4 h-4" />
-                                        <span>${totalCost}</span>
+                                        <span>${totalCost.toLocaleString()}</span>
                                     </div>
                                 )}
                             </>
                         )}
                     </div>
+                    
+                    {/* Activity Preview Icons - Show in collapsed state */}
+                    {!isExpanded && hasActivities && (
+                        <div className="flex items-center gap-1 mt-2">
+                            {displayActivities.slice(0, 6).map((activity: any, i: number) => (
+                                <motion.div
+                                    key={activity.id}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm border-2 border-background shadow-sm"
+                                    title={activity.title}
+                                >
+                                    {getNodeIcon(activity.type)}
+                                </motion.div>
+                            ))}
+                            {displayActivities.length > 6 && (
+                                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground border-2 border-background">
+                                    +{displayActivities.length - 6}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Expand/Collapse Icon */}
-                    <Button variant="ghost" size="icon" className="shrink-0">
+                    <div className="shrink-0 w-10 h-10 flex items-center justify-center rounded-md hover:bg-muted/80 transition-colors">
                         {isExpanded ? (
-                            <ChevronUp className="w-5 h-5" />
+                            <ChevronUp className="w-5 h-5 text-muted-foreground" />
                         ) : (
-                            <ChevronDown className="w-5 h-5" />
+                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
                         )}
-                    </Button>
+                    </div>
                 </div>
 
                 {/* Expanded View - Full Details */}
                 <AnimatePresence>
                 {isExpanded && (
                     <motion.div 
-                        className="mt-4 pt-4 border-t space-y-3" 
+                        className="mt-4 pt-4 border-t space-y-4" 
                         onClick={(e) => e.stopPropagation()}
                         initial="collapsed"
                         animate="expanded"
                         exit="collapsed"
                         variants={expandCollapse}
                     >
+                        {/* Day Summary Panel */}
+                        {hasActivities && !showPlaceholder && (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-muted/30 rounded-lg">
+                                <div className="text-center">
+                                    <div className="text-xs text-muted-foreground mb-1">Activities</div>
+                                    <div className="text-lg font-semibold">{activityCount}</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xs text-muted-foreground mb-1">Budget</div>
+                                    <div className="text-lg font-semibold">${totalCost.toLocaleString()}</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xs text-muted-foreground mb-1">Duration</div>
+                                    <div className="text-lg font-semibold">
+                                        {displayActivities.reduce((sum: number, a: any) => {
+                                            const duration = a.timing?.duration || '0h';
+                                            const hours = parseInt(duration) || 0;
+                                            return sum + hours;
+                                        }, 0)}h
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xs text-muted-foreground mb-1">Status</div>
+                                    <div className="text-lg font-semibold">
+                                        {displayActivities.filter((a: any) => a.bookingRef).length}/{activityCount}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="space-y-3">
                         {showPlaceholder ? (
                             /* Placeholder for generating activities */
                             <div className="space-y-3">
@@ -285,66 +380,98 @@ export function DayCard({
                                         >
                                             <motion.div
                                                 variants={listItem}
+                                                whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
+                                                transition={{ duration: 0.2 }}
                                                 className={cn(
-                                                    'p-3 rounded-lg border-l-4 bg-muted/50 hover:bg-muted transition-colors',
+                                                    'group relative p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
                                                     getNodeColor(node.type),
                                                     isReordering && 'opacity-50 pointer-events-none'
                                                 )}
                                             >
-                                                <div className="flex items-start gap-3">
-                                                    {/* Icon */}
-                                                    <div className="text-xl">{getNodeIcon(node.type)}</div>
+                                                {/* Subtle gradient overlay */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                
+                                                <div className="relative flex items-start gap-4">
+                                                    {/* Icon with background */}
+                                                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                        {getNodeIcon(node.type)}
+                                                    </div>
 
                                                     {/* Content */}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-2 mb-1">
-                                                            <h4 className="font-semibold text-sm">{node.title}</h4>
-                                                            {node.locked && (
-                                                                <Badge variant="secondary" className="shrink-0">
-                                                                    <Lock className="w-3 h-3" />
-                                                                </Badge>
-                                                            )}
+                                                        {/* Header */}
+                                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                                            <div className="flex-1 min-w-0">
+                                                                <h4 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
+                                                                    {node.title}
+                                                                </h4>
+                                                                {node.location?.address && (
+                                                                    <p className="text-xs text-gray-600 flex items-center gap-1 line-clamp-1">
+                                                                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                                                                        <span className="truncate">{node.location.address}</span>
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            {/* Status badges */}
+                                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                                                {node.locked && (
+                                                                    <Badge variant="secondary" className="h-6 px-2">
+                                                                        <Lock className="w-3 h-3" />
+                                                                    </Badge>
+                                                                )}
+                                                                {node.bookingRef && (
+                                                                    <Badge className="h-6 px-2 bg-green-100 text-green-700 hover:bg-green-100">
+                                                                        ✓ Booked
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
                                                         </div>
 
-                                                        {node.location?.address && (
-                                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-                                                                <MapPin className="w-3 h-3" />
-                                                                {node.location.address}
-                                                            </p>
-                                                        )}
-
-                                                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                                        {/* Meta information */}
+                                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mb-2">
                                                             {node.timing?.startTime && (
-                                                                <div className="flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" />
-                                                                    {node.timing.startTime}
-                                                                    {node.timing.duration && ` (${node.timing.duration})`}
+                                                                <div className="flex items-center gap-1 font-medium">
+                                                                    <Clock className="w-3.5 h-3.5" />
+                                                                    <span>{node.timing.startTime}</span>
+                                                                    {node.timing.duration && (
+                                                                        <span className="text-gray-400">• {node.timing.duration}</span>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                             {node.cost?.amount && (
-                                                                <div className="flex items-center gap-1">
-                                                                    <DollarSign className="w-3 h-3" />
-                                                                    ${node.cost.amount}
+                                                                <div className="flex items-center gap-1 font-medium">
+                                                                    <DollarSign className="w-3.5 h-3.5" />
+                                                                    <span>${node.cost.amount.toLocaleString()}</span>
                                                                 </div>
                                                             )}
                                                         </div>
 
+                                                        {/* Description */}
                                                         {node.details?.description && (
-                                                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                                            <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-3">
                                                                 {node.details.description}
                                                             </p>
                                                         )}
 
                                                         {/* Actions */}
-                                                        <div className="flex gap-2 mt-2">
+                                                        <div className="flex items-center gap-2">
                                                             {!node.bookingRef && (
-                                                                <Button size="sm" variant="outline" className="h-7 text-xs">
+                                                                <Button 
+                                                                    size="sm" 
+                                                                    variant="outline" 
+                                                                    className="h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                                                                >
                                                                     Book Now
                                                                 </Button>
                                                             )}
-                                                            {node.bookingRef && (
-                                                                <Badge variant="default" className="text-xs">Booked</Badge>
-                                                            )}
+                                                            <Button 
+                                                                size="sm" 
+                                                                variant="ghost" 
+                                                                className="h-8 text-xs px-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            >
+                                                                View Details
+                                                            </Button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -366,65 +493,97 @@ export function DayCard({
                                 <motion.div
                                     key={index}
                                     variants={listItem}
+                                    whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
+                                    transition={{ duration: 0.2 }}
                                     className={cn(
-                                        'p-3 rounded-lg border-l-4 bg-muted/50 hover:bg-muted transition-colors',
+                                        'group relative p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
                                         getNodeColor(node.type)
                                     )}
                                 >
-                                    <div className="flex items-start gap-3">
-                                        {/* Icon */}
-                                        <div className="text-xl">{getNodeIcon(node.type)}</div>
+                                    {/* Subtle gradient overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    
+                                    <div className="relative flex items-start gap-4">
+                                        {/* Icon with background */}
+                                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                            {getNodeIcon(node.type)}
+                                        </div>
 
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-2 mb-1">
-                                                <h4 className="font-semibold text-sm">{node.title}</h4>
-                                                {node.locked && (
-                                                    <Badge variant="secondary" className="shrink-0">
-                                                        <Lock className="w-3 h-3" />
-                                                    </Badge>
-                                                )}
+                                            {/* Header */}
+                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
+                                                        {node.title}
+                                                    </h4>
+                                                    {node.location?.address && (
+                                                        <p className="text-xs text-gray-600 flex items-center gap-1 line-clamp-1">
+                                                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                                                            <span className="truncate">{node.location.address}</span>
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Status badges */}
+                                                <div className="flex items-center gap-1 flex-shrink-0">
+                                                    {node.locked && (
+                                                        <Badge variant="secondary" className="h-6 px-2">
+                                                            <Lock className="w-3 h-3" />
+                                                        </Badge>
+                                                    )}
+                                                    {node.bookingRef && (
+                                                        <Badge className="h-6 px-2 bg-green-100 text-green-700 hover:bg-green-100">
+                                                            ✓ Booked
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            {node.location?.address && (
-                                                <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-                                                    <MapPin className="w-3 h-3" />
-                                                    {node.location.address}
-                                                </p>
-                                            )}
-
-                                            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                            {/* Meta information */}
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mb-2">
                                                 {node.timing?.startTime && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Clock className="w-3 h-3" />
-                                                        {node.timing.startTime}
-                                                        {node.timing.duration && ` (${node.timing.duration})`}
+                                                    <div className="flex items-center gap-1 font-medium">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        <span>{node.timing.startTime}</span>
+                                                        {node.timing.duration && (
+                                                            <span className="text-gray-400">• {node.timing.duration}</span>
+                                                        )}
                                                     </div>
                                                 )}
                                                 {node.cost?.amount && (
-                                                    <div className="flex items-center gap-1">
-                                                        <DollarSign className="w-3 h-3" />
-                                                        ${node.cost.amount}
+                                                    <div className="flex items-center gap-1 font-medium">
+                                                        <DollarSign className="w-3.5 h-3.5" />
+                                                        <span>${node.cost.amount.toLocaleString()}</span>
                                                     </div>
                                                 )}
                                             </div>
 
+                                            {/* Description */}
                                             {node.details?.description && (
-                                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                                <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-3">
                                                     {node.details.description}
                                                 </p>
                                             )}
 
                                             {/* Actions */}
-                                            <div className="flex gap-2 mt-2">
+                                            <div className="flex items-center gap-2">
                                                 {!node.bookingRef && (
-                                                    <Button size="sm" variant="outline" className="h-7 text-xs">
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline" 
+                                                        className="h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                                                    >
                                                         Book Now
                                                     </Button>
                                                 )}
-                                                {node.bookingRef && (
-                                                    <Badge variant="default" className="text-xs">Booked</Badge>
-                                                )}
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="ghost" 
+                                                    className="h-8 text-xs px-3 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    View Details
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
@@ -432,10 +591,12 @@ export function DayCard({
                             ))}
                             </motion.div>
                         )}
+                        </div>
                     </motion.div>
                 )}
                 </AnimatePresence>
             </CardContent>
+            </div>
         </Card>
     );
 }

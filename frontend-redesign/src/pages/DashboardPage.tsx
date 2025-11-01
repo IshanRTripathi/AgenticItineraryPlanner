@@ -57,7 +57,7 @@ export function DashboardPage() {
             
             <Button
               size="lg"
-              onClick={() => window.location.href = '/ai-planner'}
+              onClick={() => window.location.href = '/planner'}
               className="gap-2"
             >
               <Sparkles className="w-5 h-5" />

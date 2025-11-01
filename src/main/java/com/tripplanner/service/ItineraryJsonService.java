@@ -174,8 +174,9 @@ public class ItineraryJsonService {
             // Serialize unified structure to JSON with error handling
             String json = serializeItineraryWithRetry(itinerary);
             
-            // Store as masterItinerary.json at root/itineraries/{itineraryId}/
-            String path = "itineraries/" + itineraryId + "/masterItinerary";
+            // Store as masterItinerary document in versions subcollection
+            // Path format: itineraries/{itineraryId}/versions/master
+            String path = "itineraries/" + itineraryId + "/versions/master";
             
             // Use FirestoreDatabaseService's flexible document storage with retry
             if (databaseService instanceof FirestoreDatabaseService) {

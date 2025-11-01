@@ -57,7 +57,7 @@ export function HeroSection() {
             size="lg"
             variant="secondary"
             className="text-lg px-8 py-6 h-auto hover:scale-105 transition-transform"
-            onClick={() => window.location.href = '/ai-planner'}
+            onClick={() => window.location.href = '/planner'}
           >
             <Sparkles className="mr-2 h-5 w-5" />
             Let AI Plan My Itinerary

@@ -154,6 +154,20 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  diff?: ItineraryDiff; // Optional itinerary changes
+}
+
+export interface ItineraryDiff {
+  added: DiffItem[];
+  removed: DiffItem[];
+  updated: DiffItem[];
+}
+
+export interface DiffItem {
+  nodeId: string;
+  day: number | null;
+  fields?: string[];
+  title?: string;
 }
 
 export interface ChatRequest {

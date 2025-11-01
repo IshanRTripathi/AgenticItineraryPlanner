@@ -6,17 +6,16 @@
 import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { DayCard } from '@/components/trip/DayCard';
-import { PlacePhotos } from '@/components/places/PlacePhotos';
 import { TripMap } from '@/components/map/TripMap';
+import { EmptyState } from '@/components/common/EmptyState';
 import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
-import {
-  MapPin,
-  Map as MapIcon,
-} from 'lucide-react';
+import { Calendar, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { staggerChildren, slideUp } from '@/utils/animations';
+import { getDayColor } from '@/constants/dayColors';
 
 interface PlanTabProps {
   itinerary: any; // NormalizedItinerary type
@@ -161,34 +160,105 @@ export function PlanTab({ itinerary }: PlanTabProps) {
           </div>
         </TabsContent>
 
-        {/* Day by Day View */}
+        {/* Day by Day View - Restructured */}
         <TabsContent value="day-by-day" className="mt-6">
-          {isRefetching && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700">
-              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <span>Updating itinerary...</span>
+          <div className="space-y-6">
+            {/* Timeline Header with Overview */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Your Itinerary</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {mappedDays.length} days • {mappedDays.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0)} activities
+                </p>
+              </div>
+              
+              {/* Quick Actions */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setExpandedDay(expandedDay === null ? 0 : null)}
+                >
+                  {expandedDay === null ? 'Expand All' : 'Collapse All'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isGenerating}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Day
+                </Button>
+              </div>
             </div>
-          )}
-          <motion.div 
-            className="space-y-4"
-            variants={staggerChildren}
-            initial="initial"
-            animate="animate"
-          >
-            {mappedDays.map((day: any, dayIndex: number) => (
-              <motion.div key={dayIndex} variants={slideUp}>
-                <DayCard
-                  day={day}
-                  isExpanded={expandedDay === dayIndex}
-                  onToggle={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
-                  itineraryId={itineraryId}
-                  enableDragDrop={!isGenerating && !isRefetching}
-                  onRefetchNeeded={handleRefetchNeeded}
-                  isGenerating={isGenerating}
-                />
+
+            {/* Progress Indicator */}
+            {isRefetching && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700"
+              >
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <span>Updating itinerary...</span>
               </motion.div>
-            ))}
-          </motion.div>
+            )}
+
+            {/* Timeline View */}
+            <div className="relative">
+              {/* Vertical Timeline Line */}
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-transparent hidden md:block" />
+              
+              {/* Day Cards */}
+              <motion.div 
+                className="space-y-6"
+                variants={staggerChildren}
+                initial="initial"
+                animate="animate"
+              >
+                {mappedDays.map((day: any, dayIndex: number) => {
+                  const dayColor = getDayColor(day.dayNumber);
+                  return (
+                    <motion.div 
+                      key={dayIndex} 
+                      variants={slideUp}
+                      className="relative"
+                    >
+                      {/* Timeline Dot - Colored to match day */}
+                      <div 
+                        className="absolute left-6 top-8 w-3 h-3 rounded-full border-4 border-background shadow-lg hidden md:block z-10" 
+                        style={{ backgroundColor: dayColor.primary }}
+                      />
+                      
+                      {/* Enhanced Day Card */}
+                      <div className="md:ml-16">
+                        <DayCard
+                          day={day}
+                          isExpanded={expandedDay === dayIndex}
+                          onToggle={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
+                          itineraryId={itineraryId}
+                          enableDragDrop={!isGenerating && !isRefetching}
+                          onRefetchNeeded={handleRefetchNeeded}
+                          isGenerating={isGenerating}
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </div>
+
+            {/* Empty State */}
+            {mappedDays.length === 0 && !isGenerating && (
+              <EmptyState
+                icon={Calendar}
+                title="No days planned yet"
+                description="Start building your itinerary by adding your first day"
+                actionLabel="Add First Day"
+                onAction={() => {/* TODO: Add day handler */}}
+              />
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

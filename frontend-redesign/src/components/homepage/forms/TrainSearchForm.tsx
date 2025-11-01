@@ -20,7 +20,7 @@ export function TrainSearchForm() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
-    navigate('/search-results?type=trains');
+    navigate('/search?type=trains');
     e.preventDefault();
     console.log('Searching trains:', { fromStation, toStation, journeyDate, trainClass });
     // TODO: Implement search logic

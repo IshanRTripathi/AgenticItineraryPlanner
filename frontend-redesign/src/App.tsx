@@ -13,7 +13,7 @@ const TripWizardPage = lazy(() => import('./pages/TripWizardPage'));
 const AgentProgressPage = lazy(() => import('./pages/AgentProgressPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
-const SearchResultsPage = lazy(() => import('./pages/SearchResultsPage'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -56,11 +56,11 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/search-results" element={<SearchResultsPage />} />
+          <Route path="/search" element={<SearchPage />} />
           
           {/* Protected Routes */}
-          <Route path="/ai-planner" element={<ProtectedRoute><TripWizardPage /></ProtectedRoute>} />
-          <Route path="/ai-progress" element={<ProtectedRoute><AgentProgressPage /></ProtectedRoute>} />
+          <Route path="/planner" element={<ProtectedRoute><TripWizardPage /></ProtectedRoute>} />
+          <Route path="/planner-progress" element={<ProtectedRoute><AgentProgressPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/trip/:id" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

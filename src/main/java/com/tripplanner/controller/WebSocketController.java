@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -140,21 +141,40 @@ public class WebSocketController {
             // Process with OrchestratorService
             ChatResponse chatResponse = orchestratorService.route(chatRequest);
             
+            // Build data map with null-safe values
+            Map<String, Object> innerData = new HashMap<>();
+            if (chatResponse.getChangeSet() != null) {
+                innerData.put("changeSet", chatResponse.getChangeSet());
+            }
+            if (chatResponse.getDiff() != null) {
+                innerData.put("diff", chatResponse.getDiff());
+            }
+            innerData.put("applied", chatResponse.isApplied());
+            if (chatResponse.getErrors() != null && !chatResponse.getErrors().isEmpty()) {
+                innerData.put("errors", chatResponse.getErrors());
+            }
+            if (chatResponse.getWarnings() != null && !chatResponse.getWarnings().isEmpty()) {
+                innerData.put("warnings", chatResponse.getWarnings());
+            }
+            if (chatResponse.getIntent() != null) {
+                innerData.put("intent", chatResponse.getIntent());
+            }
+            if (chatResponse.getCandidates() != null && !chatResponse.getCandidates().isEmpty()) {
+                innerData.put("candidates", chatResponse.getCandidates());
+            }
+            
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("id", "msg_" + System.currentTimeMillis() + "_ws");
+            responseData.put("text", chatResponse.getMessage() != null ? chatResponse.getMessage() : "");
+            responseData.put("sender", "assistant");
+            responseData.put("timestamp", Instant.now().toString());
+            responseData.put("data", innerData);
+            
             // Create WebSocket response message
             ItineraryUpdateMessage response = ItineraryUpdateMessage.builder()
                     .updateType("chat_response")
                     .itineraryId(itineraryId)
-                    .data(Map.of(
-                            "id", "msg_" + System.currentTimeMillis() + "_ws",
-                            "text", chatResponse.getMessage(),
-                            "sender", "assistant",
-                            "timestamp", Instant.now().toString(),
-                            "data", Map.of(
-                                    "changeSet", chatResponse.getChangeSet(),
-                                    "applied", chatResponse.isApplied(),
-                                    "errors", chatResponse.getErrors()
-                            )
-                    ))
+                    .data(responseData)
                     .timestamp(Instant.now())
                     .build();
             
@@ -163,13 +183,14 @@ public class WebSocketController {
             
             // If changes were applied, also broadcast itinerary update
             if (chatResponse.getChangeSet() != null && chatResponse.isApplied()) {
+                Map<String, Object> updateData = new HashMap<>();
+                updateData.put("chatResponse", chatResponse);
+                updateData.put("changes", chatResponse.getChangeSet());
+                
                 ItineraryUpdateMessage updateMessage = ItineraryUpdateMessage.builder()
                         .updateType("chat_update")
                         .itineraryId(itineraryId)
-                        .data(Map.of(
-                                "chatResponse", chatResponse,
-                                "changes", chatResponse.getChangeSet()
-                        ))
+                        .data(updateData)
                         .timestamp(Instant.now())
                         .build();
                 
@@ -182,18 +203,20 @@ public class WebSocketController {
             // Send error response
             String itineraryId = (String) message.get("itineraryId");
             if (itineraryId != null) {
+                Map<String, Object> errorData = new HashMap<>();
+                errorData.put("id", "msg_" + System.currentTimeMillis() + "_error");
+                errorData.put("text", "I'm sorry, I encountered an error processing your request. Please try again.");
+                errorData.put("sender", "assistant");
+                errorData.put("timestamp", Instant.now().toString());
+                
+                Map<String, Object> errorInnerData = new HashMap<>();
+                errorInnerData.put("error", e.getMessage() != null ? e.getMessage() : "Unknown error");
+                errorData.put("data", errorInnerData);
+                
                 ItineraryUpdateMessage errorResponse = ItineraryUpdateMessage.builder()
                         .updateType("chat_response")
                         .itineraryId(itineraryId)
-                        .data(Map.of(
-                                "id", "msg_" + System.currentTimeMillis() + "_error",
-                                "text", "I'm sorry, I encountered an error processing your request. Please try again.",
-                                "sender", "assistant",
-                                "timestamp", Instant.now().toString(),
-                                "data", Map.of(
-                                        "error", e.getMessage()
-                                )
-                        ))
+                        .data(errorData)
                         .timestamp(Instant.now())
                         .build();
                 
