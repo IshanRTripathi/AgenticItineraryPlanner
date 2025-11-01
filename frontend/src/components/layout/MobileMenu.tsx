@@ -3,8 +3,11 @@
  * Slide-out navigation menu for mobile devices
  */
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Home, Compass, Calendar, User, LogIn, Plane, Hotel, Search } from 'lucide-react';
+import { X, Home, Compass, Calendar, User, LogIn, LogOut, Plane, Hotel, Search } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
 interface MobileMenuProps {
@@ -13,6 +16,31 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
+  const { user, signOut, isAuthenticated, loading } = useAuth();
+  const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await signOut();
+      toast({
+        title: 'Signed out successfully',
+        description: 'You have been logged out of your account',
+      });
+      onClose();
+      window.location.href = '/';
+    } catch (error: any) {
+      toast({
+        title: 'Logout failed',
+        description: error.message || 'Please try again',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const menuItems = [
     { icon: Home, label: 'Home', href: '/' },
     { icon: Search, label: 'Search', href: '/search' },
@@ -74,17 +102,38 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-          <Button
-            className="w-full"
-            onClick={() => {
-              window.location.href = '/login';
-              onClose();
-            }}
-          >
-            <LogIn className="w-4 h-4 mr-2" />
-            Sign In
-          </Button>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+          {loading ? (
+            // Show nothing while loading
+            <div className="h-12" />
+          ) : isAuthenticated ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground truncate">{user?.email}</span>
+              </div>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                {isLoggingOut ? 'Signing out...' : 'Sign Out'}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full"
+              onClick={() => {
+                window.location.href = '/login';
+                onClose();
+              }}
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </>

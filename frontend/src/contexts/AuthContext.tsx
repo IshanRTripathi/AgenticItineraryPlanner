@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const token = await authService.getIdToken();
           if (token) {
-            apiClient.setAuthToken(token);
+            (apiClient as any).setAuthToken(token);
             itineraryApi.setAuthToken(token);
             logger.info('Auth token set for API requests', {
               component: 'AuthContext'
@@ -54,11 +54,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           logger.error('Failed to get ID token', {
             component: 'AuthContext'
           }, error as Error);
-          apiClient.clearAuthToken();
+          (apiClient as any).clearAuthToken();
           itineraryApi.setAuthToken(null);
         }
       } else {
-        apiClient.clearAuthToken();
+        (apiClient as any).clearAuthToken();
         itineraryApi.setAuthToken(null);
         logger.info('Auth token cleared', {
           component: 'AuthContext'
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         const newToken = await authService.getIdTokenForceRefresh();
         if (newToken) {
-          apiClient.setAuthToken(newToken);
+          (apiClient as any).setAuthToken(newToken);
           itineraryApi.setAuthToken(newToken);
           logger.info('Token refreshed proactively at ' + new Date().toISOString(), {
             component: 'AuthContext'
@@ -105,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const newToken = await authService.getIdTokenForceRefresh();
         if (newToken) {
-          apiClient.setAuthToken(newToken);
+          (apiClient as any).setAuthToken(newToken);
           itineraryApi.setAuthToken(newToken);
           logger.info('Token refreshed on mount', {
             component: 'AuthContext'

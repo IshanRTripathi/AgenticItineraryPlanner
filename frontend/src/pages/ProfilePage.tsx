@@ -1,323 +1,207 @@
 /**
- * User Profile Page
- * View and edit user profile information
+ * Profile Page
+ * Displays user information from authentication
  */
 
-import { useState } from 'react';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar } from '@/components/ui/avatar';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Lock } from 'lucide-react';
-
-// Mock user data
-const MOCK_USER = {
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '+1 (555) 123-4567',
-  location: 'New York, USA',
-  joinDate: 'January 2024',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-};
+import { Badge } from '@/components/ui/badge';
+import { 
+  User, 
+  Mail, 
+  Calendar, 
+  Shield, 
+  ArrowLeft,
+  CheckCircle2
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(MOCK_USER);
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSave = () => {
-    // TODO: Implement save logic
-    console.log('Save profile:', formData);
-    setIsEditing(false);
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground mb-4">Please sign in to view your profile</p>
+            <Button onClick={() => navigate('/login')}>Sign In</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (user.displayName) {
+      const names = user.displayName.split(' ');
+      if (names.length >= 2) {
+        return `${names[0].charAt(0)}${names[1].charAt(0)}`.toUpperCase();
+      }
+      return names[0].charAt(0).toUpperCase();
+    }
+    return user.email?.charAt(0).toUpperCase() || 'U';
+  };
+
+  // Format date
+  const formatDate = (timestamp: string | undefined) => {
+    if (!timestamp) return 'N/A';
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <main className="flex-1 bg-muted/30 py-12">
-        <div className="container max-w-4xl">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              My Profile
-            </h1>
-            <p className="text-muted-foreground">
-              Manage your account settings and preferences
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container max-w-4xl">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
 
-          <Tabs value="profile" onValueChange={() => {}}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="preferences">Preferences</TabsTrigger>
-            </TabsList>
+        {/* Profile Header */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-6">
+              {/* Avatar */}
+              <div className="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center font-bold text-3xl shadow-lg">
+                {getUserInitials()}
+              </div>
 
-            {/* Profile Tab */}
-            <TabsContent value="profile">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>Profile Information</CardTitle>
-                      <CardDescription>
-                        Update your personal details and contact information
-                      </CardDescription>
-                    </div>
-                    {!isEditing && (
-                      <Button onClick={() => setIsEditing(true)}>
-                        Edit Profile
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {/* Avatar */}
-                  <div className="flex items-center gap-6 mb-8">
-                    <Avatar className="w-24 h-24">
-                      <img src={MOCK_USER.avatar} alt={MOCK_USER.name} />
-                    </Avatar>
-                    {isEditing && (
-                      <Button variant="outline" size="sm">
-                        <Camera className="w-4 h-4 mr-2" />
-                        Change Photo
-                      </Button>
-                    )}
-                  </div>
+              {/* User Info */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {user.displayName || 'User'}
+                  </h1>
+                  {user.emailVerified && (
+                    <Badge className="bg-green-100 text-green-700 border-green-200">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-muted-foreground mb-4">{user.email}</p>
+                <div className="flex gap-2">
+                  <Badge variant="outline">Free Plan</Badge>
+                  <Badge variant="outline">Member since {new Date(user.metadata?.creationTime || '').getFullYear()}</Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                  {/* Form */}
-                  <div className="space-y-6">
-                    {/* Name */}
-                    <div>
-                      <Label htmlFor="name">Full Name</Label>
-                      <div className="relative mt-2">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="pl-10"
-                          disabled={!isEditing}
-                        />
-                      </div>
-                    </div>
+        {/* Account Details */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Account Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Email */}
+            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <Mail className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 mb-1">Email Address</p>
+                <p className="text-sm text-muted-foreground break-all">{user.email}</p>
+                {user.emailVerified ? (
+                  <Badge className="mt-2 bg-green-100 text-green-700 border-green-200 text-xs">
+                    Verified
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="mt-2 text-xs">
+                    Not Verified
+                  </Badge>
+                )}
+              </div>
+            </div>
 
-                    {/* Email */}
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <div className="relative mt-2">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="pl-10"
-                          disabled={!isEditing}
-                        />
-                      </div>
-                    </div>
+            {/* Display Name */}
+            {user.displayName && (
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 mb-1">Display Name</p>
+                  <p className="text-sm text-muted-foreground">{user.displayName}</p>
+                </div>
+              </div>
+            )}
 
-                    {/* Phone */}
-                    <div>
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <div className="relative mt-2">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="pl-10"
-                          disabled={!isEditing}
-                        />
-                      </div>
-                    </div>
+            {/* User ID */}
+            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-gray-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 mb-1">User ID</p>
+                <p className="text-xs text-muted-foreground font-mono break-all">{user.uid}</p>
+              </div>
+            </div>
 
-                    {/* Location */}
-                    <div>
-                      <Label htmlFor="location">Location</Label>
-                      <div className="relative mt-2">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input
-                          id="location"
-                          value={formData.location}
-                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                          className="pl-10"
-                          disabled={!isEditing}
-                        />
-                      </div>
-                    </div>
+            {/* Account Created */}
+            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900 mb-1">Member Since</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(user.metadata?.creationTime)}
+                </p>
+              </div>
+            </div>
 
-                    {/* Member Since */}
-                    <div>
-                      <Label>Member Since</Label>
-                      <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-                        <Calendar className="w-5 h-5" />
-                        <span>{formData.joinDate}</span>
-                      </div>
-                    </div>
+            {/* Last Sign In */}
+            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900 mb-1">Last Sign In</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(user.metadata?.lastSignInTime)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                    {/* Actions */}
-                    {isEditing && (
-                      <div className="flex gap-3 pt-4">
-                        <Button onClick={handleSave}>
-                          Save Changes
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setFormData(MOCK_USER);
-                            setIsEditing(false);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Security Tab */}
-            <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
-                  <CardDescription>
-                    Manage your password and security preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {/* Change Password */}
-                    <div>
-                      <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <Lock className="w-5 h-5" />
-                        Change Password
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="currentPassword">Current Password</Label>
-                          <Input
-                            id="currentPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            className="mt-2"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="newPassword">New Password</Label>
-                          <Input
-                            id="newPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            className="mt-2"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-                          <Input
-                            id="confirmNewPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            className="mt-2"
-                          />
-                        </div>
-                        <Button>Update Password</Button>
-                      </div>
-                    </div>
-
-                    {/* Two-Factor Authentication */}
-                    <div className="pt-6 border-t">
-                      <h3 className="font-semibold mb-2">Two-Factor Authentication</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Add an extra layer of security to your account
-                      </p>
-                      <Button variant="outline">Enable 2FA</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Preferences Tab */}
-            <TabsContent value="preferences">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Preferences</CardTitle>
-                  <CardDescription>
-                    Customize your experience
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {/* Email Notifications */}
-                    <div>
-                      <h3 className="font-semibold mb-4">Email Notifications</h3>
-                      <div className="space-y-3">
-                        <label className="flex items-center gap-3">
-                          <input type="checkbox" defaultChecked />
-                          <div>
-                            <div className="font-medium">Trip Updates</div>
-                            <div className="text-sm text-muted-foreground">
-                              Receive updates about your trips
-                            </div>
-                          </div>
-                        </label>
-                        <label className="flex items-center gap-3">
-                          <input type="checkbox" defaultChecked />
-                          <div>
-                            <div className="font-medium">Booking Confirmations</div>
-                            <div className="text-sm text-muted-foreground">
-                              Get notified when bookings are confirmed
-                            </div>
-                          </div>
-                        </label>
-                        <label className="flex items-center gap-3">
-                          <input type="checkbox" />
-                          <div>
-                            <div className="font-medium">Promotional Emails</div>
-                            <div className="text-sm text-muted-foreground">
-                              Receive special offers and deals
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Currency */}
-                    <div className="pt-6 border-t">
-                      <Label htmlFor="currency">Preferred Currency</Label>
-                      <select
-                        id="currency"
-                        className="mt-2 w-full h-12 px-4 rounded-md border border-input bg-background"
-                      >
-                        <option>USD - US Dollar</option>
-                        <option>EUR - Euro</option>
-                        <option>GBP - British Pound</option>
-                        <option>JPY - Japanese Yen</option>
-                      </select>
-                    </div>
-
-                    <Button>Save Preferences</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-
-      <Footer />
+        {/* Provider Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Authentication Provider</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Google</p>
+                <p className="text-xs text-muted-foreground">Signed in with Google account</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
-
-
-export default ProfilePage;

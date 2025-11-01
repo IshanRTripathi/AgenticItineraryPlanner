@@ -3,30 +3,38 @@
  * HTTP client with auth token management and 401 handling
  */
 
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { auth } from '@/config/firebase';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
+// Extend AxiosInstance with custom methods
+interface ExtendedAxiosInstance extends AxiosInstance {
+  setAuthToken: (token: string | null) => void;
+  clearAuthToken: () => void;
+}
+
 // Create axios instance
-export const apiClient = axios.create({
+const instance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 30000, // 30 seconds
-});
+}) as ExtendedAxiosInstance;
 
 // Add helper methods for compatibility with AuthContext
-(apiClient as any).setAuthToken = (token: string | null) => {
+instance.setAuthToken = (token: string | null) => {
   // Token is already handled by interceptors, but we keep this for compatibility
   console.log('[API Client] setAuthToken called (handled by interceptors)');
 };
 
-(apiClient as any).clearAuthToken = () => {
+instance.clearAuthToken = () => {
   // Token is already handled by interceptors, but we keep this for compatibility
   console.log('[API Client] clearAuthToken called (handled by interceptors)');
 };
+
+export const apiClient = instance;
 
 // Track if we're currently refreshing the token
 let isRefreshing = false;

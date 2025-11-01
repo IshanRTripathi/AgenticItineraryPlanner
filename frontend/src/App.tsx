@@ -16,7 +16,7 @@ const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })));
 
 // Loading fallback component
 function PageLoader() {

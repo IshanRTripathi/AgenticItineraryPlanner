@@ -7,12 +7,12 @@ import { useScrollAnimation } from '../useScrollAnimation';
 import { fadeInUp } from '@/lib/animations/variants';
 
 export function useFadeIn(delay = 0) {
-  const { ref, controls } = useScrollAnimation();
+  const { ref, isVisible } = useScrollAnimation();
   
   return {
     ref,
     initial: 'initial',
-    animate: controls,
+    animate: isVisible ? 'animate' : 'initial',
     variants: fadeInUp,
     transition: { delay },
   };
