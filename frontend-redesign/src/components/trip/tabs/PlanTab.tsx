@@ -5,13 +5,12 @@
 
 import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DayCard } from '@/components/trip/DayCard';
 import { TripMap } from '@/components/map/TripMap';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
-import { Calendar, Plus } from 'lucide-react';
+import { Calendar, Plus, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { staggerChildren, slideUp } from '@/utils/animations';
@@ -26,8 +25,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   const itineraryId = itinerary?.id || itinerary?.itineraryId;
   const isGenerating = itinerary?.status === 'generating' || itinerary?.status === 'planning';
   
-  const [selectedDestination, setSelectedDestination] = useState(0);
-  const [subTab, setSubTab] = useState('destinations');
+  const [subTab, setSubTab] = useState('day-by-day');
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [isRefetching, setIsRefetching] = useState(false);
   
@@ -85,83 +83,47 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   
   console.log('[PlanTab] Mapped days:', mappedDays);
 
-  // Group nodes by location
-  const destinations = mappedDays.reduce((acc: any[], day: any) => {
-    const location = day.location;
-    const existing = acc.find(d => d.name === location);
-    
-    if (existing) {
-      existing.days.push(day);
-    } else {
-      acc.push({
-        name: location,
-        days: [day],
-        image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400',
-      });
-    }
-    
-    return acc;
-  }, []);
+
   
-  console.log('[PlanTab] Destinations:', destinations);
+
 
   return (
     <div className="space-y-6">
+      {/* Tab Navigation */}
       <Tabs value={subTab} onValueChange={setSubTab}>
-        <TabsList>
-          <TabsTrigger value="destinations">Destinations</TabsTrigger>
-          <TabsTrigger value="day-by-day">Day by Day</TabsTrigger>
-        </TabsList>
-
-        {/* Destinations View */}
-        <TabsContent value="destinations" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Destination List */}
-            <motion.div 
-              className="lg:col-span-1 space-y-3"
-              variants={staggerChildren}
-              initial="initial"
-              animate="animate"
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex gap-3">
+            <button
+              onClick={() => setSubTab('day-by-day')}
+              className={cn(
+                "px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                "border flex items-center gap-3",
+                subTab === 'day-by-day'
+                  ? "border-primary bg-primary text-white shadow-lg shadow-primary/25"
+                  : "border-gray-200 bg-white hover:border-primary/50 hover:bg-primary/5 text-gray-700"
+              )}
             >
-              <h3 className="text-lg font-semibold mb-4">Destinations</h3>
-              {destinations.map((dest: any, index: number) => (
-                <motion.div key={index} variants={slideUp}>
-                <Card
-                  className={cn(
-                    'cursor-pointer transition-all hover:shadow-md',
-                    selectedDestination === index && 'ring-2 ring-primary'
-                  )}
-                  onClick={() => setSelectedDestination(index)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex gap-3">
-                      <img
-                        src={dest.image}
-                        alt={dest.name}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{dest.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {dest.days.length} {dest.days.length === 1 ? 'day' : 'days'}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Trip Map */}
-            <div className="lg:col-span-2">
-              <TripMap itinerary={itinerary} />
-            </div>
+              <Calendar className="w-5 h-5" />
+              <span className="font-semibold">Day by Day</span>
+            </button>
+            <button
+              onClick={() => setSubTab('map')}
+              className={cn(
+                "px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                "border flex items-center gap-3",
+                subTab === 'map'
+                  ? "border-primary bg-primary text-white shadow-lg shadow-primary/25"
+                  : "border-gray-200 bg-white hover:border-primary/50 hover:bg-primary/5 text-gray-700"
+              )}
+            >
+              <MapPin className="w-5 h-5" />
+              <span className="font-semibold">Map View</span>
+            </button>
           </div>
-        </TabsContent>
+        </div>
 
-        {/* Day by Day View - Restructured */}
-        <TabsContent value="day-by-day" className="mt-6">
+        {/* Day by Day View */}
+        <TabsContent value="day-by-day">
           <div className="space-y-6">
             {/* Timeline Header with Overview */}
             <div className="flex items-center justify-between">
@@ -258,6 +220,13 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                 onAction={() => {/* TODO: Add day handler */}}
               />
             )}
+          </div>
+        </TabsContent>
+
+        {/* Map View - Full viewport */}
+        <TabsContent value="map" className="p-0">
+          <div className="h-[calc(100vh-16rem)] min-h-[600px]">
+            <TripMap itinerary={itinerary} />
           </div>
         </TabsContent>
       </Tabs>

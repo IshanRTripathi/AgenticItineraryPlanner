@@ -509,12 +509,6 @@ export function TripMap({ itinerary }: TripMapProps) {
 
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            Trip Map
-          </CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
@@ -549,12 +543,6 @@ export function TripMap({ itinerary }: TripMapProps) {
   if (error) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            Trip Map
-          </CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -569,12 +557,6 @@ export function TripMap({ itinerary }: TripMapProps) {
   if (nodes.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            Trip Map
-          </CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -590,49 +572,44 @@ export function TripMap({ itinerary }: TripMapProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between mb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Navigation className="w-5 h-5" />
-            Trip Map
-          </CardTitle>
-          <span className="text-sm font-normal text-muted-foreground">
-            {filteredNodes.length} of {nodes.length} locations
-          </span>
-        </div>
+    <div className="h-full flex gap-4">
+      {/* Left Sidebar - Day Filters */}
+      {days.length > 1 && (
+        <div className="w-64 flex-shrink-0 space-y-3">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-1">Filter by Day</h3>
+            <p className="text-xs text-gray-600">
+              {filteredNodes.length} of {nodes.length} locations
+            </p>
+          </div>
 
-        {/* Day Filter Controls */}
-        {days.length > 1 && (
-          <div className="flex flex-wrap gap-2">
-            {/* All Days button - same style as day buttons */}
-            <button
-              onClick={() => {
-                const allDaysSelected = selectedDays.size === days.length;
-                if (allDaysSelected) {
-                  // Deselect all
-                  setSelectedDays(new Set());
-                  setShowAllDays(false);
-                } else {
-                  // Select all
-                  setShowAllDays(true);
-                  setSelectedDays(new Set(days.map((d: any) => d.dayNumber)));
-                }
-                setHighlightedDay(null);
-              }}
-              className={cn(
-                "px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                "border-2 flex items-center gap-2",
-                selectedDays.size === days.length
-                  ? "border-primary bg-primary text-white shadow-sm"
-                  : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 text-gray-700"
-              )}
-            >
-              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm" />
-              <span>All Days</span>
-            </button>
+          {/* All Days button */}
+          <button
+            onClick={() => {
+              const allDaysSelected = selectedDays.size === days.length;
+              if (allDaysSelected) {
+                setSelectedDays(new Set());
+                setShowAllDays(false);
+              } else {
+                setShowAllDays(true);
+                setSelectedDays(new Set(days.map((d: any) => d.dayNumber)));
+              }
+              setHighlightedDay(null);
+            }}
+            className={cn(
+              "w-full px-4 py-3 rounded-lg text-sm font-medium transition-all",
+              "border-2 flex items-center gap-3",
+              selectedDays.size === days.length
+                ? "border-primary bg-primary text-white shadow-md"
+                : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 text-gray-700"
+            )}
+          >
+            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm flex-shrink-0" />
+            <span>All Days</span>
+          </button>
 
-            {/* Individual Day Buttons */}
+          {/* Individual Day Buttons - Vertical Stack */}
+          <div className="space-y-2">
             {days.map((day: any, index: number) => {
               const dayColor = DAY_COLORS[index % DAY_COLORS.length];
               const isSelected = selectedDays.has(day.dayNumber);
@@ -660,12 +637,12 @@ export function TripMap({ itinerary }: TripMapProps) {
                   onMouseEnter={() => setHighlightedDay(day.dayNumber)}
                   onMouseLeave={() => setHighlightedDay(null)}
                   className={cn(
-                    "px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                    "border-2 flex items-center gap-2",
+                    "w-full px-4 py-3 rounded-lg text-sm font-medium transition-all",
+                    "border-2 flex items-center justify-between gap-3",
                     isSelected
-                      ? "border-transparent shadow-sm"
-                      : "border-gray-200 bg-white hover:border-gray-300",
-                    isHighlighted && "ring-2 ring-offset-1 scale-105"
+                      ? "border-transparent shadow-md"
+                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm",
+                    isHighlighted && "ring-2 ring-offset-1 scale-[1.02]"
                   )}
                   style={{
                     backgroundColor: isSelected ? dayColor.light : undefined,
@@ -673,16 +650,19 @@ export function TripMap({ itinerary }: TripMapProps) {
                     ...(isHighlighted && { '--tw-ring-color': dayColor.primary } as any),
                   }}
                 >
-                  {/* Color indicator */}
-                  <div
-                    className="w-3 h-3 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: dayColor.primary }}
-                  />
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {/* Color indicator */}
+                    <div
+                      className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
+                      style={{ backgroundColor: dayColor.primary }}
+                    />
 
-                  {/* Day info */}
-                  <span>Day {day.dayNumber}</span>
+                    <span className="truncate">Day {day.dayNumber}</span>
+                  </div>
+
+                  {/* Activity count badge */}
                   {dayNodeCount > 0 && (
-                    <span className="text-xs px-1.5 py-0.5 rounded-full bg-white/60">
+                    <span className="text-xs px-2 py-1 rounded-full bg-white/80 font-semibold flex-shrink-0">
                       {dayNodeCount}
                     </span>
                   )}
@@ -690,46 +670,49 @@ export function TripMap({ itinerary }: TripMapProps) {
               );
             })}
           </div>
-        )}
-      </CardHeader>
+        </div>
+      )}
 
-      <CardContent className="p-6">
-        {/* Map Container */}
-        <div
-          ref={mapRef}
-          className="w-full h-[500px] rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200"
-        />
+      {/* Right Side - Map */}
+      <Card className="flex-1 flex flex-col">
+        <CardContent className="p-3 flex-1 flex flex-col">
+          {/* Map Container */}
+          <div
+            ref={mapRef}
+            className="w-full flex-1 min-h-[650px] rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200"
+          />
 
-        {/* Resolution statistics */}
-        {resolutionStats.total > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm" />
-              <span>{resolutionStats.exact} exact</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
-              <span>{resolutionStats.approximate} approximate</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
-              <span>{resolutionStats.city} city center</span>
-            </div>
-            {resolutionStats.fallback > 0 && (
+          {/* Resolution statistics */}
+          {resolutionStats.total > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <AlertCircle className="w-3 h-3 text-gray-500" />
-                <span>{resolutionStats.fallback} fallback</span>
+                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm" />
+                <span>{resolutionStats.exact} exact</span>
               </div>
-            )}
-            {resolutionStats.filtered > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-400">•</span>
-                <span>{resolutionStats.filtered} generic filtered</span>
+                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
+                <span>{resolutionStats.approximate} approximate</span>
               </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
+                <span>{resolutionStats.city} city center</span>
+              </div>
+              {resolutionStats.fallback > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <AlertCircle className="w-3 h-3 text-gray-500" />
+                  <span>{resolutionStats.fallback} fallback</span>
+                </div>
+              )}
+              {resolutionStats.filtered > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-gray-400">•</span>
+                  <span>{resolutionStats.filtered} generic filtered</span>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
