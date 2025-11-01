@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { loadGoogleMaps } from '@/utils/googleMapsLoader';
 
 interface GoogleMapsAPI {
-  maps: typeof google.maps;
+  maps: any;
 }
 
 interface UseGoogleMapsResult {

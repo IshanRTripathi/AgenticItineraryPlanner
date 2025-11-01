@@ -45,6 +45,7 @@ data/itinerarydb.trace.db
 !package.json
 !package-lock.json
 !tsconfig.json
+!tsconfig.node.json
 !firebase.json
 !firestore.rules
 !firestore.indexes.json

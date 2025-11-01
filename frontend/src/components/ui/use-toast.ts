@@ -1,6 +1,11 @@
 import * as React from "react"
 
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
+export type ToastActionElement = React.ReactElement<any>;
+
+export interface ToastProps {
+  variant?: 'default' | 'success' | 'error' | 'warning';
+  [key: string]: any;
+}
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000

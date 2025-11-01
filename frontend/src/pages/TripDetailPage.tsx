@@ -223,6 +223,7 @@ function TripDetailContent() {
         onClose={closeBookingModal}
         bookingType={bookingModal.type}
         itemName={bookingModal.name}
+        providerUrl=""
       />
 
       {/* Connection Status Indicator - only show if we were previously connected */}

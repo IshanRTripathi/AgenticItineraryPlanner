@@ -80,9 +80,9 @@ export function TripSidebar({
       });
 
       // Try Web Share API if available
-      if (navigator.share && state.itinerary) {
+      if (typeof navigator.share === 'function' && state.itinerary) {
         try {
-          await exportService.shareViaWebAPI(state.itinerary);
+          await exportService.shareViaWebAPI(state.itinerary as any);
         } catch (e) {
           // User cancelled or not supported, link already copied
         }
@@ -111,7 +111,7 @@ export function TripSidebar({
     setIsExporting(true);
     try {
       // TODO: Use options for enhanced export
-      await exportService.exportToPDF(state.itinerary);
+      await exportService.exportToPDF(state.itinerary as any);
       
       toast({
         title: 'Export Successful',

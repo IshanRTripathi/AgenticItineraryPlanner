@@ -30,7 +30,7 @@ class WebSocketService {
   private eventListeners: Map<string, Function[]> = new Map();
   private connectionHandlers: Set<(connected: boolean) => void> = new Set();
   private connectionState: ConnectionState = 'disconnected';
-  private currentItineraryId: string | null = null;
+  private currentItineraryId: string | undefined = undefined;
   private subscriptions: Map<string, any> = new Map();
 
   // Connection management
@@ -488,7 +488,7 @@ class WebSocketService {
     }
 
     this.connectionState = 'disconnected';
-    this.currentItineraryId = null;
+    this.currentItineraryId = undefined;
     this.reconnectAttempts = 0;
     this.notifyConnectionHandlers(false);
     logger.info('WebSocket disconnected', {
