@@ -6,9 +6,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Plane, Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStompWebSocket } from '@/hooks/useStompWebSocket';
+import { InteractiveGlobe } from '@/components/homepage/InteractiveGlobe';
 
 interface DayStatus {
   dayNumber: number;
@@ -49,7 +50,7 @@ export function AgentProgress() {
   const { isConnected } = useStompWebSocket(itineraryId, {
     onMessage: (message) => {
       console.log('[AgentProgress] Raw WebSocket message:', JSON.stringify(message, null, 2));
-      
+
       // Add to debug messages (keep last 10)
       setDebugMessages(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString(), data: message }]);
 
@@ -60,14 +61,14 @@ export function AgentProgress() {
         const progress = data.progress ?? message.progress;
         const step = data.step ?? message.step ?? message.agentKind;
         const statusMessage = data.status ?? data.message ?? message.message ?? message.status;
-        
+
         console.log('[AgentProgress] Agent progress update:', {
           progress,
           step,
           message: statusMessage,
           rawData: data
         });
-        
+
         setState((prev) => ({
           ...prev,
           overallProgress: typeof progress === 'number' ? progress : prev.overallProgress,
@@ -85,36 +86,36 @@ export function AgentProgress() {
         const activities = dayData.nodes?.length ?? data.activities ?? message.activities ?? 0;
         const progress = data.progress ?? message.progress ?? 0;
         const dayMessage = data.message ?? message.message;
-        
-        console.log('[AgentProgress] Day completed:', { 
-          dayNumber, 
-          activities, 
+
+        console.log('[AgentProgress] Day completed:', {
+          dayNumber,
+          activities,
           progress,
           rawData: data,
-          dayData 
+          dayData
         });
-        
+
         if (dayNumber) {
           setState((prev) => {
             // Update or add day status
             const existingDayIndex = prev.daysCompleted.findIndex(d => d.dayNumber === dayNumber);
             let updatedDays = [...prev.daysCompleted];
-            
+
             if (existingDayIndex >= 0) {
               updatedDays[existingDayIndex] = { dayNumber, status: 'completed', activities };
             } else {
               updatedDays.push({ dayNumber, status: 'completed', activities });
             }
-            
+
             // Sort by day number
             updatedDays.sort((a, b) => a.dayNumber - b.dayNumber);
-            
+
             // Calculate total days if not set
             const totalDays = prev.totalDays || data.totalDays || message.totalDays || updatedDays.length;
-            
+
             // Update overall progress if provided
             const newProgress = progress > 0 ? progress : prev.overallProgress;
-            
+
             return {
               ...prev,
               daysCompleted: updatedDays,
@@ -124,7 +125,7 @@ export function AgentProgress() {
               message: dayMessage || `Day ${dayNumber} completed with ${activities} activities`,
             };
           });
-          
+
           // Enable partial view button after first day
           if (dayNumber === 1) {
             console.log('[AgentProgress] Enabling partial view button');
@@ -143,14 +144,14 @@ export function AgentProgress() {
         const toPhase = data.toPhase ?? message.toPhase;
         const progress = data.progress ?? message.progress;
         const phaseMessage = data.message ?? message.message;
-        
+
         console.log('[AgentProgress] Phase transition:', {
           from: fromPhase,
           to: toPhase,
           progress,
           message: phaseMessage
         });
-        
+
         setState((prev) => ({
           ...prev,
           overallProgress: typeof progress === 'number' ? progress : prev.overallProgress,
@@ -163,9 +164,9 @@ export function AgentProgress() {
       if (message.updateType === 'generation_complete' || message.type === 'generation_complete') {
         const data = (message as any).data || message;
         const completionMessage = data.message ?? message.message ?? 'Itinerary generation complete!';
-        
+
         console.log('[AgentProgress] Generation complete!');
-        
+
         setState((prev) => ({
           ...prev,
           overallProgress: 100,
@@ -173,7 +174,7 @@ export function AgentProgress() {
           currentPhase: 'Complete',
           message: completionMessage,
         }));
-        
+
         // Auto-redirect after 2 seconds when complete
         setTimeout(() => {
           window.location.href = `/trip/${itineraryId}`;
@@ -215,167 +216,168 @@ export function AgentProgress() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-blue-100 border-2 border-primary/20 flex items-center justify-center shadow-lg mb-3">
-            <Plane className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold">
-            <span className="text-gray-900">Easy</span>
-            <span className="text-primary">Trip</span>
-          </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col lg:flex-row relative overflow-hidden">
+      {/* Globe Background - Behind everything - Fullscreen and more transparent */}
+      <div className="fixed inset-0 z-0 opacity-15 flex items-center justify-center">
+        <div className="w-[150vw] h-[150vh]">
+          <InteractiveGlobe />
         </div>
+      </div>
 
-        {/* Main Progress Card - Glass Morphism */}
-        <div className="p-8 rounded-3xl bg-white/40 backdrop-blur-xl border border-white/60 shadow-2xl">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {state.isComplete ? 'Itinerary Complete!' : 'Generating Your Itinerary'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {state.message}
+
+      {/* Cards Container - Centered with equal widths */}
+      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 relative z-10">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Card - Agent Status & Progress */}
+          <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl h-[700px] flex flex-col">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {state.isComplete ? '🎉 Complete!' : 'Generating...'}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {state.message}
+              </p>
+            </div>
+
+            {/* Connection/Error Status */}
+            {!isConnected && !state.hasError && (
+              <div className="mb-4 p-3 rounded-xl bg-yellow-500/10 backdrop-blur-md border border-yellow-500/20">
+                <div className="flex items-center gap-2 text-yellow-700 text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Connecting...</span>
+                </div>
+              </div>
+            )}
+
+            {state.hasError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 backdrop-blur-md border border-red-500/20">
+                <div className="flex items-center gap-2 text-red-700 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{state.errorMessage}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Progress Circle */}
+            <div className="flex items-center justify-center mb-6 flex-1">
+              <div className="relative w-32 h-32">
+                <svg className="transform -rotate-90 w-32 h-32">
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    className="text-gray-200/50"
+                  />
+                  <motion.circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeLinecap="round"
+                    className="text-primary"
+                    initial={{ strokeDashoffset: 352 }}
+                    animate={{ strokeDashoffset: 352 - (352 * state.overallProgress) / 100 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    style={{ strokeDasharray: 352 }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-3xl font-bold text-gray-900">{Math.round(state.overallProgress)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Phase */}
+            <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                  {state.isComplete ? (
+                    <Check className="w-6 h-6 text-white" />
+                  ) : (
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-bold text-gray-900 truncate">{state.currentPhase}</p>
+                  <p className="text-sm text-gray-600 truncate mt-0.5">{state.message}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Info Text */}
+            <p className="text-xs text-center text-gray-600 mt-4">
+              {state.isComplete
+                ? 'Redirecting automatically...'
+                : 'Generation typically takes 45-60 seconds'
+              }
             </p>
           </div>
 
-          {/* Connection Status */}
-          {!isConnected && !state.hasError && (
-            <div className="mb-6 p-4 rounded-xl bg-yellow-50/80 backdrop-blur-sm border border-yellow-200/50">
-              <div className="flex items-center gap-2 text-yellow-800">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">Connecting to generation service...</span>
-              </div>
-            </div>
-          )}
+          {/* Right Card - Days Generated */}
+          <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl h-[700px] flex flex-col">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Days Generated</h3>
 
-          {/* Error State */}
-          {state.hasError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50/80 backdrop-blur-sm border border-red-200/50">
-              <div className="flex items-center gap-2 text-red-800">
-                <AlertCircle className="w-4 h-4" />
-                <span className="text-sm">{state.errorMessage}</span>
+            {state.daysCompleted.length === 0 ? (
+              <div className="text-center py-12 flex-1 flex flex-col items-center justify-center">
+                <Sparkles className="w-12 h-12 text-primary mx-auto mb-3 opacity-50" />
+                <p className="text-sm text-gray-600">Waiting for first day...</p>
               </div>
-            </div>
-          )}
-
-          {/* Overall Progress Bar */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-              <span className="font-semibold">Overall Progress</span>
-              <span className="font-semibold tabular-nums">{Math.round(state.overallProgress)}%</span>
-            </div>
-            
-            <div className="h-3 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm">
-              <motion.div
-                className="h-full bg-gradient-to-r from-primary to-blue-600 rounded-full relative overflow-hidden"
-                initial={{ width: 0 }}
-                animate={{ width: `${state.overallProgress}%` }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-              >
-                {/* Shimmer effect */}
-                <div 
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                  style={{
-                    animation: 'shimmer 2s infinite',
-                    backgroundSize: '200% 100%'
-                  }}
-                />
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Current Phase */}
-          <div className="mb-6 p-4 rounded-xl bg-primary/5 backdrop-blur-sm border border-primary/10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Loader2 className="w-5 h-5 text-primary animate-spin" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900">{state.currentPhase}</p>
-                <p className="text-xs text-muted-foreground">{state.message}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Days Progress */}
-          {state.daysCompleted.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Days Generated</h3>
-              <div className="space-y-2">
+            ) : (
+              <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                 {state.daysCompleted.map((day) => (
                   <motion.div
                     key={day.dayNumber}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center justify-between p-3 rounded-lg bg-green-50/80 backdrop-blur-sm border border-green-200/50"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-xl hover:bg-white/50 transition-all"
                   >
-                    <div className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-green-600" />
-                      <span className="text-sm font-medium text-gray-900">Day {day.dayNumber}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
+                          <Check className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-base font-bold text-gray-900">Day {day.dayNumber}</p>
+                          <p className="text-sm text-gray-600 mt-0.5">{day.activities} activities</p>
+                        </div>
+                      </div>
+                      <div className="px-4 py-1.5 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/40 shadow-sm">
+                        <span className="text-sm font-semibold text-green-700">Ready</span>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">{day.activities} activities</span>
                   </motion.div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Action Button */}
-          <div className="flex flex-col gap-3">
-            {canViewPartial && !state.isComplete && (
-              <Button
-                onClick={handleViewPartial}
-                className="w-full h-12 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-md"
-              >
-                View Partially Generated Itinerary
-              </Button>
-            )}
-            
-            {state.isComplete && (
-              <Button
-                onClick={() => window.location.href = `/trip/${itineraryId}`}
-                className="w-full h-12 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-md"
-              >
-                View Complete Itinerary
-              </Button>
-            )}
-            
-            {!canViewPartial && !state.isComplete && (
-              <div className="text-center text-sm text-muted-foreground">
-                Button will appear once first day is generated
-              </div>
-            )}
+            {/* Action Buttons */}
+            <div className="mt-6 space-y-3">
+              {canViewPartial && !state.isComplete && (
+                <Button
+                  onClick={handleViewPartial}
+                  className="w-full h-12 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white shadow-lg"
+                >
+                  View Partial Itinerary
+                </Button>
+              )}
+
+              {state.isComplete && (
+                <Button
+                  onClick={() => window.location.href = `/trip/${itineraryId}`}
+                  className="w-full h-12 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg"
+                >
+                  View Complete Itinerary
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Info Text */}
-        <p className="text-xs text-center text-muted-foreground mt-4">
-          {state.isComplete 
-            ? 'Redirecting automatically in 2 seconds...'
-            : 'Generation typically takes 45-60 seconds'
-          }
-        </p>
-
-        {/* Debug Panel - Remove in production */}
-        {debugMessages.length > 0 && (
-          <details className="mt-4 p-4 rounded-xl bg-gray-100/80 backdrop-blur-sm border border-gray-300/50">
-            <summary className="text-xs font-semibold text-gray-700 cursor-pointer">
-              Debug: WebSocket Messages ({debugMessages.length})
-            </summary>
-            <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
-              {debugMessages.map((msg, idx) => (
-                <div key={idx} className="text-xs font-mono bg-white p-2 rounded border border-gray-200">
-                  <div className="text-gray-500">{msg.time}</div>
-                  <pre className="text-gray-800 whitespace-pre-wrap break-all">
-                    {JSON.stringify(msg.data, null, 2)}
-                  </pre>
-                </div>
-              ))}
-            </div>
-          </details>
-        )}
       </div>
 
       {/* Add shimmer keyframes */}

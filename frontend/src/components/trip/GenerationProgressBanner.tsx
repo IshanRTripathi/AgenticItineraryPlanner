@@ -333,63 +333,77 @@ export function GenerationProgressBanner({
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          {/* Left: Icon + Message */}
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                {progress === 100 ? (
-                  <Check className="w-4 h-4 text-white" />
-                ) : (
-                  <Loader2 className="w-4 h-4 text-white animate-spin" />
+    <div className="sticky top-0 z-50 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        {/* Glass Morphism Card */}
+        <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Icon + Message */}
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="relative flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg">
+                  {progress === 100 ? (
+                    <Check className="w-5 h-5 text-white" />
+                  ) : (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  )}
+                </div>
+                {progress < 100 && (
+                  <div className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-ping" />
                 )}
               </div>
-              {progress < 100 && (
-                <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping" />
-              )}
-            </div>
-            
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white">
-                  {progress === 100 ? 'Itinerary Complete!' : getPhaseMessage()}
-                </span>
-                {completedDays > 0 && progress < 100 && (
-                  <span className="text-xs text-white/80">
-                    ({completedDays}/{totalDays} days ready)
+              
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">
+                    {progress === 100 ? 'Itinerary Complete!' : getPhaseMessage()}
                   </span>
-                )}
-              </div>
-              <div className="text-xs text-white/70 mt-0.5">
-                {progress === 100 
-                  ? 'All activities are now available'
-                  : 'Updates appear automatically as they\'re ready'
-                }
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Progress */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="hidden sm:block w-32">
-              <div className="h-2 bg-white/20 rounded-full overflow-hidden backdrop-blur">
-                <div 
-                  className="h-full bg-white rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                >
-                  <div className="h-full w-full bg-gradient-to-r from-white/0 via-white/40 to-white/0 animate-shimmer" 
-                       style={{ backgroundSize: '200% 100%' }} />
+                  {completedDays > 0 && progress < 100 && (
+                    <span className="text-xs text-gray-600 px-2 py-0.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/30">
+                      {completedDays}/{totalDays} days ready
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-gray-600 mt-0.5">
+                  {progress === 100 
+                    ? 'All activities are now available'
+                    : 'Updates appear automatically as they\'re ready'
+                  }
                 </div>
               </div>
             </div>
-            <span className="text-sm font-bold text-white tabular-nums">
-              {Math.round(progress)}%
-            </span>
+
+            {/* Right: Progress */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="hidden sm:block w-32">
+                <div className="h-2.5 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" 
+                         style={{ backgroundSize: '200% 100%' }} />
+                  </div>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-gray-900 tabular-nums min-w-[3ch]">
+                {Math.round(progress)}%
+              </span>
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Add shimmer animation */}
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
     </div>
   );
 }
