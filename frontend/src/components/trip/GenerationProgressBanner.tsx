@@ -333,63 +333,54 @@ export function GenerationProgressBanner({
   };
 
   return (
-    <div className="sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        {/* Glass Morphism Card */}
-        <div className="p-4 rounded-2xl bg-white/30 backdrop-blur-xl border border-white/40 shadow-2xl">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left: Icon + Message */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg">
-                  {progress === 100 ? (
-                    <Check className="w-5 h-5 text-white" />
-                  ) : (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  )}
-                </div>
-                {progress < 100 && (
-                  <div className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-ping" />
-                )}
-              </div>
-              
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {progress === 100 ? 'Itinerary Complete!' : getPhaseMessage()}
-                  </span>
-                  {completedDays > 0 && progress < 100 && (
-                    <span className="text-xs text-gray-600 px-2 py-0.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/30">
-                      {completedDays}/{totalDays} days ready
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-600 mt-0.5">
-                  {progress === 100 
-                    ? 'All activities are now available'
-                    : 'Updates appear automatically as they\'re ready'
-                  }
-                </div>
-              </div>
+    <div className="fixed top-4 right-4 z-50 max-w-md">
+      {/* Compact Glass Morphism Card */}
+      <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xl border border-white/40 shadow-2xl">
+        <div className="flex items-center gap-3">
+          {/* Icon */}
+          <div className="relative flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg">
+              {progress === 100 ? (
+                <Check className="w-4 h-4 text-white" />
+              ) : (
+                <Loader2 className="w-4 h-4 text-white animate-spin" />
+              )}
             </div>
-
-            {/* Right: Progress */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="hidden sm:block w-32">
-                <div className="h-2.5 bg-white/30 backdrop-blur-md rounded-full overflow-hidden border border-white/40">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-                    style={{ width: `${progress}%` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" 
-                         style={{ backgroundSize: '200% 100%' }} />
-                  </div>
-                </div>
-              </div>
-              <span className="text-sm font-bold text-gray-900 tabular-nums min-w-[3ch]">
+            {progress < 100 && (
+              <div className="absolute inset-0 rounded-lg border-2 border-primary/30 animate-ping" />
+            )}
+          </div>
+          
+          {/* Message & Progress */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <span className="text-xs font-semibold text-gray-900 truncate">
+                {progress === 100 ? 'Complete!' : getPhaseMessage()}
+              </span>
+              <span className="text-xs font-bold text-gray-900 tabular-nums">
                 {Math.round(progress)}%
               </span>
             </div>
+            
+            {/* Progress Bar */}
+            <div className="h-1.5 bg-gray-200/30 backdrop-blur-md rounded-full overflow-hidden border border-white/40">
+              <div 
+                className="h-full bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                style={{ width: `${progress}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" 
+                     style={{ backgroundSize: '200% 100%' }} />
+              </div>
+            </div>
+            
+            {/* Days Badge */}
+            {completedDays > 0 && progress < 100 && (
+              <div className="mt-1">
+                <span className="text-xs text-gray-700 px-2 py-0.5 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20 inline-block">
+                  {completedDays}/{totalDays} days ready
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>

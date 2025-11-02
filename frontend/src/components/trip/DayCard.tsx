@@ -86,6 +86,21 @@ const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | 
     return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${apiKey}`;
 };
 
+const formatTime = (timestamp?: string): string => {
+    if (!timestamp) return '';
+    try {
+        const date = new Date(timestamp);
+        // Format as "8:00 AM" or "2:30 PM"
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    } catch (e) {
+        return timestamp; // Return original if parsing fails
+    }
+};
+
 const getNodeColor = (type: string) => {
     switch (type) {
         case 'attraction':
@@ -181,11 +196,11 @@ export function DayCard({
     const showPlaceholder = isGenerating && !hasActivities;
 
     const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-        });
+        // Readable format: "Monday, Jan 15" or "Friday, Dec 3"
+        const dateObj = new Date(date);
+        const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+        const monthDay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `${weekday}, ${monthDay}`;
     };
 
     return (
@@ -528,7 +543,7 @@ export function DayCard({
                                                                                 {node.timing?.startTime && (
                                                                                     <div className="flex items-center gap-1 font-medium">
                                                                                         <Clock className="w-3.5 h-3.5" />
-                                                                                        <span>{node.timing.startTime}</span>
+                                                                                        <span>{formatTime(node.timing.startTime)}</span>
                                                                                         {node.timing.duration && (
                                                                                             <span className="text-gray-400">• {node.timing.duration}</span>
                                                                                         )}
@@ -687,7 +702,7 @@ export function DayCard({
                                                                 {node.timing?.startTime && (
                                                                     <div className="flex items-center gap-1 font-medium">
                                                                         <Clock className="w-3.5 h-3.5" />
-                                                                        <span>{node.timing.startTime}</span>
+                                                                        <span>{formatTime(node.timing.startTime)}</span>
                                                                         {node.timing.duration && (
                                                                             <span className="text-gray-400">• {node.timing.duration}</span>
                                                                         )}

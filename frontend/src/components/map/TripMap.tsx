@@ -147,11 +147,18 @@ export function TripMap({ itinerary }: TripMapProps) {
 
   // Safe access to days - memoized to prevent infinite loops
   // Handle nested structure: itinerary.itinerary.days or itinerary.days
+  const itineraryId = (itinerary as any)?.id || (itinerary as any)?.itineraryId;
   const days = useMemo(() => {
     const result = (itinerary as any)?.itinerary?.days || (itinerary as any)?.days || [];
     console.log('[TripMap] Days extracted:', result.length, 'days');
     return result;
   }, [itinerary]);
+  
+  // Create stable string representation of days to prevent unnecessary re-renders
+  const daysKey = useMemo(() => {
+    return days.map((d: any) => `${d.dayNumber}-${d.nodes?.length || 0}`).join('|');
+  }, [days]);
+  
   const destinationCity = useMemo(
     () => extractCityName(days[0]?.location || 'Unknown'),
     [days]
@@ -164,15 +171,24 @@ export function TripMap({ itinerary }: TripMapProps) {
   }, [days]);
 
   // Resolve coordinates for all nodes with parallel batch processing
+  // Only re-run when daysKey changes (not on every itinerary object change)
   useEffect(() => {
+    // Skip if no days or already resolved for this key
+    if (days.length === 0) {
+      setNodes([]);
+      setIsResolving(false);
+      return;
+    }
+    
     async function resolveCoordinates() {
       setIsResolving(true);
       const startTime = performance.now();
 
       console.log('[TripMap] ========== MAP COORDINATE RESOLUTION START ==========');
-      console.log('[TripMap] Itinerary ID:', (itinerary as any)?.id || itinerary?.itineraryId);
+      console.log('[TripMap] Itinerary ID:', itineraryId);
       console.log('[TripMap] Total days:', days.length);
       console.log('[TripMap] Destination city:', destinationCity);
+      console.log('[TripMap] Days key:', daysKey);
       console.log('[TripMap] Using PARALLEL batch processing');
 
       const allNodes: MapNode[] = [];
@@ -292,7 +308,8 @@ export function TripMap({ itinerary }: TripMapProps) {
     }
 
     resolveCoordinates();
-  }, [days, destinationCity]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daysKey, destinationCity, itineraryId]); // Use stable daysKey instead of days array
 
   // Filter nodes based on selected days
   const filteredNodes = useMemo(() => {
@@ -321,8 +338,17 @@ export function TripMap({ itinerary }: TripMapProps) {
   }, [filteredNodes, nodes]);
 
   // Initialize map with resolved coordinates
+  // Only re-run when necessary dependencies change
   useEffect(() => {
-    if (!api || !mapRef.current || nodes.length === 0 || isResolving) return;
+    if (!api || !mapRef.current || nodes.length === 0 || isResolving) {
+      console.log('[TripMap] Skipping map initialization:', {
+        hasApi: !!api,
+        hasMapRef: !!mapRef.current,
+        nodesCount: nodes.length,
+        isResolving
+      });
+      return;
+    }
 
     console.log('[TripMap] ========== MAP INITIALIZATION START ==========');
     console.log('[TripMap] Google Maps API loaded:', !!api);

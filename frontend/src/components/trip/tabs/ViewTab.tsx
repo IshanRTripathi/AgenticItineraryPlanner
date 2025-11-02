@@ -72,20 +72,43 @@ export function ViewTab({ itinerary }: ViewTabProps) {
   
   // Calculate statistics
   const activityCount = days.reduce((total: number, day: any) => {
-    // TripData uses 'components', not 'nodes'
-    return total + (day.components?.length || 0);
+    // Backend uses 'nodes', fallback to 'components' for backward compatibility
+    const nodes = day.nodes || day.components || [];
+    return total + nodes.length;
   }, 0);
   
   // Calculate total budget from all nodes across all days
   const totalBudget = days.reduce((total: number, day: any) => {
     const nodes = day.nodes || day.components || [];
     const dayTotal = nodes.reduce((daySum: number, node: any) => {
-      // Get cost from node.cost object
-      const cost = node.cost?.amountPerPerson || node.cost?.amount || 0;
-      return daySum + cost;
+      // Try multiple cost field locations
+      const cost = node.cost?.amountPerPerson 
+        || node.cost?.amount 
+        || node.estimatedCost?.amountPerPerson
+        || node.estimatedCost?.amount
+        || node.price
+        || 0;
+      
+      console.log('[ViewTab] Node cost:', {
+        title: node.title || node.name,
+        cost,
+        costObject: node.cost,
+        estimatedCost: node.estimatedCost,
+        price: node.price
+      });
+      
+      return daySum + (typeof cost === 'number' ? cost : 0);
     }, 0);
     return total + dayTotal;
   }, 0);
+  
+  console.log('[ViewTab] Budget calculation:', {
+    daysCount: days.length,
+    activityCount,
+    totalBudget,
+    firstDay: days[0],
+    firstDayNodes: days[0]?.nodes || days[0]?.components
+  });
   
   const bookingsCount = 0; // TODO: Get from bookings
 
@@ -379,7 +402,9 @@ export function ViewTab({ itinerary }: ViewTabProps) {
       </div>
 
       {/* Trip Map */}
-      <TripMap itinerary={itinerary} />
+      <div className="h-[calc(100vh-32rem)] min-h-[650px]">
+        <TripMap itinerary={itinerary} />
+      </div>
 
       {/* Quick Actions */}
       <Card>

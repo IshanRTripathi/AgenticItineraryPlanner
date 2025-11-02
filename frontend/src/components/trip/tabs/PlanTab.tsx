@@ -90,12 +90,10 @@ export function PlanTab({ itinerary }: PlanTabProps) {
     date: day.date,
     location: day.location || day.theme,
     // Use nodes directly from backend (already in correct format)
-    // Fallback to components for backward compatibility
+    // Fallback to components for backward compatibility - preserve ALL fields
     nodes: day.nodes || (day.components || []).map((component: any) => ({
-      ...component,
-      title: component.name || component.title,
-      id: component.id,
-      type: component.type
+      ...component,  // ✅ Spread ALL fields including location, timing, cost, etc.
+      title: component.name || component.title,  // Normalize title field
     }))
   }));
   
