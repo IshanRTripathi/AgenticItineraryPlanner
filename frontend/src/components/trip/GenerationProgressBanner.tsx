@@ -333,10 +333,10 @@ export function GenerationProgressBanner({
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-4">
         {/* Glass Morphism Card */}
-        <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl">
+        <div className="p-4 rounded-2xl bg-white/30 backdrop-blur-xl border border-white/40 shadow-2xl">
           <div className="flex items-center justify-between gap-4">
             {/* Left: Icon + Message */}
             <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -376,7 +376,7 @@ export function GenerationProgressBanner({
             {/* Right: Progress */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className="hidden sm:block w-32">
-                <div className="h-2.5 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm">
+                <div className="h-2.5 bg-white/30 backdrop-blur-md rounded-full overflow-hidden border border-white/40">
                   <div 
                     className="h-full bg-gradient-to-r from-primary to-blue-600 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
                     style={{ width: `${progress}%` }}
