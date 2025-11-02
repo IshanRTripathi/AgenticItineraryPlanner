@@ -70,15 +70,15 @@ export function TripWizard() {
 
             // Check if response has the expected structure
             if (response.success && response.data) {
-                const { executionId, itinerary } = response.data;
+                const { itinerary } = response.data;
                 const itineraryId = itinerary?.id;
 
-                if (executionId && itineraryId) {
-                    console.log('[TripWizard] Navigating to progress:', { executionId, itineraryId });
-                    // Navigate to progress page with executionId and itineraryId
-                    window.location.href = `/ai-progress?executionId=${executionId}&itineraryId=${itineraryId}`;
+                if (itineraryId) {
+                    console.log('[TripWizard] Navigating to progress:', { itineraryId });
+                    // Navigate to progress page with only itineraryId (executionId not needed)
+                    window.location.href = `/ai-progress?itineraryId=${itineraryId}`;
                 } else {
-                    console.error('Missing executionId or itineraryId in response:', response.data);
+                    console.error('Missing itineraryId in response:', response.data);
                     alert('Failed to create itinerary. Missing required data.');
                 }
             } else {

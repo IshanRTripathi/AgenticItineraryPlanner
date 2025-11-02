@@ -180,23 +180,14 @@ class WebSocketService {
             url: this.config.url
           });
           return new SockJS(this.config.url, null, {
-            transports: ['websocket', 'xhr-polling'],
-            timeout: 10000
+            transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+            timeout: 10000,
+            sessionId: () => `session_${itineraryId}_${Date.now()}`
           });
         },
         connectHeaders: {},
-        debug: (str) => {
-          // Only log important STOMP events to reduce noise
-          if (str.includes('Opening Web Socket') ||
-            str.includes('CONNECT') ||
-            str.includes('CONNECTED') ||
-            str.includes('ERROR') ||
-            str.includes('DISCONNECT')) {
-            logger.debug('STOMP event', {
-              component: 'WebSocketService',
-              action: 'stomp_debug'
-            }, { message: str });
-          }
+        debug: () => {
+          // Disable debug logging to reduce noise
         },
         reconnectDelay: 0, // Disable automatic reconnection - we'll handle it manually
         heartbeatIncoming: this.config.heartbeatInterval,
@@ -368,15 +359,19 @@ class WebSocketService {
   private handleMessage(message: IMessage): void {
     try {
       const data = JSON.parse(message.body);
+      
+      // Backend sends 'updateType', not 'type' - check both
+      const messageType = data.updateType || data.type || 'connection_status';
+      
       logger.debug('Message received', {
         component: 'WebSocketService',
         action: 'message_received',
-        messageType: data.type
+        messageType: messageType
       });
 
       const wsMessage: WebSocketMessage = {
-        type: data.type || 'connection_status',
-        data: data.data,
+        type: messageType as any,
+        data: data.data || data,
         agentId: data.agentId,
         progress: data.progress,
         timestamp: data.timestamp || new Date().toISOString()

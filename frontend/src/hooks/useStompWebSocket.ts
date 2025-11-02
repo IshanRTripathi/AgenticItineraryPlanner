@@ -17,7 +17,7 @@ interface StompOptions {
 }
 
 export function useStompWebSocket(
-  executionId: string | null,
+  itineraryId: string | null,
   options: StompOptions = {}
 ) {
   const [data, setData] = useState<any>(null);
@@ -36,7 +36,13 @@ export function useStompWebSocket(
   } = options;
 
   const connect = useCallback(() => {
-    if (!executionId) return;
+    if (!itineraryId) return;
+    
+    // Prevent duplicate connections
+    if (clientRef.current?.connected) {
+      console.log('[STOMP] Already connected, skipping');
+      return;
+    }
 
     const wsUrl = import.meta.env.VITE_WS_BASE_URL || 'http://localhost:8080/ws';
     
@@ -54,9 +60,10 @@ export function useStompWebSocket(
         setError(null);
         onConnect?.();
 
-        // Subscribe to agent progress topic
+        // Subscribe to itinerary updates topic
+        // CRITICAL: Backend publishes to /topic/itinerary/{itineraryId}
         subscriptionRef.current = client.subscribe(
-          `/topic/itinerary/${executionId}`,
+          `/topic/itinerary/${itineraryId}`,
           (message: IMessage) => {
             try {
               const parsedData = JSON.parse(message.body);
@@ -83,7 +90,7 @@ export function useStompWebSocket(
 
     clientRef.current = client;
     client.activate();
-  }, [executionId, onMessage, onError, onConnect, onDisconnect, reconnect, reconnectDelay]);
+  }, [itineraryId, reconnect, reconnectDelay]); // ✅ Removed callback dependencies
 
   const disconnect = useCallback(() => {
     if (subscriptionRef.current) {
@@ -108,11 +115,15 @@ export function useStompWebSocket(
   }, []);
 
   useEffect(() => {
+    if (!itineraryId) return;
+    
     connect();
+    
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itineraryId]); // ✅ Only reconnect when itineraryId changes
 
   return {
     data,

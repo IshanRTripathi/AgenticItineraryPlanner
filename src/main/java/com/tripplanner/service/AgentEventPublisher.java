@@ -193,6 +193,32 @@ public class AgentEventPublisher {
     }
     
     /**
+     * Publish agent completion event.
+     */
+    public void publishAgentComplete(String itineraryId, String executionId, 
+                                     String agentName, int itemsProcessed) {
+        try {
+            String message = String.format("%s completed: %d items processed", 
+                                         agentName, itemsProcessed);
+            
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "agent_complete", 
+                java.util.Map.of(
+                    "type", "agent_complete",
+                    "agentName", agentName,
+                    "itemsProcessed", itemsProcessed,
+                    "message", message
+                ));
+            
+            logger.info("Published agent completion event via WebSocket: itinerary={}, agent={}, items={}", 
+                       itineraryId, agentName, itemsProcessed);
+                       
+        } catch (Exception e) {
+            logger.error("Failed to publish agent completion event for itinerary: {}, agent: {}", 
+                        itineraryId, agentName, e);
+        }
+    }
+    
+    /**
      * Check if there are active connections for an itinerary.
      * Always returns true for WebSocket (connections are managed by WebSocket service).
      */

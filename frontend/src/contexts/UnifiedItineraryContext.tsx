@@ -58,17 +58,17 @@ interface UnifiedItineraryProviderProps {
 export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItineraryProviderProps) {
   const [state, dispatch] = useReducer(unifiedItineraryReducer, initialState);
 
-  // Enhanced dispatch with logging
+  // Enhanced dispatch with logging (STABLE - no state dependency)
   const loggedDispatch = useCallback((action: any) => {
     logDebug(`Dispatching action: ${action.type}`, {
       component: 'UnifiedItineraryProvider',
       action: 'dispatch',
       itineraryId,
       actionType: action.type
-    }, { action, currentState: state });
+    });
 
     dispatch(action);
-  }, [state, itineraryId]);
+  }, [itineraryId]); // REMOVED state dependency to make it stable
 
   // Create action creators
   const loadItinerary = useCallback(createLoadItinerary(loggedDispatch), [loggedDispatch]);
@@ -173,6 +173,19 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
 
     let isActive = true;
     let connectionTimeout: ReturnType<typeof setTimeout>;
+    let reloadTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    // Debounced reload function to prevent too many API calls
+    const scheduleItineraryReload = () => {
+      if (reloadTimeout) {
+        clearTimeout(reloadTimeout);
+      }
+      reloadTimeout = setTimeout(() => {
+        if (isActive) {
+          loadItinerary(itineraryId);
+        }
+      }, 2000); // Wait 2 seconds after last event before reloading
+    };
 
     // Delay connection to prevent immediate reconnection loops
     connectionTimeout = setTimeout(() => {
@@ -203,14 +216,18 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
       if (!isActive) return;
 
       console.log('[UnifiedItineraryProvider] WebSocket message received:', message);
-      logInfo(`WebSocket message received: ${message.type}`, {
+      
+      // Backend sends 'updateType', frontend expects 'type' - handle both
+      const messageType = message.type || message.updateType;
+      
+      logInfo(`WebSocket message received: ${messageType}`, {
         component: 'UnifiedItineraryProvider',
         action: 'websocket_message',
         itineraryId,
-        messageType: message.type
+        messageType: messageType
       }, message);
 
-      switch (message.type) {
+      switch (messageType) {
         case 'itinerary_updated':
           console.log('[UnifiedItineraryProvider] Processing itinerary update:', message.data);
           logInfo('Processing itinerary update from WebSocket', {
@@ -233,6 +250,42 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
             type: 'UPDATE_AGENT_PROGRESS',
             payload: { agentId: message.agentId!, progress: message.progress! }
           });
+          break;
+        case 'day_completed':
+          logInfo(`Day ${message.data?.dayNumber} completed`, {
+            component: 'UnifiedItineraryProvider',
+            action: 'day_completed',
+            itineraryId,
+            dayNumber: message.data?.dayNumber
+          });
+          // Schedule reload with debounce
+          scheduleItineraryReload();
+          break;
+        case 'phase_transition':
+          logInfo(`Phase transition: ${message.data?.fromPhase} → ${message.data?.toPhase}`, {
+            component: 'UnifiedItineraryProvider',
+            action: 'phase_transition',
+            itineraryId
+          });
+          // Update current phase in state
+          if (message.data?.toPhase) {
+            loggedDispatch({ 
+              type: 'SET_CURRENT_PHASE', 
+              payload: message.data.toPhase.toLowerCase() 
+            });
+          }
+          // Schedule reload with debounce
+          scheduleItineraryReload();
+          break;
+        case 'agent_complete':
+          logInfo(`Agent completed: ${message.data?.agentName} (${message.data?.itemsProcessed} items)`, {
+            component: 'UnifiedItineraryProvider',
+            action: 'agent_complete',
+            itineraryId,
+            agentName: message.data?.agentName
+          });
+          // Schedule reload with debounce
+          scheduleItineraryReload();
           break;
         case 'chat_response':
           logInfo('Chat response received via WebSocket', {
@@ -323,6 +376,9 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
     return () => {
       isActive = false;
       clearTimeout(connectionTimeout);
+      if (reloadTimeout) {
+        clearTimeout(reloadTimeout);
+      }
 
       logInfo('Cleaning up WebSocket connection', {
         component: 'UnifiedItineraryProvider',
@@ -334,7 +390,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
       webSocketService.offConnectionChange(handleConnectionChange);
       webSocketService.disconnect();
     };
-  }, [itineraryId]); // Remove loggedDispatch from dependencies to prevent reconnection loops
+  }, [itineraryId]); // REMOVED loadItinerary - it's captured in closure
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({

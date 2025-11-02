@@ -80,15 +80,17 @@ export function PremiumTripWizard() {
 
             console.log('[PremiumTripWizard] Create itinerary response:', response);
 
-            // Response is direct from backend: { itinerary, executionId, status, stages }
-            const { executionId, itinerary } = response;
+            // Response from backend: { itinerary, executionId, status, stages }
+            // CRITICAL: Only itineraryId is used for WebSocket - executionId is just for tracking
+            const { itinerary } = response;
             const itineraryId = itinerary?.id;
 
-            if (executionId && itineraryId) {
-                console.log('[PremiumTripWizard] Navigating to trip detail:', { executionId, itineraryId });
-                window.location.href = `/trip/${itineraryId}`;
+            if (itineraryId) {
+                console.log('[PremiumTripWizard] Navigating to planner progress:', { itineraryId });
+                // Only pass itineraryId - it's the only identifier needed for WebSocket
+                window.location.href = `/planner-progress?itineraryId=${itineraryId}`;
             } else {
-                console.error('Missing executionId or itineraryId in response:', response);
+                console.error('Missing itineraryId in response:', response);
                 alert('Failed to create itinerary. Missing required data.');
             }
         } catch (error) {

@@ -19,6 +19,7 @@ import { BookingsTab } from '@/components/trip/tabs/BookingsTab';
 import { ChatTab } from '@/components/trip/tabs/ChatTab';
 import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
 import { ErrorDisplay } from '@/components/error/ErrorDisplay';
+import { GenerationProgressBanner } from '@/components/trip/GenerationProgressBanner';
 import { UnifiedItineraryProvider, useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { Eye, Map, CreditCard, DollarSign, Package, FileText, MessageSquare } from 'lucide-react';
 
@@ -30,8 +31,20 @@ function TripDetailContent() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { state, loadItinerary } = useUnifiedItinerary();
   const [wasConnected, setWasConnected] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const { itinerary, loading, error, isConnected } = state;
+
+  // Track when itinerary is being refreshed (not initial load)
+  const prevItineraryRef = React.useRef(itinerary);
+  React.useEffect(() => {
+    if (loading && prevItineraryRef.current) {
+      setIsRefreshing(true);
+    } else if (!loading) {
+      setIsRefreshing(false);
+      prevItineraryRef.current = itinerary;
+    }
+  }, [loading, itinerary]);
 
   // Track if we were ever connected
   React.useEffect(() => {
@@ -137,55 +150,59 @@ function TripDetailContent() {
     setBookingModal({ ...bookingModal, isOpen: false });
   };
 
-  // Render active tab content
+  // Render active tab content with refresh indicator
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 'view':
-        return <ViewTab itinerary={itinerary} />;
-      case 'plan':
-        return <PlanTab itinerary={itinerary} />;
-      case 'chat':
-        return <ChatTab />;
-      case 'bookings':
-        return <BookingsTab itinerary={itinerary} />;
-      case 'budget':
-        return <BudgetTab tripId={id!} />;
-      case 'packing':
-        return <PackingTab />;
-      case 'docs':
-        return <DocsTab />;
-      default:
-        return <ViewTab itinerary={itinerary} />;
-    }
+    const content = (() => {
+      switch (activeTab) {
+        case 'view':
+          return <ViewTab itinerary={itinerary} key={itinerary?.updatedAt || 'view'} />;
+        case 'plan':
+          return <PlanTab itinerary={itinerary} key={itinerary?.updatedAt || 'plan'} />;
+        case 'chat':
+          return <ChatTab />;
+        case 'bookings':
+          return <BookingsTab itinerary={itinerary} key={itinerary?.updatedAt || 'bookings'} />;
+        case 'budget':
+          return <BudgetTab tripId={id!} />;
+        case 'packing':
+          return <PackingTab />;
+        case 'docs':
+          return <DocsTab />;
+        default:
+          return <ViewTab itinerary={itinerary} key={itinerary?.updatedAt || 'view'} />;
+      }
+    })();
+
+    return (
+      <div className="relative">
+        {isRefreshing && (
+          <div className="absolute top-0 left-0 right-0 z-10 bg-blue-50 border-b border-blue-200 px-4 py-2 flex items-center gap-2 animate-fade-in">
+            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-blue-700 font-medium">Updating itinerary...</span>
+          </div>
+        )}
+        <div className={isRefreshing ? 'opacity-75 transition-opacity' : ''}>
+          {content}
+        </div>
+      </div>
+    );
   };
+
+  // Calculate generation progress
+  const completedDays = days.filter((day: any) => day.nodes && day.nodes.length > 0).length;
+  const currentPhase = state.currentPhase || 'skeleton';
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Generation Progress Banner */}
+      {/* Premium Generation Progress Banner */}
       {isGenerating && (
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-primary/20">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">Creating Your Perfect Itinerary</p>
-                  <p className="text-xs text-muted-foreground">
-                    Our AI agents are working on your personalized travel plan. Updates will appear automatically.
-                  </p>
-                </div>
-              </div>
-              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  Live Updates
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <GenerationProgressBanner
+          itineraryStatus={itinerary.status}
+          completedDays={completedDays}
+          totalDays={days.length || 4}
+          currentPhase={currentPhase}
+          onComplete={() => loadItinerary(id!)}
+        />
       )}
 
       {/* Mobile: Horizontal Tabs */}

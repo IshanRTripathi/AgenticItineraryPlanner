@@ -95,6 +95,13 @@ public class TransportAgent extends BaseAgent {
             logger.info("=== TRANSPORT AGENT COMPLETE ===");
             logger.info("Populated {} transport segments", populatedTransport.size());
             
+            // Publish agent completion event via WebSocket
+            if (agentEventPublisher.hasActiveConnections(itineraryId)) {
+                String execId = "agent_" + System.currentTimeMillis();
+                agentEventPublisher.publishAgentComplete(itineraryId, execId, 
+                    "TransportAgent", populatedTransport.size());
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to populate transport for itinerary: {}", itineraryId, e);
             // Don't throw - graceful degradation (keep placeholders)

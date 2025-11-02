@@ -96,6 +96,13 @@ public class ActivityAgent extends BaseAgent {
             logger.info("=== ACTIVITY AGENT COMPLETE ===");
             logger.info("Populated {} attractions", populatedAttractions.size());
             
+            // Publish agent completion event via WebSocket
+            if (agentEventPublisher.hasActiveConnections(itineraryId)) {
+                String execId = "agent_" + System.currentTimeMillis();
+                agentEventPublisher.publishAgentComplete(itineraryId, execId, 
+                    "ActivityAgent", populatedAttractions.size());
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to populate attractions for itinerary: {}", itineraryId, e);
             // Don't throw - graceful degradation (keep placeholders)

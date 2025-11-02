@@ -95,6 +95,13 @@ public class MealAgent extends BaseAgent {
             logger.info("=== MEAL AGENT COMPLETE ===");
             logger.info("Populated {} meals", populatedMeals.size());
             
+            // Publish agent completion event via WebSocket
+            if (agentEventPublisher.hasActiveConnections(itineraryId)) {
+                String execId = "agent_" + System.currentTimeMillis();
+                agentEventPublisher.publishAgentComplete(itineraryId, execId, 
+                    "MealAgent", populatedMeals.size());
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to populate meals for itinerary: {}", itineraryId, e);
             // Don't throw - graceful degradation (keep placeholders)

@@ -6,6 +6,7 @@ import { UnifiedItineraryState, UnifiedItineraryAction } from './UnifiedItinerar
 export const initialState: UnifiedItineraryState = {
   // Core itinerary data
   itinerary: null,
+  currentPhase: null,
   loading: false,
   error: null,
   
@@ -62,6 +63,9 @@ export function unifiedItineraryReducer(
     
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
+    
+    case 'SET_CURRENT_PHASE':
+      return { ...state, currentPhase: action.payload };
     
     case 'SET_ITINERARY':
       return {
