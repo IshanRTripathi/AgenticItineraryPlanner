@@ -91,8 +91,10 @@ export function AgentProgress() {
       setDayActivities(activityMap);
 
       console.log('[AgentProgress] Itinerary data loaded:', {
+        status: data.status,
         days: data.days?.length,
-        activities: activityMap
+        activities: activityMap,
+        note: 'If status is "generating", banner will show on trip detail page'
       });
     } catch (error) {
       console.error('[AgentProgress] Failed to load itinerary:', error);
@@ -153,12 +155,14 @@ export function AgentProgress() {
           }
 
           // Redirect to trip page after first day completes
+          // Add ?generating=true to ensure banner shows even if status changes quickly
           if (dayNum === 1 && !onCompleteCalledRef.current) {
             onCompleteCalledRef.current = true;
-            console.log('[AgentProgress] First day complete, redirecting to trip page');
+            console.log('[AgentProgress] First day complete, redirecting to trip page with generating flag');
             setTimeout(() => {
-              window.location.href = `/trip/${itinId}`;
-            }, 2000); // 2 second delay to show the completion message
+              // Add generating=true parameter to force banner to show
+              window.location.href = `/trip/${itinId}?generating=true`;
+            }, 2000);
           }
         }
       }

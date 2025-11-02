@@ -303,11 +303,10 @@ export class SmartCoordinateResolver {
       console.warn('[CoordinateResolver] City geocoding failed:', cityName, error);
     }
 
-    // Ultimate fallback: world center (not India-specific)
-    console.warn('[CoordinateResolver] Using fallback coordinates for:', cityName);
-    const fallback = { lat: 0, lng: 0 }; // World center - neutral fallback
-    this.cityCache.set(normalized, fallback);
-    return fallback;
+    // Ultimate fallback: return null to indicate failure
+    // This allows the map to skip nodes that can't be resolved
+    console.warn('[CoordinateResolver] Failed to resolve coordinates for:', cityName);
+    return null;
   }
 
   /**

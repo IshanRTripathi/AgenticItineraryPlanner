@@ -120,17 +120,56 @@ function TripDetailContent() {
     );
   }
 
-  // Check if itinerary is still generating
-  const isGenerating = itinerary.status === 'generating' || itinerary.status === 'planning';
+  // Extract data from real itinerary with safe access (must be before isGenerating check)
+  const days = (itinerary as any)?.days || [];
+  
+  // Get start and end dates from itinerary metadata (more reliable than days array during generation)
+  const startDate = (itinerary as any)?.startDate || days[0]?.date || '';
+  const endDate = (itinerary as any)?.endDate || days[days.length - 1]?.date || '';
+  
+  // Calculate expected total days from date range (more accurate during generation)
+  const calculateExpectedDays = (): number => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? diffDays : days.length || 4;
+    }
+    return days.length || 4;
+  };
+  
+  const expectedTotalDays = calculateExpectedDays();
+  
+  /**
+   * WORKAROUND: Backend sometimes marks itinerary as 'completed' too early
+   * Detect if generation is still in progress by checking:
+   * 1. Status is 'generating' or 'planning' (explicit)
+   * 2. OR: Days count < expected days (implicit - still generating)
+   * 3. OR: Some days have no activities yet (implicit - still populating)
+   */
+  const hasIncompleteDays = days.length < expectedTotalDays || 
+                            days.some((day: any) => !day.nodes || day.nodes.length === 0);
+  
+  const isGenerating = 
+    itinerary.status === 'generating' || 
+    itinerary.status === 'planning' ||
+    (hasIncompleteDays && days.length > 0 && days.length < expectedTotalDays);
+  
+  // Debug logging
+  console.log('[TripDetailPage] Itinerary status:', {
+    id: itinerary.id,
+    status: itinerary.status,
+    isGenerating,
+    daysCount: days.length,
+    expectedTotalDays,
+    startDate,
+    endDate
+  });
   
   // If generating, we'll show the UI with a banner but still render the content
   // This allows for optimistic updates as data comes in via WebSocket
-
-  // Extract data from real itinerary with safe access
-  const days = (itinerary as any)?.days || [];
   const destination = days[0]?.location || (itinerary as any)?.summary || 'Unknown Destination';
-  const startDate = days[0]?.date || '';
-  const endDate = days[days.length - 1]?.date || '';
   const travelers = 2; // TODO: Get from itinerary metadata when available
 
   const formatDateRange = (start: string, end: string) => {
@@ -192,17 +231,63 @@ function TripDetailContent() {
   const completedDays = days.filter((day: any) => day.nodes && day.nodes.length > 0).length;
   const currentPhase = state.currentPhase || 'skeleton';
 
+  /**
+   * BANNER VISIBILITY DECISION
+   * 
+   * The banner shows when:
+   * 1. itinerary.status === 'generating' OR 'planning' (from API)
+   * 2. OR ?generating=true in URL (from redirect during generation)
+   * 3. OR ?testProgress=true in URL (for testing)
+   * 4. OR days.length < expectedTotalDays (implicit detection)
+   * 
+   * Example URLs:
+   * - Normal: /trip/it_xxx (shows banner only if generating)
+   * - From redirect: /trip/it_xxx?generating=true (shows banner)
+   * - Test mode: /trip/it_xxx?testProgress=true (always shows banner)
+   */
+  
+  // Check URL parameters
+  const generatingParam = searchParams.get('generating') === 'true';
+  const testProgressMode = searchParams.get('testProgress') === 'true';
+
+  // Debug: Log banner visibility decision
+  const shouldShowBanner = isGenerating || generatingParam || testProgressMode;
+  console.log('[TripDetailPage] Banner visibility decision:', {
+    shouldShowBanner,
+    isGenerating,
+    generatingParam,
+    testProgressMode,
+    itineraryStatus: itinerary.status,
+    completedDays,
+    expectedTotalDays,
+    hasIncompleteDays,
+    currentPhase,
+    explanation: shouldShowBanner 
+      ? (testProgressMode ? 'Showing in TEST MODE' : generatingParam ? 'Showing - redirected during generation' : 'Showing - generation in progress')
+      : 'Hidden - generation not active (add ?testProgress=true to test)'
+  });
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      {/* Premium Generation Progress Banner */}
-      {isGenerating && (
+      {/* Premium Generation Progress Banner with Real-time Updates */}
+      {shouldShowBanner ? (
         <GenerationProgressBanner
-          itineraryStatus={itinerary.status}
+          itineraryId={id!}
+          itineraryStatus={testProgressMode || generatingParam ? 'generating' : itinerary.status}
           completedDays={completedDays}
-          totalDays={days.length || 4}
+          totalDays={expectedTotalDays}
           currentPhase={currentPhase}
-          onComplete={() => loadItinerary(id!)}
+          onComplete={() => {
+            // Remove generating parameter when complete
+            searchParams.delete('generating');
+            setSearchParams(searchParams);
+            loadItinerary(id!);
+          }}
         />
+      ) : (
+        <div style={{ display: 'none' }}>
+          {/* Banner hidden: status={itinerary.status}, isGenerating={String(isGenerating)} */}
+        </div>
       )}
 
       {/* Mobile: Horizontal Tabs */}

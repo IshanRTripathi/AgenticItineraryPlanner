@@ -356,6 +356,11 @@ export const geocodingUtils = {
    * Get coordinates for a component, geocoding if necessary
    */
   async getCoordinatesForComponent(component: any): Promise<Coordinates | null> {
+    // Skip transport/transit nodes entirely
+    if (component?.type === 'transport' || component?.type === 'transit') {
+      return null;
+    }
+    
     // First try to get existing coordinates
     const existingCoords = this.extractCoordinates(component);
     if (existingCoords) {

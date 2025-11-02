@@ -30,6 +30,14 @@ public class GooglePlacesService {
     private static final Logger logger = LoggerFactory.getLogger(GooglePlacesService.class);
     private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place";
     
+    // Place Details API fields to request
+    private static final String PLACE_DETAILS_FIELDS = "photos,reviews,opening_hours,price_level,rating,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number";
+    
+    // Retry configuration
+    private static final int MAX_RETRIES = 5;
+    private static final int INITIAL_RETRY_DELAY_MS = 1000;
+    private static final int MAX_RETRY_DELAY_MS = 8000;
+    
     // Rate limiting tracking
     private final AtomicInteger dailyRequestCount = new AtomicInteger(0);
     private final AtomicLong lastResetTime = new AtomicLong(System.currentTimeMillis());
@@ -52,10 +60,12 @@ public class GooglePlacesService {
     @Value("${google.places.rate.limit.enabled:true}")
     private boolean rateLimitEnabled;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     public GooglePlacesService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+        this.objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
     }
     
     /**
@@ -77,11 +87,14 @@ public class GooglePlacesService {
         checkCircuitBreaker();
         
         try {
-            // Build URL manually to avoid encoding issues
-            String encodedPlaceId = java.net.URLEncoder.encode(placeId, "UTF-8");
-            String encodedFields = java.net.URLEncoder.encode("photos,reviews,opening_hours,price_level,rating,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number", "UTF-8");
-            String encodedKey = java.net.URLEncoder.encode(apiKey, "UTF-8");
-            String url = BASE_URL + "/details/json?place_id=" + encodedPlaceId + "&fields=" + encodedFields + "&key=" + encodedKey;
+            // Build URL using UriComponentsBuilder to handle encoding properly
+            // This avoids double-encoding issues when RestTemplate makes the request
+            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/details/json")
+                    .queryParam("place_id", placeId)
+                    .queryParam("fields", PLACE_DETAILS_FIELDS)
+                    .queryParam("key", apiKey)
+                    .build(false) // Don't encode - let RestTemplate handle it
+                    .toUriString();
             
             // Make GET request with retry logic
             PlaceDetailsResponse response = makeRequestWithRetry(url, PlaceDetailsResponse.class);
@@ -167,90 +180,75 @@ public class GooglePlacesService {
      * Make HTTP request with exponential backoff retry mechanism.
      */
     private <T> T makeRequestWithRetry(String url, Class<T> responseType) {
-        int maxRetries = 5;
-        int retryDelay = 1000; // Start with 1 second
+        int retryDelay = INITIAL_RETRY_DELAY_MS;
         
-        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                // First get as String to see raw response
                 ResponseEntity<String> rawResponse = restTemplate.getForEntity(url, String.class);
                 
                 if (rawResponse.getStatusCode().is2xxSuccessful()) {
                     String rawBody = rawResponse.getBody();
-                    logger.debug("Raw API response (first 500 chars): {}", 
-                        rawBody != null && rawBody.length() > 500 ? rawBody.substring(0, 500) + "..." : rawBody);
                     
-                    // Now parse it properly
+                    // Parse response
                     try {
-                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                        T parsedResponse = mapper.readValue(rawBody, responseType);
-                        return parsedResponse;
+                        return objectMapper.readValue(rawBody, responseType);
                     } catch (Exception parseEx) {
-                        logger.error("Failed to parse response: {}", parseEx.getMessage());
-                        logger.error("Raw response body: {}", rawBody);
-                        throw new RuntimeException("Failed to parse API response", parseEx);
+                        logger.error("Failed to parse Google Places API response: {}", parseEx.getMessage());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Raw response body: {}", rawBody);
+                        }
+                        throw new RuntimeException("Failed to parse API response: " + parseEx.getMessage(), parseEx);
                     }
                 } else {
-                    throw new RuntimeException("HTTP " + rawResponse.getStatusCode() + " response from Google Places API");
+                    throw new RuntimeException("HTTP " + rawResponse.getStatusCode() + " from Google Places API");
                 }
                 
             } catch (HttpClientErrorException e) {
-                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                    logger.warn("Rate limit hit on attempt {} of {}, retrying in {}ms", attempt, maxRetries, retryDelay);
-                    
-                    if (attempt == maxRetries) {
-                        throw new RuntimeException("Rate limit exceeded after " + maxRetries + " attempts", e);
-                    }
-                    
-                    // Wait before retry
-                    try {
-                        Thread.sleep(retryDelay);
-                        retryDelay = Math.min(retryDelay * 2, 8000); // Exponential backoff, max 8 seconds
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("Request interrupted", ie);
-                    }
+                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS && attempt < MAX_RETRIES) {
+                    logger.warn("Rate limit hit, retrying in {}ms (attempt {}/{})", retryDelay, attempt, MAX_RETRIES);
+                    sleepWithInterruptHandling(retryDelay);
+                    retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY_MS);
+                } else if (attempt == MAX_RETRIES) {
+                    throw new RuntimeException("Google Places API failed after " + MAX_RETRIES + " attempts: " + e.getStatusCode(), e);
                 } else {
-                    // Non-retryable client error
-                    throw new RuntimeException("Google Places API client error: " + e.getStatusCode(), e);
+                    throw new RuntimeException("Google Places API error: " + e.getStatusCode(), e);
                 }
                 
             } catch (HttpServerErrorException e) {
-                logger.warn("Server error on attempt {} of {}, retrying in {}ms", attempt, maxRetries, retryDelay);
-                
-                if (attempt == maxRetries) {
-                    throw new RuntimeException("Server error after " + maxRetries + " attempts", e);
+                if (attempt < MAX_RETRIES) {
+                    logger.warn("Server error, retrying in {}ms (attempt {}/{})", retryDelay, attempt, MAX_RETRIES);
+                    sleepWithInterruptHandling(retryDelay);
+                    retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY_MS);
+                } else {
+                    throw new RuntimeException("Google Places API server error after " + MAX_RETRIES + " attempts", e);
                 }
                 
-                // Wait before retry
-                try {
-                    Thread.sleep(retryDelay);
-                    retryDelay = Math.min(retryDelay * 2, 8000); // Exponential backoff, max 8 seconds
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Request interrupted", ie);
-                }
-                
+            } catch (RuntimeException e) {
+                throw e; // Re-throw runtime exceptions
             } catch (Exception e) {
-                if (attempt == maxRetries) {
-                    throw new RuntimeException("Request failed after " + maxRetries + " attempts", e);
-                }
-                
-                logger.warn("Request failed on attempt {} of {}: {}, retrying in {}ms", 
-                           attempt, maxRetries, e.getMessage(), retryDelay);
-                
-                // Wait before retry
-                try {
-                    Thread.sleep(retryDelay);
-                    retryDelay = Math.min(retryDelay * 2, 8000); // Exponential backoff, max 8 seconds
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Request interrupted", ie);
+                if (attempt < MAX_RETRIES) {
+                    logger.warn("Request failed, retrying in {}ms (attempt {}/{}): {}", retryDelay, attempt, MAX_RETRIES, e.getMessage());
+                    sleepWithInterruptHandling(retryDelay);
+                    retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY_MS);
+                } else {
+                    throw new RuntimeException("Request failed after " + MAX_RETRIES + " attempts: " + e.getMessage(), e);
                 }
             }
         }
         
         throw new RuntimeException("Unexpected error in retry logic");
+    }
+    
+    /**
+     * Sleep with proper interrupt handling.
+     */
+    private void sleepWithInterruptHandling(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Request interrupted during retry", ie);
+        }
     }
     
     /**
@@ -448,26 +446,16 @@ public class GooglePlacesService {
      */
     @Cacheable(value = "placeSearch", key = "#query + '_' + #location")
     public PlaceSearchResult searchPlace(String query, String location) {
-        logger.info("========== GOOGLE PLACES API SEARCH ==========");
-        logger.info("Query: {}", query);
-        logger.info("Location: {}", location);
-        logger.info("API Key configured: {}", apiKey != null && !apiKey.isEmpty());
-        logger.info("API Key length: {}", apiKey != null ? apiKey.length() : 0);
+        logger.debug("Searching place: query='{}', location='{}'", query, location);
         
         if (query == null || query.trim().isEmpty()) {
             logger.warn("Empty query provided to searchPlace");
             return null;
         }
         
-        // Check rate limits
-        logger.debug("Checking rate limits...");
+        // Check rate limits and circuit breaker
         checkRateLimit();
-        logger.debug("Rate limit check passed");
-        
-        // Check circuit breaker
-        logger.debug("Checking circuit breaker...");
         checkCircuitBreaker();
-        logger.debug("Circuit breaker check passed");
         
         try {
             // Build search query
@@ -476,27 +464,22 @@ public class GooglePlacesService {
                 searchQuery = query + " " + location;
             }
             
-            // Build URL manually to avoid encoding issues
-            String encodedQuery = java.net.URLEncoder.encode(searchQuery, "UTF-8");
-            String encodedKey = java.net.URLEncoder.encode(apiKey, "UTF-8");
-            String url = BASE_URL + "/textsearch/json?query=" + encodedQuery + "&key=" + encodedKey;
+            // Build URL using UriComponentsBuilder to handle encoding properly
+            // This avoids double-encoding issues when RestTemplate makes the request
+            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
+                    .queryParam("query", searchQuery)
+                    .queryParam("key", apiKey)
+                    .build(false) // Don't encode - let RestTemplate handle it
+                    .toUriString();
             
-            logger.info("Making request to Google Places API");
-            logger.info("URL: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
-            logger.info("Search query: {}", searchQuery);
+            logger.debug("Requesting Google Places API: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
             
             // Make GET request with retry logic
             PlaceSearchResponse response = makeRequestWithRetry(url, PlaceSearchResponse.class);
             
-            logger.info("Received response from Google Places API");
-            logger.info("Response object: {}", response != null ? "not null" : "NULL");
-            logger.info("Response status: {}", response != null ? response.getStatus() : "null");
-            logger.info("Results: {}", response != null ? response.getResults() : "null");
-            logger.info("Results count: {}", response != null && response.getResults() != null ? response.getResults().size() : 0);
-            
-            // Debug: Log raw response if parsing seems wrong
-            if (response != null && response.getStatus() != null && !response.getStatus().equals("OK") && !response.getStatus().equals("ZERO_RESULTS")) {
-                logger.warn("Unexpected status from Google Places API: {}", response.getStatus());
+            if (response != null && response.getStatus() != null && 
+                !response.getStatus().equals("OK") && !response.getStatus().equals("ZERO_RESULTS")) {
+                logger.warn("Unexpected Google Places API status: {}", response.getStatus());
             }
             
             // Increment request count
@@ -507,22 +490,22 @@ public class GooglePlacesService {
                 response.getResults() != null && !response.getResults().isEmpty()) {
                 
                 PlaceSearchResult firstResult = response.getResults().get(0);
-                logger.info("✓ Successfully found place: {}", firstResult.getName());
-                logger.info("  Coordinates: ({}, {})", 
+                logger.info("Found place: {} at ({}, {}) [placeId: {}]", 
+                    firstResult.getName(),
                     firstResult.getGeometry().getLocation().getLatitude(),
-                    firstResult.getGeometry().getLocation().getLongitude());
-                logger.info("  Place ID: {}", firstResult.getPlaceId());
+                    firstResult.getGeometry().getLocation().getLongitude(),
+                    firstResult.getPlaceId());
                 recordSuccess();
                 return firstResult;
                 
             } else if (response != null && "ZERO_RESULTS".equals(response.getStatus())) {
-                logger.info("No results found for query: {}", searchQuery);
+                logger.debug("No results found for query: {}", searchQuery);
                 return null;
                 
             } else {
-                logger.error("✗ Google Places API error");
-                logger.error("  Status: {}", response != null ? response.getStatus() : "null");
-                logger.error("  Error message: {}", response != null ? response.getErrorMessage() : "null");
+                String status = response != null ? response.getStatus() : "null";
+                String errorMsg = response != null ? response.getErrorMessage() : "null";
+                logger.error("Google Places API error - Status: {}, Message: {}", status, errorMsg);
                 recordFailure();
                 return null;
             }

@@ -126,7 +126,10 @@ export function TripMap({ itinerary }: TripMapProps) {
     city: 0,
     fallback: 0,
     filtered: 0, // Generic activities filtered out
+    failed: 0, // Failed to resolve
   });
+
+  const [failedNodes, setFailedNodes] = useState<Array<{ title: string; day: number }>>([]);
 
   // Day filtering state
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
@@ -169,7 +172,8 @@ export function TripMap({ itinerary }: TripMapProps) {
       console.log('[TripMap] Using PARALLEL batch processing');
 
       const allNodes: MapNode[] = [];
-      const stats = { total: 0, exact: 0, approximate: 0, city: 0, fallback: 0, filtered: 0 };
+      const stats = { total: 0, exact: 0, approximate: 0, city: 0, fallback: 0, filtered: 0, failed: 0 };
+      const failed: Array<{ title: string; day: number }> = [];
 
       // Collect all nodes to resolve
       const nodesToResolve: Array<{
@@ -181,6 +185,11 @@ export function TripMap({ itinerary }: TripMapProps) {
       for (const day of days) {
         const nodes = day.nodes || day.components || [];
         for (const node of nodes) {
+          // Skip transport/transit nodes entirely from map
+          if (node.type === 'transport' || node.type === 'transit') {
+            continue;
+          }
+
           stats.total++;
           nodesToResolve.push({
             node,
@@ -214,6 +223,15 @@ export function TripMap({ itinerary }: TripMapProps) {
         // Process results
         batch.forEach(({ node, day, nodeTitle }, index) => {
           const result = results[index];
+
+          // Skip if resolution failed (coordinates are 0,0 or invalid)
+          if (!result || !result.coordinates ||
+            (Math.abs(result.coordinates.lat) < 0.0001 && Math.abs(result.coordinates.lng) < 0.0001)) {
+            console.log(`[TripMap]   ❌ Failed to resolve: ${nodeTitle}`);
+            stats.failed++;
+            failed.push({ title: nodeTitle, day });
+            return; // Skip this node from map
+          }
 
           // Filter out generic activities with city center coordinates
           if (result.confidence === 'city' && isGenericActivity(nodeTitle)) {
@@ -252,6 +270,7 @@ export function TripMap({ itinerary }: TripMapProps) {
 
       setNodes(allNodes);
       setResolutionStats(stats);
+      setFailedNodes(failed);
       setIsResolving(false);
 
       console.log('[TripMap] ========== COORDINATE RESOLUTION COMPLETE ==========');
@@ -684,29 +703,55 @@ export function TripMap({ itinerary }: TripMapProps) {
 
           {/* Resolution statistics */}
           {resolutionStats.total > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm" />
-                <span>{resolutionStats.exact} exact</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
-                <span>{resolutionStats.approximate} approximate</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
-                <span>{resolutionStats.city} city center</span>
-              </div>
-              {resolutionStats.fallback > 0 && (
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
-                  <AlertCircle className="w-3 h-3 text-gray-500" />
-                  <span>{resolutionStats.fallback} fallback</span>
+                  <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm" />
+                  <span>{resolutionStats.exact} exact</span>
                 </div>
-              )}
-              {resolutionStats.filtered > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-gray-400">•</span>
-                  <span>{resolutionStats.filtered} generic filtered</span>
+                  <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
+                  <span>{resolutionStats.approximate} approximate</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
+                  <span>{resolutionStats.city} city center</span>
+                </div>
+                {resolutionStats.fallback > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle className="w-3 h-3 text-gray-500" />
+                    <span>{resolutionStats.fallback} fallback</span>
+                  </div>
+                )}
+                {resolutionStats.filtered > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-gray-400">•</span>
+                    <span>{resolutionStats.filtered} generic filtered</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Failed nodes section */}
+              {failedNodes.length > 0 && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-amber-900 mb-1">
+                        Locations not shown on map ({failedNodes.length})
+                      </p>
+                      <div className="space-y-1">
+                        {failedNodes.map((node, idx) => (
+                          <div key={idx} className="text-xs text-amber-700">
+                            <span className="font-medium">Day {node.day}:</span> {node.title}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-amber-600 mt-2">
+                        These locations couldn't be resolved to map coordinates.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

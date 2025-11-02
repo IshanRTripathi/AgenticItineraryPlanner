@@ -17,6 +17,16 @@ import java.util.*;
 public class EnrichmentAgent extends BaseAgent {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentAgent.class);
+    
+    // Node types to exclude from Google Places enrichment
+    private static final Set<String> EXCLUDED_NODE_TYPES = Set.of("accommodation", "hotel", "transport", "transit");
+    
+    // Coordinate validation constants
+    private static final double COORDINATE_ZERO_THRESHOLD = 0.0001;
+    private static final double MIN_LATITUDE = -90.0;
+    private static final double MAX_LATITUDE = 90.0;
+    private static final double MIN_LONGITUDE = -180.0;
+    private static final double MAX_LONGITUDE = 180.0;
 
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
@@ -573,27 +583,70 @@ public class EnrichmentAgent extends BaseAgent {
     
     /**
      * Check if a node needs place search (missing coordinates or placeId).
+     * Only searches if coordinates are null, 0,0, or invalid.
      */
     private boolean needsPlaceSearch(NormalizedNode node) {
-        if (node == null) {
+        if (node == null || isExcludedNodeType(node.getType())) {
             return false;
         }
         
-        // Skip accommodation and transport nodes
-        if ("accommodation".equals(node.getType()) || "transport".equals(node.getType())) {
-            return false;
+        boolean hasValidCoordinates = hasValidCoordinates(node);
+        boolean hasPlaceId = hasPlaceId(node);
+        
+        // Only search if coordinates are missing/invalid OR placeId is missing
+        return !hasValidCoordinates || !hasPlaceId;
+    }
+    
+    /**
+     * Check if node type should be excluded from enrichment.
+     */
+    private boolean isExcludedNodeType(String nodeType) {
+        return nodeType != null && EXCLUDED_NODE_TYPES.contains(nodeType);
+    }
+    
+    /**
+     * Check if node has valid coordinates.
+     */
+    private boolean hasValidCoordinates(NormalizedNode node) {
+        return node.getLocation() != null && 
+               node.getLocation().getCoordinates() != null &&
+               node.getLocation().getCoordinates().getLat() != null &&
+               node.getLocation().getCoordinates().getLng() != null &&
+               !isInvalidCoordinate(node.getLocation().getCoordinates());
+    }
+    
+    /**
+     * Check if node has a valid place ID.
+     */
+    private boolean hasPlaceId(NormalizedNode node) {
+        return node.getLocation() != null && 
+               node.getLocation().getPlaceId() != null && 
+               !node.getLocation().getPlaceId().trim().isEmpty();
+    }
+    
+    /**
+     * Check if coordinates are invalid (0,0, out of range, or NaN).
+     */
+    private boolean isInvalidCoordinate(Coordinates coords) {
+        if (coords == null || coords.getLat() == null || coords.getLng() == null) {
+            return true;
         }
         
-        // Check if node has coordinates
-        boolean hasCoordinates = node.getLocation() != null && 
-                                node.getLocation().getCoordinates() != null &&
-                                node.getLocation().getCoordinates().getLat() != null &&
-                                node.getLocation().getCoordinates().getLng() != null;
+        double lat = coords.getLat();
+        double lng = coords.getLng();
         
-        // Check if node has placeId
-        boolean hasPlaceId = node.getLocation() != null && node.getLocation().getPlaceId() != null;
+        // Check for NaN
+        if (Double.isNaN(lat) || Double.isNaN(lng)) {
+            return true;
+        }
         
-        return !hasCoordinates || !hasPlaceId;
+        // Check for (0,0) - center of earth
+        if (Math.abs(lat) < COORDINATE_ZERO_THRESHOLD && Math.abs(lng) < COORDINATE_ZERO_THRESHOLD) {
+            return true;
+        }
+        
+        // Check for out of range
+        return lat < MIN_LATITUDE || lat > MAX_LATITUDE || lng < MIN_LONGITUDE || lng > MAX_LONGITUDE;
     }
     
     /**
@@ -673,8 +726,8 @@ public class EnrichmentAgent extends BaseAgent {
      * Check if a node needs ENRICHMENT based on missing data.
      */
     private boolean needsEnrichment(NormalizedNode node) {
-        if (node == null || node.getLocation() == null || node.getLocation().getPlaceId() == null) {
-            return false; // Can't enrich without place ID
+        if (node == null || !hasPlaceId(node) || isExcludedNodeType(node.getType())) {
+            return false;
         }
 
         // Check if agentData.photos is empty or outdated
