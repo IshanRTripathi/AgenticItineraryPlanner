@@ -167,53 +167,6 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={isRefetching}
-                  onClick={async () => {
-                    if (!itineraryId) return;
-                    setIsRefetching(true);
-                    try {
-                      console.log('[PlanTab] 🔄 Triggering enrichment for itinerary:', itineraryId);
-                      
-                      // Import authService dynamically
-                      const { authService } = await import('@/services/authService');
-                      const token = await authService.getIdToken();
-                      
-                      const response = await fetch(`/api/v1/itineraries/${itineraryId}/enrich`, {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}`
-                        }
-                      });
-                      
-                      if (response.ok) {
-                        console.log('[PlanTab] ✅ Enrichment triggered successfully');
-                        // Wait for enrichment to complete then reload
-                        setTimeout(() => handleRefetchNeeded(), 3000);
-                      } else {
-                        console.error('[PlanTab] ❌ Enrichment failed:', response.status);
-                        setIsRefetching(false);
-                      }
-                    } catch (error) {
-                      console.error('[PlanTab] ❌ Enrichment error:', error);
-                      setIsRefetching(false);
-                    }
-                  }}
-                >
-                  {isRefetching ? (
-                    <>
-                      <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      Enriching...
-                    </>
-                  ) : (
-                    <>
-                      ✨ Enrich Data
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
                   disabled={isGenerating}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -222,17 +175,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
               </div>
             </div>
 
-            {/* Progress Indicator */}
-            {isRefetching && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2 text-sm text-blue-700"
-              >
-                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                <span>Updating itinerary...</span>
-              </motion.div>
-            )}
+
 
             {/* Timeline View */}
             <div className="relative">

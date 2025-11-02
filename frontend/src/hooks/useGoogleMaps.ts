@@ -22,7 +22,12 @@ export function useGoogleMaps(): UseGoogleMapsResult {
   const [api, setApi] = useState<GoogleMapsAPI | null>(null);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    // Try runtime config first, then fall back to build-time env var
+    const runtimeKey = (window as any).__APP_CONFIG__?.GOOGLE_MAPS_API_KEY;
+    const buildTimeKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    
+    // Use runtime key if it's not a placeholder, otherwise use build-time key
+    const apiKey = (runtimeKey && !runtimeKey.startsWith('__')) ? runtimeKey : buildTimeKey;
 
     if (!apiKey) {
       setError(new Error('Google Maps API key is not configured'));

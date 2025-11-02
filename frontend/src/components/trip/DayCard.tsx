@@ -81,7 +81,10 @@ const getGoogleMapsUrl = (placeId?: string): string | undefined => {
 
 const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | undefined => {
     if (!photoReference) return undefined;
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    // Try runtime config first, then fall back to build-time env var
+    const runtimeKey = (window as any).__APP_CONFIG__?.GOOGLE_MAPS_API_KEY;
+    const buildTimeKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    const apiKey = (runtimeKey && !runtimeKey.startsWith('__')) ? runtimeKey : buildTimeKey;
     if (!apiKey) return undefined;
     return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${apiKey}`;
 };
