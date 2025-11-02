@@ -95,7 +95,7 @@ const ToastItem = ({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg border px-4 py-3 shadow-elevation-3 animate-slide-in-down min-w-[300px]',
+        'flex items-center gap-3 rounded-lg border px-4 py-2.5 shadow-elevation-3 animate-slide-in-down min-w-[300px]',
         variantStyles[toast.variant || 'default']
       )}
     >

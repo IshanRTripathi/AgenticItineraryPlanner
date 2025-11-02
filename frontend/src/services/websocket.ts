@@ -318,11 +318,24 @@ class WebSocketService {
       return;
     }
 
-    // Clear existing subscriptions
+    // Clear existing subscriptions to prevent duplicates
     this.subscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
+      try {
+        subscription.unsubscribe();
+      } catch (error) {
+        logger.warn('Error unsubscribing', {
+          component: 'WebSocketService',
+          action: 'unsubscribe_error'
+        }, error);
+      }
     });
     this.subscriptions.clear();
+    
+    logger.info('Cleared existing subscriptions', {
+      component: 'WebSocketService',
+      action: 'clear_subscriptions',
+      itineraryId: this.currentItineraryId
+    });
 
     // Subscribe to itinerary-specific updates
     const itineraryTopic = `/topic/itinerary/${this.currentItineraryId}`;
@@ -353,6 +366,10 @@ class WebSocketService {
     });
   }
 
+  // Message deduplication cache
+  private messageCache = new Map<string, number>();
+  private readonly MESSAGE_CACHE_TTL = 1000; // 1 second
+
   /**
    * Handle incoming STOMP messages
    */
@@ -362,6 +379,35 @@ class WebSocketService {
       
       // Backend sends 'updateType', not 'type' - check both
       const messageType = data.updateType || data.type || 'connection_status';
+      
+      // Create message fingerprint for deduplication
+      const messageFingerprint = `${messageType}_${data.timestamp}_${data.progress || ''}_${JSON.stringify(data.data || {}).substring(0, 100)}`;
+      const now = Date.now();
+      
+      // Check if we've seen this message recently (within 1 second)
+      const lastSeen = this.messageCache.get(messageFingerprint);
+      if (lastSeen && (now - lastSeen) < this.MESSAGE_CACHE_TTL) {
+        logger.debug('Duplicate message ignored', {
+          component: 'WebSocketService',
+          action: 'duplicate_ignored',
+          messageType: messageType,
+          timeSinceLastSeen: now - lastSeen
+        });
+        return; // Skip duplicate
+      }
+      
+      // Store message fingerprint
+      this.messageCache.set(messageFingerprint, now);
+      
+      // Clean up old cache entries (older than TTL)
+      if (this.messageCache.size > 100) {
+        const cutoff = now - this.MESSAGE_CACHE_TTL;
+        for (const [key, timestamp] of this.messageCache.entries()) {
+          if (timestamp < cutoff) {
+            this.messageCache.delete(key);
+          }
+        }
+      }
       
       logger.debug('Message received', {
         component: 'WebSocketService',

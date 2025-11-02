@@ -41,27 +41,11 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
 
   return (
     <div className="space-y-6">
-      {/* Compact Header */}
-      <motion.div
-        className="text-center"
-        variants={fadeInUp}
-        initial="initial"
-        animate="animate"
-      >
-        <h2 className="text-2xl font-bold text-foreground mb-1">
-          Where do you want to go?
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Choose your origin and destination
-        </p>
-      </motion.div>
-
       {/* Origin and Destination Side by Side */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
         animate="animate"
-        transition={{ delay: 0.1 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto"
       >
         <div>
@@ -86,12 +70,12 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
         </div>
       </motion.div>
 
-      {/* Popular Destinations - More Compact */}
+      {/* Popular Destinations - Single Row */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
         animate="animate"
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1 }}
       >
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="w-4 h-4 text-muted-foreground" />
@@ -99,8 +83,8 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
             Popular Destinations
           </span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {POPULAR_DESTINATIONS.map((dest) => (
+        <div className="grid grid-cols-4 gap-2">
+          {POPULAR_DESTINATIONS.slice(0, 4).map((dest) => (
             <motion.button
               key={dest.name}
               onClick={() => handleDestinationChange(dest.name)}
@@ -116,17 +100,6 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
           ))}
         </div>
       </motion.div>
-
-      {/* Helper Text */}
-      {destination && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center text-xs text-muted-foreground"
-        >
-          ✨ Great choice! {destination} is an amazing destination
-        </motion.div>
-      )}
     </div>
   );
 }

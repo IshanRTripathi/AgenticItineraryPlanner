@@ -76,6 +76,7 @@ export function PremiumTripWizard() {
                 budgetMax: formData.budgetRange?.[1] || 2000,
                 pace: formData.pace || 'moderate',
                 interests: formData.interests || [],
+                constraints: formData.customInstructions ? [formData.customInstructions] : [],
             });
 
             console.log('[PremiumTripWizard] Create itinerary response:', response);
@@ -138,28 +139,6 @@ export function PremiumTripWizard() {
                 transition={{ duration: 0.5 }}
             >
                 <Card className="p-6 md:p-8 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-                    {/* Header - More Compact */}
-                    <motion.div
-                        className="mb-6 text-center"
-                        variants={fadeInUp}
-                        initial="initial"
-                        animate="animate"
-                    >
-                        <motion.div
-                            className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary-600 mb-4 shadow-lg"
-                            whileHover={{ scale: 1.05, rotate: 5 }}
-                            transition={{ type: 'spring', stiffness: 300 }}
-                        >
-                            <Sparkles className="w-7 h-7 text-white" />
-                        </motion.div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-                            Plan Your Perfect Trip
-                        </h1>
-                        <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-                            Let our AI create a personalized itinerary with premium search experience
-                        </p>
-                    </motion.div>
-
                     {/* Progress Indicator */}
                     <motion.div
                         variants={fadeInUp}

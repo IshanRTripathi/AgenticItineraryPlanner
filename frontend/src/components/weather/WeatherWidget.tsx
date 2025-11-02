@@ -47,7 +47,7 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
           <CardTitle className="text-base">Weather Forecast</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-6 text-muted-foreground text-sm">
+          <div className="text-center py-4 text-muted-foreground text-sm">
             <Cloud className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>Weather API not configured</p>
           </div>
@@ -63,7 +63,7 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
           <CardTitle className="text-base">Weather Forecast</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center py-6">
+          <div className="flex items-center justify-center py-4">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         </CardContent>
@@ -78,7 +78,7 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
           <CardTitle className="text-base">Weather Forecast</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-6 text-muted-foreground text-sm">
+          <div className="text-center py-4 text-muted-foreground text-sm">
             <Cloud className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>Unable to load weather data</p>
             {error && <p className="text-xs mt-2">{String(error)}</p>}

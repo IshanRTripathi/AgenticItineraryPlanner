@@ -42,10 +42,10 @@ export function DashboardPage() {
 
       <Header />
       
-      <main className="flex-1 bg-muted/30 py-12">
+      <main className="flex-1 bg-muted/30 py-8">
         <div className="container">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-2">
                 My Trips

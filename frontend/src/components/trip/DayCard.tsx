@@ -145,7 +145,7 @@ export function DayCard({
             <div
                 onClick={onToggle}
                 className={cn(
-                    'w-full text-left p-4 md:p-6',
+                    'w-full text-left p-4',
                     'cursor-pointer hover:bg-muted/50 active:bg-muted transition-colors'
                 )}
             >
@@ -294,7 +294,7 @@ export function DayCard({
                                             {[1, 2, 3].map((i) => (
                                                 <div
                                                     key={i}
-                                                    className="p-3 rounded-lg border-l-4 border-l-gray-300 bg-muted/30 animate-pulse"
+                                                    className="p-2.5 rounded-lg border-l-4 border-l-gray-300 bg-muted/30 animate-pulse"
                                                 >
                                                     <div className="flex items-start gap-3">
                                                         <div className="w-6 h-6 bg-muted rounded" />
@@ -383,7 +383,7 @@ export function DayCard({
                                                                     whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
                                                                     transition={{ duration: 0.2 }}
                                                                     className={cn(
-                                                                        'group relative p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
+                                                                        'group relative p-3 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
                                                                         getNodeColor(node.type),
                                                                         isReordering && 'opacity-50 pointer-events-none'
                                                                     )}
@@ -391,7 +391,7 @@ export function DayCard({
                                                                     {/* Subtle gradient overlay */}
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                                                    <div className="relative flex items-start gap-4">
+                                                                    <div className="relative flex items-start gap-3">
                                                                         {/* Icon with background */}
                                                                         <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                                                                             {getNodeIcon(node.type)}

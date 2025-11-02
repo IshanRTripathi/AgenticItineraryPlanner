@@ -64,6 +64,7 @@ export function TripWizard() {
                 budget: formData.budget || 'mid-range',
                 pace: formData.pace || 'moderate',
                 interests: formData.interests || [],
+                constraints: formData.customInstructions ? [formData.customInstructions] : [],
             });
 
             console.log('[TripWizard] Create itinerary response:', response);

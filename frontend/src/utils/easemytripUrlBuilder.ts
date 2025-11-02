@@ -39,6 +39,22 @@ function extractCityName(location: string): string {
 }
 
 /**
+ * Format date to DD/MM/YYYY for EaseMyTrip
+ */
+function formatDateEMT(dateString: string): string {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return '';
+  }
+}
+
+/**
  * Build EaseMyTrip hotel booking URL
  */
 export function buildHotelUrl(params: EaseMyTripUrlParams): string {
@@ -51,19 +67,23 @@ export function buildHotelUrl(params: EaseMyTripUrlParams): string {
     rooms = 1,
   } = params;
 
-  const city = extractCityName(destination);
-  const checkInDate = formatDate(checkIn);
-  const checkOutDate = formatDate(checkOut);
+  // Keep full destination with country for better search results
+  const checkInDate = formatDateEMT(checkIn);
+  const checkOutDate = formatDateEMT(checkOut);
 
-  // EaseMyTrip hotel search URL format
-  const baseUrl = 'https://www.easemytrip.com/hotels';
+  // Generate a simple timestamp-based ID (EaseMyTrip uses 'e' parameter)
+  const timestamp = Date.now().toString().slice(-12);
+
+  // EaseMyTrip actual hotel search URL format
+  const baseUrl = 'https://www.easemytrip.com/hotel-new/search';
   const searchParams = new URLSearchParams({
-    city: city,
-    checkin: checkInDate,
-    checkout: checkOutDate,
-    adults: adults.toString(),
-    children: children.toString(),
-    rooms: rooms.toString(),
+    e: timestamp,
+    city: destination, // Use full destination
+    cin: checkInDate,
+    cOut: checkOutDate,
+    Hotel: 'NA',
+    Rooms: rooms.toString(),
+    pax: (adults + children).toString(),
   });
 
   return `${baseUrl}?${searchParams.toString()}`;
@@ -175,20 +195,29 @@ export function buildEaseMyTripUrl(
   booking: CategorizedBooking,
   itinerary?: any
 ): string {
+  // Extract destination from booking
   const destination = booking.dayLocation || booking.location?.address || '';
-  // Get date from day in itinerary
-  const day = itinerary?.days?.find((d: any) => d.dayNumber === booking.dayNumber);
+
+  // Get days array from nested structure
+  const days = itinerary?.itinerary?.days || itinerary?.days || [];
+  const day = days.find((d: any) => d.dayNumber === booking.dayNumber);
   const date = day?.date || '';
-  
-  // Extract trip-level data if available
-  const adults = itinerary?.travelers?.adults || 2;
-  const children = itinerary?.travelers?.children || 0;
-  const rooms = itinerary?.travelers?.rooms || 1;
+
+  // Extract trip-level data from various possible locations
+  const party = itinerary?.party || itinerary?.travelers || {};
+  const adults = party.adults || 2;
+  const children = party.children || 0;
+  const infants = party.infants || 0;
+  const rooms = party.rooms || 1;
+
+  // Get trip start and end dates
+  const startDate = days[0]?.date || itinerary?.startDate || '';
+  const endDate = days[days.length - 1]?.date || itinerary?.endDate || '';
 
   // Determine booking type and build appropriate URL
   // Check node type for more specific categorization
   const nodeType = booking.type.toLowerCase();
-  
+
   // Transport types
   if (nodeType.includes('flight') || nodeType.includes('plane')) {
     const origin = getPreviousLocation(booking, itinerary) || destination;
@@ -200,7 +229,7 @@ export function buildEaseMyTripUrl(
       children,
     });
   }
-  
+
   if (nodeType.includes('train') || nodeType.includes('railway')) {
     const trainOrigin = getPreviousLocation(booking, itinerary) || destination;
     return buildTrainUrl({
@@ -209,7 +238,7 @@ export function buildEaseMyTripUrl(
       date,
     });
   }
-  
+
   if (nodeType.includes('bus')) {
     const busOrigin = getPreviousLocation(booking, itinerary) || destination;
     return buildBusUrl({
@@ -261,15 +290,19 @@ export function buildEaseMyTripUrl(
  */
 function calculateCheckOutDate(checkInDate: string, itinerary?: any): string {
   if (!checkInDate) return '';
-  
+
   try {
     const checkIn = new Date(checkInDate);
-    
+
+    // Get days array from nested structure
+    const days = itinerary?.itinerary?.days || itinerary?.days || [];
+
     // If we have itinerary end date, use that
-    if (itinerary?.endDate) {
-      return formatDate(itinerary.endDate);
+    const endDate = days[days.length - 1]?.date || itinerary?.endDate;
+    if (endDate) {
+      return formatDate(endDate);
     }
-    
+
     // Otherwise, default to next day
     const checkOut = new Date(checkIn);
     checkOut.setDate(checkOut.getDate() + 1);
@@ -284,17 +317,19 @@ function calculateCheckOutDate(checkInDate: string, itinerary?: any): string {
  * (origin city for flights/trains/buses)
  */
 function getPreviousLocation(booking: CategorizedBooking, itinerary?: any): string {
-  if (!itinerary?.days) return '';
-  
+  // Get days array from nested structure
+  const days = itinerary?.itinerary?.days || itinerary?.days || [];
+  if (!days || days.length === 0) return '';
+
   // Find the day before this booking
   const currentDayNumber = booking.dayNumber;
   if (currentDayNumber <= 1) {
     // First day - use home city or first destination
-    return itinerary.origin || itinerary.destination || '';
+    return itinerary?.origin || itinerary?.destination || days[0]?.location || '';
   }
-  
+
   // Get previous day's location
-  const previousDay = itinerary.days.find((d: any) => d.dayNumber === currentDayNumber - 1);
+  const previousDay = days.find((d: any) => d.dayNumber === currentDayNumber - 1);
   return previousDay?.location || '';
 }
 

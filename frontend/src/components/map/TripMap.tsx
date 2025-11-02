@@ -147,7 +147,11 @@ export function TripMap({ itinerary }: TripMapProps) {
 
   // Safe access to days - memoized to prevent infinite loops
   // Handle nested structure: itinerary.itinerary.days or itinerary.days
-  const days = useMemo(() => (itinerary as any)?.itinerary?.days || (itinerary as any)?.days || [], [(itinerary as any)?.itinerary?.days, (itinerary as any)?.days]);
+  const days = useMemo(() => {
+    const result = (itinerary as any)?.itinerary?.days || (itinerary as any)?.days || [];
+    console.log('[TripMap] Days extracted:', result.length, 'days');
+    return result;
+  }, [itinerary]);
   const destinationCity = useMemo(
     () => extractCityName(days[0]?.location || 'Unknown'),
     [days]
@@ -573,16 +577,22 @@ export function TripMap({ itinerary }: TripMapProps) {
     );
   }
 
-  if (nodes.length === 0) {
+  if (nodes.length === 0 && !isResolving) {
     return (
       <Card>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No locations to display</p>
+            <p>No locations to display on map</p>
             <p className="text-xs mt-2">
-              Total days: {days.length},
-              Total activities: {days.reduce((sum, d) => sum + (d.nodes?.length || 0), 0)}
+              {days.length > 0 ? (
+                <>
+                  Total days: {days.length},
+                  Total activities: {days.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0)}
+                </>
+              ) : (
+                'Waiting for itinerary data...'
+              )}
             </p>
           </div>
         </CardContent>

@@ -73,7 +73,7 @@ export function TripSidebar({
     setIsSharing(true);
     try {
       const shareLink = await exportService.generateShareLink(tripId);
-      
+
       toast({
         title: 'Link Copied!',
         description: 'Shareable link copied to clipboard',
@@ -112,7 +112,7 @@ export function TripSidebar({
     try {
       // TODO: Use options for enhanced export
       await exportService.exportToPDF(state.itinerary as any);
-      
+
       toast({
         title: 'Export Successful',
         description: 'Your itinerary is ready to print or save as PDF',
@@ -145,26 +145,11 @@ export function TripSidebar({
           variant="ghost"
           size="sm"
           onClick={handleBack}
-          className="mb-3 -ml-2"
+          className="-ml-2"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Button>
-
-        <h2 className="text-lg font-semibold text-foreground truncate mb-1">
-          {destination}
-        </h2>
-
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
-            <span>{dateRange}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="w-4 h-4" />
-            <span>{travelerCount}</span>
-          </div>
-        </div>
       </div>
 
       {/* Navigation Items */}

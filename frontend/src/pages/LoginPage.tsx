@@ -102,7 +102,7 @@ export function LoginPage() {
       </div>
 
       {/* Left Side - Features */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-blue-600 p-12 items-center justify-center relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-blue-600 p-8 items-center justify-center relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
@@ -131,7 +131,7 @@ export function LoginPage() {
       </div>
 
       {/* Right Side - Sign In */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 min-h-screen">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 min-h-screen">
         <div className="w-full max-w-xl">
           {/* Mobile Logo */}
           <div className="lg:hidden flex flex-col items-center mb-8">
@@ -145,7 +145,7 @@ export function LoginPage() {
           </div>
 
           {/* Modal height: 3 cards (140px each) + 2 gaps (24px each) = 468px */}
-          <Card className="p-12 shadow-2xl border-0 bg-white h-[468px] flex flex-col justify-center">
+          <Card className="p-8 shadow-2xl border-0 bg-white h-[468px] flex flex-col justify-center">
             {/* Header */}
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>

@@ -43,7 +43,8 @@ public class PipelineOrchestrator {
     private final ItineraryJsonService itineraryJsonService;
     private final AgentEventPublisher agentEventPublisher;
     private final ExecutorService pipelineExecutor;
-    
+    private final UserDataService userDataService;
+
     @Value("${itinerary.generation.pipeline.parallel:true}")
     private boolean enableParallel;
     
@@ -61,13 +62,13 @@ public class PipelineOrchestrator {
     private long finalizationTimeoutMs;
     
     public PipelineOrchestrator(SkeletonPlannerAgent skeletonPlannerAgent,
-                               ActivityAgent activityAgent,
-                               MealAgent mealAgent,
-                               TransportAgent transportAgent,
-                               CostEstimatorAgent costEstimatorAgent,
-                               EnrichmentAgent enrichmentAgent,
-                               ItineraryJsonService itineraryJsonService,
-                               AgentEventPublisher agentEventPublisher) {
+                                ActivityAgent activityAgent,
+                                MealAgent mealAgent,
+                                TransportAgent transportAgent,
+                                CostEstimatorAgent costEstimatorAgent,
+                                EnrichmentAgent enrichmentAgent,
+                                ItineraryJsonService itineraryJsonService,
+                                AgentEventPublisher agentEventPublisher, UserDataService userDataService) {
         this.skeletonPlannerAgent = skeletonPlannerAgent;
         this.activityAgent = activityAgent;
         this.mealAgent = mealAgent;
@@ -84,6 +85,7 @@ public class PipelineOrchestrator {
             t.setDaemon(true);
             return t;
         });
+        this.userDataService = userDataService;
     }
     
     /**
@@ -414,6 +416,7 @@ public class PipelineOrchestrator {
             if (itineraryOpt.isPresent()) {
                 NormalizedItinerary itinerary = itineraryOpt.get();
                 itinerary.setStatus("completed");
+                itinerary.setUpdatedAt(System.currentTimeMillis());
                 
                 // Ensure userId is set (it should already be set from initial creation)
                 if (itinerary.getUserId() == null || itinerary.getUserId().trim().isEmpty()) {
@@ -423,6 +426,23 @@ public class PipelineOrchestrator {
                 } else {
                     itineraryJsonService.saveMasterItinerary(itineraryId, itinerary);
                     logger.info("Updated itinerary status to 'completed' for: {}", itineraryId);
+                    
+                    // CRITICAL: Also update TripMetadata status for consistency
+                    try {
+                        Optional<TripMetadata> metadataOpt = userDataService.getUserTripMetadata(itinerary.getUserId(), itineraryId);
+                        if (metadataOpt.isPresent()) {
+                            TripMetadata metadata = metadataOpt.get();
+                            metadata.setStatus("completed");
+                            metadata.setUpdatedAt(System.currentTimeMillis());
+                            userDataService.saveUserTripMetadata(itinerary.getUserId(), metadata);
+                            logger.info("Updated TripMetadata status to 'completed' for: {}", itineraryId);
+                        } else {
+                            logger.warn("TripMetadata not found for itinerary {}, status not updated in metadata", itineraryId);
+                        }
+                    } catch (Exception metaEx) {
+                        logger.error("Failed to update TripMetadata status: {}", metaEx.getMessage());
+                        // Don't throw, just log - itinerary status is already updated
+                    }
                 }
             } else {
                 logger.warn("Itinerary {} not found when trying to update status to completed", itineraryId);

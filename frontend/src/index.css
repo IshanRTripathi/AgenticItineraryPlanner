@@ -223,6 +223,12 @@
     max-width: var(--container-xl);
   }
   
+  /* Reduced padding container variant */
+  .container-tight {
+    @apply mx-auto px-3 sm:px-4 lg:px-6;
+    max-width: var(--container-xl);
+  }
+  
   /* Glass morphism effect */
   .glass {
     background: var(--glass-bg);
@@ -251,8 +257,8 @@
     @apply transition-all duration-normal ease-standard;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
     @apply disabled:opacity-50 disabled:pointer-events-none;
-    min-height: var(--touch-target-min);
-    padding: 0 var(--space-4);
+    min-height: 44px;
+    padding: 0 var(--space-3);
   }
   
   .btn-primary {
@@ -293,12 +299,12 @@
   .input {
     @apply w-full rounded-md;
     @apply border border-input bg-background;
-    @apply px-4 py-3;
+    @apply px-3 py-2.5;
     @apply text-base;
     @apply transition-all duration-fast ease-standard;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    min-height: var(--touch-target-min);
+    min-height: 44px;
   }
   
   /* Remove validation indicators from date inputs */

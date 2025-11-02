@@ -172,7 +172,7 @@ export function Autocomplete({
               onClick={() => handleSelectOption(option)}
               onMouseEnter={() => setHighlightedIndex(index)}
               className={cn(
-                'w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors',
+                'w-full px-3 py-2.5 text-left hover:bg-muted/50 transition-colors',
                 'flex items-center justify-between gap-2',
                 highlightedIndex === index && 'bg-muted/50',
                 index === 0 && 'rounded-t-lg',

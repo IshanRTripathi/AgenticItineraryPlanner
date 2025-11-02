@@ -57,7 +57,7 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-6">
       <div className="container max-w-4xl">
         {/* Back Button */}
         <Button
@@ -108,7 +108,7 @@ export function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Email */}
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <Mail className="w-5 h-5 text-blue-600" />
               </div>
@@ -129,7 +129,7 @@ export function ProfilePage() {
 
             {/* Display Name */}
             {user.displayName && (
-              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                   <User className="w-5 h-5 text-purple-600" />
                 </div>
@@ -141,7 +141,7 @@ export function ProfilePage() {
             )}
 
             {/* User ID */}
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                 <Shield className="w-5 h-5 text-gray-600" />
               </div>
@@ -152,7 +152,7 @@ export function ProfilePage() {
             </div>
 
             {/* Account Created */}
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-5 h-5 text-green-600" />
               </div>
@@ -165,7 +165,7 @@ export function ProfilePage() {
             </div>
 
             {/* Last Sign In */}
-            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-5 h-5 text-amber-600" />
               </div>
@@ -185,7 +185,7 @@ export function ProfilePage() {
             <CardTitle>Authentication Provider</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center">
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

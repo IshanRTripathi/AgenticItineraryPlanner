@@ -27,19 +27,30 @@ export function GenerationProgressBanner({
   currentPhase: initialPhase = 'skeleton',
   onComplete
 }: GenerationProgressBannerProps) {
+  // Check URL for initial progress (from AgentProgress redirect)
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlProgress = urlParams.get('progress');
+  
   // Log the total days to verify it's coming from itinerary data
   console.log('[GenerationProgressBanner] Initialized with totalDays:', totalDays, 'from itinerary data');
   
-  // Initialize with props-based progress as fallback
-  const initialProgress = initialCompletedDays > 0 
-    ? Math.min((initialCompletedDays / totalDays) * 100, 99)
-    : 1; // Start at 1% to show something immediately
+  // Initialize with URL progress if available, otherwise use props-based progress
+  const initialProgress = urlProgress 
+    ? Math.min(parseInt(urlProgress), 99)
+    : initialCompletedDays > 0 
+      ? Math.min((initialCompletedDays / totalDays) * 100, 99)
+      : 1; // Start at 1% to show something immediately
+  
+  console.log('[GenerationProgressBanner] Initial progress:', initialProgress, 'from URL:', urlProgress);
   
   const [progress, setProgress] = useState(initialProgress);
   const [isVisible, setIsVisible] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(
-    initialCompletedDays > 0 
-      ? `${initialCompletedDays} of ${totalDays} days ready`
+    urlProgress 
+      ? 'Building your itinerary...'
+      : initialCompletedDays > 0 
+        ? `${initialCompletedDays} of ${totalDays} days ready`
       : 'Connecting to generation service...'
   );
   const [completedDays, setCompletedDays] = useState(initialCompletedDays);
@@ -102,7 +113,15 @@ export function GenerationProgressBanner({
         if (progressValue !== undefined && progressValue !== null) {
           const backendProgress = Number(progressValue);
           if (!isNaN(backendProgress)) {
-            setProgress(prev => Math.max(prev, backendProgress));
+            // Only update if backend progress is higher than current, or if we haven't initialized yet
+            setProgress(prev => {
+              // If we have URL progress and backend sends lower, keep URL progress
+              if (urlProgress && !hasInitialized) {
+                setHasInitialized(true);
+                return Math.max(prev, backendProgress);
+              }
+              return Math.max(prev, backendProgress);
+            });
             console.log('[GenerationProgressBanner] Progress update from backend:', backendProgress, 'from event:', event);
           }
         }
@@ -205,12 +224,12 @@ export function GenerationProgressBanner({
     }
   };
 
-  // Update message when WebSocket connects
+  // Update message when WebSocket connects (only if not completed)
   useEffect(() => {
-    if (isConnected && progress <= 1) {
+    if (isConnected && progress <= 1 && itineraryStatus !== 'completed' && itineraryStatus !== 'ready') {
       setCurrentMessage('Generation started...');
     }
-  }, [isConnected, progress]);
+  }, [isConnected, progress, itineraryStatus]);
 
   // Debug logging
   useEffect(() => {

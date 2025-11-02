@@ -70,18 +70,18 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-3 border-b">
           <h2 className="text-xl font-bold text-primary">EasyTrip</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-muted rounded-full transition-colors"
+            className="p-1.5 hover:bg-muted rounded-full transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4">
+        <nav className="p-3">
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -102,7 +102,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t bg-background">
           {loading ? (
             // Show nothing while loading
             <div className="h-12" />

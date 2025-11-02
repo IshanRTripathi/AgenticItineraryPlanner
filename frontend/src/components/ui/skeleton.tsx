@@ -32,7 +32,7 @@ export function Skeleton({ className, variant = 'rectangular' }: SkeletonProps) 
 // Preset skeleton components
 export function SkeletonCard() {
   return (
-    <div className="space-y-4 p-6 border rounded-lg">
+    <div className="space-y-4 p-4 border rounded-lg">
       <Skeleton className="h-48 w-full" />
       <Skeleton className="h-6 w-3/4" />
       <Skeleton className="h-4 w-full" />

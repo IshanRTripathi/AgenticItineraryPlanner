@@ -75,6 +75,15 @@ public class TransportAgent extends BaseAgent {
         logger.info("Populating transport nodes for itinerary: {}", itineraryId);
         
         try {
+            // IMPORTANT: Ensure all nodes have IDs BEFORE extracting contexts
+            // This prevents duplicate key errors when collecting into a Map
+            for (NormalizedDay day : skeleton.getDays()) {
+                if (day.getNodes() == null) continue;
+                for (NormalizedNode node : day.getNodes()) {
+                    nodeIdGenerator.ensureNodeHasId(node, day.getDayNumber(), skeleton);
+                }
+            }
+            
             // Extract all transport nodes from skeleton
             List<TransportContext> transportContexts = extractTransportNodes(skeleton);
             
@@ -191,17 +200,23 @@ public class TransportAgent extends BaseAgent {
     private void updateItineraryWithTransport(String itineraryId, NormalizedItinerary skeleton,
                                               List<PopulatedTransport> populatedTransport) {
         
+        // Filter out any null nodeIds and handle duplicates gracefully
         Map<String, PopulatedTransport> transportMap = populatedTransport.stream()
-            .collect(Collectors.toMap(PopulatedTransport::getNodeId, t -> t));
+            .filter(t -> t.getNodeId() != null)
+            .collect(Collectors.toMap(
+                PopulatedTransport::getNodeId, 
+                t -> t,
+                (existing, replacement) -> {
+                    logger.warn("Duplicate transport nodeId found: {}, keeping first occurrence", existing.getNodeId());
+                    return existing;
+                }
+            ));
         
         for (NormalizedDay day : skeleton.getDays()) {
             if (day.getNodes() == null) continue;
             
             for (NormalizedNode node : day.getNodes()) {
-                // Ensure node has ID
-                nodeIdGenerator.ensureNodeHasId(node, day.getDayNumber(), skeleton);
-                logger.debug("Ensuring node {} has ID for day {}", node.getTitle(), day.getDayNumber());
-                
+                // Node IDs are already ensured at the start of populateTransport
                 if ("transport".equals(node.getType())) {
                     PopulatedTransport populated = transportMap.get(node.getId());
                     if (populated != null) {

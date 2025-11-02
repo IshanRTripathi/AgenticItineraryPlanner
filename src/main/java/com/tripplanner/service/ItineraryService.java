@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -236,10 +237,14 @@ public class ItineraryService {
             // Automatically migrate if needed
             ni = migrationService.migrateIfNeeded(ni);
             logger.debug("Loaded itinerary {} (version {})", id, ni.getVersion());
+            
+            // Calculate actual status instead of hardcoding "completed"
+            String actualStatus = calculateItineraryStatus(ni);
+            
             ItineraryDto result = ItineraryDto.builder()
                     .id(ni.getItineraryId())
                     .summary(ni.getSummary())
-                    .status("completed")
+                    .status(actualStatus)
                     .build();
 
             logger.info("=== GET ITINERARY RESPONSE ===");
@@ -316,6 +321,25 @@ public class ItineraryService {
                             try { endDate = LocalDate.parse(metadata.getEndDate()); } catch (Exception ignored) {}
                         }
 
+                        // Get actual status from the itinerary instead of hardcoding "completed"
+                        // Edge case: Use metadata status if available, otherwise fetch from itinerary
+                        String actualStatus = "completed"; // Safe default for list view
+                        try {
+                            // Check if metadata has status (optimization to avoid extra fetch)
+                            if (metadata.getStatus() != null && !metadata.getStatus().isBlank()) {
+                                actualStatus = metadata.getStatus();
+                            } else {
+                                // Fallback: fetch full itinerary to calculate status
+                                Optional<NormalizedItinerary> itinOpt = itineraryJsonService.getItinerary(metadata.getItineraryId());
+                                if (itinOpt.isPresent()) {
+                                    actualStatus = calculateItineraryStatus(itinOpt.get());
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.warn("Failed to get status for itinerary {}: {}", metadata.getItineraryId(), e.getMessage());
+                            // Keep default "completed" on error to avoid breaking UI
+                        }
+
                         return ItineraryDto.builder()
                                 .id(metadata.getItineraryId())
                                 .destination(destination)
@@ -324,7 +348,7 @@ public class ItineraryService {
                                 .language(metadata.getLanguage() != null ? metadata.getLanguage() : "en")
                                 .summary(metadata.getSummary())
                                 .interests(metadata.getInterests())
-                                .status("completed")
+                                .status(actualStatus)
                                 .build();
                     })
                     .toList();
@@ -364,9 +388,27 @@ public class ItineraryService {
      * @return Status string: "planning", "generating", "completed", or "failed"
      */
     public String calculateItineraryStatus(NormalizedItinerary itinerary) {
+        // Edge case: null itinerary
+        if (itinerary == null) {
+            logger.warn("calculateItineraryStatus called with null itinerary");
+            return "planning";
+        }
+        
+        // Edge case: Check explicit status field first (set by pipeline completion)
+        if (itinerary.getStatus() != null && !itinerary.getStatus().isBlank()) {
+            String explicitStatus = itinerary.getStatus().toLowerCase();
+            // Trust explicit status if it's a valid value
+            if (explicitStatus.equals("completed") || 
+                explicitStatus.equals("generating") || 
+                explicitStatus.equals("failed")) {
+                return explicitStatus;
+            }
+        }
+        
         // Priority 1: Check for running agents
-        if (itinerary.getAgents() != null) {
+        if (itinerary.getAgents() != null && !itinerary.getAgents().isEmpty()) {
             boolean anyRunning = itinerary.getAgents().values().stream()
+                .filter(agent -> agent != null && agent.getStatus() != null)
                 .anyMatch(agent -> "running".equals(agent.getStatus()));
             if (anyRunning) {
                 return "generating";
@@ -376,6 +418,7 @@ public class ItineraryService {
         // Priority 2: Check for completed content
         if (itinerary.getDays() != null && !itinerary.getDays().isEmpty()) {
             boolean hasContent = itinerary.getDays().stream()
+                .filter(day -> day != null)
                 .anyMatch(day -> day.getNodes() != null && !day.getNodes().isEmpty());
             if (hasContent) {
                 return "completed";
@@ -383,8 +426,9 @@ public class ItineraryService {
         }
         
         // Priority 3: Check for all idle agents with no content
-        if (itinerary.getAgents() != null) {
+        if (itinerary.getAgents() != null && !itinerary.getAgents().isEmpty()) {
             boolean allIdle = itinerary.getAgents().values().stream()
+                .filter(agent -> agent != null && agent.getStatus() != null)
                 .allMatch(agent -> "idle".equals(agent.getStatus()));
             if (allIdle && (itinerary.getDays() == null || itinerary.getDays().isEmpty())) {
                 return "planning";

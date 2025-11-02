@@ -116,7 +116,7 @@ export function ShareModal({
           <TabsContent value="link" className="space-y-4 mt-4">
             {/* Generate Link */}
             {!shareLink ? (
-              <div className="text-center py-6">
+              <div className="text-center py-4">
                 <Button
                   onClick={generateLink}
                   disabled={isGenerating}

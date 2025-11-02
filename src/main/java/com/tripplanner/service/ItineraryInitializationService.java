@@ -99,7 +99,11 @@ public class ItineraryInitializationService {
         itinerary.setSummary("Your personalized itinerary for " + request.getDestination());
         itinerary.setCurrency("INR");
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
+        itinerary.setConstraints(request.getConstraints() != null ? request.getConstraints() : new ArrayList<>());
         itinerary.setDays(new ArrayList<>());
+        
+        // CRITICAL: Set initial status to "generating" to indicate work in progress
+        itinerary.setStatus("generating");
 
         // Set explicit trip meta
         itinerary.setOrigin(request.getStartLocation());

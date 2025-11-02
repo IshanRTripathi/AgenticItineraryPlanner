@@ -34,15 +34,6 @@ export function DestinationStep({ data, onDataChange }: DestinationStepProps) {
 
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          Where do you want to go?
-        </h2>
-        <p className="text-muted-foreground">
-          Choose your dream destination
-        </p>
-      </div>
-
       {/* Destination Input */}
       <div>
         <Label htmlFor="destination">Destination</Label>
@@ -53,7 +44,7 @@ export function DestinationStep({ data, onDataChange }: DestinationStepProps) {
             value={destination}
             onChange={(e) => handleDestinationChange(e.target.value)}
             placeholder="Enter city or country"
-            className="pl-10 h-14 text-lg"
+            className="pl-10 h-12"
           />
         </div>
       </div>
@@ -61,12 +52,12 @@ export function DestinationStep({ data, onDataChange }: DestinationStepProps) {
       {/* Popular Destinations */}
       <div>
         <Label className="mb-3 block">Popular Destinations</Label>
-        <div className="flex flex-wrap gap-2">
-          {POPULAR_DESTINATIONS.map((dest) => (
+        <div className="grid grid-cols-4 gap-2">
+          {POPULAR_DESTINATIONS.slice(0, 4).map((dest) => (
             <button
               key={dest}
               onClick={() => handleDestinationChange(dest)}
-              className="px-4 py-2 rounded-full border border-border hover:border-primary hover:bg-primary/5 transition-colors text-sm"
+              className="px-3 py-2 rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-colors text-sm"
             >
               {dest}
             </button>

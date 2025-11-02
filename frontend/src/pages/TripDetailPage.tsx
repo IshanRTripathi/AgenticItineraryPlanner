@@ -169,7 +169,30 @@ function TripDetailContent() {
   
   // If generating, we'll show the UI with a banner but still render the content
   // This allows for optimistic updates as data comes in via WebSocket
-  const destination = days[0]?.location || (itinerary as any)?.summary || 'Unknown Destination';
+  
+  // Extract clean destination name (just the city)
+  const getDestinationName = () => {
+    // Try to get from first day's location
+    if (days[0]?.location) {
+      return days[0].location.split(',')[0].trim();
+    }
+    
+    // Try to extract from summary (e.g., "Your personalized itinerary for Sydney, Australia" -> "Sydney")
+    const summary = (itinerary as any)?.summary || '';
+    const match = summary.match(/for\s+([^,]+)/);
+    if (match) {
+      return match[1].trim();
+    }
+    
+    // Try destination field
+    if ((itinerary as any)?.destination) {
+      return (itinerary as any).destination.split(',')[0].trim();
+    }
+    
+    return 'Unknown Destination';
+  };
+  
+  const destination = getDestinationName();
   const travelers = 2; // TODO: Get from itinerary metadata when available
 
   const formatDateRange = (start: string, end: string) => {
@@ -273,7 +296,12 @@ function TripDetailContent() {
       {shouldShowBanner ? (
         <GenerationProgressBanner
           itineraryId={id!}
-          itineraryStatus={testProgressMode || generatingParam ? 'generating' : itinerary.status}
+          itineraryStatus={
+            // Always use actual status if completed, otherwise respect URL params
+            itinerary.status === 'completed'
+              ? itinerary.status 
+              : (testProgressMode || generatingParam ? 'generating' : itinerary.status)
+          }
           completedDays={completedDays}
           totalDays={expectedTotalDays}
           currentPhase={currentPhase}
@@ -313,7 +341,7 @@ function TripDetailContent() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-8">
+          <div className="p-4 md:p-6">
             {renderTabContent()}
           </div>
         </main>

@@ -45,6 +45,9 @@ public class NormalizedItinerary {
     
     @JsonProperty("themes")
     private List<String> themes;
+    
+    @JsonProperty("constraints")
+    private List<String> constraints; // User's custom instructions/requirements
 
     // Explicit trip meta to avoid parsing from summary
     @JsonProperty("origin")
@@ -176,6 +179,14 @@ public class NormalizedItinerary {
     
     public void setThemes(List<String> themes) {
         this.themes = themes;
+    }
+    
+    public List<String> getConstraints() {
+        return constraints;
+    }
+    
+    public void setConstraints(List<String> constraints) {
+        this.constraints = constraints;
     }
 
     public String getOrigin() {

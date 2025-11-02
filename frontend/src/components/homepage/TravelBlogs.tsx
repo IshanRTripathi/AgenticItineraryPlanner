@@ -5,7 +5,7 @@ import { mockBlogs } from '../../data/mockBlogs';
 
 export function TravelBlogs() {
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-8">
@@ -53,7 +53,7 @@ interface BlogCardProps {
 
 function BlogCard({ blog }: BlogCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer group p-0">
       {/* Image */}
       <div className="relative aspect-video overflow-hidden">
         <img
@@ -70,7 +70,7 @@ function BlogCard({ blog }: BlogCardProps) {
       </div>
 
       {/* Content */}
-      <CardContent className="p-5">
+      <div className="p-4">
         {/* Title */}
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
           {blog.title}
@@ -105,7 +105,7 @@ function BlogCard({ blog }: BlogCardProps) {
           Read More
           <ArrowRight className="h-3.5 w-3.5" />
         </button>
-      </CardContent>
+      </div>
     </Card>
   );
 }

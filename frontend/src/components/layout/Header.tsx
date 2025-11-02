@@ -119,9 +119,9 @@ export function Header() {
 
                   {/* Dropdown Menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* User Info */}
-                      <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="px-3 py-2.5 border-b border-gray-100">
                         <div className="flex items-center gap-3">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 truncate">
@@ -138,7 +138,7 @@ export function Header() {
                       <div className="py-1">
                         <a
                           href="/profile"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setProfileDropdownOpen(false)}
                         >
                           <User className="w-4 h-4 text-muted-foreground" />
@@ -146,7 +146,7 @@ export function Header() {
                         </a>
                         <a
                           href="/settings"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setProfileDropdownOpen(false)}
                         >
                           <Settings className="w-4 h-4 text-muted-foreground" />
@@ -154,7 +154,7 @@ export function Header() {
                         </a>
                         <a
                           href="/help"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setProfileDropdownOpen(false)}
                         >
                           <HelpCircle className="w-4 h-4 text-muted-foreground" />
@@ -167,7 +167,7 @@ export function Header() {
                         <button
                           onClick={handleLogout}
                           disabled={isLoggingOut}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                         >
                           <LogOut className="w-4 h-4" />
                           <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
@@ -185,7 +185,7 @@ export function Header() {
                 </Button>
               )}
               <button
-                className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+                className="md:hidden p-1.5 hover:bg-muted rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <Menu className="h-6 w-6" />

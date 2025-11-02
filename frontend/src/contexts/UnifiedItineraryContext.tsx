@@ -215,8 +215,6 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
     const handleMessage = (message: any) => {
       if (!isActive) return;
 
-      console.log('[UnifiedItineraryProvider] WebSocket message received:', message);
-      
       // Backend sends 'updateType', frontend expects 'type' - handle both
       const messageType = message.type || message.updateType;
       
@@ -225,7 +223,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
         action: 'websocket_message',
         itineraryId,
         messageType: messageType
-      }, message);
+      });
 
       switch (messageType) {
         case 'itinerary_updated':
@@ -349,12 +347,12 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
           }
           break;
         default:
-          logWarn(`Unknown WebSocket message type: ${message.type}`, {
+          logWarn(`Unknown WebSocket message type: ${messageType}`, {
             component: 'UnifiedItineraryProvider',
             action: 'websocket_unknown_message',
             itineraryId,
-            messageType: message.type
-          }, message);
+            messageType: messageType
+          });
       }
     };
 

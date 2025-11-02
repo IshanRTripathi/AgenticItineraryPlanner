@@ -605,6 +605,76 @@ public class EnrichmentAgent extends BaseAgent {
     }
     
     /**
+     * Build a search query combining title and location name for better specificity.
+     * Strategy:
+     * 1. If locationName is specific (contains place type keywords or special chars), use it
+     * 2. If locationName is generic (just district/city name), use title which is more specific
+     * 3. Always prefer more specific information for better Google Places search results
+     */
+    private String buildSearchQuery(NormalizedNode node) {
+        String title = node.getTitle();
+        String locationName = (node.getLocation() != null) ? node.getLocation().getName() : null;
+        
+        // If no information available, return null
+        if ((title == null || title.trim().isEmpty()) && 
+            (locationName == null || locationName.trim().isEmpty())) {
+            return null;
+        }
+        
+        // If only title available, use it
+        if (locationName == null || locationName.trim().isEmpty()) {
+            return title.trim();
+        }
+        
+        // If only location name available, use it
+        if (title == null || title.trim().isEmpty()) {
+            return locationName.trim();
+        }
+        
+        // Both available - check if locationName is generic (just district/city name)
+        // Generic location names are typically short (1-2 words) and don't contain specific identifiers
+        String locationLower = locationName.toLowerCase().trim();
+        String[] locationWords = locationName.trim().split("\\s+");
+        
+        // Check for specific place indicators
+        boolean hasSpecificIndicators = locationName.contains("(") || 
+                                       locationName.contains("-") ||
+                                       locationLower.contains("restaurant") ||
+                                       locationLower.contains("temple") ||
+                                       locationLower.contains("museum") ||
+                                       locationLower.contains("park") ||
+                                       locationLower.contains("market") ||
+                                       locationLower.contains("street") ||
+                                       locationLower.contains("tower") ||
+                                       locationLower.contains("palace") ||
+                                       locationLower.contains("shrine") ||
+                                       locationLower.contains("garden") ||
+                                       locationLower.contains("square") ||
+                                       locationLower.contains("station") ||
+                                       locationLower.contains("crossing") ||
+                                       locationLower.contains("gate") ||
+                                       locationLower.contains("bridge") ||
+                                       locationLower.contains("building") ||
+                                       locationLower.contains("center") ||
+                                       locationLower.contains("hall");
+        
+        // If locationName has specific indicators or is long (3+ words), it's likely specific
+        boolean isSpecificLocation = hasSpecificIndicators || locationWords.length >= 3;
+        
+        if (isSpecificLocation) {
+            // Specific location name - use it directly
+            // Example: "Sushi Zanmai (Tsukiji Honten)" or "Senso-ji Temple"
+            logger.debug("Specific location detected ({}), using as-is", locationName);
+            return locationName.trim();
+        } else {
+            // Generic location - use title which should be more specific
+            // Example: locationName="Shibuya", title="Shibuya Crossing & Hachiko Statue" -> use title
+            logger.debug("Generic location detected ({}), using title ({}) instead", locationName, title);
+            return title.trim();
+        }
+    }
+    
+    /**
      * Check if node has valid coordinates.
      */
     private boolean hasValidCoordinates(NormalizedNode node) {
@@ -653,29 +723,25 @@ public class EnrichmentAgent extends BaseAgent {
      * Search for a place and set its placeId and coordinates.
      */
     private NormalizedNode searchAndSetPlaceId(NormalizedNode node, String destination) {
-        // Get location name
-        String locationName = null;
-        if (node.getLocation() != null && node.getLocation().getName() != null) {
-            locationName = node.getLocation().getName();
-        } else if (node.getTitle() != null) {
-            locationName = node.getTitle();
-        }
+        // Build search query combining title and location name for better specificity
+        String searchQuery = buildSearchQuery(node);
         
-        if (locationName == null || locationName.trim().isEmpty()) {
-            logger.warn("Node {} has no location name for search", node.getId());
+        if (searchQuery == null || searchQuery.trim().isEmpty()) {
+            logger.warn("Node {} has no searchable information", node.getId());
             return null;
         }
         
         logger.info("========== ENRICHING NODE WITH PLACE SEARCH ==========");
         logger.info("Node ID: {}", node.getId());
         logger.info("Node title: {}", node.getTitle());
-        logger.info("Location name: {}", locationName);
+        logger.info("Location name: {}", node.getLocation() != null ? node.getLocation().getName() : "null");
+        logger.info("Search query: {}", searchQuery);
         logger.info("Destination context: {}", destination);
         
         try {
-            // Search for place
+            // Search for place using combined query
             logger.info("Calling GooglePlacesService.searchPlace()...");
-            PlaceSearchResult searchResult = googlePlacesService.searchPlace(locationName, destination);
+            PlaceSearchResult searchResult = googlePlacesService.searchPlace(searchQuery, destination);
             logger.info("GooglePlacesService returned: {}", searchResult != null ? "result found" : "null");
             
             if (searchResult != null && searchResult.getGeometry() != null && 
@@ -708,15 +774,15 @@ public class EnrichmentAgent extends BaseAgent {
                     enrichedNode.getLocation().setRating(searchResult.getRating());
                 }
                 
-                logger.info("Found place for node {} ({}): {} at ({}, {})", 
-                    node.getId(), locationName, searchResult.getName(),
+                logger.info("Found place for node {} (search: '{}'): {} at ({}, {})", 
+                    node.getId(), searchQuery, searchResult.getName(),
                     searchResult.getGeometry().getLocation().getLatitude(),
                     searchResult.getGeometry().getLocation().getLongitude());
                 
                 return enrichedNode;
             }
         } catch (Exception e) {
-            logger.error("Failed to search place for node {} ({}): {}", node.getId(), locationName, e.getMessage());
+            logger.error("Failed to search place for node {} (search: '{}'): {}", node.getId(), searchQuery, e.getMessage());
         }
         
         return null;

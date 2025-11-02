@@ -2,10 +2,11 @@ import { ArrowRight, Plane } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { mockRoutes } from '../../data/mockRoutes';
+import { useNavigate } from 'react-router-dom';
 
 export function PopularRoutes() {
   return (
-    <section className="py-16 bg-white">
+    <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-8">
@@ -19,30 +20,11 @@ export function PopularRoutes() {
           </Button>
         </div>
 
-        {/* Horizontal Scroll Container */}
-        <div className="relative">
-          {/* Scroll Container */}
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-            {mockRoutes.map((route) => (
-              <RouteCard key={route.id} route={route} />
-            ))}
-          </div>
-
-          {/* Scroll Indicators (Desktop) */}
-          <div className="hidden md:flex absolute top-1/2 -translate-y-1/2 left-0 right-0 justify-between pointer-events-none">
-            <button
-              className="pointer-events-auto w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors -ml-5"
-              aria-label="Scroll left"
-            >
-              <ArrowRight className="h-5 w-5 rotate-180" />
-            </button>
-            <button
-              className="pointer-events-auto w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors -mr-5"
-              aria-label="Scroll right"
-            >
-              <ArrowRight className="h-5 w-5" />
-            </button>
-          </div>
+        {/* Route Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {mockRoutes.slice(0, 2).map((route) => (
+            <RouteCard key={route.id} route={route} />
+          ))}
         </div>
 
         {/* Mobile View All Button */}
@@ -69,49 +51,121 @@ interface RouteCardProps {
 }
 
 function RouteCard({ route }: RouteCardProps) {
+  const navigate = useNavigate();
+
+  const handleBookFlight = () => {
+    navigate('/search');
+  };
+
   return (
-    <Card className="flex-shrink-0 w-[280px] snap-start hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-      <CardContent className="p-6">
-        {/* Airline Logo */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-            <Plane className="h-4 w-4 text-primary" />
-          </div>
-          <span className="text-sm font-medium text-gray-700">{route.airline}</span>
-        </div>
+    <div className="group cursor-pointer">
+      {/* Boarding Pass Container */}
+      <div className="relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-gray-200">
+        {/* Perforated Edge Effect - Top */}
+        <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-gray-800 to-transparent"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 12px 0, transparent 7px, white 7px)',
+            backgroundSize: '24px 100%',
+            backgroundRepeat: 'repeat-x'
+          }}
+        />
 
-        {/* Route */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{route.origin}</div>
-            <div className="text-xs text-gray-500 mt-1">Origin</div>
-          </div>
-
-          <div className="flex-1 mx-4 flex items-center justify-center">
-            <div className="h-px bg-gray-300 flex-1"></div>
-            <Plane className="h-4 w-4 text-primary mx-2" />
-            <div className="h-px bg-gray-300 flex-1"></div>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{route.destination}</div>
-            <div className="text-xs text-gray-500 mt-1">Destination</div>
-          </div>
-        </div>
-
-        {/* Price and CTA */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div>
-            <div className="text-xs text-gray-500">Starting from</div>
-            <div className="text-xl font-bold text-primary">
-              {route.currency}{route.price.toLocaleString()}
+        {/* Main Ticket Body */}
+        <div className="pt-6 pb-4 px-6 bg-gradient-to-br from-white via-blue-50/20 to-indigo-50/30">
+          {/* Airline Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center ring-2 ring-primary/10">
+                <Plane className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-sm font-bold text-gray-900">{route.airline}</div>
+                <div className="text-xs text-gray-500 font-medium">BUSINESS CLASS</div>
+              </div>
+            </div>
+            <div className="text-xs text-gray-400 font-mono bg-gray-100 px-2 py-1 rounded">
+              FLT-{Math.floor(Math.random() * 9000) + 1000}
             </div>
           </div>
-          <Button size="sm">
-            View Flights
-          </Button>
+
+          {/* Route Information */}
+          <div className="flex items-center justify-between mb-6">
+            {/* Origin */}
+            <div className="flex-1">
+              <div className="text-xs text-gray-600 uppercase tracking-wider mb-2 font-semibold">From</div>
+              <div className="text-2xl font-bold text-gray-900 leading-none mb-1">{route.origin}</div>
+              <div className="text-xs text-gray-500 font-medium">Departure City</div>
+            </div>
+
+            {/* Flight Path */}
+            <div className="flex-1 flex items-center justify-center px-6">
+              <div className="relative w-full">
+                <div className="h-[3px] bg-gradient-to-r from-primary/30 via-primary to-primary/30 relative rounded-full">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1.5 rounded-full shadow-md">
+                    <Plane className="h-4 w-4 text-primary" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Destination */}
+            <div className="flex-1 text-right">
+              <div className="text-xs text-gray-600 uppercase tracking-wider mb-2 font-semibold">To</div>
+              <div className="text-2xl font-bold text-gray-900 leading-none mb-1">{route.destination}</div>
+              <div className="text-xs text-gray-500 font-medium">Arrival City</div>
+            </div>
+          </div>
+
+          {/* Barcode Effect */}
+          <div className="flex gap-[2px] h-14 mb-4 opacity-50">
+            {Array.from({ length: 50 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-gray-800 rounded-sm"
+                style={{ height: `${Math.random() * 60 + 40}%` }}
+              />
+            ))}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Perforated Divider */}
+        <div className="relative h-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t-2 border-dashed border-gray-300" />
+          </div>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-gray-100 rounded-full border-4 border-white shadow-sm" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-8 h-8 bg-gray-100 rounded-full border-4 border-white shadow-sm" />
+        </div>
+
+        {/* Stub Section */}
+        <div className="px-6 py-4 bg-gradient-to-br from-gray-50 to-gray-100/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs text-gray-600 uppercase tracking-wider mb-1 font-semibold">Starting from</div>
+              <div className="text-2xl font-bold text-primary">
+                {route.currency} {route.price.toLocaleString()}
+              </div>
+              <div className="text-xs text-gray-500 mt-0.5">per person</div>
+            </div>
+            <Button
+              size="md"
+              className="text-sm h-10 px-6 font-semibold group-hover:bg-primary-hover shadow-md"
+              onClick={handleBookFlight}
+            >
+              Book Flight
+            </Button>
+          </div>
+        </div>
+
+        {/* Perforated Edge Effect - Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-gray-800 to-transparent"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 12px 100%, transparent 7px, white 7px)',
+            backgroundSize: '24px 100%',
+            backgroundRepeat: 'repeat-x'
+          }}
+        />
+      </div>
+    </div>
   );
 }

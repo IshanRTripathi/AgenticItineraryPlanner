@@ -67,11 +67,11 @@ export function BottomSheet({
 
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b">
             <h2 className="text-lg font-bold">{title}</h2>
             <button
               onClick={() => onOpenChange(false)}
-              className="p-2 hover:bg-muted rounded-full transition-colors"
+              className="p-1.5 hover:bg-muted rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

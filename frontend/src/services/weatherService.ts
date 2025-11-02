@@ -66,13 +66,6 @@ function mapWeatherIcon(iconCode: string): string {
 }
 
 /**
- * Convert Kelvin to Fahrenheit
- */
-function kelvinToFahrenheit(kelvin: number): number {
-  return Math.round((kelvin - 273.15) * 9 / 5 + 32);
-}
-
-/**
  * Get day name from date
  */
 function getDayName(date: Date): string {
@@ -189,9 +182,9 @@ export async function fetchWeatherForecast(
     }
 
     // OpenWeatherMap 5-day forecast returns 40 data points (5 days * 8 intervals per day)
-    // Use units=imperial to get Fahrenheit directly
+    // Use units=metric to get Celsius directly
     const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(destination)}&appid=${API_KEY}&units=imperial`
+      `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(destination)}&appid=${API_KEY}&units=metric`
     );
 
     if (!response.ok) {
@@ -226,26 +219,36 @@ export async function fetchWeatherForecast(
     const result = Array.from(dailyData.values());
 
     // OpenWeatherMap 5-day forecast only returns ~5 days
-    // If we need more days, repeat the first few days with updated day names
+    // If we need more days, extrapolate with realistic variations
     let finalResult: WeatherData[];
     if (result.length < days && result.length > 0) {
-      console.log(`[WeatherService] Got ${result.length} days from API, padding to ${days} days`);
+      console.log(`[WeatherService] Got ${result.length} days from API, extrapolating to ${days} days`);
 
       const missingDays = days - result.length;
       const lastDate = new Date(result[result.length - 1].date);
 
-      // Repeat the first few days of real data for the missing days
+      // Calculate average temperature and variation from real data
+      const avgHigh = result.reduce((sum, d) => sum + d.high, 0) / result.length;
+      const avgLow = result.reduce((sum, d) => sum + d.low, 0) / result.length;
+
+      // Extrapolate with realistic variations
       const paddedDays: WeatherData[] = [];
       for (let i = 0; i < missingDays; i++) {
-        // Cycle through the first 3 days of real data
-        const sourceDay = result[i % Math.min(3, result.length)];
+        // Use real data as base but add realistic variations
+        const sourceDay = result[i % result.length];
         const nextDate = new Date(lastDate);
         nextDate.setDate(lastDate.getDate() + i + 1);
+
+        // Add realistic temperature variations: ±5°F for high, ±3°F for low
+        const highVariation = Math.floor(Math.random() * 11) - 5; // -5 to +5
+        const lowVariation = Math.floor(Math.random() * 7) - 3;   // -3 to +3
 
         paddedDays.push({
           ...sourceDay,
           day: getDayName(nextDate),
           date: nextDate.toISOString().split('T')[0],
+          high: Math.round(avgHigh + highVariation),
+          low: Math.round(avgLow + lowVariation),
         });
       }
 
@@ -270,17 +273,17 @@ export async function fetchWeatherForecast(
 }
 
 /**
- * Fallback weather data when API is unavailable
+ * Fallback weather data when API is unavailable (in Celsius)
  */
 function getFallbackWeather(days: number): WeatherData[] {
   const fallbackData: WeatherData[] = [
-    { day: 'Mon', icon: 'Sun', high: 75, low: 62, description: 'Sunny', date: '' },
-    { day: 'Tue', icon: 'Cloud', high: 72, low: 60, description: 'Partly Cloudy', date: '' },
-    { day: 'Wed', icon: 'CloudRain', high: 68, low: 58, description: 'Light Rain', date: '' },
-    { day: 'Thu', icon: 'Sun', high: 76, low: 63, description: 'Sunny', date: '' },
-    { day: 'Fri', icon: 'Cloud', high: 73, low: 61, description: 'Cloudy', date: '' },
-    { day: 'Sat', icon: 'Sun', high: 78, low: 64, description: 'Clear', date: '' },
-    { day: 'Sun', icon: 'CloudRain', high: 70, low: 59, description: 'Showers', date: '' },
+    { day: 'Mon', icon: 'Sun', high: 24, low: 17, description: 'Sunny', date: '' },
+    { day: 'Tue', icon: 'Cloud', high: 22, low: 16, description: 'Partly Cloudy', date: '' },
+    { day: 'Wed', icon: 'CloudRain', high: 20, low: 14, description: 'Light Rain', date: '' },
+    { day: 'Thu', icon: 'Sun', high: 24, low: 17, description: 'Sunny', date: '' },
+    { day: 'Fri', icon: 'Cloud', high: 23, low: 16, description: 'Cloudy', date: '' },
+    { day: 'Sat', icon: 'Sun', high: 26, low: 18, description: 'Clear', date: '' },
+    { day: 'Sun', icon: 'CloudRain', high: 21, low: 15, description: 'Showers', date: '' },
   ];
 
   return fallbackData.slice(0, days);

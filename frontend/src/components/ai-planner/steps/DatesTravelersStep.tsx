@@ -6,8 +6,9 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, Users, Minus, Plus } from 'lucide-react';
+import { Calendar, Users, Minus, Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface DatesTravelersStepProps {
   data: any;
@@ -20,9 +21,31 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
   const [adults, setAdults] = useState(data.adults || 2);
   const [children, setChildren] = useState(data.children || 0);
   const [infants, setInfants] = useState(data.infants || 0);
+  const [suggestingDates, setSuggestingDates] = useState(false);
 
   const handleDataChange = (updates: any) => {
     onDataChange({ ...data, ...updates });
+  };
+
+  const handleSuggestBestDates = async () => {
+    setSuggestingDates(true);
+    // Simulate AI response
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Set suggested dates (e.g., 7 days from now for 5 days)
+    const today = new Date();
+    const suggestedStart = new Date(today);
+    suggestedStart.setDate(today.getDate() + 7);
+    const suggestedEnd = new Date(suggestedStart);
+    suggestedEnd.setDate(suggestedStart.getDate() + 5);
+    
+    const startDateStr = suggestedStart.toISOString().split('T')[0];
+    const endDateStr = suggestedEnd.toISOString().split('T')[0];
+    
+    setStartDate(startDateStr);
+    setEndDate(endDateStr);
+    handleDataChange({ startDate: startDateStr, endDate: endDateStr });
+    setSuggestingDates(false);
   };
 
   const updateCount = (type: 'adults' | 'children' | 'infants', delta: number) => {
@@ -39,16 +62,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
   };
 
   return (
-    <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          When are you traveling?
-        </h2>
-        <p className="text-muted-foreground">
-          Select your travel dates and number of travelers
-        </p>
-      </div>
-
+    <div className="space-y-6">
       {/* Dates */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -89,17 +103,17 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
 
       {/* Travelers */}
       <div>
-        <Label className="mb-4 flex items-center gap-2">
+        <Label className="mb-3 flex items-center gap-2">
           <Users className="w-5 h-5" />
           Travelers
         </Label>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Adults */}
-          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
             <div>
-              <div className="font-medium">Adults</div>
-              <div className="text-sm text-muted-foreground">Age 13+</div>
+              <div className="font-medium text-sm">Adults</div>
+              <div className="text-xs text-muted-foreground">Age 13+</div>
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -125,10 +139,10 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
           </div>
 
           {/* Children */}
-          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
             <div>
-              <div className="font-medium">Children</div>
-              <div className="text-sm text-muted-foreground">Age 2-12</div>
+              <div className="font-medium text-sm">Children</div>
+              <div className="text-xs text-muted-foreground">Age 2-12</div>
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -154,10 +168,10 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
           </div>
 
           {/* Infants */}
-          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between p-3 rounded-lg border border-border">
             <div>
-              <div className="font-medium">Infants</div>
-              <div className="text-sm text-muted-foreground">Under 2</div>
+              <div className="font-medium text-sm">Infants</div>
+              <div className="text-xs text-muted-foreground">Under 2</div>
             </div>
             <div className="flex items-center gap-3">
               <Button
@@ -182,6 +196,15 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
             </div>
           </div>
         </div>
+
+        {/* Suggest Best Dates Button */}
+        <Button
+          onClick={handleSuggestBestDates}
+          disabled={suggestingDates}
+          className="w-full mt-4 h-12 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg transition-all font-medium"
+        >
+          {suggestingDates ? 'Analyzing best dates...' : 'Suggest Best Travel Date'}
+        </Button>
       </div>
     </div>
   );
