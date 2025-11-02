@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Calendar,
     MapPin,
     Clock,
     DollarSign,
@@ -17,6 +16,10 @@ import {
     Lock,
     Save,
     X,
+    Star,
+    ExternalLink,
+    Image as ImageIcon,
+    Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -54,6 +57,35 @@ const getNodeIcon = (type: string) => {
     }
 };
 
+const getPriceLevelIndicator = (priceLevel?: number) => {
+    if (!priceLevel) return null;
+    return '₹'.repeat(priceLevel);
+};
+
+const formatRating = (rating?: number) => {
+    if (!rating) return null;
+    return rating.toFixed(1);
+};
+
+const formatReviewCount = (count?: number) => {
+    if (!count) return null;
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+};
+
+const getGoogleMapsUrl = (placeId?: string): string | undefined => {
+    if (!placeId) return undefined;
+    return `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+};
+
+const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | undefined => {
+    if (!photoReference) return undefined;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    if (!apiKey) return undefined;
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${apiKey}`;
+};
+
 const getNodeColor = (type: string) => {
     switch (type) {
         case 'attraction':
@@ -82,6 +114,32 @@ export function DayCard({
 }: DayCardProps) {
     // Get day color from shared palette (matches map markers)
     const dayColor = getDayColor(day.dayNumber);
+    
+    // Debug: Log activity data structure (only in development)
+    if (import.meta.env.DEV && day.nodes?.length > 0) {
+        console.log(`[DayCard Day ${day.dayNumber}] 🔍 FULL FIRST ACTIVITY:`, day.nodes[0]);
+        console.log(`[DayCard Day ${day.dayNumber}] 🔍 LOCATION OBJECT:`, day.nodes[0].location);
+        console.log(`[DayCard Day ${day.dayNumber}] Activity data check:`, {
+            activityCount: day.nodes.length,
+            firstActivity: {
+                title: day.nodes[0].title,
+                hasLocation: !!day.nodes[0].location,
+                locationKeys: day.nodes[0].location ? Object.keys(day.nodes[0].location) : [],
+                hasPhotos: !!day.nodes[0].location?.photos,
+                photoCount: day.nodes[0].location?.photos?.length || 0,
+                photosValue: day.nodes[0].location?.photos,
+                hasRating: !!day.nodes[0].location?.rating,
+                rating: day.nodes[0].location?.rating,
+                hasReviews: !!day.nodes[0].location?.userRatingsTotal,
+                reviews: day.nodes[0].location?.userRatingsTotal,
+                hasPriceLevel: !!day.nodes[0].location?.priceLevel,
+                priceLevel: day.nodes[0].location?.priceLevel,
+                hasPlaceId: !!day.nodes[0].location?.placeId,
+                placeId: day.nodes[0].location?.placeId
+            },
+            apiKeySet: !!import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY
+        });
+    }
 
     // Determine day status for visual styling
     const today = new Date();
@@ -102,7 +160,7 @@ export function DayCard({
         itineraryId: itineraryId || '',
         dayNumber: day.dayNumber,
         initialActivities: day.nodes || [],
-        onReorderSuccess: (newActivities) => {
+        onReorderSuccess: () => {
             // Don't mutate props - the refetch will update the data
             console.log('[DayCard] Reorder successful, waiting for refetch');
         },
@@ -392,19 +450,56 @@ export function DayCard({
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                                                     <div className="relative flex items-start gap-3">
-                                                                        {/* Icon with background */}
-                                                                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
-                                                                            {getNodeIcon(node.type)}
-                                                                        </div>
+                                                                        {/* Photo or Icon */}
+                                                                        {node.location?.photos?.[0] ? (
+                                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                                                                                <img
+                                                                                    src={getPhotoUrl(node.location.photos[0], 200) || ''}
+                                                                                    alt={node.title}
+                                                                                    className="w-full h-full object-cover"
+                                                                                    onError={(e) => {
+                                                                                        const target = e.target as HTMLImageElement;
+                                                                                        target.style.display = 'none';
+                                                                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl">${getNodeIcon(node.type)}</div>`;
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                                                {getNodeIcon(node.type)}
+                                                                            </div>
+                                                                        )}
 
                                                                         {/* Content */}
                                                                         <div className="flex-1 min-w-0">
                                                                             {/* Header */}
-                                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                                            <div className="flex items-start justify-between gap-2 mb-1">
                                                                                 <div className="flex-1 min-w-0">
                                                                                     <h4 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
                                                                                         {node.title}
                                                                                     </h4>
+
+                                                                                    {/* Rating, Reviews, Price Level */}
+                                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                                        {node.location?.rating && (
+                                                                                            <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                                                                                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                                                                <span>{formatRating(node.location.rating)}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {node.location?.userRatingsTotal && (
+                                                                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                                                                <Users className="w-3 h-3" />
+                                                                                                <span>{formatReviewCount(node.location.userRatingsTotal)}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {node.location?.priceLevel && (
+                                                                                            <span className="text-xs font-medium text-green-600">
+                                                                                                {getPriceLevelIndicator(node.location.priceLevel)}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+
                                                                                     {node.location?.address && (
                                                                                         <p className="text-xs text-gray-600 flex items-center gap-1 line-clamp-1">
                                                                                             <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -442,7 +537,7 @@ export function DayCard({
                                                                                 {node.cost?.amount && (
                                                                                     <div className="flex items-center gap-1 font-medium">
                                                                                         <DollarSign className="w-3.5 h-3.5" />
-                                                                                        <span>${node.cost.amount.toLocaleString()}</span>
+                                                                                        <span>₹{node.cost.amount.toLocaleString()}</span>
                                                                                     </div>
                                                                                 )}
                                                                             </div>
@@ -455,7 +550,7 @@ export function DayCard({
                                                                             )}
 
                                                                             {/* Actions */}
-                                                                            <div className="flex items-center gap-2">
+                                                                            <div className="flex items-center gap-2 flex-wrap">
                                                                                 {!node.bookingRef && (
                                                                                     <Button
                                                                                         size="sm"
@@ -465,13 +560,23 @@ export function DayCard({
                                                                                         Book Now
                                                                                     </Button>
                                                                                 )}
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="ghost"
-                                                                                    className="h-8 text-xs px-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                                >
-                                                                                    View Details
-                                                                                </Button>
+                                                                                {node.location?.placeId && (
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        variant="ghost"
+                                                                                        className="h-8 text-xs px-3"
+                                                                                        onClick={() => window.open(getGoogleMapsUrl(node.location.placeId), '_blank')}
+                                                                                    >
+                                                                                        <ExternalLink className="w-3 h-3 mr-1" />
+                                                                                        View on Map
+                                                                                    </Button>
+                                                                                )}
+                                                                                {node.location?.photos && node.location.photos.length > 1 && (
+                                                                                    <Badge variant="secondary" className="h-8 px-2 text-xs">
+                                                                                        <ImageIcon className="w-3 h-3 mr-1" />
+                                                                                        {node.location.photos.length} photos
+                                                                                    </Badge>
+                                                                                )}
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -504,19 +609,56 @@ export function DayCard({
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                                     <div className="relative flex items-start gap-4">
-                                                        {/* Icon with background */}
-                                                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
-                                                            {getNodeIcon(node.type)}
-                                                        </div>
+                                                        {/* Photo or Icon */}
+                                                        {node.location?.photos?.[0] ? (
+                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                                                                <img
+                                                                    src={getPhotoUrl(node.location.photos[0], 200) || ''}
+                                                                    alt={node.title}
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        const target = e.target as HTMLImageElement;
+                                                                        target.style.display = 'none';
+                                                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl">${getNodeIcon(node.type)}</div>`;
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                                {getNodeIcon(node.type)}
+                                                            </div>
+                                                        )}
 
                                                         {/* Content */}
                                                         <div className="flex-1 min-w-0">
                                                             {/* Header */}
-                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                            <div className="flex items-start justify-between gap-2 mb-1">
                                                                 <div className="flex-1 min-w-0">
                                                                     <h4 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
                                                                         {node.title}
                                                                     </h4>
+
+                                                                    {/* Rating, Reviews, Price Level */}
+                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                        {node.location?.rating && (
+                                                                            <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                                                                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                                                <span>{formatRating(node.location.rating)}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {node.location?.userRatingsTotal && (
+                                                                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                                                <Users className="w-3 h-3" />
+                                                                                <span>{formatReviewCount(node.location.userRatingsTotal)}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {node.location?.priceLevel && (
+                                                                            <span className="text-xs font-medium text-green-600">
+                                                                                {getPriceLevelIndicator(node.location.priceLevel)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+
                                                                     {node.location?.address && (
                                                                         <p className="text-xs text-gray-600 flex items-center gap-1 line-clamp-1">
                                                                             <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -554,7 +696,7 @@ export function DayCard({
                                                                 {node.cost?.amount && (
                                                                     <div className="flex items-center gap-1 font-medium">
                                                                         <DollarSign className="w-3.5 h-3.5" />
-                                                                        <span>${node.cost.amount.toLocaleString()}</span>
+                                                                        <span>₹{node.cost.amount.toLocaleString()}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -567,7 +709,7 @@ export function DayCard({
                                                             )}
 
                                                             {/* Actions */}
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-2 flex-wrap">
                                                                 {!node.bookingRef && (
                                                                     <Button
                                                                         size="sm"
@@ -577,13 +719,23 @@ export function DayCard({
                                                                         Book Now
                                                                     </Button>
                                                                 )}
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    className="h-8 text-xs px-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                >
-                                                                    View Details
-                                                                </Button>
+                                                                {node.location?.placeId && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="h-8 text-xs px-3"
+                                                                        onClick={() => window.open(getGoogleMapsUrl(node.location.placeId), '_blank')}
+                                                                    >
+                                                                        <ExternalLink className="w-3 h-3 mr-1" />
+                                                                        View on Map
+                                                                    </Button>
+                                                                )}
+                                                                {node.location?.photos && node.location.photos.length > 1 && (
+                                                                    <Badge variant="secondary" className="h-8 px-2 text-xs">
+                                                                        <ImageIcon className="w-3 h-3 mr-1" />
+                                                                        {node.location.photos.length} photos
+                                                                    </Badge>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>

@@ -296,6 +296,22 @@ public class ChangeEngine {
                 updated.setVersion(current.getVersion() + 1);
                 updated.setUpdatedAt(System.currentTimeMillis());
                 
+                // 🔍 DEBUG: Verify data before saving to database
+                if (updated.getDays() != null && !updated.getDays().isEmpty()) {
+                    NormalizedDay firstDay = updated.getDays().get(0);
+                    if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                        NormalizedNode firstNode = firstDay.getNodes().get(0);
+                        logger.info("🔍 [ChangeEngine.apply] BEFORE SAVE TO DB - First node:");
+                        logger.info("   Title: {}", firstNode.getTitle());
+                        if (firstNode.getLocation() != null) {
+                            logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                            logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                            logger.info("   location.userRatingsTotal: {}", firstNode.getLocation().getUserRatingsTotal());
+                            logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                        }
+                    }
+                }
+                
                 // Update main record
                 itineraryJsonService.updateItinerary(updated);
                 
@@ -447,6 +463,16 @@ public class ChangeEngine {
                     String updatedNodeTitle = nodeToUpdate != null ? nodeToUpdate.getTitle() : op.getId();
                     if (updateNode(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
                         updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("content"), updatedNodeTitle));
+                        
+                        // 🔍 DEBUG: Verify node still has location data after update
+                        NormalizedNode verifyNode = findNodeById(itinerary, op.getId());
+                        if (verifyNode != null && verifyNode.getLocation() != null) {
+                            logger.info("🔍 [ChangeEngine] After updateNode - node {} location data:", op.getId());
+                            logger.info("   photos: {}", verifyNode.getLocation().getPhotos() != null ? verifyNode.getLocation().getPhotos().size() : "null");
+                            logger.info("   rating: {}", verifyNode.getLocation().getRating());
+                            logger.info("   userRatingsTotal: {}", verifyNode.getLocation().getUserRatingsTotal());
+                            logger.info("   priceLevel: {}", verifyNode.getLocation().getPriceLevel());
+                        }
                     }
                     break;
                 case "update_edge":
@@ -1053,8 +1079,48 @@ public class ChangeEngine {
      */
     private NormalizedItinerary deepCopy(NormalizedItinerary original) {
         try {
+            // 🔍 DEBUG: Check data before serialization
+            if (original.getDays() != null && !original.getDays().isEmpty()) {
+                NormalizedDay firstDay = original.getDays().get(0);
+                if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                    NormalizedNode firstNode = firstDay.getNodes().get(0);
+                    logger.info("🔍 [deepCopy] BEFORE serialization - First node:");
+                    logger.info("   Title: {}", firstNode.getTitle());
+                    if (firstNode.getLocation() != null) {
+                        logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                        logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                        logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                    }
+                }
+            }
+            
             String json = objectMapper.writeValueAsString(original);
+            
+            // 🔍 DEBUG: Check JSON string
+            logger.info("🔍 [deepCopy] JSON length: {} characters", json.length());
+            if (json.contains("\"photos\"")) {
+                logger.info("🔍 [deepCopy] JSON contains 'photos' field ✅");
+            } else {
+                logger.warn("🔍 [deepCopy] JSON does NOT contain 'photos' field ❌");
+            }
+            
             NormalizedItinerary copy = objectMapper.readValue(json, NormalizedItinerary.class);
+            
+            // 🔍 DEBUG: Check data after deserialization
+            if (copy.getDays() != null && !copy.getDays().isEmpty()) {
+                NormalizedDay firstDay = copy.getDays().get(0);
+                if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                    NormalizedNode firstNode = firstDay.getNodes().get(0);
+                    logger.info("🔍 [deepCopy] AFTER deserialization - First node:");
+                    logger.info("   Title: {}", firstNode.getTitle());
+                    if (firstNode.getLocation() != null) {
+                        logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                        logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                        logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                    }
+                }
+            }
+            
             // Ensure all collections are initialized
             if (copy.getDays() == null) {
                 copy.setDays(new ArrayList<>());
@@ -1455,7 +1521,30 @@ public class ChangeEngine {
             }
         }
         
-        logger.debug("Merged location data for node: {}", node.getId());
+        // *** CRITICAL FIX: Merge new Google Places fields ***
+        logger.info("💾 [ChangeEngine] Merging location data for node: {}", node.getId());
+        logger.info("   Before merge - location.photos: {}", currentLocation.getPhotos() != null ? currentLocation.getPhotos().size() : "null");
+        logger.info("   Before merge - location.rating: {}", currentLocation.getRating());
+        logger.info("   Before merge - location.userRatingsTotal: {}", currentLocation.getUserRatingsTotal());
+        logger.info("   Before merge - location.priceLevel: {}", currentLocation.getPriceLevel());
+        
+        if (updateLocation.getPhotos() != null) {
+            currentLocation.setPhotos(updateLocation.getPhotos());
+            logger.info("   ✅ Merged location.photos: {} items", updateLocation.getPhotos().size());
+        }
+        if (updateLocation.getUserRatingsTotal() != null) {
+            currentLocation.setUserRatingsTotal(updateLocation.getUserRatingsTotal());
+            logger.info("   ✅ Merged location.userRatingsTotal: {}", updateLocation.getUserRatingsTotal());
+        }
+        if (updateLocation.getPriceLevel() != null) {
+            currentLocation.setPriceLevel(updateLocation.getPriceLevel());
+            logger.info("   ✅ Merged location.priceLevel: {}", updateLocation.getPriceLevel());
+        }
+        
+        logger.info("   After merge - location.photos: {}", currentLocation.getPhotos() != null ? currentLocation.getPhotos().size() : "null");
+        logger.info("   After merge - location.rating: {}", currentLocation.getRating());
+        logger.info("   After merge - location.userRatingsTotal: {}", currentLocation.getUserRatingsTotal());
+        logger.info("   After merge - location.priceLevel: {}", currentLocation.getPriceLevel());
     }
     
     /**

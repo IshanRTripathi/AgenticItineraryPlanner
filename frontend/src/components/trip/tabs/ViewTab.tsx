@@ -201,7 +201,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
         <div className="relative h-[300px] rounded-xl overflow-hidden">
           {(() => {
             // Try to get image from first day's first node with photos
-            let imageUrl = null;
+            let imageUrl: string = '';
             
             // Search through days for a node with photos
             for (const day of days) {
@@ -224,7 +224,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
             return (
               <>
                 <img
-                  src={imageUrl}
+                  src={imageUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200'}
                   alt={destination}
                   className="w-full h-full object-cover"
                   onError={(e) => {

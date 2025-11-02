@@ -46,23 +46,41 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   // Use the itinerary from state (which gets updated by loadItinerary)
   // This ensures we always have the latest data
   const currentItinerary = state.itinerary || itinerary;
-  const days = currentItinerary?.itinerary?.days || [];
   
-  console.log('[PlanTab] Render - Days count:', days.length);
-  console.log('[PlanTab] Render - State itinerary:', state.itinerary?.id);
-  console.log('[PlanTab] Render - Prop itinerary:', itinerary?.id);
-  console.log('[PlanTab] Render - Using:', currentItinerary?.id);
+  // DEBUG: Log the entire itinerary structure to understand the data
+  console.log('[PlanTab] 🔍 FULL ITINERARY OBJECT:', currentItinerary);
+  console.log('[PlanTab] 🔍 ITINERARY KEYS:', currentItinerary ? Object.keys(currentItinerary) : 'null');
+  
+  // Backend returns days at top level, not nested under itinerary.itinerary
+  // Try multiple paths for backward compatibility
+  const days = currentItinerary?.days || currentItinerary?.itinerary?.days || [];
+  
+  console.log('[PlanTab] ✅ Days count:', days.length);
+  console.log('[PlanTab] ✅ State itinerary:', state.itinerary?.id);
+  console.log('[PlanTab] ✅ Prop itinerary:', itinerary?.id);
+  console.log('[PlanTab] ✅ Using:', currentItinerary?.id);
+  console.log('[PlanTab] ✅ Days path check:', {
+    hasDaysAtRoot: !!currentItinerary?.days,
+    hasDaysNested: !!currentItinerary?.itinerary?.days,
+    daysLength: days.length,
+    firstDay: days[0]
+  });
   
   // Debug: Check data structure
   if (days.length > 0) {
-    console.log('[PlanTab] First day structure:', {
+    console.log('[PlanTab] 📊 First day structure:', {
       hasNodes: !!days[0].nodes,
       hasComponents: !!days[0].components,
       nodesCount: days[0].nodes?.length || 0,
       componentsCount: days[0].components?.length || 0,
       firstNodeId: days[0].nodes?.[0]?.id,
-      firstComponentId: days[0].components?.[0]?.id
+      firstComponentId: days[0].components?.[0]?.id,
+      firstNodeTitle: days[0].nodes?.[0]?.title,
+      dayKeys: Object.keys(days[0])
     });
+    console.log('[PlanTab] 📊 First day FULL:', days[0]);
+  } else {
+    console.log('[PlanTab] ⚠️ NO DAYS FOUND - days array is empty!');
   }
   
   // Map to format expected by DayCard
@@ -81,7 +99,12 @@ export function PlanTab({ itinerary }: PlanTabProps) {
     }))
   }));
   
-  console.log('[PlanTab] Mapped days:', mappedDays);
+  console.log('[PlanTab] 🎯 Mapped days (what DayCard receives):', mappedDays);
+  console.log('[PlanTab] 🎯 Mapped days count:', mappedDays.length);
+  if (mappedDays.length > 0) {
+    console.log('[PlanTab] 🎯 First mapped day:', mappedDays[0]);
+    console.log('[PlanTab] 🎯 First mapped day nodes count:', mappedDays[0].nodes?.length);
+  }
 
 
   
@@ -146,6 +169,53 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                 <Button
                   variant="outline"
                   size="sm"
+                  disabled={isRefetching}
+                  onClick={async () => {
+                    if (!itineraryId) return;
+                    setIsRefetching(true);
+                    try {
+                      console.log('[PlanTab] 🔄 Triggering enrichment for itinerary:', itineraryId);
+                      
+                      // Import authService dynamically
+                      const { authService } = await import('@/services/authService');
+                      const token = await authService.getIdToken();
+                      
+                      const response = await fetch(`/api/v1/itineraries/${itineraryId}/enrich`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}`
+                        }
+                      });
+                      
+                      if (response.ok) {
+                        console.log('[PlanTab] ✅ Enrichment triggered successfully');
+                        // Wait for enrichment to complete then reload
+                        setTimeout(() => handleRefetchNeeded(), 3000);
+                      } else {
+                        console.error('[PlanTab] ❌ Enrichment failed:', response.status);
+                        setIsRefetching(false);
+                      }
+                    } catch (error) {
+                      console.error('[PlanTab] ❌ Enrichment error:', error);
+                      setIsRefetching(false);
+                    }
+                  }}
+                >
+                  {isRefetching ? (
+                    <>
+                      <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Enriching...
+                    </>
+                  ) : (
+                    <>
+                      ✨ Enrich Data
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={isGenerating}
                 >
                   <Plus className="w-4 h-4 mr-2" />
@@ -178,35 +248,49 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                 initial="initial"
                 animate="animate"
               >
-                {mappedDays.map((day: any, dayIndex: number) => {
-                  const dayColor = getDayColor(day.dayNumber);
-                  return (
-                    <motion.div 
-                      key={dayIndex} 
-                      variants={slideUp}
-                      className="relative"
-                    >
-                      {/* Timeline Dot - Colored to match day */}
-                      <div 
-                        className="absolute left-6 top-8 w-3 h-3 rounded-full border-4 border-background shadow-lg hidden md:block z-10" 
-                        style={{ backgroundColor: dayColor.primary }}
-                      />
-                      
-                      {/* Enhanced Day Card */}
-                      <div className="md:ml-16">
-                        <DayCard
-                          day={day}
-                          isExpanded={expandedDay === dayIndex}
-                          onToggle={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
-                          itineraryId={itineraryId}
-                          enableDragDrop={!isGenerating && !isRefetching}
-                          onRefetchNeeded={handleRefetchNeeded}
-                          isGenerating={isGenerating}
+                {mappedDays.length === 0 ? (
+                  <div className="p-8 text-center border-2 border-dashed border-gray-300 rounded-lg">
+                    <p className="text-gray-500">No days to display. Check console for debugging info.</p>
+                  </div>
+                ) : (
+                  mappedDays.map((day: any, dayIndex: number) => {
+                    console.log(`[PlanTab] 🎨 Rendering DayCard ${dayIndex + 1}:`, {
+                      dayNumber: day.dayNumber,
+                      date: day.date,
+                      location: day.location,
+                      nodesCount: day.nodes?.length,
+                      isExpanded: expandedDay === dayIndex
+                    });
+                    
+                    const dayColor = getDayColor(day.dayNumber);
+                    return (
+                      <motion.div 
+                        key={dayIndex} 
+                        variants={slideUp}
+                        className="relative"
+                      >
+                        {/* Timeline Dot - Colored to match day */}
+                        <div 
+                          className="absolute left-6 top-8 w-3 h-3 rounded-full border-4 border-background shadow-lg hidden md:block z-10" 
+                          style={{ backgroundColor: dayColor.primary }}
                         />
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                        
+                        {/* Enhanced Day Card */}
+                        <div className="md:ml-16">
+                          <DayCard
+                            day={day}
+                            isExpanded={expandedDay === dayIndex}
+                            onToggle={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
+                            itineraryId={itineraryId}
+                            enableDragDrop={!isGenerating && !isRefetching}
+                            onRefetchNeeded={handleRefetchNeeded}
+                            isGenerating={isGenerating}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
               </motion.div>
             </div>
 

@@ -151,10 +151,16 @@ function TripDetailContent() {
   const hasIncompleteDays = days.length < expectedTotalDays || 
                             days.some((day: any) => !day.nodes || day.nodes.length === 0);
   
+  // Check if all days have activities (more reliable than status)
+  const allDaysHaveActivities = days.length === expectedTotalDays && 
+                                 days.every((day: any) => day.nodes && day.nodes.length > 0);
+  
   const isGenerating = 
-    itinerary.status === 'generating' || 
-    itinerary.status === 'planning' ||
-    (hasIncompleteDays && days.length > 0 && days.length < expectedTotalDays);
+    (itinerary.status === 'generating' || 
+     itinerary.status === 'planning' ||
+     (hasIncompleteDays && days.length > 0 && days.length < expectedTotalDays)) &&
+    itinerary.status !== 'completed' &&
+    !allDaysHaveActivities; // Don't show if all days are complete
   
   // Debug logging
   console.log('[TripDetailPage] Itinerary status:', {

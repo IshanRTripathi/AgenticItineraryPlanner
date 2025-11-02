@@ -31,7 +31,7 @@ public class GooglePlacesService {
     private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place";
     
     // Place Details API fields to request
-    private static final String PLACE_DETAILS_FIELDS = "photos,reviews,opening_hours,price_level,rating,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number";
+    private static final String PLACE_DETAILS_FIELDS = "photos,reviews,opening_hours,price_level,rating,user_ratings_total,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number";
     
     // Retry configuration
     private static final int MAX_RETRIES = 5;
@@ -104,9 +104,19 @@ public class GooglePlacesService {
             
             // Handle API response
             if (response.isSuccessful() && response.getResult() != null) {
-                logger.debug("Successfully retrieved place details for {}: {}", placeId, response.getResult().getName());
+                PlaceDetails result = response.getResult();
+                logger.info("✅ [GooglePlacesService] Successfully retrieved place details for placeId: {}", placeId);
+                logger.info("   📍 Name: {}", result.getName());
+                logger.info("   ⭐ Rating: {}", result.getRating());
+                logger.info("   👥 User Ratings Total: {}", result.getUserRatingsTotal());
+                logger.info("   💰 Price Level: {}", result.getPriceLevel());
+                logger.info("   📸 Photos: {} photos", result.getPhotos() != null ? result.getPhotos().size() : 0);
+                logger.info("   💬 Reviews: {} reviews", result.getReviews() != null ? result.getReviews().size() : 0);
+                if (result.getPhotos() != null && !result.getPhotos().isEmpty()) {
+                    logger.info("   📸 First photo reference: {}", result.getPhotos().get(0).getPhotoReference().substring(0, Math.min(30, result.getPhotos().get(0).getPhotoReference().length())) + "...");
+                }
                 recordSuccess(); // Reset circuit breaker on success
-                return response.getResult();
+                return result;
             } else if (response.isRateLimited()) {
                 recordFailure();
                 throw new RuntimeException("Google Places API rate limit exceeded");

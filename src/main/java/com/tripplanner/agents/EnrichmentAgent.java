@@ -563,21 +563,31 @@ public class EnrichmentAgent extends BaseAgent {
                 // Then, check if node needs ENRICHMENT with photos/reviews
                 if (needsEnrichment(node)) {
                     try {
+                        logger.info("🔄 [EnrichmentAgent] Node {} needs enrichment, calling enrichNode()", node.getId());
                         // Enrich the node with Google Places data
                         NormalizedNode enrichedNode = enrichNode(node);
                         if (enrichedNode != null) {
+                            logger.info("✅ [EnrichmentAgent] enrichNode() returned enriched node for {}", node.getId());
+                            logger.info("   Enriched node location.photos: {}", enrichedNode.getLocation().getPhotos() != null ? enrichedNode.getLocation().getPhotos().size() : "null");
+                            logger.info("   Enriched node location.rating: {}", enrichedNode.getLocation().getRating());
+                            logger.info("   Enriched node location.userRatingsTotal: {}", enrichedNode.getLocation().getUserRatingsTotal());
+                            logger.info("   Enriched node location.priceLevel: {}", enrichedNode.getLocation().getPriceLevel());
+                            
                             ChangeOperation enrichOp = createEnrichmentOperation(enrichedNode);
                             operations.add(enrichOp);
+                            logger.info("✅ [EnrichmentAgent] Created ChangeOperation for node {}", node.getId());
+                        } else {
+                            logger.warn("⚠️ [EnrichmentAgent] enrichNode() returned null for node {}", node.getId());
                         }
                     } catch (Exception e) {
-                        logger.warn("Failed to enrich node {}: {}", node.getId(), e.getMessage());
+                        logger.error("❌ [EnrichmentAgent] Failed to enrich node {}: {}", node.getId(), e.getMessage(), e);
                         // Continue with other nodes even if one fails
                     }
                 }
             }
         }
 
-        logger.info("Created {} ENRICHMENT operations", operations.size());
+        logger.info("📊 [EnrichmentAgent] Created {} ENRICHMENT operations total", operations.size());
         return operations;
     }
     
@@ -847,13 +857,20 @@ public class EnrichmentAgent extends BaseAgent {
         }
 
         String placeId = node.getLocation().getPlaceId();
-        logger.debug("Enriching node {} with place ID {}", node.getId(), placeId);
+        logger.info("🔄 [EnrichmentAgent] Starting enrichment for node: {} ({})", node.getId(), node.getTitle());
+        logger.info("   📍 Place ID: {}", placeId);
 
         try {
             // Get place details from Google Places API
             PlaceDetails placeDetails = googlePlacesService.getPlaceDetails(placeId);
 
             if (placeDetails != null) {
+                logger.info("✅ [EnrichmentAgent] Received PlaceDetails from API:");
+                logger.info("   ⭐ Rating: {}", placeDetails.getRating());
+                logger.info("   👥 User Ratings Total: {}", placeDetails.getUserRatingsTotal());
+                logger.info("   💰 Price Level: {}", placeDetails.getPriceLevel());
+                logger.info("   📸 Photos: {}", placeDetails.getPhotos() != null ? placeDetails.getPhotos().size() : 0);
+                
                 // Create a copy of the node for ENRICHMENT
                 NormalizedNode enrichedNode = createNodeCopy(node);
 
@@ -863,16 +880,18 @@ public class EnrichmentAgent extends BaseAgent {
                 // Set ENRICHMENT timestamp
                 setEnrichmentTimestamp(enrichedNode);
 
-                logger.debug("Successfully enriched node {} with {} photos and {} reviews",
+                logger.info("✅ [EnrichmentAgent] Successfully enriched node {} with {} photos and {} reviews",
                         node.getId(),
                         placeDetails.getPhotos() != null ? placeDetails.getPhotos().size() : 0,
                         placeDetails.getReviews() != null ? placeDetails.getReviews().size() : 0);
 
                 return enrichedNode;
+            } else {
+                logger.warn("⚠️ [EnrichmentAgent] PlaceDetails returned null for placeId: {}", placeId);
             }
 
         } catch (Exception e) {
-            logger.error("Failed to enrich node {} with place ID {}: {}", node.getId(), placeId, e.getMessage());
+            logger.error("❌ [EnrichmentAgent] Failed to enrich node {} with place ID {}: {}", node.getId(), placeId, e.getMessage(), e);
         }
 
         return null;
@@ -979,6 +998,52 @@ public class EnrichmentAgent extends BaseAgent {
                 node.getLocation().setCoordinates(coords);
             }
         }
+        
+        // *** NEW: Update location object with photos, ratings, and price level for frontend ***
+        logger.info("📝 [EnrichmentAgent] Updating NodeLocation fields for node: {}", node.getId());
+        
+        // Set photos directly in location (extract photo references)
+        if (placeDetails.getPhotos() != null && !placeDetails.getPhotos().isEmpty()) {
+            List<String> photoReferences = placeDetails.getPhotos().stream()
+                    .map(Photo::getPhotoReference)
+                    .collect(java.util.stream.Collectors.toList());
+            node.getLocation().setPhotos(photoReferences);
+            logger.info("   ✅ Set {} photo references in location.photos", photoReferences.size());
+            logger.info("      First photo ref: {}", photoReferences.get(0).substring(0, Math.min(30, photoReferences.get(0).length())) + "...");
+        } else {
+            logger.warn("   ⚠️ No photos to set in location.photos");
+        }
+        
+        // Set rating in location (in addition to details)
+        if (placeDetails.getRating() != null) {
+            node.getLocation().setRating(placeDetails.getRating());
+            logger.info("   ✅ Set location.rating = {}", placeDetails.getRating());
+        } else {
+            logger.warn("   ⚠️ No rating to set in location.rating");
+        }
+        
+        // Set user ratings total
+        if (placeDetails.getUserRatingsTotal() != null) {
+            node.getLocation().setUserRatingsTotal(placeDetails.getUserRatingsTotal());
+            logger.info("   ✅ Set location.userRatingsTotal = {}", placeDetails.getUserRatingsTotal());
+        } else {
+            logger.warn("   ⚠️ No userRatingsTotal to set in location.userRatingsTotal");
+        }
+        
+        // Set price level
+        if (placeDetails.getPriceLevel() != null) {
+            node.getLocation().setPriceLevel(placeDetails.getPriceLevel());
+            logger.info("   ✅ Set location.priceLevel = {}", placeDetails.getPriceLevel());
+        } else {
+            logger.warn("   ⚠️ No priceLevel to set in location.priceLevel");
+        }
+        
+        // Verify the data was set correctly
+        logger.info("🔍 [EnrichmentAgent] Verification - NodeLocation after update:");
+        logger.info("   location.photos: {} items", node.getLocation().getPhotos() != null ? node.getLocation().getPhotos().size() : "null");
+        logger.info("   location.rating: {}", node.getLocation().getRating());
+        logger.info("   location.userRatingsTotal: {}", node.getLocation().getUserRatingsTotal());
+        logger.info("   location.priceLevel: {}", node.getLocation().getPriceLevel());
     }
 
     /**

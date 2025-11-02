@@ -14,7 +14,7 @@ export function InteractiveGlobe() {
     if (!containerRef.current) return;
 
     // Initialize globe with transparent background
-    const globe = Globe()(containerRef.current)
+    const globe = new Globe(containerRef.current)
       .backgroundColor('rgba(0,0,0,0)') // KEY: Transparent background
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')

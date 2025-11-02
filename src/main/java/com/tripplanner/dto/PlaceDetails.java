@@ -25,6 +25,9 @@ public class PlaceDetails {
     @JsonProperty("rating")
     private Double rating;
     
+    @JsonProperty("user_ratings_total")
+    private Integer userRatingsTotal;
+    
     @JsonProperty("price_level")
     private Integer priceLevel;
     
@@ -89,6 +92,14 @@ public class PlaceDetails {
     
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+    
+    public Integer getUserRatingsTotal() {
+        return userRatingsTotal;
+    }
+    
+    public void setUserRatingsTotal(Integer userRatingsTotal) {
+        this.userRatingsTotal = userRatingsTotal;
     }
     
     public Integer getPriceLevel() {
@@ -170,6 +181,7 @@ public class PlaceDetails {
                 ", name='" + name + '\'' +
                 ", formattedAddress='" + formattedAddress + '\'' +
                 ", rating=" + rating +
+                ", userRatingsTotal=" + userRatingsTotal +
                 ", priceLevel=" + priceLevel +
                 ", photos=" + (photos != null ? photos.size() : 0) + " photos" +
                 ", reviews=" + (reviews != null ? reviews.size() : 0) + " reviews" +
