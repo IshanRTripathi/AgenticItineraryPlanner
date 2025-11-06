@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 import { TripSidebar } from '@/components/trip/TripSidebar';
 import { MobileTabs } from '@/components/trip/MobileTabs';
 import { BookingModal } from '@/components/booking/BookingModal';
@@ -21,7 +23,9 @@ import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
 import { ErrorDisplay } from '@/components/error/ErrorDisplay';
 import { GenerationProgressBanner } from '@/components/trip/GenerationProgressBanner';
 import { UnifiedItineraryProvider, useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Eye, Map, CreditCard, DollarSign, Package, FileText, MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
  * Inner component that uses the UnifiedItineraryContext
@@ -32,6 +36,8 @@ function TripDetailContent() {
   const { state, loadItinerary } = useUnifiedItinerary();
   const [wasConnected, setWasConnected] = React.useState(false);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 1024px)');
 
   const { itinerary, loading, error, isConnected } = state;
 
@@ -297,7 +303,7 @@ function TripDetailContent() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0">
+    <div className="min-h-screen bg-background pb-20 md:pb-0 safe-bottom">
       {/* Premium Generation Progress Banner with Real-time Updates */}
       {shouldShowBanner ? (
         <GenerationProgressBanner
@@ -333,21 +339,38 @@ function TripDetailContent() {
 
       {/* Desktop: Sidebar + Content Layout */}
       <div className="flex h-screen overflow-hidden bg-muted">
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block">
-          <TripSidebar
-            tripId={id!}
-            destination={destination}
-            dateRange={formatDateRange(startDate, endDate)}
-            travelerCount={travelers}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
-        </div>
+        {/* Sidebar - Drawer on mobile, fixed on desktop */}
+        <TripSidebar
+          tripId={id!}
+          destination={destination}
+          dateRange={formatDateRange(startDate, endDate)}
+          travelerCount={travelers}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-6">
+        <main className={cn(
+          "flex-1 overflow-y-auto",
+          !isMobile && "lg:ml-0"
+        )}>
+          <div className="p-3 md:p-4 lg:p-6">
+            {/* Mobile Menu Button */}
+            {isMobile && (
+              <div className="mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSidebarOpen(true)}
+                  className="min-h-[44px] gap-2 touch-manipulation active:scale-95"
+                >
+                  <Menu className="w-4 h-4" />
+                  Menu
+                </Button>
+              </div>
+            )}
             {renderTabContent()}
           </div>
         </main>

@@ -77,7 +77,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 setStartDate(e.target.value);
                 handleDataChange({ startDate: e.target.value });
               }}
-              className="pl-10 h-12"
+              className="pl-10 min-h-[48px] h-12"
             />
           </div>
         </div>
@@ -94,7 +94,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 setEndDate(e.target.value);
                 handleDataChange({ endDate: e.target.value });
               }}
-              className="pl-10 h-12"
+              className="pl-10 min-h-[48px] h-12"
               min={startDate}
             />
           </div>
@@ -121,7 +121,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 size="sm"
                 onClick={() => updateCount('adults', -1)}
                 disabled={adults <= 1}
-                className="w-8 h-8 p-0 rounded-full"
+                className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-8 md:h-8 p-0 rounded-full touch-manipulation active:scale-95"
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -131,7 +131,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 size="sm"
                 onClick={() => updateCount('adults', 1)}
                 disabled={adults >= 9}
-                className="w-8 h-8 p-0 rounded-full"
+                className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-8 md:h-8 p-0 rounded-full touch-manipulation active:scale-95"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -150,7 +150,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 size="sm"
                 onClick={() => updateCount('children', -1)}
                 disabled={children <= 0}
-                className="w-8 h-8 p-0 rounded-full"
+                className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-8 md:h-8 p-0 rounded-full touch-manipulation active:scale-95"
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -160,7 +160,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 size="sm"
                 onClick={() => updateCount('children', 1)}
                 disabled={children >= 8}
-                className="w-8 h-8 p-0 rounded-full"
+                className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-8 md:h-8 p-0 rounded-full touch-manipulation active:scale-95"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -179,7 +179,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 size="sm"
                 onClick={() => updateCount('infants', -1)}
                 disabled={infants <= 0}
-                className="w-8 h-8 p-0 rounded-full"
+                className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-8 md:h-8 p-0 rounded-full touch-manipulation active:scale-95"
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -189,7 +189,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
                 size="sm"
                 onClick={() => updateCount('infants', 1)}
                 disabled={infants >= 2}
-                className="w-8 h-8 p-0 rounded-full"
+                className="min-w-[44px] min-h-[44px] w-10 h-10 md:w-8 md:h-8 p-0 rounded-full touch-manipulation active:scale-95"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -201,7 +201,7 @@ export function DatesTravelersStep({ data, onDataChange }: DatesTravelersStepPro
         <Button
           onClick={handleSuggestBestDates}
           disabled={suggestingDates}
-          className="w-full mt-4 h-12 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg transition-all font-medium"
+          className="w-full mt-4 min-h-[48px] h-12 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg transition-all font-medium touch-manipulation active:scale-95"
         >
           {suggestingDates ? 'Analyzing best dates...' : 'Suggest Best Travel Date'}
         </Button>

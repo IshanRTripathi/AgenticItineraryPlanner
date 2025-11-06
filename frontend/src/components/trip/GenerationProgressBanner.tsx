@@ -333,7 +333,7 @@ export function GenerationProgressBanner({
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-md">
+    <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 max-w-md mx-auto sm:mx-0">
       {/* Compact Glass Morphism Card */}
       <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xl border border-white/40 shadow-2xl">
         <div className="flex items-center gap-3">

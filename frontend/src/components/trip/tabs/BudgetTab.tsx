@@ -1,6 +1,7 @@
 /**
  * Budget Tab Component
  * Shows budget breakdown, spending analysis, and cost visualizations
+ * Task 19: Mobile-optimized with horizontal scroll for tables and responsive charts
  */
 
 import { useMemo } from 'react';
@@ -9,12 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
 import { useItinerary } from '@/hooks/useItinerary';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface BudgetTabProps {
   tripId: string;
 }
 
 export function BudgetTab({ tripId }: BudgetTabProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const { data: itinerary } = useItinerary(tripId);
   
   // Calculate real budget data from itinerary
@@ -85,16 +88,16 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
   const isOverBudget = budgetData.spent > budgetData.total;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6">
       {/* Budget Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Budget</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold">
               ${budgetData.total.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -104,12 +107,12 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Spent</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Spent</CardTitle>
             <TrendingUp className="h-4 w-4 text-error" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-error">
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-xl sm:text-2xl font-bold text-error">
               ${budgetData.spent.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -118,13 +121,13 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Remaining</CardTitle>
+        <Card className="sm:col-span-2 lg:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Remaining</CardTitle>
             <TrendingDown className="h-4 w-4 text-success" />
           </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
+          <CardContent className="p-4 sm:p-6">
+            <div className={`text-xl sm:text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
               ${Math.abs(budgetData.remaining).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -137,11 +140,11 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       {/* Budget Alert */}
       {percentageSpent > 80 && (
         <Card className="border-warning bg-warning/5">
-          <CardContent className="flex items-center gap-3 pt-6">
-            <AlertCircle className="h-5 w-5 text-warning flex-shrink-0" />
+          <CardContent className="flex items-start gap-3 p-4 sm:pt-6">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-warning">Budget Alert</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm sm:text-base font-medium text-warning">Budget Alert</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 You've spent {percentageSpent.toFixed(1)}% of your budget. Consider adjusting your spending.
               </p>
             </div>

@@ -1,34 +1,40 @@
+/**
+ * Travel Blogs Section
+ * Task 15: Mobile-optimized with responsive grid and touch-friendly cards
+ */
+
 import { Clock, Calendar, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { mockBlogs } from '../../data/mockBlogs';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export function TravelBlogs() {
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
+    <section className="py-8 sm:py-10 md:py-12 bg-gray-50">
+      <div className="container mx-auto px-3 sm:px-4">
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">Travel Inspiration</h2>
-            <p className="text-gray-600 mt-2">Discover stories and tips from fellow travelers</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="flex-1">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Travel Inspiration</h2>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Discover stories and tips from fellow travelers</p>
           </div>
-          <button className="hidden md:flex items-center text-primary hover:text-primary-hover font-medium transition-colors">
+          <button className="hidden md:flex items-center text-primary hover:text-primary-hover font-medium transition-colors min-h-[44px] touch-manipulation">
             View All Articles
             <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>
 
         {/* Blog Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {mockBlogs.map((blog) => (
             <BlogCard key={blog.id} blog={blog} />
           ))}
         </div>
 
         {/* Mobile View All Button */}
-        <div className="mt-8 md:hidden">
-          <button className="w-full flex items-center justify-center text-primary hover:text-primary-hover font-medium transition-colors py-3 border border-primary rounded-lg">
+        <div className="mt-6 sm:mt-8 md:hidden">
+          <button className="w-full flex items-center justify-center text-primary hover:text-primary-hover font-medium transition-colors py-3 min-h-[48px] border border-primary rounded-lg touch-manipulation active:scale-95">
             View All Articles
             <ArrowRight className="ml-2 h-4 w-4" />
           </button>
@@ -53,57 +59,59 @@ interface BlogCardProps {
 
 function BlogCard({ blog }: BlogCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer group p-0">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer group p-0 touch-manipulation active:scale-[0.98]">
       {/* Image */}
       <div className="relative aspect-video overflow-hidden">
         <img
           src={blog.imageUrl}
           alt={blog.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
         />
         {/* Category Badge */}
-        <div className="absolute top-4 left-4">
-          <Badge className="bg-white text-gray-900 hover:bg-white">
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+          <Badge className="bg-white text-gray-900 hover:bg-white text-xs">
             {blog.category}
           </Badge>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* Title */}
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
           {blog.title}
         </h3>
 
         {/* Excerpt */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+        <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-3">
           {blog.excerpt}
         </p>
 
         {/* Meta Information */}
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-gray-500 pt-3 sm:pt-4 border-t">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              <span>{blog.readTime} min read</span>
+              <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span>{blog.readTime} min</span>
             </div>
             <div className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>{blog.publishDate}</span>
+              <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden sm:inline">{blog.publishDate}</span>
+              <span className="sm:hidden">{blog.publishDate.split(' ')[0]}</span>
             </div>
           </div>
         </div>
 
         {/* Author */}
-        <div className="mt-3 text-xs text-gray-500">
+        <div className="mt-2 sm:mt-3 text-xs text-gray-500">
           By <span className="font-medium text-gray-700">{blog.author}</span>
         </div>
 
         {/* Read More Link */}
-        <button className="mt-4 text-sm font-medium text-primary hover:text-primary-hover flex items-center gap-1 transition-colors">
+        <button className="mt-3 sm:mt-4 text-xs sm:text-sm font-medium text-primary hover:text-primary-hover flex items-center gap-1 transition-colors min-h-[44px] touch-manipulation">
           Read More
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
         </button>
       </div>
     </Card>

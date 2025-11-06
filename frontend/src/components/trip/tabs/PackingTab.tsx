@@ -1,6 +1,7 @@
 /**
  * Packing Tab Component
  * AI-generated packing suggestions with smart categorization
+ * Task 18: Mobile-optimized with full-width cards and touch-friendly checkboxes
  */
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { SmartSuggestions } from '@/components/packing/SmartSuggestions';
 import { PackingTemplates } from '@/components/packing/PackingTemplates';
 import { staggerChildren, slideUp } from '@/utils/animations';
 import { Package } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 
 interface PackingItem {
@@ -103,6 +105,7 @@ const initialPackingList: PackingCategory[] = [
 ];
 
 export function PackingTab() {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [packingList, setPackingList] = useState<PackingCategory[]>(initialPackingList);
   const [showTemplates, setShowTemplates] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Record<number, boolean>>({
@@ -200,14 +203,14 @@ export function PackingTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Templates Toggle - Moved to top */}
       {!showTemplates && (
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => setShowTemplates(true)}
-          className="w-full py-3 px-4 bg-white border-2 border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+          className="w-full py-3 px-4 min-h-[48px] bg-white border-2 border-dashed border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all touch-manipulation active:scale-95"
         >
           Browse Packing Templates
         </motion.button>
@@ -222,37 +225,37 @@ export function PackingTab() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+        className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6"
       >
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">
-              <Package className="w-6 h-6 text-primary" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <h2 className="text-xl sm:text-2xl font-bold mb-1 flex items-center gap-2">
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               Packing List
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               AI-generated suggestions for your trip
             </p>
           </div>
           
           {/* Circular Progress */}
-          <div className="relative w-20 h-20">
-            <svg className="w-20 h-20 transform -rotate-90">
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
+            <svg className="w-16 h-16 sm:w-20 sm:h-20 transform -rotate-90">
               <circle
-                cx="40"
-                cy="40"
-                r="32"
+                cx={isMobile ? "32" : "40"}
+                cy={isMobile ? "32" : "40"}
+                r={isMobile ? "26" : "32"}
                 stroke="currentColor"
-                strokeWidth="6"
+                strokeWidth={isMobile ? "5" : "6"}
                 fill="none"
                 className="text-gray-200"
               />
               <motion.circle
-                cx="40"
-                cy="40"
-                r="32"
+                cx={isMobile ? "32" : "40"}
+                cy={isMobile ? "32" : "40"}
+                r={isMobile ? "26" : "32"}
                 stroke="currentColor"
-                strokeWidth="6"
+                strokeWidth={isMobile ? "5" : "6"}
                 fill="none"
                 strokeLinecap="round"
                 className={cn(
@@ -261,28 +264,28 @@ export function PackingTab() {
                   'text-green-500'
                 )}
                 initial={{ strokeDasharray: '0 999' }}
-                animate={{ strokeDasharray: `${progress * 2} 999` }}
+                animate={{ strokeDasharray: `${progress * (isMobile ? 1.6 : 2)} 999` }}
                 transition={{ duration: 1, ease: 'easeOut' }}
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-bold text-gray-900">{progress.toFixed(0)}%</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{progress.toFixed(0)}%</span>
             </div>
           </div>
         </div>
 
         {/* Summary Stats */}
-        <div className="flex gap-6">
+        <div className="flex gap-4 sm:gap-6">
           <div>
-            <div className="text-2xl font-bold text-gray-900">{totalItems}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900">{totalItems}</div>
             <div className="text-xs text-muted-foreground">Total Items</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-primary">{checkedItems}</div>
+            <div className="text-xl sm:text-2xl font-bold text-primary">{checkedItems}</div>
             <div className="text-xs text-muted-foreground">Packed</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-600">{totalItems - checkedItems}</div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-600">{totalItems - checkedItems}</div>
             <div className="text-xs text-muted-foreground">Remaining</div>
           </div>
         </div>
@@ -297,24 +300,24 @@ export function PackingTab() {
         addedSuggestionIds={addedSuggestionIds}
       />
 
-      {/* Category Cards - 2 Column Grid */}
+      {/* Category Cards - Responsive Grid */}
       <motion.div
         variants={staggerChildren}
         initial="initial"
         animate="animate"
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4"
       >
         {packingList.map((category, categoryIndex) => (
           <motion.div 
             key={categoryIndex} 
             variants={slideUp} 
-            className={expandedCategories[categoryIndex] ? "h-[400px]" : "h-auto"}
+            className={expandedCategories[categoryIndex] ? "h-auto sm:h-[400px]" : "h-auto"}
           >
             <PackingCategoryCard
               name={category.name}
               icon={category.icon}
               items={category.items}
-              defaultExpanded={categoryIndex < 2}
+              defaultExpanded={isMobile ? false : categoryIndex < 2}
               onToggleItem={(itemId) => toggleItem(categoryIndex, itemId)}
               onAddItem={(itemName) => {
                 const newItem: PackingItem = {

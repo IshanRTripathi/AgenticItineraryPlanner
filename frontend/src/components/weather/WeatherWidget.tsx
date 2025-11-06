@@ -1,6 +1,7 @@
 /**
  * Weather Widget Component
  * Displays weather forecast for trip locations
+ * Task 14: Mobile-optimized with stacked layout and responsive icons
  */
 
 import { useQuery } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ import {
   Droplets,
   Loader2,
 } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { weatherService } from '@/services/weatherService';
 
 interface WeatherWidgetProps {
@@ -31,6 +33,7 @@ const getWeatherIcon = (condition: string) => {
 };
 
 export function WeatherWidget({ location, date }: WeatherWidgetProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const { data: weather, isLoading, error } = useQuery({
     queryKey: ['weather', location, date],
     queryFn: async () => {
@@ -43,12 +46,12 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
   if (!import.meta.env.VITE_OPENWEATHER_API_KEY) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Weather Forecast</CardTitle>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-base">Weather Forecast</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            <Cloud className="w-8 h-8 mx-auto mb-2 opacity-50" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="text-center py-3 sm:py-4 text-muted-foreground text-xs sm:text-sm">
+            <Cloud className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-50" />
             <p>Weather API not configured</p>
           </div>
         </CardContent>
@@ -59,12 +62,12 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Weather Forecast</CardTitle>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-base">Weather Forecast</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="flex items-center justify-center py-3 sm:py-4">
+            <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-primary" />
           </div>
         </CardContent>
       </Card>
@@ -74,12 +77,12 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
   if (error || !weather) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Weather Forecast</CardTitle>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-base">Weather Forecast</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-4 text-muted-foreground text-sm">
-            <Cloud className="w-8 h-8 mx-auto mb-2 opacity-50" />
+        <CardContent className="p-3 sm:p-6">
+          <div className="text-center py-3 sm:py-4 text-muted-foreground text-xs sm:text-sm">
+            <Cloud className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-50" />
             <p>Unable to load weather data</p>
             {error && <p className="text-xs mt-2">{String(error)}</p>}
           </div>
@@ -92,32 +95,36 @@ export function WeatherWidget({ location, date }: WeatherWidgetProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center justify-between">
+      <CardHeader className="p-3 sm:p-6">
+        <CardTitle className="text-sm sm:text-base flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <span>Weather Forecast</span>
-          <Badge variant="secondary">{weather.city}</Badge>
+          <Badge variant="secondary" className="text-xs">{weather.city}</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <WeatherIcon className="w-12 h-12 text-primary" />
+      <CardContent className="p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* Main weather display */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <WeatherIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary flex-shrink-0" />
             <div>
-              <div className="text-3xl font-bold">{weather.temperature}°C</div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-2xl sm:text-3xl font-bold">{weather.temperature}°C</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 {weather.description}
               </div>
             </div>
           </div>
 
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Droplets className="w-4 h-4" />
-              <span>{weather.humidity}% humidity</span>
+          {/* Weather details */}
+          <div className="flex sm:flex-col gap-4 sm:gap-2 text-xs sm:text-sm w-full sm:w-auto">
+            <div className="flex items-center gap-2 text-muted-foreground flex-1 sm:flex-initial">
+              <Droplets className="w-4 h-4 flex-shrink-0" />
+              <span>{weather.humidity}%</span>
+              <span className="hidden sm:inline">humidity</span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Wind className="w-4 h-4" />
-              <span>{weather.windSpeed} km/h wind</span>
+            <div className="flex items-center gap-2 text-muted-foreground flex-1 sm:flex-initial">
+              <Wind className="w-4 h-4 flex-shrink-0" />
+              <span>{weather.windSpeed} km/h</span>
+              <span className="hidden sm:inline">wind</span>
             </div>
           </div>
         </div>

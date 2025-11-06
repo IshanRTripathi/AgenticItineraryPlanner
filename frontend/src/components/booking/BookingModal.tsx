@@ -4,7 +4,8 @@
  */
 
 import { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -73,17 +74,23 @@ export function BookingModal({
     }
   };
 
+  const isMobile = useMediaQuery('(max-width: 768px)');
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[90vw] w-full h-[90vh] p-0 gap-0 flex flex-col overflow-hidden rounded-xl border-2 border-gray-200 shadow-2xl">
+    <ResponsiveModal 
+      open={isOpen} 
+      onOpenChange={handleClose}
+      className="max-w-[95vw] md:max-w-[90vw] w-full h-[95vh] md:h-[90vh] p-0 gap-0 flex flex-col overflow-hidden"
+    >
+      <div className="flex flex-col h-full">
         {/* Close Button - Top Right */}
         <Button
           variant="ghost"
           size="icon"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-50 h-9 w-9 rounded-full bg-white/95 hover:bg-white shadow-lg border-2 border-gray-200 hover:border-gray-300 transition-all"
+          className="absolute right-2 top-2 md:right-4 md:top-4 z-50 min-w-[44px] min-h-[44px] w-11 h-11 md:w-9 md:h-9 rounded-full bg-white/95 hover:bg-white shadow-lg border-2 border-gray-200 hover:border-gray-300 transition-all touch-manipulation active:scale-95"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5 md:w-4 md:h-4" />
         </Button>
 
         {/* Iframe Container - 16:9 aspect ratio */}
@@ -131,7 +138,7 @@ export function BookingModal({
                   variant="outline"
                   size="sm"
                   onClick={handleOpenInNewTab}
-                  className="border-2 hover:border-primary/50 shadow-sm"
+                  className="border-2 hover:border-primary/50 shadow-sm min-h-[44px] touch-manipulation active:scale-95"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Open in New Tab</span>
@@ -141,7 +148,7 @@ export function BookingModal({
                   variant="primary"
                   size="sm"
                   onClick={() => setShowMarkBooked(true)}
-                  className="shadow-md hover:shadow-lg transition-shadow"
+                  className="shadow-md hover:shadow-lg transition-shadow min-h-[44px] touch-manipulation active:scale-95"
                 >
                   <Check className="w-4 h-4 mr-2" />
                   Mark as Booked
@@ -150,7 +157,7 @@ export function BookingModal({
                   variant="ghost"
                   size="sm"
                   onClick={handleClose}
-                  className="hover:bg-gray-100"
+                  className="hover:bg-gray-100 min-h-[44px] touch-manipulation active:scale-95"
                 >
                   Book Later
                 </Button>
@@ -234,7 +241,7 @@ export function BookingModal({
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ResponsiveModal>
   );
 }

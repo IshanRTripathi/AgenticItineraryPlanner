@@ -103,16 +103,16 @@ export function TripWizard() {
     };
 
     return (
-        <Card className="max-w-4xl mx-auto p-8 shadow-elevation-3">
+        <Card className="md:max-w-4xl md:mx-auto md:p-8 md:shadow-elevation-3 min-h-screen md:min-h-0 p-4 rounded-none md:rounded-lg">
             {/* Header */}
-            <div className="mb-8 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary-600 mb-4">
-                    <Sparkles className="w-8 h-8 text-white" />
+            <div className="mb-6 md:mb-8 text-center">
+                <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-primary to-primary-600 mb-3 md:mb-4">
+                    <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                     Plan Your Perfect Trip
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-sm md:text-base text-muted-foreground">
                     Let our AI create a personalized itinerary just for you
                 </p>
             </div>
@@ -121,7 +121,7 @@ export function TripWizard() {
             <WizardProgress currentStep={currentStep} steps={STEPS} />
 
             {/* Step Content */}
-            <div className="my-8">
+            <div className="my-6 md:my-8">
                 <CurrentStepComponent
                     data={formData}
                     onDataChange={handleStepData}
@@ -129,12 +129,12 @@ export function TripWizard() {
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between gap-4">
+            <div className="flex justify-between gap-3 md:gap-4">
                 <Button
                     variant="outline"
                     onClick={handleBack}
                     disabled={isFirstStep}
-                    className="min-w-32"
+                    className="min-w-[120px] md:min-w-32 min-h-[48px] touch-manipulation active:scale-95"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back
@@ -142,7 +142,7 @@ export function TripWizard() {
 
                 <Button
                     onClick={handleNext}
-                    className="min-w-32"
+                    className="min-w-[120px] md:min-w-32 min-h-[48px] touch-manipulation active:scale-95"
                 >
                     {isLastStep ? 'Create Itinerary' : 'Next'}
                     {!isLastStep && <ArrowRight className="w-4 h-4 ml-2" />}

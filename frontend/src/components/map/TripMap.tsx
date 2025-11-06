@@ -2,17 +2,21 @@
  * Trip Map Component
  * Google Maps integration showing trip locations and routes
  * Uses smart coordinate resolution with fallback strategies
+ * Task 10: Mobile-optimized map with responsive layout and touch controls
  */
 
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Navigation, Loader2, AlertCircle, SlidersHorizontal } from 'lucide-react';
 import type { NormalizedItinerary, Coordinates } from '@/types/dto';
 import { useGoogleMaps } from '@/hooks/useGoogleMaps';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { coordinateResolver } from '@/services/coordinateResolver';
 import { DAY_COLORS } from '@/constants/dayColors';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 
 interface TripMapProps {
@@ -109,6 +113,7 @@ function createMarkerIcon(dayColor: string, isHighlighted: boolean): string {
 }
 
 export function TripMap({ itinerary }: TripMapProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const polylinesRef = useRef<any[]>([]);
@@ -135,6 +140,7 @@ export function TripMap({ itinerary }: TripMapProps) {
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [highlightedDay, setHighlightedDay] = useState<number | null>(null);
   const [showAllDays, setShowAllDays] = useState(true);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Extract destination city from itinerary
   // Extract just the city name, removing country suffix if present
@@ -385,7 +391,12 @@ export function TripMap({ itinerary }: TripMapProps) {
         ],
         mapTypeControl: false,
         streetViewControl: false,
-        fullscreenControl: true,
+        fullscreenControl: !isMobile, // Hide fullscreen on mobile
+        zoomControl: true,
+        zoomControlOptions: {
+          position: isMobile ? api.maps.ControlPosition.RIGHT_BOTTOM : api.maps.ControlPosition.RIGHT_CENTER,
+        },
+        gestureHandling: 'greedy', // Better touch handling on mobile
       });
     }
 
@@ -441,49 +452,49 @@ export function TripMap({ itinerary }: TripMapProps) {
 
       const infoWindow = new api.maps.InfoWindow({
         content: `
-          <div style="padding: 14px; min-width: 240px; font-family: system-ui, -apple-system, sans-serif;">
+          <div style="padding: 12px; max-width: 280px; min-width: 200px; font-family: system-ui, -apple-system, sans-serif;">
             <!-- Header -->
-            <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: start; gap: 10px; margin-bottom: 10px;">
               <div style="
-                width: 36px;
-                height: 36px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
                 background: ${dayColor.primary};
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 20px;
+                font-size: 18px;
                 flex-shrink: 0;
               ">
                 ${typeInfo.emoji}
               </div>
               <div style="flex: 1; min-width: 0;">
-                <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 600; color: #111827; line-height: 1.3;">
+                <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600; color: #111827; line-height: 1.3; word-wrap: break-word;">
                   ${node.title}
                 </h3>
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; flex-wrap: wrap;">
                   <span style="
                     display: inline-flex;
                     align-items: center;
-                    padding: 3px 10px;
-                    border-radius: 14px;
+                    padding: 2px 8px;
+                    border-radius: 12px;
                     background: ${dayColor.light};
                     color: ${dayColor.primary};
                     font-weight: 600;
-                    font-size: 12px;
+                    font-size: 11px;
                   ">
                     Day ${node.day}
                   </span>
-                  <span style="color: #6b7280;">${typeInfo.label}</span>
+                  <span style="color: #6b7280; font-size: 11px;">${typeInfo.label}</span>
                 </div>
               </div>
             </div>
             <!-- Confidence indicator -->
             <div style="
-              padding: 8px 12px;
+              padding: 6px 10px;
               background: #f9fafb;
-              border-radius: 8px;
-              font-size: 12px;
+              border-radius: 6px;
+              font-size: 11px;
               color: #6b7280;
               border-left: 3px solid ${dayColor.primary};
             ">
@@ -491,6 +502,7 @@ export function TripMap({ itinerary }: TripMapProps) {
             </div>
           </div>
         `,
+        maxWidth: 280,
       });
 
       marker.addListener('click', () => {
@@ -626,164 +638,202 @@ export function TripMap({ itinerary }: TripMapProps) {
     );
   }
 
-  return (
-    <div className="h-full flex gap-4">
-      {/* Left Sidebar - Day Filters */}
-      {days.length > 1 && (
-        <div className="w-64 flex-shrink-0 space-y-3">
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">Filter by Day</h3>
-            <p className="text-xs text-gray-600">
-              {filteredNodes.length} of {nodes.length} locations
-            </p>
-          </div>
-
-          {/* All Days button */}
-          <button
-            onClick={() => {
-              const allDaysSelected = selectedDays.size === days.length;
-              if (allDaysSelected) {
-                setSelectedDays(new Set());
-                setShowAllDays(false);
-              } else {
-                setShowAllDays(true);
-                setSelectedDays(new Set(days.map((d: any) => d.dayNumber)));
-              }
-              setHighlightedDay(null);
-            }}
-            className={cn(
-              "w-full px-4 py-3 rounded-lg text-sm font-medium transition-all",
-              "border-2 flex items-center gap-3",
-              selectedDays.size === days.length
-                ? "border-primary bg-primary text-white shadow-md"
-                : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 text-gray-700"
-            )}
-          >
-            <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm flex-shrink-0" />
-            <span>All Days</span>
-          </button>
-
-          {/* Individual Day Buttons - Vertical Stack */}
-          <div className="space-y-2">
-            {days.map((day: any, index: number) => {
-              const dayColor = DAY_COLORS[index % DAY_COLORS.length];
-              const isSelected = selectedDays.has(day.dayNumber);
-              const isHighlighted = highlightedDay === day.dayNumber;
-              const dayNodeCount = nodesByDay.get(day.dayNumber)?.length || 0;
-
-              return (
-                <button
-                  key={day.dayNumber}
-                  onClick={() => {
-                    setShowAllDays(false);
-                    setSelectedDays(prev => {
-                      const next = new Set(prev);
-                      if (next.has(day.dayNumber)) {
-                        next.delete(day.dayNumber);
-                        if (highlightedDay === day.dayNumber) {
-                          setHighlightedDay(null);
-                        }
-                      } else {
-                        next.add(day.dayNumber);
-                      }
-                      return next;
-                    });
-                  }}
-                  onMouseEnter={() => setHighlightedDay(day.dayNumber)}
-                  onMouseLeave={() => setHighlightedDay(null)}
-                  className={cn(
-                    "w-full px-4 py-3 rounded-lg text-sm font-medium transition-all",
-                    "border-2 flex items-center justify-between gap-3",
-                    isSelected
-                      ? "border-transparent shadow-md"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm",
-                    isHighlighted && "ring-2 ring-offset-1 scale-[1.02]"
-                  )}
-                  style={{
-                    backgroundColor: isSelected ? dayColor.light : undefined,
-                    color: isSelected ? dayColor.primary : undefined,
-                    ...(isHighlighted && { '--tw-ring-color': dayColor.primary } as any),
-                  }}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {/* Color indicator */}
-                    <div
-                      className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
-                      style={{ backgroundColor: dayColor.primary }}
-                    />
-
-                    <span className="truncate">Day {day.dayNumber}</span>
-                  </div>
-
-                  {/* Activity count badge */}
-                  {dayNodeCount > 0 && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-white/80 font-semibold flex-shrink-0">
-                      {dayNodeCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+  // Day filter content component (shared between mobile and desktop)
+  const DayFiltersContent = () => (
+    <div className="space-y-3">
+      {!isMobile && (
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-gray-900 mb-1">Filter by Day</h3>
+          <p className="text-xs text-gray-600">
+            {filteredNodes.length} of {nodes.length} locations
+          </p>
         </div>
       )}
 
-      {/* Right Side - Map */}
+      {/* All Days button */}
+      <button
+        onClick={() => {
+          const allDaysSelected = selectedDays.size === days.length;
+          if (allDaysSelected) {
+            setSelectedDays(new Set());
+            setShowAllDays(false);
+          } else {
+            setShowAllDays(true);
+            setSelectedDays(new Set(days.map((d: any) => d.dayNumber)));
+          }
+          setHighlightedDay(null);
+          if (isMobile) setIsFiltersOpen(false);
+        }}
+        className={cn(
+          "w-full px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all touch-manipulation active:scale-95",
+          "border-2 flex items-center gap-3",
+          selectedDays.size === days.length
+            ? "border-primary bg-primary text-white shadow-md"
+            : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 text-gray-700"
+        )}
+      >
+        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm flex-shrink-0" />
+        <span>All Days</span>
+      </button>
+
+      {/* Individual Day Buttons - Vertical Stack */}
+      <div className="space-y-2">
+        {days.map((day: any, index: number) => {
+          const dayColor = DAY_COLORS[index % DAY_COLORS.length];
+          const isSelected = selectedDays.has(day.dayNumber);
+          const isHighlighted = highlightedDay === day.dayNumber;
+          const dayNodeCount = nodesByDay.get(day.dayNumber)?.length || 0;
+
+          return (
+            <button
+              key={day.dayNumber}
+              onClick={() => {
+                setShowAllDays(false);
+                setSelectedDays(prev => {
+                  const next = new Set(prev);
+                  if (next.has(day.dayNumber)) {
+                    next.delete(day.dayNumber);
+                    if (highlightedDay === day.dayNumber) {
+                      setHighlightedDay(null);
+                    }
+                  } else {
+                    next.add(day.dayNumber);
+                  }
+                  return next;
+                });
+              }}
+              onMouseEnter={() => !isMobile && setHighlightedDay(day.dayNumber)}
+              onMouseLeave={() => !isMobile && setHighlightedDay(null)}
+              className={cn(
+                "w-full px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all touch-manipulation active:scale-95",
+                "border-2 flex items-center justify-between gap-3",
+                isSelected
+                  ? "border-transparent shadow-md"
+                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm",
+                isHighlighted && "ring-2 ring-offset-1 scale-[1.02]"
+              )}
+              style={{
+                backgroundColor: isSelected ? dayColor.light : undefined,
+                color: isSelected ? dayColor.primary : undefined,
+                ...(isHighlighted && { '--tw-ring-color': dayColor.primary } as any),
+              }}
+            >
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {/* Color indicator */}
+                <div
+                  className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
+                  style={{ backgroundColor: dayColor.primary }}
+                />
+
+                <span className="truncate">Day {day.dayNumber}</span>
+              </div>
+
+              {/* Activity count badge */}
+              {dayNodeCount > 0 && (
+                <span className="text-xs px-2 py-1 rounded-full bg-white/80 font-semibold flex-shrink-0">
+                  {dayNodeCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full flex flex-col md:flex-row gap-3 md:gap-4">
+      {/* Mobile: Filter Button */}
+      {isMobile && days.length > 1 && (
+        <div className="flex-shrink-0">
+          <Button
+            onClick={() => setIsFiltersOpen(true)}
+            variant="outline"
+            className="w-full min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+          >
+            <SlidersHorizontal className="w-4 h-4 mr-2" />
+            Day Filters
+            {selectedDays.size < days.length && (
+              <Badge variant="secondary" className="ml-2">
+                {selectedDays.size}/{days.length}
+              </Badge>
+            )}
+          </Button>
+
+          <ResponsiveModal
+            open={isFiltersOpen}
+            onOpenChange={setIsFiltersOpen}
+            title="Filter by Day"
+            description={`${filteredNodes.length} of ${nodes.length} locations`}
+          >
+            <DayFiltersContent />
+          </ResponsiveModal>
+        </div>
+      )}
+
+      {/* Desktop: Left Sidebar - Day Filters */}
+      {!isMobile && days.length > 1 && (
+        <div className="w-64 flex-shrink-0">
+          <DayFiltersContent />
+        </div>
+      )}
+
+      {/* Map Container */}
       <Card className="flex-1 flex flex-col">
-        <CardContent className="p-3 flex-1 flex flex-col">
-          {/* Map Container */}
+        <CardContent className="p-2 sm:p-3 flex-1 flex flex-col">
+          {/* Map */}
           <div
             ref={mapRef}
-            className="w-full flex-1 min-h-[650px] rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200"
+            className="w-full flex-1 h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg md:rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200 touch-manipulation"
           />
 
           {/* Resolution statistics */}
           {resolutionStats.total > 0 && (
-            <div className="mt-4 space-y-3">
-              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-3 md:mt-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm" />
-                  <span>{resolutionStats.exact} exact</span>
+                  <span className="text-xs sm:text-sm">{resolutionStats.exact} exact</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
-                  <span>{resolutionStats.approximate} approximate</span>
+                  <span className="text-xs sm:text-sm">{resolutionStats.approximate} approx</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
-                  <span>{resolutionStats.city} city center</span>
+                  <span className="text-xs sm:text-sm">{resolutionStats.city} city</span>
                 </div>
                 {resolutionStats.fallback > 0 && (
                   <div className="flex items-center gap-1.5">
                     <AlertCircle className="w-3 h-3 text-gray-500" />
-                    <span>{resolutionStats.fallback} fallback</span>
+                    <span className="text-xs sm:text-sm">{resolutionStats.fallback} fallback</span>
                   </div>
                 )}
                 {resolutionStats.filtered > 0 && (
                   <div className="flex items-center gap-1.5">
                     <span className="text-gray-400">•</span>
-                    <span>{resolutionStats.filtered} generic filtered</span>
+                    <span className="text-xs sm:text-sm">{resolutionStats.filtered} filtered</span>
                   </div>
                 )}
               </div>
 
               {/* Failed nodes section */}
               {failedNodes.length > 0 && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-amber-900 mb-1">
-                        Locations not shown on map ({failedNodes.length})
+                      <p className="text-xs sm:text-sm font-semibold text-amber-900 mb-1">
+                        Locations not shown ({failedNodes.length})
                       </p>
-                      <div className="space-y-1">
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
                         {failedNodes.map((node, idx) => (
                           <div key={idx} className="text-xs text-amber-700">
                             <span className="font-medium">Day {node.day}:</span> {node.title}
                           </div>
                         ))}
                       </div>
-                      <p className="text-xs text-amber-600 mt-2">
+                      <p className="text-xs text-amber-600 mt-2 hidden sm:block">
                         These locations couldn't be resolved to map coordinates.
                       </p>
                     </div>

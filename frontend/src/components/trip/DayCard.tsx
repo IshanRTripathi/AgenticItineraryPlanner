@@ -567,13 +567,13 @@ export function DayCard({
                                                                                 </p>
                                                                             )}
 
-                                                                            {/* Actions */}
-                                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                            {/* Actions - Stack vertically on mobile */}
+                                                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                                                                 {!node.bookingRef && (
                                                                                     <Button
                                                                                         size="sm"
                                                                                         variant="outline"
-                                                                                        className="h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors touch-manipulation active:scale-95"
                                                                                     >
                                                                                         Book Now
                                                                                     </Button>
@@ -582,7 +582,7 @@ export function DayCard({
                                                                                     <Button
                                                                                         size="sm"
                                                                                         variant="ghost"
-                                                                                        className="h-8 text-xs px-3"
+                                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 touch-manipulation active:scale-95"
                                                                                         onClick={() => window.open(getGoogleMapsUrl(node.location.placeId), '_blank')}
                                                                                     >
                                                                                         <ExternalLink className="w-3 h-3 mr-1" />
@@ -627,9 +627,9 @@ export function DayCard({
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                                     <div className="relative flex items-start gap-4">
-                                                        {/* Photo or Icon */}
+                                                        {/* Photo or Icon - Responsive sizing */}
                                                         {node.location?.photos?.[0] ? (
-                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                                                            <div className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
                                                                 <img
                                                                     src={getPhotoUrl(node.location.photos[0], 200) || ''}
                                                                     alt={node.title}
@@ -637,12 +637,12 @@ export function DayCard({
                                                                     onError={(e) => {
                                                                         const target = e.target as HTMLImageElement;
                                                                         target.style.display = 'none';
-                                                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl">${getNodeIcon(node.type)}</div>`;
+                                                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl sm:text-2xl">${getNodeIcon(node.type)}</div>`;
                                                                     }}
                                                                 />
                                                             </div>
                                                         ) : (
-                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                            <div className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                                                                 {getNodeIcon(node.type)}
                                                             </div>
                                                         )}
@@ -656,8 +656,8 @@ export function DayCard({
                                                                         {node.title}
                                                                     </h4>
 
-                                                                    {/* Rating, Reviews, Price Level */}
-                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                    {/* Rating, Reviews, Price Level - Stack on mobile */}
+                                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
                                                                         {node.location?.rating && (
                                                                             <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
                                                                                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -726,13 +726,13 @@ export function DayCard({
                                                                 </p>
                                                             )}
 
-                                                            {/* Actions */}
-                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                            {/* Actions - Stack vertically on mobile */}
+                                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                                                 {!node.bookingRef && (
                                                                     <Button
                                                                         size="sm"
                                                                         variant="outline"
-                                                                        className="h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors touch-manipulation active:scale-95"
                                                                     >
                                                                         Book Now
                                                                     </Button>
@@ -741,7 +741,7 @@ export function DayCard({
                                                                     <Button
                                                                         size="sm"
                                                                         variant="ghost"
-                                                                        className="h-8 text-xs px-3"
+                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 touch-manipulation active:scale-95"
                                                                         onClick={() => window.open(getGoogleMapsUrl(node.location.placeId), '_blank')}
                                                                     >
                                                                         <ExternalLink className="w-3 h-3 mr-1" />

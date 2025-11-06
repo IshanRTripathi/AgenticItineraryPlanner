@@ -1,12 +1,13 @@
 /**
  * Trip Sidebar Component
  * Fixed sidebar navigation for trip management
- * Task 24.2-24.5
+ * Mobile-optimized: Drawer on mobile/tablet, fixed sidebar on desktop
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Drawer } from '@/components/ui/drawer';
 import {
   ArrowLeft,
   Eye,
@@ -22,11 +23,13 @@ import {
   Users,
   Loader2,
   MessageSquare,
+  Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { exportService } from '@/services/exportService';
 import { useToast } from '@/components/ui/use-toast';
 import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { ExportOptionsModal, ExportOptions } from '@/components/export/ExportOptionsModal';
 import { ShareModal } from '@/components/share/ShareModal';
 
@@ -37,6 +40,8 @@ interface TripSidebarProps {
   travelerCount: number;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const NAV_ITEMS = [
@@ -56,6 +61,8 @@ export function TripSidebar({
   travelerCount,
   activeTab,
   onTabChange,
+  isOpen = true,
+  onClose,
 }: TripSidebarProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -64,6 +71,7 @@ export function TripSidebar({
   const [isSharing, setIsSharing] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 1024px)');
 
   const handleBack = () => {
     navigate('/dashboard');
@@ -137,15 +145,22 @@ export function TripSidebar({
     }
   };
 
-  return (
-    <aside className="w-[280px] h-screen bg-white border-r border-border flex flex-col">
+  const handleTabClick = (tabId: string) => {
+    onTabChange(tabId);
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
+  const sidebarContent = (
+    <>
       {/* Header */}
       <div className="p-4 border-b border-border">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleBack}
-          className="-ml-2"
+          className="min-w-[44px] min-h-[44px] -ml-2 touch-manipulation active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
@@ -161,9 +176,10 @@ export function TripSidebar({
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => handleTabClick(item.id)}
               className={cn(
-                'w-full flex items-center gap-3 px-4 h-12 text-sm font-medium transition-colors',
+                'w-full flex items-center gap-3 px-4 min-h-[48px] text-sm font-medium transition-colors',
+                'touch-manipulation active:scale-95',
                 isActive
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-primary/5 hover:text-foreground'
@@ -183,6 +199,7 @@ export function TripSidebar({
           size="icon"
           onClick={() => setIsShareModalOpen(true)}
           title="Share Trip"
+          className="min-w-[48px] min-h-[48px] touch-manipulation active:scale-95"
         >
           <Share2 className="w-5 h-5" />
         </Button>
@@ -192,6 +209,7 @@ export function TripSidebar({
           size="icon"
           onClick={() => setIsExportModalOpen(true)}
           title="Export PDF"
+          className="min-w-[48px] min-h-[48px] touch-manipulation active:scale-95"
         >
           <Download className="w-5 h-5" />
         </Button>
@@ -199,7 +217,7 @@ export function TripSidebar({
         <Button
           variant="ghost"
           size="icon"
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 min-w-[48px] min-h-[48px] touch-manipulation active:scale-95"
           onClick={handleDelete}
           title="Delete Trip"
         >
@@ -222,6 +240,24 @@ export function TripSidebar({
         itineraryId={tripId}
         itinerary={state.itinerary}
       />
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile/Tablet: Drawer */}
+      {isMobile ? (
+        <Drawer open={isOpen} onClose={onClose || (() => {})} side="left">
+          <div className="flex flex-col h-full bg-white">
+            {sidebarContent}
+          </div>
+        </Drawer>
+      ) : (
+        /* Desktop: Fixed Sidebar */
+        <aside className="w-[280px] h-screen bg-white border-r border-border flex flex-col">
+          {sidebarContent}
+        </aside>
+      )}
+    </>
   );
 }
