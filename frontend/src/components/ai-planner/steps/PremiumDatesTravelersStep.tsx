@@ -71,13 +71,13 @@ export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTr
   };
 
   return (
-    <div className="space-y-6">
-      {/* Side-by-side Layout: Date Picker (left) + Travelers (right) */}
+    <div className="space-y-5 sm:space-y-6">
+      {/* Stack on mobile, side-by-side on desktop */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
         animate="animate"
-        className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-6 items-start"
+        className="grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-4 sm:gap-6 items-start"
       >
         {/* Date Range Picker */}
         <div>
@@ -89,14 +89,14 @@ export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTr
         </div>
 
         {/* Traveler Selector */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <TravelerSelector value={travelers} onChange={handleTravelersChange} />
           
           {/* Suggest Best Dates Button */}
           <Button
             onClick={handleSuggestBestDates}
             disabled={suggestingDates}
-            className="w-full h-12 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg transition-all font-medium"
+            className="w-full h-11 sm:h-12 px-4 sm:px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg transition-all font-medium text-sm sm:text-base touch-manipulation active:scale-95"
           >
             {suggestingDates ? 'Analyzing best dates...' : 'Suggest Best Travel Date'}
           </Button>

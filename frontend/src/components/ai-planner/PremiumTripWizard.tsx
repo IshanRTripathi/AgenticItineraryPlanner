@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import { api, endpoints } from '@/services/api';
 import { fadeInUp, slideInRight, slideInLeft } from '@/lib/animations/variants';
+import { cn } from '@/lib/utils';
 
 const STEPS = [
     { id: 1, title: 'Destination', component: PremiumDestinationStep },
@@ -131,14 +132,14 @@ export function PremiumTripWizard() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary/5 py-8 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary/5 py-4 sm:py-8 px-3 sm:px-4">
             <motion.div
                 className="max-w-5xl mx-auto"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <Card className="p-6 md:p-8 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+                <Card className="p-4 sm:p-6 md:p-8 shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
                     {/* Progress Indicator */}
                     <motion.div
                         variants={fadeInUp}
@@ -150,7 +151,7 @@ export function PremiumTripWizard() {
                     </motion.div>
 
                     {/* Step Content with Animations */}
-                    <div className="my-8">
+                    <div className="my-6 sm:my-8">
                         <AnimatePresence mode="wait" custom={direction}>
                             <motion.div
                                 key={currentStep}
@@ -171,7 +172,7 @@ export function PremiumTripWizard() {
 
                     {/* Navigation */}
                     <motion.div
-                        className="flex justify-between gap-4 pt-8 border-t border-border"
+                        className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 pt-6 sm:pt-8 border-t border-border"
                         variants={fadeInUp}
                         initial="initial"
                         animate="animate"
@@ -181,7 +182,7 @@ export function PremiumTripWizard() {
                             variant="outline"
                             onClick={handleBack}
                             disabled={isFirstStep || isSubmitting}
-                            className="min-w-32 h-12"
+                            className="w-full sm:w-auto sm:min-w-32 h-11 sm:h-12 touch-manipulation active:scale-95"
                             size="lg"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -191,23 +192,31 @@ export function PremiumTripWizard() {
                         <Button
                             onClick={handleNext}
                             disabled={!isStepValid() || isSubmitting}
-                            className="min-w-32 h-12 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 shadow-lg hover:shadow-xl transition-all"
+                            className={cn(
+                                "w-full sm:w-auto sm:min-w-32 h-12 sm:h-14 shadow-lg hover:shadow-xl transition-all touch-manipulation active:scale-95 font-semibold text-base sm:text-lg",
+                                isLastStep 
+                                    ? "bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 hover:from-green-700 hover:via-green-600 hover:to-emerald-700 text-white relative overflow-hidden group"
+                                    : "bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700"
+                            )}
                             size="lg"
                         >
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Creating...
+                                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                    <span>Creating Your Trip...</span>
                                 </>
                             ) : isLastStep ? (
                                 <>
-                                    <Sparkles className="w-4 h-4 mr-2" />
-                                    Create Itinerary
+                                    {/* Shimmer effect for Create button */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer-fast" />
+                                    <Sparkles className="w-5 h-5 mr-2 relative z-10" />
+                                    <span className="relative z-10">Create My Itinerary</span>
+                                    <Sparkles className="w-4 h-4 ml-2 relative z-10" />
                                 </>
                             ) : (
                                 <>
-                                    Next
-                                    <ArrowRight className="w-4 h-4 ml-2" />
+                                    <span>Next Step</span>
+                                    <ArrowRight className="w-5 h-5 ml-2" />
                                 </>
                             )}
                         </Button>
@@ -215,7 +224,7 @@ export function PremiumTripWizard() {
 
                     {/* Step Indicator */}
                     <motion.div
-                        className="text-center mt-6 text-sm text-muted-foreground"
+                        className="text-center mt-4 sm:mt-6 text-xs sm:text-sm text-muted-foreground"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
@@ -224,6 +233,17 @@ export function PremiumTripWizard() {
                     </motion.div>
                 </Card>
             </motion.div>
+
+            {/* Add shimmer animation for Create button */}
+            <style>{`
+                @keyframes shimmer-fast {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+                .group:hover .group-hover\\:animate-shimmer-fast {
+                    animation: shimmer-fast 1.5s infinite;
+                }
+            `}</style>
         </div>
     );
 }

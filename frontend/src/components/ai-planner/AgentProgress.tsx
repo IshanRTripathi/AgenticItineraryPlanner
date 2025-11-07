@@ -1,6 +1,8 @@
 /**
  * AI Agent Progress - Real-Time WebSocket Updates
  * Shows actual generation progress with glass morphism design
+ * Mobile: Stacked compact cards with glassmorphism
+ * Desktop: Side-by-side layout
  * Stays on page until user chooses to view or generation completes
  */
 
@@ -10,6 +12,7 @@ import { Plane, Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStompWebSocket } from '@/hooks/useStompWebSocket';
 import { InteractiveGlobe } from '@/components/homepage/InteractiveGlobe';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface DayStatus {
   dayNumber: number;
@@ -31,6 +34,7 @@ interface ProgressState {
 export function AgentProgress() {
   const urlParams = new URLSearchParams(window.location.search);
   const itineraryId = urlParams.get('itineraryId');
+  const isMobile = useMediaQuery('(max-width: 1023px)');
 
   const [state, setState] = useState<ProgressState>({
     overallProgress: 0,
@@ -215,6 +219,171 @@ export function AgentProgress() {
     );
   }
 
+  // Mobile View - Stacked compact cards
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary to-blue-600 relative overflow-hidden flex items-center justify-center p-4">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-800/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+
+        <div className="relative z-10 w-full max-w-md space-y-4">
+          {/* Progress Card */}
+          <div className="bg-white/15 backdrop-blur-2xl border border-white/30 rounded-3xl p-6 shadow-2xl">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {state.isComplete ? '🎉 Complete!' : 'Generating...'}
+              </h2>
+              <p className="text-sm text-white/80">
+                {state.message}
+              </p>
+            </div>
+
+            {/* Connection/Error Status */}
+            {!isConnected && !state.hasError && (
+              <div className="mb-4 p-3 rounded-xl bg-yellow-500/20 backdrop-blur-md border border-yellow-500/30">
+                <div className="flex items-center gap-2 text-yellow-100 text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Connecting...</span>
+                </div>
+              </div>
+            )}
+
+            {state.hasError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/20 backdrop-blur-md border border-red-500/30">
+                <div className="flex items-center gap-2 text-red-100 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{state.errorMessage}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Progress Circle - Compact */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="relative w-28 h-28">
+                <svg className="transform -rotate-90 w-28 h-28">
+                  <circle
+                    cx="56"
+                    cy="56"
+                    r="50"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="none"
+                    className="text-white/20"
+                  />
+                  <motion.circle
+                    cx="56"
+                    cy="56"
+                    r="50"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="none"
+                    strokeLinecap="round"
+                    className="text-white"
+                    initial={{ strokeDashoffset: 314 }}
+                    animate={{ strokeDashoffset: 314 - (314 * state.overallProgress) / 100 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    style={{ strokeDasharray: 314 }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-3xl font-bold text-white">{Math.round(state.overallProgress)}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Current Phase - Compact */}
+            <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/30 flex items-center justify-center flex-shrink-0">
+                  {state.isComplete ? (
+                    <Check className="w-5 h-5 text-white" />
+                  ) : (
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{state.currentPhase}</p>
+                  <p className="text-xs text-white/80 truncate mt-0.5">{state.message}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Info Text */}
+            <p className="text-xs text-center text-white/70 mt-4">
+              {state.isComplete
+                ? 'Redirecting automatically...'
+                : 'Generation typically takes 45-60 seconds'
+              }
+            </p>
+          </div>
+
+          {/* Days Card - Compact */}
+          <div className="bg-white/15 backdrop-blur-2xl border border-white/30 rounded-3xl p-6 shadow-2xl max-h-[400px] flex flex-col">
+            <h3 className="text-lg font-bold text-white mb-3">Days Generated</h3>
+
+            {state.daysCompleted.length === 0 ? (
+              <div className="text-center py-8 flex-1 flex flex-col items-center justify-center">
+                <Sparkles className="w-10 h-10 text-white/50 mx-auto mb-2" />
+                <p className="text-sm text-white/70">Waiting for first day...</p>
+              </div>
+            ) : (
+              <div className="space-y-2 flex-1 overflow-y-auto pr-2">
+                {state.daysCompleted.map((day) => (
+                  <motion.div
+                    key={day.dayNumber}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="p-3 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 shadow-lg"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-green-500/30 flex items-center justify-center">
+                          <Check className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-white">Day {day.dayNumber}</p>
+                          <p className="text-xs text-white/70">{day.activities} activities</p>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1 rounded-lg bg-green-500/30 backdrop-blur-sm border border-green-500/40">
+                        <span className="text-xs font-semibold text-white">Ready</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* Action Buttons - Compact */}
+            <div className="mt-4 space-y-2">
+              {canViewPartial && !state.isComplete && (
+                <Button
+                  onClick={handleViewPartial}
+                  className="w-full h-11 bg-white text-primary hover:bg-white/95 shadow-lg font-semibold touch-manipulation active:scale-95"
+                >
+                  View Partial Itinerary
+                </Button>
+              )}
+
+              {state.isComplete && (
+                <Button
+                  onClick={() => window.location.href = `/trip/${itineraryId}`}
+                  className="w-full h-11 bg-white text-green-600 hover:bg-white/95 shadow-lg font-semibold touch-manipulation active:scale-95"
+                >
+                  View Complete Itinerary
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop View - Original side-by-side layout
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col lg:flex-row relative overflow-hidden">
       {/* Globe Background - Behind everything - Fullscreen and more transparent */}
