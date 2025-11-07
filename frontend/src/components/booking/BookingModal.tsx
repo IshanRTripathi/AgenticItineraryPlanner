@@ -1,12 +1,12 @@
 /**
  * Booking Modal Component
- * Displays iframe for EaseMyTrip booking with mark as booked functionality
+ * Displays iframe for EaseMyTrip booking - Full screen like SearchPage
  */
 
-import { useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink, Shield, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -20,12 +20,33 @@ interface BookingModalProps {
 export function BookingModal({ 
   isOpen, 
   onClose, 
-  bookingType, 
   itemName,
   providerUrl,
-  onMarkBooked
 }: BookingModalProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(isOpen);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsAnimating(true);
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+    } else if (isVisible) {
+      setIsAnimating(false);
+      // Delay unmount for exit animation
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        document.body.style.overflow = '';
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, isVisible]);
 
   const handleClose = () => {
     setIsLoading(true);
@@ -36,11 +57,25 @@ export function BookingModal({
     window.open(providerUrl, '_blank', 'noopener,noreferrer');
   };
 
+  if (!isVisible) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      {/* Full-screen modal content - matches SearchPage layout */}
+    <div className="fixed inset-0 z-[9999]">
+      {/* Backdrop */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
+          isAnimating ? "opacity-100" : "opacity-0"
+        )}
+        onClick={handleClose}
+      />
+      
+      {/* Full-screen modal content */}
       <div 
-        className="relative bg-gradient-to-b from-background to-muted/20 w-[100vw] h-[100vh] max-w-none flex flex-col overflow-hidden"
+        className={cn(
+          "fixed inset-0 bg-gradient-to-b from-background to-muted/20 flex flex-col overflow-hidden transition-all duration-300",
+          isAnimating ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button - Top Right */}
@@ -55,20 +90,20 @@ export function BookingModal({
 
         {/* Main content area - matches SearchPage */}
         <main className="flex-1 flex flex-col overflow-hidden px-2 sm:px-4 py-2 gap-2 min-h-0 pt-14 md:pt-2">
-          {/* Security Ribbon */}
+          {/* Security Ribbon - Smaller text on mobile */}
           <div className="flex-shrink-0 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white rounded-lg shadow-lg border-2 border-blue-400">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-3 sm:px-4 py-3">
-              <div className="flex items-start sm:items-center gap-3 flex-1 w-full">
-                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 px-2 sm:px-3 md:px-4 py-2 sm:py-3">
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 w-full min-w-0">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm font-semibold mb-0.5">Secure Booking via EaseMyTrip</p>
-                  <p className="text-xs text-blue-100 hidden sm:block">
+                  <p className="text-[10px] sm:text-xs md:text-sm font-semibold mb-0 sm:mb-0.5 truncate">Secure Booking via EaseMyTrip</p>
+                  <p className="text-[9px] sm:text-xs text-blue-100 hidden sm:block truncate">
                     Booking {itemName} securely. Your data is protected.
                   </p>
-                  <p className="text-xs text-blue-100 sm:hidden">
-                    Secure booking with data protection
+                  <p className="text-[9px] sm:text-xs text-blue-100 sm:hidden truncate">
+                    Secure booking protected
                   </p>
                 </div>
               </div>
@@ -76,9 +111,9 @@ export function BookingModal({
                 variant="secondary"
                 size="sm"
                 onClick={handleOpenInNewTab}
-                className="w-full sm:w-auto min-h-[44px] bg-white text-blue-600 hover:bg-blue-50 border-0 shadow-md font-semibold touch-manipulation active:scale-95 transition-transform"
+                className="w-full sm:w-auto min-h-[40px] sm:min-h-[44px] bg-white text-blue-600 hover:bg-blue-50 border-0 shadow-md font-semibold touch-manipulation active:scale-95 transition-transform text-xs sm:text-sm"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
+                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                 <span className="hidden sm:inline">Open in New Tab</span>
                 <span className="sm:hidden">New Tab</span>
               </Button>
@@ -112,6 +147,6 @@ export function BookingModal({
 
         </main>
       </div>
-    </Dialog>
+    </div>
   );
 }
