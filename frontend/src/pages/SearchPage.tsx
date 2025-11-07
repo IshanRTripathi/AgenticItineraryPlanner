@@ -9,7 +9,12 @@ import { Header } from '@/components/layout/Header';
 import { Loader2, Shield, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function SearchPage() {
+interface SearchPageProps {
+  mobileMenuOpen?: boolean;
+  onMobileMenuChange?: (open: boolean) => void;
+}
+
+export function SearchPage({ mobileMenuOpen, onMobileMenuChange }: SearchPageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const easemytripUrl = 'https://www.easemytrip.com';
 
@@ -19,7 +24,7 @@ export function SearchPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-b from-background to-muted/20">
-      <Header />
+      <Header mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={onMobileMenuChange} />
 
       {/* Main content area - takes remaining height after header */}
       <main className="flex-1 flex flex-col overflow-hidden px-2 sm:px-4 py-2 gap-2 min-h-0">

@@ -665,14 +665,14 @@ export function TripMap({ itinerary }: TripMapProps) {
           if (isMobile) setIsFiltersOpen(false);
         }}
         className={cn(
-          "w-full px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all touch-manipulation active:scale-95",
-          "border-2 flex items-center gap-3",
+          "w-full px-3 py-2 sm:px-4 sm:py-3 min-h-[40px] sm:min-h-[48px] rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95",
+          "border-2 flex items-center gap-2 sm:gap-3",
           selectedDays.size === days.length
             ? "border-primary bg-primary text-white shadow-md"
             : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 text-gray-700"
         )}
       >
-        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm flex-shrink-0" />
+        <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm flex-shrink-0" />
         <span>All Days</span>
       </button>
 
@@ -705,8 +705,8 @@ export function TripMap({ itinerary }: TripMapProps) {
               onMouseEnter={() => !isMobile && setHighlightedDay(day.dayNumber)}
               onMouseLeave={() => !isMobile && setHighlightedDay(null)}
               className={cn(
-                "w-full px-4 py-3 min-h-[48px] rounded-lg text-sm font-medium transition-all touch-manipulation active:scale-95",
-                "border-2 flex items-center justify-between gap-3",
+                "w-full px-3 py-2 sm:px-4 sm:py-3 min-h-[40px] sm:min-h-[48px] rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95",
+                "border-2 flex items-center justify-between gap-2 sm:gap-3",
                 isSelected
                   ? "border-transparent shadow-md"
                   : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm",
@@ -718,10 +718,10 @@ export function TripMap({ itinerary }: TripMapProps) {
                 ...(isHighlighted && { '--tw-ring-color': dayColor.primary } as any),
               }}
             >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 {/* Color indicator */}
                 <div
-                  className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm"
+                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 shadow-sm"
                   style={{ backgroundColor: dayColor.primary }}
                 />
 
@@ -730,7 +730,7 @@ export function TripMap({ itinerary }: TripMapProps) {
 
               {/* Activity count badge */}
               {dayNodeCount > 0 && (
-                <span className="text-xs px-2 py-1 rounded-full bg-white/80 font-semibold flex-shrink-0">
+                <span className="text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full bg-white/80 font-semibold flex-shrink-0">
                   {dayNodeCount}
                 </span>
               )}
@@ -747,14 +747,21 @@ export function TripMap({ itinerary }: TripMapProps) {
       {isMobile && days.length > 1 && (
         <div className="flex-shrink-0">
           <Button
-            onClick={() => setIsFiltersOpen(true)}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('[TripMap] Opening filters modal');
+              // Use setTimeout to ensure modal opens after current event cycle
+              setTimeout(() => setIsFiltersOpen(true), 0);
+            }}
             variant="outline"
-            className="w-full min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+            className="w-full h-9 text-xs px-3 touch-manipulation active:scale-95 transition-transform"
           >
-            <SlidersHorizontal className="w-4 h-4 mr-2" />
+            <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" />
             Day Filters
             {selectedDays.size < days.length && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="secondary" className="ml-1.5 text-xs px-1.5 py-0.5">
                 {selectedDays.size}/{days.length}
               </Badge>
             )}
@@ -762,7 +769,10 @@ export function TripMap({ itinerary }: TripMapProps) {
 
           <ResponsiveModal
             open={isFiltersOpen}
-            onOpenChange={setIsFiltersOpen}
+            onOpenChange={(open) => {
+              console.log('[TripMap] Modal onOpenChange:', open);
+              setIsFiltersOpen(open);
+            }}
             title="Filter by Day"
             description={`${filteredNodes.length} of ${nodes.length} locations`}
           >
@@ -784,7 +794,11 @@ export function TripMap({ itinerary }: TripMapProps) {
           {/* Map */}
           <div
             ref={mapRef}
-            className="w-full flex-1 h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg md:rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200 touch-manipulation"
+            className="w-full flex-1 h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg md:rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200"
+            style={{ touchAction: 'none' }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
           />
 
           {/* Resolution statistics */}

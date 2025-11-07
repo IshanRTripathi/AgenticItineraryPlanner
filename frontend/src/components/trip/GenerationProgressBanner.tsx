@@ -2,12 +2,14 @@
  * Generation Progress Banner
  * Compact, refined progress indicator for trip page during generation
  * Now with real-time WebSocket updates!
+ * Mobile: Minimal square box in top right corner to avoid covering navigation
  */
 
 import { useEffect, useState } from 'react';
 import { Sparkles, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStompWebSocket } from '@/hooks/useStompWebSocket';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { AgentProgressEvent } from '@/types/dto';
 
 interface GenerationProgressBannerProps {
@@ -27,6 +29,8 @@ export function GenerationProgressBanner({
   currentPhase: initialPhase = 'skeleton',
   onComplete
 }: GenerationProgressBannerProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  
   // Check URL for initial progress (from AgentProgress redirect)
   const urlParams = new URLSearchParams(window.location.search);
   const urlProgress = urlParams.get('progress');
@@ -332,6 +336,52 @@ export function GenerationProgressBanner({
     }
   };
 
+  // Mobile: Ultra-minimal progress indicator
+  if (isMobile) {
+    return (
+      <div className="fixed top-[4.5rem] right-2 z-50">
+        {/* Compact Progress Circle */}
+        <div className="relative w-10 h-10 rounded-full bg-white shadow-lg border border-gray-200">
+          {/* Circular Progress Ring */}
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 40 40">
+            {/* Background circle */}
+            <circle
+              cx="20"
+              cy="20"
+              r="17"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              fill="none"
+              className="text-gray-200"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="20"
+              cy="20"
+              r="17"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              fill="none"
+              strokeLinecap="round"
+              className="text-primary transition-all duration-500"
+              strokeDasharray={`${(progress / 100) * 106.8} 106.8`}
+            />
+          </svg>
+          
+          {/* Center Content */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {progress === 100 ? (
+              <Check className="w-4 h-4 text-primary" />
+            ) : (
+              <span className="text-[10px] font-bold text-primary">{Math.round(progress)}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: Full banner
   return (
     <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 max-w-md mx-auto sm:mx-0">
       {/* Compact Glass Morphism Card */}

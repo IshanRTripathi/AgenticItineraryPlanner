@@ -23,6 +23,8 @@ export function Drawer({
   children,
   className,
 }: DrawerProps) {
+  const [isVisible, setIsVisible] = React.useState(open);
+  const [isAnimating, setIsAnimating] = React.useState(false);
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
   const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
 
@@ -51,6 +53,24 @@ export function Drawer({
     }
   };
 
+  // Handle visibility and animation states
+  React.useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      // Small delay to trigger animation after mount
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+      });
+    } else if (isVisible) {
+      setIsAnimating(false);
+      // Delay unmount to allow exit animation
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 300); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [open, isVisible]);
+
   // Prevent body scroll when drawer is open
   React.useEffect(() => {
     if (open) {
@@ -64,13 +84,20 @@ export function Drawer({
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!isVisible) return null;
+
+  const handleDrawerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+        className={cn(
+          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300",
+          isAnimating ? "opacity-100" : "opacity-0"
+        )}
         onClick={onClose}
       />
 
@@ -81,13 +108,14 @@ export function Drawer({
           'transition-transform duration-300 ease-out',
           'w-80 max-w-[85vw]',
           side === 'left' ? 'left-0' : 'right-0',
-          open
+          isAnimating
             ? 'translate-x-0'
             : side === 'left'
             ? '-translate-x-full'
             : 'translate-x-full',
           className
         )}
+        onClick={handleDrawerClick}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

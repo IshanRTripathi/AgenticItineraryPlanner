@@ -112,32 +112,32 @@ export function PlanTab({ itinerary }: PlanTabProps) {
     <div className="space-y-6">
       {/* Tab Navigation */}
       <Tabs value={subTab} onValueChange={setSubTab}>
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex gap-3">
+        <div className="flex justify-center mb-4 sm:mb-6">
+          <div className="inline-flex gap-2 sm:gap-3">
             <button
               onClick={() => setSubTab('day-by-day')}
               className={cn(
-                "px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                "border flex items-center gap-3",
+                "px-3 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200",
+                "border flex items-center gap-2 sm:gap-3 min-h-[40px] touch-manipulation active:scale-95",
                 subTab === 'day-by-day'
                   ? "border-primary bg-primary text-white shadow-lg shadow-primary/25"
                   : "border-gray-200 bg-white hover:border-primary/50 hover:bg-primary/5 text-gray-700"
               )}
             >
-              <Calendar className="w-5 h-5" />
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="font-semibold">Day by Day</span>
             </button>
             <button
               onClick={() => setSubTab('map')}
               className={cn(
-                "px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200",
-                "border flex items-center gap-3",
+                "px-3 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200",
+                "border flex items-center gap-2 sm:gap-3 min-h-[40px] touch-manipulation active:scale-95",
                 subTab === 'map'
                   ? "border-primary bg-primary text-white shadow-lg shadow-primary/25"
                   : "border-gray-200 bg-white hover:border-primary/50 hover:bg-primary/5 text-gray-700"
               )}
             >
-              <MapPin className="w-5 h-5" />
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="font-semibold">Map View</span>
             </button>
           </div>
@@ -145,22 +145,23 @@ export function PlanTab({ itinerary }: PlanTabProps) {
 
         {/* Day by Day View */}
         <TabsContent value="day-by-day">
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Timeline Header with Overview */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <div>
-                <h2 className="text-2xl font-bold">Your Itinerary</h2>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold">Your Itinerary</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   {mappedDays.length} days • {mappedDays.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0)} activities
                 </p>
               </div>
               
               {/* Quick Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setExpandedDay(expandedDay === null ? 0 : null)}
+                  className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95"
                 >
                   {expandedDay === null ? 'Expand All' : 'Collapse All'}
                 </Button>
@@ -168,8 +169,9 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                   variant="outline"
                   size="sm"
                   disabled={isGenerating}
+                  className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Add Day
                 </Button>
               </div>
@@ -250,7 +252,10 @@ export function PlanTab({ itinerary }: PlanTabProps) {
 
         {/* Map View - Full viewport */}
         <TabsContent value="map" className="p-0">
-          <div className="h-[calc(100vh-16rem)] min-h-[600px]">
+          <div 
+            className="h-[calc(100vh-16rem)] min-h-[600px] overflow-hidden"
+            style={{ touchAction: 'none' }}
+          >
             <TripMap itinerary={itinerary} />
           </div>
         </TabsContent>

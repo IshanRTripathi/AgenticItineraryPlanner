@@ -7,8 +7,6 @@
 
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
 import { TripSidebar } from '@/components/trip/TripSidebar';
 import { MobileTabs } from '@/components/trip/MobileTabs';
 import { BookingModal } from '@/components/booking/BookingModal';
@@ -36,7 +34,6 @@ function TripDetailContent() {
   const { state, loadItinerary } = useUnifiedItinerary();
   const [wasConnected, setWasConnected] = React.useState(false);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 1024px)');
 
   const { itinerary, loading, error, isConnected } = state;
@@ -303,9 +300,9 @@ function TripDetailContent() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-0 safe-bottom">
+    <div className="min-h-screen bg-background">
       {/* Premium Generation Progress Banner with Real-time Updates */}
-      {shouldShowBanner ? (
+      {shouldShowBanner && (
         <GenerationProgressBanner
           itineraryId={id!}
           itineraryStatus={
@@ -324,13 +321,9 @@ function TripDetailContent() {
             loadItinerary(id!);
           }}
         />
-      ) : (
-        <div style={{ display: 'none' }}>
-          {/* Banner hidden: status={itinerary.status}, isGenerating={String(isGenerating)} */}
-        </div>
       )}
 
-      {/* Mobile: Horizontal Tabs */}
+      {/* Mobile: Horizontal Tabs - Sticky at top */}
       <MobileTabs
         tabs={TABS}
         activeTab={activeTab}
@@ -338,39 +331,27 @@ function TripDetailContent() {
       />
 
       {/* Desktop: Sidebar + Content Layout */}
-      <div className="flex h-screen overflow-hidden bg-muted">
-        {/* Sidebar - Drawer on mobile, fixed on desktop */}
-        <TripSidebar
-          tripId={id!}
-          destination={destination}
-          dateRange={formatDateRange(startDate, endDate)}
-          travelerCount={travelers}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+      <div className="flex md:h-screen overflow-hidden bg-muted">
+        {/* Sidebar - Hidden on mobile (using tabs instead), fixed on desktop */}
+        {!isMobile && (
+          <TripSidebar
+            tripId={id!}
+            destination={destination}
+            dateRange={formatDateRange(startDate, endDate)}
+            travelerCount={travelers}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            isOpen={false}
+            onClose={() => {}}
+          />
+        )}
 
         {/* Main Content */}
         <main className={cn(
-          "flex-1 overflow-y-auto",
+          "flex-1 overflow-y-auto pb-20 md:pb-0",
           !isMobile && "lg:ml-0"
         )}>
           <div className="p-3 md:p-4 lg:p-6">
-            {/* Mobile Menu Button */}
-            {isMobile && (
-              <div className="mb-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSidebarOpen(true)}
-                  className="min-h-[44px] gap-2 touch-manipulation active:scale-95"
-                >
-                  <Menu className="w-4 h-4" />
-                  Menu
-                </Button>
-              </div>
-            )}
             {renderTabContent()}
           </div>
         </main>
@@ -398,7 +379,12 @@ function TripDetailContent() {
 /**
  * Wrapper component that provides UnifiedItineraryContext
  */
-export function TripDetailPage() {
+interface TripDetailPageProps {
+  mobileMenuOpen?: boolean;
+  onMobileMenuChange?: (open: boolean) => void;
+}
+
+export function TripDetailPage({ mobileMenuOpen, onMobileMenuChange }: TripDetailPageProps) {
   const { id } = useParams<{ id: string }>();
 
   if (!id) {
@@ -414,7 +400,7 @@ export function TripDetailPage() {
 
   return (
     <UnifiedItineraryProvider itineraryId={id}>
-      <TripDetailContent />
+      <TripDetailContent mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={onMobileMenuChange} />
     </UnifiedItineraryProvider>
   );
 }

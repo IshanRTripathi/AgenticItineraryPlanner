@@ -26,6 +26,40 @@ export function BottomSheet({
   className,
 }: BottomSheetProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  // Minimum swipe distance (in px) to trigger close
+  const minSwipeDistance = 100;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientY);
+    setIsDragging(true);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) {
+      setIsDragging(false);
+      return;
+    }
+    
+    const distance = touchEnd - touchStart;
+    
+    // Close bottom sheet on downward swipe
+    if (distance > minSwipeDistance) {
+      onOpenChange(false);
+    }
+    
+    setIsDragging(false);
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
 
   if (!isMobile) {
     // Desktop: Regular dialog
@@ -61,8 +95,25 @@ export function BottomSheet({
         )}
       >
         {/* Drag handle */}
-        <div className="flex justify-center py-3 border-b">
-          <div className="w-12 h-1 bg-muted rounded-full" />
+        <div 
+          className="flex justify-center py-3 border-b cursor-grab active:cursor-grabbing touch-none"
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            onTouchStart(e);
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation();
+            onTouchMove(e);
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            onTouchEnd();
+          }}
+        >
+          <div className={cn(
+            "w-12 h-1 bg-muted rounded-full transition-all",
+            isDragging && "bg-muted-foreground/50 w-16"
+          )} />
         </div>
 
         {/* Header */}
@@ -71,7 +122,7 @@ export function BottomSheet({
             <h2 className="text-lg font-bold">{title}</h2>
             <button
               onClick={() => onOpenChange(false)}
-              className="p-1.5 hover:bg-muted rounded-full transition-colors"
+              className="p-1.5 hover:bg-muted rounded-full transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation active:scale-95"
             >
               <X className="w-5 h-5" />
             </button>

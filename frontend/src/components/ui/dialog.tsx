@@ -14,17 +14,47 @@ interface DialogProps {
 }
 
 const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
-  if (!open) return null;
+  const [isVisible, setIsVisible] = React.useState(open);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
+  React.useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      setIsAnimating(true);
+    } else if (isVisible) {
+      setIsAnimating(false);
+      // Delay unmount to allow exit animation
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 300); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [open, isVisible]);
+
+  if (!isVisible) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    // Only close if clicking directly on the backdrop/wrapper, not on children
+    if (e.target === e.currentTarget) {
+      onOpenChange?.(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-modal">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
-        onClick={() => onOpenChange?.(false)}
+        className={cn(
+          "fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
+          isAnimating ? "opacity-100" : "opacity-0"
+        )}
+        onClick={handleBackdropClick}
       />
       {/* Content */}
-      <div className="fixed inset-0 flex items-center justify-center p-4">
+      <div 
+        className="fixed inset-0 flex items-center justify-center p-4"
+        onClick={handleBackdropClick}
+      >
         {children}
       </div>
     </div>
@@ -34,27 +64,45 @@ const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
 const DialogContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { onClose?: () => void }
->(({ className, children, onClose, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      'relative bg-background rounded-lg shadow-elevation-3 w-full max-w-lg p-5 animate-scale-in',
-      className
-    )}
-    {...props}
-  >
-    {children}
-    {onClose && (
-      <button
-        onClick={onClose}
-        className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
-      >
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </button>
-    )}
-  </div>
-));
+>(({ className, children, onClose, onClick, ...props }, ref) => {
+  // Get the parent Dialog's open state through context or props
+  const [isAnimating, setIsAnimating] = React.useState(true);
+
+  React.useEffect(() => {
+    // Trigger animation on mount
+    setIsAnimating(true);
+  }, []);
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    onClick?.(e);
+  };
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'relative bg-background rounded-lg shadow-elevation-3 w-full max-w-lg p-5',
+        'transition-all duration-300',
+        isAnimating ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
+        className
+      )}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </button>
+      )}
+    </div>
+  );
+});
 DialogContent.displayName = 'DialogContent';
 
 const DialogHeader = ({

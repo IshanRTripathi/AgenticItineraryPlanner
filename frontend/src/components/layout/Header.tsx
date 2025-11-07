@@ -7,8 +7,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, LogOut, User, Settings, HelpCircle } from 'lucide-react';
+import { LogOut, User, Settings, HelpCircle } from 'lucide-react';
 import { MobileMenu } from './MobileMenu';
+import { AnimatedHamburger } from './AnimatedHamburger';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { useStickyHeader } from '@/hooks/useScrollAnimation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,8 +17,12 @@ import { useToast } from '@/components/ui/use-toast';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 
-export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface HeaderProps {
+  mobileMenuOpen?: boolean;
+  onMobileMenuChange?: (open: boolean) => void;
+}
+
+export function Header({ mobileMenuOpen = false, onMobileMenuChange }: HeaderProps = {}) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const isScrolled = useStickyHeader(20);
@@ -212,13 +217,6 @@ export function Header() {
                   Sign In
                 </Button>
               )}
-              <button
-                className="md:hidden min-w-[44px] min-h-[44px] p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation active:scale-95"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open navigation menu"
-              >
-                <Menu className="h-6 w-6" />
-              </button>
             </div>
           </div>
         </div>
@@ -227,7 +225,7 @@ export function Header() {
       {/* Mobile Menu */}
       <MobileMenu
         isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
+        onClose={() => onMobileMenuChange?.(false)}
       />
 
       {/* Mobile Profile Bottom Sheet */}

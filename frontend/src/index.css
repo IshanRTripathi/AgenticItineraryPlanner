@@ -363,6 +363,19 @@
   .safe-left {
     padding-left: var(--safe-area-inset-left);
   }
+
+  /* Safe area utilities for height */
+  .h-safe-bottom {
+    height: var(--safe-area-inset-bottom);
+  }
+
+  .pb-safe {
+    padding-bottom: max(0.5rem, var(--safe-area-inset-bottom));
+  }
+
+  .pt-safe {
+    padding-top: max(0.5rem, var(--safe-area-inset-top));
+  }
   
   .safe-right {
     padding-right: var(--safe-area-inset-right);

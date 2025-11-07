@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { BottomNav } from './components/layout/BottomNav';
+import { FloatingHamburger } from './components/layout/FloatingHamburger';
 import { HomePage } from './pages/HomePage';
 import { Loader2 } from 'lucide-react';
 import { analytics } from './services/analytics';
@@ -31,10 +32,16 @@ function PageLoader() {
 
 function App() {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Track page views
   useEffect(() => {
     analytics.page(location.pathname, document.title);
+  }, [location.pathname]);
+  
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
   }, [location.pathname]);
   
   // Hide bottom nav on login/signup pages
@@ -52,21 +59,29 @@ function App() {
       
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/search" element={<SearchPage />} />
+          <Route path="/search" element={<SearchPage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} />} />
           
           {/* Protected Routes */}
           <Route path="/planner" element={<ProtectedRoute><TripWizardPage /></ProtectedRoute>} />
           <Route path="/planner-progress" element={<ProtectedRoute><AgentProgressPage /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/trip/:id" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} /></ProtectedRoute>} />
+          <Route path="/trip/:id" element={<ProtectedRoute><TripDetailPage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} /></ProtectedRoute>} />
         </Routes>
       </Suspense>
       
-      {/* Mobile Bottom Navigation */}
-      {!hideBottomNav && <BottomNav />}
+      {/* Floating Hamburger Button */}
+      {!hideBottomNav && (
+        <FloatingHamburger
+          isOpen={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        />
+      )}
+      
+      {/* Mobile Bottom Navigation - Hidden when menu is open */}
+      {!hideBottomNav && <BottomNav hide={mobileMenuOpen} />}
     </ErrorBoundary>
   );
 }
