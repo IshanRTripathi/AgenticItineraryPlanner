@@ -379,12 +379,7 @@ function TripDetailContent() {
 /**
  * Wrapper component that provides UnifiedItineraryContext
  */
-interface TripDetailPageProps {
-  mobileMenuOpen?: boolean;
-  onMobileMenuChange?: (open: boolean) => void;
-}
-
-export function TripDetailPage({ mobileMenuOpen, onMobileMenuChange }: TripDetailPageProps) {
+export function TripDetailPage() {
   const { id } = useParams<{ id: string }>();
 
   if (!id) {
@@ -400,7 +395,7 @@ export function TripDetailPage({ mobileMenuOpen, onMobileMenuChange }: TripDetai
 
   return (
     <UnifiedItineraryProvider itineraryId={id}>
-      <TripDetailContent mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={onMobileMenuChange} />
+      <TripDetailContent />
     </UnifiedItineraryProvider>
   );
 }

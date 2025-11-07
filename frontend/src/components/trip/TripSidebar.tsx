@@ -154,13 +154,13 @@ export function TripSidebar({
 
   const sidebarContent = (
     <>
-      {/* Header */}
-      <div className="p-4 border-b border-border">
+      {/* Header with Trip Info */}
+      <div className="p-6 border-b border-border bg-gradient-to-br from-primary/5 to-transparent">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleBack}
-          className="min-w-[44px] min-h-[44px] -ml-2 touch-manipulation active:scale-95"
+          className="min-w-[44px] min-h-[44px] -ml-2 mb-4 touch-manipulation active:scale-95 hover:bg-white/50"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
@@ -168,61 +168,66 @@ export function TripSidebar({
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 overflow-y-auto py-2">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
+      <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <div className="space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleTabClick(item.id)}
-              className={cn(
-                'w-full flex items-center gap-3 px-4 min-h-[48px] text-sm font-medium transition-colors',
-                'touch-manipulation active:scale-95',
-                isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-primary/5 hover:text-foreground'
-              )}
-            >
-              <Icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleTabClick(item.id)}
+                className={cn(
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg',
+                  'text-sm font-medium transition-all duration-200',
+                  'touch-manipulation active:scale-95',
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                )}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-border flex items-center justify-around">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsShareModalOpen(true)}
-          title="Share Trip"
-          className="min-w-[48px] min-h-[48px] touch-manipulation active:scale-95"
-        >
-          <Share2 className="w-5 h-5" />
-        </Button>
+      <div className="p-4 border-t border-border bg-gray-50/50">
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsShareModalOpen(true)}
+            className="flex flex-col items-center gap-1 h-auto py-3 touch-manipulation active:scale-95 hover:bg-white hover:border-primary hover:text-primary"
+          >
+            <Share2 className="w-5 h-5" />
+            <span className="text-xs">Share</span>
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsExportModalOpen(true)}
-          title="Export PDF"
-          className="min-w-[48px] min-h-[48px] touch-manipulation active:scale-95"
-        >
-          <Download className="w-5 h-5" />
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsExportModalOpen(true)}
+            className="flex flex-col items-center gap-1 h-auto py-3 touch-manipulation active:scale-95 hover:bg-white hover:border-primary hover:text-primary"
+          >
+            <Download className="w-5 h-5" />
+            <span className="text-xs">Export</span>
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 min-w-[48px] min-h-[48px] touch-manipulation active:scale-95"
-          onClick={handleDelete}
-          title="Delete Trip"
-        >
-          <Trash2 className="w-5 h-5" />
-        </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex flex-col items-center gap-1 h-auto py-3 text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive touch-manipulation active:scale-95"
+            onClick={handleDelete}
+          >
+            <Trash2 className="w-5 h-5" />
+            <span className="text-xs">Delete</span>
+          </Button>
+        </div>
       </div>
 
       {/* Export Options Modal */}
@@ -254,7 +259,7 @@ export function TripSidebar({
         </Drawer>
       ) : (
         /* Desktop: Fixed Sidebar */
-        <aside className="w-[280px] h-screen bg-white border-r border-border flex flex-col">
+        <aside className="w-[280px] h-screen bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 flex flex-col shadow-sm">
           {sidebarContent}
         </aside>
       )}

@@ -3,7 +3,7 @@
  * Glassmorphism design with better icon positioned below header on the left
  */
 
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FloatingHamburgerProps {

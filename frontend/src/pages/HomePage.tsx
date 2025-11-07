@@ -5,15 +5,10 @@ import { TravelBlogs } from '../components/homepage/TravelBlogs';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 
-interface HomePageProps {
-  mobileMenuOpen?: boolean;
-  onMobileMenuChange?: (open: boolean) => void;
-}
-
-export function HomePage({ mobileMenuOpen, onMobileMenuChange }: HomePageProps) {
+export function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Header mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={onMobileMenuChange} />
+      <Header />
       
       <main>
         {/* Hero Section with Search Widget */}

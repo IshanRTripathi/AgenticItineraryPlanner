@@ -127,12 +127,12 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
   );
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`max-w-[85%] rounded-xl px-4 py-3 shadow-sm transition-all ${isUser
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3 sm:mb-4`}>
+      <div className={`max-w-[90%] sm:max-w-[85%] rounded-lg sm:rounded-xl px-3 py-2 sm:px-4 sm:py-3 shadow-sm transition-all ${isUser
         ? 'bg-gradient-to-br from-primary/10 to-primary/5 text-gray-900 border border-primary/20'
         : 'bg-white text-gray-900 border border-gray-200 shadow-md'
         }`}>
-        <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
           <span className="text-xs font-semibold text-gray-700">
             {isUser ? 'You' : '✨ AI Assistant'}
           </span>
@@ -154,10 +154,10 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
           </div>
         ) : (
           <>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed mb-2">{m.text}</p>
+            <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed mb-1.5 sm:mb-2">{m.text}</p>
 
             {m.intent && !m.applied && (
-              <div className="mt-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+              <div className="mt-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1.5 sm:px-3 sm:py-2 border border-gray-200">
                 <span className="font-medium text-gray-700">Intent:</span> {m.intent}
               </div>
             )}
@@ -165,35 +165,35 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
         )}
 
         {Array.isArray(m.warnings) && m.warnings.length > 0 && (
-          <div className="mt-2 text-xs bg-yellow-50 text-yellow-800 rounded-lg px-3 py-2 border border-yellow-200 flex items-start gap-2">
+          <div className="mt-2 text-xs bg-yellow-50 text-yellow-800 rounded px-2 py-1.5 sm:px-3 sm:py-2 border border-yellow-200 flex items-start gap-1.5 sm:gap-2">
             <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0 text-yellow-600" />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <span className="font-medium">Warnings</span>
-              <ul className="list-disc ml-4 mt-1 space-y-1">{m.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>
+              <ul className="list-disc ml-3 sm:ml-4 mt-1 space-y-1">{m.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul>
             </div>
           </div>
         )}
 
         {/* Simple success message if no changeSet */}
         {m.applied && !hasChanges && (
-          <div className="mt-3">
-            <div className="inline-flex items-center gap-2 text-sm bg-green-50 text-green-700 rounded-lg px-3 py-2 border border-green-200">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <div className="mt-2 sm:mt-3">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm bg-green-50 text-green-700 rounded px-2 py-1.5 sm:px-3 sm:py-2 border border-green-200">
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
               <span className="font-medium">Changes Applied Successfully</span>
             </div>
           </div>
         )}
 
         {!isUser && Array.isArray(m.candidates) && m.candidates.length > 0 && (
-          <div className="mt-3 border rounded-lg bg-white overflow-hidden">
-            <div className="px-3 py-2 border-b bg-gray-50 text-xs font-medium">
+          <div className="mt-2 sm:mt-3 border rounded-lg bg-white overflow-hidden">
+            <div className="px-2 py-1.5 sm:px-3 sm:py-2 border-b bg-gray-50 text-xs font-medium">
               Did you mean one of these?
             </div>
-            <div className="p-3 space-y-2 max-h-48 overflow-y-auto">
+            <div className="p-2 sm:p-3 space-y-1.5 sm:space-y-2 max-h-40 sm:max-h-48 overflow-y-auto">
               {m.candidates.slice(0, 5).map((c: any, idx: number) => (
                 <div
                   key={c.id || idx}
-                  className="flex items-center justify-between gap-2 text-sm hover:bg-gray-50 p-2 rounded transition-colors"
+                  className="flex items-center justify-between gap-2 text-xs sm:text-sm hover:bg-gray-50 p-1.5 sm:p-2 rounded transition-colors"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate text-gray-900">{c.title}</div>
@@ -204,7 +204,7 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 h-7 text-xs px-2"
                     onClick={() => onSelectCandidate(`Use "${c.title}" from day ${c.day}`)}
                   >
                     Select
@@ -217,7 +217,7 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
 
         {/* Proposed Changes - Use Premium Display with Apply Action */}
         {showPreview && hasChanges && (
-          <div className="mt-3">
+          <div className="mt-2 sm:mt-3">
             <ItineraryChangesDisplay
               diff={diff!}
               message="Proposed changes to your itinerary"
@@ -227,11 +227,12 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
             />
             
             {/* Apply Actions */}
-            <div className="mt-2 flex justify-end gap-2">
+            <div className="mt-2 flex justify-end gap-1.5 sm:gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onToggleDetail(messageId)}
+                className="h-7 sm:h-8 text-xs px-2 sm:px-3"
               >
                 {isDetailed ? 'Collapse' : 'Expand'}
               </Button>
@@ -239,7 +240,7 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
                 size="sm"
                 disabled={isApplying}
                 onClick={() => onApplyChanges(messageId, m.changeSet)}
-                className="bg-primary hover:bg-primary-hover"
+                className="bg-primary hover:bg-primary-hover h-7 sm:h-8 text-xs px-2 sm:px-3"
               >
                 {isApplying ? (
                   <>

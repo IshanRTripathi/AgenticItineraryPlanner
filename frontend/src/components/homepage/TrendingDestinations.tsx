@@ -105,29 +105,39 @@ export function TrendingDestinations() {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
 
   return (
-    <section ref={ref as any} className="py-8 sm:py-10 md:py-12 bg-muted">
-      <div className="container px-3 sm:px-4">
+    <section ref={ref as any} className="py-6 sm:py-10 md:py-12 bg-muted">
+      <div className="container">
         <motion.h2 
           initial={{ opacity: 0, y: -20 }}
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8"
+          className="text-xl sm:text-3xl font-bold mb-4 sm:mb-8 px-4"
         >
           Trending Destinations
         </motion.h2>
         
+        {/* Mobile: Horizontal Scroll, Desktop: Grid */}
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6"
+          className={`
+            ${isMobile 
+              ? 'flex overflow-x-auto gap-2.5 pb-4 scrollbar-hide snap-x snap-mandatory px-4' 
+              : 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 px-4'
+            }
+          `}
           variants={containerVariants}
           initial="hidden"
           animate={isVisible ? "visible" : "hidden"}
         >
           {MOCK_DESTINATIONS.map((dest) => (
-            <motion.div key={dest.id} variants={itemVariants}>
-              <div className="group cursor-pointer touch-manipulation active:scale-95 transition-transform">
-                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500">
+            <motion.div 
+              key={dest.id} 
+              variants={itemVariants}
+              className={isMobile ? 'flex-shrink-0 w-[240px] snap-start' : ''}
+            >
+              <div className="group cursor-pointer touch-manipulation active:scale-95 transition-transform h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 h-full">
                   {/* Image Container with Gradient Overlay */}
-                  <div className="relative aspect-[4/3] overflow-hidden">
+                  <div className={`relative ${isMobile ? 'aspect-[3/4]' : 'aspect-[4/3]'} overflow-hidden`}>
                     <img
                       src={dest.image}
                       alt={dest.name}
@@ -138,35 +148,35 @@ export function TrendingDestinations() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
                     
                     {/* Tag Badge */}
-                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                      <div className="bg-white/95 backdrop-blur-sm text-gray-900 text-xs font-semibold px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-lg">
+                    <div className="absolute top-2 right-2">
+                      <div className="bg-white/95 backdrop-blur-sm text-gray-900 text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full shadow-lg">
                         {dest.tag}
                       </div>
                     </div>
 
                     {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                      <div className="flex items-end justify-between gap-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4">
+                      <div className="flex items-end justify-between gap-1.5">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-white font-bold text-xl sm:text-2xl mb-0.5 sm:mb-1 drop-shadow-lg truncate">
+                          <h3 className="text-white font-bold text-sm sm:text-2xl mb-0.5 drop-shadow-lg truncate">
                             {dest.name}
                           </h3>
-                          <p className="text-white/90 text-xs sm:text-sm font-medium drop-shadow-md">
+                          <p className="text-white/90 text-[9px] sm:text-sm font-medium drop-shadow-md">
                             {dest.country}
                           </p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <div className="text-white/80 text-xs mb-0.5">from</div>
-                          <div className="text-white font-bold text-lg sm:text-xl drop-shadow-lg">
+                          <div className="text-white/80 text-[8px] sm:text-xs mb-0.5">from</div>
+                          <div className="text-white font-bold text-xs sm:text-xl drop-shadow-lg">
                             ₹{(dest.price / 1000).toFixed(0)}k
                           </div>
                         </div>
                       </div>
                       
-                      {/* Explore Button - Always visible on mobile, hover on desktop */}
-                      <div className={`mt-2 sm:mt-3 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0'} transition-all duration-300`}>
-                        <button className="w-full bg-white text-gray-900 font-semibold text-xs sm:text-sm py-2 sm:py-2.5 min-h-[44px] rounded-lg hover:bg-gray-100 transition-colors shadow-lg touch-manipulation active:scale-95">
-                          Explore Destination
+                      {/* Explore Button */}
+                      <div className={`mt-1.5 sm:mt-2 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0'} transition-all duration-300`}>
+                        <button className="w-full bg-white text-gray-900 font-semibold text-[9px] sm:text-sm py-1.5 sm:py-2.5 min-h-[36px] sm:min-h-[44px] rounded-lg hover:bg-gray-100 transition-colors shadow-lg touch-manipulation active:scale-95">
+                          Explore
                         </button>
                       </div>
                     </div>

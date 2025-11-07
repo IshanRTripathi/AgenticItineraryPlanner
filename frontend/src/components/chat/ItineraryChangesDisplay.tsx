@@ -59,18 +59,18 @@ export function ItineraryChangesDisplay({
     }
 
     return (
-        <Card className="p-4 shadow-sm border border-gray-200 bg-white my-3">
+        <Card className="p-2.5 sm:p-4 shadow-sm border border-gray-200 bg-white my-2 sm:my-3">
             {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-lg">✨</span>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm sm:text-lg">✨</span>
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900">
+                    <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 text-xs sm:text-sm truncate">
                             {message || 'Your itinerary has been updated'}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                             {totalChanges} {totalChanges === 1 ? 'change' : 'changes'}
                         </p>
                     </div>
@@ -81,17 +81,17 @@ export function ItineraryChangesDisplay({
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="text-gray-600"
+                        className="text-gray-600 h-7 sm:h-8 px-2 flex-shrink-0"
                     >
                         {isExpanded ? (
                             <>
-                                <ChevronUp className="w-4 h-4 mr-1" />
-                                Hide
+                                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                                <span className="hidden sm:inline">Hide</span>
                             </>
                         ) : (
                             <>
-                                <ChevronDown className="w-4 h-4 mr-1" />
-                                View details
+                                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                                <span className="hidden sm:inline">View details</span>
                             </>
                         )}
                     </Button>
@@ -100,7 +100,7 @@ export function ItineraryChangesDisplay({
 
             {/* Changes List */}
             {isExpanded && (
-                <div className="space-y-2 mb-3" role="list">
+                <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-3" role="list">
                     {changes.map((change, index) => (
                         <ChangeItem
                             key={`${change.nodeId}-${index}`}
@@ -113,12 +113,12 @@ export function ItineraryChangesDisplay({
 
             {/* Actions */}
             {onViewItinerary && (
-                <div className="pt-3 border-t border-gray-100">
+                <div className="pt-2 sm:pt-3 border-t border-gray-100">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={onViewItinerary}
-                        className="w-full"
+                        className="w-full h-8 sm:h-9 text-xs sm:text-sm"
                     >
                         View full itinerary
                     </Button>
@@ -155,7 +155,7 @@ function ChangeItem({ change, onUndo }: ChangeItemProps) {
     return (
         <div
             className={cn(
-                'flex items-center justify-between p-3 rounded-lg border transition-all duration-300',
+                'flex items-center justify-between p-2 sm:p-3 rounded-lg border transition-all duration-300',
                 colorClass,
                 change.type === 'added' && 'animate-slide-in-from-top',
                 change.type === 'removed' && 'opacity-60 line-through',
@@ -164,7 +164,7 @@ function ChangeItem({ change, onUndo }: ChangeItemProps) {
             role="listitem"
             aria-label={`${label} ${change.title}`}
         >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                 {/* Icon */}
                 <div className="flex-shrink-0">
                     {icon}
@@ -172,9 +172,9 @@ function ChangeItem({ change, onUndo }: ChangeItemProps) {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium truncate">{change.title}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/50 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                        <span className="font-medium truncate text-xs sm:text-sm">{change.title}</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded-full bg-white/50 flex-shrink-0">
                             {label}
                         </span>
                         {change.day && (
@@ -185,7 +185,7 @@ function ChangeItem({ change, onUndo }: ChangeItemProps) {
                     </div>
 
                     {change.fields && change.fields.length > 0 && (
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-gray-600 mt-0.5 sm:mt-1 truncate">
                             Updated: {change.fields.join(', ')}
                         </p>
                     )}
@@ -198,11 +198,11 @@ function ChangeItem({ change, onUndo }: ChangeItemProps) {
                         size="sm"
                         onClick={handleUndo}
                         disabled={isUndoing}
-                        className="flex-shrink-0 h-8 px-2 text-xs"
+                        className="flex-shrink-0 h-7 sm:h-8 px-1.5 sm:px-2 text-xs"
                         aria-label={`Undo ${label} ${change.title}`}
                     >
-                        <Undo2 className="w-3 h-3 mr-1" />
-                        Undo
+                        <Undo2 className="w-3 h-3 sm:mr-1" />
+                        <span className="hidden sm:inline">Undo</span>
                     </Button>
                 )}
             </div>
@@ -214,11 +214,11 @@ function ChangeItem({ change, onUndo }: ChangeItemProps) {
 function getChangeIcon(type: ChangeType) {
     switch (type) {
         case 'added':
-            return <Plus className="w-4 h-4" aria-label="Added" />;
+            return <Plus className="w-3 h-3 sm:w-4 sm:h-4" aria-label="Added" />;
         case 'modified':
-            return <span className="text-base font-bold" aria-label="Modified">~</span>;
+            return <span className="text-sm sm:text-base font-bold" aria-label="Modified">~</span>;
         case 'removed':
-            return <Minus className="w-4 h-4" aria-label="Removed" />;
+            return <Minus className="w-3 h-3 sm:w-4 sm:h-4" aria-label="Removed" />;
     }
 }
 

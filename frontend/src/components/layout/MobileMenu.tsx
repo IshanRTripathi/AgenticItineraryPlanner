@@ -144,7 +144,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden',
+          'fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300',
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={onClose}
@@ -155,7 +155,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       <div
         ref={menuRef}
         className={cn(
-          'fixed top-0 left-0 h-full w-64 max-w-[75vw] bg-white shadow-2xl z-50 transition-transform duration-300 ease-out md:hidden',
+          'fixed top-0 left-0 h-full w-64 max-w-[75vw] bg-white shadow-2xl z-50 transition-transform duration-300 ease-out',
           'flex flex-col',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}

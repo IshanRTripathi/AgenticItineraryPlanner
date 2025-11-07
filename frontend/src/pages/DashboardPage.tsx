@@ -13,12 +13,7 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 
-interface DashboardPageProps {
-  mobileMenuOpen?: boolean;
-  onMobileMenuChange?: (open: boolean) => void;
-}
-
-export function DashboardPage({ mobileMenuOpen, onMobileMenuChange }: DashboardPageProps) {
+export function DashboardPage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { isPulling, pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: async () => {
@@ -48,7 +43,7 @@ export function DashboardPage({ mobileMenuOpen, onMobileMenuChange }: DashboardP
         </div>
       </div>
 
-      <Header mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={onMobileMenuChange} />
+      <Header />
       
       <main className="flex-1 bg-muted/30 py-4 sm:py-6 md:py-8">
         <div className="container px-3 sm:px-4">
@@ -64,7 +59,7 @@ export function DashboardPage({ mobileMenuOpen, onMobileMenuChange }: DashboardP
             </div>
             
             <Button
-              size={isMobile ? 'default' : 'lg'}
+              size={isMobile ? undefined : 'lg'}
               onClick={() => window.location.href = '/planner'}
               className="w-full md:w-auto gap-2 min-h-[44px] touch-manipulation active:scale-95 transition-transform"
             >

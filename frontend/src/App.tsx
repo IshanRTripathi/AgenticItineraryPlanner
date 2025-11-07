@@ -59,16 +59,16 @@ function App() {
       
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route path="/" element={<HomePage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/search" element={<SearchPage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} />} />
+          <Route path="/search" element={<SearchPage />} />
           
           {/* Protected Routes */}
           <Route path="/planner" element={<ProtectedRoute><TripWizardPage /></ProtectedRoute>} />
           <Route path="/planner-progress" element={<ProtectedRoute><AgentProgressPage /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} /></ProtectedRoute>} />
-          <Route path="/trip/:id" element={<ProtectedRoute><TripDetailPage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage mobileMenuOpen={mobileMenuOpen} onMobileMenuChange={setMobileMenuOpen} /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/trip/:id" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Routes>
       </Suspense>
       
