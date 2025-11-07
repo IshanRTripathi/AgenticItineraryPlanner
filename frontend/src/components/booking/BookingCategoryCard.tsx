@@ -9,6 +9,32 @@ import { ChevronDown, Clock, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BookingCategoryGroup, CategorizedBooking, getNodeIcon } from '@/utils/categorizeBookings';
 
+/**
+ * Format time string to be more user-friendly
+ * Converts various time formats to 12-hour format with AM/PM
+ */
+function formatTime(timeStr: string): string {
+  if (!timeStr) return '';
+  
+  // If already in 12-hour format with AM/PM, return as is
+  if (/\d{1,2}:\d{2}\s*(AM|PM)/i.test(timeStr)) {
+    return timeStr;
+  }
+  
+  // Try to parse 24-hour format (HH:MM or H:MM)
+  const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hours}:${minutes} ${ampm}`;
+  }
+  
+  // If no match, return original
+  return timeStr;
+}
+
 interface BookingCategoryCardProps {
   group: BookingCategoryGroup;
   defaultExpanded?: boolean;
@@ -139,7 +165,7 @@ export function BookingCategoryCard({
                           {booking.timing?.startTime && (
                             <div className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {booking.timing.startTime}
+                              {formatTime(booking.timing.startTime)}
                             </div>
                           )}
                           {booking.cost?.amount && (

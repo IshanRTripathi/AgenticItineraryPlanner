@@ -4,14 +4,9 @@
  */
 
 import { useState } from 'react';
-import { ResponsiveModal } from '@/components/ui/responsive-modal';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, ExternalLink, Shield, X, Check, Upload } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Loader2, ExternalLink, Shield, X } from 'lucide-react';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -31,14 +26,9 @@ export function BookingModal({
   onMarkBooked
 }: BookingModalProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [showMarkBooked, setShowMarkBooked] = useState(false);
-  const [bookingRef, setBookingRef] = useState('');
-  const { toast } = useToast();
 
   const handleClose = () => {
     setIsLoading(true);
-    setShowMarkBooked(false);
-    setBookingRef('');
     onClose();
   };
 
@@ -46,43 +36,13 @@ export function BookingModal({
     window.open(providerUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleMarkBooked = () => {
-    if (bookingRef.trim()) {
-      onMarkBooked?.(bookingRef.trim());
-      toast({
-        title: 'Booking Marked',
-        description: `${itemName} has been marked as booked`,
-      });
-      handleClose();
-    } else {
-      toast({
-        title: 'Booking Reference Required',
-        description: 'Please enter a booking reference or confirmation number',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Dummy upload - just show success
-      toast({
-        title: 'Document Uploaded',
-        description: `${file.name} uploaded successfully (demo)`,
-      });
-    }
-  };
-
-  const isMobile = useMediaQuery('(max-width: 768px)');
-
   return (
-    <ResponsiveModal 
-      open={isOpen} 
-      onOpenChange={handleClose}
-      className="max-w-[95vw] md:max-w-[90vw] w-full h-[95vh] md:h-[90vh] p-0 gap-0 flex flex-col overflow-hidden"
-    >
-      <div className="flex flex-col h-full">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      {/* Full-screen modal content - matches SearchPage layout */}
+      <div 
+        className="relative bg-gradient-to-b from-background to-muted/20 w-[100vw] h-[100vh] max-w-none flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close Button - Top Right */}
         <Button
           variant="ghost"
@@ -93,155 +53,65 @@ export function BookingModal({
           <X className="w-5 h-5 md:w-4 md:h-4" />
         </Button>
 
-        {/* Iframe Container - 16:9 aspect ratio */}
-        <div className="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100">
-          {isLoading && (
-            <div className="absolute inset-0 bg-white/98 backdrop-blur-sm flex items-center justify-center z-10">
-              <div className="text-center">
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
-                  <Loader2 className="relative w-12 h-12 animate-spin text-primary mx-auto" />
+        {/* Main content area - matches SearchPage */}
+        <main className="flex-1 flex flex-col overflow-hidden px-2 sm:px-4 py-2 gap-2 min-h-0 pt-14 md:pt-2">
+          {/* Security Ribbon */}
+          <div className="flex-shrink-0 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white rounded-lg shadow-lg border-2 border-blue-400">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-3 sm:px-4 py-3">
+              <div className="flex items-start sm:items-center gap-3 flex-1 w-full">
+                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <p className="text-base font-semibold mb-2 text-gray-900">Loading booking page...</p>
-                <p className="text-sm text-muted-foreground">Secure booking in progress</p>
-              </div>
-            </div>
-          )}
-          
-          <iframe
-            src={providerUrl}
-            className="w-full h-full border-0 bg-white"
-            title="EaseMyTrip Booking"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-            onLoad={() => setIsLoading(false)}
-          />
-        </div>
-
-        {/* Bottom Action Bar */}
-        <div className="border-t-2 border-gray-200 bg-gradient-to-r from-white to-gray-50 p-4 shadow-inner">
-          {!showMarkBooked ? (
-            <div className="flex items-center justify-between gap-4">
-              {/* Left: Info */}
-              <div className="flex items-center gap-2 text-sm">
-                <Badge variant="secondary" className="text-xs shadow-sm border border-gray-200">
-                  <Shield className="w-3 h-3 mr-1" />
-                  Secure Booking
-                </Badge>
-                <span className="text-muted-foreground hidden sm:inline font-medium">
-                  Complete your booking on EaseMyTrip
-                </span>
-              </div>
-
-              {/* Right: Actions */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleOpenInNewTab}
-                  className="border-2 hover:border-primary/50 shadow-sm min-h-[44px] touch-manipulation active:scale-95"
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Open in New Tab</span>
-                  <span className="sm:hidden">New Tab</span>
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setShowMarkBooked(true)}
-                  className="shadow-md hover:shadow-lg transition-shadow min-h-[44px] touch-manipulation active:scale-95"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Mark as Booked
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleClose}
-                  className="hover:bg-gray-100 min-h-[44px] touch-manipulation active:scale-95"
-                >
-                  Book Later
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                <h3 className="font-semibold text-base flex items-center gap-2">
-                  <Check className="w-4 h-4 text-primary" />
-                  Mark as Booked
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowMarkBooked(false);
-                    setBookingRef('');
-                  }}
-                  className="hover:bg-gray-100"
-                >
-                  Cancel
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Booking Reference Input */}
-                <div className="space-y-2">
-                  <Label htmlFor="bookingRef" className="text-xs font-semibold text-gray-700">
-                    Booking Reference / Confirmation Number
-                  </Label>
-                  <Input
-                    id="bookingRef"
-                    placeholder="e.g., EMT123456789"
-                    value={bookingRef}
-                    onChange={(e) => setBookingRef(e.target.value)}
-                    className="h-10 border-2 focus:border-primary shadow-sm"
-                  />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold mb-0.5">Secure Booking via EaseMyTrip</p>
+                  <p className="text-xs text-blue-100 hidden sm:block">
+                    Booking {itemName} securely. Your data is protected.
+                  </p>
+                  <p className="text-xs text-blue-100 sm:hidden">
+                    Secure booking with data protection
+                  </p>
                 </div>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleOpenInNewTab}
+                className="w-full sm:w-auto min-h-[44px] bg-white text-blue-600 hover:bg-blue-50 border-0 shadow-md font-semibold touch-manipulation active:scale-95 transition-transform"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Open in New Tab</span>
+                <span className="sm:hidden">New Tab</span>
+              </Button>
+            </div>
+          </div>
 
-                {/* Document Upload (Dummy) */}
-                <div className="space-y-2">
-                  <Label htmlFor="document" className="text-xs font-semibold text-gray-700">
-                    Upload Confirmation (Optional)
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="document"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={handleFileUpload}
-                      className="h-10 cursor-pointer border-2 shadow-sm file:mr-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-primary file:text-white hover:file:bg-primary/90 file:transition-colors"
-                    />
+          {/* Iframe Container - Takes all remaining vertical space */}
+          <div className="flex-1 relative bg-white rounded-lg border border-gray-200 sm:border-2 shadow-xl overflow-hidden min-h-0">
+            {isLoading && (
+              <div className="absolute inset-0 bg-white/98 backdrop-blur-sm flex items-center justify-center z-10">
+                <div className="text-center px-4">
+                  <div className="relative mb-4 sm:mb-6">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                    <Loader2 className="relative w-10 h-10 sm:w-12 sm:h-12 animate-spin text-primary mx-auto" />
                   </div>
+                  <p className="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-gray-900">Loading booking page...</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Preparing your booking</p>
                 </div>
               </div>
+            )}
+            
+            <iframe
+              src={providerUrl}
+              className="w-full h-full border-0"
+              title="EaseMyTrip Booking"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+              onLoad={() => setIsLoading(false)}
+              allow="payment"
+            />
+          </div>
 
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setShowMarkBooked(false);
-                    setBookingRef('');
-                  }}
-                  className="border-2 hover:bg-gray-50"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleMarkBooked}
-                  disabled={!bookingRef.trim()}
-                  className="shadow-md hover:shadow-lg transition-shadow"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Confirm Booking
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+        </main>
       </div>
-    </ResponsiveModal>
+    </Dialog>
   );
 }

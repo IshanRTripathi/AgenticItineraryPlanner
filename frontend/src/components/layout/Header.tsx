@@ -8,8 +8,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, Settings, HelpCircle } from 'lucide-react';
-import { MobileMenu } from './MobileMenu';
-import { AnimatedHamburger } from './AnimatedHamburger';
+
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { useStickyHeader } from '@/hooks/useScrollAnimation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,12 +16,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 
-interface HeaderProps {
-  mobileMenuOpen?: boolean;
-  onMobileMenuChange?: (open: boolean) => void;
-}
-
-export function Header({ mobileMenuOpen = false, onMobileMenuChange }: HeaderProps = {}) {
+export function Header() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const isScrolled = useStickyHeader(20);
@@ -221,12 +215,6 @@ export function Header({ mobileMenuOpen = false, onMobileMenuChange }: HeaderPro
           </div>
         </div>
       </header>
-
-      {/* Mobile Menu */}
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        onClose={() => onMobileMenuChange?.(false)}
-      />
 
       {/* Mobile Profile Bottom Sheet */}
       <BottomSheet

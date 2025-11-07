@@ -4,6 +4,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { BottomNav } from './components/layout/BottomNav';
 import { FloatingHamburger } from './components/layout/FloatingHamburger';
+import { MobileMenu } from './components/layout/MobileMenu';
 import { HomePage } from './pages/HomePage';
 import { Loader2 } from 'lucide-react';
 import { analytics } from './services/analytics';
@@ -71,6 +72,12 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Routes>
       </Suspense>
+      
+      {/* Mobile Menu */}
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
       
       {/* Floating Hamburger Button */}
       {!hideBottomNav && (

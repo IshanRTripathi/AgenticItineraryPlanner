@@ -88,49 +88,49 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
   const isOverBudget = budgetData.spent > budgetData.total;
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+    <div className="space-y-3 sm:space-y-4 md:space-y-6">
       {/* Budget Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Total Budget</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold">
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold">
               ${budgetData.total.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
               {budgetData.currency}
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Spent</CardTitle>
-            <TrendingUp className="h-4 w-4 text-error" />
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-error" />
           </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="text-xl sm:text-2xl font-bold text-error">
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-error">
               ${budgetData.spent.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
               {percentageSpent.toFixed(1)}% of budget
             </p>
           </CardContent>
         </Card>
 
         <Card className="sm:col-span-2 lg:col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Remaining</CardTitle>
-            <TrendingDown className="h-4 w-4 text-success" />
+            <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
           </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className={`text-xl sm:text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
               ${Math.abs(budgetData.remaining).toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
               {isOverBudget ? 'Over budget' : 'Under budget'}
             </p>
           </CardContent>
@@ -140,10 +140,10 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       {/* Budget Alert */}
       {percentageSpent > 80 && (
         <Card className="border-warning bg-warning/5">
-          <CardContent className="flex items-start gap-3 p-4 sm:pt-6">
+          <CardContent className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 md:pt-6">
             <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm sm:text-base font-medium text-warning">Budget Alert</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm md:text-base font-medium text-warning">Budget Alert</p>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 You've spent {percentageSpent.toFixed(1)}% of your budget. Consider adjusting your spending.
               </p>
@@ -154,13 +154,13 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
 
       {/* Category Breakdown */}
       <Card>
-        <CardHeader>
-          <CardTitle>Spending by Category</CardTitle>
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-base sm:text-lg">Spending by Category</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Pie Chart */}
-            <div className="h-[300px]">
+            <div className="h-[250px] sm:h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -168,8 +168,8 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(entry: any) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    label={isMobile ? false : (entry: any) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
+                    outerRadius={isMobile ? 60 : 80}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -183,18 +183,18 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
             </div>
 
             {/* Category List */}
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {categoryData.map((category) => (
-                <div key={category.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div key={category.name} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div
-                      className="w-4 h-4 rounded-full"
+                      className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0"
                       style={{ backgroundColor: category.color }}
                     />
-                    <span className="text-sm font-medium">{category.name}</span>
+                    <span className="text-xs sm:text-sm font-medium truncate">{category.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold">${category.value}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                    <span className="text-xs sm:text-sm font-bold">${category.value}</span>
                     <Badge variant="outline" className="text-xs">
                       {((category.value / budgetData.spent) * 100).toFixed(0)}%
                     </Badge>
@@ -208,23 +208,23 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
 
       {/* Daily Costs */}
       <Card>
-        <CardHeader>
-          <CardTitle>Daily Spending</CardTitle>
+        <CardHeader className="p-3 sm:p-4 md:p-6">
+          <CardTitle className="text-base sm:text-lg">Daily Spending</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
+        <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+          <div className="h-[250px] sm:h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyCosts}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
+                <XAxis dataKey="day" tick={{ fontSize: isMobile ? 10 : 12 }} />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <Tooltip formatter={(value) => `$${value}`} />
-                <Legend />
+                {!isMobile && <Legend />}
                 <Bar dataKey="cost" fill="#002B5B" name="Daily Cost" />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-4 text-sm text-muted-foreground">
+          <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
             Average daily cost: ${(budgetData.spent / dailyCosts.length).toFixed(2)}
           </div>
         </CardContent>

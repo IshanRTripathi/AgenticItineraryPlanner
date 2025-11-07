@@ -67,7 +67,7 @@ export function buildHotelUrl(params: EaseMyTripUrlParams): string {
     rooms = 1,
   } = params;
 
-  // Keep full destination with country for better search results
+  // Use full destination with city and country for better search results
   const checkInDate = formatDateEMT(checkIn);
   const checkOutDate = formatDateEMT(checkOut);
 
@@ -75,15 +75,15 @@ export function buildHotelUrl(params: EaseMyTripUrlParams): string {
   const timestamp = Date.now().toString().slice(-12);
 
   // EaseMyTrip actual hotel search URL format
-  const baseUrl = 'https://www.easemytrip.com/hotel-new/search';
+  // The 'city' parameter accepts full location strings like "Paris, France"
+  const baseUrl = 'https://www.easemytrip.com/hotels';
   const searchParams = new URLSearchParams({
-    e: timestamp,
-    city: destination, // Use full destination
-    cin: checkInDate,
-    cOut: checkOutDate,
-    Hotel: 'NA',
-    Rooms: rooms.toString(),
-    pax: (adults + children).toString(),
+    city: destination, // Full destination with country
+    checkin: checkInDate,
+    checkout: checkOutDate,
+    rooms: rooms.toString(),
+    adults: adults.toString(),
+    children: children.toString(),
   });
 
   return `${baseUrl}?${searchParams.toString()}`;
