@@ -39,6 +39,7 @@ public class AgentEventPublisher {
             
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "day_completed", 
                 java.util.Map.of(
+                    "type", "day_completed",
                     "dayNumber", completedDay.getDayNumber(),
                     "progress", progress,
                     "message", message,
@@ -88,7 +89,9 @@ public class AgentEventPublisher {
                 java.util.Map.of(
                     "message", message,
                     "itinerary", finalItinerary,
-                    "progress", 100
+                    "progress", 100,
+                    "status", "completed",
+                    "type", "generation_complete"
                 ));
             
             logger.info("Published generation complete event via WebSocket: itinerary={}, days={}, total_nodes={}", 
@@ -109,6 +112,7 @@ public class AgentEventPublisher {
         try {
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "phase_transition", 
                 java.util.Map.of(
+                    "type", "phase_transition",
                     "fromPhase", fromPhase,
                     "toPhase", toPhase,
                     "progress", overallProgress,
@@ -150,6 +154,7 @@ public class AgentEventPublisher {
         try {
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "warning", 
                 java.util.Map.of(
+                    "type", "warning",
                     "errorCode", errorCode,
                     "message", message,
                     "recoveryAction", recoveryAction,
@@ -172,6 +177,7 @@ public class AgentEventPublisher {
         try {
             webSocketEventPublisher.publishItineraryUpdate(itineraryId, "error", 
                 java.util.Map.of(
+                    "type", "error",
                     "context", context,
                     "message", exception.getMessage(),
                     "severity", severity.name(),
@@ -183,6 +189,32 @@ public class AgentEventPublisher {
                         
         } catch (Exception e) {
             logger.error("Failed to publish exception-based error event for itinerary: {}", itineraryId, e);
+        }
+    }
+    
+    /**
+     * Publish agent completion event.
+     */
+    public void publishAgentComplete(String itineraryId, String executionId, 
+                                     String agentName, int itemsProcessed) {
+        try {
+            String message = String.format("%s completed: %d items processed", 
+                                         agentName, itemsProcessed);
+            
+            webSocketEventPublisher.publishItineraryUpdate(itineraryId, "agent_complete", 
+                java.util.Map.of(
+                    "type", "agent_complete",
+                    "agentName", agentName,
+                    "itemsProcessed", itemsProcessed,
+                    "message", message
+                ));
+            
+            logger.info("Published agent completion event via WebSocket: itinerary={}, agent={}, items={}", 
+                       itineraryId, agentName, itemsProcessed);
+                       
+        } catch (Exception e) {
+            logger.error("Failed to publish agent completion event for itinerary: {}, agent: {}", 
+                        itineraryId, agentName, e);
         }
     }
     

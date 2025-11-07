@@ -43,7 +43,8 @@ public class PipelineOrchestrator {
     private final ItineraryJsonService itineraryJsonService;
     private final AgentEventPublisher agentEventPublisher;
     private final ExecutorService pipelineExecutor;
-    
+    private final UserDataService userDataService;
+
     @Value("${itinerary.generation.pipeline.parallel:true}")
     private boolean enableParallel;
     
@@ -61,13 +62,13 @@ public class PipelineOrchestrator {
     private long finalizationTimeoutMs;
     
     public PipelineOrchestrator(SkeletonPlannerAgent skeletonPlannerAgent,
-                               ActivityAgent activityAgent,
-                               MealAgent mealAgent,
-                               TransportAgent transportAgent,
-                               CostEstimatorAgent costEstimatorAgent,
-                               EnrichmentAgent enrichmentAgent,
-                               ItineraryJsonService itineraryJsonService,
-                               AgentEventPublisher agentEventPublisher) {
+                                ActivityAgent activityAgent,
+                                MealAgent mealAgent,
+                                TransportAgent transportAgent,
+                                CostEstimatorAgent costEstimatorAgent,
+                                EnrichmentAgent enrichmentAgent,
+                                ItineraryJsonService itineraryJsonService,
+                                AgentEventPublisher agentEventPublisher, UserDataService userDataService) {
         this.skeletonPlannerAgent = skeletonPlannerAgent;
         this.activityAgent = activityAgent;
         this.mealAgent = mealAgent;
@@ -84,6 +85,7 @@ public class PipelineOrchestrator {
             t.setDaemon(true);
             return t;
         });
+        this.userDataService = userDataService;
     }
     
     /**
@@ -118,51 +120,108 @@ public class PipelineOrchestrator {
                 logger.info("=== PHASE 2: POPULATION ===");
                 publishPhaseStart(itineraryId, executionId, "population", "Populating node details...");
                 
-                executePopulationPhase(itineraryId, skeleton, executionId);
+                long populationTime = 0;
+                try {
+                    executePopulationPhase(itineraryId, skeleton, executionId);
+                    populationTime = System.currentTimeMillis() - startTime - skeletonTime;
+                    logger.info("Phase 2 complete ({} ms)", populationTime);
+                    publishPhaseComplete(itineraryId, executionId, "population", populationTime);
+                } catch (Exception e) {
+                    populationTime = System.currentTimeMillis() - startTime - skeletonTime;
+                    logger.error("Phase 2 failed after {} ms, continuing to enrichment: {}", populationTime, e.getMessage(), e);
+                    publishPhaseComplete(itineraryId, executionId, "population", populationTime);
+                }
                 
-                long populationTime = System.currentTimeMillis() - startTime - skeletonTime;
-                logger.info("Phase 2 complete ({} ms)", populationTime);
-                publishPhaseComplete(itineraryId, executionId, "population", populationTime);
-                
-                // Phase 3: Enrichment (Optional)
+                // Phase 3: Enrichment (CRITICAL - Always run this to add Google Places data)
                 logger.info("=== PHASE 3: ENRICHMENT ===");
-                publishPhaseStart(itineraryId, executionId, "ENRICHMENT", "Adding location details...");
+                publishPhaseStart(itineraryId, executionId, "enrichment", "Adding location details...");
                 
-                executeEnrichmentPhase(itineraryId, skeleton, executionId);
-                
-                long enrichmentTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime;
-                logger.info("Phase 3 complete ({} ms)", enrichmentTime);
-                publishPhaseComplete(itineraryId, executionId, "ENRICHMENT", enrichmentTime);
+                long enrichmentTime = 0;
+                try {
+                    executeEnrichmentPhase(itineraryId, skeleton, executionId);
+                    enrichmentTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime;
+                    logger.info("Phase 3 complete ({} ms)", enrichmentTime);
+                    publishPhaseComplete(itineraryId, executionId, "enrichment", enrichmentTime);
+                    
+                    // CRITICAL FIX: Reload itinerary after enrichment to get the enriched data
+                    // The enrichment phase modifies the itinerary in Firestore, but the 'skeleton' variable
+                    // is stale. We need to reload to get photos, ratings, price levels, etc.
+                    logger.info("🔄 Reloading itinerary after enrichment to get enriched data...");
+                    Optional<NormalizedItinerary> enrichedOpt = itineraryJsonService.getItinerary(itineraryId);
+                    if (enrichedOpt.isPresent()) {
+                        skeleton = enrichedOpt.get();
+                        logger.info("✅ Reloaded itinerary - Version: {}, has {} days", 
+                                   skeleton.getVersion(), skeleton.getDays().size());
+                        
+                        // Log first node to verify enrichment data is present
+                        if (!skeleton.getDays().isEmpty() && 
+                            !skeleton.getDays().get(0).getNodes().isEmpty()) {
+                            NormalizedNode firstNode = skeleton.getDays().get(0).getNodes().get(0);
+                            if (firstNode.getLocation() != null) {
+                                logger.info("📸 First node after reload - photos: {}, rating: {}, priceLevel: {}",
+                                           firstNode.getLocation().getPhotos() != null ? 
+                                               firstNode.getLocation().getPhotos().size() + " items" : "null",
+                                           firstNode.getLocation().getRating(),
+                                           firstNode.getLocation().getPriceLevel());
+                            }
+                        }
+                    } else {
+                        logger.warn("⚠️ Failed to reload itinerary after enrichment, using stale data");
+                    }
+                } catch (Exception e) {
+                    enrichmentTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime;
+                    logger.error("Phase 3 failed after {} ms, continuing to cost estimation: {}", enrichmentTime, e.getMessage(), e);
+                    publishPhaseComplete(itineraryId, executionId, "enrichment", enrichmentTime);
+                }
                 
                 // Phase 4: Cost Estimation
                 logger.info("=== PHASE 4: COST ESTIMATION ===");
                 publishPhaseStart(itineraryId, executionId, "cost_estimation", "Estimating costs...");
                 
-                String budgetTier = request.getBudgetTier() != null ? request.getBudgetTier() : "medium";
-                costEstimatorAgent.estimateCosts(itineraryId, skeleton, budgetTier);
-                
-                long costTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime;
-                logger.info("Phase 4 complete ({} ms)", costTime);
-                publishPhaseComplete(itineraryId, executionId, "cost_estimation", costTime);
+                long costTime = 0;
+                try {
+                    String budgetTier = request.getBudgetTier() != null ? request.getBudgetTier() : "medium";
+                    costEstimatorAgent.estimateCosts(itineraryId, skeleton, budgetTier);
+                    costTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime;
+                    logger.info("Phase 4 complete ({} ms)", costTime);
+                    publishPhaseComplete(itineraryId, executionId, "cost_estimation", costTime);
+                } catch (Exception e) {
+                    costTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime;
+                    logger.error("Phase 4 failed after {} ms, continuing to finalization: {}", costTime, e.getMessage(), e);
+                    publishPhaseComplete(itineraryId, executionId, "cost_estimation", costTime);
+                }
                 
                 // Phase 5: Finalization
                 logger.info("=== PHASE 5: FINALIZATION ===");
                 publishPhaseStart(itineraryId, executionId, "finalization", "Finalizing itinerary...");
                 
-                NormalizedItinerary finalItinerary = executeFinalizationPhase(itineraryId);
-                
-                long totalTime = System.currentTimeMillis() - startTime;
-                logger.info("=== PIPELINE COMPLETE ===");
-                logger.info("Total time: {} ms", totalTime);
-                logger.info("Days: {}, Nodes: {}", 
-                    finalItinerary.getDays().size(),
-                    finalItinerary.getDays().stream()
-                        .mapToInt(d -> d.getNodes() != null ? d.getNodes().size() : 0)
-                        .sum());
-                
-                publishPhaseComplete(itineraryId, executionId, "finalization", 
-                    System.currentTimeMillis() - startTime - skeletonTime - enrichmentTime);
-                publishPipelineComplete(itineraryId, executionId, totalTime);
+                NormalizedItinerary finalItinerary = null;
+                try {
+                    finalItinerary = executeFinalizationPhase(itineraryId);
+                    
+                    long totalTime = System.currentTimeMillis() - startTime;
+                    logger.info("=== PIPELINE COMPLETE ===");
+                    logger.info("Total time: {} ms", totalTime);
+                    logger.info("Days: {}, Nodes: {}", 
+                        finalItinerary.getDays().size(),
+                        finalItinerary.getDays().stream()
+                            .mapToInt(d -> d.getNodes() != null ? d.getNodes().size() : 0)
+                            .sum());
+                    
+                    publishPhaseComplete(itineraryId, executionId, "finalization", 
+                        System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime - costTime);
+                    publishPipelineComplete(itineraryId, executionId, totalTime);
+                } catch (Exception e) {
+                    logger.error("Phase 5 failed: {}", e.getMessage(), e);
+                    // Try to get the itinerary anyway
+                    Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                    if (itineraryOpt.isPresent()) {
+                        finalItinerary = itineraryOpt.get();
+                        logger.info("Retrieved itinerary despite finalization failure");
+                    } else {
+                        throw new RuntimeException("Finalization failed and itinerary not found", e);
+                    }
+                }
                 
                 return finalItinerary;
                 
@@ -281,30 +340,46 @@ public class PipelineOrchestrator {
     }
     
     /**
-     * Phase 3: Enrich with external data.
+     * Phase 3: Enrich with external data (coordinates, photos, reviews).
      */
     private void executeEnrichmentPhase(String itineraryId, NormalizedItinerary skeleton, 
                                        String executionId) {
         try {
+            logger.info("Starting enrichment phase for itinerary: {}", itineraryId);
+            logger.info("Enrichment will add: coordinates, place IDs, photos, reviews, ratings");
+            
             // Enrichment is optional - if it fails, we continue with basic data
             CompletableFuture<Void> enrichmentFuture = CompletableFuture.runAsync(() -> {
                 try {
+                    // Call EnrichmentAgent's executeInternal method directly
                     Map<String, Object> enrichmentData = new HashMap<>();
-                    enrichmentData.put("taskType", "enrich");  // EnrichmentAgent supports "enrich"
+                    enrichmentData.put("taskType", "enrich");
                     BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = 
                         new BaseAgent.AgentRequest<>(enrichmentData, ChangeEngine.ApplyResult.class);
-                    enrichmentAgent.execute(itineraryId, enrichmentRequest);
+                    
+                    logger.info("Calling EnrichmentAgent.execute() for itinerary: {}", itineraryId);
+                    ChangeEngine.ApplyResult result = enrichmentAgent.execute(itineraryId, enrichmentRequest);
+                    
+                    if (result != null) {
+                        logger.info("Enrichment completed successfully. Version: {}", result.getToVersion());
+                    } else {
+                        logger.info("Enrichment completed with no changes");
+                    }
                 } catch (Exception e) {
-                    logger.warn("Enrichment failed, continuing with basic data: {}", e.getMessage());
+                    logger.error("Enrichment failed for itinerary: {}", itineraryId, e);
+                    logger.warn("Continuing with basic data (no coordinates/photos)");
                 }
             }, pipelineExecutor);
             
             enrichmentFuture.get(enrichmentTimeoutMs, TimeUnit.MILLISECONDS);
+            logger.info("Enrichment phase completed for itinerary: {}", itineraryId);
             
         } catch (TimeoutException e) {
-            logger.warn("Enrichment timed out after {} ms, continuing...", enrichmentTimeoutMs);
+            logger.warn("Enrichment timed out after {} ms for itinerary: {}, continuing...", 
+                       enrichmentTimeoutMs, itineraryId);
         } catch (Exception e) {
-            logger.warn("Enrichment phase failed, continuing with basic data: {}", e.getMessage());
+            logger.warn("Enrichment phase failed for itinerary: {}, continuing with basic data: {}", 
+                       itineraryId, e.getMessage());
         }
     }
     
@@ -398,20 +473,40 @@ public class PipelineOrchestrator {
             if (itineraryOpt.isPresent()) {
                 NormalizedItinerary itinerary = itineraryOpt.get();
                 itinerary.setStatus("completed");
+                itinerary.setUpdatedAt(System.currentTimeMillis());
                 
                 // Ensure userId is set (it should already be set from initial creation)
                 if (itinerary.getUserId() == null || itinerary.getUserId().trim().isEmpty()) {
-                    logger.warn("UserId not found in itinerary {}, attempting to retrieve from metadata", itineraryId);
-                    // Try to get userId from the itinerary metadata or skip save
-                    // For now, just log and skip the save to avoid blocking completion
-                    logger.error("Cannot save itinerary {} without userId - skipping status update", itineraryId);
+                    logger.warn("UserId not found in itinerary {}, this should not happen", itineraryId);
+                    logger.warn("Itinerary was likely not properly initialized. Status update will be skipped.");
+                    // Don't throw exception, just skip the status update to avoid blocking completion
                 } else {
                     itineraryJsonService.saveMasterItinerary(itineraryId, itinerary);
                     logger.info("Updated itinerary status to 'completed' for: {}", itineraryId);
+                    
+                    // CRITICAL: Also update TripMetadata status for consistency
+                    try {
+                        Optional<TripMetadata> metadataOpt = userDataService.getUserTripMetadata(itinerary.getUserId(), itineraryId);
+                        if (metadataOpt.isPresent()) {
+                            TripMetadata metadata = metadataOpt.get();
+                            metadata.setStatus("completed");
+                            metadata.setUpdatedAt(System.currentTimeMillis());
+                            userDataService.saveUserTripMetadata(itinerary.getUserId(), metadata);
+                            logger.info("Updated TripMetadata status to 'completed' for: {}", itineraryId);
+                        } else {
+                            logger.warn("TripMetadata not found for itinerary {}, status not updated in metadata", itineraryId);
+                        }
+                    } catch (Exception metaEx) {
+                        logger.error("Failed to update TripMetadata status: {}", metaEx.getMessage());
+                        // Don't throw, just log - itinerary status is already updated
+                    }
                 }
+            } else {
+                logger.warn("Itinerary {} not found when trying to update status to completed", itineraryId);
             }
         } catch (Exception e) {
             logger.error("Failed to update itinerary status to completed: {}", e.getMessage(), e);
+            // Don't throw exception, just log and continue
         }
         
         // Publish SSE events if there are active connections

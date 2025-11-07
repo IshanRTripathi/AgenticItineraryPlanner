@@ -127,7 +127,30 @@ public class ItineraryJsonService {
      */
     private Optional<NormalizedItinerary> deserializeItinerary(FirestoreItinerary entity) {
         try {
+            // 🔍 DEBUG: Check if JSON contains photos field
+            String json = entity.getJson();
+            if (json.contains("\"photos\"")) {
+                logger.info("🔍 [deserializeItinerary] JSON from DB contains 'photos' field ✅");
+            } else {
+                logger.warn("🔍 [deserializeItinerary] JSON from DB does NOT contain 'photos' field ❌");
+            }
+            
             NormalizedItinerary itinerary = objectMapper.readValue(entity.getJson(), NormalizedItinerary.class);
+            
+            // 🔍 DEBUG: Check if deserialized object has photos
+            if (itinerary.getDays() != null && !itinerary.getDays().isEmpty()) {
+                NormalizedDay firstDay = itinerary.getDays().get(0);
+                if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                    NormalizedNode firstNode = firstDay.getNodes().get(0);
+                    logger.info("🔍 [deserializeItinerary] After deserialization - First node:");
+                    logger.info("   Title: {}", firstNode.getTitle());
+                    if (firstNode.getLocation() != null) {
+                        logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                        logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                        logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                    }
+                }
+            }
             
             // Populate map fields if not already present
             populateMapFields(itinerary);
@@ -174,8 +197,19 @@ public class ItineraryJsonService {
             // Serialize unified structure to JSON with error handling
             String json = serializeItineraryWithRetry(itinerary);
             
-            // Store as masterItinerary.json at root/itineraries/{itineraryId}/
-            String path = "itineraries/" + itineraryId + "/masterItinerary";
+            // 🔍 DEBUG: Check if JSON contains photos field
+            if (json.contains("\"photos\"")) {
+                logger.info("🔍 [saveMasterItinerary] JSON contains 'photos' field ✅");
+                // Count occurrences
+                int count = json.split("\"photos\"", -1).length - 1;
+                logger.info("🔍 [saveMasterItinerary] Found {} occurrences of 'photos' in JSON", count);
+            } else {
+                logger.warn("🔍 [saveMasterItinerary] JSON does NOT contain 'photos' field ❌");
+            }
+            
+            // Store as masterItinerary document in versions subcollection
+            // Path format: itineraries/{itineraryId}/versions/master
+            String path = "itineraries/" + itineraryId + "/versions/master";
             
             // Use FirestoreDatabaseService's flexible document storage with retry
             if (databaseService instanceof FirestoreDatabaseService) {

@@ -43,9 +43,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Register STOMP endpoint for WebSocket connections
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*") // Allow all origins for development
-                .withSockJS(); // Enable SockJS fallback
+                .withSockJS()
+                .setSessionCookieNeeded(false) // Prevent session cookie issues
+                .setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"); // Use CDN for consistency
         
-        logger.info("STOMP endpoints registered successfully");
+        logger.info("STOMP endpoints registered successfully with session management optimizations");
     }
     
     /**

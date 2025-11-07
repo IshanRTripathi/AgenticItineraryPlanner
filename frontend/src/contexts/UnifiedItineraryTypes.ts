@@ -14,6 +14,13 @@ export interface ChatMessage {
   selectedNodeId?: string;
   data?: any;
   type?: 'text' | 'itinerary_update' | 'booking_confirmation' | 'error';
+  intent?: string;
+  changeSet?: any;
+  diff?: any;
+  warnings?: string[];
+  errors?: string[];
+  applied?: boolean;
+  candidates?: any[];
 }
 
 export interface WorkflowNode {
@@ -111,6 +118,9 @@ export interface UnifiedItineraryState {
   isConnected: boolean;
   lastSyncTime: Date | null;
   syncStatus: 'idle' | 'syncing' | 'error';
+  
+  // Generation tracking
+  currentPhase: string | null;
 }
 
 /**
@@ -121,6 +131,7 @@ export type UnifiedItineraryAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_ITINERARY'; payload: TripData }
+  | { type: 'SET_CURRENT_PHASE'; payload: string | null }
   | { type: 'UPDATE_DAY'; payload: { dayIndex: number; day: NormalizedDay } }
   | { type: 'UPDATE_NODE'; payload: { dayIndex: number; nodeIndex: number; node: NormalizedNode } }
   | { type: 'ADD_NODE'; payload: { dayIndex: number; node: NormalizedNode; position?: number } }

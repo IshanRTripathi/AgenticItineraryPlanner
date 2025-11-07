@@ -47,9 +47,12 @@ public class CorsConfig implements WebMvcConfigurer {
         // Cache preflight response for 1 hour
         configuration.setMaxAge(3600L);
         
-        // Apply to all API endpoints
+        // Apply to all endpoints including WebSocket and SockJS dynamic paths
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/ws/**", configuration);
+        source.registerCorsConfiguration("/info/**", configuration);
+        source.registerCorsConfiguration("/**", configuration); // Catch-all for SockJS dynamic paths
         
         return source;
     }

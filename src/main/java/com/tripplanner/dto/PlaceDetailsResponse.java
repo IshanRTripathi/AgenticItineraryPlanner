@@ -1,11 +1,14 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
  * Response wrapper for Google Places API place details response.
+ * Ignores unknown properties to be resilient to API changes.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PlaceDetailsResponse {
     
     @JsonProperty("result")

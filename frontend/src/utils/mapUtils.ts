@@ -1,4 +1,27 @@
-import type { MapBounds, Coordinates, MapMarker } from '../types/MapTypes';
+import type { Coordinates } from '../types/dto';
+
+// Map-specific types
+export interface MapBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
+export interface MapMarker {
+  id: string;
+  position: Coordinates;
+  type: 'attraction' | 'meal' | 'accommodation' | 'transport';
+  status: 'planned' | 'in_progress' | 'completed' | 'skipped' | 'cancelled';
+  locked?: boolean;
+}
+
+// Google Maps type declarations
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 /**
  * Calculate optimal zoom level for given bounds and viewport
@@ -24,13 +47,14 @@ export function calculateOptimalZoom(
  * Animate map to bounds with smooth transition
  */
 export function animateToBounds(
-  map: google.maps.Map,
+  map: any,
   bounds: MapBounds,
   options: { duration?: number; padding?: number } = {}
 ): Promise<void> {
   return new Promise((resolve) => {
     const { duration = 1000, padding = 48 } = options;
     
+    const google = (window as any).google;
     const latLngBounds = new google.maps.LatLngBounds(
       { lat: bounds.south, lng: bounds.west },
       { lat: bounds.north, lng: bounds.east }
@@ -60,7 +84,7 @@ export function createMarkerIcon(
     cancelled: '#EF4444',    // Red
   };
 
-  const icons = {
+  const icons: Record<string, string> = {
     attraction: '🎯',
     meal: '🍽️',
     accommodation: '🏨',
@@ -203,38 +227,5 @@ export function expandBounds(
     west: lngCenter - lngDiff / 2,
     north: latCenter + latDiff / 2,
     east: lngCenter + lngDiff / 2,
-  };
-}
-
-/**
- * Debounce function for map operations
- */
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-/**
- * Throttle function for map operations
- */
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  
-  return (...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
   };
 }

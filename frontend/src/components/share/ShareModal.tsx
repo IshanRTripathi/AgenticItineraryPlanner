@@ -1,104 +1,197 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { X, Copy, Check, Share2 } from 'lucide-react';
-import { apiClient } from '../../services/apiClient';
+/**
+ * Share Modal
+ * Allows users to share itinerary via link, email, or social media
+ * Task 13: Mobile-optimized with ResponsiveModal and touch-friendly buttons
+ */
+
+import { useState } from 'react';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { exportService } from '@/services/exportService';
+import { Copy, Check, Mail, Link as LinkIcon, Share2 } from 'lucide-react';
+import { EmailShareForm } from '@/components/share/EmailShareForm';
 
 interface ShareModalProps {
-  itineraryId: string;
   isOpen: boolean;
   onClose: () => void;
+  itineraryId: string;
+  itinerary: any;
 }
 
-export function ShareModal({ itineraryId, isOpen, onClose }: ShareModalProps) {
+export function ShareModal({
+  isOpen,
+  onClose,
+  itineraryId,
+  itinerary,
+}: ShareModalProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [shareLink, setShareLink] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
-  React.useEffect(() => {
-    if (isOpen && !shareLink) {
-      generateShareLink();
-    }
-  }, [isOpen]);
-
-  const generateShareLink = async () => {
-    setLoading(true);
+  const generateLink = async () => {
+    setIsGenerating(true);
     try {
-      const response = await fetch(
-        `${(apiClient as any).baseUrl}/itineraries/${itineraryId}:share`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${(apiClient as any).authToken || ''}`,
-          },
-          body: JSON.stringify({}),
-        }
-      );
-      const data = await response.json();
-      const link = `${window.location.origin}/shared/${data.shareId}`;
+      const link = await exportService.generateShareLink(itineraryId);
       setShareLink(link);
+      toast({
+        title: 'Link generated',
+        description: 'Share link has been copied to clipboard',
+      });
     } catch (error) {
-      
+      toast({
+        title: 'Failed to generate link',
+        description: 'Please try again',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false);
+      setIsGenerating(false);
     }
   };
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+      toast({
+        title: 'Copied!',
+        description: 'Link copied to clipboard',
+      });
     } catch (error) {
-      
+      toast({
+        title: 'Failed to copy',
+        description: 'Please try again',
+        variant: 'destructive',
+      });
     }
   };
 
-  if (!isOpen) return null;
+  const shareViaWebAPI = async () => {
+    try {
+      await exportService.shareViaWebAPI(itinerary);
+    } catch (error) {
+      // User cancelled or not supported
+      if ((error as Error).name !== 'AbortError') {
+        toast({
+          title: 'Share failed',
+          description: 'Could not share itinerary',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Share2 className="w-5 h-5" />
-              <CardTitle>Share Itinerary</CardTitle>
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Share Itinerary"
+      description="Share your travel plans with friends and family"
+      className="sm:max-w-[550px]"
+    >
+      <Tabs value="link" onValueChange={() => {}} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="link" className="min-h-[44px] gap-1 sm:gap-2">
+            <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">Link</span>
+          </TabsTrigger>
+          <TabsTrigger value="email" className="min-h-[44px] gap-1 sm:gap-2">
+            <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">Email</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="link" className="space-y-4 mt-4">
+          {/* Generate Link */}
+          {!shareLink ? (
+            <div className="text-center py-4 sm:py-6">
+              <Button
+                onClick={generateLink}
+                disabled={isGenerating}
+                size="lg"
+                className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+              >
+                {isGenerating ? 'Generating...' : 'Generate Share Link'}
+              </Button>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                Create a shareable link for this itinerary
+              </p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-gray-600">
-            Anyone with this link can view your itinerary
-          </p>
-          <div className="flex gap-2">
-            <Input
-              value={shareLink}
-              readOnly
-              placeholder={loading ? 'Generating link...' : 'Share link'}
-              className="flex-1"
-            />
-            <Button
-              onClick={copyToClipboard}
-              disabled={!shareLink || loading}
-              variant="outline"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </Button>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          ) : (
+            <>
+              {/* Copy Link */}
+              <div className="space-y-2">
+                <Label htmlFor="share-link" className="text-sm sm:text-base">Share Link</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="share-link"
+                    value={shareLink}
+                    readOnly
+                    className="flex-1 min-h-[44px] text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={copyToClipboard}
+                    className="min-w-[48px] min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+                  >
+                    {isCopied ? (
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Anyone with this link can view your itinerary
+                </p>
+              </div>
+
+              {/* Web Share API (Mobile) */}
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <Button
+                  variant="outline"
+                  className="w-full min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+                  onClick={shareViaWebAPI}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share via...
+                </Button>
+              )}
+
+              {/* Generate New Link */}
+              <Button
+                variant="ghost"
+                className="w-full min-h-[44px] touch-manipulation active:scale-95 transition-transform"
+                onClick={generateLink}
+                disabled={isGenerating}
+              >
+                Generate New Link
+              </Button>
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="email" className="mt-4">
+          <EmailShareForm
+            itineraryId={itineraryId}
+            onSuccess={() => {
+              toast({
+                title: 'Email sent!',
+                description: 'Your itinerary has been shared',
+              });
+              onClose();
+            }}
+          />
+        </TabsContent>
+      </Tabs>
+    </ResponsiveModal>
   );
 }
-

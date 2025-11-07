@@ -46,7 +46,7 @@ google:
     mock-mode: ${GEMINI_MOCK_MODE:false}
   places:
     api:
-      key: ${GOOGLE_PLACES_API_KEY:}
+      key: ${GOOGLE_PLACES_API_KEY:AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss}
     daily:
       limit: ${GOOGLE_PLACES_DAILY_LIMIT:1000}
     rate-limit:

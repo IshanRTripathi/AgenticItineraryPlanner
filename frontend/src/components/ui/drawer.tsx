@@ -1,132 +1,139 @@
-"use client";
+/**
+ * Drawer Component
+ * Slide-in panel from the side with backdrop
+ * Mobile-optimized with swipe gestures
+ */
 
-import * as React from "react";
-import { Drawer as DrawerPrimitive } from "vaul@1.1.2";
+import * as React from 'react';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-import { cn } from "./utils";
-
-function Drawer({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-  return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
+interface DrawerProps {
+  open: boolean;
+  onClose: () => void;
+  side?: 'left' | 'right';
+  children: React.ReactNode;
+  className?: string;
 }
 
-function DrawerTrigger({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
-  return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
-}
-
-function DrawerPortal({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
-  return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
-}
-
-function DrawerClose({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Close>) {
-  return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
-}
-
-function DrawerOverlay({
-  className,
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Overlay>) {
-  return (
-    <DrawerPrimitive.Overlay
-      data-slot="drawer-overlay"
-      className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-function DrawerContent({
-  className,
+export function Drawer({
+  open,
+  onClose,
+  side = 'left',
   children,
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+  className,
+}: DrawerProps) {
+  const [isVisible, setIsVisible] = React.useState(open);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+
+  // Minimum swipe distance (in px) to trigger close
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(side === 'left' ? e.targetTouches[0].clientX : e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(side === 'left' ? e.targetTouches[0].clientX : e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    // Close drawer on swipe in the closing direction
+    if ((side === 'left' && isLeftSwipe) || (side === 'right' && isRightSwipe)) {
+      onClose();
+    }
+  };
+
+  // Handle visibility and animation states
+  React.useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      // Small delay to trigger animation after mount
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+      });
+    } else if (isVisible) {
+      setIsAnimating(false);
+      // Delay unmount to allow exit animation
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 300); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [open, isVisible]);
+
+  // Prevent body scroll when drawer is open
+  React.useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
+  if (!isVisible) return null;
+
+  const handleDrawerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <DrawerPortal data-slot="drawer-portal">
-      <DrawerOverlay />
-      <DrawerPrimitive.Content
-        data-slot="drawer-content"
+    <>
+      {/* Backdrop */}
+      <div
         className={cn(
-          "group/drawer-content bg-background fixed z-50 flex h-auto flex-col",
-          "data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:border-b",
-          "data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[80vh] data-[vaul-drawer-direction=bottom]:rounded-t-lg data-[vaul-drawer-direction=bottom]:border-t",
-          "data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm",
-          "data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm",
-          className,
+          "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300",
+          isAnimating ? "opacity-100" : "opacity-0"
         )}
-        {...props}
+        onClick={onClose}
+      />
+
+      {/* Drawer */}
+      <div
+        className={cn(
+          'fixed top-0 bottom-0 z-50 bg-background shadow-elevation-3',
+          'transition-transform duration-300 ease-out',
+          'w-80 max-w-[85vw]',
+          side === 'left' ? 'left-0' : 'right-0',
+          isAnimating
+            ? 'translate-x-0'
+            : side === 'left'
+            ? '-translate-x-full'
+            : 'translate-x-full',
+          className
+        )}
+        onClick={handleDrawerClick}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
-        <div className="bg-muted mx-auto mt-4 hidden h-2 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
-        {children}
-      </DrawerPrimitive.Content>
-    </DrawerPortal>
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors z-10 min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation active:scale-95"
+          aria-label="Close drawer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Content */}
+        <div className="h-full overflow-y-auto">
+          {children}
+        </div>
+      </div>
+    </>
   );
 }
-
-function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="drawer-header"
-      className={cn("flex flex-col gap-1.5 p-4", className)}
-      {...props}
-    />
-  );
-}
-
-function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="drawer-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
-      {...props}
-    />
-  );
-}
-
-function DrawerTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Title>) {
-  return (
-    <DrawerPrimitive.Title
-      data-slot="drawer-title"
-      className={cn("text-foreground font-semibold", className)}
-      {...props}
-    />
-  );
-}
-
-function DrawerDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Description>) {
-  return (
-    <DrawerPrimitive.Description
-      data-slot="drawer-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  );
-}
-
-export {
-  Drawer,
-  DrawerPortal,
-  DrawerOverlay,
-  DrawerTrigger,
-  DrawerClose,
-  DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
-  DrawerDescription,
-};

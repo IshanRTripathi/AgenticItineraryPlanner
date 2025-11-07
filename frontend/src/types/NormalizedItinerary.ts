@@ -37,6 +37,8 @@ export interface NormalizedDay {
 
 export interface NormalizedNode {
   id: string;
+  // Backend uses: "attraction", "meal", "hotel", "transit"
+  // We also support "transport" and "accommodation" as aliases for backward compatibility
   type: 'attraction' | 'meal' | 'hotel' | 'transit' | 'transport' | 'accommodation';
   title: string;
   location?: NodeLocation;
@@ -49,9 +51,10 @@ export interface NormalizedNode {
   transit?: TransitInfo;
   locked?: boolean;
   bookingRef?: string;
-  status?: string; // "planned", "in_progress", "skipped", "cancelled", "completed"
-  updatedBy?: string; // "agent" or "user"
+  status?: 'planned' | 'in_progress' | 'skipped' | 'cancelled' | 'completed';
+  updatedBy?: 'agent' | 'user';
   updatedAt?: number; // milliseconds since epoch
+  agentData?: Record<string, any>;
 }
 
 export interface NodeLocation {

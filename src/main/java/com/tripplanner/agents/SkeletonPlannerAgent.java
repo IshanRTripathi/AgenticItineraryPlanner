@@ -80,8 +80,19 @@ public class SkeletonPlannerAgent extends BaseAgent {
         logger.info("Destination: {}", request.getDestination());
         
         try {
-            // Create initial itinerary
-            NormalizedItinerary itinerary = createInitialItinerary(itineraryId, request);
+            // Load the existing itinerary (which was created by ItineraryInitializationService with userId)
+            Optional<NormalizedItinerary> existingOpt = itineraryJsonService.getItinerary(itineraryId);
+            NormalizedItinerary itinerary;
+            
+            if (existingOpt.isPresent()) {
+                // Use existing itinerary to preserve userId and other metadata
+                itinerary = existingOpt.get();
+                logger.info("Loaded existing itinerary with userId: {}", itinerary.getUserId());
+            } else {
+                // Fallback: create new itinerary (shouldn't happen in normal flow)
+                logger.warn("Itinerary {} not found, creating new one (userId will be missing)", itineraryId);
+                itinerary = createInitialItinerary(itineraryId, request);
+            }
             
             // Generate days in small batches
             int totalDays = request.getDurationDays();
@@ -252,13 +263,13 @@ public class SkeletonPlannerAgent extends BaseAgent {
         return """
             You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
             
-            IMPORTANT: Generate ONLY the basic structure, NOT detailed information.
+            IMPORTANT: Generate ONLY the basic structure with DESCRIPTIVE placeholder titles.
             
             Your job:
             1. Create time slots for the day (morning to evening)
             2. Assign node types to each slot (attraction, meal, transport)
             3. Set rough timing (start/end times)
-            4. Use placeholder titles
+            4. Use DESCRIPTIVE placeholder titles that indicate the type of activity
             5. CRITICAL: Use consistent node ID format: "day{dayNumber}_node{sequenceNumber}"
             
             Node ID Format Rules:
@@ -268,11 +279,23 @@ public class SkeletonPlannerAgent extends BaseAgent {
             - Always use underscore between day and node
             - Always use sequential numbering starting from 1
             
+            Title Guidelines:
+            - Use DESCRIPTIVE placeholders that indicate activity type
+            - Examples: "Morning Cultural Exploration", "Lunch at Local Restaurant", "Afternoon Shopping District"
+            - NOT generic like "Morning Activity" or "Lunch Spot"
+            - Include time of day and activity category
+            - Make titles informative enough to understand the plan flow
+            
+            Location Guidelines:
+            - For location.name, use the destination city name (e.g., "Tokyo, Japan")
+            - Do NOT use generic names like "Breakfast Spot" or "Morning Activity Area"
+            - The enrichment agent will add specific place details later
+            
             Do NOT include:
-            - Specific place names (use "Morning Activity", "Lunch Spot", etc.)
+            - Specific place names or addresses
             - Detailed descriptions
             - Costs
-            - Exact locations/addresses
+            - Exact coordinates
             - Reviews or ratings
             
             Node Types:
@@ -287,7 +310,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
             - 0-2 transport placeholders (if needed)
             - 0-1 accommodation placeholder (if overnight)
             
-            Keep it simple and fast - other agents will add details later.
+            Keep it simple and fast - other agents will add specific details later.
             """;
     }
     
@@ -307,8 +330,17 @@ public class SkeletonPlannerAgent extends BaseAgent {
             prompt.append("Interests: ").append(String.join(", ", request.getInterests())).append("\n");
         }
         
+        // CRITICAL: Include user's custom instructions/constraints
+        if (request.getConstraints() != null && !request.getConstraints().isEmpty()) {
+            prompt.append("\nIMPORTANT - User Requirements:\n");
+            for (String constraint : request.getConstraints()) {
+                prompt.append("- ").append(constraint).append("\n");
+            }
+            prompt.append("Please ensure the itinerary structure accommodates these requirements.\n");
+        }
+        
         prompt.append("\nGenerate time slots with node type placeholders.\n");
-        prompt.append("Use generic titles like 'Morning Activity', 'Lunch Break', etc.\n");
+        prompt.append("Use descriptive titles like 'Morning Cultural Exploration', 'Lunch at Local Restaurant', etc.\n");
         prompt.append("Focus on timing and logical flow, not specific places.\n");
         prompt.append("CRITICAL: Use node IDs in format 'day").append(dayNumber).append("_node1', 'day").append(dayNumber).append("_node2', etc.\n");
         

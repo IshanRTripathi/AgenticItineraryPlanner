@@ -45,6 +45,9 @@ public class ChangeEngine {
     private final NodeIdGenerator nodeIdGenerator;
     private final EnrichmentService enrichmentService;
     
+    @Autowired(required = false)
+    private WebSocketEventPublisher webSocketEventPublisher;
+    
     // Primary constructor with enrichment service
     @Autowired
     public ChangeEngine(ItineraryJsonService itineraryJsonService,
@@ -204,8 +207,11 @@ public class ChangeEngine {
                 );
             }
             
+            // Publish itinerary change event via WebSocket for real-time UI updates
+            publishItineraryChangeEvent(itinerary.getItineraryId(), diff, changeSet);
+            
             // Trigger automatic enrichment for new/modified nodes (async, non-blocking)
-            triggerAutoEnrichment(itineraryId, diff);
+            triggerAutoEnrichment(itinerary.getItineraryId(), diff);
             
             return result;
             
@@ -290,6 +296,22 @@ public class ChangeEngine {
                 updated.setVersion(current.getVersion() + 1);
                 updated.setUpdatedAt(System.currentTimeMillis());
                 
+                // 🔍 DEBUG: Verify data before saving to database
+                if (updated.getDays() != null && !updated.getDays().isEmpty()) {
+                    NormalizedDay firstDay = updated.getDays().get(0);
+                    if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                        NormalizedNode firstNode = firstDay.getNodes().get(0);
+                        logger.info("🔍 [ChangeEngine.apply] BEFORE SAVE TO DB - First node:");
+                        logger.info("   Title: {}", firstNode.getTitle());
+                        if (firstNode.getLocation() != null) {
+                            logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                            logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                            logger.info("   location.userRatingsTotal: {}", firstNode.getLocation().getUserRatingsTotal());
+                            logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                        }
+                    }
+                }
+                
                 // Update main record
                 itineraryJsonService.updateItinerary(updated);
                 
@@ -310,6 +332,9 @@ public class ChangeEngine {
                     "change_application"
                 );
             }
+            
+            // Publish itinerary change event via WebSocket for real-time UI updates
+            publishItineraryChangeEvent(itineraryId, diff, changeSet);
             
             // Trigger automatic enrichment for new/modified nodes (async, non-blocking)
             triggerAutoEnrichment(itineraryId, diff);
@@ -385,8 +410,23 @@ public class ChangeEngine {
             
             switch (op.getOp()) {
                 case "move":
+                    // Get node title for move
+                    NormalizedNode nodeToMove = findNodeById(itinerary, op.getId());
+                    String movedNodeTitle = nodeToMove != null ? nodeToMove.getTitle() : op.getId();
                     if (moveNode(itinerary, op, changeSet.getPreferences())) {
-                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("timing")));
+                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("timing"), movedNodeTitle));
+                    }
+                    break;
+                case "reorder":
+                    if (reorderNodes(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
+                        // Mark all reordered nodes as updated with titles
+                        if (op.getNodeIds() != null) {
+                            for (String nodeId : op.getNodeIds()) {
+                                NormalizedNode reorderedNode = findNodeById(itinerary, nodeId);
+                                String reorderedNodeTitle = reorderedNode != null ? reorderedNode.getTitle() : nodeId;
+                                updated.add(new DiffItem(nodeId, changeSet.getDay(), Arrays.asList("position"), reorderedNodeTitle));
+                            }
+                        }
                     }
                     break;
                 case "insert":
@@ -395,8 +435,11 @@ public class ChangeEngine {
                     }
                     break;
                 case "delete":
+                    // Get node title before deletion
+                    NormalizedNode nodeToDelete = findNodeById(itinerary, op.getId());
+                    String deletedNodeTitle = nodeToDelete != null ? nodeToDelete.getTitle() : op.getId();
                     if (deleteNode(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
-                        removed.add(new DiffItem(op.getId(), changeSet.getDay()));
+                        removed.add(new DiffItem(op.getId(), changeSet.getDay(), null, deletedNodeTitle));
                     }
                     break;
                 case "replace":
@@ -415,8 +458,21 @@ public class ChangeEngine {
                     }
                     break;
                 case "update":
+                    // Get node title for update
+                    NormalizedNode nodeToUpdate = findNodeById(itinerary, op.getId());
+                    String updatedNodeTitle = nodeToUpdate != null ? nodeToUpdate.getTitle() : op.getId();
                     if (updateNode(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
-                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("content")));
+                        updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("content"), updatedNodeTitle));
+                        
+                        // 🔍 DEBUG: Verify node still has location data after update
+                        NormalizedNode verifyNode = findNodeById(itinerary, op.getId());
+                        if (verifyNode != null && verifyNode.getLocation() != null) {
+                            logger.info("🔍 [ChangeEngine] After updateNode - node {} location data:", op.getId());
+                            logger.info("   photos: {}", verifyNode.getLocation().getPhotos() != null ? verifyNode.getLocation().getPhotos().size() : "null");
+                            logger.info("   rating: {}", verifyNode.getLocation().getRating());
+                            logger.info("   userRatingsTotal: {}", verifyNode.getLocation().getUserRatingsTotal());
+                            logger.info("   priceLevel: {}", verifyNode.getLocation().getPriceLevel());
+                        }
                     }
                     break;
                 case "update_edge":
@@ -466,6 +522,99 @@ public class ChangeEngine {
         
         updateNodeAudit(node, "user");
         
+        return true;
+    }
+    
+    /**
+     * Reorder nodes within a day to match the provided order.
+     */
+    private boolean reorderNodes(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
+        if (op.getNodeIds() == null || op.getNodeIds().isEmpty()) {
+            logger.warn("No nodeIds provided for reorder operation");
+            return false;
+        }
+        
+        // Find the day
+        NormalizedDay targetDay = findDayByNumber(itinerary, day);
+        if (targetDay == null) {
+            logger.warn("Day not found: {}", day);
+            return false;
+        }
+        
+        List<NormalizedNode> currentNodes = targetDay.getNodes();
+        if (currentNodes == null || currentNodes.isEmpty()) {
+            logger.warn("No nodes in day {}", day);
+            return false;
+        }
+        
+        // Create a map of node ID to node for quick lookup
+        Map<String, NormalizedNode> nodeMap = new HashMap<>();
+        for (NormalizedNode node : currentNodes) {
+            nodeMap.put(node.getId(), node);
+        }
+        
+        // CRITICAL: Validate that the reorder includes ALL nodes in the day
+        // This prevents accidental deletion of nodes not included in the reorder
+        if (op.getNodeIds().size() != currentNodes.size()) {
+            logger.error("Reorder operation must include ALL nodes in the day. Expected {} nodes, got {}. " +
+                        "Current nodes: {}, Provided nodes: {}", 
+                        currentNodes.size(), op.getNodeIds().size(),
+                        currentNodes.stream().map(NormalizedNode::getId).collect(Collectors.toList()),
+                        op.getNodeIds());
+            return false;
+        }
+        
+        // Validate that all provided IDs exist and no duplicates
+        Set<String> seenIds = new HashSet<>();
+        for (String nodeId : op.getNodeIds()) {
+            if (!nodeMap.containsKey(nodeId)) {
+                logger.error("Node ID {} not found in day {}. Available nodes: {}", 
+                            nodeId, day, nodeMap.keySet());
+                return false;
+            }
+            if (!seenIds.add(nodeId)) {
+                logger.error("Duplicate node ID {} in reorder operation", nodeId);
+                return false;
+            }
+        }
+        
+        // Check if any nodes are locked
+        if (Boolean.TRUE.equals(preferences != null ? preferences.getRespectLocks() : true)) {
+            for (String nodeId : op.getNodeIds()) {
+                NormalizedNode node = nodeMap.get(nodeId);
+                if (Boolean.TRUE.equals(node.getLocked()) || lockManager.isLocked(nodeId)) {
+                    logger.warn("Cannot reorder: node {} is locked", nodeId);
+                    return false;
+                }
+            }
+        }
+        
+        // Log the reorder operation
+        logger.info("=== REORDER OPERATION ===");
+        logger.info("Day {}: Current order: {}", day, 
+                   currentNodes.stream().map(NormalizedNode::getId).collect(Collectors.toList()));
+        logger.info("Day {}: New order: {}", day, op.getNodeIds());
+        
+        // Create new ordered list
+        List<NormalizedNode> newOrder = new ArrayList<>();
+        for (String nodeId : op.getNodeIds()) {
+            newOrder.add(nodeMap.get(nodeId));
+        }
+        
+        // Replace the nodes list with the new order
+        targetDay.setNodes(newOrder);
+        
+        // Verify the order was set correctly
+        logger.info("Day {}: After setNodes: {}", day,
+                   targetDay.getNodes().stream().map(NormalizedNode::getId).collect(Collectors.toList()));
+        
+        // Update audit info for all reordered nodes
+        for (NormalizedNode node : newOrder) {
+            updateNodeAudit(node, "user");
+        }
+        
+        logger.info("Successfully reordered {} nodes in day {}", newOrder.size(), day);
+        logger.info("=========================");
         return true;
     }
     
@@ -876,10 +1025,10 @@ public class ChangeEngine {
                 switch (op.getOp()) {
                     case "move":
                         detail.setField("timing");
-                        detail.setNewValue(Map.of(
-                            "startTime", op.getStartTime(),
-                            "endTime", op.getEndTime()
-                        ));
+                        Map<String, Object> timingMap = new HashMap<>();
+                        timingMap.put("startTime", op.getStartTime());
+                        timingMap.put("endTime", op.getEndTime());
+                        detail.setNewValue(timingMap);
                         break;
                     case "insert":
                         detail.setOperation("CREATE");
@@ -930,8 +1079,48 @@ public class ChangeEngine {
      */
     private NormalizedItinerary deepCopy(NormalizedItinerary original) {
         try {
+            // 🔍 DEBUG: Check data before serialization
+            if (original.getDays() != null && !original.getDays().isEmpty()) {
+                NormalizedDay firstDay = original.getDays().get(0);
+                if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                    NormalizedNode firstNode = firstDay.getNodes().get(0);
+                    logger.info("🔍 [deepCopy] BEFORE serialization - First node:");
+                    logger.info("   Title: {}", firstNode.getTitle());
+                    if (firstNode.getLocation() != null) {
+                        logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                        logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                        logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                    }
+                }
+            }
+            
             String json = objectMapper.writeValueAsString(original);
+            
+            // 🔍 DEBUG: Check JSON string
+            logger.info("🔍 [deepCopy] JSON length: {} characters", json.length());
+            if (json.contains("\"photos\"")) {
+                logger.info("🔍 [deepCopy] JSON contains 'photos' field ✅");
+            } else {
+                logger.warn("🔍 [deepCopy] JSON does NOT contain 'photos' field ❌");
+            }
+            
             NormalizedItinerary copy = objectMapper.readValue(json, NormalizedItinerary.class);
+            
+            // 🔍 DEBUG: Check data after deserialization
+            if (copy.getDays() != null && !copy.getDays().isEmpty()) {
+                NormalizedDay firstDay = copy.getDays().get(0);
+                if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                    NormalizedNode firstNode = firstDay.getNodes().get(0);
+                    logger.info("🔍 [deepCopy] AFTER deserialization - First node:");
+                    logger.info("   Title: {}", firstNode.getTitle());
+                    if (firstNode.getLocation() != null) {
+                        logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                        logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                        logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                    }
+                }
+            }
+            
             // Ensure all collections are initialized
             if (copy.getDays() == null) {
                 copy.setDays(new ArrayList<>());
@@ -1332,7 +1521,30 @@ public class ChangeEngine {
             }
         }
         
-        logger.debug("Merged location data for node: {}", node.getId());
+        // *** CRITICAL FIX: Merge new Google Places fields ***
+        logger.info("💾 [ChangeEngine] Merging location data for node: {}", node.getId());
+        logger.info("   Before merge - location.photos: {}", currentLocation.getPhotos() != null ? currentLocation.getPhotos().size() : "null");
+        logger.info("   Before merge - location.rating: {}", currentLocation.getRating());
+        logger.info("   Before merge - location.userRatingsTotal: {}", currentLocation.getUserRatingsTotal());
+        logger.info("   Before merge - location.priceLevel: {}", currentLocation.getPriceLevel());
+        
+        if (updateLocation.getPhotos() != null) {
+            currentLocation.setPhotos(updateLocation.getPhotos());
+            logger.info("   ✅ Merged location.photos: {} items", updateLocation.getPhotos().size());
+        }
+        if (updateLocation.getUserRatingsTotal() != null) {
+            currentLocation.setUserRatingsTotal(updateLocation.getUserRatingsTotal());
+            logger.info("   ✅ Merged location.userRatingsTotal: {}", updateLocation.getUserRatingsTotal());
+        }
+        if (updateLocation.getPriceLevel() != null) {
+            currentLocation.setPriceLevel(updateLocation.getPriceLevel());
+            logger.info("   ✅ Merged location.priceLevel: {}", updateLocation.getPriceLevel());
+        }
+        
+        logger.info("   After merge - location.photos: {}", currentLocation.getPhotos() != null ? currentLocation.getPhotos().size() : "null");
+        logger.info("   After merge - location.rating: {}", currentLocation.getRating());
+        logger.info("   After merge - location.userRatingsTotal: {}", currentLocation.getUserRatingsTotal());
+        logger.info("   After merge - location.priceLevel: {}", currentLocation.getPriceLevel());
     }
     
     /**
@@ -1341,9 +1553,19 @@ public class ChangeEngine {
      * This method is a placeholder for future edge functionality.
      */
     private boolean updateEdge(NormalizedItinerary itinerary, ChangeOperation op, Integer day, ChangePreferences preferences) {
-        // VALIDATE: Check if day number is null
-        if (day == null) {
-            logger.error("Edge update has null day number");
+        // Extract day number from edge ID if day parameter is null
+        Integer effectiveDay = day;
+        if (effectiveDay == null && op.getId() != null) {
+            // Try to extract day number from edge ID (format: dayX_nodeY_to_dayX_nodeZ)
+            effectiveDay = extractDayNumberFromEdgeId(op.getId());
+            if (effectiveDay != null) {
+                logger.debug("Extracted day number {} from edge ID: {}", effectiveDay, op.getId());
+            }
+        }
+        
+        // VALIDATE: Check if day number is still null after extraction
+        if (effectiveDay == null) {
+            logger.error("Edge update has null day number and could not extract from edge ID");
             logger.error("Edge operation details: id={}, op={}", 
                 op.getId(), 
                 op.getOp());
@@ -1354,34 +1576,46 @@ public class ChangeEngine {
         }
         
         // Find the target day
-        NormalizedDay targetDay = findDayByNumber(itinerary, day);
+        NormalizedDay targetDay = findDayByNumber(itinerary, effectiveDay);
         if (targetDay == null) {
             logger.warn("Day {} not found for edge update: node={}, op={}", 
-                day, 
+                effectiveDay, 
                 op.getId(),
                 op.getOp());
             return false;
         }
         
-        // Check if the node exists
-        NormalizedNode node = findNodeById(itinerary, op.getId());
-        if (node == null) {
-            logger.warn("Node not found for edge update: {}", op.getId());
-            return false;
-        }
+        // For edge updates, we don't need to check if the node exists
+        // since edges connect nodes and may be created before nodes are fully populated
         
-        // Check if node is locked
-        if (Boolean.TRUE.equals(node.getLocked()) && 
-            Boolean.TRUE.equals(preferences != null ? preferences.getRespectLocks() : true)) {
-            logger.warn("Cannot update edges for locked node: {}", op.getId());
-            return false;
-        }
-        
-        // For now, just update the node's audit trail since edges are not implemented
-        updateNodeAudit(node, "user");
-        
-        logger.debug("Edge update operation acknowledged for node: {} (edges not yet implemented)", op.getId());
+        // For now, just log the edge update since edges are not fully implemented
+        logger.debug("Edge update operation acknowledged for edge: {} on day {}", op.getId(), effectiveDay);
         return true;
+    }
+    
+    /**
+     * Extract day number from edge ID.
+     * Edge IDs follow the format: dayX_nodeY_to_dayX_nodeZ
+     * 
+     * @param edgeId The edge ID to parse
+     * @return The day number, or null if it cannot be extracted
+     */
+    private Integer extractDayNumberFromEdgeId(String edgeId) {
+        if (edgeId == null || edgeId.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            // Try to extract day number from edge ID (format: dayX_nodeY_to_dayX_nodeZ)
+            if (edgeId.startsWith("day") && edgeId.contains("_")) {
+                String dayPart = edgeId.substring(3, edgeId.indexOf("_"));
+                return Integer.parseInt(dayPart);
+            }
+        } catch (Exception e) {
+            logger.debug("Could not extract day number from edge ID: {}", edgeId);
+        }
+        
+        return null;
     }
     
     /**
@@ -1470,5 +1704,80 @@ public class ChangeEngine {
         
         // Trigger enrichment asynchronously (non-blocking)
         enrichmentService.enrichNodesAsync(itineraryId, nodeIdsToEnrich);
+    }
+
+    /**
+     * Publish itinerary change event via WebSocket for real-time UI updates.
+     * This enables the chat interface to display changes in a high-end, user-friendly manner.
+     */
+    private void publishItineraryChangeEvent(String itineraryId, ItineraryDiff diff, ChangeSet changeSet) {
+        try {
+            // Only publish if there are actual changes
+            boolean hasChanges = (diff.getAdded() != null && !diff.getAdded().isEmpty())
+                    || (diff.getRemoved() != null && !diff.getRemoved().isEmpty())
+                    || (diff.getUpdated() != null && !diff.getUpdated().isEmpty());
+            
+            if (!hasChanges) {
+                logger.debug("No changes to publish for itinerary: {}", itineraryId);
+                return;
+            }
+            
+            // Build a user-friendly message
+            String message = buildChangeMessage(diff);
+            
+            // Publish via WebSocket
+            Map<String, Object> eventData = new HashMap<>();
+            eventData.put("type", "itinerary_change");
+            eventData.put("diff", diff);
+            eventData.put("message", message);
+            eventData.put("canUndo", true);
+            eventData.put("timestamp", System.currentTimeMillis());
+            
+            // Include agent info if available
+            if (changeSet.getAgent() != null) {
+                eventData.put("agent", changeSet.getAgent());
+            }
+            
+            // Publish to WebSocket subscribers
+            if (webSocketEventPublisher != null) {
+                webSocketEventPublisher.publishItineraryUpdate(itineraryId, "itinerary_change", eventData);
+                logger.info("Published itinerary change event: itinerary={}, added={}, updated={}, removed={}", 
+                           itineraryId,
+                           diff.getAdded() != null ? diff.getAdded().size() : 0,
+                           diff.getUpdated() != null ? diff.getUpdated().size() : 0,
+                           diff.getRemoved() != null ? diff.getRemoved().size() : 0);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to publish itinerary change event for itinerary: {}", itineraryId, e);
+            // Don't throw - this is a non-critical operation
+        }
+    }
+    
+    /**
+     * Build a user-friendly message describing the changes.
+     */
+    private String buildChangeMessage(ItineraryDiff diff) {
+        List<String> parts = new ArrayList<>();
+        
+        int addedCount = diff.getAdded() != null ? diff.getAdded().size() : 0;
+        int updatedCount = diff.getUpdated() != null ? diff.getUpdated().size() : 0;
+        int removedCount = diff.getRemoved() != null ? diff.getRemoved().size() : 0;
+        
+        if (addedCount > 0) {
+            parts.add(addedCount + " " + (addedCount == 1 ? "item added" : "items added"));
+        }
+        if (updatedCount > 0) {
+            parts.add(updatedCount + " " + (updatedCount == 1 ? "item updated" : "items updated"));
+        }
+        if (removedCount > 0) {
+            parts.add(removedCount + " " + (removedCount == 1 ? "item removed" : "items removed"));
+        }
+        
+        if (parts.isEmpty()) {
+            return "Your itinerary has been updated";
+        }
+        
+        return "Your itinerary has been updated: " + String.join(", ", parts);
     }
 }

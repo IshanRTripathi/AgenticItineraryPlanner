@@ -95,6 +95,13 @@ public class MealAgent extends BaseAgent {
             logger.info("=== MEAL AGENT COMPLETE ===");
             logger.info("Populated {} meals", populatedMeals.size());
             
+            // Publish agent completion event via WebSocket
+            if (agentEventPublisher.hasActiveConnections(itineraryId)) {
+                String execId = "agent_" + System.currentTimeMillis();
+                agentEventPublisher.publishAgentComplete(itineraryId, execId, 
+                    "MealAgent", populatedMeals.size());
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to populate meals for itinerary: {}", itineraryId, e);
             // Don't throw - graceful degradation (keep placeholders)
@@ -222,8 +229,15 @@ public class MealAgent extends BaseAgent {
                         node.getDetails().setDescription(populated.getDescription());
                         node.getDetails().setCategory(populated.getCuisineType());
                         
-                        if (node.getLocation() != null && populated.getLocationName() != null) {
-                            node.getLocation().setName(populated.getLocationName());
+                        // Update location name - use locationName if provided, otherwise use title as fallback
+                        if (node.getLocation() != null) {
+                            String locationName = populated.getLocationName();
+                            if (locationName == null || locationName.trim().isEmpty()) {
+                                // Fallback to title if locationName not provided
+                                locationName = populated.getTitle();
+                                logger.debug("Using title as location name for node {}: {}", node.getId(), locationName);
+                            }
+                            node.getLocation().setName(locationName);
                         }
                     }
                 }
@@ -255,6 +269,9 @@ public class MealAgent extends BaseAgent {
             5. Consider timing (breakfast, lunch, dinner, snack)
             6. Ensure variety across meals and days
             7. Include local specialties and authentic experiences
+            8. IMPORTANT: For locationName, provide the SPECIFIC restaurant/place name, NOT just the district
+               - GOOD: "Sushi Zanmai Tsukiji", "Ichiran Ramen Shibuya", "Gonpachi Nishi-Azabu"
+               - BAD: "Tsukiji", "Shibuya", "Nishi-Azabu"
             
             Cuisine Types:
             - local: Traditional local cuisine
@@ -270,6 +287,7 @@ public class MealAgent extends BaseAgent {
             Meal Types: breakfast, lunch, dinner, snack
             
             Be specific, practical, and ensure dining matches the destination and timing.
+            The locationName field should be specific enough to find the exact restaurant on Google Maps.
             """;
     }
     
@@ -319,9 +337,12 @@ public class MealAgent extends BaseAgent {
                         "type": "string",
                         "enum": ["breakfast", "lunch", "dinner", "snack"]
                       },
-                      "locationName": { "type": "string" }
+                      "locationName": { 
+                        "type": "string",
+                        "description": "SPECIFIC restaurant name (e.g., 'Sushi Zanmai Tsukiji' not 'Tsukiji', 'Ichiran Ramen Shibuya' not 'Shibuya'). Must be searchable on Google Maps."
+                      }
                     },
-                    "required": ["nodeId", "title", "description", "cuisineType", "mealType"]
+                    "required": ["nodeId", "title", "description", "cuisineType", "mealType", "locationName"]
                   }
                 }
               },

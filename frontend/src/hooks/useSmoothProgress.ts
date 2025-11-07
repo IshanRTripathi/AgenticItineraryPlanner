@@ -91,7 +91,7 @@ export function useProgressWithStages(
   actualProgress?: number // Optional real progress from backend
 ) {
   const smoothProgress = useSmoothProgress(isActive, {
-    duration: 60000, // 1 minute
+    duration: 120000, // 2 minutes to match backend generation time
     fastPhaseEnd: 70
   });
 

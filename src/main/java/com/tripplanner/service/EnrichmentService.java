@@ -186,9 +186,10 @@ public class EnrichmentService {
                     return false;
                 }
                 
-                // Skip accommodation and transport nodes
-                if ("accommodation".equals(node.getType()) || "transport".equals(node.getType())) {
-                    logger.debug("Skipping {} node {}", node.getType(), node.getId());
+                // Only enrich meal and attraction nodes (skip all other types)
+                if (!"meal".equals(node.getType()) && !"attraction".equals(node.getType())) {
+                    logger.debug("Skipping {} node {} (only meal and attraction nodes are enriched)", 
+                        node.getType(), node.getId());
                     return false;
                 }
                 

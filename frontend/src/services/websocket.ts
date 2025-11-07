@@ -30,7 +30,7 @@ class WebSocketService {
   private eventListeners: Map<string, Function[]> = new Map();
   private connectionHandlers: Set<(connected: boolean) => void> = new Set();
   private connectionState: ConnectionState = 'disconnected';
-  private currentItineraryId: string | null = null;
+  private currentItineraryId: string | undefined = undefined;
   private subscriptions: Map<string, any> = new Map();
 
   // Connection management
@@ -62,9 +62,15 @@ class WebSocketService {
     // SockJS expects HTTP/HTTPS URLs, not WebSocket URLs
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
     const hostname = window.location.hostname;
-    const baseUrl = import.meta.env.VITE_WS_BASE_URL || `${protocol}//${hostname}:8080`;
-
-    return `${baseUrl}/ws`;
+    const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL;
+    
+    // If VITE_WS_BASE_URL is provided, use it directly (it should already include /ws)
+    if (wsBaseUrl) {
+      return wsBaseUrl;
+    }
+    
+    // Otherwise, construct the default URL
+    return `${protocol}//${hostname}:8080/ws`;
   }
 
   /**
@@ -174,23 +180,14 @@ class WebSocketService {
             url: this.config.url
           });
           return new SockJS(this.config.url, null, {
-            transports: ['websocket', 'xhr-polling'],
-            timeout: 10000
+            transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
+            timeout: 10000,
+            sessionId: () => `session_${itineraryId}_${Date.now()}`
           });
         },
         connectHeaders: {},
-        debug: (str) => {
-          // Only log important STOMP events to reduce noise
-          if (str.includes('Opening Web Socket') ||
-            str.includes('CONNECT') ||
-            str.includes('CONNECTED') ||
-            str.includes('ERROR') ||
-            str.includes('DISCONNECT')) {
-            logger.debug('STOMP event', {
-              component: 'WebSocketService',
-              action: 'stomp_debug'
-            }, { message: str });
-          }
+        debug: () => {
+          // Disable debug logging to reduce noise
         },
         reconnectDelay: 0, // Disable automatic reconnection - we'll handle it manually
         heartbeatIncoming: this.config.heartbeatInterval,
@@ -321,11 +318,24 @@ class WebSocketService {
       return;
     }
 
-    // Clear existing subscriptions
+    // Clear existing subscriptions to prevent duplicates
     this.subscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
+      try {
+        subscription.unsubscribe();
+      } catch (error) {
+        logger.warn('Error unsubscribing', {
+          component: 'WebSocketService',
+          action: 'unsubscribe_error'
+        }, error);
+      }
     });
     this.subscriptions.clear();
+    
+    logger.info('Cleared existing subscriptions', {
+      component: 'WebSocketService',
+      action: 'clear_subscriptions',
+      itineraryId: this.currentItineraryId
+    });
 
     // Subscribe to itinerary-specific updates
     const itineraryTopic = `/topic/itinerary/${this.currentItineraryId}`;
@@ -356,21 +366,58 @@ class WebSocketService {
     });
   }
 
+  // Message deduplication cache
+  private messageCache = new Map<string, number>();
+  private readonly MESSAGE_CACHE_TTL = 1000; // 1 second
+
   /**
    * Handle incoming STOMP messages
    */
   private handleMessage(message: IMessage): void {
     try {
       const data = JSON.parse(message.body);
+      
+      // Backend sends 'updateType', not 'type' - check both
+      const messageType = data.updateType || data.type || 'connection_status';
+      
+      // Create message fingerprint for deduplication
+      const messageFingerprint = `${messageType}_${data.timestamp}_${data.progress || ''}_${JSON.stringify(data.data || {}).substring(0, 100)}`;
+      const now = Date.now();
+      
+      // Check if we've seen this message recently (within 1 second)
+      const lastSeen = this.messageCache.get(messageFingerprint);
+      if (lastSeen && (now - lastSeen) < this.MESSAGE_CACHE_TTL) {
+        logger.debug('Duplicate message ignored', {
+          component: 'WebSocketService',
+          action: 'duplicate_ignored',
+          messageType: messageType,
+          timeSinceLastSeen: now - lastSeen
+        });
+        return; // Skip duplicate
+      }
+      
+      // Store message fingerprint
+      this.messageCache.set(messageFingerprint, now);
+      
+      // Clean up old cache entries (older than TTL)
+      if (this.messageCache.size > 100) {
+        const cutoff = now - this.MESSAGE_CACHE_TTL;
+        for (const [key, timestamp] of this.messageCache.entries()) {
+          if (timestamp < cutoff) {
+            this.messageCache.delete(key);
+          }
+        }
+      }
+      
       logger.debug('Message received', {
         component: 'WebSocketService',
         action: 'message_received',
-        messageType: data.type
+        messageType: messageType
       });
 
       const wsMessage: WebSocketMessage = {
-        type: data.type || 'connection_status',
-        data: data.data,
+        type: messageType as any,
+        data: data.data || data,
         agentId: data.agentId,
         progress: data.progress,
         timestamp: data.timestamp || new Date().toISOString()
@@ -482,7 +529,7 @@ class WebSocketService {
     }
 
     this.connectionState = 'disconnected';
-    this.currentItineraryId = null;
+    this.currentItineraryId = undefined;
     this.reconnectAttempts = 0;
     this.notifyConnectionHandlers(false);
     logger.info('WebSocket disconnected', {

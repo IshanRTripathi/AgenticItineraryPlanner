@@ -1,3 +1,8 @@
+/**
+ * useDebounce Hook
+ * Debounces a value to reduce unnecessary updates
+ */
+
 import { useEffect, useState } from 'react';
 
 export function useDebounce<T>(value: T, delay: number = 300): T {
@@ -16,13 +21,17 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
   return debouncedValue;
 }
 
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+/**
+ * useDebounceCallback Hook
+ * Debounces a callback function
+ */
+export function useDebounceCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number = 300
-): (...args: Parameters<T>) => void {
+): T {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
-  return (...args: Parameters<T>) => {
+  const debouncedCallback = ((...args: Parameters<T>) => {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -32,5 +41,15 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     }, delay);
 
     setTimeoutId(newTimeoutId);
-  };
+  }) as T;
+
+  useEffect(() => {
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
+
+  return debouncedCallback;
 }

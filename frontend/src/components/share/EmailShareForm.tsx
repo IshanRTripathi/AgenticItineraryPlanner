@@ -1,158 +1,198 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Checkbox } from '../ui/checkbox';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Mail, CheckCircle, AlertTriangle } from 'lucide-react';
-import { apiClient } from '../../services/apiClient';
+/**
+ * Email Share Form
+ * Form for sharing itinerary via email
+ */
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { itineraryApi } from '@/services/api';
+import { Loader2, Mail, Plus, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface EmailShareFormProps {
-  isOpen: boolean;
-  onClose: () => void;
   itineraryId: string;
+  onSuccess?: () => void;
 }
 
-export const EmailShareForm: React.FC<EmailShareFormProps> = ({
-  isOpen,
-  onClose,
-  itineraryId
-}) => {
-  const [recipients, setRecipients] = useState('');
-  const [subject, setSubject] = useState('Check out this travel itinerary');
+export function EmailShareForm({ itineraryId, onSuccess }: EmailShareFormProps) {
+  const [recipients, setRecipients] = useState<string[]>([]);
+  const [currentEmail, setCurrentEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [includePdf, setIncludePdf] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
 
-  const handleSend = async () => {
-    const emailList = recipients.split(',').map(e => e.trim()).filter(e => e);
-    
-    if (emailList.length === 0) {
-      setError('Please enter at least one email address');
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const addRecipient = () => {
+    const email = currentEmail.trim();
+    if (!email) return;
+
+    if (!isValidEmail(email)) {
+      toast({
+        title: 'Invalid email',
+        description: 'Please enter a valid email address',
+        variant: 'destructive',
+      });
       return;
     }
 
+    if (recipients.includes(email)) {
+      toast({
+        title: 'Duplicate email',
+        description: 'This email is already added',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setRecipients([...recipients, email]);
+    setCurrentEmail('');
+  };
+
+  const removeRecipient = (email: string) => {
+    setRecipients(recipients.filter((r) => r !== email));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addRecipient();
+    }
+  };
+
+  const handleSend = async () => {
+    if (recipients.length === 0) {
+      toast({
+        title: 'No recipients',
+        description: 'Please add at least one email address',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSending(true);
     try {
-      setLoading(true);
-      setError(null);
+      await itineraryApi.post('/email/send', {
+        itineraryId,
+        recipients,
+        message: message || undefined,
+      });
 
-      // Placeholder - API method needs to be implemented
-      
+      toast({
+        title: 'Email sent!',
+        description: `Itinerary shared with ${recipients.length} ${
+          recipients.length === 1 ? 'person' : 'people'
+        }`,
+      });
 
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-        setSuccess(false);
-        setRecipients('');
-        setMessage('');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to send email');
+      // Reset form
+      setRecipients([]);
+      setMessage('');
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      toast({
+        title: 'Failed to send',
+        description: 'Could not send email. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false);
+      setIsSending(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5" />
-            Share via Email
-          </DialogTitle>
-          <DialogDescription>
-            Send this itinerary to friends or family
-          </DialogDescription>
-        </DialogHeader>
-
-        {success ? (
-          <div className="py-8">
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Email sent successfully!
-              </AlertDescription>
-            </Alert>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="recipients">
-                Recipients <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="recipients"
-                type="email"
-                placeholder="email@example.com, another@example.com"
-                value={recipients}
-                onChange={(e) => setRecipients(e.target.value)}
-                disabled={loading}
-              />
-              <p className="text-xs text-gray-500">
-                Separate multiple emails with commas
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="subject">Subject</Label>
-              <Input
-                id="subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="message">Personal Message (Optional)</Label>
-              <Textarea
-                id="message"
-                placeholder="Add a personal note..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                disabled={loading}
-                rows={4}
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="includePdf"
-                checked={includePdf}
-                onCheckedChange={(checked) => setIncludePdf(checked as boolean)}
-                disabled={loading}
-              />
-              <Label htmlFor="includePdf" className="cursor-pointer">
-                Include PDF attachment
-              </Label>
-            </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </div>
-        )}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+    <div className="space-y-4">
+      {/* Email Input */}
+      <div className="space-y-2">
+        <Label htmlFor="email">Recipient Email</Label>
+        <div className="flex gap-2">
+          <Input
+            id="email"
+            type="email"
+            placeholder="friend@example.com"
+            value={currentEmail}
+            onChange={(e) => setCurrentEmail(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isSending}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={addRecipient}
+            disabled={isSending}
+          >
+            <Plus className="w-4 h-4" />
           </Button>
-          {!success && (
-            <Button onClick={handleSend} disabled={loading}>
-              {loading ? 'Sending...' : 'Send Email'}
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Press Enter or click + to add multiple recipients
+        </p>
+      </div>
 
+      {/* Recipients List */}
+      {recipients.length > 0 && (
+        <div className="space-y-2">
+          <Label>Recipients ({recipients.length})</Label>
+          <div className="flex flex-wrap gap-2">
+            {recipients.map((email) => (
+              <Badge key={email} variant="secondary" className="gap-1">
+                {email}
+                <button
+                  type="button"
+                  onClick={() => removeRecipient(email)}
+                  className="ml-1 hover:text-destructive"
+                  disabled={isSending}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Optional Message */}
+      <div className="space-y-2">
+        <Label htmlFor="message">Message (Optional)</Label>
+        <Textarea
+          id="message"
+          placeholder="Add a personal message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={4}
+          disabled={isSending}
+        />
+      </div>
+
+      {/* Send Button */}
+      <Button
+        className="w-full"
+        onClick={handleSend}
+        disabled={isSending || recipients.length === 0}
+      >
+        {isSending ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Sending...
+          </>
+        ) : (
+          <>
+            <Mail className="w-4 h-4 mr-2" />
+            Send Email
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}

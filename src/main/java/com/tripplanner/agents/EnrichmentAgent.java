@@ -17,6 +17,16 @@ import java.util.*;
 public class EnrichmentAgent extends BaseAgent {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentAgent.class);
+    
+    // Node types to exclude from Google Places enrichment
+    private static final Set<String> EXCLUDED_NODE_TYPES = Set.of("accommodation", "hotel", "transport", "transit");
+    
+    // Coordinate validation constants
+    private static final double COORDINATE_ZERO_THRESHOLD = 0.0001;
+    private static final double MIN_LATITUDE = -90.0;
+    private static final double MAX_LATITUDE = 90.0;
+    private static final double MIN_LONGITUDE = -180.0;
+    private static final double MAX_LONGITUDE = 180.0;
 
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
@@ -553,69 +563,196 @@ public class EnrichmentAgent extends BaseAgent {
                 // Then, check if node needs ENRICHMENT with photos/reviews
                 if (needsEnrichment(node)) {
                     try {
+                        logger.info("🔄 [EnrichmentAgent] Node {} needs enrichment, calling enrichNode()", node.getId());
                         // Enrich the node with Google Places data
                         NormalizedNode enrichedNode = enrichNode(node);
                         if (enrichedNode != null) {
+                            logger.info("✅ [EnrichmentAgent] enrichNode() returned enriched node for {}", node.getId());
+                            logger.info("   Enriched node location.photos: {}", enrichedNode.getLocation().getPhotos() != null ? enrichedNode.getLocation().getPhotos().size() : "null");
+                            logger.info("   Enriched node location.rating: {}", enrichedNode.getLocation().getRating());
+                            logger.info("   Enriched node location.userRatingsTotal: {}", enrichedNode.getLocation().getUserRatingsTotal());
+                            logger.info("   Enriched node location.priceLevel: {}", enrichedNode.getLocation().getPriceLevel());
+                            
                             ChangeOperation enrichOp = createEnrichmentOperation(enrichedNode);
                             operations.add(enrichOp);
+                            logger.info("✅ [EnrichmentAgent] Created ChangeOperation for node {}", node.getId());
+                        } else {
+                            logger.warn("⚠️ [EnrichmentAgent] enrichNode() returned null for node {}", node.getId());
                         }
                     } catch (Exception e) {
-                        logger.warn("Failed to enrich node {}: {}", node.getId(), e.getMessage());
+                        logger.error("❌ [EnrichmentAgent] Failed to enrich node {}: {}", node.getId(), e.getMessage(), e);
                         // Continue with other nodes even if one fails
                     }
                 }
             }
         }
 
-        logger.info("Created {} ENRICHMENT operations", operations.size());
+        logger.info("📊 [EnrichmentAgent] Created {} ENRICHMENT operations total", operations.size());
         return operations;
     }
     
     /**
      * Check if a node needs place search (missing coordinates or placeId).
+     * Only searches if coordinates are null, 0,0, or invalid.
      */
     private boolean needsPlaceSearch(NormalizedNode node) {
-        if (node == null) {
+        if (node == null || isExcludedNodeType(node.getType())) {
             return false;
         }
         
-        // Skip accommodation and transport nodes
-        if ("accommodation".equals(node.getType()) || "transport".equals(node.getType())) {
-            return false;
+        boolean hasValidCoordinates = hasValidCoordinates(node);
+        boolean hasPlaceId = hasPlaceId(node);
+        
+        // Only search if coordinates are missing/invalid OR placeId is missing
+        return !hasValidCoordinates || !hasPlaceId;
+    }
+    
+    /**
+     * Check if node type should be excluded from enrichment.
+     */
+    private boolean isExcludedNodeType(String nodeType) {
+        return nodeType != null && EXCLUDED_NODE_TYPES.contains(nodeType);
+    }
+    
+    /**
+     * Build a search query combining title and location name for better specificity.
+     * Strategy:
+     * 1. If locationName is specific (contains place type keywords or special chars), use it
+     * 2. If locationName is generic (just district/city name), use title which is more specific
+     * 3. Always prefer more specific information for better Google Places search results
+     */
+    private String buildSearchQuery(NormalizedNode node) {
+        String title = node.getTitle();
+        String locationName = (node.getLocation() != null) ? node.getLocation().getName() : null;
+        
+        // If no information available, return null
+        if ((title == null || title.trim().isEmpty()) && 
+            (locationName == null || locationName.trim().isEmpty())) {
+            return null;
         }
         
-        // Check if node has coordinates
-        boolean hasCoordinates = node.getLocation() != null && 
-                                node.getLocation().getCoordinates() != null &&
-                                node.getLocation().getCoordinates().getLat() != null &&
-                                node.getLocation().getCoordinates().getLng() != null;
+        // If only title available, use it
+        if (locationName == null || locationName.trim().isEmpty()) {
+            return title.trim();
+        }
         
-        // Check if node has placeId
-        boolean hasPlaceId = node.getLocation() != null && node.getLocation().getPlaceId() != null;
+        // If only location name available, use it
+        if (title == null || title.trim().isEmpty()) {
+            return locationName.trim();
+        }
         
-        return !hasCoordinates || !hasPlaceId;
+        // Both available - check if locationName is generic (just district/city name)
+        // Generic location names are typically short (1-2 words) and don't contain specific identifiers
+        String locationLower = locationName.toLowerCase().trim();
+        String[] locationWords = locationName.trim().split("\\s+");
+        
+        // Check for specific place indicators
+        boolean hasSpecificIndicators = locationName.contains("(") || 
+                                       locationName.contains("-") ||
+                                       locationLower.contains("restaurant") ||
+                                       locationLower.contains("temple") ||
+                                       locationLower.contains("museum") ||
+                                       locationLower.contains("park") ||
+                                       locationLower.contains("market") ||
+                                       locationLower.contains("street") ||
+                                       locationLower.contains("tower") ||
+                                       locationLower.contains("palace") ||
+                                       locationLower.contains("shrine") ||
+                                       locationLower.contains("garden") ||
+                                       locationLower.contains("square") ||
+                                       locationLower.contains("station") ||
+                                       locationLower.contains("crossing") ||
+                                       locationLower.contains("gate") ||
+                                       locationLower.contains("bridge") ||
+                                       locationLower.contains("building") ||
+                                       locationLower.contains("center") ||
+                                       locationLower.contains("hall");
+        
+        // If locationName has specific indicators or is long (3+ words), it's likely specific
+        boolean isSpecificLocation = hasSpecificIndicators || locationWords.length >= 3;
+        
+        if (isSpecificLocation) {
+            // Specific location name - use it directly
+            // Example: "Sushi Zanmai (Tsukiji Honten)" or "Senso-ji Temple"
+            logger.debug("Specific location detected ({}), using as-is", locationName);
+            return locationName.trim();
+        } else {
+            // Generic location - use title which should be more specific
+            // Example: locationName="Shibuya", title="Shibuya Crossing & Hachiko Statue" -> use title
+            logger.debug("Generic location detected ({}), using title ({}) instead", locationName, title);
+            return title.trim();
+        }
+    }
+    
+    /**
+     * Check if node has valid coordinates.
+     */
+    private boolean hasValidCoordinates(NormalizedNode node) {
+        return node.getLocation() != null && 
+               node.getLocation().getCoordinates() != null &&
+               node.getLocation().getCoordinates().getLat() != null &&
+               node.getLocation().getCoordinates().getLng() != null &&
+               !isInvalidCoordinate(node.getLocation().getCoordinates());
+    }
+    
+    /**
+     * Check if node has a valid place ID.
+     */
+    private boolean hasPlaceId(NormalizedNode node) {
+        return node.getLocation() != null && 
+               node.getLocation().getPlaceId() != null && 
+               !node.getLocation().getPlaceId().trim().isEmpty();
+    }
+    
+    /**
+     * Check if coordinates are invalid (0,0, out of range, or NaN).
+     */
+    private boolean isInvalidCoordinate(Coordinates coords) {
+        if (coords == null || coords.getLat() == null || coords.getLng() == null) {
+            return true;
+        }
+        
+        double lat = coords.getLat();
+        double lng = coords.getLng();
+        
+        // Check for NaN
+        if (Double.isNaN(lat) || Double.isNaN(lng)) {
+            return true;
+        }
+        
+        // Check for (0,0) - center of earth
+        if (Math.abs(lat) < COORDINATE_ZERO_THRESHOLD && Math.abs(lng) < COORDINATE_ZERO_THRESHOLD) {
+            return true;
+        }
+        
+        // Check for out of range
+        return lat < MIN_LATITUDE || lat > MAX_LATITUDE || lng < MIN_LONGITUDE || lng > MAX_LONGITUDE;
     }
     
     /**
      * Search for a place and set its placeId and coordinates.
      */
     private NormalizedNode searchAndSetPlaceId(NormalizedNode node, String destination) {
-        // Get location name
-        String locationName = null;
-        if (node.getLocation() != null && node.getLocation().getName() != null) {
-            locationName = node.getLocation().getName();
-        } else if (node.getTitle() != null) {
-            locationName = node.getTitle();
-        }
+        // Build search query combining title and location name for better specificity
+        String searchQuery = buildSearchQuery(node);
         
-        if (locationName == null || locationName.trim().isEmpty()) {
-            logger.warn("Node {} has no location name for search", node.getId());
+        if (searchQuery == null || searchQuery.trim().isEmpty()) {
+            logger.warn("Node {} has no searchable information", node.getId());
             return null;
         }
         
+        logger.info("========== ENRICHING NODE WITH PLACE SEARCH ==========");
+        logger.info("Node ID: {}", node.getId());
+        logger.info("Node title: {}", node.getTitle());
+        logger.info("Location name: {}", node.getLocation() != null ? node.getLocation().getName() : "null");
+        logger.info("Search query: {}", searchQuery);
+        logger.info("Destination context: {}", destination);
+        
         try {
-            // Search for place
-            PlaceSearchResult searchResult = googlePlacesService.searchPlace(locationName, destination);
+            // Search for place using combined query
+            logger.info("Calling GooglePlacesService.searchPlace()...");
+            PlaceSearchResult searchResult = googlePlacesService.searchPlace(searchQuery, destination);
+            logger.info("GooglePlacesService returned: {}", searchResult != null ? "result found" : "null");
             
             if (searchResult != null && searchResult.getGeometry() != null && 
                 searchResult.getGeometry().getLocation() != null) {
@@ -647,15 +784,15 @@ public class EnrichmentAgent extends BaseAgent {
                     enrichedNode.getLocation().setRating(searchResult.getRating());
                 }
                 
-                logger.info("Found place for node {} ({}): {} at ({}, {})", 
-                    node.getId(), locationName, searchResult.getName(),
+                logger.info("Found place for node {} (search: '{}'): {} at ({}, {})", 
+                    node.getId(), searchQuery, searchResult.getName(),
                     searchResult.getGeometry().getLocation().getLatitude(),
                     searchResult.getGeometry().getLocation().getLongitude());
                 
                 return enrichedNode;
             }
         } catch (Exception e) {
-            logger.error("Failed to search place for node {} ({}): {}", node.getId(), locationName, e.getMessage());
+            logger.error("Failed to search place for node {} (search: '{}'): {}", node.getId(), searchQuery, e.getMessage());
         }
         
         return null;
@@ -665,8 +802,8 @@ public class EnrichmentAgent extends BaseAgent {
      * Check if a node needs ENRICHMENT based on missing data.
      */
     private boolean needsEnrichment(NormalizedNode node) {
-        if (node == null || node.getLocation() == null || node.getLocation().getPlaceId() == null) {
-            return false; // Can't enrich without place ID
+        if (node == null || !hasPlaceId(node) || isExcludedNodeType(node.getType())) {
+            return false;
         }
 
         // Check if agentData.photos is empty or outdated
@@ -720,13 +857,20 @@ public class EnrichmentAgent extends BaseAgent {
         }
 
         String placeId = node.getLocation().getPlaceId();
-        logger.debug("Enriching node {} with place ID {}", node.getId(), placeId);
+        logger.info("🔄 [EnrichmentAgent] Starting enrichment for node: {} ({})", node.getId(), node.getTitle());
+        logger.info("   📍 Place ID: {}", placeId);
 
         try {
             // Get place details from Google Places API
             PlaceDetails placeDetails = googlePlacesService.getPlaceDetails(placeId);
 
             if (placeDetails != null) {
+                logger.info("✅ [EnrichmentAgent] Received PlaceDetails from API:");
+                logger.info("   ⭐ Rating: {}", placeDetails.getRating());
+                logger.info("   👥 User Ratings Total: {}", placeDetails.getUserRatingsTotal());
+                logger.info("   💰 Price Level: {}", placeDetails.getPriceLevel());
+                logger.info("   📸 Photos: {}", placeDetails.getPhotos() != null ? placeDetails.getPhotos().size() : 0);
+                
                 // Create a copy of the node for ENRICHMENT
                 NormalizedNode enrichedNode = createNodeCopy(node);
 
@@ -736,16 +880,18 @@ public class EnrichmentAgent extends BaseAgent {
                 // Set ENRICHMENT timestamp
                 setEnrichmentTimestamp(enrichedNode);
 
-                logger.debug("Successfully enriched node {} with {} photos and {} reviews",
+                logger.info("✅ [EnrichmentAgent] Successfully enriched node {} with {} photos and {} reviews",
                         node.getId(),
                         placeDetails.getPhotos() != null ? placeDetails.getPhotos().size() : 0,
                         placeDetails.getReviews() != null ? placeDetails.getReviews().size() : 0);
 
                 return enrichedNode;
+            } else {
+                logger.warn("⚠️ [EnrichmentAgent] PlaceDetails returned null for placeId: {}", placeId);
             }
 
         } catch (Exception e) {
-            logger.error("Failed to enrich node {} with place ID {}: {}", node.getId(), placeId, e.getMessage());
+            logger.error("❌ [EnrichmentAgent] Failed to enrich node {} with place ID {}: {}", node.getId(), placeId, e.getMessage(), e);
         }
 
         return null;
@@ -852,6 +998,52 @@ public class EnrichmentAgent extends BaseAgent {
                 node.getLocation().setCoordinates(coords);
             }
         }
+        
+        // *** NEW: Update location object with photos, ratings, and price level for frontend ***
+        logger.info("📝 [EnrichmentAgent] Updating NodeLocation fields for node: {}", node.getId());
+        
+        // Set photos directly in location (extract photo references)
+        if (placeDetails.getPhotos() != null && !placeDetails.getPhotos().isEmpty()) {
+            List<String> photoReferences = placeDetails.getPhotos().stream()
+                    .map(Photo::getPhotoReference)
+                    .collect(java.util.stream.Collectors.toList());
+            node.getLocation().setPhotos(photoReferences);
+            logger.info("   ✅ Set {} photo references in location.photos", photoReferences.size());
+            logger.info("      First photo ref: {}", photoReferences.get(0).substring(0, Math.min(30, photoReferences.get(0).length())) + "...");
+        } else {
+            logger.warn("   ⚠️ No photos to set in location.photos");
+        }
+        
+        // Set rating in location (in addition to details)
+        if (placeDetails.getRating() != null) {
+            node.getLocation().setRating(placeDetails.getRating());
+            logger.info("   ✅ Set location.rating = {}", placeDetails.getRating());
+        } else {
+            logger.warn("   ⚠️ No rating to set in location.rating");
+        }
+        
+        // Set user ratings total
+        if (placeDetails.getUserRatingsTotal() != null) {
+            node.getLocation().setUserRatingsTotal(placeDetails.getUserRatingsTotal());
+            logger.info("   ✅ Set location.userRatingsTotal = {}", placeDetails.getUserRatingsTotal());
+        } else {
+            logger.warn("   ⚠️ No userRatingsTotal to set in location.userRatingsTotal");
+        }
+        
+        // Set price level
+        if (placeDetails.getPriceLevel() != null) {
+            node.getLocation().setPriceLevel(placeDetails.getPriceLevel());
+            logger.info("   ✅ Set location.priceLevel = {}", placeDetails.getPriceLevel());
+        } else {
+            logger.warn("   ⚠️ No priceLevel to set in location.priceLevel");
+        }
+        
+        // Verify the data was set correctly
+        logger.info("🔍 [EnrichmentAgent] Verification - NodeLocation after update:");
+        logger.info("   location.photos: {} items", node.getLocation().getPhotos() != null ? node.getLocation().getPhotos().size() : "null");
+        logger.info("   location.rating: {}", node.getLocation().getRating());
+        logger.info("   location.userRatingsTotal: {}", node.getLocation().getUserRatingsTotal());
+        logger.info("   location.priceLevel: {}", node.getLocation().getPriceLevel());
     }
 
     /**

@@ -1,11 +1,14 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
  * Photo DTO for Google Places API photos.
+ * Ignores unknown properties to be resilient to API changes.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Photo {
     
     @JsonProperty("photo_reference")

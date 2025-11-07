@@ -127,9 +127,16 @@ public class ItinerariesController {
             
             return ResponseEntity.ok(response);
             
+        } catch (IllegalArgumentException e) {
+            // Bad request errors (validation failures)
+            logger.error("Invalid request for itinerary creation: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ItineraryCreationResponse.error(e.getMessage()));
         } catch (Exception e) {
+            // Internal server errors
             logger.error("Failed to create itinerary", e);
-            return ResponseEntity.ok(ItineraryCreationResponse.error(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ItineraryCreationResponse.error("Failed to create itinerary: " + e.getMessage()));
         }
     }
     
@@ -313,6 +320,26 @@ public class ItinerariesController {
                 normalizedItinerary.setStatus(status);
                 
                 logger.info("Normalized itinerary found: {}, status: {}", id, status);
+                
+                // 🔍 DEBUG: Log first activity's location data to verify API response
+                if (normalizedItinerary.getDays() != null && !normalizedItinerary.getDays().isEmpty()) {
+                    NormalizedDay firstDay = normalizedItinerary.getDays().get(0);
+                    if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
+                        NormalizedNode firstNode = firstDay.getNodes().get(0);
+                        logger.info("🔍 [API Response] First activity location data:");
+                        logger.info("   Title: {}", firstNode.getTitle());
+                        if (firstNode.getLocation() != null) {
+                            logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                            logger.info("   location.rating: {}", firstNode.getLocation().getRating());
+                            logger.info("   location.userRatingsTotal: {}", firstNode.getLocation().getUserRatingsTotal());
+                            logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
+                            logger.info("   location.placeId: {}", firstNode.getLocation().getPlaceId());
+                        } else {
+                            logger.warn("   location is NULL!");
+                        }
+                    }
+                }
+                
                 return ResponseEntity.ok(normalizedItinerary);
             } else {
                 logger.warn("Normalized itinerary not found: {}", id);
@@ -696,6 +723,57 @@ public class ItinerariesController {
         } catch (Exception e) {
             logger.error("Error canceling agent {} for itinerary {}: {}", agentType, id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * Manually trigger enrichment for an existing itinerary
+     * This is useful for re-enriching old itineraries that were created before enrichment was implemented
+     */
+    @PostMapping("/{id}/enrich")
+    public ResponseEntity<Map<String, Object>> enrichItinerary(
+            @PathVariable String id,
+            HttpServletRequest request) {
+        try {
+            String userId = (String) request.getAttribute("userId");
+            if (userId == null) {
+                logger.warn("User ID not found in request, using anonymous for development");
+                userId = "anonymous";
+            }
+            
+            logger.info("=== MANUAL ENRICHMENT TRIGGERED ===");
+            logger.info("Itinerary ID: {}", id);
+            logger.info("User ID: {}", userId);
+            
+            // Load the itinerary
+            Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
+            if (itineraryOpt.isEmpty()) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Itinerary not found: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
+            
+            NormalizedItinerary itinerary = itineraryOpt.get();
+            
+            // Execute enrichment agent
+            Map<String, Object> result = agentRegistry.executeAgent("ENRICHMENT", itinerary, new HashMap<>());
+            
+            logger.info("Enrichment completed for itinerary: {}", id);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Enrichment triggered successfully");
+            response.put("itineraryId", id);
+            response.put("result", result);
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error enriching itinerary {}: {}", id, e.getMessage(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
     

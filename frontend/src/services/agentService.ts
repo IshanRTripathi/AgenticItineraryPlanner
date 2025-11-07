@@ -29,7 +29,8 @@ class AgentService {
     try {
       // Get lock states if respect locks is enabled
       if (respectLocks) {
-        const lockStates = await apiClient.getLockStates(itineraryId);
+        const response = await apiClient.get(`/itineraries/${itineraryId}/locks`);
+        const lockStates = response.data;
         const lockedNodes = Object.entries(lockStates)
           .filter(([_, isLocked]) => isLocked)
           .map(([nodeId]) => nodeId);
@@ -99,7 +100,8 @@ class AgentService {
    */
   async canExecuteAgent(itineraryId: string): Promise<{ canExecute: boolean; lockedNodes: string[] }> {
     try {
-      const lockStates = await apiClient.getLockStates(itineraryId);
+      const response = await apiClient.get(`/itineraries/${itineraryId}/locks`);
+      const lockStates = response.data;
       const lockedNodes = Object.entries(lockStates)
         .filter(([_, isLocked]) => isLocked)
         .map(([nodeId]) => nodeId);

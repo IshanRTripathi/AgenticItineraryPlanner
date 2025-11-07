@@ -58,6 +58,9 @@ public class TripMetadata {
     @JsonProperty("version")
     private Integer version;
     
+    @JsonProperty("status")
+    private String status; // "planning", "generating", "completed", "failed"
+    
     // Default constructor
     public TripMetadata() {}
     
@@ -91,6 +94,9 @@ public class TripMetadata {
         this.createdAt = itinerary.getCreatedAt();
         this.updatedAt = itinerary.getUpdatedAt();
         this.version = itinerary.getVersion();
+        
+        // Set status from itinerary (defaults to "generating" if not set)
+        this.status = itinerary.getStatus() != null ? itinerary.getStatus() : "generating";
         
         // Extract party info from request
         if (request.getParty() != null) {
@@ -235,6 +241,14 @@ public class TripMetadata {
     
     public void setVersion(Integer version) {
         this.version = version;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
     }
     
     /**

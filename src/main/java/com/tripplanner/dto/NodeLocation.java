@@ -31,6 +31,15 @@ public class NodeLocation {
     @JsonProperty("closingHours")
     private String closingHours; // e.g., "18:00"
     
+    @JsonProperty("photos")
+    private java.util.List<String> photos; // Photo references from Google Places
+    
+    @JsonProperty("userRatingsTotal")
+    private Integer userRatingsTotal; // Total number of reviews
+    
+    @JsonProperty("priceLevel")
+    private Integer priceLevel; // Price level (0-4)
+    
     public NodeLocation() {}
     
     public NodeLocation(String name, String address, Coordinates coordinates) {
@@ -123,6 +132,30 @@ public class NodeLocation {
         this.closingHours = closingHours;
     }
     
+    public java.util.List<String> getPhotos() {
+        return photos;
+    }
+    
+    public void setPhotos(java.util.List<String> photos) {
+        this.photos = photos;
+    }
+    
+    public Integer getUserRatingsTotal() {
+        return userRatingsTotal;
+    }
+    
+    public void setUserRatingsTotal(Integer userRatingsTotal) {
+        this.userRatingsTotal = userRatingsTotal;
+    }
+    
+    public Integer getPriceLevel() {
+        return priceLevel;
+    }
+    
+    public void setPriceLevel(Integer priceLevel) {
+        this.priceLevel = priceLevel;
+    }
+    
     @Override
     public String toString() {
         return "NodeLocation{" +
@@ -134,6 +167,9 @@ public class NodeLocation {
                 ", rating=" + rating +
                 ", openingHours='" + openingHours + '\'' +
                 ", closingHours='" + closingHours + '\'' +
+                ", photos=" + (photos != null ? photos.size() + " photos" : "null") +
+                ", userRatingsTotal=" + userRatingsTotal +
+                ", priceLevel=" + priceLevel +
                 '}';
     }
 }

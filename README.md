@@ -2,6 +2,19 @@
 
 A comprehensive travel planning platform powered by AI agents that creates personalized itineraries with real-time updates, booking capabilities, and sharing features.
 
+## 📚 Documentation
+
+**NEW**: Complete analysis and redesign documentation available in [`analysis/`](analysis/)
+
+- **[Quick Reference](analysis/QUICK_REFERENCE.md)** - Fast navigation guide
+- **[Analysis Complete](analysis/ANALYSIS_COMPLETE.md)** - Executive summary
+- **[Final Summary](analysis/FINAL_SUMMARY.md)** - Complete wrap-up
+- **[Project Specification](analysis/EASEMYTRIP_REDESIGN_SPECIFICATION.md)** - Full project spec
+- **[Frontend Analysis](analysis/FRONTEND_UI_REDESIGN_SPECIFICATION.md)** - Detailed frontend docs
+- **[Detailed Sections](analysis/frontend-spec/)** - 11 technical documents
+
+**Status**: ✅ Analysis 100% Complete | ✅ Implementation 100% Complete | 🚀 Production Ready
+
 ## 🏗️ Architecture
 
 **Backend**: Java 17 + Spring Boot 3.x + Firestore + OpenRouter/Gemini AI + Razorpay  

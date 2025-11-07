@@ -1,5 +1,6 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.ArrayList;
@@ -7,7 +8,9 @@ import java.util.ArrayList;
 /**
  * Place details from Google Places API.
  * Contains comprehensive information about a place including photos, reviews, and metadata.
+ * Ignores unknown properties to be resilient to API changes.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PlaceDetails {
     
     @JsonProperty("place_id")
@@ -21,6 +24,9 @@ public class PlaceDetails {
     
     @JsonProperty("rating")
     private Double rating;
+    
+    @JsonProperty("user_ratings_total")
+    private Integer userRatingsTotal;
     
     @JsonProperty("price_level")
     private Integer priceLevel;
@@ -86,6 +92,14 @@ public class PlaceDetails {
     
     public void setRating(Double rating) {
         this.rating = rating;
+    }
+    
+    public Integer getUserRatingsTotal() {
+        return userRatingsTotal;
+    }
+    
+    public void setUserRatingsTotal(Integer userRatingsTotal) {
+        this.userRatingsTotal = userRatingsTotal;
     }
     
     public Integer getPriceLevel() {
@@ -167,6 +181,7 @@ public class PlaceDetails {
                 ", name='" + name + '\'' +
                 ", formattedAddress='" + formattedAddress + '\'' +
                 ", rating=" + rating +
+                ", userRatingsTotal=" + userRatingsTotal +
                 ", priceLevel=" + priceLevel +
                 ", photos=" + (photos != null ? photos.size() : 0) + " photos" +
                 ", reviews=" + (reviews != null ? reviews.size() : 0) + " reviews" +
@@ -182,6 +197,7 @@ public class PlaceDetails {
     /**
      * Opening hours information from Google Places API.
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class OpeningHours {
         @JsonProperty("open_now")
         private Boolean openNow;
@@ -221,9 +237,13 @@ public class PlaceDetails {
     /**
      * Geometry information from Google Places API.
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Geometry {
         @JsonProperty("location")
         private Location location;
+        
+        @JsonProperty("viewport")
+        private Viewport viewport;
         
         public Location getLocation() {
             return location;
@@ -233,13 +253,23 @@ public class PlaceDetails {
             this.location = location;
         }
         
+        public Viewport getViewport() {
+            return viewport;
+        }
+        
+        public void setViewport(Viewport viewport) {
+            this.viewport = viewport;
+        }
+        
         @Override
         public String toString() {
             return "Geometry{" +
                     "location=" + location +
+                    ", viewport=" + viewport +
                     '}';
         }
         
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Location {
             @JsonProperty("lat")
             private Double lat;
@@ -268,6 +298,39 @@ public class PlaceDetails {
                 return "Location{" +
                         "lat=" + lat +
                         ", lng=" + lng +
+                        '}';
+            }
+        }
+        
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static class Viewport {
+            @JsonProperty("northeast")
+            private Location northeast;
+            
+            @JsonProperty("southwest")
+            private Location southwest;
+            
+            public Location getNortheast() {
+                return northeast;
+            }
+            
+            public void setNortheast(Location northeast) {
+                this.northeast = northeast;
+            }
+            
+            public Location getSouthwest() {
+                return southwest;
+            }
+            
+            public void setSouthwest(Location southwest) {
+                this.southwest = southwest;
+            }
+            
+            @Override
+            public String toString() {
+                return "Viewport{" +
+                        "northeast=" + northeast +
+                        ", southwest=" + southwest +
                         '}';
             }
         }

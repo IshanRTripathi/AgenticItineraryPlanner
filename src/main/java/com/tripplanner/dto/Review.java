@@ -1,11 +1,14 @@
 package com.tripplanner.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 /**
  * Review DTO for Google Places API reviews.
+ * Ignores unknown properties to be resilient to API changes.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Review {
     
     @JsonProperty("author_name")

@@ -96,6 +96,13 @@ public class ActivityAgent extends BaseAgent {
             logger.info("=== ACTIVITY AGENT COMPLETE ===");
             logger.info("Populated {} attractions", populatedAttractions.size());
             
+            // Publish agent completion event via WebSocket
+            if (agentEventPublisher.hasActiveConnections(itineraryId)) {
+                String execId = "agent_" + System.currentTimeMillis();
+                agentEventPublisher.publishAgentComplete(itineraryId, execId, 
+                    "ActivityAgent", populatedAttractions.size());
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to populate attractions for itinerary: {}", itineraryId, e);
             // Don't throw - graceful degradation (keep placeholders)
@@ -203,9 +210,15 @@ public class ActivityAgent extends BaseAgent {
                             node.getTiming().setDurationMin(populated.getDurationMinutes());
                         }
                         
-                        // Update location name if available
-                        if (node.getLocation() != null && populated.getLocationName() != null) {
-                            node.getLocation().setName(populated.getLocationName());
+                        // Update location name - use locationName if provided, otherwise use title as fallback
+                        if (node.getLocation() != null) {
+                            String locationName = populated.getLocationName();
+                            if (locationName == null || locationName.trim().isEmpty()) {
+                                // Fallback to title if locationName not provided
+                                locationName = populated.getTitle();
+                                logger.debug("Using title as location name for node {}: {}", node.getId(), locationName);
+                            }
+                            node.getLocation().setName(locationName);
                         }
                     }
                 }
@@ -238,6 +251,9 @@ public class ActivityAgent extends BaseAgent {
             5. Estimate realistic visit durations
             6. Consider the time slot and day context
             7. Ensure variety across the day and trip
+            8. IMPORTANT: For locationName, provide the SPECIFIC place name, NOT just the district/area
+               - GOOD: "Shibuya Crossing", "Senso-ji Temple", "Tsukiji Outer Market"
+               - BAD: "Shibuya", "Asakusa", "Tsukiji"
             
             Categories:
             - museum: Museums, galleries, exhibitions
@@ -250,6 +266,7 @@ public class ActivityAgent extends BaseAgent {
             - nature: Beaches, mountains, natural attractions
             
             Be specific, practical, and ensure attractions match the destination and timing.
+            The locationName field should be specific enough to find the exact place on Google Maps.
             """;
     }
     
@@ -262,6 +279,15 @@ public class ActivityAgent extends BaseAgent {
         
         if (skeleton.getThemes() != null && !skeleton.getThemes().isEmpty()) {
             prompt.append("Interests: ").append(String.join(", ", skeleton.getThemes())).append("\n");
+        }
+        
+        // CRITICAL: Include user's custom instructions/constraints
+        if (skeleton.getConstraints() != null && !skeleton.getConstraints().isEmpty()) {
+            prompt.append("\nIMPORTANT - User Requirements:\n");
+            for (String constraint : skeleton.getConstraints()) {
+                prompt.append("- ").append(constraint).append("\n");
+            }
+            prompt.append("Please ensure all data comply with these requirements.\n");
         }
         
         prompt.append("\nAttraction slots to populate:\n");
@@ -297,9 +323,12 @@ public class ActivityAgent extends BaseAgent {
                                 "entertainment", "shopping", "experience", "nature"]
                       },
                       "durationMinutes": { "type": "integer" },
-                      "locationName": { "type": "string" }
+                      "locationName": { 
+                        "type": "string",
+                        "description": "SPECIFIC place name (e.g., 'Shibuya Crossing' not 'Shibuya', 'Senso-ji Temple' not 'Asakusa'). Must be searchable on Google Maps."
+                      }
                     },
-                    "required": ["nodeId", "title", "description", "category"]
+                    "required": ["nodeId", "title", "description", "category", "locationName"]
                   }
                 }
               },
