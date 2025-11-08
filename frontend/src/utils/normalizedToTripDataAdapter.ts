@@ -183,7 +183,13 @@ function convertNode(node: NormalizedNode): TripComponent {
       coordinates: {
         lat: node.location?.coordinates?.lat || null,
         lng: node.location?.coordinates?.lng || null
-      }
+      },
+      // *** CRITICAL FIX: Preserve enrichment fields from NodeLocation ***
+      placeId: node.location?.placeId,
+      photos: node.location?.photos,
+      rating: node.location?.rating,
+      userRatingsTotal: node.location?.userRatingsTotal,
+      priceLevel: node.location?.priceLevel
     },
     timing: {
       startTime: node.timing?.startTime ? new Date(node.timing.startTime).toISOString() : '',

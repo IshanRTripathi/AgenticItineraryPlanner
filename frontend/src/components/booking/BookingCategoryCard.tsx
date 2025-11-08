@@ -13,8 +13,22 @@ import { BookingCategoryGroup, CategorizedBooking, getNodeIcon } from '@/utils/c
  * Format time string to be more user-friendly
  * Converts various time formats to 12-hour format with AM/PM
  */
-function formatTime(timeStr: string): string {
+function formatTime(timeStr: string | number): string {
   if (!timeStr) return '';
+  
+  // If it's a number (timestamp), convert to Date and format
+  if (typeof timeStr === 'number') {
+    try {
+      const date = new Date(timeStr);
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      return '';
+    }
+  }
   
   // If already in 12-hour format with AM/PM, return as is
   if (/\d{1,2}:\d{2}\s*(AM|PM)/i.test(timeStr)) {

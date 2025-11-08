@@ -43,9 +43,9 @@ export function GenerationProgressBanner({
     ? Math.min(parseInt(urlProgress), 99)
     : initialCompletedDays > 0 
       ? Math.min((initialCompletedDays / totalDays) * 100, 99)
-      : 1; // Start at 1% to show something immediately
+      : 0; // Start at 0% and wait for WebSocket updates
   
-  console.log('[GenerationProgressBanner] Initial progress:', initialProgress, 'from URL:', urlProgress);
+  console.log('[GenerationProgressBanner] Initial progress:', initialProgress, 'from URL:', urlProgress, 'completedDays:', initialCompletedDays);
   
   const [progress, setProgress] = useState(initialProgress);
   const [isVisible, setIsVisible] = useState(true);
@@ -114,20 +114,40 @@ export function GenerationProgressBanner({
           || eventData.progress 
           || (event as any).data?.progress;
         
+        console.log('🟡 BANNER RECEIVE - agent_progress:', {
+          'Raw Event': event,
+          'Event Data': eventData,
+          'Progress Value': progressValue,
+          'event.progress': event.progress,
+          'eventData.progress': eventData.progress,
+          '(event as any).data?.progress': (event as any).data?.progress
+        });
+        
         if (progressValue !== undefined && progressValue !== null) {
           const backendProgress = Number(progressValue);
           if (!isNaN(backendProgress)) {
             // Only update if backend progress is higher than current, or if we haven't initialized yet
             setProgress(prev => {
-              // If we have URL progress and backend sends lower, keep URL progress
+              const newProgress = urlProgress && !hasInitialized 
+                ? Math.max(prev, backendProgress)
+                : Math.max(prev, backendProgress);
+              
+              console.log('🟡 BANNER Progress update:', {
+                'Previous': prev,
+                'Backend': backendProgress,
+                'New': newProgress
+              });
+              
               if (urlProgress && !hasInitialized) {
                 setHasInitialized(true);
-                return Math.max(prev, backendProgress);
               }
-              return Math.max(prev, backendProgress);
+              return newProgress;
             });
-            console.log('[GenerationProgressBanner] Progress update from backend:', backendProgress, 'from event:', event);
+          } else {
+            console.warn('🟡 BANNER Progress is NaN:', progressValue);
           }
+        } else {
+          console.warn('🟡 BANNER No progress value found in event');
         }
         
         // Backend sends status/message - check multiple locations
@@ -140,7 +160,24 @@ export function GenerationProgressBanner({
         
         if (messageValue) {
           setCurrentMessage(messageValue);
-          console.log('[GenerationProgressBanner] Message from backend:', messageValue);
+          console.log('🟡 BANNER Message update:', messageValue);
+        }
+      }
+
+      // Handle enrichment_update event for individual activities
+      if (eventType === 'enrichment_update') {
+        const nodeId = eventData.nodeId || (event as any).nodeId;
+        const enrichmentStatus = eventData.enrichmentStatus || (event as any).enrichmentStatus;
+        
+        if (nodeId && enrichmentStatus) {
+          console.log('[GenerationProgressBanner] Enrichment update:', { nodeId, enrichmentStatus });
+          // The itinerary will be updated via the main WebSocket handler
+          // This just updates the progress message
+          if (enrichmentStatus === 'enriching') {
+            setCurrentMessage('📸 Enriching activity with photos...');
+          } else if (enrichmentStatus === 'enriched') {
+            setCurrentMessage('✅ Activity enriched with details');
+          }
         }
       }
 
@@ -192,7 +229,8 @@ export function GenerationProgressBanner({
       case 'enrichment':
       case 'enriching':
       case 'place_enrichment':
-        return 'Enriching with photos & details...';
+      case 'google_maps_enrichment':
+        return '📸 Enriching with photos & reviews...';
       
       case 'cost_estimation':
       case 'cost':

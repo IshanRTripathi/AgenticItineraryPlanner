@@ -102,6 +102,23 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   if (mappedDays.length > 0) {
     console.log('[PlanTab] 🎯 First mapped day:', mappedDays[0]);
     console.log('[PlanTab] 🎯 First mapped day nodes count:', mappedDays[0].nodes?.length);
+    
+    // *** ENRICHMENT DATA VERIFICATION ***
+    if (mappedDays[0].nodes && mappedDays[0].nodes.length > 0) {
+      const firstNode = mappedDays[0].nodes[0];
+      console.log('[PlanTab] 🔍 ENRICHMENT CHECK - First node:', {
+        id: firstNode.id,
+        title: firstNode.title,
+        hasLocation: !!firstNode.location,
+        locationKeys: firstNode.location ? Object.keys(firstNode.location) : [],
+        photos: firstNode.location?.photos,
+        photosCount: firstNode.location?.photos?.length || 0,
+        rating: firstNode.location?.rating,
+        userRatingsTotal: firstNode.location?.userRatingsTotal,
+        priceLevel: firstNode.location?.priceLevel,
+        placeId: firstNode.location?.placeId
+      });
+    }
   }
 
 

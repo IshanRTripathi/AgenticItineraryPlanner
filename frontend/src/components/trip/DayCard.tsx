@@ -20,6 +20,9 @@ import {
     ExternalLink,
     Image as ImageIcon,
     Users,
+    Loader2,
+    CheckCircle2,
+    AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -89,7 +92,7 @@ const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | 
     return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${apiKey}`;
 };
 
-const formatTime = (timestamp?: string): string => {
+const formatTime = (timestamp?: string | number): string => {
     if (!timestamp) return '';
     try {
         const date = new Date(timestamp);
@@ -100,7 +103,7 @@ const formatTime = (timestamp?: string): string => {
             hour12: true
         });
     } catch (e) {
-        return timestamp; // Return original if parsing fails
+        return typeof timestamp === 'string' ? timestamp : ''; // Return original if parsing fails
     }
 };
 
@@ -118,6 +121,66 @@ const getNodeColor = (type: string) => {
             return 'border-l-green-500';
         default:
             return 'border-l-gray-500';
+    }
+};
+
+// Determine enrichment status from node data
+const getEnrichmentStatus = (node: any): 'pending' | 'enriching' | 'enriched' | 'failed' => {
+    // If explicitly set, use it
+    if (node.enrichmentStatus) {
+        return node.enrichmentStatus;
+    }
+    
+    // Otherwise, infer from data presence
+    const hasPhotos = node.location?.photos && node.location.photos.length > 0;
+    const hasRating = node.location?.rating !== undefined;
+    const hasPlaceId = node.location?.placeId !== undefined;
+    
+    // If has rich data, consider enriched
+    if (hasPhotos || hasRating || hasPlaceId) {
+        return 'enriched';
+    }
+    
+    // If has basic location but no rich data, might be pending
+    if (node.location?.name) {
+        return 'pending';
+    }
+    
+    return 'pending';
+};
+
+// Enrichment status badge component
+const EnrichmentBadge = ({ status }: { status: 'pending' | 'enriching' | 'enriched' | 'failed' }) => {
+    switch (status) {
+        case 'enriching':
+            return (
+                <Badge variant="secondary" className="h-6 px-2 bg-blue-50 text-blue-700 border-blue-200">
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    <span className="text-xs">Enriching...</span>
+                </Badge>
+            );
+        case 'enriched':
+            return (
+                <Badge variant="secondary" className="h-6 px-2 bg-green-50 text-green-700 border-green-200">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    <span className="text-xs">Enriched</span>
+                </Badge>
+            );
+        case 'failed':
+            return (
+                <Badge variant="secondary" className="h-6 px-2 bg-amber-50 text-amber-700 border-amber-200">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    <span className="text-xs">Limited data</span>
+                </Badge>
+            );
+        case 'pending':
+        default:
+            return (
+                <Badge variant="secondary" className="h-6 px-2 bg-gray-50 text-gray-600 border-gray-200">
+                    <Clock className="w-3 h-3 mr-1" />
+                    <span className="text-xs">Pending</span>
+                </Badge>
+            );
     }
 };
 
@@ -210,7 +273,8 @@ export function DayCard({
         <Card
             className={cn(
                 "overflow-hidden transition-all duration-300 border-l-4",
-                dayStatus === 'past' && 'opacity-60',
+                // Only apply past day opacity if NOT generating
+                !isGenerating && dayStatus === 'past' && 'opacity-60',
                 dayStatus === 'current' && 'ring-2 ring-offset-2'
             )}
             style={{
@@ -370,9 +434,11 @@ export function DayCard({
                                             {[1, 2, 3].map((i) => (
                                                 <div
                                                     key={i}
-                                                    className="p-2.5 rounded-lg border-l-4 border-l-gray-300 bg-muted/30 animate-pulse"
+                                                    className="p-2.5 rounded-lg border-l-4 border-l-gray-300 bg-muted/30 animate-pulse relative overflow-hidden"
                                                 >
-                                                    <div className="flex items-start gap-3">
+                                                    {/* Shimmer effect */}
+                                                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+                                                    <div className="flex items-start gap-3 relative">
                                                         <div className="w-6 h-6 bg-muted rounded" />
                                                         <div className="flex-1 space-y-2">
                                                             <div className="h-4 bg-muted rounded w-3/4" />
@@ -381,9 +447,15 @@ export function DayCard({
                                                     </div>
                                                 </div>
                                             ))}
-                                            <p className="text-center text-sm text-muted-foreground py-4">
-                                                AI agents are creating activities for this day...
-                                            </p>
+                                            <div className="text-center py-4">
+                                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    <span>AI agents are creating activities for this day...</span>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Activities will be enriched with photos and details
+                                                </p>
+                                            </div>
                                         </div>
                                     ) : enableDragDrop && itineraryId ? (
                                         /* Drag & Drop Enabled */
@@ -461,7 +533,9 @@ export function DayCard({
                                                                     className={cn(
                                                                         'group relative p-3 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
                                                                         getNodeColor(node.type),
-                                                                        isReordering && 'opacity-50 pointer-events-none'
+                                                                        isReordering && 'opacity-50 pointer-events-none',
+                                                                        // Add shimmer effect for enriching activities
+                                                                        isGenerating && getEnrichmentStatus(node) === 'enriching' && 'animate-pulse'
                                                                     )}
                                                                 >
                                                                     {/* Subtle gradient overlay */}
@@ -527,7 +601,11 @@ export function DayCard({
                                                                                 </div>
 
                                                                                 {/* Status badges */}
-                                                                                <div className="flex items-center gap-1 flex-shrink-0">
+                                                                                <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
+                                                                                    {/* Show enrichment status during generation */}
+                                                                                    {isGenerating && (
+                                                                                        <EnrichmentBadge status={getEnrichmentStatus(node)} />
+                                                                                    )}
                                                                                     {node.locked && (
                                                                                         <Badge variant="secondary" className="h-6 px-2">
                                                                                             <Lock className="w-3 h-3" />
@@ -620,7 +698,9 @@ export function DayCard({
                                                     transition={{ duration: 0.2 }}
                                                     className={cn(
                                                         'group relative p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
-                                                        getNodeColor(node.type)
+                                                        getNodeColor(node.type),
+                                                        // Add shimmer effect for enriching activities
+                                                        isGenerating && getEnrichmentStatus(node) === 'enriching' && 'animate-pulse'
                                                     )}
                                                 >
                                                     {/* Subtle gradient overlay */}
@@ -686,7 +766,11 @@ export function DayCard({
                                                                 </div>
 
                                                                 {/* Status badges */}
-                                                                <div className="flex items-center gap-1 flex-shrink-0">
+                                                                <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
+                                                                    {/* Show enrichment status during generation */}
+                                                                    {isGenerating && (
+                                                                        <EnrichmentBadge status={getEnrichmentStatus(node)} />
+                                                                    )}
                                                                     {node.locked && (
                                                                         <Badge variant="secondary" className="h-6 px-2">
                                                                             <Lock className="w-3 h-3" />
@@ -769,4 +853,24 @@ export function DayCard({
             </div>
         </Card>
     );
+}
+
+// Add shimmer animation for loading states
+const shimmerKeyframes = `
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+`;
+
+// Inject shimmer animation styles
+if (typeof document !== 'undefined' && !document.getElementById('daycard-shimmer-styles')) {
+    const style = document.createElement('style');
+    style.id = 'daycard-shimmer-styles';
+    style.textContent = shimmerKeyframes;
+    document.head.appendChild(style);
 }

@@ -250,6 +250,9 @@ export interface NodeLocation {
   rating?: number;
   openingHours?: string;
   closingHours?: string;
+  photos?: string[]; // Photo references from Google Maps
+  userRatingsTotal?: number; // Number of reviews
+  priceLevel?: number; // 1-4 price level from Google Maps
 }
 
 export interface Coordinates {

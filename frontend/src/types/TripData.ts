@@ -61,6 +61,12 @@ export interface TripComponent {
       lat: number | null;
       lng: number | null;
     };
+    // Google Places enrichment fields
+    placeId?: string;
+    photos?: string[];
+    rating?: number;
+    userRatingsTotal?: number;
+    priceLevel?: number;
   };
   timing: {
     startTime: string; // ISO string

@@ -351,16 +351,21 @@ public class WebSocketController {
      * Broadcast agent progress update
      */
     public void broadcastAgentProgress(String itineraryId, String agentId, int progress, String status) {
+        Map<String, Object> data = Map.of(
+                "agentId", agentId,
+                "progress", progress,
+                "status", status
+        );
+        
         ItineraryUpdateMessage message = ItineraryUpdateMessage.builder()
                 .updateType("agent_progress")
                 .itineraryId(itineraryId)
-                .data(Map.of(
-                        "agentId", agentId,
-                        "progress", progress,
-                        "status", status
-                ))
+                .data(data)
                 .timestamp(Instant.now())
                 .build();
+        
+        logger.info("🔵 WEBSOCKET SEND - agent_progress: itinerary={}, progress={}%, agentId={}, status={}, fullData={}", 
+                    itineraryId, progress, agentId, status, data);
         
         broadcastToItinerary(itineraryId, message);
     }

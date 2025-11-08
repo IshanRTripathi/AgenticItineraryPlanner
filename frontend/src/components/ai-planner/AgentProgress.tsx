@@ -63,22 +63,32 @@ export function AgentProgress() {
         // Data is nested in message.data
         const data = (message as any).data || message;
         const progress = data.progress ?? message.progress;
-        const step = data.step ?? message.step ?? message.agentKind;
+        const step = data.step ?? message.step ?? message.agentKind ?? data.agentId;
         const statusMessage = data.status ?? data.message ?? message.message ?? message.status;
 
-        console.log('[AgentProgress] Agent progress update:', {
-          progress,
-          step,
-          message: statusMessage,
-          rawData: data
+        console.log('🟢 WEBSOCKET RECEIVE - agent_progress:', {
+          'Raw Message': message,
+          'Extracted Data': data,
+          'Progress Value': progress,
+          'Progress Type': typeof progress,
+          'Step/Phase': step,
+          'Status Message': statusMessage,
+          'data.progress': data.progress,
+          'message.progress': message.progress,
+          'Will Update To': typeof progress === 'number' ? progress : 'SKIPPED (not a number)'
         });
 
-        setState((prev) => ({
-          ...prev,
-          overallProgress: typeof progress === 'number' ? progress : prev.overallProgress,
-          currentPhase: step || prev.currentPhase,
-          message: statusMessage || prev.message,
-        }));
+        setState((prev) => {
+          const newProgress = typeof progress === 'number' ? progress : prev.overallProgress;
+          console.log('🟢 State updated - new progress:', newProgress, 'previous:', prev.overallProgress);
+          
+          return {
+            ...prev,
+            overallProgress: newProgress,
+            currentPhase: step || prev.currentPhase,
+            message: statusMessage || prev.message,
+          };
+        });
       }
 
       // Day completed - check both updateType and day field

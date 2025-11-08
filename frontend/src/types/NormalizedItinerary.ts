@@ -52,6 +52,7 @@ export interface NormalizedNode {
   locked?: boolean;
   bookingRef?: string;
   status?: 'planned' | 'in_progress' | 'skipped' | 'cancelled' | 'completed';
+  enrichmentStatus?: 'pending' | 'enriching' | 'enriched' | 'failed'; // Google Maps enrichment status
   updatedBy?: 'agent' | 'user';
   updatedAt?: number; // milliseconds since epoch
   agentData?: Record<string, any>;
@@ -61,6 +62,11 @@ export interface NodeLocation {
   name: string;
   address: string;
   coordinates: Coordinates;
+  placeId?: string; // Google Maps Place ID
+  photos?: string[]; // Photo references from Google Maps
+  rating?: number; // Google Maps rating
+  userRatingsTotal?: number; // Number of reviews
+  priceLevel?: number; // 1-4 price level from Google Maps
 }
 
 export interface Coordinates {
