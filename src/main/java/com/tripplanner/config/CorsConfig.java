@@ -33,13 +33,24 @@ public class CorsConfig implements WebMvcConfigurer {
         // Allow all origins temporarily
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         
-        // Allow all HTTP methods
+        // Allow all HTTP methods including WebSocket upgrade
         configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"
         ));
         
-        // Allow all headers
+        // Allow all headers including WebSocket-specific headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Expose headers that clients need to read
+        configuration.setExposedHeaders(Arrays.asList(
+            "Authorization",
+            "Content-Type",
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ));
         
         // Allow credentials for authenticated requests
         configuration.setAllowCredentials(true);
@@ -52,6 +63,7 @@ public class CorsConfig implements WebMvcConfigurer {
         source.registerCorsConfiguration("/api/**", configuration);
         source.registerCorsConfiguration("/ws/**", configuration);
         source.registerCorsConfiguration("/info/**", configuration);
+        source.registerCorsConfiguration("/sockjs-node/**", configuration); // For SockJS
         source.registerCorsConfiguration("/**", configuration); // Catch-all for SockJS dynamic paths
         
         return source;
