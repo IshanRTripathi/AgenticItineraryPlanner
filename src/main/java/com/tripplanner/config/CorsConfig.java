@@ -30,8 +30,17 @@ public class CorsConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow all origins temporarily
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Allow specific origins for production and development
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:*",
+            "http://127.0.0.1:*",
+            "https://*.run.app",  // Google Cloud Run domains
+            "https://*.a.run.app", // Google Cloud Run domains (alternative)
+            "*" // Fallback for any other origins
+        ));
+        
+        // Explicitly set allowed origins (without credentials, more permissive)
+        configuration.addAllowedOrigin("https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app");
         
         // Allow all HTTP methods including WebSocket upgrade
         configuration.setAllowedMethods(Arrays.asList(
@@ -49,7 +58,9 @@ public class CorsConfig implements WebMvcConfigurer {
             "Accept",
             "Origin",
             "Access-Control-Request-Method",
-            "Access-Control-Request-Headers"
+            "Access-Control-Request-Headers",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials"
         ));
         
         // Allow credentials for authenticated requests

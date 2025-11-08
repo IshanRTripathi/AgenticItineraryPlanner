@@ -58,26 +58,27 @@ export function useStompWebSocket(
       clientRef.current = null;
     }
 
-    // Construct WebSocket URL with proper protocol detection
+    // Construct WebSocket URL - SockJS requires http(s):// not ws(s)://
     let wsUrl = import.meta.env.VITE_WS_BASE_URL;
     
     if (!wsUrl) {
       // Auto-detect WebSocket URL from API base URL
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_APP_BASE_URL;
       if (apiBaseUrl) {
-        // Convert http(s):// to ws(s):// and append /ws path
-        wsUrl = apiBaseUrl.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:').replace(/\/api\/v1$/, '') + '/ws';
+        // Keep http(s):// protocol for SockJS, just append /ws path
+        wsUrl = apiBaseUrl.replace(/\/api\/v1$/, '') + '/ws';
       } else {
         // Fallback to localhost
-        wsUrl = 'ws://localhost:8080/ws';
+        wsUrl = 'http://localhost:8080/ws';
       }
     }
     
-    // Ensure WebSocket URL uses ws:// or wss:// protocol (not http/https)
-    if (wsUrl.startsWith('http://')) {
-      wsUrl = wsUrl.replace('http://', 'ws://');
-    } else if (wsUrl.startsWith('https://')) {
-      wsUrl = wsUrl.replace('https://', 'wss://');
+    // SockJS requires http(s):// URLs, not ws(s)://
+    // It handles the WebSocket upgrade internally
+    if (wsUrl.startsWith('ws://')) {
+      wsUrl = wsUrl.replace('ws://', 'http://');
+    } else if (wsUrl.startsWith('wss://')) {
+      wsUrl = wsUrl.replace('wss://', 'https://');
     }
     
     console.log('[STOMP] Using WebSocket URL:', wsUrl);

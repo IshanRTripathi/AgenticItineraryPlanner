@@ -60,17 +60,28 @@ class WebSocketService {
 
   private getWebSocketUrl(): string {
     // SockJS expects HTTP/HTTPS URLs, not WebSocket URLs
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-    const hostname = window.location.hostname;
     const wsBaseUrl = import.meta.env.VITE_WS_BASE_URL;
     
-    // If VITE_WS_BASE_URL is provided, use it directly (it should already include /ws)
+    // If VITE_WS_BASE_URL is provided, use it directly
     if (wsBaseUrl) {
+      // Ensure it uses http(s):// not ws(s)://
+      if (wsBaseUrl.startsWith('ws://')) {
+        return wsBaseUrl.replace('ws://', 'http://');
+      } else if (wsBaseUrl.startsWith('wss://')) {
+        return wsBaseUrl.replace('wss://', 'https://');
+      }
       return wsBaseUrl;
     }
     
-    // Otherwise, construct the default URL
-    return `${protocol}//${hostname}:8080/ws`;
+    // Auto-detect from API base URL
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_APP_BASE_URL;
+    if (apiBaseUrl) {
+      // Remove /api/v1 suffix and add /ws
+      return apiBaseUrl.replace(/\/api\/v1$/, '') + '/ws';
+    }
+    
+    // Fallback to localhost for development
+    return 'http://localhost:8080/ws';
   }
 
   /**
