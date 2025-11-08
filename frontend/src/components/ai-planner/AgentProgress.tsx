@@ -225,9 +225,7 @@ export function AgentProgress() {
       <div className="h-screen relative overflow-hidden flex flex-col p-4 pb-safe">
         {/* Globe Background */}
         <div className="absolute z-0 opacity-10 flex items-center justify-center">
-          <div className="w-[50vw] h-[50vh]">
             <InteractiveGlobe />
-          </div>
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
@@ -371,10 +369,8 @@ export function AgentProgress() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden">
       {/* Globe Background - Behind everything - Fullscreen and more transparent */}
-      <div className="fixed inset-0 z-0 opacity-15 flex items-center justify-center">
-        <div className="w-[50vw] h-[50vh]">
+      <div className="absolute z-30 opacity-0 flex items-center justify-center">
           <InteractiveGlobe />
-        </div>
       </div>
 
 
