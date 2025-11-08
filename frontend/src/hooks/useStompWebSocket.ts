@@ -66,11 +66,18 @@ export function useStompWebSocket(
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_APP_BASE_URL;
       if (apiBaseUrl) {
         // Convert http(s):// to ws(s):// and append /ws path
-        wsUrl = apiBaseUrl.replace(/^http/, 'ws').replace(/\/api\/v1$/, '') + '/ws';
+        wsUrl = apiBaseUrl.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:').replace(/\/api\/v1$/, '') + '/ws';
       } else {
         // Fallback to localhost
         wsUrl = 'ws://localhost:8080/ws';
       }
+    }
+    
+    // Ensure WebSocket URL uses ws:// or wss:// protocol (not http/https)
+    if (wsUrl.startsWith('http://')) {
+      wsUrl = wsUrl.replace('http://', 'ws://');
+    } else if (wsUrl.startsWith('https://')) {
+      wsUrl = wsUrl.replace('https://', 'wss://');
     }
     
     console.log('[STOMP] Using WebSocket URL:', wsUrl);
