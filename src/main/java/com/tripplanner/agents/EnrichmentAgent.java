@@ -545,6 +545,12 @@ public class EnrichmentAgent extends BaseAgent {
                     continue;
                 }
 
+                // Skip excluded node types (hotels, accommodations, transport)
+                if (isExcludedNodeType(node.getType())) {
+                    logger.debug("⏭️ [EnrichmentAgent] Skipping excluded node type '{}': {}", node.getType(), node.getTitle());
+                    continue;
+                }
+
                 // First, search for place if node doesn't have coordinates or placeId
                 if (needsPlaceSearch(node)) {
                     try {

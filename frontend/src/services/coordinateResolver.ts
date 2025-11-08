@@ -71,16 +71,26 @@ export class SmartCoordinateResolver {
     console.log('[CoordinateResolver] City context:', cityName);
 
     // Strategy 1: Use provided coordinates if valid
-    if (location?.coordinates && this.isValidCoordinates(location.coordinates)) {
-      console.log('[CoordinateResolver] ✓ Strategy 1: Using provided coordinates');
-      console.log('[CoordinateResolver]   Name:', location.name);
-      console.log('[CoordinateResolver]   Coords:', location.coordinates);
-      return {
-        coordinates: location.coordinates,
-        confidence: 'exact',
-        source: 'provided',
-        cached: false,
-      };
+    if (location?.coordinates) {
+      const isValid = this.isValidCoordinates(location.coordinates);
+      console.log('[CoordinateResolver] Strategy 1 check:', {
+        name: location.name,
+        hasCoords: !!location.coordinates,
+        coords: location.coordinates,
+        isValid
+      });
+      
+      if (isValid) {
+        console.log('[CoordinateResolver] ✓ Strategy 1: Using provided coordinates');
+        console.log('[CoordinateResolver]   Name:', location.name);
+        console.log('[CoordinateResolver]   Coords:', location.coordinates);
+        return {
+          coordinates: location.coordinates,
+          confidence: 'exact',
+          source: 'provided',
+          cached: false,
+        };
+      }
     }
 
     // Strategy 2: Check if location is generic (skip API call)
@@ -388,19 +398,37 @@ export class SmartCoordinateResolver {
 
   /**
    * Validate coordinates
+   * Rejects null, undefined, NaN, out of range, and (0,0) coordinates
    */
   private isValidCoordinates(coords: Coordinates): boolean {
-    return (
-      coords &&
-      typeof coords.lat === 'number' &&
-      typeof coords.lng === 'number' &&
-      !isNaN(coords.lat) &&
-      !isNaN(coords.lng) &&
-      coords.lat >= -90 &&
-      coords.lat <= 90 &&
-      coords.lng >= -180 &&
-      coords.lng <= 180
-    );
+    if (!coords) {
+      console.log('[CoordinateResolver] Invalid: coords is null/undefined');
+      return false;
+    }
+    
+    if (typeof coords.lat !== 'number' || typeof coords.lng !== 'number') {
+      console.log('[CoordinateResolver] Invalid: lat/lng not numbers', coords);
+      return false;
+    }
+    
+    if (isNaN(coords.lat) || isNaN(coords.lng)) {
+      console.log('[CoordinateResolver] Invalid: lat/lng is NaN', coords);
+      return false;
+    }
+    
+    // Reject (0,0) coordinates - likely uninitialized
+    if (Math.abs(coords.lat) < 0.0001 && Math.abs(coords.lng) < 0.0001) {
+      console.log('[CoordinateResolver] Invalid: coordinates are (0,0)', coords);
+      return false;
+    }
+    
+    // Check range
+    if (coords.lat < -90 || coords.lat > 90 || coords.lng < -180 || coords.lng > 180) {
+      console.log('[CoordinateResolver] Invalid: out of range', coords);
+      return false;
+    }
+    
+    return true;
   }
 
   /**

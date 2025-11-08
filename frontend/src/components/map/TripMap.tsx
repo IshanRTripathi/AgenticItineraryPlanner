@@ -211,8 +211,10 @@ export function TripMap({ itinerary }: TripMapProps) {
       for (const day of days) {
         const nodes = day.nodes || day.components || [];
         for (const node of nodes) {
-          // Skip transport/transit nodes entirely from map
-          if (node.type === 'transport' || node.type === 'transit') {
+          // Skip transport/transit and hotel/accommodation nodes from map
+          // Hotels are not booked at itinerary generation time
+          if (node.type === 'transport' || node.type === 'transit' || 
+              node.type === 'hotel' || node.type === 'accommodation') {
             continue;
           }
 
