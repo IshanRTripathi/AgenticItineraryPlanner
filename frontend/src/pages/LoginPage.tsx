@@ -10,7 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plane, Sparkles, Shield, Calendar, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plane, Sparkles, Shield, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
@@ -84,13 +84,7 @@ export function LoginPage() {
     }
   };
 
-  const nextSlide = () => {
-    setActiveSlide((prev) => (prev + 1) % FEATURES.length);
-  };
 
-  const prevSlide = () => {
-    setActiveSlide((prev) => (prev - 1 + FEATURES.length) % FEATURES.length);
-  };
 
   if (loading) {
     return (

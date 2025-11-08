@@ -112,7 +112,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
   return (
     <div className="relative">
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <MapPin className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
         <Input
           ref={inputRef}
           value={value}
@@ -124,7 +124,7 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
           }}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="pl-10"
+          className="pl-9 sm:pl-10 h-11 sm:h-10 text-sm"
         />
       </div>
 
@@ -135,17 +135,17 @@ export function LocationInput({ value, onChange, placeholder }: LocationInputPro
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+            className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden max-h-[280px] overflow-y-auto"
           >
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-100 transition-colors flex items-center gap-2 ${
+                className={`w-full px-3 sm:px-4 py-3 sm:py-3.5 text-left text-xs sm:text-sm hover:bg-gray-100 active:bg-gray-200 transition-colors flex items-center gap-2 touch-manipulation ${
                   index === activeIndex ? 'bg-gray-100' : ''
                 }`}
               >
-                <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
                 <span className="truncate">{suggestion}</span>
               </button>
             ))}

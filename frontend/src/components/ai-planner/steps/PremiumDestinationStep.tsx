@@ -40,13 +40,13 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
   };
 
   return (
-    <div className="space-y-6">
-      {/* Origin and Destination Side by Side */}
+    <div className="space-y-5 sm:space-y-6">
+      {/* Origin and Destination - Stack on mobile */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
         animate="animate"
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto"
       >
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
@@ -70,7 +70,7 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
         </div>
       </motion.div>
 
-      {/* Popular Destinations - Single Row */}
+      {/* Popular Destinations - 2 cols on mobile, 4 on desktop */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
@@ -83,17 +83,17 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
             Popular Destinations
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {POPULAR_DESTINATIONS.slice(0, 4).map((dest) => (
             <motion.button
               key={dest.name}
               onClick={() => handleDestinationChange(dest.name)}
-              className="p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group"
+              className="p-2.5 sm:p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left group touch-manipulation active:scale-95"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="text-2xl mb-1">{dest.emoji}</div>
-              <div className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">
+              <div className="text-xl sm:text-2xl mb-1">{dest.emoji}</div>
+              <div className="text-[10px] sm:text-xs font-medium text-foreground group-hover:text-primary transition-colors line-clamp-1">
                 {dest.name}
               </div>
             </motion.button>

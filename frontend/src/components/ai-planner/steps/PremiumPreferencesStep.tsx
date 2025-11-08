@@ -58,7 +58,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
 
       {/* Compact Layout */}
       <motion.div
@@ -81,7 +81,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                   onDataChange({ budgetRange: preset.range });
                 }}
                 className={cn(
-                  'p-3 rounded-lg border-2 transition-all text-center relative',
+                  'p-2 sm:p-3 rounded-lg border-2 transition-all text-center relative touch-manipulation active:scale-95',
                   budget[0] === preset.range[0] && budget[1] === preset.range[1]
                     ? 'border-primary bg-primary/5 shadow-md'
                     : 'border-border hover:border-primary/50'
@@ -89,9 +89,9 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="text-xl mb-1">{preset.emoji}</div>
-                <div className="text-xs font-semibold">{preset.label}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{preset.description}</div>
+                <div className="text-lg sm:text-xl mb-0.5 sm:mb-1">{preset.emoji}</div>
+                <div className="text-[10px] sm:text-xs font-semibold">{preset.label}</div>
+                <div className="text-[9px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">{preset.description}</div>
               </motion.button>
             ))}
           </div>
@@ -108,7 +108,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                 key={option.id}
                 onClick={() => handlePaceChange(option.id)}
                 className={cn(
-                  'p-3 rounded-lg border-2 transition-all text-center relative',
+                  'p-2 sm:p-3 rounded-lg border-2 transition-all text-center relative touch-manipulation active:scale-95',
                   pace === option.id
                     ? 'border-primary bg-primary/5 shadow-md'
                     : 'border-border hover:border-primary/50'
@@ -116,20 +116,20 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="text-xl mb-1">{option.emoji}</div>
-                <div className="text-xs font-semibold">{option.label}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{option.description}</div>
+                <div className="text-lg sm:text-xl mb-0.5 sm:mb-1">{option.emoji}</div>
+                <div className="text-[10px] sm:text-xs font-semibold">{option.label}</div>
+                <div className="text-[9px] sm:text-xs text-muted-foreground mt-0.5">{option.description}</div>
               </motion.button>
             ))}
           </div>
         </div>
 
-        {/* Interests - 2 Rows */}
+        {/* Interests - 2 cols on mobile, 3 on desktop */}
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
             Interests
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {INTERESTS.map((interest) => {
               const Icon = interest.icon;
               const isSelected = interests.includes(interest.id);
@@ -138,7 +138,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                   key={interest.id}
                   onClick={() => toggleInterest(interest.id)}
                   className={cn(
-                    'p-2.5 rounded-lg border-2 transition-all flex items-center justify-center gap-1.5 text-xs',
+                    'p-2 sm:p-2.5 rounded-lg border-2 transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs touch-manipulation active:scale-95',
                     isSelected
                       ? 'border-primary bg-primary/5 shadow-md'
                       : 'border-border hover:border-primary/50'
@@ -146,8 +146,8 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Icon className={cn('w-3.5 h-3.5', isSelected ? 'text-primary' : interest.color)} />
-                  <span className={cn('font-medium', isSelected ? 'text-primary' : 'text-foreground')}>
+                  <Icon className={cn('w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0', isSelected ? 'text-primary' : interest.color)} />
+                  <span className={cn('font-medium truncate', isSelected ? 'text-primary' : 'text-foreground')}>
                     {interest.label}
                   </span>
                 </motion.button>
@@ -169,7 +169,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
               onDataChange({ customInstructions: e.target.value });
             }}
             placeholder="Any special requests or preferences? e.g., 'I prefer vegetarian restaurants', 'Include kid-friendly activities', 'Avoid crowded places'..."
-            className="min-h-[80px] text-sm resize-none"
+            className="min-h-[80px] sm:min-h-[100px] text-xs sm:text-sm resize-none"
           />
         </div>
       </motion.div>
