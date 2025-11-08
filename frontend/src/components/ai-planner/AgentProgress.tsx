@@ -82,6 +82,12 @@ export function AgentProgress() {
           const newProgress = typeof progress === 'number' ? progress : prev.overallProgress;
           console.log('🟢 State updated - new progress:', newProgress, 'previous:', prev.overallProgress);
           
+          // Enable button if progress > 30% (fallback if day_completed event doesn't fire)
+          if (newProgress > 30 && !canViewPartial) {
+            console.log('[AgentProgress] Enabling partial view button based on progress:', newProgress);
+            setCanViewPartial(true);
+          }
+          
           return {
             ...prev,
             overallProgress: newProgress,
@@ -140,9 +146,9 @@ export function AgentProgress() {
             };
           });
 
-          // Enable partial view button after first day
-          if (dayNumber === 1) {
-            console.log('[AgentProgress] Enabling partial view button');
+          // Enable partial view button after any day is completed
+          if (dayNumber >= 1) {
+            console.log('[AgentProgress] Enabling partial view button for day', dayNumber);
             setCanViewPartial(true);
           }
         } else {
@@ -211,8 +217,17 @@ export function AgentProgress() {
     },
   });
 
+  // Enable button when progress reaches 30% or any day is completed
+  useEffect(() => {
+    if (!canViewPartial && (state.overallProgress > 30 || state.daysCompleted.length > 0)) {
+      console.log('[AgentProgress] Enabling button - progress:', state.overallProgress, 'days:', state.daysCompleted.length);
+      setCanViewPartial(true);
+    }
+  }, [state.overallProgress, state.daysCompleted.length, canViewPartial]);
+
   // Handle manual redirect
   const handleViewPartial = () => {
+    console.log('[AgentProgress] Redirecting to trip page with generating=true');
     window.location.href = `/trip/${itineraryId}?generating=true`;
   };
 

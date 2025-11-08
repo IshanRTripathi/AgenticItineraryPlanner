@@ -299,52 +299,70 @@ export function GenerationProgressBanner({
   }, [itineraryStatus, onComplete]);
 
   /**
-   * VISIBILITY LOGIC - When should the banner show?
+   * SMART VISIBILITY LOGIC
    * 
-   * Data Sources:
-   * 1. itineraryStatus (from backend API) - Source of truth
-   *    - 'generating' or 'planning' = Generation in progress → SHOW BANNER
-   *    - 'completed' or 'ready' = Generation done → HIDE BANNER
-   *    - 'draft' or other = Not started → HIDE BANNER
-   * 
-   * 2. WebSocket events - Only active during generation
-   *    - Provides real-time progress updates
-   *    - Not available for completed itineraries
-   * 
-   * 3. Days array - Populated during generation
-   *    - Empty at start, filled progressively
-   *    - Fully populated when complete
-   * 
-   * Decision: Show banner ONLY when status indicates active generation
+   * Hide banner if:
+   * 1. Status is NOT "generating" or "planning"
+   * 2. OR if itinerary has days with activities (generation actually complete)
+   * 3. OR after 60 seconds (assume stale status)
    */
   
+  // Check if itinerary is actually complete (has days with activities)
+  const hasCompletedDays = completedDays > 0 || totalDays > 0;
+  const isActuallyComplete = hasCompletedDays && completedDays >= totalDays;
+  
+  // Auto-hide after 60 seconds OR if actually complete
+  useEffect(() => {
+    const isGenerating = itineraryStatus === 'generating' || itineraryStatus === 'planning';
+    
+    // Hide immediately if actually complete
+    if (isActuallyComplete) {
+      console.log('[GenerationProgressBanner] Hiding - itinerary is actually complete');
+      setIsVisible(false);
+      return;
+    }
+    
+    // Auto-hide after 60 seconds if status says generating
+    if (isGenerating && isVisible) {
+      console.log('[GenerationProgressBanner] Status is generating, will auto-hide after 60s');
+      const timeout = setTimeout(() => {
+        console.log('[GenerationProgressBanner] Auto-hiding after 60s timeout');
+        setIsVisible(false);
+      }, 60000); // 60 seconds
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [itineraryStatus, isVisible, isActuallyComplete]);
+  
   const isGenerating = itineraryStatus === 'generating' || itineraryStatus === 'planning';
-  const isCompleted = itineraryStatus === 'completed' || itineraryStatus === 'ready';
   
   // Debug: Log visibility decision
   console.log('[GenerationProgressBanner] Visibility check:', {
     isVisible,
     itineraryStatus,
     isGenerating,
-    isCompleted,
-    willShow: isVisible && isGenerating && !isCompleted
+    hasCompletedDays,
+    isActuallyComplete,
+    completedDays,
+    totalDays,
+    willShow: isVisible && isGenerating && !isActuallyComplete
   });
   
-  // Rule 1: Hide if manually set to invisible (after completion animation)
+  // Rule 1: Hide if manually set to invisible
   if (!isVisible) {
     console.log('[GenerationProgressBanner] Hidden - isVisible=false');
     return null;
   }
-  
-  // Rule 2: Hide if generation is complete
-  if (isCompleted) {
-    console.log('[GenerationProgressBanner] Hidden - generation completed');
+
+  // Rule 2: Hide if actually complete (has all days)
+  if (isActuallyComplete) {
+    console.log('[GenerationProgressBanner] Hidden - itinerary is complete');
     return null;
   }
 
-  // Rule 3: Show ONLY if actively generating
+  // Rule 3: Show ONLY if status is "generating" or "planning"
   if (!isGenerating) {
-    console.log('[GenerationProgressBanner] Hidden - not generating. Status:', itineraryStatus);
+    console.log('[GenerationProgressBanner] Hidden - status not generating:', itineraryStatus);
     return null;
   }
   

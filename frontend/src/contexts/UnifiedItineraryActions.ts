@@ -327,22 +327,30 @@ export const createSendChatMessage = (
         autoApply: false
       };
 
-      // Send via WebSocket for real-time response
-      logInfo('Sending chat message via WebSocket', {
-        component: 'UnifiedItineraryProvider',
-        action: 'chat_websocket_send',
-        itineraryId
-      });
+      // Send via WebSocket for real-time response if connected, otherwise use REST API
+      if (state.isConnected) {
+        logInfo('Sending chat message via WebSocket', {
+          component: 'UnifiedItineraryProvider',
+          action: 'chat_websocket_send',
+          itineraryId
+        });
+        
+        webSocketService.sendChatMessage(message, {
+          selectedNodeId,
+          selectedDay: state.selectedDay,
+          scope: chatRequest.scope,
+          autoApply: false
+        });
+        
+        // WebSocket will handle the response via the message handler
+        // No need to wait for REST API response
+        dispatch({ type: 'SET_CHAT_LOADING', payload: false });
+        timer();
+        return;
+      }
       
-      webSocketService.sendChatMessage(message, {
-        selectedNodeId,
-        selectedDay: state.selectedDay,
-        scope: chatRequest.scope,
-        autoApply: false
-      });
-      
-      // Also send via REST API as fallback and for reliability
-      logInfo('Sending chat message via REST API', {
+      // Fallback to REST API if WebSocket not connected
+      logInfo('Sending chat message via REST API (WebSocket not connected)', {
         component: 'UnifiedItineraryProvider',
         action: 'chat_rest_send',
         itineraryId

@@ -64,6 +64,15 @@ public abstract class BaseAgent {
         logger.info("Request Details: {}", requestData != null ? requestData.toString() : "null");
         logger.info("=============================");
         
+        // Validate itineraryId before execution
+        if (itineraryId == null || itineraryId.trim().isEmpty() || "undefined".equals(itineraryId) || "null".equals(itineraryId)) {
+            String errorMsg = String.format("Invalid itineraryId: '%s'. Agent %s cannot execute without a valid itinerary ID.", 
+                                          itineraryId, agentKind);
+            logger.error(errorMsg);
+            // Cannot emit event without valid itineraryId, so just throw
+            throw new IllegalArgumentException(errorMsg);
+        }
+        
         // Validate responsibility before execution
         try {
             validateResponsibility(request);

@@ -158,12 +158,8 @@ function TripDetailContent() {
   const allDaysHaveActivities = days.length === expectedTotalDays && 
                                  days.every((day: any) => day.nodes && day.nodes.length > 0);
   
-  const isGenerating = 
-    (itinerary.status === 'generating' || 
-     itinerary.status === 'planning' ||
-     (hasIncompleteDays && days.length > 0 && days.length < expectedTotalDays)) &&
-    itinerary.status !== 'completed' &&
-    !allDaysHaveActivities; // Don't show if all days are complete
+  // Simple check: is status "generating" or "planning"?
+  const isGenerating = itinerary.status === 'generating' || itinerary.status === 'planning';
   
   // Debug logging
   console.log('[TripDetailPage] Itinerary status:', {
@@ -264,39 +260,25 @@ function TripDetailContent() {
   const currentPhase = state.currentPhase || 'skeleton';
 
   /**
-   * BANNER VISIBILITY DECISION
+   * SIMPLIFIED BANNER VISIBILITY
    * 
-   * The banner shows when:
+   * Show banner if:
    * 1. itinerary.status === 'generating' OR 'planning' (from API)
    * 2. OR ?generating=true in URL (from redirect during generation)
-   * 3. OR ?testProgress=true in URL (for testing)
-   * 4. OR days.length < expectedTotalDays (implicit detection)
    * 
-   * Example URLs:
-   * - Normal: /trip/it_xxx (shows banner only if generating)
-   * - From redirect: /trip/it_xxx?generating=true (shows banner)
-   * - Test mode: /trip/it_xxx?testProgress=true (always shows banner)
+   * Banner will auto-hide after 60 seconds
    */
   
   // Check URL parameters
   const generatingParam = searchParams.get('generating') === 'true';
-  const testProgressMode = searchParams.get('testProgress') === 'true';
 
-  // Debug: Log banner visibility decision
-  const shouldShowBanner = isGenerating || generatingParam || testProgressMode;
-  console.log('[TripDetailPage] Banner visibility decision:', {
+  // Simple logic: show if generating or URL param says so
+  const shouldShowBanner = isGenerating || generatingParam;
+  
+  console.log('[TripDetailPage] Banner visibility:', {
     shouldShowBanner,
-    isGenerating,
-    generatingParam,
-    testProgressMode,
-    itineraryStatus: itinerary.status,
-    completedDays,
-    expectedTotalDays,
-    hasIncompleteDays,
-    currentPhase,
-    explanation: shouldShowBanner 
-      ? (testProgressMode ? 'Showing in TEST MODE' : generatingParam ? 'Showing - redirected during generation' : 'Showing - generation in progress')
-      : 'Hidden - generation not active (add ?testProgress=true to test)'
+    status: itinerary.status,
+    generatingParam
   });
 
   return (
@@ -305,17 +287,11 @@ function TripDetailContent() {
       {shouldShowBanner && (
         <GenerationProgressBanner
           itineraryId={id!}
-          itineraryStatus={
-            // Always use actual status if completed, otherwise respect URL params
-            itinerary.status === 'completed'
-              ? itinerary.status 
-              : (testProgressMode || generatingParam ? 'generating' : itinerary.status)
-          }
+          itineraryStatus={generatingParam ? 'generating' : itinerary.status}
           completedDays={completedDays}
           totalDays={expectedTotalDays}
           currentPhase={currentPhase}
           onComplete={() => {
-            // Remove generating parameter when complete
             searchParams.delete('generating');
             setSearchParams(searchParams);
             loadItinerary(id!);
@@ -394,7 +370,7 @@ export function TripDetailPage() {
   }
 
   return (
-    <UnifiedItineraryProvider itineraryId={id}>
+    <UnifiedItineraryProvider itineraryId={id!}>
       <TripDetailContent />
     </UnifiedItineraryProvider>
   );

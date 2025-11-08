@@ -302,6 +302,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
           };
 
           loggedDispatch({ type: 'ADD_CHAT_MESSAGE', payload: chatMessage });
+          loggedDispatch({ type: 'SET_CHAT_LOADING', payload: false });
           // Persist assistant message to history (best-effort, non-blocking)
           itineraryApi.addChatHistoryMessage(itineraryId, {
             message: chatMessage.text,
