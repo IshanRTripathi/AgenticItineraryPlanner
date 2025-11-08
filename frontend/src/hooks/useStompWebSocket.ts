@@ -68,6 +68,10 @@ export function useStompWebSocket(
       } else if (wsUrl.startsWith('wss://')) {
         wsUrl = wsUrl.replace('wss://', 'https://');
       }
+      // Ensure /ws suffix is present
+      if (!wsUrl.endsWith('/ws')) {
+        wsUrl = wsUrl + '/ws';
+      }
     } else {
       // Auto-detect WebSocket URL from API base URL
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_APP_BASE_URL;
