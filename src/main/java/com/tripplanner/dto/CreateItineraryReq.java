@@ -18,6 +18,8 @@ public class CreateItineraryReq {
     private LocalDate endDate;
     private PartyDto party;
     private String budgetTier;
+    private Double budgetMin; // Minimum budget amount
+    private Double budgetMax; // Maximum budget amount
     @Builder.Default
     private List<String> interests = List.of();
     @Builder.Default

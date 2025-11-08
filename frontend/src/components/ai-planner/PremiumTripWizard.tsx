@@ -65,6 +65,17 @@ export function PremiumTripWizard() {
         try {
             // Call backend API to create itinerary
             // Note: Backend currently only uses destination, origin is stored for future use
+            const budgetMin = formData.budgetRange?.[0] || 500;
+            const budgetMax = formData.budgetRange?.[1] || 2000;
+            
+            // Determine budget tier based on range
+            let budgetTier = 'moderate';
+            if (budgetMax <= 1000) {
+                budgetTier = 'budget';
+            } else if (budgetMax >= 2500) {
+                budgetTier = 'luxury';
+            }
+            
             const response = await api.post<any>(endpoints.createItinerary, {
                 destination: formData.destination,
                 origin: formData.origin, // Store for future use
@@ -73,8 +84,9 @@ export function PremiumTripWizard() {
                 adults: formData.adults || 2,
                 children: formData.children || 0,
                 infants: formData.infants || 0,
-                budgetMin: formData.budgetRange?.[0] || 500,
-                budgetMax: formData.budgetRange?.[1] || 2000,
+                budgetTier: budgetTier,
+                budgetMin: budgetMin,
+                budgetMax: budgetMax,
                 pace: formData.pace || 'moderate',
                 interests: formData.interests || [],
                 constraints: formData.customInstructions ? [formData.customInstructions] : [],

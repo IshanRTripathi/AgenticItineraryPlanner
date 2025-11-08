@@ -698,6 +698,7 @@ export const api = itineraryApi;
 export const endpoints = {
   createItinerary: '/itineraries',
   getItinerary: (id: string) => `/itineraries/${id}/json`,
+  getMetadata: (id: string) => `/itineraries/${id}/metadata`,
   getAllItineraries: '/itineraries',
   deleteItinerary: (id: string) => `/itineraries/${id}`,
   websocketUrl: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080/ws',

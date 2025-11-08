@@ -40,6 +40,12 @@ public class TripMetadata {
     @JsonProperty("budgetTier")
     private String budgetTier;
     
+    @JsonProperty("budgetMin")
+    private Double budgetMin;
+    
+    @JsonProperty("budgetMax")
+    private Double budgetMax;
+    
     @JsonProperty("interests")
     private List<String> interests;
     
@@ -109,6 +115,8 @@ public class TripMetadata {
         
         // Extract other metadata from request
         this.budgetTier = request.getBudgetTier();
+        this.budgetMin = request.getBudgetMin();
+        this.budgetMax = request.getBudgetMax();
         this.interests = request.getInterests();
         this.constraints = request.getConstraints();
         this.language = request.getLanguage();
@@ -193,6 +201,22 @@ public class TripMetadata {
     
     public void setBudgetTier(String budgetTier) {
         this.budgetTier = budgetTier;
+    }
+    
+    public Double getBudgetMin() {
+        return budgetMin;
+    }
+    
+    public void setBudgetMin(Double budgetMin) {
+        this.budgetMin = budgetMin;
+    }
+    
+    public Double getBudgetMax() {
+        return budgetMax;
+    }
+    
+    public void setBudgetMax(Double budgetMax) {
+        this.budgetMax = budgetMax;
     }
     
     public List<String> getInterests() {

@@ -16,7 +16,10 @@ export interface CreateItineraryReq {
   adults?: number;
   children?: number;
   infants?: number;
-  budget?: string; // 'budget' | 'moderate' | 'luxury'
+  budget?: string; // 'budget' | 'moderate' | 'luxury' (deprecated, use budgetTier)
+  budgetTier?: string; // 'budget' | 'moderate' | 'luxury'
+  budgetMin?: number; // Minimum budget amount
+  budgetMax?: number; // Maximum budget amount
   pace?: string; // 'relaxed' | 'moderate' | 'fast'
   interests?: string[];
   preferences?: Record<string, any>;
@@ -61,7 +64,10 @@ export interface ItineraryMetadata {
   adults?: number;
   children?: number;
   infants?: number;
-  budget?: string;
+  budget?: string; // deprecated, use budgetTier
+  budgetTier?: string;
+  budgetMin?: number;
+  budgetMax?: number;
   pace?: string;
   interests?: string[];
   totalCost?: number;

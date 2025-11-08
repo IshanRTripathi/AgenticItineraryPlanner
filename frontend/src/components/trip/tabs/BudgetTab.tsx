@@ -4,13 +4,14 @@
  * Task 19: Mobile-optimized with horizontal scroll for tables and responsive charts
  */
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
 import { useItinerary } from '@/hooks/useItinerary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { api, endpoints } from '@/services/api';
 
 interface BudgetTabProps {
   tripId: string;
@@ -19,11 +20,49 @@ interface BudgetTabProps {
 export function BudgetTab({ tripId }: BudgetTabProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { data: itinerary } = useItinerary(tripId);
+  const [metadata, setMetadata] = useState<any>(null);
+  
+  // Fetch trip metadata to get user's original budget
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const data = await api.get(endpoints.getMetadata(tripId));
+        setMetadata(data);
+      } catch (error) {
+        console.error('Failed to fetch trip metadata:', error);
+      }
+    };
+    
+    fetchMetadata();
+  }, [tripId]);
+  
+  // Get user's original budget preferences from metadata
+  const userBudget = useMemo(() => {
+    if (!metadata) {
+      return {
+        min: 0,
+        max: 0,
+        tier: '',
+      };
+    }
+    
+    return {
+      min: metadata.budgetMin || 0,
+      max: metadata.budgetMax || 0,
+      tier: metadata.budgetTier || '',
+    };
+  }, [metadata]);
   
   // Calculate real budget data from itinerary
   const budgetData = useMemo(() => {
     if (!itinerary) {
-      return { total: 0, spent: 0, remaining: 0, currency: 'USD' };
+      return { 
+        total: 0, 
+        spent: 0, 
+        remaining: 0, 
+        currency: 'USD',
+        plannedBudget: userBudget.max || 0,
+      };
     }
     
     // NormalizedItinerary has days with nodes directly
@@ -37,8 +76,9 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       spent,
       remaining: total - spent,
       currency: itinerary.currency || 'USD',
+      plannedBudget: userBudget.max || total, // Use user's max budget or calculated total
     };
-  }, [itinerary]);
+  }, [itinerary, userBudget]);
   
   // Calculate category breakdown
   const categoryData = useMemo(() => {
@@ -84,31 +124,47 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
     return <div className="p-8 text-center text-muted-foreground">Loading budget data...</div>;
   }
   
-  const percentageSpent = budgetData.total > 0 ? (budgetData.spent / budgetData.total) * 100 : 0;
-  const isOverBudget = budgetData.spent > budgetData.total;
+  const percentageSpent = budgetData.plannedBudget > 0 ? (budgetData.spent / budgetData.plannedBudget) * 100 : 0;
+  const isOverBudget = budgetData.spent > budgetData.plannedBudget;
+  const isOverPlannedBudget = budgetData.total > budgetData.plannedBudget;
 
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6">
       {/* Budget Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Budget</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Your Budget</CardTitle>
             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className="text-lg sm:text-xl md:text-2xl font-bold">
+              ${budgetData.plannedBudget.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+              {userBudget.tier ? `${userBudget.tier} tier` : budgetData.currency}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Estimated Cost</CardTitle>
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+            <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverPlannedBudget ? 'text-warning' : ''}`}>
               ${budgetData.total.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {budgetData.currency}
+              {isOverPlannedBudget ? 'Over planned budget' : 'Within budget'}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Spent</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Booked</CardTitle>
             <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-error" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -121,17 +177,17 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-2 lg:col-span-1">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Remaining</CardTitle>
             <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
-              ${Math.abs(budgetData.remaining).toLocaleString()}
+              ${Math.abs(budgetData.plannedBudget - budgetData.spent).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {isOverBudget ? 'Over budget' : 'Under budget'}
+              {isOverBudget ? 'Over budget' : 'Available to spend'}
             </p>
           </CardContent>
         </Card>

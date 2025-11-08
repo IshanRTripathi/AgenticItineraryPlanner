@@ -1040,6 +1040,33 @@ public class ItinerariesController {
     }
     
     /**
+     * Get trip metadata for an itinerary
+     */
+    @GetMapping("/{id}/metadata")
+    public ResponseEntity<TripMetadata> getMetadata(
+            @PathVariable String id,
+            HttpServletRequest request) {
+        try {
+            String userId = (String) request.getAttribute("userId");
+            if (userId == null) {
+                logger.warn("User ID not found in request, using anonymous for development");
+                userId = "anonymous";
+            }
+            
+            // Get metadata from UserDataService
+            Optional<TripMetadata> metadataOpt = userDataService.getUserTripMetadata(userId, id);
+            if (metadataOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            return ResponseEntity.ok(metadataOpt.get());
+        } catch (Exception e) {
+            logger.error("Error getting metadata for itinerary {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
      * Get workflow data for an itinerary
      */
     @GetMapping("/{id}/workflow")
