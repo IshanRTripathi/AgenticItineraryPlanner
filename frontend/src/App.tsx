@@ -45,8 +45,8 @@ function App() {
     setMobileMenuOpen(false);
   }, [location.pathname]);
   
-  // Hide bottom nav on login/signup pages
-  const hideBottomNav = ['/login', '/signup'].includes(location.pathname);
+  // Hide bottom nav on login/signup/planner-progress pages
+  const hideBottomNav = ['/login', '/signup', '/planner-progress'].includes(location.pathname);
 
   return (
     <ErrorBoundary>

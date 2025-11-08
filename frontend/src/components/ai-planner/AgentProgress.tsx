@@ -160,7 +160,7 @@ export function AgentProgress() {
           ...prev,
           overallProgress: typeof progress === 'number' ? progress : prev.overallProgress,
           currentPhase: toPhase || prev.currentPhase,
-          message: phaseMessage || `Moving to ${toPhase} phase`,
+          message: phaseMessage || (toPhase ? `Moving to ${toPhase} phase` : 'Moving to next phase'),
         }));
       }
 
@@ -219,150 +219,134 @@ export function AgentProgress() {
     );
   }
 
-  // Mobile View - Stacked compact cards
+  // Mobile View - Ultra compact, everything visible without scrolling
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary to-blue-600 relative overflow-hidden flex items-center justify-center p-4">
-        {/* Animated Background Blobs */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-800/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="h-screen relative overflow-hidden flex flex-col p-4 pb-safe">
+        {/* Globe Background */}
+        <div className="absolute z-0 opacity-10 flex items-center justify-center">
+          <div className="w-[50vw] h-[50vh]">
+            <InteractiveGlobe />
+          </div>
+        </div>
 
-        <div className="relative z-10 w-full max-w-md space-y-4">
-          {/* Progress Card */}
-          <div className="bg-white/15 backdrop-blur-2xl border border-white/30 rounded-3xl p-6 shadow-2xl">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                {state.isComplete ? '🎉 Complete!' : 'Generating...'}
+        <div className="relative z-10 flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
+          {/* Single Unified Card with Glassmorphism */}
+          <div className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl p-5 shadow-2xl">
+            
+            {/* Header with Progress */}
+            <div className="text-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900 mb-1">
+                {state.isComplete ? '🎉 Complete!' : 'Creating Your Trip'}
               </h2>
-              <p className="text-sm text-white/80">
-                {state.message}
+              <p className="text-xs text-muted-foreground">
+                {state.isComplete ? 'Redirecting...' : 'Typically takes 45-60 seconds'}
               </p>
             </div>
 
             {/* Connection/Error Status */}
             {!isConnected && !state.hasError && (
-              <div className="mb-4 p-3 rounded-xl bg-yellow-500/20 backdrop-blur-md border border-yellow-500/30">
-                <div className="flex items-center gap-2 text-yellow-100 text-sm">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+              <div className="mb-3 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                <div className="flex items-center gap-2 text-yellow-700 text-xs">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Connecting...</span>
                 </div>
               </div>
             )}
 
             {state.hasError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/20 backdrop-blur-md border border-red-500/30">
-                <div className="flex items-center gap-2 text-red-100 text-sm">
-                  <AlertCircle className="w-4 h-4" />
+              <div className="mb-3 p-2 rounded-lg bg-red-500/10 border border-red-500/30">
+                <div className="flex items-center gap-2 text-red-700 text-xs">
+                  <AlertCircle className="w-3.5 h-3.5" />
                   <span>{state.errorMessage}</span>
                 </div>
               </div>
             )}
 
-            {/* Progress Circle - Compact */}
-            <div className="flex items-center justify-center mb-6">
-              <div className="relative w-28 h-28">
-                <svg className="transform -rotate-90 w-28 h-28">
+            {/* Progress Circle - Smaller */}
+            <div className="flex items-center justify-center mb-4">
+              <div className="relative w-24 h-24">
+                <svg className="transform -rotate-90 w-24 h-24">
                   <circle
-                    cx="56"
-                    cy="56"
-                    r="50"
+                    cx="48"
+                    cy="48"
+                    r="42"
                     stroke="currentColor"
-                    strokeWidth="6"
+                    strokeWidth="5"
                     fill="none"
-                    className="text-white/20"
+                    className="text-gray-200"
                   />
                   <motion.circle
-                    cx="56"
-                    cy="56"
-                    r="50"
+                    cx="48"
+                    cy="48"
+                    r="42"
                     stroke="currentColor"
-                    strokeWidth="6"
+                    strokeWidth="5"
                     fill="none"
                     strokeLinecap="round"
-                    className="text-white"
-                    initial={{ strokeDashoffset: 314 }}
-                    animate={{ strokeDashoffset: 314 - (314 * state.overallProgress) / 100 }}
+                    className="text-primary"
+                    initial={{ strokeDashoffset: 264 }}
+                    animate={{ strokeDashoffset: 264 - (264 * state.overallProgress) / 100 }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
-                    style={{ strokeDasharray: 314 }}
+                    style={{ strokeDasharray: 264 }}
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl font-bold text-white">{Math.round(state.overallProgress)}%</span>
+                  <span className="text-2xl font-bold text-gray-900">{Math.round(state.overallProgress)}%</span>
                 </div>
               </div>
             </div>
 
-            {/* Current Phase - Compact */}
-            <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/30 flex items-center justify-center flex-shrink-0">
+            {/* Current Phase - Inline */}
+            <div className="p-3 rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                   {state.isComplete ? (
-                    <Check className="w-5 h-5 text-white" />
+                    <Check className="w-4 h-4 text-primary" />
                   ) : (
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-white truncate">{state.currentPhase}</p>
-                  <p className="text-xs text-white/80 truncate mt-0.5">{state.message}</p>
+                  <p className="text-xs font-bold text-gray-900 truncate">{state.currentPhase}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{state.message}</p>
                 </div>
               </div>
             </div>
 
-            {/* Info Text */}
-            <p className="text-xs text-center text-white/70 mt-4">
-              {state.isComplete
-                ? 'Redirecting automatically...'
-                : 'Generation typically takes 45-60 seconds'
-              }
-            </p>
-          </div>
-
-          {/* Days Card - Compact */}
-          <div className="bg-white/15 backdrop-blur-2xl border border-white/30 rounded-3xl p-6 shadow-2xl max-h-[400px] flex flex-col">
-            <h3 className="text-lg font-bold text-white mb-3">Days Generated</h3>
-
-            {state.daysCompleted.length === 0 ? (
-              <div className="text-center py-8 flex-1 flex flex-col items-center justify-center">
-                <Sparkles className="w-10 h-10 text-white/50 mx-auto mb-2" />
-                <p className="text-sm text-white/70">Waiting for first day...</p>
-              </div>
-            ) : (
-              <div className="space-y-2 flex-1 overflow-y-auto pr-2">
-                {state.daysCompleted.map((day) => (
-                  <motion.div
-                    key={day.dayNumber}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="p-3 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 shadow-lg"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-green-500/30 flex items-center justify-center">
-                          <Check className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">Day {day.dayNumber}</p>
-                          <p className="text-xs text-white/70">{day.activities} activities</p>
-                        </div>
-                      </div>
-                      <div className="px-3 py-1 rounded-lg bg-green-500/30 backdrop-blur-sm border border-green-500/40">
-                        <span className="text-xs font-semibold text-white">Ready</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+            {/* Days Generated - Compact Grid */}
+            {state.daysCompleted.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-gray-900 mb-2">Days Ready:</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {state.daysCompleted.map((day) => (
+                    <motion.div
+                      key={day.dayNumber}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="aspect-square rounded-lg bg-green-500/10 backdrop-blur-sm border border-green-500/30 flex flex-col items-center justify-center p-1"
+                    >
+                      <Check className="w-3.5 h-3.5 text-green-600 mb-0.5" />
+                      <span className="text-[10px] font-bold text-green-700">Day {day.dayNumber}</span>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Action Buttons - Compact */}
-            <div className="mt-4 space-y-2">
+            {state.daysCompleted.length === 0 && (
+              <div className="text-center py-4 mb-4">
+                <Sparkles className="w-8 h-8 text-white opacity-70 mx-auto mb-1.5" />
+                <p className="text-xs text-muted-foreground text-white">Waiting for first day...</p>
+              </div>
+            )}
+
+            {/* Action Buttons - Always visible */}
+            <div className="space-y-2">
               {canViewPartial && !state.isComplete && (
                 <Button
                   onClick={handleViewPartial}
-                  className="w-full h-11 bg-white text-primary hover:bg-white/95 shadow-lg font-semibold touch-manipulation active:scale-95"
+                  className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-white shadow-lg font-semibold touch-manipulation active:scale-95 text-sm"
                 >
                   View Partial Itinerary
                 </Button>
@@ -371,7 +355,7 @@ export function AgentProgress() {
               {state.isComplete && (
                 <Button
                   onClick={() => window.location.href = `/trip/${itineraryId}`}
-                  className="w-full h-11 bg-white text-green-600 hover:bg-white/95 shadow-lg font-semibold touch-manipulation active:scale-95"
+                  className="w-full h-11 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg font-semibold touch-manipulation active:scale-95 text-sm"
                 >
                   View Complete Itinerary
                 </Button>
@@ -385,10 +369,10 @@ export function AgentProgress() {
 
   // Desktop View - Original side-by-side layout
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col lg:flex-row relative overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden">
       {/* Globe Background - Behind everything - Fullscreen and more transparent */}
       <div className="fixed inset-0 z-0 opacity-15 flex items-center justify-center">
-        <div className="w-[150vw] h-[150vh]">
+        <div className="w-[50vw] h-[50vh]">
           <InteractiveGlobe />
         </div>
       </div>
@@ -493,8 +477,8 @@ export function AgentProgress() {
 
             {state.daysCompleted.length === 0 ? (
               <div className="text-center py-12 flex-1 flex flex-col items-center justify-center">
-                <Sparkles className="w-12 h-12 text-primary mx-auto mb-3 opacity-50" />
-                <p className="text-sm text-gray-600">Waiting for first day...</p>
+                <Sparkles className="w-12 h-12 text-white mx-auto mb-3 opacity-70" />
+                <p className="text-sm text-white">Waiting for first day...</p>
               </div>
             ) : (
               <div className="space-y-3 flex-1 overflow-y-auto pr-2">
