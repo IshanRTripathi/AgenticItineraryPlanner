@@ -1,0 +1,222 @@
+{
+  "header": {
+    "profile": {
+      "myProfile": "ਮੇਰਾ ਪ੍ਰੋਫਾਈਲ",
+      "settings": "ਸੈਟਿੰਗਾਂ",
+      "help": "ਮਦਦ ਅਤੇ ਸਹਾਇਤਾ",
+      "signOut": "ਸਾਈਨ ਆਉਟ",
+      "signingOut": "ਸਾਈਨ ਆਉਟ ਹੋ ਰਿਹਾ ਹੈ..."
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} ਯਾਤਰੀ",
+    "travelers_plural": "{{count}} ਯਾਤਰੀ",
+    "budget": "ਬਜਟ: {{amount}}",
+    "days": "{{count}} ਦਿਨ",
+    "days_plural": "{{count}} ਦਿਨ"
+  },
+  "chat": {
+    "title": "AI ਸਹਾਇਕ",
+    "titleMobile": "AI ਚੈਟ",
+    "placeholder": "ਆਪਣੀ ਯਾਤਰਾ ਨੂੰ ਸੋਧਣ ਲਈ ਮੈਨੂੰ ਕਹੋ...",
+    "placeholderMobile": "ਮੈਨੂੰ ਪੁੱਛੋ...",
+    "empty": {
+      "title": "ਆਪਣੇ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਨੂੰ ਸੋਧਣ ਲਈ ਮੈਨੂੰ ਕਹੋ!",
+      "suggestion": "ਕੋਸ਼ਿਸ਼ ਕਰੋ: \"ਰਾਤ ਦੇ ਖਾਣੇ ਲਈ ਇੱਕ ਰੈਸਟੋਰੈਂਟ ਸ਼ਾਮਲ ਕਰੋ\""
+    },
+    "status": {
+      "live": "ਲਾਈਵ",
+      "offline": "ਆਫਲਾਈਨ",
+      "beta": "ਬੀਟਾ"
+    },
+    "sending": "ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ..."
+  },
+  "weather": {
+    "title": "ਮੌਸਮ ਦੀ ਭਵਿੱਖਬਾਣੀ",
+    "notConfigured": "ਮੌਸਮ API ਸੰਰਚਿਤ ਨਹੀਂ ਹੈ",
+    "loading": "ਮੌਸਮ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    "error": "ਮੌਸਮ ਡੇਟਾ ਲੋਡ ਕਰਨ ਵਿੱਚ ਅਸਮਰੱਥ",
+    "humidity": "ਨਮੀ",
+    "wind": "ਹਵਾ"
+  },
+  "tripList": {
+    "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    "tryAgain": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "count": "{{count}} ਯਾਤਰਾ",
+    "count_plural": "{{count}} ਯਾਤਰਾਵਾਂ"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "ਕੁੱਲ ਦਿਨ",
+      "days": "{{count}} ਦਿਨ",
+      "days_plural": "{{count}} ਦਿਨ",
+      "activities": "ਗਤੀਵਿਧੀਆਂ",
+      "budget": "ਬਜਟ",
+      "weather": "ਮੌਸਮ",
+      "planned": "ਯੋਜਨਾਬੱਧ",
+      "perPerson": "ਪ੍ਰਤੀ ਵਿਅਕਤੀ",
+      "generating": "ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ",
+      "unavailable": "ਉਪਲਬਧ ਨਹੀਂ"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "ਯਾਤਰਾ ਸੰਪਾਦਿਤ ਕਰੋ",
+        "description": "ਤਾਰੀਖਾਂ ਜਾਂ ਤਰਜੀਹਾਂ ਨੂੰ ਸੋਧੋ"
+      },
+      "shareTrip": {
+        "title": "ਯਾਤਰਾ ਸਾਂਝੀ ਕਰੋ",
+        "description": "ਦੋਸਤਾਂ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"
+      },
+      "exportPdf": {
+        "title": "PDF ਨਿਰਯਾਤ ਕਰੋ",
+        "description": "ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਡਾਊਨਲੋਡ ਕਰੋ"
+      },
+      "addToCalendar": {
+        "title": "ਕੈਲੰਡਰ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ",
+        "description": "Google ਨਾਲ ਸਿੰਕ ਕਰੋ"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "ਦਿਨ ਪ੍ਰਤੀ ਦਿਨ",
+    "mapView": "ਨਕਸ਼ਾ ਦ੍ਰਿਸ਼",
+    "yourItinerary": "ਤੁਹਾਡਾ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ",
+    "summary": "{{days}} ਦਿਨ • {{activities}} ਗਤੀਵਿਧੀਆਂ",
+    "expandAll": "ਸਭ ਵਿਸਤਾਰ ਕਰੋ",
+    "collapseAll": "ਸਭ ਸੰਕੁਚਿਤ ਕਰੋ",
+    "addDay": "ਦਿਨ ਜੋੜੋ",
+    "empty": {
+      "title": "ਅਜੇ ਤੱਕ ਕੋਈ ਦਿਨ ਯੋਜਨਾਬੱਧ ਨਹੀਂ",
+      "description": "ਆਪਣਾ ਪਹਿਲਾ ਦਿਨ ਜੋੜ ਕੇ ਆਪਣਾ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਬਣਾਉਣਾ ਸ਼ੁਰੂ ਕਰੋ",
+      "action": "ਪਹਿਲਾ ਦਿਨ ਜੋੜੋ"
+    }
+  },
+  "dayCard": {
+    "day": "ਦਿਨ {{number}}",
+    "today": "ਅੱਜ",
+    "planning": "ਯੋਜਨਾ ਬਣਾ ਰਹੇ ਹਾਂ...",
+    "generatingActivities": "ਗਤੀਵਿਧੀਆਂ ਬਣਾ ਰਹੇ ਹਾਂ...",
+    "activitiesCount": "{{count}} ਗਤੀਵਿਧੀਆਂ",
+    "unsavedChanges": "ਅਣਸੁਰੱਖਿਅਤ ਤਬਦੀਲੀਆਂ",
+    "discard": "ਰੱਦ ਕਰੋ",
+    "saveChanges": "ਤਬਦੀਲੀਆਂ ਸੁਰੱਖਿਅਤ ਕਰੋ",
+    "saving": "ਸੁਰੱਖਿਅਤ ਕਰ ਰਹੇ ਹਾਂ...",
+    "booked": "ਬੁੱਕ ਕੀਤਾ ਗਿਆ",
+    "bookNow": "ਹੁਣੇ ਬੁੱਕ ਕਰੋ",
+    "viewOnMap": "ਨਕਸ਼ੇ 'ਤੇ ਦੇਖੋ",
+    "photos": "{{count}} ਫੋਟੋਆਂ",
+    "reviews": "{{count}} ਸਮੀਖਿਆਵਾਂ",
+    "summary": {
+      "activities": "ਗਤੀਵਿਧੀਆਂ",
+      "budget": "ਬਜਟ",
+      "duration": "ਮਿਆਦ",
+      "status": "ਸਥਿਤੀ"
+    },
+    "generating": {
+      "message": "AI ਏਜੰਟ ਇਸ ਦਿਨ ਲਈ ਗਤੀਵਿਧੀਆਂ ਬਣਾ ਰਹੇ ਹਨ...",
+      "enrichment": "ਗਤੀਵਿਧੀਆਂ ਨੂੰ ਫੋਟੋਆਂ ਅਤੇ ਵੇਰਵਿਆਂ ਨਾਲ ਸਮ੍ਰਿੱਧ ਕੀਤਾ ਜਾਵੇਗਾ"
+    },
+    "enrichment": {
+      "enriching": "ਸਮ੍ਰਿੱਧ ਕਰ ਰਹੇ ਹਾਂ...",
+      "enriched": "ਸਮ੍ਰਿੱਧ ਕੀਤਾ ਗਿਆ",
+      "limitedData": "ਸੀਮਤ ਡੇਟਾ",
+      "pending": "ਬਕਾਇਆ"
+    }
+  },
+  "bottomNav": {
+    "home": "ਹੋਮ",
+    "search": "ਖੋਜੋ",
+    "plan": "ਯੋਜਨਾ",
+    "trips": "ਯਾਤਰਾਵਾਂ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ"
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "ਉਪਭੋਗਤਾ",
+    "signingOut": "ਸਾਈਨ ਆਉਟ ਹੋ ਰਿਹਾ ਹੈ...",
+    "signedOutSuccess": "ਸਫਲਤਾਪੂਰਵਕ ਸਾਈਨ ਆਉਟ ਹੋ ਗਿਆ",
+    "signedOutDescription": "ਤੁਸੀਂ ਆਪਣੇ ਖਾਤੇ ਤੋਂ ਲੌਗ ਆਉਟ ਹੋ ਗਏ ਹੋ",
+    "logoutFailed": "ਲੌਗਆਉਟ ਅਸਫਲ ਰਿਹਾ",
+    "tryAgain": "ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"
+  },
+  "chatTab": {
+    "title": "AI ਯਾਤਰਾ ਸਹਾਇਕ",
+    "subtitle": "ਆਪਣੇ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਨੂੰ ਸੋਧਣ ਲਈ AI ਨਾਲ ਚੈਟ ਕਰੋ",
+    "status": {
+      "live": "ਲਾਈਵ"
+    },
+    "loadMore": "{{count}} ਹੋਰ ਲੋਡ ਕਰੋ",
+    "showing": "{{total}} ਵਿੱਚੋਂ {{current}} ਸੁਨੇਹੇ ਦਿਖਾ ਰਹੇ ਹਾਂ",
+    "empty": {
+      "title": "ਗੱਲਬਾਤ ਸ਼ੁਰੂ ਕਰੋ",
+      "subtitle": "ਆਪਣੇ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਨੂੰ ਸੋਧਣ ਲਈ ਮੈਨੂੰ ਕਹੋ!",
+      "examples": "ਇਹ ਉਦਾਹਰਣਾਂ ਅਜ਼ਮਾਓ:"
+    },
+    "input": {
+      "placeholder": "ਆਪਣੀ ਯਾਤਰਾ ਬਾਰੇ ਮੈਨੂੰ ਪੁੱਛੋ...",
+      "send": "ਭੇਜੋ",
+      "sending": "ਭੇਜਿਆ ਜਾ ਰਿਹਾ ਹੈ",
+      "hint": "ਭੇਜਣ ਲਈ Enter ਦਬਾਓ, ਨਵੀਂ ਲਾਈਨ ਲਈ Shift+Enter"
+    }
+  },
+  "bookingsTab": {
+    "title": "ਬੁਕਿੰਗਾਂ",
+    "subtitle": "ਆਪਣੀਆਂ ਸਾਰੀਆਂ ਯਾਤਰਾ ਬੁਕਿੰਗਾਂ ਇੱਕ ਥਾਂ 'ਤੇ ਪ੍ਰਬੰਧਿਤ ਕਰੋ",
+    "stats": {
+      "totalItems": "ਕੁੱਲ ਆਈਟਮਾਂ",
+      "booked": "ਬੁੱਕ ਕੀਤਾ ਗਿਆ",
+      "available": "ਉਪਲਬਧ"
+    },
+    "empty": {
+      "title": "ਕੋਈ ਬੁੱਕ ਕਰਨ ਯੋਗ ਆਈਟਮਾਂ ਨਹੀਂ",
+      "description": "ਤੁਹਾਡੇ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਵਿੱਚ ਅਜੇ ਤੱਕ ਕੋਈ ਬੁੱਕ ਕਰਨ ਯੋਗ ਆਈਟਮਾਂ ਨਹੀਂ ਹਨ"
+    }
+  },
+  "budgetTab": {
+    "loading": "ਬਜਟ ਡੇਟਾ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    "cards": {
+      "yourBudget": {
+        "title": "ਤੁਹਾਡਾ ਬਜਟ",
+        "tier": "{{tier}} ਪੱਧਰ"
+      },
+      "estimatedCost": {
+        "title": "ਅਨੁਮਾਨਿਤ ਲਾਗਤ",
+        "overBudget": "ਯੋਜਨਾਬੱਧ ਬਜਟ ਤੋਂ ਵੱਧ",
+        "withinBudget": "ਬਜਟ ਦੇ ਅੰਦਰ"
+      },
+      "booked": {
+        "title": "ਬੁੱਕ ਕੀਤਾ ਗਿਆ",
+        "percentage": "ਬਜਟ ਦਾ {{percentage}}%"
+      },
+      "remaining": {
+        "title": "ਬਾਕੀ",
+        "overBudget": "ਬਜਟ ਤੋਂ ਵੱਧ",
+        "available": "ਖਰਚ ਕਰਨ ਲਈ ਉਪਲਬਧ"
+      }
+    },
+    "alert": {
+      "title": "ਬਜਟ ਚੇਤਾਵਨੀ",
+      "message": "ਤੁਸੀਂ ਆਪਣੇ ਬਜਟ ਦਾ {{percentage}}% ਖਰਚ ਕਰ ਲਿਆ ਹੈ। ਆਪਣੇ ਖਰਚੇ ਨੂੰ ਸਮਾਯੋਜਿਤ ਕਰਨ 'ਤੇ ਵਿਚਾਰ ਕਰੋ।"
+    },
+    "categoryBreakdown": {
+      "title": "ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ ਖਰਚ"
+    },
+    "dailySpending": {
+      "title": "ਰੋਜ਼ਾਨਾ ਖਰਚ",
+      "chartLabel": "ਰੋਜ਼ਾਨਾ ਲਾਗਤ",
+      "average": "ਔਸਤ ਰੋਜ਼ਾਨਾ ਲਾਗਤ: ${{amount}}"
+    }
+  },
+  "tripSidebar": {
+    "linkCopied": "ਲਿੰਕ ਕਾਪੀ ਹੋ ਗਿਆ!",
+    "linkCopiedDescription": "ਸਾਂਝਾ ਕਰਨ ਯੋਗ ਲਿੰਕ ਕਲਿੱਪਬੋਰਡ 'ਤੇ ਕਾਪੀ ਹੋ ਗਿਆ",
+    "shareFailed": "ਸਾਂਝਾ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ",
+    "shareFailedDescription": "ਸਾਂਝਾ ਕਰਨ ਯੋਗ ਲਿੰਕ ਤਿਆਰ ਨਹੀਂ ਹੋ ਸਕਿਆ",
+    "exportSuccess": "ਨਿਰਯਾਤ ਸਫਲ ਰਿਹਾ",
+    "exportSuccessDescription": "ਤੁਹਾਡਾ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਪ੍ਰਿੰਟ ਕਰਨ ਜਾਂ PDF ਵਜੋਂ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਤਿਆਰ ਹੈ",
+    "exportFailed": "ਨਿਰਯਾਤ ਅਸਫਲ ਰਿਹਾ",
+    "exportFailedDescription": "PDF ਨਿਰਯਾਤ ਨਹੀਂ ਹੋ ਸਕਿਆ",
+    "itineraryNotLoaded": "ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਲੋਡ ਨਹੀਂ ਹੋਇਆ",
+    "deleteConfirm": "ਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਤੌਰ 'ਤੇ ਇਸ ਯਾਤਰਾ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ? ਇਸ ਕਾਰਵਾਈ ਨੂੰ ਵਾਪਸ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।"
+  }
+}

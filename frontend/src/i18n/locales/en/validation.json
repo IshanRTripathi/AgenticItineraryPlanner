@@ -1,0 +1,20 @@
+{
+  "required": "This field is required",
+  "email": "Please enter a valid email address",
+  "minLength": "Minimum {{min}} characters required",
+  "maxLength": "Maximum {{max}} characters allowed",
+  "min": "Value must be at least {{min}}",
+  "max": "Value must be at most {{max}}",
+  "pattern": "Invalid format",
+  "url": "Please enter a valid URL",
+  "phone": "Please enter a valid phone number",
+  "date": "Please enter a valid date",
+  "dateRange": "End date must be after start date",
+  "number": "Please enter a valid number",
+  "integer": "Please enter a whole number",
+  "positive": "Value must be positive",
+  "negative": "Value must be negative",
+  "match": "Fields do not match",
+  "unique": "This value is already taken",
+  "custom": "Validation failed"
+}

@@ -1,0 +1,208 @@
+{
+  "dashboard": {
+    "title": "Mis viajes",
+    "subtitle": "Gestiona tus planes de viaje y reservas",
+    "subtitleMobile": "Tus planes de viaje",
+    "newTrip": "Planificar nuevo viaje",
+    "newTripMobile": "Nuevo viaje",
+    "filters": {
+      "all": "Todos los viajes",
+      "allMobile": "Todos",
+      "upcoming": "Próximos",
+      "upcomingMobile": "Pronto",
+      "completed": "Completados",
+      "completedMobile": "Hechos"
+    },
+    "empty": {
+      "title": "Aún no hay viajes",
+      "description": "Comienza a planificar tu próxima aventura con IA"
+    },
+    "loading": "Cargando tus viajes...",
+    "error": "Error al cargar los viajes"
+  },
+  "login": {
+    "title": "Bienvenido de nuevo",
+    "subtitle": "Inicia sesión para comenzar a planificar tu próxima aventura",
+    "signInWithGoogle": "Continuar con Google",
+    "signingIn": "Iniciando sesión...",
+    "features": {
+      "aiPlanning": {
+        "title": "Planificación con IA",
+        "description": "Itinerarios inteligentes creados por IA según tus preferencias"
+      },
+      "manageBookings": {
+        "title": "Gestionar todas las reservas",
+        "description": "Rastrea vuelos, hoteles y actividades en un solo lugar"
+      },
+      "secure": {
+        "title": "Seguro y confiable",
+        "description": "Tus datos protegidos con seguridad de nivel empresarial"
+      }
+    },
+    "privacy": {
+      "text": "Al continuar, aceptas nuestros",
+      "terms": "Términos de servicio",
+      "and": "y",
+      "privacy": "Política de privacidad"
+    },
+    "trustedBy": "Confiado por más de 10K viajeros"
+  },
+  "home": {
+    "hero": {
+      "title": "Planifica tu",
+      "titleHighlight": "Viaje Perfecto",
+      "subtitle": "Itinerarios impulsados por IA adaptados a tus preferencias. Descubre destinos, reserva alojamiento y explora el mundo de manera más inteligente.",
+      "startPlanning": "Comenzar a Planificar",
+      "explore": "Explorar"
+    },
+    "trendingDestinations": {
+      "title": "Destinos Populares",
+      "from": "desde",
+      "explore": "Explorar"
+    },
+    "popularRoutes": {
+      "title": "Rutas de Vuelo Populares",
+      "subtitle": "Mejores ofertas en destinos de moda",
+      "viewAll": "Ver Todas las Rutas",
+      "from": "Desde",
+      "to": "Hasta",
+      "startingFrom": "Desde",
+      "perPerson": "por persona",
+      "bookFlight": "Reservar Vuelo"
+    },
+    "travelBlogs": {
+      "title": "Inspiración de Viaje",
+      "subtitle": "Descubre historias y consejos de otros viajeros",
+      "viewAll": "Ver Todos los Artículos",
+      "by": "Por",
+      "readMore": "Leer Más"
+    }
+  },
+  "tripDetail": {
+    "tabs": {
+      "view": "Ver",
+      "plan": "Planificar",
+      "chat": "Chat",
+      "bookings": "Reservas",
+      "budget": "Presupuesto",
+      "packing": "Equipaje",
+      "docs": "Documentos"
+    },
+    "sidebar": {
+      "backToDashboard": "Volver al panel",
+      "share": "Compartir",
+      "export": "Exportar",
+      "delete": "Eliminar"
+    },
+    "updatingItinerary": "Actualizando itinerario...",
+    "reconnecting": "Reconectando al servidor...",
+    "invalidTripId": "ID de viaje inválido",
+    "itineraryNotFound": "Itinerario no encontrado"
+  },
+  "profile": {
+    "title": "Perfil",
+    "myProfile": "Mi perfil",
+    "settings": "Configuración",
+    "help": "Ayuda y soporte",
+    "languagePreferences": "Preferencias de idioma",
+    "selectLanguage": "Selecciona tu idioma",
+    "languageDescription": "Los cambios se aplicarán inmediatamente en todas las páginas",
+    "accountDetails": "Detalles de la cuenta",
+    "accountDetailsDescription": "Tu información personal y estado de cuenta",
+    "authProvider": "Proveedor de autenticación",
+    "pleaseSignIn": "Por favor, inicia sesión para ver tu perfil",
+    "editProfile": "Editar perfil",
+    "memberSince": "Miembro desde",
+    "lastSignIn": "Último inicio de sesión",
+    "stats": {
+      "totalTrips": "Viajes totales",
+      "places": "Lugares",
+      "since": "Desde"
+    },
+    "quickActions": {
+      "title": "Acciones rápidas",
+      "description": "Gestiona tu cuenta y preferencias",
+      "myTrips": "Mis viajes",
+      "planTrip": "Planificar viaje",
+      "upgrade": "Mejorar",
+      "language": "Idioma"
+    }
+  },
+  "planner": {
+    "steps": {
+      "destination": "Destino",
+      "datesTravelers": "Fechas y viajeros",
+      "preferences": "Preferencias",
+      "review": "Revisar"
+    },
+    "destination": {
+      "fromLabel": "Desde (Origen)",
+      "toLabel": "Hasta (Destino)",
+      "fromPlaceholder": "Tu ubicación de inicio...",
+      "toPlaceholder": "¿A dónde quieres ir?...",
+      "popularDestinations": "Destinos populares"
+    },
+    "datesTravelers": {
+      "suggestBestDates": "Sugerir mejor fecha de viaje",
+      "analyzingDates": "Analizando mejores fechas..."
+    },
+    "preferences": {
+      "budgetRange": "Rango de presupuesto",
+      "travelPace": "Ritmo de viaje",
+      "interests": "Intereses",
+      "additionalInstructions": "Instrucciones adicionales (Opcional)",
+      "instructionsPlaceholder": "¿Alguna solicitud especial o preferencia? Por ejemplo, 'Prefiero restaurantes vegetarianos', 'Incluir actividades para niños', 'Evitar lugares concurridos'...",
+      "pace": {
+        "relaxed": "Relajado",
+        "relaxedDesc": "2-3 actividades por día",
+        "moderate": "Moderado",
+        "moderateDesc": "4-5 actividades por día",
+        "fast": "Ritmo rápido",
+        "fastDesc": "6+ actividades por día"
+      },
+      "budget": {
+        "budget": "Económico",
+        "moderate": "Moderado",
+        "luxury": "Lujo"
+      },
+      "interestsList": {
+        "culture": "Cultura e historia",
+        "adventure": "Aventura",
+        "food": "Comida y gastronomía",
+        "photography": "Fotografía",
+        "shopping": "Compras",
+        "relaxation": "Relajación"
+      }
+    },
+    "review": {
+      "destination": "Destino",
+      "dates": "Fechas",
+      "travelers": "Viajeros",
+      "budget": "Presupuesto",
+      "pace": "Ritmo",
+      "interests": "Intereses",
+      "from": "Desde",
+      "notSelected": "No seleccionado",
+      "notSet": "No establecido",
+      "none": "Ninguno",
+      "person": "Persona",
+      "people": "Personas",
+      "adult": "Adulto",
+      "adults": "Adultos",
+      "child": "Niño",
+      "children": "Niños",
+      "infant": "Bebé",
+      "infants": "Bebés",
+      "day": "día",
+      "days": "días",
+      "activities": "actividades"
+    },
+    "navigation": {
+      "back": "Atrás",
+      "nextStep": "Siguiente paso",
+      "createItinerary": "Crear mi itinerario",
+      "creatingTrip": "Creando tu viaje...",
+      "stepOf": "Paso {{current}} de {{total}}"
+    }
+  }
+}

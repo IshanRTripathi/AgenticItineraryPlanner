@@ -1,0 +1,64 @@
+{
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "tryAgain": "Intentar de nuevo",
+    "refresh": "Actualizar",
+    "loading": "Cargando...",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "signUp": "Registrarse",
+    "view": "Ver detalles"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "pending": "Pendiente",
+    "completed": "Completado",
+    "upcoming": "Próximo",
+    "ongoing": "En curso"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "search": "Buscar",
+    "planTrip": "Planificar viaje",
+    "myTrips": "Mis viajes",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "help": "Ayuda y soporte"
+  },
+  "time": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "now": "Ahora",
+    "justNow": "Justo ahora",
+    "minutesAgo": "hace {{count}} minuto",
+    "minutesAgo_plural": "hace {{count}} minutos",
+    "hoursAgo": "hace {{count}} hora",
+    "hoursAgo_plural": "hace {{count}} horas",
+    "daysAgo": "hace {{count}} día",
+    "daysAgo_plural": "hace {{count}} días"
+  },
+  "common": {
+    "or": "o",
+    "and": "y",
+    "of": "de",
+    "to": "a",
+    "from": "desde",
+    "in": "en",
+    "at": "en",
+    "on": "en",
+    "by": "por",
+    "with": "con",
+    "for": "para"
+  }
+}

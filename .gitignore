@@ -50,6 +50,7 @@ data/itinerarydb.trace.db
 !firestore.rules
 !firestore.indexes.json
 !.firebaserc
+!frontend/src/i18n/locales/**/*.json
 .env
 .env.local
 .env.production

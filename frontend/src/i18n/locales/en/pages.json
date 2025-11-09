@@ -1,0 +1,208 @@
+{
+  "dashboard": {
+    "title": "My Trips",
+    "subtitle": "Manage your travel plans and bookings",
+    "subtitleMobile": "Your travel plans",
+    "newTrip": "Plan New Trip",
+    "newTripMobile": "New Trip",
+    "filters": {
+      "all": "All Trips",
+      "allMobile": "All",
+      "upcoming": "Upcoming",
+      "upcomingMobile": "Soon",
+      "completed": "Completed",
+      "completedMobile": "Done"
+    },
+    "empty": {
+      "title": "No trips yet",
+      "description": "Start planning your next adventure with AI"
+    },
+    "loading": "Loading your trips...",
+    "error": "Failed to load trips"
+  },
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Sign in to start planning your next adventure",
+    "signInWithGoogle": "Continue with Google",
+    "signingIn": "Signing in...",
+    "features": {
+      "aiPlanning": {
+        "title": "AI-Powered Planning",
+        "description": "Smart itineraries crafted by AI based on your preferences"
+      },
+      "manageBookings": {
+        "title": "Manage All Bookings",
+        "description": "Track flights, hotels, and activities in one place"
+      },
+      "secure": {
+        "title": "Secure & Reliable",
+        "description": "Your data protected with enterprise-grade security"
+      }
+    },
+    "privacy": {
+      "text": "By continuing, you agree to our",
+      "terms": "Terms of Service",
+      "and": "and",
+      "privacy": "Privacy Policy"
+    },
+    "trustedBy": "Trusted by 10K+ travelers"
+  },
+  "home": {
+    "hero": {
+      "title": "Plan Your",
+      "titleHighlight": "Perfect Trip",
+      "subtitle": "AI-powered itineraries tailored to your preferences. Discover destinations, book stays, and explore the world smarter.",
+      "startPlanning": "Start Planning",
+      "explore": "Explore"
+    },
+    "trendingDestinations": {
+      "title": "Trending Destinations",
+      "from": "from",
+      "explore": "Explore"
+    },
+    "popularRoutes": {
+      "title": "Popular Flight Routes",
+      "subtitle": "Best deals on trending destinations",
+      "viewAll": "View All Routes",
+      "from": "From",
+      "to": "To",
+      "startingFrom": "Starting from",
+      "perPerson": "per person",
+      "bookFlight": "Book Flight"
+    },
+    "travelBlogs": {
+      "title": "Travel Inspiration",
+      "subtitle": "Discover stories and tips from fellow travelers",
+      "viewAll": "View All Articles",
+      "by": "By",
+      "readMore": "Read More"
+    }
+  },
+  "tripDetail": {
+    "tabs": {
+      "view": "View",
+      "plan": "Plan",
+      "chat": "Chat",
+      "bookings": "Bookings",
+      "budget": "Budget",
+      "packing": "Packing",
+      "docs": "Docs"
+    },
+    "sidebar": {
+      "backToDashboard": "Back to Dashboard",
+      "share": "Share",
+      "export": "Export",
+      "delete": "Delete"
+    },
+    "updatingItinerary": "Updating itinerary...",
+    "reconnecting": "Reconnecting to server...",
+    "invalidTripId": "Invalid trip ID",
+    "itineraryNotFound": "Itinerary not found"
+  },
+  "planner": {
+    "steps": {
+      "destination": "Destination",
+      "datesTravelers": "Dates & Travelers",
+      "preferences": "Preferences",
+      "review": "Review"
+    },
+    "destination": {
+      "fromLabel": "From (Origin)",
+      "toLabel": "To (Destination)",
+      "fromPlaceholder": "Your starting location...",
+      "toPlaceholder": "Where you want to go...",
+      "popularDestinations": "Popular Destinations"
+    },
+    "datesTravelers": {
+      "suggestBestDates": "Suggest Best Travel Date",
+      "analyzingDates": "Analyzing best dates..."
+    },
+    "preferences": {
+      "budgetRange": "Budget Range",
+      "travelPace": "Travel Pace",
+      "interests": "Interests",
+      "additionalInstructions": "Additional Instructions (Optional)",
+      "instructionsPlaceholder": "Any special requests or preferences? e.g., 'I prefer vegetarian restaurants', 'Include kid-friendly activities', 'Avoid crowded places'...",
+      "pace": {
+        "relaxed": "Relaxed",
+        "relaxedDesc": "2-3 activities per day",
+        "moderate": "Moderate",
+        "moderateDesc": "4-5 activities per day",
+        "fast": "Fast-paced",
+        "fastDesc": "6+ activities per day"
+      },
+      "budget": {
+        "budget": "Budget",
+        "moderate": "Moderate",
+        "luxury": "Luxury"
+      },
+      "interestsList": {
+        "culture": "Culture & History",
+        "adventure": "Adventure",
+        "food": "Food & Dining",
+        "photography": "Photography",
+        "shopping": "Shopping",
+        "relaxation": "Relaxation"
+      }
+    },
+    "review": {
+      "destination": "Destination",
+      "dates": "Dates",
+      "travelers": "Travelers",
+      "budget": "Budget",
+      "pace": "Pace",
+      "interests": "Interests",
+      "from": "From",
+      "notSelected": "Not selected",
+      "notSet": "Not set",
+      "none": "None",
+      "person": "Person",
+      "people": "People",
+      "adult": "Adult",
+      "adults": "Adults",
+      "child": "Child",
+      "children": "Children",
+      "infant": "Infant",
+      "infants": "Infants",
+      "day": "day",
+      "days": "days",
+      "activities": "activities"
+    },
+    "navigation": {
+      "back": "Back",
+      "nextStep": "Next Step",
+      "createItinerary": "Create My Itinerary",
+      "creatingTrip": "Creating Your Trip...",
+      "stepOf": "Step {{current}} of {{total}}"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "myProfile": "My Profile",
+    "settings": "Settings",
+    "help": "Help & Support",
+    "languagePreferences": "Language Preferences",
+    "selectLanguage": "Select Your Language",
+    "languageDescription": "Changes will be applied immediately across all pages",
+    "accountDetails": "Account Details",
+    "accountDetailsDescription": "Your personal information and account status",
+    "authProvider": "Authentication Provider",
+    "pleaseSignIn": "Please sign in to view your profile",
+    "editProfile": "Edit Profile",
+    "memberSince": "Member Since",
+    "lastSignIn": "Last Sign In",
+    "stats": {
+      "totalTrips": "Total Trips",
+      "places": "Places",
+      "since": "Since"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Manage your account and preferences",
+      "myTrips": "My Trips",
+      "planTrip": "Plan Trip",
+      "upgrade": "Upgrade",
+      "language": "Language"
+    }
+  }
+}

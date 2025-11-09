@@ -1,0 +1,222 @@
+{
+  "header": {
+    "profile": {
+      "myProfile": "ನನ್ನ ಪ್ರೊಫೈಲ್",
+      "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+      "help": "ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ",
+      "signOut": "ಸೈನ್ ಔಟ್",
+      "signingOut": "ಸೈನ್ ಔಟ್ ಆಗುತ್ತಿದೆ..."
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} ಪ್ರಯಾಣಿಕ",
+    "travelers_plural": "{{count}} ಪ್ರಯಾಣಿಕರು",
+    "budget": "ಬಜೆಟ್: {{amount}}",
+    "days": "{{count}} ದಿನ",
+    "days_plural": "{{count}} ದಿನಗಳು"
+  },
+  "chat": {
+    "title": "AI ಸಹಾಯಕ",
+    "titleMobile": "AI ಚಾಟ್",
+    "placeholder": "ನಿಮ್ಮ ಪ್ರವಾಸವನ್ನು ಮಾರ್ಪಡಿಸಲು ನನ್ನನ್ನು ಕೇಳಿ...",
+    "placeholderMobile": "ನನ್ನನ್ನು ಕೇಳಿ...",
+    "empty": {
+      "title": "ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮವನ್ನು ಮಾರ್ಪಡಿಸಲು ನನ್ನನ್ನು ಕೇಳಿ!",
+      "suggestion": "ಪ್ರಯತ್ನಿಸಿ: \"ರಾತ್ರಿ ಊಟಕ್ಕಾಗಿ ರೆಸ್ಟೋರೆಂಟ್ ಸೇರಿಸಿ\""
+    },
+    "status": {
+      "live": "ಲೈವ್",
+      "offline": "ಆಫ್‌ಲೈನ್",
+      "beta": "ಬೀಟಾ"
+    },
+    "sending": "ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "weather": {
+    "title": "ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ",
+    "notConfigured": "ಹವಾಮಾನ API ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ",
+    "loading": "ಹವಾಮಾನ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "error": "ಹವಾಮಾನ ಡೇಟಾ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ",
+    "humidity": "ಆರ್ದ್ರತೆ",
+    "wind": "ಗಾಳಿ"
+  },
+  "tripList": {
+    "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "tryAgain": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+    "count": "{{count}} ಪ್ರವಾಸ",
+    "count_plural": "{{count}} ಪ್ರವಾಸಗಳು"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "ಒಟ್ಟು ದಿನಗಳು",
+      "days": "{{count}} ದಿನ",
+      "days_plural": "{{count}} ದಿನಗಳು",
+      "activities": "ಚಟುವಟಿಕೆಗಳು",
+      "budget": "ಬಜೆಟ್",
+      "weather": "ಹವಾಮಾನ",
+      "planned": "ಯೋಜಿತ",
+      "perPerson": "ಪ್ರತಿ ವ್ಯಕ್ತಿಗೆ",
+      "generating": "ರಚಿಸಲಾಗುತ್ತಿದೆ",
+      "unavailable": "ಲಭ್ಯವಿಲ್ಲ"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "ಪ್ರವಾಸ ಸಂಪಾದಿಸಿ",
+        "description": "ದಿನಾಂಕಗಳು ಅಥವಾ ಆದ್ಯತೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ"
+      },
+      "shareTrip": {
+        "title": "ಪ್ರವಾಸ ಹಂಚಿಕೊಳ್ಳಿ",
+        "description": "ಸ್ನೇಹಿತರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ"
+      },
+      "exportPdf": {
+        "title": "PDF ರಫ್ತು ಮಾಡಿ",
+        "description": "ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"
+      },
+      "addToCalendar": {
+        "title": "ಕ್ಯಾಲೆಂಡರ್‌ಗೆ ಸೇರಿಸಿ",
+        "description": "Google ನೊಂದಿಗೆ ಸಿಂಕ್ ಮಾಡಿ"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "ದಿನದಿಂದ ದಿನಕ್ಕೆ",
+    "mapView": "ನಕ್ಷೆ ವೀಕ್ಷಣೆ",
+    "yourItinerary": "ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮ",
+    "summary": "{{days}} ದಿನಗಳು • {{activities}} ಚಟುವಟಿಕೆಗಳು",
+    "expandAll": "ಎಲ್ಲವನ್ನೂ ವಿಸ್ತರಿಸಿ",
+    "collapseAll": "ಎಲ್ಲವನ್ನೂ ಸಂಕುಚಿಸಿ",
+    "addDay": "ದಿನ ಸೇರಿಸಿ",
+    "empty": {
+      "title": "ಇನ್ನೂ ಯಾವುದೇ ದಿನಗಳನ್ನು ಯೋಜಿಸಲಾಗಿಲ್ಲ",
+      "description": "ನಿಮ್ಮ ಮೊದಲ ದಿನವನ್ನು ಸೇರಿಸುವ ಮೂಲಕ ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮವನ್ನು ನಿರ್ಮಿಸಲು ಪ್ರಾರಂಭಿಸಿ",
+      "action": "ಮೊದಲ ದಿನ ಸೇರಿಸಿ"
+    }
+  },
+  "dayCard": {
+    "day": "ದಿನ {{number}}",
+    "today": "ಇಂದು",
+    "planning": "ಯೋಜನೆ ಮಾಡಲಾಗುತ್ತಿದೆ...",
+    "generatingActivities": "ಚಟುವಟಿಕೆಗಳನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+    "activitiesCount": "{{count}} ಚಟುವಟಿಕೆಗಳು",
+    "unsavedChanges": "ಉಳಿಸದ ಬದಲಾವಣೆಗಳು",
+    "discard": "ತ್ಯಜಿಸಿ",
+    "saveChanges": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",
+    "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ...",
+    "booked": "ಬುಕ್ ಮಾಡಲಾಗಿದೆ",
+    "bookNow": "ಈಗ ಬುಕ್ ಮಾಡಿ",
+    "viewOnMap": "ನಕ್ಷೆಯಲ್ಲಿ ನೋಡಿ",
+    "photos": "{{count}} ಫೋಟೋಗಳು",
+    "reviews": "{{count}} ವಿಮರ್ಶೆಗಳು",
+    "summary": {
+      "activities": "ಚಟುವಟಿಕೆಗಳು",
+      "budget": "ಬಜೆಟ್",
+      "duration": "ಅವಧಿ",
+      "status": "ಸ್ಥಿತಿ"
+    },
+    "generating": {
+      "message": "AI ಏಜೆಂಟ್‌ಗಳು ಈ ದಿನಕ್ಕಾಗಿ ಚಟುವಟಿಕೆಗಳನ್ನು ರಚಿಸುತ್ತಿದ್ದಾರೆ...",
+      "enrichment": "ಚಟುವಟಿಕೆಗಳನ್ನು ಫೋಟೋಗಳು ಮತ್ತು ವಿವರಗಳೊಂದಿಗೆ ಸಮೃದ್ಧಗೊಳಿಸಲಾಗುವುದು"
+    },
+    "enrichment": {
+      "enriching": "ಸಮೃದ್ಧಗೊಳಿಸಲಾಗುತ್ತಿದೆ...",
+      "enriched": "ಸಮೃದ್ಧಗೊಳಿಸಲಾಗಿದೆ",
+      "limitedData": "ಸೀಮಿತ ಡೇಟಾ",
+      "pending": "ಬಾಕಿ ಉಳಿದಿದೆ"
+    }
+  },
+  "bottomNav": {
+    "home": "ಮುಖಪುಟ",
+    "search": "ಹುಡುಕಿ",
+    "plan": "ಯೋಜನೆ",
+    "trips": "ಪ್ರವಾಸಗಳು",
+    "profile": "ಪ್ರೊಫೈಲ್"
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "ಬಳಕೆದಾರ",
+    "signingOut": "ಸೈನ್ ಔಟ್ ಆಗುತ್ತಿದೆ...",
+    "signedOutSuccess": "ಯಶಸ್ವಿಯಾಗಿ ಸೈನ್ ಔಟ್ ಆಗಿದೆ",
+    "signedOutDescription": "ನೀವು ನಿಮ್ಮ ಖಾತೆಯಿಂದ ಲಾಗ್ ಔಟ್ ಆಗಿದ್ದೀರಿ",
+    "logoutFailed": "ಲಾಗೌಟ್ ವಿಫಲವಾಗಿದೆ",
+    "tryAgain": "ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"
+  },
+  "chatTab": {
+    "title": "AI ಪ್ರಯಾಣ ಸಹಾಯಕ",
+    "subtitle": "ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮವನ್ನು ಮಾರ್ಪಡಿಸಲು AI ನೊಂದಿಗೆ ಚಾಟ್ ಮಾಡಿ",
+    "status": {
+      "live": "ಲೈವ್"
+    },
+    "loadMore": "{{count}} ಹೆಚ್ಚು ಲೋಡ್ ಮಾಡಿ",
+    "showing": "{{total}} ರಲ್ಲಿ {{current}} ಸಂದೇಶಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "empty": {
+      "title": "ಸಂಭಾಷಣೆ ಪ್ರಾರಂಭಿಸಿ",
+      "subtitle": "ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮವನ್ನು ಮಾರ್ಪಡಿಸಲು ನನ್ನನ್ನು ಕೇಳಿ!",
+      "examples": "ಈ ಉದಾಹರಣೆಗಳನ್ನು ಪ್ರಯತ್ನಿಸಿ:"
+    },
+    "input": {
+      "placeholder": "ನಿಮ್ಮ ಪ್ರವಾಸದ ಬಗ್ಗೆ ನನ್ನನ್ನು ಕೇಳಿ...",
+      "send": "ಕಳುಹಿಸಿ",
+      "sending": "ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ",
+      "hint": "ಕಳುಹಿಸಲು Enter ಒತ್ತಿರಿ, ಹೊಸ ಸಾಲಿಗಾಗಿ Shift+Enter"
+    }
+  },
+  "bookingsTab": {
+    "title": "ಬುಕಿಂಗ್‌ಗಳು",
+    "subtitle": "ನಿಮ್ಮ ಎಲ್ಲಾ ಪ್ರವಾಸ ಬುಕಿಂಗ್‌ಗಳನ್ನು ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ನಿರ್ವಹಿಸಿ",
+    "stats": {
+      "totalItems": "ಒಟ್ಟು ಐಟಂಗಳು",
+      "booked": "ಬುಕ್ ಮಾಡಲಾಗಿದೆ",
+      "available": "ಲಭ್ಯವಿದೆ"
+    },
+    "empty": {
+      "title": "ಬುಕ್ ಮಾಡಬಹುದಾದ ಐಟಂಗಳಿಲ್ಲ",
+      "description": "ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮದಲ್ಲಿ ಇನ್ನೂ ಯಾವುದೇ ಬುಕ್ ಮಾಡಬಹುದಾದ ಐಟಂಗಳಿಲ್ಲ"
+    }
+  },
+  "budgetTab": {
+    "loading": "ಬಜೆಟ್ ಡೇಟಾ ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "cards": {
+      "yourBudget": {
+        "title": "ನಿಮ್ಮ ಬಜೆಟ್",
+        "tier": "{{tier}} ಹಂತ"
+      },
+      "estimatedCost": {
+        "title": "ಅಂದಾಜು ವೆಚ್ಚ",
+        "overBudget": "ಯೋಜಿತ ಬಜೆಟ್‌ಗಿಂತ ಹೆಚ್ಚು",
+        "withinBudget": "ಬಜೆಟ್‌ನೊಳಗೆ"
+      },
+      "booked": {
+        "title": "ಬುಕ್ ಮಾಡಲಾಗಿದೆ",
+        "percentage": "ಬಜೆಟ್‌ನ {{percentage}}%"
+      },
+      "remaining": {
+        "title": "ಉಳಿದಿದೆ",
+        "overBudget": "ಬಜೆಟ್‌ಗಿಂತ ಹೆಚ್ಚು",
+        "available": "ಖರ್ಚು ಮಾಡಲು ಲಭ್ಯವಿದೆ"
+      }
+    },
+    "alert": {
+      "title": "ಬಜೆಟ್ ಎಚ್ಚರಿಕೆ",
+      "message": "ನೀವು ನಿಮ್ಮ ಬಜೆಟ್‌ನ {{percentage}}% ಖರ್ಚು ಮಾಡಿದ್ದೀರಿ। ನಿಮ್ಮ ಖರ್ಚನ್ನು ಸರಿಹೊಂದಿಸುವುದನ್ನು ಪರಿಗಣಿಸಿ।"
+    },
+    "categoryBreakdown": {
+      "title": "ವರ್ಗದ ಪ್ರಕಾರ ಖರ್ಚು"
+    },
+    "dailySpending": {
+      "title": "ದೈನಂದಿನ ಖರ್ಚು",
+      "chartLabel": "ದೈನಂದಿನ ವೆಚ್ಚ",
+      "average": "ಸರಾಸರಿ ದೈನಂದಿನ ವೆಚ್ಚ: ${{amount}}"
+    }
+  },
+  "tripSidebar": {
+    "linkCopied": "ಲಿಂಕ್ ನಕಲಿಸಲಾಗಿದೆ!",
+    "linkCopiedDescription": "ಹಂಚಿಕೊಳ್ಳಬಹುದಾದ ಲಿಂಕ್ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ",
+    "shareFailed": "ಹಂಚಿಕೆ ವಿಫಲವಾಗಿದೆ",
+    "shareFailedDescription": "ಹಂಚಿಕೊಳ್ಳಬಹುದಾದ ಲಿಂಕ್ ರಚಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+    "exportSuccess": "ರಫ್ತು ಯಶಸ್ವಿಯಾಗಿದೆ",
+    "exportSuccessDescription": "ನಿಮ್ಮ ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮವನ್ನು ಮುದ್ರಿಸಲು ಅಥವಾ PDF ಆಗಿ ಉಳಿಸಲು ಸಿದ್ಧವಾಗಿದೆ",
+    "exportFailed": "ರಫ್ತು ವಿಫಲವಾಗಿದೆ",
+    "exportFailedDescription": "PDF ರಫ್ತು ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+    "itineraryNotLoaded": "ಪ್ರವಾಸ ಕಾರ್ಯಕ್ರಮ ಲೋಡ್ ಆಗಿಲ್ಲ",
+    "deleteConfirm": "ನೀವು ಈ ಪ್ರವಾಸವನ್ನು ಅಳಿಸಲು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ? ಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ."
+  }
+}

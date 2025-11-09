@@ -1,0 +1,227 @@
+{
+  "header": {
+    "profile": {
+      "account": "खाता",
+      "myProfile": "मेरी प्रोफ़ाइल",
+      "settings": "सेटिंग्स",
+      "help": "सहायता और समर्थन",
+      "signOut": "साइन आउट",
+      "signingOut": "साइन आउट हो रहा है...",
+      "signedOutSuccess": "सफलतापूर्वक साइन आउट हो गया",
+      "signedOutDescription": "आप अपने खाते से लॉग आउट हो गए हैं",
+      "logoutFailed": "लॉगआउट विफल रहा",
+      "tryAgain": "कृपया पुनः प्रयास करें"
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} यात्री",
+    "travelers_plural": "{{count}} यात्री",
+    "budget": "बजट: {{amount}}",
+    "days": "{{count}} दिन",
+    "days_plural": "{{count}} दिन"
+  },
+  "chat": {
+    "title": "AI सहायक",
+    "titleMobile": "AI चैट",
+    "placeholder": "मुझसे अपनी यात्रा में बदलाव करने के लिए कहें...",
+    "placeholderMobile": "मुझसे पूछें...",
+    "empty": {
+      "title": "मुझसे अपना यात्रा कार्यक्रम बदलने के लिए कहें!",
+      "suggestion": "प्रयास करें: \"रात के खाने के लिए एक रेस्तरां जोड़ें\""
+    },
+    "status": {
+      "live": "लाइव",
+      "offline": "ऑफ़लाइन",
+      "beta": "बीटा"
+    },
+    "sending": "भेजा जा रहा है..."
+  },
+  "weather": {
+    "title": "मौसम पूर्वानुमान",
+    "notConfigured": "मौसम API कॉन्फ़िगर नहीं है",
+    "loading": "मौसम लोड हो रहा है...",
+    "error": "मौसम डेटा लोड करने में असमर्थ",
+    "humidity": "आर्द्रता",
+    "wind": "हवा"
+  },
+  "tripList": {
+    "loading": "लोड हो रहा है...",
+    "tryAgain": "पुनः प्रयास करें",
+    "count": "{{count}} यात्रा",
+    "count_plural": "{{count}} यात्राएं"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "कुल दिन",
+      "days": "{{count}} दिन",
+      "days_plural": "{{count}} दिन",
+      "activities": "गतिविधियां",
+      "budget": "बजट",
+      "weather": "मौसम",
+      "planned": "नियोजित",
+      "perPerson": "प्रति व्यक्ति",
+      "generating": "जनरेट हो रहा है",
+      "unavailable": "अनुपलब्ध"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "यात्रा संपादित करें",
+        "description": "तिथियां या प्राथमिकताएं संशोधित करें"
+      },
+      "shareTrip": {
+        "title": "यात्रा साझा करें",
+        "description": "दोस्तों के साथ साझा करें"
+      },
+      "exportPdf": {
+        "title": "PDF निर्यात करें",
+        "description": "यात्रा कार्यक्रम डाउनलोड करें"
+      },
+      "addToCalendar": {
+        "title": "कैलेंडर में जोड़ें",
+        "description": "Google के साथ सिंक करें"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "दिन-प्रतिदिन",
+    "mapView": "मानचित्र दृश्य",
+    "yourItinerary": "आपका यात्रा कार्यक्रम",
+    "summary": "{{days}} दिन • {{activities}} गतिविधियां",
+    "expandAll": "सभी विस्तृत करें",
+    "collapseAll": "सभी संक्षिप्त करें",
+    "addDay": "दिन जोड़ें",
+    "empty": {
+      "title": "अभी तक कोई दिन नियोजित नहीं",
+      "description": "अपना पहला दिन जोड़कर अपना यात्रा कार्यक्रम बनाना शुरू करें",
+      "action": "पहला दिन जोड़ें"
+    }
+  },
+  "dayCard": {
+    "day": "दिन {{number}}",
+    "today": "आज",
+    "planning": "योजना बना रहे हैं...",
+    "generatingActivities": "गतिविधियां बना रहे हैं...",
+    "activitiesCount": "{{count}} गतिविधियां",
+    "unsavedChanges": "असहेजे परिवर्तन",
+    "discard": "रद्द करें",
+    "saveChanges": "परिवर्तन सहेजें",
+    "saving": "सहेज रहे हैं...",
+    "booked": "बुक किया गया",
+    "bookNow": "अभी बुक करें",
+    "viewOnMap": "मानचित्र पर देखें",
+    "photos": "{{count}} फोटो",
+    "reviews": "{{count}} समीक्षाएं",
+    "summary": {
+      "activities": "गतिविधियां",
+      "budget": "बजट",
+      "duration": "अवधि",
+      "status": "स्थिति"
+    },
+    "generating": {
+      "message": "AI एजेंट इस दिन के लिए गतिविधियां बना रहे हैं...",
+      "enrichment": "गतिविधियों को फोटो और विवरण के साथ समृद्ध किया जाएगा"
+    },
+    "enrichment": {
+      "enriching": "समृद्ध कर रहे हैं...",
+      "enriched": "समृद्ध",
+      "limitedData": "सीमित डेटा",
+      "pending": "लंबित"
+    }
+  },
+  "chatTab": {
+    "title": "AI यात्रा सहायक",
+    "subtitle": "अपना यात्रा कार्यक्रम संशोधित करने के लिए AI से चैट करें",
+    "status": {
+      "live": "लाइव"
+    },
+    "loadMore": "{{count}} और लोड करें",
+    "showing": "{{total}} में से {{current}} संदेश दिखा रहे हैं",
+    "empty": {
+      "title": "बातचीत शुरू करें",
+      "subtitle": "मुझसे अपना यात्रा कार्यक्रम संशोधित करने के लिए कहें!",
+      "examples": "ये उदाहरण आज़माएं:"
+    },
+    "input": {
+      "placeholder": "मुझसे अपनी यात्रा के बारे में पूछें...",
+      "send": "भेजें",
+      "sending": "भेजा जा रहा है",
+      "hint": "भेजने के लिए Enter दबाएं, नई लाइन के लिए Shift+Enter"
+    }
+  },
+  "bookingsTab": {
+    "title": "बुकिंग",
+    "subtitle": "अपनी सभी यात्रा बुकिंग एक जगह प्रबंधित करें",
+    "stats": {
+      "totalItems": "कुल आइटम",
+      "booked": "बुक किया गया",
+      "available": "उपलब्ध"
+    },
+    "empty": {
+      "title": "कोई बुक करने योग्य आइटम नहीं",
+      "description": "आपके यात्रा कार्यक्रम में अभी तक कोई बुक करने योग्य आइटम नहीं है"
+    }
+  },
+  "budgetTab": {
+    "loading": "बजट डेटा लोड हो रहा है...",
+    "cards": {
+      "yourBudget": {
+        "title": "आपका बजट",
+        "tier": "{{tier}} स्तर"
+      },
+      "estimatedCost": {
+        "title": "अनुमानित लागत",
+        "overBudget": "नियोजित बजट से अधिक",
+        "withinBudget": "बजट के भीतर"
+      },
+      "booked": {
+        "title": "बुक किया गया",
+        "percentage": "बजट का {{percentage}}%"
+      },
+      "remaining": {
+        "title": "शेष",
+        "overBudget": "बजट से अधिक",
+        "available": "खर्च करने के लिए उपलब्ध"
+      }
+    },
+    "alert": {
+      "title": "बजट अलर्ट",
+      "message": "आपने अपने बजट का {{percentage}}% खर्च कर दिया है। अपने खर्च को समायोजित करने पर विचार करें।"
+    },
+    "categoryBreakdown": {
+      "title": "श्रेणी के अनुसार खर्च"
+    },
+    "dailySpending": {
+      "title": "दैनिक खर्च",
+      "chartLabel": "दैनिक लागत",
+      "average": "औसत दैनिक लागत: ${{amount}}"
+    }
+  },
+  "bottomNav": {
+    "home": "होम",
+    "search": "खोजें",
+    "plan": "योजना",
+    "trips": "यात्राएं",
+    "profile": "प्रोफ़ाइल"
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "उपयोगकर्ता",
+    "signingOut": "साइन आउट हो रहा है...",
+    "signedOutSuccess": "सफलतापूर्वक साइन आउट हो गया",
+    "signedOutDescription": "आप अपने खाते से लॉग आउट हो गए हैं",
+    "logoutFailed": "लॉगआउट विफल रहा",
+    "tryAgain": "कृपया पुनः प्रयास करें"
+  },
+  "tripSidebar": {
+    "linkCopied": "लिंक कॉपी हो गया!",
+    "linkCopiedDescription": "साझा करने योग्य लिंक क्लिपबोर्ड पर कॉपी हो गया",
+    "shareFailed": "साझा करना विफल रहा",
+    "shareFailedDescription": "साझा करने योग्य लिंक उत्पन्न नहीं हो सका",
+    "exportSuccess": "निर्यात सफल रहा",
+    "exportSuccessDescription": "आपका यात्रा कार्यक्रम प्रिंट या PDF के रूप में सहेजने के लिए तैयार है",
+    "exportFailed": "निर्यात विफल रहा",
+    "exportFailedDescription": "PDF निर्यात नहीं हो सका",
+    "itineraryNotLoaded": "यात्रा कार्यक्रम लोड नहीं हुआ",
+    "deleteConfirm": "क्या आप वाकई इस यात्रा को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।"
+  }
+}

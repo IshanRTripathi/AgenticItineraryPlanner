@@ -1,0 +1,64 @@
+{
+  "actions": {
+    "save": "সংরক্ষণ করুন",
+    "cancel": "বাতিল করুন",
+    "delete": "মুছুন",
+    "edit": "সম্পাদনা করুন",
+    "back": "পিছনে",
+    "next": "পরবর্তী",
+    "submit": "জমা দিন",
+    "close": "বন্ধ করুন",
+    "confirm": "নিশ্চিত করুন",
+    "tryAgain": "আবার চেষ্টা করুন",
+    "refresh": "রিফ্রেশ করুন",
+    "loading": "লোড হচ্ছে...",
+    "signIn": "সাইন ইন",
+    "signOut": "সাইন আউট",
+    "signUp": "সাইন আপ",
+    "view": "বিস্তারিত দেখুন"
+  },
+  "status": {
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফলতা",
+    "pending": "মুলতুবি",
+    "completed": "সম্পন্ন",
+    "upcoming": "আসন্ন",
+    "ongoing": "চলমান"
+  },
+  "navigation": {
+    "home": "হোম",
+    "search": "অনুসন্ধান",
+    "planTrip": "ভ্রমণ পরিকল্পনা করুন",
+    "myTrips": "আমার ভ্রমণ",
+    "profile": "প্রোফাইল",
+    "settings": "সেটিংস",
+    "help": "সাহায্য এবং সহায়তা"
+  },
+  "time": {
+    "today": "আজ",
+    "yesterday": "গতকাল",
+    "tomorrow": "আগামীকাল",
+    "now": "এখন",
+    "justNow": "এইমাত্র",
+    "minutesAgo": "{{count}} মিনিট আগে",
+    "minutesAgo_plural": "{{count}} মিনিট আগে",
+    "hoursAgo": "{{count}} ঘন্টা আগে",
+    "hoursAgo_plural": "{{count}} ঘন্টা আগে",
+    "daysAgo": "{{count}} দিন আগে",
+    "daysAgo_plural": "{{count}} দিন আগে"
+  },
+  "common": {
+    "or": "অথবা",
+    "and": "এবং",
+    "of": "এর",
+    "to": "কে",
+    "from": "থেকে",
+    "in": "মধ্যে",
+    "at": "এ",
+    "on": "উপর",
+    "by": "দ্বারা",
+    "with": "সাথে",
+    "for": "জন্য"
+  }
+}

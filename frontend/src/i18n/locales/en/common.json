@@ -1,0 +1,64 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "tryAgain": "Try Again",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "view": "View Details"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "pending": "Pending",
+    "completed": "Completed",
+    "upcoming": "Upcoming",
+    "ongoing": "Ongoing"
+  },
+  "navigation": {
+    "home": "Home",
+    "search": "Search",
+    "planTrip": "Plan Trip",
+    "myTrips": "My Trips",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help & Support"
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "now": "Now",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} minute ago",
+    "minutesAgo_plural": "{{count}} minutes ago",
+    "hoursAgo": "{{count}} hour ago",
+    "hoursAgo_plural": "{{count}} hours ago",
+    "daysAgo": "{{count}} day ago",
+    "daysAgo_plural": "{{count}} days ago"
+  },
+  "common": {
+    "or": "or",
+    "and": "and",
+    "of": "of",
+    "to": "to",
+    "from": "from",
+    "in": "in",
+    "at": "at",
+    "on": "on",
+    "by": "by",
+    "with": "with",
+    "for": "for"
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "header": {
+    "profile": {
+      "account": "অ্যাকাউন্ট",
+      "myProfile": "আমার প্রোফাইল",
+      "settings": "সেটিংস",
+      "help": "সাহায্য এবং সহায়তা",
+      "signOut": "সাইন আউট",
+      "signingOut": "সাইন আউট হচ্ছে...",
+      "signedOutSuccess": "সফলভাবে সাইন আউট হয়েছে",
+      "signedOutDescription": "আপনি আপনার অ্যাকাউন্ট থেকে লগ আউট হয়েছেন",
+      "logoutFailed": "লগআউট ব্যর্থ হয়েছে",
+      "tryAgain": "অনুগ্রহ করে আবার চেষ্টা করুন"
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} জন ভ্রমণকারী",
+    "travelers_plural": "{{count}} জন ভ্রমণকারী",
+    "budget": "বাজেট: {{amount}}",
+    "days": "{{count}} দিন",
+    "days_plural": "{{count}} দিন"
+  },
+  "chat": {
+    "title": "AI সহায়ক",
+    "titleMobile": "AI চ্যাট",
+    "placeholder": "আপনার ভ্রমণ পরিবর্তন করতে আমাকে বলুন...",
+    "placeholderMobile": "আমাকে জিজ্ঞাসা করুন...",
+    "empty": {
+      "title": "আপনার ভ্রমণসূচী পরিবর্তন করতে আমাকে বলুন!",
+      "suggestion": "চেষ্টা করুন: \"রাতের খাবারের জন্য একটি রেস্তোরাঁ যোগ করুন\""
+    },
+    "status": {
+      "live": "লাইভ",
+      "offline": "অফলাইন",
+      "beta": "বিটা"
+    },
+    "sending": "পাঠানো হচ্ছে..."
+  },
+  "weather": {
+    "title": "আবহাওয়ার পূর্বাভাস",
+    "notConfigured": "আবহাওয়া API কনফিগার করা হয়নি",
+    "loading": "আবহাওয়া লোড হচ্ছে...",
+    "error": "আবহাওয়া ডেটা লোড করতে অক্ষম",
+    "humidity": "আর্দ্রতা",
+    "wind": "বাতাস"
+  },
+  "tripList": {
+    "loading": "লোড হচ্ছে...",
+    "tryAgain": "আবার চেষ্টা করুন",
+    "count": "{{count}}টি ভ্রমণ",
+    "count_plural": "{{count}}টি ভ্রমণ"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "মোট দিন",
+      "days": "{{count}} দিন",
+      "days_plural": "{{count}} দিন",
+      "activities": "কার্যক্রম",
+      "budget": "বাজেট",
+      "weather": "আবহাওয়া",
+      "planned": "পরিকল্পিত",
+      "perPerson": "প্রতি ব্যক্তি",
+      "generating": "তৈরি হচ্ছে",
+      "unavailable": "উপলব্ধ নয়"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "ভ্রমণ সম্পাদনা করুন",
+        "description": "তারিখ বা পছন্দ পরিবর্তন করুন"
+      },
+      "shareTrip": {
+        "title": "ভ্রমণ শেয়ার করুন",
+        "description": "বন্ধুদের সাথে শেয়ার করুন"
+      },
+      "exportPdf": {
+        "title": "PDF রপ্তানি করুন",
+        "description": "ভ্রমণসূচী ডাউনলোড করুন"
+      },
+      "addToCalendar": {
+        "title": "ক্যালেন্ডারে যোগ করুন",
+        "description": "Google এর সাথে সিঙ্ক করুন"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "দিন অনুযায়ী",
+    "mapView": "ম্যাপ ভিউ",
+    "yourItinerary": "আপনার ভ্রমণসূচী",
+    "summary": "{{days}} দিন • {{activities}} কার্যক্রম",
+    "expandAll": "সব প্রসারিত করুন",
+    "collapseAll": "সব সংকুচিত করুন",
+    "addDay": "দিন যোগ করুন",
+    "empty": {
+      "title": "এখনও কোনো দিন পরিকল্পিত নয়",
+      "description": "আপনার প্রথম দিন যোগ করে আপনার ভ্রমণসূচী তৈরি করা শুরু করুন",
+      "action": "প্রথম দিন যোগ করুন"
+    }
+  },
+  "dayCard": {
+    "day": "দিন {{number}}",
+    "today": "আজ",
+    "planning": "পরিকল্পনা করা হচ্ছে...",
+    "generatingActivities": "কার্যক্রম তৈরি করা হচ্ছে...",
+    "activitiesCount": "{{count}} কার্যক্রম",
+    "unsavedChanges": "অসংরক্ষিত পরিবর্তন",
+    "discard": "বাতিল করুন",
+    "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
+    "saving": "সংরক্ষণ করা হচ্ছে...",
+    "booked": "বুক করা হয়েছে",
+    "bookNow": "এখনই বুক করুন",
+    "viewOnMap": "ম্যাপে দেখুন",
+    "photos": "{{count}} ফটো",
+    "reviews": "{{count}} পর্যালোচনা",
+    "summary": {
+      "activities": "কার্যক্রম",
+      "budget": "বাজেট",
+      "duration": "সময়কাল",
+      "status": "অবস্থা"
+    },
+    "generating": {
+      "message": "AI এজেন্টরা এই দিনের জন্য কার্যক্রম তৈরি করছে...",
+      "enrichment": "কার্যক্রমগুলি ফটো এবং বিবরণ দিয়ে সমৃদ্ধ করা হবে"
+    },
+    "enrichment": {
+      "enriching": "সমৃদ্ধ করা হচ্ছে...",
+      "enriched": "সমৃদ্ধ করা হয়েছে",
+      "limitedData": "সীমিত ডেটা",
+      "pending": "মুলতুবি"
+    }
+  },
+  "bottomNav": {
+    "home": "হোম",
+    "search": "অনুসন্ধান",
+    "plan": "পরিকল্পনা",
+    "trips": "ভ্রমণ",
+    "profile": "প্রোফাইল"
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "ব্যবহারকারী",
+    "signingOut": "সাইন আউট হচ্ছে...",
+    "signedOutSuccess": "সফলভাবে সাইন আউট হয়েছে",
+    "signedOutDescription": "আপনি আপনার অ্যাকাউন্ট থেকে লগ আউট হয়েছেন",
+    "logoutFailed": "লগআউট ব্যর্থ হয়েছে",
+    "tryAgain": "অনুগ্রহ করে আবার চেষ্টা করুন"
+  },
+  "chatTab": {
+    "title": "AI ভ্রমণ সহায়ক",
+    "subtitle": "আপনার ভ্রমণসূচী পরিবর্তন করতে AI এর সাথে চ্যাট করুন",
+    "status": {
+      "live": "লাইভ"
+    },
+    "loadMore": "{{count}} আরও লোড করুন",
+    "showing": "{{total}} এর মধ্যে {{current}} বার্তা দেখানো হচ্ছে",
+    "empty": {
+      "title": "কথোপকথন শুরু করুন",
+      "subtitle": "আপনার ভ্রমণসূচী পরিবর্তন করতে আমাকে বলুন!",
+      "examples": "এই উদাহরণগুলি চেষ্টা করুন:"
+    },
+    "input": {
+      "placeholder": "আপনার ভ্রমণ সম্পর্কে আমাকে জিজ্ঞাসা করুন...",
+      "send": "পাঠান",
+      "sending": "পাঠানো হচ্ছে",
+      "hint": "পাঠাতে Enter চাপুন, নতুন লাইনের জন্য Shift+Enter"
+    }
+  },
+  "bookingsTab": {
+    "title": "বুকিং",
+    "subtitle": "আপনার সমস্ত ভ্রমণ বুকিং এক জায়গায় পরিচালনা করুন",
+    "stats": {
+      "totalItems": "মোট আইটেম",
+      "booked": "বুক করা হয়েছে",
+      "available": "উপলব্ধ"
+    },
+    "empty": {
+      "title": "কোনো বুক করার যোগ্য আইটেম নেই",
+      "description": "আপনার ভ্রমণসূচীতে এখনও কোনো বুক করার যোগ্য আইটেম নেই"
+    }
+  },
+  "budgetTab": {
+    "loading": "বাজেট ডেটা লোড হচ্ছে...",
+    "cards": {
+      "yourBudget": {
+        "title": "আপনার বাজেট",
+        "tier": "{{tier}} স্তর"
+      },
+      "estimatedCost": {
+        "title": "আনুমানিক খরচ",
+        "overBudget": "পরিকল্পিত বাজেটের বেশি",
+        "withinBudget": "বাজেটের মধ্যে"
+      },
+      "booked": {
+        "title": "বুক করা হয়েছে",
+        "percentage": "বাজেটের {{percentage}}%"
+      },
+      "remaining": {
+        "title": "অবশিষ্ট",
+        "overBudget": "বাজেটের বেশি",
+        "available": "খরচ করার জন্য উপলব্ধ"
+      }
+    },
+    "alert": {
+      "title": "বাজেট সতর্কতা",
+      "message": "আপনি আপনার বাজেটের {{percentage}}% খরচ করেছেন। আপনার খরচ সামঞ্জস্য করার কথা বিবেচনা করুন।"
+    },
+    "categoryBreakdown": {
+      "title": "বিভাগ অনুযায়ী খরচ"
+    },
+    "dailySpending": {
+      "title": "দৈনিক খরচ",
+      "chartLabel": "দৈনিক খরচ",
+      "average": "গড় দৈনিক খরচ: ${{amount}}"
+    }
+  },
+  "tripSidebar": {
+    "linkCopied": "লিঙ্ক কপি হয়েছে!",
+    "linkCopiedDescription": "শেয়ারযোগ্য লিঙ্ক ক্লিপবোর্ডে কপি হয়েছে",
+    "shareFailed": "শেয়ার ব্যর্থ হয়েছে",
+    "shareFailedDescription": "শেয়ারযোগ্য লিঙ্ক তৈরি করা যায়নি",
+    "exportSuccess": "রপ্তানি সফল হয়েছে",
+    "exportSuccessDescription": "আপনার ভ্রমণসূচী প্রিন্ট বা PDF হিসাবে সংরক্ষণের জন্য প্রস্তুত",
+    "exportFailed": "রপ্তানি ব্যর্থ হয়েছে",
+    "exportFailedDescription": "PDF রপ্তানি করা যায়নি",
+    "itineraryNotLoaded": "ভ্রমণসূচী লোড হয়নি",
+    "deleteConfirm": "আপনি কি নিশ্চিত যে আপনি এই ভ্রমণটি মুছতে চান? এই ক্রিয়াটি পূর্বাবস্থায় ফেরানো যাবে না।"
+  }
+}

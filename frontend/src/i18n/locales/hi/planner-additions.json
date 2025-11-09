@@ -1,0 +1,79 @@
+{
+  "planner": {
+    "steps": {
+      "destination": "गंतव्य",
+      "datesTravelers": "तिथियां और यात्री",
+      "preferences": "प्राथमिकताएं",
+      "review": "समीक्षा"
+    },
+    "destination": {
+      "fromLabel": "से (प्रारंभ)",
+      "toLabel": "तक (गंतव्य)",
+      "fromPlaceholder": "आपका प्रारंभिक स्थान...",
+      "toPlaceholder": "आप कहां जाना चाहते हैं...",
+      "popularDestinations": "लोकप्रिय गंतव्य"
+    },
+    "datesTravelers": {
+      "suggestBestDates": "सर्वोत्तम यात्रा तिथि सुझाएं",
+      "analyzingDates": "सर्वोत्तम तिथियों का विश्लेषण..."
+    },
+    "preferences": {
+      "budgetRange": "बजट सीमा",
+      "travelPace": "यात्रा गति",
+      "interests": "रुचियां",
+      "additionalInstructions": "अतिरिक्त निर्देश (वैकल्पिक)",
+      "instructionsPlaceholder": "कोई विशेष अनुरोध या प्राथमिकताएं? जैसे, 'मैं शाकाहारी रेस्तरां पसंद करता हूं', 'बच्चों के अनुकूल गतिविधियां शामिल करें', 'भीड़भाड़ वाली जगहों से बचें'...",
+      "pace": {
+        "relaxed": "आरामदायक",
+        "relaxedDesc": "प्रति दिन 2-3 गतिविधियां",
+        "moderate": "मध्यम",
+        "moderateDesc": "प्रति दिन 4-5 गतिविधियां",
+        "fast": "तेज़-गति",
+        "fastDesc": "प्रति दिन 6+ गतिविधियां"
+      },
+      "budget": {
+        "budget": "बजट",
+        "moderate": "मध्यम",
+        "luxury": "लक्जरी"
+      },
+      "interestsList": {
+        "culture": "संस्कृति और इतिहास",
+        "adventure": "साहसिक",
+        "food": "भोजन और भोजन",
+        "photography": "फोटोग्राफी",
+        "shopping": "खरीदारी",
+        "relaxation": "विश्राम"
+      }
+    },
+    "review": {
+      "destination": "गंतव्य",
+      "dates": "तिथियां",
+      "travelers": "यात्री",
+      "budget": "बजट",
+      "pace": "गति",
+      "interests": "रुचियां",
+      "from": "से",
+      "notSelected": "चयनित नहीं",
+      "notSet": "सेट नहीं",
+      "none": "कोई नहीं",
+      "person": "व्यक्ति",
+      "people": "लोग",
+      "adult": "वयस्क",
+      "adults": "वयस्क",
+      "child": "बच्चा",
+      "children": "बच्चे",
+      "infant": "शिशु",
+      "infants": "शिशु",
+      "day": "दिन",
+      "days": "दिन",
+      "activities": "गतिविधियां"
+    },
+    "navigation": {
+      "back": "वापस",
+      "nextStep": "अगला कदम",
+      "createItinerary": "मेरा यात्रा कार्यक्रम बनाएं",
+      "creatingTrip": "आपकी यात्रा बनाई जा रही है...",
+      "stepOf": "चरण {{current}} का {{total}}"
+    }
+  }
+}

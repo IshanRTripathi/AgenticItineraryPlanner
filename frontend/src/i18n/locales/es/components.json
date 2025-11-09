@@ -1,0 +1,227 @@
+{
+  "header": {
+    "profile": {
+      "account": "Cuenta",
+      "myProfile": "Mi perfil",
+      "settings": "Configuración",
+      "help": "Ayuda y soporte",
+      "signOut": "Cerrar sesión",
+      "signingOut": "Cerrando sesión...",
+      "signedOutSuccess": "Sesión cerrada exitosamente",
+      "signedOutDescription": "Has cerrado sesión de tu cuenta",
+      "logoutFailed": "Error al cerrar sesión",
+      "tryAgain": "Por favor, inténtalo de nuevo"
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} viajero",
+    "travelers_plural": "{{count}} viajeros",
+    "budget": "Presupuesto: {{amount}}",
+    "days": "{{count}} día",
+    "days_plural": "{{count}} días"
+  },
+  "chat": {
+    "title": "Asistente IA",
+    "titleMobile": "Chat IA",
+    "placeholder": "Pídeme que modifique tu viaje...",
+    "placeholderMobile": "Pregúntame...",
+    "empty": {
+      "title": "¡Pídeme que modifique tu itinerario!",
+      "suggestion": "Prueba: \"Añade un restaurante para cenar\""
+    },
+    "status": {
+      "live": "En vivo",
+      "offline": "Desconectado",
+      "beta": "Beta"
+    },
+    "sending": "Enviando..."
+  },
+  "weather": {
+    "title": "Pronóstico del tiempo",
+    "notConfigured": "API del tiempo no configurada",
+    "loading": "Cargando el tiempo...",
+    "error": "No se pueden cargar los datos del tiempo",
+    "humidity": "humedad",
+    "wind": "viento"
+  },
+  "tripList": {
+    "loading": "Cargando...",
+    "tryAgain": "Intentar de nuevo",
+    "count": "{{count}} viaje",
+    "count_plural": "{{count}} viajes"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "Días totales",
+      "days": "{{count}} día",
+      "days_plural": "{{count}} días",
+      "activities": "Actividades",
+      "budget": "Presupuesto",
+      "weather": "Tiempo",
+      "planned": "Planificado",
+      "perPerson": "Por persona",
+      "generating": "Generando",
+      "unavailable": "No disponible"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "Editar viaje",
+        "description": "Modificar fechas o preferencias"
+      },
+      "shareTrip": {
+        "title": "Compartir viaje",
+        "description": "Compartir con amigos"
+      },
+      "exportPdf": {
+        "title": "Exportar PDF",
+        "description": "Descargar itinerario"
+      },
+      "addToCalendar": {
+        "title": "Añadir al calendario",
+        "description": "Sincronizar con Google"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "Día a día",
+    "mapView": "Vista de mapa",
+    "yourItinerary": "Tu itinerario",
+    "summary": "{{days}} días • {{activities}} actividades",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
+    "addDay": "Añadir día",
+    "empty": {
+      "title": "Aún no hay días planificados",
+      "description": "Comienza a construir tu itinerario añadiendo tu primer día",
+      "action": "Añadir primer día"
+    }
+  },
+  "dayCard": {
+    "day": "Día {{number}}",
+    "today": "Hoy",
+    "planning": "Planificando...",
+    "generatingActivities": "Generando actividades...",
+    "activitiesCount": "{{count}} actividades",
+    "unsavedChanges": "Cambios sin guardar",
+    "discard": "Descartar",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando...",
+    "booked": "Reservado",
+    "bookNow": "Reservar ahora",
+    "viewOnMap": "Ver en mapa",
+    "photos": "{{count}} fotos",
+    "reviews": "{{count}} reseñas",
+    "summary": {
+      "activities": "Actividades",
+      "budget": "Presupuesto",
+      "duration": "Duración",
+      "status": "Estado"
+    },
+    "generating": {
+      "message": "Los agentes de IA están creando actividades para este día...",
+      "enrichment": "Las actividades se enriquecerán con fotos y detalles"
+    },
+    "enrichment": {
+      "enriching": "Enriqueciendo...",
+      "enriched": "Enriquecido",
+      "limitedData": "Datos limitados",
+      "pending": "Pendiente"
+    }
+  },
+  "chatTab": {
+    "title": "Asistente de Viaje IA",
+    "subtitle": "Chatea con IA para modificar tu itinerario",
+    "status": {
+      "live": "En vivo"
+    },
+    "loadMore": "Cargar {{count}} más",
+    "showing": "Mostrando {{current}} de {{total}} mensajes",
+    "empty": {
+      "title": "Iniciar una conversación",
+      "subtitle": "¡Pídeme que modifique tu itinerario!",
+      "examples": "Prueba estos ejemplos:"
+    },
+    "input": {
+      "placeholder": "Pregúntame sobre tu viaje...",
+      "send": "Enviar",
+      "sending": "Enviando",
+      "hint": "Presiona Enter para enviar, Shift+Enter para nueva línea"
+    }
+  },
+  "bookingsTab": {
+    "title": "Reservas",
+    "subtitle": "Gestiona todas tus reservas de viaje en un solo lugar",
+    "stats": {
+      "totalItems": "Total de artículos",
+      "booked": "Reservado",
+      "available": "Disponible"
+    },
+    "empty": {
+      "title": "Sin artículos reservables",
+      "description": "Tu itinerario aún no tiene artículos reservables"
+    }
+  },
+  "budgetTab": {
+    "loading": "Cargando datos de presupuesto...",
+    "cards": {
+      "yourBudget": {
+        "title": "Tu presupuesto",
+        "tier": "nivel {{tier}}"
+      },
+      "estimatedCost": {
+        "title": "Costo estimado",
+        "overBudget": "Sobre presupuesto planificado",
+        "withinBudget": "Dentro del presupuesto"
+      },
+      "booked": {
+        "title": "Reservado",
+        "percentage": "{{percentage}}% del presupuesto"
+      },
+      "remaining": {
+        "title": "Restante",
+        "overBudget": "Sobre presupuesto",
+        "available": "Disponible para gastar"
+      }
+    },
+    "alert": {
+      "title": "Alerta de presupuesto",
+      "message": "Has gastado el {{percentage}}% de tu presupuesto. Considera ajustar tus gastos."
+    },
+    "categoryBreakdown": {
+      "title": "Gastos por categoría"
+    },
+    "dailySpending": {
+      "title": "Gasto diario",
+      "chartLabel": "Costo diario",
+      "average": "Costo diario promedio: ${{amount}}"
+    }
+  },
+  "bottomNav": {
+    "home": "Inicio",
+    "search": "Buscar",
+    "plan": "Planificar",
+    "trips": "Viajes",
+    "profile": "Perfil"
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "Usuario",
+    "signingOut": "Cerrando sesión...",
+    "signedOutSuccess": "Sesión cerrada exitosamente",
+    "signedOutDescription": "Has cerrado sesión de tu cuenta",
+    "logoutFailed": "Error al cerrar sesión",
+    "tryAgain": "Por favor, inténtalo de nuevo"
+  },
+  "tripSidebar": {
+    "linkCopied": "¡Enlace copiado!",
+    "linkCopiedDescription": "Enlace para compartir copiado al portapapeles",
+    "shareFailed": "Error al compartir",
+    "shareFailedDescription": "No se pudo generar el enlace para compartir",
+    "exportSuccess": "Exportación exitosa",
+    "exportSuccessDescription": "Tu itinerario está listo para imprimir o guardar como PDF",
+    "exportFailed": "Error al exportar",
+    "exportFailedDescription": "No se pudo exportar el PDF",
+    "itineraryNotLoaded": "Itinerario no cargado",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este viaje? Esta acción no se puede deshacer."
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "actions": {
+    "save": "ਸੇਵ ਕਰੋ",
+    "cancel": "ਰੱਦ ਕਰੋ",
+    "delete": "ਮਿਟਾਓ",
+    "edit": "ਸੰਪਾਦਿਤ ਕਰੋ",
+    "back": "ਵਾਪਸ",
+    "next": "ਅਗਲਾ",
+    "submit": "ਜਮ੍ਹਾਂ ਕਰੋ",
+    "close": "ਬੰਦ ਕਰੋ",
+    "confirm": "ਪੁਸ਼ਟੀ ਕਰੋ",
+    "tryAgain": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+    "refresh": "ਤਾਜ਼ਾ ਕਰੋ",
+    "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    "signIn": "ਸਾਈਨ ਇਨ",
+    "signOut": "ਸਾਈਨ ਆਉਟ",
+    "signUp": "ਸਾਈਨ ਅੱਪ",
+    "view": "ਵੇਰਵੇ ਦੇਖੋ"
+  },
+  "status": {
+    "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
+    "error": "ਗਲਤੀ",
+    "success": "ਸਫਲਤਾ",
+    "pending": "ਬਕਾਇਆ",
+    "completed": "ਪੂਰਾ ਹੋਇਆ",
+    "upcoming": "ਆਉਣ ਵਾਲਾ",
+    "ongoing": "ਜਾਰੀ"
+  },
+  "navigation": {
+    "home": "ਹੋਮ",
+    "search": "ਖੋਜੋ",
+    "planTrip": "ਯਾਤਰਾ ਦੀ ਯੋਜਨਾ ਬਣਾਓ",
+    "myTrips": "ਮੇਰੀਆਂ ਯਾਤਰਾਵਾਂ",
+    "profile": "ਪ੍ਰੋਫਾਈਲ",
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "help": "ਮਦਦ ਅਤੇ ਸਹਾਇਤਾ"
+  },
+  "time": {
+    "today": "ਅੱਜ",
+    "yesterday": "ਕੱਲ੍ਹ",
+    "tomorrow": "ਕੱਲ੍ਹ",
+    "now": "ਹੁਣ",
+    "justNow": "ਹੁਣੇ ਹੀ",
+    "minutesAgo": "{{count}} ਮਿੰਟ ਪਹਿਲਾਂ",
+    "minutesAgo_plural": "{{count}} ਮਿੰਟ ਪਹਿਲਾਂ",
+    "hoursAgo": "{{count}} ਘੰਟਾ ਪਹਿਲਾਂ",
+    "hoursAgo_plural": "{{count}} ਘੰਟੇ ਪਹਿਲਾਂ",
+    "daysAgo": "{{count}} ਦਿਨ ਪਹਿਲਾਂ",
+    "daysAgo_plural": "{{count}} ਦਿਨ ਪਹਿਲਾਂ"
+  },
+  "common": {
+    "or": "ਜਾਂ",
+    "and": "ਅਤੇ",
+    "of": "ਦਾ",
+    "to": "ਨੂੰ",
+    "from": "ਤੋਂ",
+    "in": "ਵਿੱਚ",
+    "at": "ਤੇ",
+    "on": "ਤੇ",
+    "by": "ਦੁਆਰਾ",
+    "with": "ਨਾਲ",
+    "for": "ਲਈ"
+  }
+}

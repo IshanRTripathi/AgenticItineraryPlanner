@@ -1,0 +1,208 @@
+{
+  "dashboard": {
+    "title": "আমার ভ্রমণ",
+    "subtitle": "আপনার ভ্রমণ পরিকল্পনা এবং বুকিং পরিচালনা করুন",
+    "subtitleMobile": "আপনার ভ্রমণ পরিকল্পনা",
+    "newTrip": "নতুন ভ্রমণ পরিকল্পনা করুন",
+    "newTripMobile": "নতুন ভ্রমণ",
+    "filters": {
+      "all": "সব ভ্রমণ",
+      "allMobile": "সব",
+      "upcoming": "আসন্ন",
+      "upcomingMobile": "শীঘ্রই",
+      "completed": "সম্পন্ন",
+      "completedMobile": "সম্পন্ন"
+    },
+    "empty": {
+      "title": "এখনও কোনো ভ্রমণ নেই",
+      "description": "AI দিয়ে আপনার পরবর্তী অ্যাডভেঞ্চার পরিকল্পনা শুরু করুন"
+    },
+    "loading": "আপনার ভ্রমণ লোড হচ্ছে...",
+    "error": "ভ্রমণ লোড করতে ব্যর্থ হয়েছে"
+  },
+  "login": {
+    "title": "আবার স্বাগতম",
+    "subtitle": "আপনার পরবর্তী অ্যাডভেঞ্চার পরিকল্পনা শুরু করতে সাইন ইন করুন",
+    "signInWithGoogle": "Google দিয়ে চালিয়ে যান",
+    "signingIn": "সাইন ইন হচ্ছে...",
+    "features": {
+      "aiPlanning": {
+        "title": "AI-চালিত পরিকল্পনা",
+        "description": "আপনার পছন্দের উপর ভিত্তি করে AI দ্বারা তৈরি স্মার্ট ভ্রমণসূচী"
+      },
+      "manageBookings": {
+        "title": "সব বুকিং পরিচালনা করুন",
+        "description": "এক জায়গায় ফ্লাইট, হোটেল এবং কার্যক্রম ট্র্যাক করুন"
+      },
+      "secure": {
+        "title": "নিরাপদ এবং নির্ভরযোগ্য",
+        "description": "এন্টারপ্রাইজ-গ্রেড নিরাপত্তা দিয়ে আপনার ডেটা সুরক্ষিত"
+      }
+    },
+    "privacy": {
+      "text": "চালিয়ে যাওয়ার মাধ্যমে, আপনি আমাদের সম্মত হন",
+      "terms": "সেবার শর্তাবলী",
+      "and": "এবং",
+      "privacy": "গোপনীয়তা নীতি"
+    },
+    "trustedBy": "10K+ ভ্রমণকারী দ্বারা বিশ্বস্ত"
+  },
+  "home": {
+    "hero": {
+      "title": "আপনার পরিকল্পনা করুন",
+      "titleHighlight": "নিখুঁত ভ্রমণ",
+      "subtitle": "আপনার পছন্দের সাথে মানানসই AI-চালিত ভ্রমণসূচী। গন্তব্য আবিষ্কার করুন, থাকার ব্যবস্থা বুক করুন এবং স্মার্টভাবে বিশ্ব অন্বেষণ করুন।",
+      "startPlanning": "পরিকল্পনা শুরু করুন",
+      "explore": "অন্বেষণ করুন"
+    },
+    "trendingDestinations": {
+      "title": "ট্রেন্ডিং গন্তব্য",
+      "from": "থেকে",
+      "explore": "অন্বেষণ করুন"
+    },
+    "popularRoutes": {
+      "title": "জনপ্রিয় ফ্লাইট রুট",
+      "subtitle": "ট্রেন্ডিং গন্তব্যে সেরা ডিল",
+      "viewAll": "সব রুট দেখুন",
+      "from": "থেকে",
+      "to": "পর্যন্ত",
+      "startingFrom": "শুরু",
+      "perPerson": "প্রতি ব্যক্তি",
+      "bookFlight": "ফ্লাইট বুক করুন"
+    },
+    "travelBlogs": {
+      "title": "ভ্রমণ অনুপ্রেরণা",
+      "subtitle": "সহযাত্রীদের গল্প এবং টিপস আবিষ্কার করুন",
+      "viewAll": "সব নিবন্ধ দেখুন",
+      "by": "দ্বারা",
+      "readMore": "আরও পড়ুন"
+    }
+  },
+  "tripDetail": {
+    "tabs": {
+      "view": "দেখুন",
+      "plan": "পরিকল্পনা",
+      "chat": "চ্যাট",
+      "bookings": "বুকিং",
+      "budget": "বাজেট",
+      "packing": "প্যাকিং",
+      "docs": "নথি"
+    },
+    "sidebar": {
+      "backToDashboard": "ড্যাশবোর্ডে ফিরে যান",
+      "share": "শেয়ার করুন",
+      "export": "রপ্তানি করুন",
+      "delete": "মুছুন"
+    },
+    "updatingItinerary": "ভ্রমণসূচী আপডেট হচ্ছে...",
+    "reconnecting": "সার্ভারের সাথে পুনরায় সংযোগ করা হচ্ছে...",
+    "invalidTripId": "অবৈধ ভ্রমণ ID",
+    "itineraryNotFound": "ভ্রমণসূচী পাওয়া যায়নি"
+  },
+  "profile": {
+    "title": "প্রোফাইল",
+    "myProfile": "আমার প্রোফাইল",
+    "settings": "সেটিংস",
+    "help": "সাহায্য এবং সহায়তা",
+    "languagePreferences": "ভাষা পছন্দ",
+    "selectLanguage": "আপনার ভাষা নির্বাচন করুন",
+    "languageDescription": "পরিবর্তনগুলি অবিলম্বে সমস্ত পৃষ্ঠায় প্রয়োগ করা হবে",
+    "accountDetails": "অ্যাকাউন্টের বিবরণ",
+    "accountDetailsDescription": "আপনার ব্যক্তিগত তথ্য এবং অ্যাকাউন্ট স্থিতি",
+    "authProvider": "প্রমাণীকরণ প্রদানকারী",
+    "pleaseSignIn": "আপনার প্রোফাইল দেখতে অনুগ্রহ করে সাইন ইন করুন",
+    "editProfile": "প্রোফাইল সম্পাদনা করুন",
+    "memberSince": "সদস্য হয়েছেন",
+    "lastSignIn": "শেষ সাইন ইন",
+    "stats": {
+      "totalTrips": "মোট ভ্রমণ",
+      "places": "স্থান",
+      "since": "থেকে"
+    },
+    "quickActions": {
+      "title": "দ্রুত ক্রিয়া",
+      "description": "আপনার অ্যাকাউন্ট এবং পছন্দ পরিচালনা করুন",
+      "myTrips": "আমার ভ্রমণ",
+      "planTrip": "ভ্রমণ পরিকল্পনা করুন",
+      "upgrade": "আপগ্রেড করুন",
+      "language": "ভাষা"
+    }
+  },
+  "planner": {
+    "steps": {
+      "destination": "গন্তব্য",
+      "datesTravelers": "তারিখ এবং ভ্রমণকারী",
+      "preferences": "পছন্দ",
+      "review": "পর্যালোচনা"
+    },
+    "destination": {
+      "fromLabel": "থেকে (উৎস)",
+      "toLabel": "পর্যন্ত (গন্তব্য)",
+      "fromPlaceholder": "আপনার শুরুর স্থান...",
+      "toPlaceholder": "আপনি কোথায় যেতে চান...",
+      "popularDestinations": "জনপ্রিয় গন্তব্য"
+    },
+    "datesTravelers": {
+      "suggestBestDates": "সেরা ভ্রমণ তারিখ সুপারিশ করুন",
+      "analyzingDates": "সেরা তারিখ বিশ্লেষণ করা হচ্ছে..."
+    },
+    "preferences": {
+      "budgetRange": "বাজেট পরিসীমা",
+      "travelPace": "ভ্রমণ গতি",
+      "interests": "আগ্রহ",
+      "additionalInstructions": "অতিরিক্ত নির্দেশাবলী (ঐচ্ছিক)",
+      "instructionsPlaceholder": "কোনো বিশেষ অনুরোধ বা পছন্দ? যেমন, 'আমি নিরামিষ রেস্তোরাঁ পছন্দ করি', 'শিশু-বান্ধব কার্যক্রম অন্তর্ভুক্ত করুন', 'ভিড়ের জায়গা এড়িয়ে চলুন'...",
+      "pace": {
+        "relaxed": "আরামদায়ক",
+        "relaxedDesc": "প্রতিদিন 2-3টি কার্যক্রম",
+        "moderate": "মাঝারি",
+        "moderateDesc": "প্রতিদিন 4-5টি কার্যক্রম",
+        "fast": "দ্রুত-গতি",
+        "fastDesc": "প্রতিদিন 6+ কার্যক্রম"
+      },
+      "budget": {
+        "budget": "বাজেট",
+        "moderate": "মাঝারি",
+        "luxury": "বিলাসবহুল"
+      },
+      "interestsList": {
+        "culture": "সংস্কৃতি এবং ইতিহাস",
+        "adventure": "অ্যাডভেঞ্চার",
+        "food": "খাবার এবং ডাইনিং",
+        "photography": "ফটোগ্রাফি",
+        "shopping": "কেনাকাটা",
+        "relaxation": "বিশ্রাম"
+      }
+    },
+    "review": {
+      "destination": "গন্তব্য",
+      "dates": "তারিখ",
+      "travelers": "ভ্রমণকারী",
+      "budget": "বাজেট",
+      "pace": "গতি",
+      "interests": "আগ্রহ",
+      "from": "থেকে",
+      "notSelected": "নির্বাচিত নয়",
+      "notSet": "সেট করা নেই",
+      "none": "কোনোটি নেই",
+      "person": "ব্যক্তি",
+      "people": "মানুষ",
+      "adult": "প্রাপ্তবয়স্ক",
+      "adults": "প্রাপ্তবয়স্ক",
+      "child": "শিশু",
+      "children": "শিশু",
+      "infant": "শিশু",
+      "infants": "শিশু",
+      "day": "দিন",
+      "days": "দিন",
+      "activities": "কার্যক্রম"
+    },
+    "navigation": {
+      "back": "পিছনে",
+      "nextStep": "পরবর্তী ধাপ",
+      "createItinerary": "আমার ভ্রমণসূচী তৈরি করুন",
+      "creatingTrip": "আপনার ভ্রমণ তৈরি করা হচ্ছে...",
+      "stepOf": "ধাপ {{current}} এর {{total}}"
+    }
+  }
+}

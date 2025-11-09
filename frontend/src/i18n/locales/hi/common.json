@@ -1,0 +1,64 @@
+{
+  "actions": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "back": "वापस",
+    "next": "अगला",
+    "submit": "जमा करें",
+    "close": "बंद करें",
+    "confirm": "पुष्टि करें",
+    "tryAgain": "पुनः प्रयास करें",
+    "refresh": "रीफ्रेश करें",
+    "loading": "लोड हो रहा है...",
+    "signIn": "साइन इन करें",
+    "signOut": "साइन आउट करें",
+    "signUp": "साइन अप करें",
+    "view": "विवरण देखें"
+  },
+  "status": {
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफलता",
+    "pending": "लंबित",
+    "completed": "पूर्ण",
+    "upcoming": "आगामी",
+    "ongoing": "चल रहा है"
+  },
+  "navigation": {
+    "home": "होम",
+    "search": "खोजें",
+    "planTrip": "यात्रा की योजना बनाएं",
+    "myTrips": "मेरी यात्राएं",
+    "profile": "प्रोफ़ाइल",
+    "settings": "सेटिंग्स",
+    "help": "सहायता और समर्थन"
+  },
+  "time": {
+    "today": "आज",
+    "yesterday": "कल",
+    "tomorrow": "कल",
+    "now": "अभी",
+    "justNow": "अभी-अभी",
+    "minutesAgo": "{{count}} मिनट पहले",
+    "minutesAgo_plural": "{{count}} मिनट पहले",
+    "hoursAgo": "{{count}} घंटे पहले",
+    "hoursAgo_plural": "{{count}} घंटे पहले",
+    "daysAgo": "{{count}} दिन पहले",
+    "daysAgo_plural": "{{count}} दिन पहले"
+  },
+  "common": {
+    "or": "या",
+    "and": "और",
+    "of": "का",
+    "to": "को",
+    "from": "से",
+    "in": "में",
+    "at": "पर",
+    "on": "पर",
+    "by": "द्वारा",
+    "with": "के साथ",
+    "for": "के लिए"
+  }
+}

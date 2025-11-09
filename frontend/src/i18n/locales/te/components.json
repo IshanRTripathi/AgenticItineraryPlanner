@@ -1,0 +1,222 @@
+{
+  "header": {
+    "profile": {
+      "myProfile": "నా ప్రొఫైల్",
+      "settings": "సెట్టింగ్‌లు",
+      "help": "సహాయం మరియు మద్దతు",
+      "signOut": "సైన్ అవుట్",
+      "signingOut": "సైన్ అవుట్ అవుతోంది..."
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} ప్రయాణికుడు",
+    "travelers_plural": "{{count}} ప్రయాణికులు",
+    "budget": "బడ్జెట్: {{amount}}",
+    "days": "{{count}} రోజు",
+    "days_plural": "{{count}} రోజులు"
+  },
+  "chat": {
+    "title": "AI సహాయకుడు",
+    "titleMobile": "AI చాట్",
+    "placeholder": "మీ యాత్రను సవరించమని నన్ను అడగండి...",
+    "placeholderMobile": "నన్ను అడగండి...",
+    "empty": {
+      "title": "మీ ప్రయాణ కార్యక్రమాన్ని సవరించమని నన్ను అడగండి!",
+      "suggestion": "ప్రయత్నించండి: \"రాత్రి భోజనం కోసం రెస్టారెంట్ జోడించండి\""
+    },
+    "status": {
+      "live": "లైవ్",
+      "offline": "ఆఫ్‌లైన్",
+      "beta": "బీటా"
+    },
+    "sending": "పంపుతోంది..."
+  },
+  "weather": {
+    "title": "వాతావరణ సూచన",
+    "notConfigured": "వాతావరణ API కాన్ఫిగర్ చేయబడలేదు",
+    "loading": "వాతావరణం లోడ్ అవుతోంది...",
+    "error": "వాతావరణ డేటాను లోడ్ చేయడం సాధ్యం కాలేదు",
+    "humidity": "తేమ",
+    "wind": "గాలి"
+  },
+  "tripList": {
+    "loading": "లోడ్ అవుతోంది...",
+    "tryAgain": "మళ్లీ ప్రయత్నించండి",
+    "count": "{{count}} యాత్ర",
+    "count_plural": "{{count}} యాత్రలు"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "మొత్తం రోజులు",
+      "days": "{{count}} రోజు",
+      "days_plural": "{{count}} రోజులు",
+      "activities": "కార్యకలాపాలు",
+      "budget": "బడ్జెట్",
+      "weather": "వాతావరణం",
+      "planned": "ప్లాన్ చేయబడింది",
+      "perPerson": "ప్రతి వ్యక్తికి",
+      "generating": "రూపొందిస్తోంది",
+      "unavailable": "అందుబాటులో లేదు"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "యాత్రను సవరించండి",
+        "description": "తేదీలు లేదా ప్రాధాన్యతలను సవరించండి"
+      },
+      "shareTrip": {
+        "title": "యాత్రను భాగస్వామ్యం చేయండి",
+        "description": "స్నేహితులతో భాగస్వామ్యం చేయండి"
+      },
+      "exportPdf": {
+        "title": "PDF ఎగుమతి చేయండి",
+        "description": "ప్రయాణ కార్యక్రమాన్ని డౌన్‌లోడ్ చేయండి"
+      },
+      "addToCalendar": {
+        "title": "క్యాలెండర్‌కు జోడించండి",
+        "description": "Google తో సింక్ చేయండి"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "రోజు వారీగా",
+    "mapView": "మ్యాప్ వ్యూ",
+    "yourItinerary": "మీ ప్రయాణ కార్యక్రమం",
+    "summary": "{{days}} రోజులు • {{activities}} కార్యకలాపాలు",
+    "expandAll": "అన్నింటినీ విస్తరించండి",
+    "collapseAll": "అన్నింటినీ కుదించండి",
+    "addDay": "రోజు జోడించండి",
+    "empty": {
+      "title": "ఇంకా రోజులు ప్లాన్ చేయలేదు",
+      "description": "మీ మొదటి రోజును జోడించడం ద్వారా మీ ప్రయాణ కార్యక్రమాన్ని నిర్మించడం ప్రారంభించండి",
+      "action": "మొదటి రోజు జోడించండి"
+    }
+  },
+  "dayCard": {
+    "day": "రోజు {{number}}",
+    "today": "ఈరోజు",
+    "planning": "ప్లాన్ చేస్తున్నాం...",
+    "generatingActivities": "కార్యకలాపాలను రూపొందిస్తున్నాం...",
+    "activitiesCount": "{{count}} కార్యకలాపాలు",
+    "unsavedChanges": "సేవ్ చేయని మార్పులు",
+    "discard": "విస్మరించండి",
+    "saveChanges": "మార్పులను సేవ్ చేయండి",
+    "saving": "సేవ్ చేస్తున్నాం...",
+    "booked": "బుక్ చేయబడింది",
+    "bookNow": "ఇప్పుడే బుక్ చేయండి",
+    "viewOnMap": "మ్యాప్‌లో చూడండి",
+    "photos": "{{count}} ఫోటోలు",
+    "reviews": "{{count}} సమీక్షలు",
+    "summary": {
+      "activities": "కార్యకలాపాలు",
+      "budget": "బడ్జెట్",
+      "duration": "వ్యవధి",
+      "status": "స్థితి"
+    },
+    "generating": {
+      "message": "AI ఏజెంట్లు ఈ రోజు కోసం కార్యకలాపాలను రూపొందిస్తున్నారు...",
+      "enrichment": "కార్యకలాపాలు ఫోటోలు మరియు వివరాలతో సమృద్ధి చేయబడతాయి"
+    },
+    "enrichment": {
+      "enriching": "సమృద్ధి చేస్తున్నాం...",
+      "enriched": "సమృద్ధి చేయబడింది",
+      "limitedData": "పరిమిత డేటా",
+      "pending": "పెండింగ్‌లో ఉంది"
+    }
+  },
+  "bottomNav": {
+    "home": "హోమ్",
+    "search": "వెతకండి",
+    "plan": "ప్లాన్",
+    "trips": "యాత్రలు",
+    "profile": "ప్రొఫైల్"
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "వినియోగదారు",
+    "signingOut": "సైన్ ఔట్ అవుతోంది...",
+    "signedOutSuccess": "విజయవంతంగా సైన్ ఔట్ అయింది",
+    "signedOutDescription": "మీరు మీ ఖాతా నుండి లాగ్ ఔట్ అయ్యారు",
+    "logoutFailed": "లాగౌట్ విఫలమైంది",
+    "tryAgain": "దయచేసి మళ్లీ ప్రయత్నించండి"
+  },
+  "chatTab": {
+    "title": "AI ప్రయాణ సహాయకుడు",
+    "subtitle": "మీ ప్రయాణ కార్యక్రమాన్ని సవరించడానికి AI తో చాట్ చేయండి",
+    "status": {
+      "live": "లైవ్"
+    },
+    "loadMore": "{{count}} మరిన్ని లోడ్ చేయండి",
+    "showing": "{{total}} లో {{current}} సందేశాలను చూపిస్తోంది",
+    "empty": {
+      "title": "సంభాషణ ప్రారంభించండి",
+      "subtitle": "మీ ప్రయాణ కార్యక్రమాన్ని సవరించమని నన్ను అడగండి!",
+      "examples": "ఈ ఉదాహరణలను ప్రయత్నించండి:"
+    },
+    "input": {
+      "placeholder": "మీ యాత్ర గురించి నన్ను అడగండి...",
+      "send": "పంపండి",
+      "sending": "పంపుతోంది",
+      "hint": "పంపడానికి Enter నొక్కండి, కొత్త లైన్ కోసం Shift+Enter"
+    }
+  },
+  "bookingsTab": {
+    "title": "బుకింగ్‌లు",
+    "subtitle": "మీ అన్ని ప్రయాణ బుకింగ్‌లను ఒకే చోట నిర్వహించండి",
+    "stats": {
+      "totalItems": "మొత్తం అంశాలు",
+      "booked": "బుక్ చేయబడింది",
+      "available": "అందుబాటులో ఉంది"
+    },
+    "empty": {
+      "title": "బుక్ చేయదగిన అంశాలు లేవు",
+      "description": "మీ ప్రయాణ కార్యక్రమంలో ఇంకా బుక్ చేయదగిన అంశాలు లేవు"
+    }
+  },
+  "budgetTab": {
+    "loading": "బడ్జెట్ డేటా లోడ్ అవుతోంది...",
+    "cards": {
+      "yourBudget": {
+        "title": "మీ బడ్జెట్",
+        "tier": "{{tier}} స్థాయి"
+      },
+      "estimatedCost": {
+        "title": "అంచనా వ్యయం",
+        "overBudget": "ప్లాన్ చేసిన బడ్జెట్ కంటే ఎక్కువ",
+        "withinBudget": "బడ్జెట్‌లో"
+      },
+      "booked": {
+        "title": "బుక్ చేయబడింది",
+        "percentage": "బడ్జెట్‌లో {{percentage}}%"
+      },
+      "remaining": {
+        "title": "మిగిలినది",
+        "overBudget": "బడ్జెట్ కంటే ఎక్కువ",
+        "available": "ఖర్చు చేయడానికి అందుబాటులో ఉంది"
+      }
+    },
+    "alert": {
+      "title": "బడ్జెట్ హెచ్చరిక",
+      "message": "మీరు మీ బడ్జెట్‌లో {{percentage}}% ఖర్చు చేసారు। మీ ఖర్చును సర్దుబాటు చేయడాన్ని పరిగణించండి।"
+    },
+    "categoryBreakdown": {
+      "title": "వర్గం వారీగా ఖర్చు"
+    },
+    "dailySpending": {
+      "title": "రోజువారీ ఖర్చు",
+      "chartLabel": "రోజువారీ వ్యయం",
+      "average": "సగటు రోజువారీ వ్యయం: ${{amount}}"
+    }
+  },
+  "tripSidebar": {
+    "linkCopied": "లింక్ కాపీ చేయబడింది!",
+    "linkCopiedDescription": "భాగస్వామ్య లింక్ క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది",
+    "shareFailed": "భాగస్వామ్యం విఫలమైంది",
+    "shareFailedDescription": "భాగస్వామ్య లింక్‌ను రూపొందించడం సాధ్యం కాలేదు",
+    "exportSuccess": "ఎగుమతి విజయవంతమైంది",
+    "exportSuccessDescription": "మీ ప్రయాణ కార్యక్రమం ముద్రించడానికి లేదా PDF గా సేవ్ చేయడానికి సిద్ధంగా ఉంది",
+    "exportFailed": "ఎగుమతి విఫలమైంది",
+    "exportFailedDescription": "PDF ఎగుమతి చేయడం సాధ్యం కాలేదు",
+    "itineraryNotLoaded": "ప్రయాణ కార్యక్రమం లోడ్ కాలేదు",
+    "deleteConfirm": "మీరు ఖచ్చితంగా ఈ యాత్రను తొలగించాలనుకుంటున్నారా? ఈ చర్యను రద్దు చేయడం సాధ్యం కాదు."
+  }
+}

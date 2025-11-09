@@ -1,0 +1,208 @@
+{
+  "dashboard": {
+    "title": "मेरी यात्राएं",
+    "subtitle": "अपनी यात्रा योजनाओं और बुकिंग का प्रबंधन करें",
+    "subtitleMobile": "आपकी यात्रा योजनाएं",
+    "newTrip": "नई यात्रा की योजना बनाएं",
+    "newTripMobile": "नई यात्रा",
+    "filters": {
+      "all": "सभी यात्राएं",
+      "allMobile": "सभी",
+      "upcoming": "आगामी",
+      "upcomingMobile": "जल्द",
+      "completed": "पूर्ण",
+      "completedMobile": "पूर्ण"
+    },
+    "empty": {
+      "title": "अभी तक कोई यात्रा नहीं",
+      "description": "AI के साथ अपने अगले साहसिक कार्य की योजना शुरू करें"
+    },
+    "loading": "आपकी यात्राएं लोड हो रही हैं...",
+    "error": "यात्राएं लोड करने में विफल"
+  },
+  "login": {
+    "title": "वापस स्वागत है",
+    "subtitle": "अपना अगला साहसिक कार्य शुरू करने के लिए साइन इन करें",
+    "signInWithGoogle": "Google के साथ जारी रखें",
+    "signingIn": "साइन इन हो रहा है...",
+    "features": {
+      "aiPlanning": {
+        "title": "AI-संचालित योजना",
+        "description": "आपकी प्राथमिकताओं के आधार पर AI द्वारा तैयार स्मार्ट यात्रा कार्यक्रम"
+      },
+      "manageBookings": {
+        "title": "सभी बुकिंग प्रबंधित करें",
+        "description": "एक ही स्थान पर उड़ानों, होटलों और गतिविधियों को ट्रैक करें"
+      },
+      "secure": {
+        "title": "सुरक्षित और विश्वसनीय",
+        "description": "एंटरप्राइज़-ग्रेड सुरक्षा के साथ आपका डेटा सुरक्षित"
+      }
+    },
+    "privacy": {
+      "text": "जारी रखकर, आप हमारी सहमति देते हैं",
+      "terms": "सेवा की शर्तें",
+      "and": "और",
+      "privacy": "गोपनीयता नीति"
+    },
+    "trustedBy": "10K+ यात्रियों द्वारा विश्वसनीय"
+  },
+  "home": {
+    "hero": {
+      "title": "अपनी योजना बनाएं",
+      "titleHighlight": "परफेक्ट यात्रा",
+      "subtitle": "आपकी प्राथमिकताओं के अनुरूप AI-संचालित यात्रा कार्यक्रम। गंतव्यों की खोज करें, ठहरने की बुकिंग करें, और दुनिया को स्मार्ट तरीके से एक्सप्लोर करें।",
+      "startPlanning": "योजना शुरू करें",
+      "explore": "एक्सप्लोर करें"
+    },
+    "trendingDestinations": {
+      "title": "ट्रेंडिंग गंतव्य",
+      "from": "से",
+      "explore": "एक्सप्लोर करें"
+    },
+    "popularRoutes": {
+      "title": "लोकप्रिय फ्लाइट रूट",
+      "subtitle": "ट्रेंडिंग गंतव्यों पर सर्वोत्तम सौदे",
+      "viewAll": "सभी रूट देखें",
+      "from": "से",
+      "to": "तक",
+      "startingFrom": "शुरुआत",
+      "perPerson": "प्रति व्यक्ति",
+      "bookFlight": "फ्लाइट बुक करें"
+    },
+    "travelBlogs": {
+      "title": "यात्रा प्रेरणा",
+      "subtitle": "साथी यात्रियों की कहानियां और सुझाव खोजें",
+      "viewAll": "सभी लेख देखें",
+      "by": "द्वारा",
+      "readMore": "और पढ़ें"
+    }
+  },
+  "tripDetail": {
+    "tabs": {
+      "view": "देखें",
+      "plan": "योजना",
+      "chat": "चैट",
+      "bookings": "बुकिंग",
+      "budget": "बजट",
+      "packing": "पैकिंग",
+      "docs": "दस्तावेज़"
+    },
+    "sidebar": {
+      "backToDashboard": "डैशबोर्ड पर वापस जाएं",
+      "share": "साझा करें",
+      "export": "निर्यात करें",
+      "delete": "हटाएं"
+    },
+    "updatingItinerary": "यात्रा कार्यक्रम अपडेट हो रहा है...",
+    "reconnecting": "सर्वर से पुनः कनेक्ट हो रहा है...",
+    "invalidTripId": "अमान्य यात्रा ID",
+    "itineraryNotFound": "यात्रा कार्यक्रम नहीं मिला"
+  },
+  "profile": {
+    "title": "प्रोफ़ाइल",
+    "myProfile": "मेरी प्रोफ़ाइल",
+    "settings": "सेटिंग्स",
+    "help": "सहायता और समर्थन",
+    "languagePreferences": "भाषा प्राथमिकताएं",
+    "selectLanguage": "अपनी भाषा चुनें",
+    "languageDescription": "परिवर्तन तुरंत सभी पृष्ठों पर लागू हो जाएंगे",
+    "accountDetails": "खाता विवरण",
+    "accountDetailsDescription": "आपकी व्यक्तिगत जानकारी और खाता स्थिति",
+    "authProvider": "प्रमाणीकरण प्रदाता",
+    "pleaseSignIn": "अपनी प्रोफ़ाइल देखने के लिए कृपया साइन इन करें",
+    "editProfile": "प्रोफ़ाइल संपादित करें",
+    "memberSince": "सदस्य बने",
+    "lastSignIn": "अंतिम साइन इन",
+    "stats": {
+      "totalTrips": "कुल यात्राएं",
+      "places": "स्थान",
+      "since": "से"
+    },
+    "quickActions": {
+      "title": "त्वरित क्रियाएं",
+      "description": "अपने खाते और प्राथमिकताओं का प्रबंधन करें",
+      "myTrips": "मेरी यात्राएं",
+      "planTrip": "यात्रा की योजना बनाएं",
+      "upgrade": "अपग्रेड करें",
+      "language": "भाषा"
+    }
+  },
+  "planner": {
+    "steps": {
+      "destination": "गंतव्य",
+      "datesTravelers": "तिथियां और यात्री",
+      "preferences": "प्राथमिकताएं",
+      "review": "समीक्षा"
+    },
+    "destination": {
+      "fromLabel": "से (प्रारंभ)",
+      "toLabel": "तक (गंतव्य)",
+      "fromPlaceholder": "आपका प्रारंभिक स्थान...",
+      "toPlaceholder": "आप कहां जाना चाहते हैं...",
+      "popularDestinations": "लोकप्रिय गंतव्य"
+    },
+    "datesTravelers": {
+      "suggestBestDates": "सर्वोत्तम यात्रा तिथि सुझाएं",
+      "analyzingDates": "सर्वोत्तम तिथियों का विश्लेषण..."
+    },
+    "preferences": {
+      "budgetRange": "बजट सीमा",
+      "travelPace": "यात्रा गति",
+      "interests": "रुचियां",
+      "additionalInstructions": "अतिरिक्त निर्देश (वैकल्पिक)",
+      "instructionsPlaceholder": "कोई विशेष अनुरोध या प्राथमिकताएं? जैसे, 'मैं शाकाहारी रेस्तरां पसंद करता हूं', 'बच्चों के अनुकूल गतिविधियां शामिल करें', 'भीड़भाड़ वाली जगहों से बचें'...",
+      "pace": {
+        "relaxed": "आरामदायक",
+        "relaxedDesc": "प्रति दिन 2-3 गतिविधियां",
+        "moderate": "मध्यम",
+        "moderateDesc": "प्रति दिन 4-5 गतिविधियां",
+        "fast": "तेज़-गति",
+        "fastDesc": "प्रति दिन 6+ गतिविधियां"
+      },
+      "budget": {
+        "budget": "बजट",
+        "moderate": "मध्यम",
+        "luxury": "लक्जरी"
+      },
+      "interestsList": {
+        "culture": "संस्कृति और इतिहास",
+        "adventure": "साहसिक",
+        "food": "भोजन और भोजन",
+        "photography": "फोटोग्राफी",
+        "shopping": "खरीदारी",
+        "relaxation": "विश्राम"
+      }
+    },
+    "review": {
+      "destination": "गंतव्य",
+      "dates": "तिथियां",
+      "travelers": "यात्री",
+      "budget": "बजट",
+      "pace": "गति",
+      "interests": "रुचियां",
+      "from": "से",
+      "notSelected": "चयनित नहीं",
+      "notSet": "सेट नहीं",
+      "none": "कोई नहीं",
+      "person": "व्यक्ति",
+      "people": "लोग",
+      "adult": "वयस्क",
+      "adults": "वयस्क",
+      "child": "बच्चा",
+      "children": "बच्चे",
+      "infant": "शिशु",
+      "infants": "शिशु",
+      "day": "दिन",
+      "days": "दिन",
+      "activities": "गतिविधियां"
+    },
+    "navigation": {
+      "back": "वापस",
+      "nextStep": "अगला कदम",
+      "createItinerary": "मेरा यात्रा कार्यक्रम बनाएं",
+      "creatingTrip": "आपकी यात्रा बनाई जा रही है...",
+      "stepOf": "चरण {{current}} का {{total}}"
+    }
+  }
+}

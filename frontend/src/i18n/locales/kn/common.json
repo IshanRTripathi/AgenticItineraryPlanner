@@ -1,0 +1,64 @@
+{
+  "actions": {
+    "save": "ಉಳಿಸಿ",
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "delete": "ಅಳಿಸಿ",
+    "edit": "ಸಂಪಾದಿಸಿ",
+    "back": "ಹಿಂದೆ",
+    "next": "ಮುಂದೆ",
+    "submit": "ಸಲ್ಲಿಸಿ",
+    "close": "ಮುಚ್ಚಿ",
+    "confirm": "ದೃಢೀಕರಿಸಿ",
+    "tryAgain": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+    "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "signIn": "ಸೈನ್ ಇನ್",
+    "signOut": "ಸೈನ್ ಔಟ್",
+    "signUp": "ಸೈನ್ ಅಪ್",
+    "view": "ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ"
+  },
+  "status": {
+    "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "error": "ದೋಷ",
+    "success": "ಯಶಸ್ಸು",
+    "pending": "ಬಾಕಿ ಇದೆ",
+    "completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
+    "upcoming": "ಮುಂಬರುವ",
+    "ongoing": "ನಡೆಯುತ್ತಿದೆ"
+  },
+  "navigation": {
+    "home": "ಮುಖಪುಟ",
+    "search": "ಹುಡುಕಿ",
+    "planTrip": "ಪ್ರವಾಸ ಯೋಜಿಸಿ",
+    "myTrips": "ನನ್ನ ಪ್ರವಾಸಗಳು",
+    "profile": "ಪ್ರೊಫೈಲ್",
+    "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "help": "ಸಹಾಯ ಮತ್ತು ಬೆಂಬಲ"
+  },
+  "time": {
+    "today": "ಇಂದು",
+    "yesterday": "ನಿನ್ನೆ",
+    "tomorrow": "ನಾಳೆ",
+    "now": "ಈಗ",
+    "justNow": "ಈಗಷ್ಟೇ",
+    "minutesAgo": "{{count}} ನಿಮಿಷದ ಹಿಂದೆ",
+    "minutesAgo_plural": "{{count}} ನಿಮಿಷಗಳ ಹಿಂದೆ",
+    "hoursAgo": "{{count}} ಗಂಟೆಯ ಹಿಂದೆ",
+    "hoursAgo_plural": "{{count}} ಗಂಟೆಗಳ ಹಿಂದೆ",
+    "daysAgo": "{{count}} ದಿನದ ಹಿಂದೆ",
+    "daysAgo_plural": "{{count}} ದಿನಗಳ ಹಿಂದೆ"
+  },
+  "common": {
+    "or": "ಅಥವಾ",
+    "and": "ಮತ್ತು",
+    "of": "ನ",
+    "to": "ಗೆ",
+    "from": "ನಿಂದ",
+    "in": "ನಲ್ಲಿ",
+    "at": "ನಲ್ಲಿ",
+    "on": "ಮೇಲೆ",
+    "by": "ಮೂಲಕ",
+    "with": "ಜೊತೆ",
+    "for": "ಗಾಗಿ"
+  }
+}

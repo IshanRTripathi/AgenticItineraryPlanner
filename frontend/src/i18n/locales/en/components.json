@@ -1,0 +1,227 @@
+{
+  "header": {
+    "profile": {
+      "account": "Account",
+      "myProfile": "My Profile",
+      "settings": "Settings",
+      "help": "Help & Support",
+      "signOut": "Sign Out",
+      "signingOut": "Signing out...",
+      "signedOutSuccess": "Signed out successfully",
+      "signedOutDescription": "You have been logged out of your account",
+      "logoutFailed": "Logout failed",
+      "tryAgain": "Please try again"
+    }
+  },
+  "tripCard": {
+    "travelers": "{{count}} traveler",
+    "travelers_plural": "{{count}} travelers",
+    "budget": "Budget: {{amount}}",
+    "days": "{{count}} day",
+    "days_plural": "{{count}} days"
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "titleMobile": "AI Chat",
+    "placeholder": "Ask me to modify your trip...",
+    "placeholderMobile": "Ask me...",
+    "empty": {
+      "title": "Ask me to modify your itinerary!",
+      "suggestion": "Try: \"Add a restaurant for dinner\""
+    },
+    "status": {
+      "live": "Live",
+      "offline": "Offline",
+      "beta": "Beta"
+    },
+    "sending": "Sending..."
+  },
+  "weather": {
+    "title": "Weather Forecast",
+    "notConfigured": "Weather API not configured",
+    "loading": "Loading weather...",
+    "error": "Unable to load weather data",
+    "humidity": "humidity",
+    "wind": "wind"
+  },
+  "tripList": {
+    "loading": "Loading...",
+    "tryAgain": "Try Again",
+    "count": "{{count}} trip",
+    "count_plural": "{{count}} trips"
+  },
+  "viewTab": {
+    "stats": {
+      "totalDays": "Total Days",
+      "days": "{{count}} day",
+      "days_plural": "{{count}} days",
+      "activities": "Activities",
+      "budget": "Budget",
+      "weather": "Weather",
+      "planned": "Planned",
+      "perPerson": "Per person",
+      "generating": "Generating",
+      "unavailable": "Unavailable"
+    },
+    "quickActions": {
+      "editTrip": {
+        "title": "Edit Trip",
+        "description": "Modify dates or preferences"
+      },
+      "shareTrip": {
+        "title": "Share Trip",
+        "description": "Share with friends"
+      },
+      "exportPdf": {
+        "title": "Export PDF",
+        "description": "Download itinerary"
+      },
+      "addToCalendar": {
+        "title": "Add to Calendar",
+        "description": "Sync with Google"
+      }
+    }
+  },
+  "planTab": {
+    "dayByDay": "Day by Day",
+    "mapView": "Map View",
+    "yourItinerary": "Your Itinerary",
+    "summary": "{{days}} days • {{activities}} activities",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "addDay": "Add Day",
+    "empty": {
+      "title": "No days planned yet",
+      "description": "Start building your itinerary by adding your first day",
+      "action": "Add First Day"
+    }
+  },
+  "dayCard": {
+    "day": "Day {{number}}",
+    "today": "Today",
+    "planning": "Planning...",
+    "generatingActivities": "Generating activities...",
+    "activitiesCount": "{{count}} activities",
+    "unsavedChanges": "Unsaved changes",
+    "discard": "Discard",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "booked": "Booked",
+    "bookNow": "Book Now",
+    "viewOnMap": "View on Map",
+    "photos": "{{count}} photos",
+    "reviews": "{{count}} reviews",
+    "summary": {
+      "activities": "Activities",
+      "budget": "Budget",
+      "duration": "Duration",
+      "status": "Status"
+    },
+    "generating": {
+      "message": "AI agents are creating activities for this day...",
+      "enrichment": "Activities will be enriched with photos and details"
+    },
+    "enrichment": {
+      "enriching": "Enriching...",
+      "enriched": "Enriched",
+      "limitedData": "Limited data",
+      "pending": "Pending"
+    }
+  },
+  "bottomNav": {
+    "home": "Home",
+    "search": "Search",
+    "plan": "Plan",
+    "trips": "Trips",
+    "profile": "Profile"
+  },
+  "chatTab": {
+    "title": "AI Travel Assistant",
+    "subtitle": "Chat with AI to modify your itinerary",
+    "status": {
+      "live": "Live"
+    },
+    "loadMore": "Load {{count}} More",
+    "showing": "Showing {{current}} of {{total}} messages",
+    "empty": {
+      "title": "Start a conversation",
+      "subtitle": "Ask me to modify your itinerary!",
+      "examples": "Try these examples:"
+    },
+    "input": {
+      "placeholder": "Ask me about your trip...",
+      "send": "Send",
+      "sending": "Sending",
+      "hint": "Press Enter to send, Shift+Enter for new line"
+    }
+  },
+  "bookingsTab": {
+    "title": "Bookings",
+    "subtitle": "Manage all your trip bookings in one place",
+    "stats": {
+      "totalItems": "Total Items",
+      "booked": "Booked",
+      "available": "Available"
+    },
+    "empty": {
+      "title": "No Bookable Items",
+      "description": "Your itinerary doesn't have any bookable items yet"
+    }
+  },
+  "budgetTab": {
+    "loading": "Loading budget data...",
+    "cards": {
+      "yourBudget": {
+        "title": "Your Budget",
+        "tier": "{{tier}} tier"
+      },
+      "estimatedCost": {
+        "title": "Estimated Cost",
+        "overBudget": "Over planned budget",
+        "withinBudget": "Within budget"
+      },
+      "booked": {
+        "title": "Booked",
+        "percentage": "{{percentage}}% of budget"
+      },
+      "remaining": {
+        "title": "Remaining",
+        "overBudget": "Over budget",
+        "available": "Available to spend"
+      }
+    },
+    "alert": {
+      "title": "Budget Alert",
+      "message": "You've spent {{percentage}}% of your budget. Consider adjusting your spending."
+    },
+    "categoryBreakdown": {
+      "title": "Spending by Category"
+    },
+    "dailySpending": {
+      "title": "Daily Spending",
+      "chartLabel": "Daily Cost",
+      "average": "Average daily cost: ${{amount}}"
+    }
+  },
+  "mobileMenu": {
+    "title": "EasyTrip",
+    "user": "User",
+    "signingOut": "Signing out...",
+    "signedOutSuccess": "Signed out successfully",
+    "signedOutDescription": "You have been logged out of your account",
+    "logoutFailed": "Logout failed",
+    "tryAgain": "Please try again"
+  },
+  "tripSidebar": {
+    "linkCopied": "Link Copied!",
+    "linkCopiedDescription": "Shareable link copied to clipboard",
+    "shareFailed": "Share Failed",
+    "shareFailedDescription": "Could not generate shareable link",
+    "exportSuccess": "Export Successful",
+    "exportSuccessDescription": "Your itinerary is ready to print or save as PDF",
+    "exportFailed": "Export Failed",
+    "exportFailedDescription": "Could not export PDF",
+    "itineraryNotLoaded": "Itinerary not loaded",
+    "deleteConfirm": "Are you sure you want to delete this trip? This action cannot be undone."
+  }
+}

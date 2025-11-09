@@ -1,0 +1,208 @@
+{
+  "dashboard": {
+    "title": "ਮੇਰੀਆਂ ਯਾਤਰਾਵਾਂ",
+    "subtitle": "ਆਪਣੀਆਂ ਯਾਤਰਾ ਯੋਜਨਾਵਾਂ ਅਤੇ ਬੁਕਿੰਗਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
+    "subtitleMobile": "ਤੁਹਾਡੀਆਂ ਯਾਤਰਾ ਯੋਜਨਾਵਾਂ",
+    "newTrip": "ਨਵੀਂ ਯਾਤਰਾ ਦੀ ਯੋਜਨਾ ਬਣਾਓ",
+    "newTripMobile": "ਨਵੀਂ ਯਾਤਰਾ",
+    "filters": {
+      "all": "ਸਾਰੀਆਂ ਯਾਤਰਾਵਾਂ",
+      "allMobile": "ਸਾਰੀਆਂ",
+      "upcoming": "ਆਉਣ ਵਾਲੀਆਂ",
+      "upcomingMobile": "ਜਲਦੀ",
+      "completed": "ਪੂਰੀਆਂ ਹੋਈਆਂ",
+      "completedMobile": "ਪੂਰੀਆਂ"
+    },
+    "empty": {
+      "title": "ਅਜੇ ਕੋਈ ਯਾਤਰਾ ਨਹੀਂ",
+      "description": "AI ਨਾਲ ਆਪਣੇ ਅਗਲੇ ਸਾਹਸ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣੀ ਸ਼ੁਰੂ ਕਰੋ"
+    },
+    "loading": "ਤੁਹਾਡੀਆਂ ਯਾਤਰਾਵਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ...",
+    "error": "ਯਾਤਰਾਵਾਂ ਲੋਡ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
+  },
+  "login": {
+    "title": "ਵਾਪਸ ਜੀ ਆਇਆਂ ਨੂੰ",
+    "subtitle": "ਆਪਣੇ ਅਗਲੇ ਸਾਹਸ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਲਈ ਸਾਈਨ ਇਨ ਕਰੋ",
+    "signInWithGoogle": "Google ਨਾਲ ਜਾਰੀ ਰੱਖੋ",
+    "signingIn": "ਸਾਈਨ ਇਨ ਹੋ ਰਿਹਾ ਹੈ...",
+    "features": {
+      "aiPlanning": {
+        "title": "AI-ਸੰਚਾਲਿਤ ਯੋਜਨਾਬੰਦੀ",
+        "description": "ਤੁਹਾਡੀਆਂ ਤਰਜੀਹਾਂ ਦੇ ਆਧਾਰ 'ਤੇ AI ਦੁਆਰਾ ਤਿਆਰ ਕੀਤੇ ਸਮਾਰਟ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ"
+      },
+      "manageBookings": {
+        "title": "ਸਾਰੀਆਂ ਬੁਕਿੰਗਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
+        "description": "ਇੱਕ ਥਾਂ 'ਤੇ ਫਲਾਈਟਾਂ, ਹੋਟਲਾਂ ਅਤੇ ਗਤੀਵਿਧੀਆਂ ਨੂੰ ਟਰੈਕ ਕਰੋ"
+      },
+      "secure": {
+        "title": "ਸੁਰੱਖਿਅਤ ਅਤੇ ਭਰੋਸੇਯੋਗ",
+        "description": "ਐਂਟਰਪ੍ਰਾਈਜ਼-ਗ੍ਰੇਡ ਸੁਰੱਖਿਆ ਨਾਲ ਤੁਹਾਡਾ ਡੇਟਾ ਸੁਰੱਖਿਅਤ"
+      }
+    },
+    "privacy": {
+      "text": "ਜਾਰੀ ਰੱਖ ਕੇ, ਤੁਸੀਂ ਸਾਡੇ ਨਾਲ ਸਹਿਮਤ ਹੋ",
+      "terms": "ਸੇਵਾ ਦੀਆਂ ਸ਼ਰਤਾਂ",
+      "and": "ਅਤੇ",
+      "privacy": "ਗੋਪਨੀਯਤਾ ਨੀਤੀ"
+    },
+    "trustedBy": "10K+ ਯਾਤਰੀਆਂ ਦੁਆਰਾ ਭਰੋਸੇਯੋਗ"
+  },
+  "home": {
+    "hero": {
+      "title": "ਆਪਣੀ ਯੋਜਨਾ ਬਣਾਓ",
+      "titleHighlight": "ਸੰਪੂਰਨ ਯਾਤਰਾ",
+      "subtitle": "ਤੁਹਾਡੀਆਂ ਤਰਜੀਹਾਂ ਦੇ ਅਨੁਕੂਲ AI-ਸੰਚਾਲਿਤ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ। ਮੰਜ਼ਿਲਾਂ ਦੀ ਖੋਜ ਕਰੋ, ਠਹਿਰਨ ਦੀ ਬੁਕਿੰਗ ਕਰੋ, ਅਤੇ ਦੁਨੀਆ ਨੂੰ ਸਮਾਰਟ ਤਰੀਕੇ ਨਾਲ ਐਕਸਪਲੋਰ ਕਰੋ।",
+      "startPlanning": "ਯੋਜਨਾ ਸ਼ੁਰੂ ਕਰੋ",
+      "explore": "ਐਕਸਪਲੋਰ ਕਰੋ"
+    },
+    "trendingDestinations": {
+      "title": "ਟ੍ਰੈਂਡਿੰਗ ਮੰਜ਼ਿਲਾਂ",
+      "from": "ਤੋਂ",
+      "explore": "ਐਕਸਪਲੋਰ ਕਰੋ"
+    },
+    "popularRoutes": {
+      "title": "ਪ੍ਰਸਿੱਧ ਫਲਾਈਟ ਰੂਟ",
+      "subtitle": "ਟ੍ਰੈਂਡਿੰਗ ਮੰਜ਼ਿਲਾਂ 'ਤੇ ਸਭ ਤੋਂ ਵਧੀਆ ਸੌਦੇ",
+      "viewAll": "ਸਾਰੇ ਰੂਟ ਦੇਖੋ",
+      "from": "ਤੋਂ",
+      "to": "ਤੱਕ",
+      "startingFrom": "ਸ਼ੁਰੂਆਤ",
+      "perPerson": "ਪ੍ਰਤੀ ਵਿਅਕਤੀ",
+      "bookFlight": "ਫਲਾਈਟ ਬੁੱਕ ਕਰੋ"
+    },
+    "travelBlogs": {
+      "title": "ਯਾਤਰਾ ਪ੍ਰੇਰਣਾ",
+      "subtitle": "ਸਾਥੀ ਯਾਤਰੀਆਂ ਦੀਆਂ ਕਹਾਣੀਆਂ ਅਤੇ ਸੁਝਾਅ ਖੋਜੋ",
+      "viewAll": "ਸਾਰੇ ਲੇਖ ਦੇਖੋ",
+      "by": "ਦੁਆਰਾ",
+      "readMore": "ਹੋਰ ਪੜ੍ਹੋ"
+    }
+  },
+  "tripDetail": {
+    "tabs": {
+      "view": "ਦੇਖੋ",
+      "plan": "ਯੋਜਨਾ",
+      "chat": "ਚੈਟ",
+      "bookings": "ਬੁਕਿੰਗਾਂ",
+      "budget": "ਬਜਟ",
+      "packing": "ਪੈਕਿੰਗ",
+      "docs": "ਦਸਤਾਵੇਜ਼"
+    },
+    "sidebar": {
+      "backToDashboard": "ਡੈਸ਼ਬੋਰਡ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+      "share": "ਸਾਂਝਾ ਕਰੋ",
+      "export": "ਨਿਰਯਾਤ ਕਰੋ",
+      "delete": "ਮਿਟਾਓ"
+    },
+    "updatingItinerary": "ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ...",
+    "reconnecting": "ਸਰਵਰ ਨਾਲ ਦੁਬਾਰਾ ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ...",
+    "invalidTripId": "ਅਵੈਧ ਯਾਤਰਾ ID",
+    "itineraryNotFound": "ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਨਹੀਂ ਮਿਲਿਆ"
+  },
+  "profile": {
+    "title": "ਪ੍ਰੋਫਾਈਲ",
+    "myProfile": "ਮੇਰਾ ਪ੍ਰੋਫਾਈਲ",
+    "settings": "ਸੈਟਿੰਗਾਂ",
+    "help": "ਮਦਦ ਅਤੇ ਸਹਾਇਤਾ",
+    "languagePreferences": "ਭਾਸ਼ਾ ਤਰਜੀਹਾਂ",
+    "selectLanguage": "ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ",
+    "languageDescription": "ਤਬਦੀਲੀਆਂ ਤੁਰੰਤ ਸਾਰੇ ਪੰਨਿਆਂ 'ਤੇ ਲਾਗੂ ਹੋਣਗੀਆਂ",
+    "accountDetails": "ਖਾਤਾ ਵੇਰਵੇ",
+    "accountDetailsDescription": "ਤੁਹਾਡੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਅਤੇ ਖਾਤਾ ਸਥਿਤੀ",
+    "authProvider": "ਪ੍ਰਮਾਣਿਕਤਾ ਪ੍ਰਦਾਤਾ",
+    "pleaseSignIn": "ਆਪਣਾ ਪ੍ਰੋਫਾਈਲ ਦੇਖਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਸਾਈਨ ਇਨ ਕਰੋ",
+    "editProfile": "ਪ੍ਰੋਫਾਈਲ ਸੰਪਾਦਿਤ ਕਰੋ",
+    "memberSince": "ਸਦੱਸ ਬਣੇ",
+    "lastSignIn": "ਆਖਰੀ ਸਾਈਨ ਇਨ",
+    "stats": {
+      "totalTrips": "ਕੁੱਲ ਯਾਤਰਾਵਾਂ",
+      "places": "ਸਥਾਨ",
+      "since": "ਤੋਂ"
+    },
+    "quickActions": {
+      "title": "ਤੇਜ਼ ਕਾਰਵਾਈਆਂ",
+      "description": "ਆਪਣੇ ਖਾਤੇ ਅਤੇ ਤਰਜੀਹਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
+      "myTrips": "ਮੇਰੀਆਂ ਯਾਤਰਾਵਾਂ",
+      "planTrip": "ਯਾਤਰਾ ਦੀ ਯੋਜਨਾ ਬਣਾਓ",
+      "upgrade": "ਅੱਪਗ੍ਰੇਡ ਕਰੋ",
+      "language": "ਭਾਸ਼ਾ"
+    }
+  },
+  "planner": {
+    "steps": {
+      "destination": "ਮੰਜ਼ਿਲ",
+      "datesTravelers": "ਤਾਰੀਖਾਂ ਅਤੇ ਯਾਤਰੀ",
+      "preferences": "ਤਰਜੀਹਾਂ",
+      "review": "ਸਮੀਖਿਆ"
+    },
+    "destination": {
+      "fromLabel": "ਤੋਂ (ਮੂਲ)",
+      "toLabel": "ਤੱਕ (ਮੰਜ਼ਿਲ)",
+      "fromPlaceholder": "ਤੁਹਾਡਾ ਸ਼ੁਰੂਆਤੀ ਸਥਾਨ...",
+      "toPlaceholder": "ਤੁਸੀਂ ਕਿੱਥੇ ਜਾਣਾ ਚਾਹੁੰਦੇ ਹੋ...",
+      "popularDestinations": "ਪ੍ਰਸਿੱਧ ਮੰਜ਼ਿਲਾਂ"
+    },
+    "datesTravelers": {
+      "suggestBestDates": "ਸਭ ਤੋਂ ਵਧੀਆ ਯਾਤਰਾ ਤਾਰੀਖ ਸੁਝਾਓ",
+      "analyzingDates": "ਸਭ ਤੋਂ ਵਧੀਆ ਤਾਰੀਖਾਂ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ..."
+    },
+    "preferences": {
+      "budgetRange": "ਬਜਟ ਰੇਂਜ",
+      "travelPace": "ਯਾਤਰਾ ਗਤੀ",
+      "interests": "ਰੁਚੀਆਂ",
+      "additionalInstructions": "ਵਾਧੂ ਨਿਰਦੇਸ਼ (ਵਿਕਲਪਿਕ)",
+      "instructionsPlaceholder": "ਕੋਈ ਵਿਸ਼ੇਸ਼ ਬੇਨਤੀਆਂ ਜਾਂ ਤਰਜੀਹਾਂ? ਜਿਵੇਂ, 'ਮੈਂ ਸ਼ਾਕਾਹਾਰੀ ਰੈਸਟੋਰੈਂਟ ਪਸੰਦ ਕਰਦਾ ਹਾਂ', 'ਬੱਚਿਆਂ ਲਈ ਅਨੁਕੂਲ ਗਤੀਵਿਧੀਆਂ ਸ਼ਾਮਲ ਕਰੋ', 'ਭੀੜ-ਭੜੱਕੇ ਵਾਲੀਆਂ ਥਾਵਾਂ ਤੋਂ ਬਚੋ'...",
+      "pace": {
+        "relaxed": "ਆਰਾਮਦਾਇਕ",
+        "relaxedDesc": "ਪ੍ਰਤੀ ਦਿਨ 2-3 ਗਤੀਵਿਧੀਆਂ",
+        "moderate": "ਮੱਧਮ",
+        "moderateDesc": "ਪ੍ਰਤੀ ਦਿਨ 4-5 ਗਤੀਵਿਧੀਆਂ",
+        "fast": "ਤੇਜ਼-ਗਤੀ",
+        "fastDesc": "ਪ੍ਰਤੀ ਦਿਨ 6+ ਗਤੀਵਿਧੀਆਂ"
+      },
+      "budget": {
+        "budget": "ਬਜਟ",
+        "moderate": "ਮੱਧਮ",
+        "luxury": "ਲਗਜ਼ਰੀ"
+      },
+      "interestsList": {
+        "culture": "ਸੱਭਿਆਚਾਰ ਅਤੇ ਇਤਿਹਾਸ",
+        "adventure": "ਸਾਹਸ",
+        "food": "ਭੋਜਨ ਅਤੇ ਖਾਣਾ",
+        "photography": "ਫੋਟੋਗ੍ਰਾਫੀ",
+        "shopping": "ਖਰੀਦਦਾਰੀ",
+        "relaxation": "ਆਰਾਮ"
+      }
+    },
+    "review": {
+      "destination": "ਮੰਜ਼ਿਲ",
+      "dates": "ਤਾਰੀਖਾਂ",
+      "travelers": "ਯਾਤਰੀ",
+      "budget": "ਬਜਟ",
+      "pace": "ਗਤੀ",
+      "interests": "ਰੁਚੀਆਂ",
+      "from": "ਤੋਂ",
+      "notSelected": "ਚੁਣਿਆ ਨਹੀਂ",
+      "notSet": "ਸੈੱਟ ਨਹੀਂ",
+      "none": "ਕੋਈ ਨਹੀਂ",
+      "person": "ਵਿਅਕਤੀ",
+      "people": "ਲੋਕ",
+      "adult": "ਬਾਲਗ",
+      "adults": "ਬਾਲਗ",
+      "child": "ਬੱਚਾ",
+      "children": "ਬੱਚੇ",
+      "infant": "ਬੱਚਾ",
+      "infants": "ਬੱਚੇ",
+      "day": "ਦਿਨ",
+      "days": "ਦਿਨ",
+      "activities": "ਗਤੀਵਿਧੀਆਂ"
+    },
+    "navigation": {
+      "back": "ਵਾਪਸ",
+      "nextStep": "ਅਗਲਾ ਕਦਮ",
+      "createItinerary": "ਮੇਰਾ ਯਾਤਰਾ ਕਾਰਜਕ੍ਰਮ ਬਣਾਓ",
+      "creatingTrip": "ਤੁਹਾਡੀ ਯਾਤਰਾ ਬਣਾਈ ਜਾ ਰਹੀ ਹੈ...",
+      "stepOf": "ਕਦਮ {{current}} ਦਾ {{total}}"
+    }
+  }
+}

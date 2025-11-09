@@ -1,0 +1,34 @@
+{
+  "network": "Error de red. Por favor, verifica tu conexión.",
+  "unauthorized": "Por favor, inicia sesión para continuar.",
+  "forbidden": "No tienes permiso para acceder a este recurso.",
+  "notFound": "No se encontró el recurso solicitado.",
+  "timeout": "La solicitud tardó demasiado. Por favor, inténtalo de nuevo.",
+  "serverError": "Error del servidor. Por favor, inténtalo más tarde.",
+  "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+  "tryAgain": "Intentar de nuevo",
+  "goBack": "Volver",
+  "refresh": "Actualizar página",
+  "api": {
+    "failed": "Solicitud de API fallida",
+    "noResponse": "Sin respuesta del servidor",
+    "invalidResponse": "Respuesta inválida del servidor"
+  },
+  "auth": {
+    "signInFailed": "Error al iniciar sesión",
+    "signOutFailed": "Error al cerrar sesión",
+    "sessionExpired": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
+    "unauthorized": "No estás autorizado para realizar esta acción."
+  },
+  "trip": {
+    "loadFailed": "Error al cargar el viaje",
+    "deleteFailed": "Error al eliminar el viaje",
+    "createFailed": "Error al crear el viaje",
+    "updateFailed": "Error al actualizar el viaje",
+    "notFound": "Viaje no encontrado"
+  },
+  "translation": {
+    "failed": "Error en la traducción",
+    "unavailable": "Servicio de traducción no disponible"
+  }
+}

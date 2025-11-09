@@ -1,0 +1,34 @@
+{
+  "network": "Network error. Please check your connection.",
+  "unauthorized": "Please sign in to continue.",
+  "forbidden": "You don't have permission to access this resource.",
+  "notFound": "The requested resource was not found.",
+  "timeout": "The request took too long. Please try again.",
+  "serverError": "Server error. Please try again later.",
+  "generic": "Something went wrong. Please try again.",
+  "tryAgain": "Try again",
+  "goBack": "Go back",
+  "refresh": "Refresh page",
+  "api": {
+    "failed": "API request failed",
+    "noResponse": "No response from server",
+    "invalidResponse": "Invalid response from server"
+  },
+  "auth": {
+    "signInFailed": "Sign in failed",
+    "signOutFailed": "Logout failed",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "unauthorized": "You are not authorized to perform this action."
+  },
+  "trip": {
+    "loadFailed": "Failed to load trip",
+    "deleteFailed": "Failed to delete trip",
+    "createFailed": "Failed to create trip",
+    "updateFailed": "Failed to update trip",
+    "notFound": "Trip not found"
+  },
+  "translation": {
+    "failed": "Translation failed",
+    "unavailable": "Translation service unavailable"
+  }
+}
