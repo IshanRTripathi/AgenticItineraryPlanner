@@ -5,6 +5,8 @@ availableSecrets:
   secretManager:
   - versionName: projects/tripaiplanner/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
     env: 'VITE_GOOGLE_MAPS_BROWSER_KEY'
+  - versionName: projects/tripaiplanner/secrets/_GOOGLE_PLACES_API_KEY/versions/latest
+    env: 'GOOGLE_PLACES_API_KEY'
 
 steps:
   # Build and deploy backend
@@ -47,6 +49,7 @@ steps:
       '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
       '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
       '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
+      '--set-secrets', 'GOOGLE_PLACES_API_KEY=_GOOGLE_PLACES_API_KEY:latest',
       '--set-secrets', 'firestore.credentials=_FIRESTORE_CREDENTIALS:latest'
     ]
     id: 'deploy-backend'
@@ -54,15 +57,17 @@ steps:
 
   # Build and deploy frontend
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'build',
-      '-f', 'Dockerfile.frontend',
-      '--build-arg', 'BACKEND_URL=${_BACKEND_URL}',
-      '--build-arg', 'VITE_WS_BASE_URL=${_BACKEND_URL}',
-      '--build-arg', 'VITE_GOOGLE_MAPS_BROWSER_KEY=${VITE_GOOGLE_MAPS_BROWSER_KEY}',
-      '-t', 'gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest',
-      '.'
-    ]
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker build \
+          -f Dockerfile.frontend \
+          --build-arg BACKEND_URL=${_BACKEND_URL} \
+          --build-arg VITE_WS_BASE_URL=${_BACKEND_URL} \
+          --build-arg VITE_GOOGLE_MAPS_BROWSER_KEY=$$VITE_GOOGLE_MAPS_BROWSER_KEY \
+          -t gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest \
+          .
     secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY']
     id: 'build-frontend'
     waitFor: ['build-backend']
