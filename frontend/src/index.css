@@ -3,6 +3,9 @@
  * Premium Design System - Material 3 + Apple HIG + Atlassian
  */
 
+/* Import Google Noto Color Emoji for consistent emoji rendering */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
+
 /* Import design tokens */
 @import './styles/tokens.css';
 

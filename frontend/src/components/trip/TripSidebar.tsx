@@ -85,8 +85,8 @@ export function TripSidebar({
       const shareLink = await exportService.generateShareLink(tripId);
 
       toast({
-        title: 'Link Copied!',
-        description: 'Shareable link copied to clipboard',
+        title: t('components.tripSidebar.linkCopied'),
+        description: t('components.tripSidebar.linkCopiedDescription'),
       });
 
       // Try Web Share API if available
@@ -99,8 +99,8 @@ export function TripSidebar({
       }
     } catch (error) {
       toast({
-        title: 'Share Failed',
-        description: 'Could not generate shareable link',
+        title: t('components.tripSidebar.shareFailed'),
+        description: t('components.tripSidebar.shareFailedDescription'),
         variant: 'destructive',
       });
     } finally {
@@ -111,8 +111,8 @@ export function TripSidebar({
   const handleExport = async (options: ExportOptions) => {
     if (!state.itinerary) {
       toast({
-        title: 'Export Failed',
-        description: 'Itinerary not loaded',
+        title: t('components.tripSidebar.exportFailed'),
+        description: t('components.tripSidebar.itineraryNotLoaded'),
         variant: 'destructive',
       });
       return;
@@ -124,14 +124,14 @@ export function TripSidebar({
       await exportService.exportToPDF(state.itinerary as any);
 
       toast({
-        title: 'Export Successful',
-        description: 'Your itinerary is ready to print or save as PDF',
+        title: t('components.tripSidebar.exportSuccess'),
+        description: t('components.tripSidebar.exportSuccessDescription'),
       });
       setIsExportModalOpen(false);
     } catch (error) {
       toast({
-        title: 'Export Failed',
-        description: 'Could not export PDF',
+        title: t('components.tripSidebar.exportFailed'),
+        description: t('components.tripSidebar.exportFailedDescription'),
         variant: 'destructive',
       });
     } finally {
@@ -140,7 +140,7 @@ export function TripSidebar({
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this trip? This action cannot be undone.')) {
+    if (confirm(t('components.tripSidebar.deleteConfirm'))) {
       // TODO: Call delete API
       console.log('Delete trip:', tripId);
       navigate('/dashboard');

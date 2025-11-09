@@ -1,45 +1,67 @@
 /**
- * Profile Page
- * Displays user information from authentication
- * Task 16: Mobile-optimized with single column layout and collapsible sections
+ * Profile Page - Enhanced UI/UX
+ * Modern profile page with improved visual design and user experience
+ * Features: Gradient header, stats cards, quick actions, smooth animations
  */
 
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { 
   User, 
   Mail, 
   Calendar, 
-  Shield, 
   ArrowLeft,
-  CheckCircle2,
-  Languages
+  Languages,
+  CreditCard,
+  MapPin,
+  Plane,
+  Edit,
+  LogOut,
+  Award,
+  TrendingUp
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { LanguageSelector } from '@/i18n/components/LanguageSelector';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
+import { motion } from 'framer-motion';
 
 export function ProfilePage() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [languageSheetOpen, setLanguageSheetOpen] = useState(false);
 
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <p className="text-sm sm:text-base text-muted-foreground mb-4">{t('pages.profile.pleaseSignIn')}</p>
-            <Button onClick={() => navigate('/login')} className="min-h-[48px] touch-manipulation">{t('common.actions.signIn')}</Button>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="w-full max-w-md shadow-xl">
+            <CardContent className="pt-6 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-8 h-8 text-primary" />
+              </div>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4">{t('pages.profile.pleaseSignIn')}</p>
+              <Button onClick={() => navigate('/login')} className="min-h-[48px] touch-manipulation">
+                {t('common.actions.signIn')}
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -64,180 +86,251 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-6">
-      <div className="container max-w-4xl px-3 sm:px-4">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-4 sm:mb-6 min-h-[44px] touch-manipulation active:scale-95 transition-transform"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          {t('common.actions.back')}
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
+      {/* Gradient Header with Profile */}
+      <div className="relative bg-gradient-to-r from-primary via-primary-hover to-primary overflow-hidden">
+        {/* Decorative background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/3 translate-y-1/3" />
+        </div>
 
-        {/* Profile Header */}
-        <Card className="mb-4 sm:mb-6">
-          <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-              {/* Avatar */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary text-white flex items-center justify-center font-bold text-2xl sm:text-3xl shadow-lg flex-shrink-0">
+        <div className="container max-w-5xl px-3 sm:px-6 relative">
+          {/* Back Button - Properly positioned at top */}
+          <div className="pt-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="text-white hover:bg-white/20 min-h-[40px] sm:min-h-[44px] touch-manipulation active:scale-95 transition-all text-sm -ml-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t('common.actions.back')}
+            </Button>
+          </div>
+
+          {/* Profile Header - Centered */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center text-center py-6 sm:py-8"
+          >
+            {/* Avatar - Clean without tick mark */}
+            <div className="relative group mb-4">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-white text-primary flex items-center justify-center font-bold text-4xl sm:text-5xl shadow-2xl ring-4 ring-white/20 transition-transform group-hover:scale-105">
                 {getUserInitials()}
               </div>
-
-              {/* User Info */}
-              <div className="flex-1 text-center sm:text-left w-full">
-                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 mb-2">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    {user.displayName || 'User'}
-                  </h1>
-                  {user.emailVerified && (
-                    <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Verified
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 break-all">{user.email}</p>
-                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                  <Badge variant="outline" className="text-xs">Free Plan</Badge>
-                  <Badge variant="outline" className="text-xs">
-                    <span className="hidden sm:inline">Member since {new Date(user.metadata?.creationTime || '').getFullYear()}</span>
-                    <span className="sm:hidden">Since {new Date(user.metadata?.creationTime || '').getFullYear()}</span>
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Language Preferences */}
-        <Card className="mb-4 sm:mb-6">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-              <Languages className="w-5 h-5" />
-              {t('pages.profile.languagePreferences')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                <Languages className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-3">
-                  {t('pages.profile.selectLanguage')}
-                </p>
-                <LanguageSelector variant="dropdown" />
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t('pages.profile.languageDescription')}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Account Details */}
-        <Card className="mb-4 sm:mb-6">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">{t('pages.profile.accountDetails')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-            {/* Email */}
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">Email Address</p>
-                <p className="text-xs sm:text-sm text-muted-foreground break-all">{user.email}</p>
-                {user.emailVerified ? (
-                  <Badge className="mt-2 bg-green-100 text-green-700 border-green-200 text-xs">
-                    Verified
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="mt-2 text-xs">
-                    Not Verified
-                  </Badge>
-                )}
-              </div>
             </div>
 
-            {/* Display Name */}
-            {user.displayName && (
-              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">Display Name</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{user.displayName}</p>
-                </div>
-              </div>
-            )}
-
-            {/* User ID */}
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">User ID</p>
-                <p className="text-xs text-muted-foreground font-mono break-all">{user.uid}</p>
-              </div>
-            </div>
-
-            {/* Account Created */}
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">Member Since</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  {formatDate(user.metadata?.creationTime)}
-                </p>
+            {/* User Info */}
+            <div className="max-w-md">
+              <h1 className="text-2xl sm:text-4xl font-bold text-white drop-shadow-lg mb-2">
+                {user.displayName || 'User'}
+              </h1>
+              <p className="text-white/90 text-sm sm:text-base mb-6 flex items-center justify-center gap-2">
+                <Mail className="w-4 h-4" />
+                <span className="truncate max-w-[280px]">{user.email}</span>
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm text-xs sm:text-sm h-9 min-h-[36px]"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  {t('pages.profile.editProfile')}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm text-xs sm:text-sm h-9 min-h-[36px]"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t('common.actions.signOut')}
+                </Button>
               </div>
             </div>
-
-            {/* Last Sign In */}
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-1">Last Sign In</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  {formatDate(user.metadata?.lastSignInTime)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Provider Info */}
-        <Card>
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">{t('pages.profile.authProvider')}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center flex-shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-900">Google</p>
-                <p className="text-xs text-muted-foreground">Signed in with Google account</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </motion.div>
+        </div>
       </div>
+
+      <div className="container max-w-5xl px-3 sm:px-6 py-6 sm:py-8 relative z-10">
+        {/* Stats Cards - Compact */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6 -mt-8 sm:-mt-12"
+        >
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex flex-col items-center gap-1 sm:gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Plane className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">0</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pages.profile.stats.totalTrips')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex flex-col items-center gap-1 sm:gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                </div>
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-green-600">0</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pages.profile.stats.places')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-2 sm:p-4">
+              <div className="flex flex-col items-center gap-1 sm:gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                </div>
+                <div className="text-center">
+                  <p className="text-lg sm:text-xl font-bold text-amber-600">
+                    {new Date(user.metadata?.creationTime || '').getFullYear()}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{t('pages.profile.stats.since')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Main Content - Single Column */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Quick Actions - Compact */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Card className="shadow-lg">
+              <CardHeader className="p-3 sm:p-4">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                  {t('pages.profile.quickActions.title')}
+                </CardTitle>
+                <CardDescription className="text-xs">{t('pages.profile.quickActions.description')}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0 grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-col h-auto py-3 hover:bg-primary/5 hover:border-primary transition-all group"
+                  onClick={() => navigate('/trips')}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors mb-2">
+                    <Plane className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="font-semibold text-xs">{t('pages.profile.quickActions.myTrips')}</p>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="flex-col h-auto py-3 hover:bg-green-50 hover:border-green-500 transition-all group"
+                  onClick={() => navigate('/planner')}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors mb-2">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                  </div>
+                  <p className="font-semibold text-xs">{t('pages.profile.quickActions.planTrip')}</p>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="flex-col h-auto py-3 hover:bg-amber-50 hover:border-amber-500 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors mb-2">
+                    <CreditCard className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <p className="font-semibold text-xs">{t('pages.profile.quickActions.upgrade')}</p>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="flex-col h-auto py-3 hover:bg-indigo-50 hover:border-indigo-500 transition-all group"
+                  onClick={() => setLanguageSheetOpen(true)}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors mb-2">
+                    <Languages className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <p className="font-semibold text-xs">{t('pages.profile.quickActions.language')}</p>
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Account Information - Compact */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <Card className="shadow-lg">
+              <CardHeader className="p-3 sm:p-4">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+                  <User className="w-4 h-4 text-primary" />
+                  {t('pages.profile.accountDetails')}
+                </CardTitle>
+                <CardDescription className="text-xs">{t('pages.profile.accountDetailsDescription')}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                {/* Account Created & Last Sign In - Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2 p-2 sm:p-3 bg-gradient-to-r from-green-50 to-transparent rounded-lg border border-green-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900">{t('pages.profile.memberSince')}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {formatDate(user.metadata?.creationTime)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 p-2 sm:p-3 bg-gradient-to-r from-amber-50 to-transparent rounded-lg border border-amber-100">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-gray-900">{t('pages.profile.lastSignIn')}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {formatDate(user.metadata?.lastSignInTime)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Language Selection Bottom Sheet */}
+      <BottomSheet
+        open={languageSheetOpen}
+        onOpenChange={setLanguageSheetOpen}
+        title={t('pages.profile.languagePreferences')}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t('pages.profile.languageDescription')}
+          </p>
+          <LanguageSelector variant="inline" showFlags={true} />
+        </div>
+      </BottomSheet>
     </div>
   );
 }
