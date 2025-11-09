@@ -6,10 +6,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Home, Compass, Calendar, User, LogIn, LogOut, Search } from 'lucide-react';
+import { Home, Compass, Calendar, User, LogIn, LogOut, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 interface MobileMenuProps {
@@ -20,6 +21,7 @@ interface MobileMenuProps {
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { user, signOut, isAuthenticated, loading } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const location = useLocation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -31,15 +33,15 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       setIsLoggingOut(true);
       await signOut();
       toast({
-        title: 'Signed out successfully',
-        description: 'You have been logged out of your account',
+        title: t('components.mobileMenu.signedOutSuccess'),
+        description: t('components.mobileMenu.signedOutDescription'),
       });
       onClose();
       window.location.href = '/';
     } catch (error: any) {
       toast({
-        title: 'Logout failed',
-        description: error.message || 'Please try again',
+        title: t('components.mobileMenu.logoutFailed'),
+        description: error.message || t('components.mobileMenu.tryAgain'),
         variant: 'destructive',
       });
     } finally {
@@ -48,11 +50,11 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   };
 
   const menuItems = [
-    { icon: Home, label: 'Home', href: '/' },
-    { icon: Search, label: 'Search', href: '/search' },
-    { icon: Calendar, label: 'Plan Trip', href: '/planner' },
-    { icon: Compass, label: 'My Trips', href: '/dashboard' },
-    { icon: User, label: 'Profile', href: '/profile' },
+    { icon: Home, label: t('common.navigation.home'), href: '/' },
+    { icon: Search, label: t('common.navigation.search'), href: '/search' },
+    { icon: Calendar, label: t('common.navigation.planTrip'), href: '/planner' },
+    { icon: Compass, label: t('common.navigation.myTrips'), href: '/dashboard' },
+    { icon: User, label: t('common.navigation.profile'), href: '/profile' },
   ];
 
   const isActive = (href: string) => {
@@ -168,7 +170,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       >
         {/* Header with gradient - Add top padding for header clearance */}
         <div className="bg-gradient-to-br from-primary to-primary/90 text-white p-3 pt-20">
-          <h2 className="text-lg font-bold mb-3">EasyTrip</h2>
+          <h2 className="text-lg font-bold mb-3">{t('components.mobileMenu.title')}</h2>
 
           {/* User Info Card - Compact */}
           {!loading && isAuthenticated && (
@@ -178,7 +180,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold truncate">
-                  {user?.displayName || 'User'}
+                  {user?.displayName || t('components.mobileMenu.user')}
                 </p>
                 <p className="text-[10px] text-white/80 truncate">
                   {user?.email}
@@ -240,7 +242,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               disabled={isLoggingOut}
             >
               <LogOut className="w-4 h-4 mr-2" />
-              {isLoggingOut ? 'Signing out...' : 'Sign Out'}
+              {isLoggingOut ? t('components.mobileMenu.signingOut') : t('common.actions.signOut')}
             </Button>
           ) : (
             <Button
@@ -251,7 +253,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               }}
             >
               <LogIn className="w-4 h-4 mr-2" />
-              Sign In
+              {t('common.actions.signIn')}
             </Button>
           )}
           {/* Safe area spacer */}

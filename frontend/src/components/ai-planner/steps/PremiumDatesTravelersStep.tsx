@@ -11,6 +11,7 @@ import { fadeInUp } from '@/lib/animations/variants';
 import { Calendar, Users, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 interface PremiumDatesTravelersStepProps {
   data: any;
@@ -18,6 +19,7 @@ interface PremiumDatesTravelersStepProps {
 }
 
 export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTravelersStepProps) {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState<Date | null>(
     data.startDate ? new Date(data.startDate) : null
   );
@@ -98,7 +100,7 @@ export function PremiumDatesTravelersStep({ data, onDataChange }: PremiumDatesTr
             disabled={suggestingDates}
             className="w-full h-11 sm:h-12 px-4 sm:px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg transition-all font-medium text-sm sm:text-base touch-manipulation active:scale-95"
           >
-            {suggestingDates ? 'Analyzing best dates...' : 'Suggest Best Travel Date'}
+            {suggestingDates ? t('pages.planner.datesTravelers.analyzingDates') : t('pages.planner.datesTravelers.suggestBestDates')}
           </Button>
         </div>
       </motion.div>

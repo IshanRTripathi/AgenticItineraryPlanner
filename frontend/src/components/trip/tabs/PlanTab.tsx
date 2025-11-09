@@ -15,12 +15,14 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { staggerChildren, slideUp } from '@/utils/animations';
 import { getDayColor } from '@/constants/dayColors';
+import { useTranslation } from '@/i18n';
 
 interface PlanTabProps {
   itinerary: any; // NormalizedItinerary type
 }
 
 export function PlanTab({ itinerary }: PlanTabProps) {
+  const { t } = useTranslation();
   const { loadItinerary, state } = useUnifiedItinerary();
   const itineraryId = itinerary?.id || itinerary?.itineraryId;
   const isGenerating = itinerary?.status === 'generating' || itinerary?.status === 'planning';
@@ -142,7 +144,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
               )}
             >
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-semibold">Day by Day</span>
+              <span className="font-semibold">{t('components.planTab.dayByDay')}</span>
             </button>
             <button
               onClick={() => setSubTab('map')}
@@ -155,7 +157,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
               )}
             >
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-semibold">Map View</span>
+              <span className="font-semibold">{t('components.planTab.mapView')}</span>
             </button>
           </div>
         </div>
@@ -166,9 +168,12 @@ export function PlanTab({ itinerary }: PlanTabProps) {
             {/* Timeline Header with Overview */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold">Your Itinerary</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">{t('components.planTab.yourItinerary')}</h2>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  {mappedDays.length} days • {mappedDays.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0)} activities
+                  {t('components.planTab.summary', { 
+                    days: mappedDays.length, 
+                    activities: mappedDays.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0) 
+                  })}
                 </p>
               </div>
               
@@ -180,7 +185,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                   onClick={() => setExpandedDay(expandedDay === null ? 0 : null)}
                   className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95"
                 >
-                  {expandedDay === null ? 'Expand All' : 'Collapse All'}
+                  {expandedDay === null ? t('components.planTab.expandAll') : t('components.planTab.collapseAll')}
                 </Button>
                 <Button
                   variant="outline"
@@ -189,7 +194,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                   className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95"
                 >
                   <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  Add Day
+                  {t('components.planTab.addDay')}
                 </Button>
               </div>
             </div>
@@ -258,9 +263,9 @@ export function PlanTab({ itinerary }: PlanTabProps) {
             {mappedDays.length === 0 && !isGenerating && (
               <EmptyState
                 icon={Calendar}
-                title="No days planned yet"
-                description="Start building your itinerary by adding your first day"
-                actionLabel="Add First Day"
+                title={t('components.planTab.empty.title')}
+                description={t('components.planTab.empty.description')}
+                actionLabel={t('components.planTab.empty.action')}
                 onAction={() => {/* TODO: Add day handler */}}
               />
             )}

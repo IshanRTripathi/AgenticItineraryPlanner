@@ -16,13 +16,7 @@ import { ArrowLeft, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 import { api, endpoints } from '@/services/api';
 import { fadeInUp, slideInRight, slideInLeft } from '@/lib/animations/variants';
 import { cn } from '@/lib/utils';
-
-const STEPS = [
-    { id: 1, title: 'Destination', component: PremiumDestinationStep },
-    { id: 2, title: 'Dates & Travelers', component: PremiumDatesTravelersStep },
-    { id: 3, title: 'Preferences', component: PremiumPreferencesStep },
-    { id: 4, title: 'Review', component: ReviewStep },
-];
+import { useTranslation } from '@/i18n';
 
 interface TripFormData {
     origin?: string;
@@ -39,12 +33,20 @@ interface TripFormData {
 }
 
 export function PremiumTripWizard() {
+    const { t } = useTranslation();
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<TripFormData>({
         origin: 'Bengaluru, Karnataka, India',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+
+    const STEPS = [
+        { id: 1, title: t('pages.planner.steps.destination'), component: PremiumDestinationStep },
+        { id: 2, title: t('pages.planner.steps.datesTravelers'), component: PremiumDatesTravelersStep },
+        { id: 3, title: t('pages.planner.steps.preferences'), component: PremiumPreferencesStep },
+        { id: 4, title: t('pages.planner.steps.review'), component: ReviewStep },
+    ];
 
     const CurrentStepComponent = STEPS[currentStep - 1].component;
     const isFirstStep = currentStep === 1;
@@ -198,7 +200,7 @@ export function PremiumTripWizard() {
                             size="lg"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
+                            {t('pages.planner.navigation.back')}
                         </Button>
 
                         <Button
@@ -215,17 +217,17 @@ export function PremiumTripWizard() {
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                    <span>Creating Your Trip...</span>
+                                    <span>{t('pages.planner.navigation.creatingTrip')}</span>
                                 </>
                             ) : isLastStep ? (
                                 <>
                                     {/* Shimmer effect for Create button */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer-fast" />
-                                    <span className="relative z-10">Create My Itinerary</span>
+                                    <span className="relative z-10">{t('pages.planner.navigation.createItinerary')}</span>
                                 </>
                             ) : (
                                 <>
-                                    <span>Next Step</span>
+                                    <span>{t('pages.planner.navigation.nextStep')}</span>
                                     <ArrowRight className="w-5 h-5 ml-2" />
                                 </>
                             )}
@@ -239,7 +241,7 @@ export function PremiumTripWizard() {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
                     >
-                        Step {currentStep} of {STEPS.length}
+                        {t('pages.planner.navigation.stepOf', { current: currentStep, total: STEPS.length })}
                     </motion.div>
                 </Card>
             </motion.div>

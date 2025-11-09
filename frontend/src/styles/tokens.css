@@ -65,9 +65,10 @@
      ======================================== */
   
   /* Font Families */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  --font-display: 'Inter', sans-serif;
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Color Emoji', sans-serif;
+  --font-display: 'Inter', 'Noto Color Emoji', sans-serif;
   --font-mono: 'Fira Code', 'Courier New', monospace;
+  --font-emoji: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   
   /* Font Sizes (8px base scale) */
   --text-xs: 0.75rem;     /* 12px */
@@ -238,4 +239,12 @@
 .touch-target {
   min-width: var(--touch-target-min);
   min-height: var(--touch-target-min);
+}
+
+/* Emoji Rendering */
+.emoji {
+  font-family: var(--font-emoji);
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
 }

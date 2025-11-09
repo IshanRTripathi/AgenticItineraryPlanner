@@ -6,6 +6,7 @@
 
 import { MapPin, Calendar, Users, DollarSign, Gauge, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '@/i18n';
 
 interface ReviewStepProps {
   data: any;
@@ -13,6 +14,7 @@ interface ReviewStepProps {
 }
 
 export function ReviewStep({ data }: ReviewStepProps) {
+  const { t } = useTranslation();
   const totalTravelers = (data.adults || 0) + (data.children || 0) + (data.infants || 0);
   
   // Calculate trip duration
@@ -28,7 +30,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
 
   // Format dates
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return 'Not selected';
+    if (!dateStr) return t('pages.planner.review.notSelected');
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
@@ -45,11 +47,11 @@ export function ReviewStep({ data }: ReviewStepProps) {
 
   // Get budget label
   const getBudgetLabel = (range: [number, number]) => {
-    if (!range) return 'Not set';
+    if (!range) return t('pages.planner.review.notSet');
     const [, max] = range;
-    if (max <= 1000) return '💰 Budget';
-    if (max <= 2500) return '💵 Moderate';
-    return '💎 Luxury';
+    if (max <= 1000) return `💰 ${t('pages.planner.preferences.budget.budget')}`;
+    if (max <= 2500) return `💵 ${t('pages.planner.preferences.budget.moderate')}`;
+    return `💎 ${t('pages.planner.preferences.budget.luxury')}`;
   };
 
   return (
@@ -70,13 +72,13 @@ export function ReviewStep({ data }: ReviewStepProps) {
               <MapPin className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Destination</p>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">{t('pages.planner.review.destination')}</p>
               <p className="text-xs sm:text-base font-bold text-foreground line-clamp-1">
-                {data.destination || 'Not selected'}
+                {data.destination || t('pages.planner.review.notSelected')}
               </p>
               {data.origin && (
                 <p className="text-[9px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 line-clamp-1 hidden sm:block">
-                  From: {data.origin}
+                  {t('pages.planner.review.from')}: {data.origin}
                 </p>
               )}
             </div>
@@ -95,7 +97,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
               <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Dates</p>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">{t('pages.planner.review.dates')}</p>
               <p className="text-[10px] sm:text-sm font-semibold text-foreground line-clamp-1">
                 {formatDate(data.startDate)}
               </p>
@@ -104,7 +106,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
               </p>
               {duration && (
                 <p className="text-[9px] sm:text-xs text-primary font-medium mt-0.5 sm:mt-1">
-                  {duration} {duration === 1 ? 'day' : 'days'}
+                  {t(duration === 1 ? 'pages.planner.review.day' : 'pages.planner.review.days', { count: duration }, { count: duration })}
                 </p>
               )}
             </div>
@@ -123,14 +125,14 @@ export function ReviewStep({ data }: ReviewStepProps) {
               <Users className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Travelers</p>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">{t('pages.planner.review.travelers')}</p>
               <p className="text-sm sm:text-xl font-bold text-foreground">
-                {totalTravelers} {totalTravelers === 1 ? 'Person' : 'People'}
+                {totalTravelers} {t(totalTravelers === 1 ? 'pages.planner.review.person' : 'pages.planner.review.people')}
               </p>
               <div className="flex flex-wrap gap-1 sm:gap-2 mt-0.5 sm:mt-1 text-[9px] sm:text-xs text-muted-foreground">
-                {data.adults > 0 && <span>{data.adults} Adult{data.adults > 1 ? 's' : ''}</span>}
-                {data.children > 0 && <span>• {data.children} Child{data.children > 1 ? 'ren' : ''}</span>}
-                {data.infants > 0 && <span>• {data.infants} Infant{data.infants > 1 ? 's' : ''}</span>}
+                {data.adults > 0 && <span>{data.adults} {t(data.adults > 1 ? 'pages.planner.review.adults' : 'pages.planner.review.adult')}</span>}
+                {data.children > 0 && <span>• {data.children} {t(data.children > 1 ? 'pages.planner.review.children' : 'pages.planner.review.child')}</span>}
+                {data.infants > 0 && <span>• {data.infants} {t(data.infants > 1 ? 'pages.planner.review.infants' : 'pages.planner.review.infant')}</span>}
               </div>
             </div>
           </div>
@@ -148,7 +150,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
               <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Budget</p>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">{t('pages.planner.review.budget')}</p>
               <p className="text-xs sm:text-base font-bold text-foreground line-clamp-1">
                 {getBudgetLabel(data.budgetRange)}
               </p>
@@ -173,14 +175,12 @@ export function ReviewStep({ data }: ReviewStepProps) {
               <Gauge className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Pace</p>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">{t('pages.planner.review.pace')}</p>
               <p className="text-xs sm:text-base font-bold text-foreground capitalize line-clamp-1">
-                {getPaceEmoji(data.pace)} {data.pace || 'Not selected'}
+                {getPaceEmoji(data.pace)} {data.pace ? t(`pages.planner.preferences.pace.${data.pace}`) : t('pages.planner.review.notSelected')}
               </p>
               <p className="text-[9px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 line-clamp-1">
-                {data.pace === 'relaxed' && '2-3 activities'}
-                {data.pace === 'moderate' && '4-5 activities'}
-                {data.pace === 'fast' && '6+ activities'}
+                {data.pace && t(`pages.planner.preferences.pace.${data.pace}Desc`)}
               </p>
             </div>
           </div>
@@ -198,7 +198,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
               <Heart className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">Interests</p>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">{t('pages.planner.review.interests')}</p>
               {data.interests && data.interests.length > 0 ? (
                 <div className="flex flex-wrap gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
                   {data.interests.slice(0, 3).map((interest: string) => (
@@ -206,7 +206,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
                       key={interest}
                       className="px-1.5 sm:px-2 py-0.5 rounded-md bg-pink-100 text-pink-700 text-[9px] sm:text-xs font-medium capitalize line-clamp-1"
                     >
-                      {interest}
+                      {t(`pages.planner.preferences.interestsList.${interest}`)}
                     </span>
                   ))}
                   {data.interests.length > 3 && (
@@ -216,7 +216,7 @@ export function ReviewStep({ data }: ReviewStepProps) {
                   )}
                 </div>
               ) : (
-                <p className="text-[10px] sm:text-sm text-muted-foreground">None</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground">{t('pages.planner.review.none')}</p>
               )}
             </div>
           </div>

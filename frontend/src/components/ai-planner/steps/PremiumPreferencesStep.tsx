@@ -9,34 +9,30 @@ import { fadeInUp } from '@/lib/animations/variants';
 import { Mountain, UtensilsCrossed, Camera, ShoppingBag, Landmark, Heart, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslation } from '@/i18n';
 
 interface PremiumPreferencesStepProps {
   data: any;
   onDataChange: (data: any) => void;
 }
 
-const PACE_OPTIONS = [
-  { id: 'relaxed', label: 'Relaxed', description: '2-3 activities per day', emoji: '🧘' },
-  { id: 'moderate', label: 'Moderate', description: '4-5 activities per day', emoji: '🚶' },
-  { id: 'fast', label: 'Fast-paced', description: '6+ activities per day', emoji: '🏃' },
-];
-
 const BUDGET_PRESETS = [
-  { label: 'Budget', range: [300, 1000] as [number, number], emoji: '💰', description: ' ' },
-  { label: 'Moderate', range: [1000, 2500] as [number, number], emoji: '💵', description: ' ' },
-  { label: 'Luxury', range: [2500, 5000] as [number, number], emoji: '💎', description: ' ' },
+  { id: 'budget', range: [300, 1000] as [number, number], emoji: '💰', description: ' ' },
+  { id: 'moderate', range: [1000, 2500] as [number, number], emoji: '💵', description: ' ' },
+  { id: 'luxury', range: [2500, 5000] as [number, number], emoji: '💎', description: ' ' },
 ];
 
-const INTERESTS = [
-  { id: 'culture', label: 'Culture & History', icon: Landmark, color: 'text-purple-500' },
-  { id: 'adventure', label: 'Adventure', icon: Mountain, color: 'text-orange-500' },
-  { id: 'food', label: 'Food & Dining', icon: UtensilsCrossed, color: 'text-red-500' },
-  { id: 'photography', label: 'Photography', icon: Camera, color: 'text-blue-500' },
-  { id: 'shopping', label: 'Shopping', icon: ShoppingBag, color: 'text-pink-500' },
-  { id: 'relaxation', label: 'Relaxation', icon: Heart, color: 'text-green-500' },
+const INTERESTS_CONFIG = [
+  { id: 'culture', icon: Landmark, color: 'text-purple-500' },
+  { id: 'adventure', icon: Mountain, color: 'text-orange-500' },
+  { id: 'food', icon: UtensilsCrossed, color: 'text-red-500' },
+  { id: 'photography', icon: Camera, color: 'text-blue-500' },
+  { id: 'shopping', icon: ShoppingBag, color: 'text-pink-500' },
+  { id: 'relaxation', icon: Heart, color: 'text-green-500' },
 ];
 
 export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreferencesStepProps) {
+  const { t } = useTranslation();
   const [budget, setBudget] = useState<[number, number]>(
     data.budgetRange || [500, 2000]
   );
@@ -70,12 +66,12 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
         {/* Budget - 3 Cards */}
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-            Budget Range
+            {t('pages.planner.preferences.budgetRange')}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {BUDGET_PRESETS.slice(0, 3).map((preset) => (
               <motion.button
-                key={preset.label}
+                key={preset.id}
                 onClick={() => {
                   setBudget(preset.range);
                   onDataChange({ budgetRange: preset.range });
@@ -90,7 +86,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="text-lg sm:text-xl mb-0.5 sm:mb-1">{preset.emoji}</div>
-                <div className="text-[10px] sm:text-xs font-semibold">{preset.label}</div>
+                <div className="text-[10px] sm:text-xs font-semibold">{t(`pages.planner.preferences.budget.${preset.id}`)}</div>
                 <div className="text-[9px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">{preset.description}</div>
               </motion.button>
             ))}
@@ -100,37 +96,40 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
         {/* Travel Pace - 3 Cards */}
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-            Travel Pace
+            {t('pages.planner.preferences.travelPace')}
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {PACE_OPTIONS.map((option) => (
-              <motion.button
-                key={option.id}
-                onClick={() => handlePaceChange(option.id)}
-                className={cn(
-                  'p-2 sm:p-3 rounded-lg border-2 transition-all text-center relative touch-manipulation active:scale-95',
-                  pace === option.id
-                    ? 'border-primary bg-primary/5 shadow-md'
-                    : 'border-border hover:border-primary/50'
-                )}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="text-lg sm:text-xl mb-0.5 sm:mb-1">{option.emoji}</div>
-                <div className="text-[10px] sm:text-xs font-semibold">{option.label}</div>
-                <div className="text-[9px] sm:text-xs text-muted-foreground mt-0.5">{option.description}</div>
-              </motion.button>
-            ))}
+            {['relaxed', 'moderate', 'fast'].map((paceId) => {
+              const emojis = { relaxed: '🧘', moderate: '🚶', fast: '🏃' };
+              return (
+                <motion.button
+                  key={paceId}
+                  onClick={() => handlePaceChange(paceId)}
+                  className={cn(
+                    'p-2 sm:p-3 rounded-lg border-2 transition-all text-center relative touch-manipulation active:scale-95',
+                    pace === paceId
+                      ? 'border-primary bg-primary/5 shadow-md'
+                      : 'border-border hover:border-primary/50'
+                  )}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="text-lg sm:text-xl mb-0.5 sm:mb-1">{emojis[paceId as keyof typeof emojis]}</div>
+                  <div className="text-[10px] sm:text-xs font-semibold">{t(`pages.planner.preferences.pace.${paceId}`)}</div>
+                  <div className="text-[9px] sm:text-xs text-muted-foreground mt-0.5">{t(`pages.planner.preferences.pace.${paceId}Desc`)}</div>
+                </motion.button>
+              );
+            })}
           </div>
         </div>
 
         {/* Interests - 2 cols on mobile, 3 on desktop */}
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-            Interests
+            {t('pages.planner.preferences.interests')}
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {INTERESTS.map((interest) => {
+            {INTERESTS_CONFIG.map((interest) => {
               const Icon = interest.icon;
               const isSelected = interests.includes(interest.id);
               return (
@@ -148,7 +147,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
                 >
                   <Icon className={cn('w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0', isSelected ? 'text-primary' : interest.color)} />
                   <span className={cn('font-medium truncate', isSelected ? 'text-primary' : 'text-foreground')}>
-                    {interest.label}
+                    {t(`pages.planner.preferences.interestsList.${interest.id}`)}
                   </span>
                 </motion.button>
               );
@@ -160,7 +159,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
             <MessageSquare className="w-3.5 h-3.5" />
-            Additional Instructions (Optional)
+            {t('pages.planner.preferences.additionalInstructions')}
           </label>
           <Textarea
             value={customInstructions}
@@ -168,7 +167,7 @@ export function PremiumPreferencesStep({ data, onDataChange }: PremiumPreference
               setCustomInstructions(e.target.value);
               onDataChange({ customInstructions: e.target.value });
             }}
-            placeholder="Any special requests or preferences? e.g., 'I prefer vegetarian restaurants', 'Include kid-friendly activities', 'Avoid crowded places'..."
+            placeholder={t('pages.planner.preferences.instructionsPlaceholder')}
             className="min-h-[80px] sm:min-h-[100px] text-xs sm:text-sm resize-none"
           />
         </div>

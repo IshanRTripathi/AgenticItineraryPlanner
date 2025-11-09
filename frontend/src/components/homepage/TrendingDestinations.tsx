@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useTranslation } from '@/i18n';
 
 const MOCK_DESTINATIONS = [
   {
@@ -101,6 +102,7 @@ const itemVariants = {
 };
 
 export function TrendingDestinations() {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
 
@@ -113,7 +115,7 @@ export function TrendingDestinations() {
           transition={{ duration: 0.5 }}
           className="text-xl sm:text-3xl font-bold mb-4 sm:mb-8 px-4"
         >
-          Trending Destinations
+          {t('pages.home.trendingDestinations.title')}
         </motion.h2>
         
         {/* Mobile: Horizontal Scroll, Desktop: Grid */}
@@ -166,7 +168,7 @@ export function TrendingDestinations() {
                           </p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <div className="text-white/80 text-[8px] sm:text-xs mb-0.5">from</div>
+                          <div className="text-white/80 text-[8px] sm:text-xs mb-0.5">{t('pages.home.trendingDestinations.from')}</div>
                           <div className="text-white font-bold text-xs sm:text-xl drop-shadow-lg">
                             ₹{(dest.price / 1000).toFixed(0)}k
                           </div>
@@ -176,7 +178,7 @@ export function TrendingDestinations() {
                       {/* Explore Button */}
                       <div className={`mt-1.5 sm:mt-2 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0'} transition-all duration-300`}>
                         <button className="w-full bg-white text-gray-900 font-semibold text-[9px] sm:text-sm py-1.5 sm:py-2.5 min-h-[36px] sm:min-h-[44px] rounded-lg hover:bg-gray-100 transition-colors shadow-lg touch-manipulation active:scale-95">
-                          Explore
+                          {t('pages.home.trendingDestinations.explore')}
                         </button>
                       </div>
                     </div>

@@ -14,9 +14,12 @@ import { useStickyHeader } from '@/hooks/useScrollAnimation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { LanguageSelector } from '@/i18n/components/LanguageSelector';
+import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 export function Header() {
+  const { t } = useTranslation();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const isScrolled = useStickyHeader(20);
@@ -50,14 +53,14 @@ export function Header() {
       setProfileSheetOpen(false);
       await signOut();
       toast({
-        title: 'Signed out successfully',
-        description: 'You have been logged out of your account',
+        title: t('components.header.profile.signedOutSuccess'),
+        description: t('components.header.profile.signedOutDescription'),
       });
       window.location.href = '/';
     } catch (error: any) {
       toast({
-        title: 'Logout failed',
-        description: error.message || 'Please try again',
+        title: t('components.header.profile.logoutFailed'),
+        description: error.message || t('components.header.profile.tryAgain'),
         variant: 'destructive',
       });
     } finally {
@@ -98,21 +101,26 @@ export function Header() {
             {/* Desktop Navigation - Hidden on mobile and tablet (< 768px) */}
             <nav className="hidden md:flex items-center gap-6">
               <a href="/" className="text-sm font-medium hover:text-primary transition-colors">
-                Home
+                {t('common.navigation.home')}
               </a>
               <a href="/planner" className="text-sm font-medium hover:text-primary transition-colors">
-                Plan Trip
+                {t('common.navigation.planTrip')}
               </a>
               <a href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
-                My Trips
+                {t('common.navigation.myTrips')}
               </a>
               <a href="/search" className="text-sm font-medium hover:text-primary transition-colors">
-                Search
+                {t('common.navigation.search')}
               </a>
             </nav>
 
             {/* Right Actions */}
             <div className="flex items-center gap-3 sm:gap-4">
+              {/* Language Selector - Desktop */}
+              <div className="hidden md:block">
+                <LanguageSelector variant="compact" showFlags={true} />
+              </div>
+
               {loading ? (
                 // Show nothing while loading to prevent flash
                 <div className="hidden lg:block w-10 h-9" />
@@ -157,7 +165,7 @@ export function Header() {
                             onClick={() => setProfileDropdownOpen(false)}
                           >
                             <User className="w-4 h-4 text-muted-foreground" />
-                            <span>My Profile</span>
+                            <span>{t('components.header.profile.myProfile')}</span>
                           </a>
                           <a
                             href="/settings"
@@ -165,7 +173,7 @@ export function Header() {
                             onClick={() => setProfileDropdownOpen(false)}
                           >
                             <Settings className="w-4 h-4 text-muted-foreground" />
-                            <span>Settings</span>
+                            <span>{t('components.header.profile.settings')}</span>
                           </a>
                           <a
                             href="/help"
@@ -173,7 +181,7 @@ export function Header() {
                             onClick={() => setProfileDropdownOpen(false)}
                           >
                             <HelpCircle className="w-4 h-4 text-muted-foreground" />
-                            <span>Help & Support</span>
+                            <span>{t('components.header.profile.help')}</span>
                           </a>
                         </div>
 
@@ -185,7 +193,7 @@ export function Header() {
                             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                           >
                             <LogOut className="w-4 h-4" />
-                            <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
+                            <span>{isLoggingOut ? t('components.header.profile.signingOut') : t('components.header.profile.signOut')}</span>
                           </button>
                         </div>
                       </div>
@@ -208,7 +216,7 @@ export function Header() {
                   onClick={() => (window.location.href = '/login')}
                   className="hidden md:inline-flex min-h-[44px]"
                 >
-                  Sign In
+                  {t('common.actions.signIn')}
                 </Button>
               )}
             </div>
@@ -220,7 +228,7 @@ export function Header() {
       <BottomSheet
         open={profileSheetOpen}
         onOpenChange={setProfileSheetOpen}
-        title="Account"
+        title={t('components.header.profile.account')}
       >
         {/* User Info */}
         <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg mb-4">
@@ -245,7 +253,7 @@ export function Header() {
             onClick={() => setProfileSheetOpen(false)}
           >
             <User className="w-5 h-5 text-muted-foreground" />
-            <span>My Profile</span>
+            <span>{t('components.header.profile.myProfile')}</span>
           </a>
           <a
             href="/settings"
@@ -253,7 +261,7 @@ export function Header() {
             onClick={() => setProfileSheetOpen(false)}
           >
             <Settings className="w-5 h-5 text-muted-foreground" />
-            <span>Settings</span>
+            <span>{t('components.header.profile.settings')}</span>
           </a>
           <a
             href="/help"
@@ -261,7 +269,7 @@ export function Header() {
             onClick={() => setProfileSheetOpen(false)}
           >
             <HelpCircle className="w-5 h-5 text-muted-foreground" />
-            <span>Help & Support</span>
+            <span>{t('components.header.profile.help')}</span>
           </a>
         </div>
 
@@ -273,7 +281,7 @@ export function Header() {
             className="w-full flex items-center justify-center gap-3 px-4 py-3 text-base text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 min-h-[48px] font-medium"
           >
             <LogOut className="w-5 h-5" />
-            <span>{isLoggingOut ? 'Signing out...' : 'Sign Out'}</span>
+            <span>{isLoggingOut ? t('components.header.profile.signingOut') : t('components.header.profile.signOut')}</span>
           </button>
         </div>
       </BottomSheet>

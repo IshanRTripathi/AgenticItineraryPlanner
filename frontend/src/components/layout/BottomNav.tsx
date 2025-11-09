@@ -9,6 +9,7 @@ import { Home, Search, PlusCircle, Calendar, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from '@/i18n';
 
 interface NavItem {
   id: string;
@@ -19,35 +20,36 @@ interface NavItem {
   badge?: number;
 }
 
-const NAV_ITEMS: NavItem[] = [
+// Navigation items configuration (labels will be translated)
+const getNavItems = (t: (key: string) => string): NavItem[] => [
   {
     id: 'home',
-    label: 'Home',
+    label: t('components.bottomNav.home'),
     icon: Home,
     path: '/',
   },
   {
     id: 'search',
-    label: 'Search',
+    label: t('components.bottomNav.search'),
     icon: Search,
     path: '/search',
   },
   {
     id: 'create',
-    label: 'Plan',
+    label: t('components.bottomNav.plan'),
     icon: PlusCircle,
     path: '/planner',
     highlight: true,
   },
   {
     id: 'trips',
-    label: 'Trips',
+    label: t('components.bottomNav.trips'),
     icon: Calendar,
     path: '/dashboard',
   },
   {
     id: 'profile',
-    label: 'Profile',
+    label: t('components.bottomNav.profile'),
     icon: User,
     path: '/profile',
   },
@@ -58,11 +60,15 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ hide = false }: BottomNavProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [rippleEffect, setRippleEffect] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
+  
+  // Get translated nav items
+  const NAV_ITEMS = getNavItems(t);
 
   const isActive = (path: string) => {
     if (path === '/') {
