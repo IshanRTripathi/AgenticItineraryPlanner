@@ -221,9 +221,7 @@ export function PremiumTripWizard() {
                                 <>
                                     {/* Shimmer effect for Create button */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shimmer-fast" />
-                                    <Sparkles className="w-5 h-5 mr-2 relative z-10" />
                                     <span className="relative z-10">Create My Itinerary</span>
-                                    <Sparkles className="w-4 h-4 ml-2 relative z-10" />
                                 </>
                             ) : (
                                 <>

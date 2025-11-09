@@ -63,7 +63,6 @@ export function DashboardPage() {
               onClick={() => window.location.href = '/planner'}
               className="w-full md:w-auto gap-2 min-h-[44px] touch-manipulation active:scale-95 transition-transform"
             >
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="hidden sm:inline">Plan New Trip</span>
               <span className="sm:hidden">New Trip</span>
             </Button>

@@ -19,7 +19,6 @@ import { BookingsTab } from '@/components/trip/tabs/BookingsTab';
 import { ChatTab } from '@/components/trip/tabs/ChatTab';
 import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
 import { ErrorDisplay } from '@/components/error/ErrorDisplay';
-import { GenerationProgressBanner } from '@/components/trip/GenerationProgressBanner';
 import { UnifiedItineraryProvider, useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Eye, Map, CreditCard, DollarSign, Package, FileText, MessageSquare } from 'lucide-react';
@@ -255,49 +254,11 @@ function TripDetailContent() {
     );
   };
 
-  // Calculate generation progress
-  const completedDays = days.filter((day: any) => day.nodes && day.nodes.length > 0).length;
-  const currentPhase = state.currentPhase || 'skeleton';
 
-  /**
-   * SIMPLIFIED BANNER VISIBILITY
-   * 
-   * Show banner if:
-   * 1. itinerary.status === 'generating' OR 'planning' (from API)
-   * 2. OR ?generating=true in URL (from redirect during generation)
-   * 
-   * Banner will auto-hide after 60 seconds
-   */
-  
-  // Check URL parameters
-  const generatingParam = searchParams.get('generating') === 'true';
-
-  // Simple logic: show if generating or URL param says so
-  const shouldShowBanner = isGenerating || generatingParam;
-  
-  console.log('[TripDetailPage] Banner visibility:', {
-    shouldShowBanner,
-    status: itinerary.status,
-    generatingParam
-  });
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Premium Generation Progress Banner with Real-time Updates */}
-      {shouldShowBanner && (
-        <GenerationProgressBanner
-          itineraryId={id!}
-          itineraryStatus={generatingParam ? 'generating' : itinerary.status}
-          completedDays={completedDays}
-          totalDays={expectedTotalDays}
-          currentPhase={currentPhase}
-          onComplete={() => {
-            searchParams.delete('generating');
-            setSearchParams(searchParams);
-            loadItinerary(id!);
-          }}
-        />
-      )}
+
 
       {/* Mobile: Horizontal Tabs - Sticky at top */}
       <MobileTabs
