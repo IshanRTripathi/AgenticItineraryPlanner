@@ -40,6 +40,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { staggerChildren, listItem, expandCollapse } from '@/utils/animations';
 import { getDayColor } from '@/constants/dayColors';
 import { useState } from 'react';
+import { buildHotelUrl, buildActivityUrl, buildBusUrl, buildTrainUrl } from '@/utils/easemytripUrlBuilder';
+import { BookingModal } from '@/components/booking/BookingModal';
 
 interface DayCardProps {
     day: any; // NormalizedDay type
@@ -95,6 +97,57 @@ const shouldShowBookingButton = (type: string): boolean => {
     // Hide booking for attractions and restaurants (meal)
     const nonBookableTypes = ['attraction', 'meal'];
     return !nonBookableTypes.includes(type.toLowerCase());
+};
+
+// Build booking URL based on activity type
+const buildBookingUrl = (node: any, day: any): string => {
+    const type = node.type?.toLowerCase();
+    const destination = node.location?.name || day.location || '';
+    const date = day.date || '';
+    
+    // Accommodation - needs destination and dates
+    if (type === 'hotel' || type === 'accommodation') {
+        return buildHotelUrl({
+            destination,
+            checkIn: date,
+            checkOut: date, // Will be calculated properly
+            rooms: 1,
+            adults: 2
+        });
+    }
+    
+    // Transport types
+    if (type === 'transit' || type === 'transport') {
+        // Check description for specific transport type
+        const description = node.details?.description?.toLowerCase() || '';
+        
+        if (description.includes('train') || description.includes('railway')) {
+            return buildTrainUrl({ origin: '', destination, date });
+        }
+        if (description.includes('bus')) {
+            return buildBusUrl({ origin: '', destination, date });
+        }
+        // Default to activities for generic transport
+        return buildActivityUrl({ destination, date });
+    }
+    
+    // Train
+    if (type === 'train' || type === 'railway') {
+        return buildTrainUrl({ origin: '', destination, date });
+    }
+    
+    // Bus
+    if (type === 'bus') {
+        return buildBusUrl({ origin: '', destination, date });
+    }
+    
+    // Cab/Taxi/Car - redirect to cabs page
+    if (type === 'cab' || type === 'taxi' || type === 'car') {
+        return 'https://www.easemytrip.com/cabs/';
+    }
+    
+    // For all other activities (attractions, dining, etc.) - redirect to activities page
+    return buildActivityUrl({ destination, date });
 };
 
 const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | undefined => {
@@ -210,6 +263,8 @@ export function DayCard({
 }: DayCardProps) {
     // Photo viewer state
     const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(null);
+    // Booking modal state
+    const [bookingModal, setBookingModal] = useState<{ isOpen: boolean; url: string; itemName: string } | null>(null);
     
     // Configure sensors for both desktop and mobile drag support
     const sensors = useSensors(
@@ -687,6 +742,14 @@ export function DayCard({
                                                                                     <Button
                                                                                         size="sm"
                                                                                         className="h-9 text-sm px-4 font-semibold shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setBookingModal({
+                                                                                                isOpen: true,
+                                                                                                url: buildBookingUrl(node, day),
+                                                                                                itemName: node.title
+                                                                                            });
+                                                                                        }}
                                                                                     >
                                                                                         Book Now
                                                                                     </Button>
@@ -927,6 +990,17 @@ export function DayCard({
                 </CardContent>
             </div>
         </Card>
+
+        {/* Booking Modal */}
+        {bookingModal?.isOpen && (
+            <BookingModal
+                isOpen={bookingModal.isOpen}
+                onClose={() => setBookingModal(null)}
+                bookingType="activity"
+                itemName={bookingModal.itemName}
+                providerUrl={bookingModal.url}
+            />
+        )}
 
         {/* Photo Viewer Modal */}
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>

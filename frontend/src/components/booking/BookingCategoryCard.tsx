@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Clock, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BookingCategoryGroup, CategorizedBooking, getNodeIcon } from '@/utils/categorizeBookings';
+import { BookingModal } from '@/components/booking/BookingModal';
+import { buildEaseMyTripUrl } from '@/utils/easemytripUrlBuilder';
 
 /**
  * Format time string to be more user-friendly
@@ -55,6 +57,7 @@ interface BookingCategoryCardProps {
   onBook?: (booking: CategorizedBooking) => void;
   onViewDetails?: (booking: CategorizedBooking) => void;
   onMarkBooked?: (booking: CategorizedBooking, confirmationCode: string) => void;
+  itinerary?: any;
 }
 
 export function BookingCategoryCard({
@@ -63,10 +66,23 @@ export function BookingCategoryCard({
   onBook,
   onViewDetails,
   onMarkBooked,
+  itinerary,
 }: BookingCategoryCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [editingBooking, setEditingBooking] = useState<string | null>(null);
   const [confirmationCode, setConfirmationCode] = useState('');
+  const [bookingModalState, setBookingModalState] = useState<{
+    isOpen: boolean;
+    booking: CategorizedBooking | null;
+  }>({ isOpen: false, booking: null });
+
+  const handleBookNow = (booking: CategorizedBooking) => {
+    setBookingModalState({ isOpen: true, booking });
+  };
+
+  const closeBookingModal = () => {
+    setBookingModalState({ isOpen: false, booking: null });
+  };
   
   const totalItems = group.items.length;
   const hasBookings = group.bookedCount > 0;
@@ -200,7 +216,7 @@ export function BookingCategoryCard({
                           {booking.status !== 'booked' && (
                             <>
                               <button
-                                onClick={() => onBook && onBook(booking)}
+                                onClick={() => handleBookNow(booking)}
                                 className="px-3 py-1 text-xs font-medium bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
                               >
                                 Book Now
@@ -287,6 +303,21 @@ export function BookingCategoryCard({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Booking Modal */}
+      {bookingModalState.booking && (
+        <BookingModal
+          isOpen={bookingModalState.isOpen}
+          onClose={closeBookingModal}
+          bookingType={
+            bookingModalState.booking.category === 'accommodation' ? 'hotel' :
+            bookingModalState.booking.category === 'transport' ? 'flight' : 'activity'
+          }
+          itemName={bookingModalState.booking.title}
+          providerUrl={buildEaseMyTripUrl(bookingModalState.booking, itinerary)}
+          onMarkBooked={onBook ? (ref) => onBook(bookingModalState.booking!) : undefined}
+        />
+      )}
     </div>
   );
 }

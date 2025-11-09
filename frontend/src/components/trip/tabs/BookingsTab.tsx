@@ -123,6 +123,7 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
                 onBook={handleBook}
                 onViewDetails={handleViewDetails}
                 onMarkBooked={handleMarkBooked}
+                itinerary={itinerary}
               />
             </motion.div>
           ))}

@@ -67,12 +67,13 @@ export function buildHotelUrl(params: EaseMyTripUrlParams): string {
     rooms = 1,
   } = params;
 
+  console.log('[buildHotelUrl] Input params:', { destination, checkIn, checkOut, adults, children, rooms });
+
   // Use full destination with city and country for better search results
   const checkInDate = formatDateEMT(checkIn);
   const checkOutDate = formatDateEMT(checkOut);
 
-  // Generate a simple timestamp-based ID (EaseMyTrip uses 'e' parameter)
-  const timestamp = Date.now().toString().slice(-12);
+  console.log('[buildHotelUrl] Formatted dates:', { checkInDate, checkOutDate });
 
   // EaseMyTrip actual hotel search URL format
   // The 'city' parameter accepts full location strings like "Paris, France"
@@ -86,7 +87,10 @@ export function buildHotelUrl(params: EaseMyTripUrlParams): string {
     children: children.toString(),
   });
 
-  return `${baseUrl}?${searchParams.toString()}`;
+  const finalUrl = `${baseUrl}?${searchParams.toString()}`;
+  console.log('[buildHotelUrl] Final URL:', finalUrl);
+
+  return finalUrl;
 }
 
 /**
@@ -173,19 +177,23 @@ export function buildBusUrl(params: EaseMyTripUrlParams): string {
  * Build EaseMyTrip activities/things to do URL
  */
 export function buildActivityUrl(params: EaseMyTripUrlParams): string {
-  const { destination = '', date = '' } = params;
+  // Simply redirect to activities page without parameters
+  return 'https://www.easemytrip.com/activities/';
+}
 
-  const city = extractCityName(destination);
-  const travelDate = formatDate(date);
+/**
+ * Build EaseMyTrip cab booking URL
+ */
+export function buildCabUrl(params: EaseMyTripUrlParams): string {
+  // Simply redirect to cabs page
+  return 'https://www.easemytrip.com/cabs/';
+}
 
-  // EaseMyTrip activities URL format
-  const baseUrl = 'https://www.easemytrip.com/activities';
-  const searchParams = new URLSearchParams({
-    city: city,
-    date: travelDate,
-  });
-
-  return `${baseUrl}?${searchParams.toString()}`;
+/**
+ * Build EaseMyTrip visa booking URL
+ */
+export function buildVisaUrl(): string {
+  return 'https://www.easemytrip.com/visa-booking';
 }
 
 /**
@@ -218,7 +226,7 @@ export function buildEaseMyTripUrl(
   // Check node type for more specific categorization
   const nodeType = booking.type.toLowerCase();
 
-  // Transport types
+  // Transport types - specific checks
   if (nodeType.includes('flight') || nodeType.includes('plane')) {
     const origin = getPreviousLocation(booking, itinerary) || destination;
     return buildFlightUrl({
@@ -248,10 +256,18 @@ export function buildEaseMyTripUrl(
     });
   }
 
+  if (nodeType.includes('cab') || nodeType.includes('taxi') || nodeType.includes('car')) {
+    return buildCabUrl({
+      origin: getPreviousLocation(booking, itinerary) || destination,
+      destination,
+      date,
+    });
+  }
+
   // Category-based routing
   switch (booking.category) {
     case 'accommodation':
-      // For hotels, we need check-in and check-out dates
+      // For hotels, we need check-in and check-out dates with destination location
       const checkIn = date;
       const checkOut = calculateCheckOutDate(date, itinerary);
       return buildHotelUrl({
@@ -264,7 +280,14 @@ export function buildEaseMyTripUrl(
       });
 
     case 'transport':
-      // Generic transport - default to flight
+      // Generic transport - check if it's cab/car, otherwise default to flight
+      if (nodeType.includes('cab') || nodeType.includes('taxi') || nodeType.includes('car')) {
+        return buildCabUrl({
+          origin: getPreviousLocation(booking, itinerary) || destination,
+          destination,
+          date,
+        });
+      }
       const origin = getPreviousLocation(booking, itinerary) || destination;
       return buildFlightUrl({
         origin,
@@ -277,7 +300,7 @@ export function buildEaseMyTripUrl(
     case 'dining':
     case 'attractions':
     default:
-      // For activities, dining, attractions - search in the destination city
+      // For activities, dining, attractions - redirect to activities page
       return buildActivityUrl({
         destination,
         date,

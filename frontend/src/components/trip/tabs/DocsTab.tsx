@@ -3,10 +3,13 @@
  * Travel documents, requirements, and emergency information
  */
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, ExternalLink, AlertTriangle, Phone, MapPin } from 'lucide-react';
+import { BookingModal } from '@/components/booking/BookingModal';
+import { buildVisaUrl } from '@/utils/easemytripUrlBuilder';
 
 interface DocsTabProps {
   tripId?: string;
@@ -14,6 +17,8 @@ interface DocsTabProps {
 }
 
 export function DocsTab({ tripId, destination = 'Paris, France' }: DocsTabProps) {
+  const [isVisaModalOpen, setIsVisaModalOpen] = useState(false);
+
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6">
       {/* Passport & Visa Requirements */}
@@ -61,10 +66,19 @@ export function DocsTab({ tripId, destination = 'Paris, France' }: DocsTabProps)
             </div>
           </div>
 
-          <Button variant="outline" className="w-full min-h-[44px] text-sm">
-            <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-            Check Official Travel Advisory
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" className="flex-1 min-h-[44px] text-sm">
+              <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+              Check Official Travel Advisory
+            </Button>
+            <Button 
+              onClick={() => setIsVisaModalOpen(true)}
+              className="flex-1 min-h-[44px] text-sm"
+            >
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+              Book Visa Assistance
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -238,6 +252,15 @@ export function DocsTab({ tripId, destination = 'Paris, France' }: DocsTabProps)
           </ul>
         </CardContent>
       </Card>
+
+      {/* Visa Booking Modal */}
+      <BookingModal
+        isOpen={isVisaModalOpen}
+        onClose={() => setIsVisaModalOpen(false)}
+        bookingType="activity"
+        itemName="Visa Assistance"
+        providerUrl={buildVisaUrl()}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
  * Individual bookable item card with status and actions
  */
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,16 +11,28 @@ import { MapPin, Clock, DollarSign, ExternalLink, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { listItem } from '@/utils/animations';
 import { CategorizedBooking, getCategoryColor, getNodeIcon } from '@/utils/categorizeBookings';
+import { BookingModal } from '@/components/booking/BookingModal';
+import { buildEaseMyTripUrl } from '@/utils/easemytripUrlBuilder';
 
 interface BookingItemCardProps {
   booking: CategorizedBooking;
   onBook?: (booking: CategorizedBooking) => void;
   onViewDetails?: (booking: CategorizedBooking) => void;
+  itinerary?: any;
 }
 
-export function BookingItemCard({ booking, onBook, onViewDetails }: BookingItemCardProps) {
+export function BookingItemCard({ booking, onBook, onViewDetails, itinerary }: BookingItemCardProps) {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const isBooked = booking.status === 'booked';
   const isPending = booking.status === 'pending';
+
+  const handleBookNow = () => {
+    setIsBookingModalOpen(true);
+  };
+
+  const bookingUrl = buildEaseMyTripUrl(booking, itinerary);
+  const bookingType = booking.category === 'accommodation' ? 'hotel' : 
+                      booking.category === 'transport' ? 'flight' : 'activity';
   
   return (
     <motion.div
@@ -88,12 +101,12 @@ export function BookingItemCard({ booking, onBook, onViewDetails }: BookingItemC
 
           {/* Actions */}
           <div className="flex gap-2 mt-2">
-            {!isBooked && onBook && (
+            {!isBooked && (
               <Button
                 size="sm"
                 variant="outline"
                 className="h-7 text-xs"
-                onClick={() => onBook(booking)}
+                onClick={handleBookNow}
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
                 Book Now
@@ -112,6 +125,16 @@ export function BookingItemCard({ booking, onBook, onViewDetails }: BookingItemC
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        bookingType={bookingType}
+        itemName={booking.title}
+        providerUrl={bookingUrl}
+        onMarkBooked={onBook ? (ref) => onBook(booking) : undefined}
+      />
     </motion.div>
   );
 }

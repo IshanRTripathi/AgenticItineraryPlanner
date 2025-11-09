@@ -33,6 +33,8 @@ export function BookingModal({
       setIsAnimating(true);
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
+      // Debug: Log the URL being loaded
+      console.log('[BookingModal] Opening booking URL:', providerUrl);
     } else if (isVisible) {
       setIsAnimating(false);
       // Delay unmount for exit animation
@@ -46,7 +48,7 @@ export function BookingModal({
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen, isVisible]);
+  }, [isOpen, isVisible, providerUrl]);
 
   const handleClose = () => {
     setIsLoading(true);
