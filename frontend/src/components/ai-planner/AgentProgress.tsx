@@ -394,7 +394,7 @@ export function AgentProgress() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative overflow-hidden">
       {/* Globe Background - Behind everything - Fullscreen and more transparent */}
-      <div className="absolute z-30 opacity-0 flex items-center justify-center">
+      <div className="absolute z-0 opacity-0 flex items-center justify-center pointer-events-none">
           <InteractiveGlobe />
       </div>
 
