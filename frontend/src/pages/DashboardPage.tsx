@@ -12,8 +12,10 @@ import { Sparkles, Loader2 } from 'lucide-react';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { isPulling, pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: async () => {
@@ -51,10 +53,10 @@ export function DashboardPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">
-                My Trips
+                {t('pages.dashboard.title')}
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground">
-                {isMobile ? 'Your travel plans' : 'Manage your travel plans and bookings'}
+                {isMobile ? t('pages.dashboard.subtitleMobile') : t('pages.dashboard.subtitle')}
               </p>
             </div>
             
@@ -63,8 +65,8 @@ export function DashboardPage() {
               onClick={() => window.location.href = '/planner'}
               className="w-full md:w-auto gap-2 min-h-[44px] touch-manipulation active:scale-95 transition-transform"
             >
-              <span className="hidden sm:inline">Plan New Trip</span>
-              <span className="sm:hidden">New Trip</span>
+              <span className="hidden sm:inline">{t('pages.dashboard.newTrip')}</span>
+              <span className="sm:hidden">{t('pages.dashboard.newTripMobile')}</span>
             </Button>
           </div>
 

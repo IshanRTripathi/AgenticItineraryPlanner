@@ -14,23 +14,27 @@ import {
   Calendar, 
   Shield, 
   ArrowLeft,
-  CheckCircle2
+  CheckCircle2,
+  Languages
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { LanguageSelector } from '@/i18n/components/LanguageSelector';
+import { useTranslation } from '@/i18n/hooks/useTranslation';
 
 export function ProfilePage() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
-            <p className="text-sm sm:text-base text-muted-foreground mb-4">Please sign in to view your profile</p>
-            <Button onClick={() => navigate('/login')} className="min-h-[48px] touch-manipulation">Sign In</Button>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4">{t('pages.profile.pleaseSignIn')}</p>
+            <Button onClick={() => navigate('/login')} className="min-h-[48px] touch-manipulation">{t('common.actions.signIn')}</Button>
           </CardContent>
         </Card>
       </div>
@@ -69,7 +73,7 @@ export function ProfilePage() {
           className="mb-4 sm:mb-6 min-h-[44px] touch-manipulation active:scale-95 transition-transform"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          {t('common.actions.back')}
         </Button>
 
         {/* Profile Header */}
@@ -107,10 +111,36 @@ export function ProfilePage() {
           </CardContent>
         </Card>
 
+        {/* Language Preferences */}
+        <Card className="mb-4 sm:mb-6">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+              <Languages className="w-5 h-5" />
+              {t('pages.profile.languagePreferences')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <Languages className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-900 mb-3">
+                  {t('pages.profile.selectLanguage')}
+                </p>
+                <LanguageSelector variant="dropdown" />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('pages.profile.languageDescription')}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Account Details */}
         <Card className="mb-4 sm:mb-6">
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">Account Details</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t('pages.profile.accountDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
             {/* Email */}
@@ -188,7 +218,7 @@ export function ProfilePage() {
         {/* Provider Info */}
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-lg sm:text-xl">Authentication Provider</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">{t('pages.profile.authProvider')}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg touch-manipulation">

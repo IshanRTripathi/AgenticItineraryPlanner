@@ -32,6 +32,7 @@ import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { ExportOptionsModal, ExportOptions } from '@/components/export/ExportOptionsModal';
 import { ShareModal } from '@/components/share/ShareModal';
+import { useTranslation } from '@/i18n';
 
 interface TripSidebarProps {
   tripId: string;
@@ -44,16 +45,6 @@ interface TripSidebarProps {
   onClose?: () => void;
 }
 
-const NAV_ITEMS = [
-  { id: 'view', label: 'View', icon: Eye },
-  { id: 'plan', label: 'Plan', icon: Map },
-  { id: 'chat', label: 'Chat', icon: MessageSquare },
-  { id: 'bookings', label: 'Bookings', icon: CreditCard },
-  { id: 'budget', label: 'Budget', icon: Wallet },
-  { id: 'packing', label: 'Packing', icon: Backpack },
-  { id: 'docs', label: 'Documents', icon: FileText },
-];
-
 export function TripSidebar({
   tripId,
   destination,
@@ -64,6 +55,7 @@ export function TripSidebar({
   isOpen = true,
   onClose,
 }: TripSidebarProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { state } = useUnifiedItinerary();
@@ -72,6 +64,16 @@ export function TripSidebar({
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 1024px)');
+
+  const NAV_ITEMS = [
+    { id: 'view', label: t('pages.tripDetail.tabs.view'), icon: Eye },
+    { id: 'plan', label: t('pages.tripDetail.tabs.plan'), icon: Map },
+    { id: 'chat', label: t('pages.tripDetail.tabs.chat'), icon: MessageSquare },
+    { id: 'bookings', label: t('pages.tripDetail.tabs.bookings'), icon: CreditCard },
+    { id: 'budget', label: t('pages.tripDetail.tabs.budget'), icon: Wallet },
+    { id: 'packing', label: t('pages.tripDetail.tabs.packing'), icon: Backpack },
+    { id: 'docs', label: t('pages.tripDetail.tabs.docs'), icon: FileText },
+  ];
 
   const handleBack = () => {
     navigate('/dashboard');
@@ -163,7 +165,7 @@ export function TripSidebar({
           className="min-w-[44px] min-h-[44px] -ml-2 mb-4 touch-manipulation active:scale-95 hover:bg-white/50"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
+          {t('pages.tripDetail.sidebar.backToDashboard')}
         </Button>
       </div>
 
@@ -205,7 +207,7 @@ export function TripSidebar({
             className="flex flex-col items-center gap-1 h-auto py-3 touch-manipulation active:scale-95 hover:bg-white hover:border-primary hover:text-primary"
           >
             <Share2 className="w-5 h-5" />
-            <span className="text-xs">Share</span>
+            <span className="text-xs">{t('pages.tripDetail.sidebar.share')}</span>
           </Button>
 
           <Button
@@ -215,7 +217,7 @@ export function TripSidebar({
             className="flex flex-col items-center gap-1 h-auto py-3 touch-manipulation active:scale-95 hover:bg-white hover:border-primary hover:text-primary"
           >
             <Download className="w-5 h-5" />
-            <span className="text-xs">Export</span>
+            <span className="text-xs">{t('pages.tripDetail.sidebar.export')}</span>
           </Button>
 
           <Button
@@ -225,7 +227,7 @@ export function TripSidebar({
             onClick={handleDelete}
           >
             <Trash2 className="w-5 h-5" />
-            <span className="text-xs">Delete</span>
+            <span className="text-xs">{t('pages.tripDetail.sidebar.delete')}</span>
           </Button>
         </div>
       </div>

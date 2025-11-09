@@ -10,6 +10,7 @@ import { X, Home, Compass, Calendar, User, LogIn, LogOut, Search } from 'lucide-
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useLocation } from 'react-router-dom';
+import { LanguageSelector } from '@/i18n/components/LanguageSelector';
 import { cn } from '@/lib/utils';
 
 interface MobileMenuProps {
@@ -230,6 +231,14 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
         {/* Footer - Add proper spacing */}
         <div className="p-3 border-t bg-gray-50/50">
+          {/* Language Selector */}
+          <div className="mb-4">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 px-1">
+              Language
+            </div>
+            <LanguageSelector variant="inline" showFlags={true} />
+          </div>
+
           {loading ? (
             <div className="h-10 animate-pulse bg-gray-200 rounded-lg mb-4" />
           ) : isAuthenticated ? (

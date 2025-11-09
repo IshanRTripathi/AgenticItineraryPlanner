@@ -21,6 +21,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, DollarSign, MapPin, MoreVertical, Trash2, Eye, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/i18n';
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, onDelete }: TripCardProps) {
+  const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const formatDate = (date: string) => {
@@ -61,7 +63,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    return `${days} days`;
+    return t('components.tripCard.days', { count: days }, { count: days });
   };
 
   const handleDeleteClick = () => {
@@ -135,7 +137,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
                     : 'bg-white/90 text-muted-foreground'
                 )}
               >
-                {trip.status === 'upcoming' ? 'Upcoming' : 'Completed'}
+                {trip.status === 'upcoming' ? t('common.status.upcoming') : t('common.status.completed')}
               </span>
             </div>
 
@@ -163,11 +165,11 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1.5">
               <Users className="w-4 h-4 text-muted-foreground" />
-              <span>{trip.travelers} traveler{trip.travelers > 1 ? 's' : ''}</span>
+              <span>{t('components.tripCard.travelers', { count: trip.travelers }, { count: trip.travelers })}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <span className="capitalize">{trip.budget}</span>
+              <span className="capitalize">{t(`components.tripCard.budget`, { amount: trip.budget })}</span>
             </div>
           </div>
 
@@ -184,7 +186,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
             onClick={() => window.location.href = `/trip/${trip.id}`}
           >
             <Eye className="w-4 h-4" />
-            View Details
+            {t('common.actions.view')}
           </Button>
           <Button
             variant="ghost"
@@ -201,7 +203,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Trip</DialogTitle>
+            <DialogTitle>{t('common.actions.delete')} Trip</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete your trip to <strong>{trip.destination}</strong>? 
               This action cannot be undone.
@@ -213,7 +215,7 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
               onClick={() => setShowDeleteDialog(false)}
               disabled={isDeleting}
             >
-              Cancel
+              {t('common.actions.cancel')}
             </Button>
             <Button
               variant="primary"
@@ -224,12 +226,12 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
               {isDeleting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Deleting...
+                  {t('common.status.loading')}
                 </>
               ) : (
                 <>
                   <Trash2 className="w-4 h-4" />
-                  Delete Trip
+                  {t('common.actions.delete')} Trip
                 </>
               )}
             </Button>

@@ -19,6 +19,7 @@ import { apiClient } from '@/services/apiClient';
 import { useToast } from '@/components/ui/use-toast';
 import { useItineraries } from '@/hooks/useItinerary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useTranslation } from '@/i18n';
 import type { ItineraryListItem } from '@/types/dto';
 
 interface Trip {
@@ -33,6 +34,7 @@ interface Trip {
 }
 
 export function TripList() {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
   const { toast } = useToast();
@@ -82,13 +84,13 @@ export function TripList() {
         <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-destructive/10 flex items-center justify-center">
           <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-destructive" />
         </div>
-        <h3 className="text-xl sm:text-2xl font-semibold mb-2">Failed to load trips</h3>
+        <h3 className="text-xl sm:text-2xl font-semibold mb-2">{t('pages.dashboard.error')}</h3>
         <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{(queryError as Error).message}</p>
         <button
           onClick={() => refetch()}
           className="px-6 py-3 min-h-[44px] bg-primary text-white rounded-lg hover:bg-primary/90 touch-manipulation active:scale-95 transition-transform"
         >
-          Try Again
+          {t('common.actions.tryAgain')}
         </button>
       </div>
     );
@@ -108,7 +110,7 @@ export function TripList() {
       <div className="flex items-center justify-center py-12 sm:py-16">
         <div className="text-center">
           <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 animate-spin text-primary mx-auto mb-3 sm:mb-4" />
-          <p className="text-sm sm:text-base text-muted-foreground">Loading your trips...</p>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('pages.dashboard.loading')}</p>
         </div>
       </div>
     );
@@ -121,9 +123,9 @@ export function TripList() {
         <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-muted flex items-center justify-center">
           <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground" />
         </div>
-        <h3 className="text-xl sm:text-2xl font-semibold mb-2">No trips yet</h3>
+        <h3 className="text-xl sm:text-2xl font-semibold mb-2">{t('pages.dashboard.empty.title')}</h3>
         <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-          Start planning your next adventure with AI
+          {t('pages.dashboard.empty.description')}
         </p>
       </div>
     );
@@ -136,20 +138,20 @@ export function TripList() {
         <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-grid">
           <TabsTrigger value="all" className="gap-1 sm:gap-2 min-h-[44px] text-xs sm:text-sm">
             <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">All Trips</span>
-            <span className="sm:hidden">All</span>
+            <span className="hidden sm:inline">{t('pages.dashboard.filters.all')}</span>
+            <span className="sm:hidden">{t('pages.dashboard.filters.allMobile')}</span>
             <span>({trips.length})</span>
           </TabsTrigger>
           <TabsTrigger value="upcoming" className="gap-1 sm:gap-2 min-h-[44px] text-xs sm:text-sm">
             <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Upcoming</span>
-            <span className="sm:hidden">Soon</span>
+            <span className="hidden sm:inline">{t('pages.dashboard.filters.upcoming')}</span>
+            <span className="sm:hidden">{t('pages.dashboard.filters.upcomingMobile')}</span>
             <span>({upcomingCount})</span>
           </TabsTrigger>
           <TabsTrigger value="completed" className="gap-1 sm:gap-2 min-h-[44px] text-xs sm:text-sm">
             <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Completed</span>
-            <span className="sm:hidden">Done</span>
+            <span className="hidden sm:inline">{t('pages.dashboard.filters.completed')}</span>
+            <span className="sm:hidden">{t('pages.dashboard.filters.completedMobile')}</span>
             <span>({completedCount})</span>
           </TabsTrigger>
         </TabsList>

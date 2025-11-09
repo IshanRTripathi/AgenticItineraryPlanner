@@ -11,12 +11,14 @@ import { categorizeBookings, CategorizedBooking } from '@/utils/categorizeBookin
 import { buildEaseMyTripUrl } from '@/utils/easemytripUrlBuilder';
 import { slideUp, staggerChildren } from '@/utils/animations';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslation } from '@/i18n';
 
 interface BookingsTabProps {
   itinerary: any; // NormalizedItinerary type
 }
 
 export function BookingsTab({ itinerary }: BookingsTabProps) {
+  const { t } = useTranslation();
   const [bookingModal, setBookingModal] = useState({
     isOpen: false,
     type: 'flight' as 'flight' | 'hotel' | 'activity',
@@ -85,24 +87,24 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
       >
-        <h2 className="text-2xl font-bold mb-2">Bookings</h2>
+        <h2 className="text-2xl font-bold mb-2">{t('components.bookingsTab.title')}</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Manage all your trip bookings in one place
+          {t('components.bookingsTab.subtitle')}
         </p>
         
         {/* Summary Stats */}
         <div className="flex gap-6">
           <div>
             <div className="text-2xl font-bold text-gray-900">{totalItems}</div>
-            <div className="text-xs text-muted-foreground">Total Items</div>
+            <div className="text-xs text-muted-foreground">{t('components.bookingsTab.stats.totalItems')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-primary">{totalBooked}</div>
-            <div className="text-xs text-muted-foreground">Booked</div>
+            <div className="text-xs text-muted-foreground">{t('components.bookingsTab.stats.booked')}</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-600">{totalAvailable}</div>
-            <div className="text-xs text-muted-foreground">Available</div>
+            <div className="text-xs text-muted-foreground">{t('components.bookingsTab.stats.available')}</div>
           </div>
         </div>
       </motion.div>
@@ -137,9 +139,9 @@ export function BookingsTab({ itinerary }: BookingsTabProps) {
           <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
             <span className="text-3xl">📋</span>
           </div>
-          <h3 className="text-lg font-semibold mb-2">No Bookable Items</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('components.bookingsTab.empty.title')}</h3>
           <p className="text-sm text-muted-foreground">
-            Your itinerary doesn't have any bookable items yet
+            {t('components.bookingsTab.empty.description')}
           </p>
         </motion.div>
       )}

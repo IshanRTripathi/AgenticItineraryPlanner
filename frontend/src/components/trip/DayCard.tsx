@@ -42,6 +42,7 @@ import { getDayColor } from '@/constants/dayColors';
 import { useState } from 'react';
 import { buildHotelUrl, buildActivityUrl, buildBusUrl, buildTrainUrl } from '@/utils/easemytripUrlBuilder';
 import { BookingModal } from '@/components/booking/BookingModal';
+import { useTranslation } from '@/i18n';
 
 interface DayCardProps {
     day: any; // NormalizedDay type
@@ -216,27 +217,27 @@ const getEnrichmentStatus = (node: any): 'pending' | 'enriching' | 'enriched' | 
 };
 
 // Enrichment status badge component
-const EnrichmentBadge = ({ status }: { status: 'pending' | 'enriching' | 'enriched' | 'failed' }) => {
+const EnrichmentBadge = ({ status, t }: { status: 'pending' | 'enriching' | 'enriched' | 'failed'; t: any }) => {
     switch (status) {
         case 'enriching':
             return (
                 <Badge variant="secondary" className="h-6 px-2 bg-blue-50 text-blue-700 border-blue-200">
                     <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    <span className="text-xs">Enriching...</span>
+                    <span className="text-xs">{t('components.dayCard.enrichment.enriching')}</span>
                 </Badge>
             );
         case 'enriched':
             return (
                 <Badge variant="secondary" className="h-6 px-2 bg-green-50 text-green-700 border-green-200">
                     <CheckCircle2 className="w-3 h-3 mr-1" />
-                    <span className="text-xs">Enriched</span>
+                    <span className="text-xs">{t('components.dayCard.enrichment.enriched')}</span>
                 </Badge>
             );
         case 'failed':
             return (
                 <Badge variant="secondary" className="h-6 px-2 bg-amber-50 text-amber-700 border-amber-200">
                     <AlertCircle className="w-3 h-3 mr-1" />
-                    <span className="text-xs">Limited data</span>
+                    <span className="text-xs">{t('components.dayCard.enrichment.limitedData')}</span>
                 </Badge>
             );
         case 'pending':
@@ -244,7 +245,7 @@ const EnrichmentBadge = ({ status }: { status: 'pending' | 'enriching' | 'enrich
             return (
                 <Badge variant="secondary" className="h-6 px-2 bg-gray-50 text-gray-600 border-gray-200">
                     <Clock className="w-3 h-3 mr-1" />
-                    <span className="text-xs">Pending</span>
+                    <span className="text-xs">{t('components.dayCard.enrichment.pending')}</span>
                 </Badge>
             );
     }
@@ -259,6 +260,7 @@ export function DayCard({
     onRefetchNeeded,
     isGenerating = false
 }: DayCardProps) {
+    const { t } = useTranslation();
     // Photo viewer state
     const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(null);
     // Booking modal state
@@ -396,7 +398,7 @@ export function DayCard({
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-base">Day {day.dayNumber}</h3>
+                                    <h3 className="font-semibold text-base">{t('components.dayCard.day', { number: day.dayNumber })}</h3>
                                     {dayStatus === 'current' && (
                                         <span
                                             className="text-xs px-2 py-0.5 rounded-full font-medium"
@@ -405,7 +407,7 @@ export function DayCard({
                                                 color: dayColor.primary
                                             }}
                                         >
-                                            Today
+                                            {t('components.dayCard.today')}
                                         </span>
                                     )}
                                 </div>
@@ -417,18 +419,18 @@ export function DayCard({
                         <div className="flex items-center gap-4 text-sm flex-wrap">
                             <div className="flex items-center gap-1 text-muted-foreground">
                                 <MapPin className="w-4 h-4" />
-                                <span className="hidden sm:inline">{day.location || 'Planning...'}</span>
+                                <span className="hidden sm:inline">{day.location || t('components.dayCard.planning')}</span>
                             </div>
                             {isGenerating && !hasActivities ? (
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                     <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-xs">Generating activities...</span>
+                                    <span className="text-xs">{t('components.dayCard.generatingActivities')}</span>
                                 </div>
                             ) : (
                                 <>
                                     <div className="flex items-center gap-1 text-muted-foreground">
                                         <Clock className="w-4 h-4" />
-                                        <span>{activityCount} activities</span>
+                                        <span>{t('components.dayCard.activitiesCount', { count: activityCount })}</span>
                                     </div>
                                     {totalCost > 0 && (
                                         <div className="flex items-center gap-1 text-muted-foreground">
@@ -488,15 +490,15 @@ export function DayCard({
                                 {hasActivities && !showPlaceholder && (
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-muted/30 rounded-lg">
                                         <div className="text-center">
-                                            <div className="text-xs text-muted-foreground mb-1">Activities</div>
+                                            <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.activities')}</div>
                                             <div className="text-lg font-semibold">{activityCount}</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs text-muted-foreground mb-1">Budget</div>
+                                            <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.budget')}</div>
                                             <div className="text-lg font-semibold">${totalCost.toLocaleString()}</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs text-muted-foreground mb-1">Duration</div>
+                                            <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.duration')}</div>
                                             <div className="text-lg font-semibold">
                                                 {displayActivities.reduce((sum: number, a: any) => {
                                                     const duration = a.timing?.duration || '0h';
@@ -506,7 +508,7 @@ export function DayCard({
                                             </div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs text-muted-foreground mb-1">Status</div>
+                                            <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.status')}</div>
                                             <div className="text-lg font-semibold">
                                                 {displayActivities.filter((a: any) => a.bookingRef).length}/{activityCount}
                                             </div>
@@ -537,10 +539,10 @@ export function DayCard({
                                             <div className="text-center py-4">
                                                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
                                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                                    <span>AI agents are creating activities for this day...</span>
+                                                    <span>{t('components.dayCard.generating.message')}</span>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Activities will be enriched with photos and details
+                                                    {t('components.dayCard.generating.enrichment')}
                                                 </p>
                                             </div>
                                         </div>
@@ -558,7 +560,7 @@ export function DayCard({
                                                     >
                                                         <div className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-100">
                                                             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-                                                            <span className="font-medium">Unsaved changes</span>
+                                                            <span className="font-medium">{t('components.dayCard.unsavedChanges')}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <Button
@@ -569,7 +571,7 @@ export function DayCard({
                                                                 className="h-8 text-xs"
                                                             >
                                                                 <X className="w-3 h-3 mr-1" />
-                                                                Discard
+                                                                {t('components.dayCard.discard')}
                                                             </Button>
                                                             <Button
                                                                 size="sm"
@@ -580,12 +582,12 @@ export function DayCard({
                                                                 {isReordering ? (
                                                                     <>
                                                                         <div className="w-3 h-3 mr-1 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                                                        Saving...
+                                                                        {t('components.dayCard.saving')}
                                                                     </>
                                                                 ) : (
                                                                     <>
                                                                         <Save className="w-3 h-3 mr-1" />
-                                                                        Save Changes
+                                                                        {t('components.dayCard.saveChanges')}
                                                                     </>
                                                                 )}
                                                             </Button>
@@ -682,7 +684,7 @@ export function DayCard({
                                                                                         )}
                                                                                         {node.location?.userRatingsTotal && (
                                                                                             <span className="text-xs text-gray-500">
-                                                                                                {formatReviewCount(node.location.userRatingsTotal)} reviews
+                                                                                                {t('components.dayCard.reviews', { count: formatReviewCount(node.location.userRatingsTotal) || '0' })}
                                                                                             </span>
                                                                                         )}
                                                                                         {node.location?.priceLevel && (
@@ -705,7 +707,7 @@ export function DayCard({
                                                                                     {node.bookingRef && (
                                                                                         <Badge className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
                                                                                             <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                                                            Booked
+                                                                                            {t('components.dayCard.booked')}
                                                                                         </Badge>
                                                                                     )}
                                                                                 </div>
@@ -749,7 +751,7 @@ export function DayCard({
                                                                                             });
                                                                                         }}
                                                                                     >
-                                                                                        Book Now
+                                                                                        {t('components.dayCard.bookNow')}
                                                                                     </Button>
                                                                                 )}
                                                                                 {node.location?.placeId && (
@@ -761,10 +763,10 @@ export function DayCard({
                                                                                             e.stopPropagation();
                                                                                             window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
                                                                                         }}
-                                                                                        title="View on Map"
+                                                                                        title={t('components.dayCard.viewOnMap')}
                                                                                     >
                                                                                         <MapPin className="w-4 h-4 sm:mr-2" />
-                                                                                        <span className="hidden sm:inline">View on Map</span>
+                                                                                        <span className="hidden sm:inline">{t('components.dayCard.viewOnMap')}</span>
                                                                                     </Button>
                                                                                 )}
                                                                                 {node.location?.photos && node.location.photos.length > 1 && (
@@ -779,10 +781,10 @@ export function DayCard({
                                                                                                 title: node.title
                                                                                             });
                                                                                         }}
-                                                                                        title={`${node.location.photos.length} photos`}
+                                                                                        title={t('components.dayCard.photos', { count: node.location.photos.length })}
                                                                                     >
                                                                                         <ImageIcon className="w-4 h-4 sm:mr-2" />
-                                                                                        <span className="hidden sm:inline">{node.location.photos.length} photos</span>
+                                                                                        <span className="hidden sm:inline">{t('components.dayCard.photos', { count: node.location.photos.length })}</span>
                                                                                     </Button>
                                                                                 )}
                                                                             </div>
@@ -894,7 +896,7 @@ export function DayCard({
                                                                 <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
                                                                     {/* Show enrichment status during generation */}
                                                                     {isGenerating && (
-                                                                        <EnrichmentBadge status={getEnrichmentStatus(node)} />
+                                                                        <EnrichmentBadge status={getEnrichmentStatus(node)} t={t} />
                                                                     )}
                                                                     {node.locked && (
                                                                         <Badge variant="secondary" className="h-6 px-2">
@@ -903,7 +905,7 @@ export function DayCard({
                                                                     )}
                                                                     {node.bookingRef && (
                                                                         <Badge className="h-6 px-2 bg-green-100 text-green-700 hover:bg-green-100">
-                                                                            ✓ Booked
+                                                                            ✓ {t('components.dayCard.booked')}
                                                                         </Badge>
                                                                     )}
                                                                 </div>
@@ -942,7 +944,7 @@ export function DayCard({
                                                                         size="sm"
                                                                         className="h-9 text-xs px-3 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                     >
-                                                                        Book Now
+                                                                        {t('components.dayCard.bookNow')}
                                                                     </Button>
                                                                 )}
                                                                 {node.location?.placeId && (

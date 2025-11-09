@@ -15,6 +15,7 @@ import { ShareModal } from '@/components/share/ShareModal';
 import { exportService } from '@/services/exportService';
 import { fetchWeatherForecast } from '@/services/weatherService';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslation } from '@/i18n';
 import {
   Calendar,
   MapPin,
@@ -229,6 +230,7 @@ interface ViewTabProps {
 }
 
 export function ViewTab({ itinerary }: ViewTabProps) {
+  const { t } = useTranslation();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -349,9 +351,9 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     
-    if (today < start) return { label: 'Upcoming', variant: 'default' as const };
-    if (today > end) return { label: 'Completed', variant: 'secondary' as const };
-    return { label: 'Ongoing', variant: 'default' as const };
+    if (today < start) return { label: t('common.status.upcoming'), variant: 'default' as const };
+    if (today > end) return { label: t('common.status.completed'), variant: 'secondary' as const };
+    return { label: t('common.status.ongoing'), variant: 'default' as const };
   };
 
   const status = getTripStatus();
@@ -424,9 +426,9 @@ export function ViewTab({ itinerary }: ViewTabProps) {
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
         <StatCard
-          title="Total Days"
+          title={t('components.viewTab.stats.totalDays')}
           value={dayCount}
-          subtitle={`${dayCount} days`}
+          subtitle={t('components.viewTab.stats.days', { count: dayCount }, { count: dayCount })}
           icon={Calendar}
           delay={0}
         />
@@ -435,7 +437,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
           <Card className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                Activities
+                {t('components.viewTab.stats.activities')}
               </CardTitle>
               <MapPin className="w-4 h-4 md:w-5 md:h-5 text-primary" />
             </CardHeader>
@@ -445,24 +447,24 @@ export function ViewTab({ itinerary }: ViewTabProps) {
                 <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
               </div>
               <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
-                Generating
+                {t('components.viewTab.stats.generating')}
               </p>
             </CardContent>
           </Card>
         ) : (
           <StatCard
-            title="Activities"
+            title={t('components.viewTab.stats.activities')}
             value={activityCount}
-            subtitle="Planned"
+            subtitle={t('components.viewTab.stats.planned')}
             icon={MapPin}
             delay={0.1}
           />
         )}
 
         <StatCard
-          title="Budget"
+          title={t('components.viewTab.stats.budget')}
           value={totalBudget}
-          subtitle="Per person"
+          subtitle={t('components.viewTab.stats.perPerson')}
           icon={IndianRupee}
           prefix="₹"
           delay={0.2}
@@ -473,7 +475,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
           <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                Weather
+                {t('components.viewTab.stats.weather')}
               </CardTitle>
               <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
@@ -485,7 +487,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
                 <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
               </div>
               <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
-                Loading
+                {t('common.actions.loading')}
               </p>
             </CardContent>
           </Card>
@@ -498,7 +500,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
             <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
                 <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  Weather
+                  {t('components.viewTab.stats.weather')}
                 </CardTitle>
                 <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
@@ -523,7 +525,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
           <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
               <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                Weather
+                {t('components.viewTab.stats.weather')}
               </CardTitle>
               <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
@@ -532,7 +534,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
             <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
               <div className="text-xl md:text-2xl font-bold text-muted-foreground">--</div>
               <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
-                Unavailable
+                {t('components.viewTab.stats.unavailable')}
               </p>
             </CardContent>
           </Card>
@@ -556,10 +558,10 @@ export function ViewTab({ itinerary }: ViewTabProps) {
               <Edit className="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <h3 className="font-semibold text-sm md:text-base text-blue-900 dark:text-blue-100 mb-0.5 md:mb-1">
-              Edit Trip
+              {t('components.viewTab.quickActions.editTrip.title')}
             </h3>
             <p className="text-[10px] md:text-xs text-blue-700/70 dark:text-blue-300/70 line-clamp-2">
-              Modify dates or preferences
+              {t('components.viewTab.quickActions.editTrip.description')}
             </p>
           </div>
           <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -576,10 +578,10 @@ export function ViewTab({ itinerary }: ViewTabProps) {
               <Share2 className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
             </div>
             <h3 className="font-semibold text-sm md:text-base text-purple-900 dark:text-purple-100 mb-0.5 md:mb-1">
-              Share Trip
+              {t('components.viewTab.quickActions.shareTrip.title')}
             </h3>
             <p className="text-[10px] md:text-xs text-purple-700/70 dark:text-purple-300/70 line-clamp-2">
-              Share with friends
+              {t('components.viewTab.quickActions.shareTrip.description')}
             </p>
           </div>
           <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -596,10 +598,10 @@ export function ViewTab({ itinerary }: ViewTabProps) {
               <Download className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
             </div>
             <h3 className="font-semibold text-sm md:text-base text-green-900 dark:text-green-100 mb-0.5 md:mb-1">
-              Export PDF
+              {t('components.viewTab.quickActions.exportPdf.title')}
             </h3>
             <p className="text-[10px] md:text-xs text-green-700/70 dark:text-green-300/70 line-clamp-2">
-              Download itinerary
+              {t('components.viewTab.quickActions.exportPdf.description')}
             </p>
           </div>
           <div className="absolute inset-0 bg-gradient-to-br from-green-400/0 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -615,10 +617,10 @@ export function ViewTab({ itinerary }: ViewTabProps) {
               <CalendarPlus className="w-4 h-4 md:w-5 md:h-5 text-orange-600 dark:text-orange-400" />
             </div>
             <h3 className="font-semibold text-sm md:text-base text-orange-900 dark:text-orange-100 mb-0.5 md:mb-1">
-              Add to Calendar
+              {t('components.viewTab.quickActions.addToCalendar.title')}
             </h3>
             <p className="text-[10px] md:text-xs text-orange-700/70 dark:text-orange-300/70 line-clamp-2">
-              Sync with Google
+              {t('components.viewTab.quickActions.addToCalendar.description')}
             </p>
           </div>
           <div className="absolute inset-0 bg-gradient-to-br from-orange-400/0 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />

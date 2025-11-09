@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { LocationInput } from '@/components/ai-planner/LocationInput';
 import { fadeInUp } from '@/lib/animations/variants';
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface PremiumDestinationStepProps {
   data: any;
@@ -26,6 +27,7 @@ const POPULAR_DESTINATIONS = [
 ];
 
 export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinationStepProps) {
+  const { t } = useTranslation();
   const [origin, setOrigin] = useState(data.origin || '');
   const [destination, setDestination] = useState(data.destination || '');
 
@@ -50,22 +52,22 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
       >
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-            From (Origin)
+            {t('pages.planner.destination.fromLabel')}
           </label>
           <LocationInput
             value={origin}
             onChange={handleOriginChange}
-            placeholder="Your starting location..."
+            placeholder={t('pages.planner.destination.fromPlaceholder')}
           />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
-            To (Destination)
+            {t('pages.planner.destination.toLabel')}
           </label>
           <LocationInput
             value={destination}
             onChange={handleDestinationChange}
-            placeholder="Where you want to go..."
+            placeholder={t('pages.planner.destination.toPlaceholder')}
           />
         </div>
       </motion.div>
@@ -80,7 +82,7 @@ export function PremiumDestinationStep({ data, onDataChange }: PremiumDestinatio
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="w-4 h-4 text-muted-foreground" />
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Popular Destinations
+            {t('pages.planner.destination.popularDestinations')}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

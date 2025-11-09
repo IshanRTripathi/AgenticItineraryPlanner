@@ -12,12 +12,14 @@ import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
 import { useItinerary } from '@/hooks/useItinerary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { api, endpoints } from '@/services/api';
+import { useTranslation } from '@/i18n';
 
 interface BudgetTabProps {
   tripId: string;
 }
 
 export function BudgetTab({ tripId }: BudgetTabProps) {
+  const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { data: itinerary } = useItinerary(tripId);
   const [metadata, setMetadata] = useState<any>(null);
@@ -121,7 +123,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
   }, [itinerary]);
   
   if (!itinerary) {
-    return <div className="p-8 text-center text-muted-foreground">Loading budget data...</div>;
+    return <div className="p-8 text-center text-muted-foreground">{t('components.budgetTab.loading')}</div>;
   }
   
   const percentageSpent = budgetData.plannedBudget > 0 ? (budgetData.spent / budgetData.plannedBudget) * 100 : 0;
@@ -134,7 +136,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Your Budget</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.yourBudget.title')}</CardTitle>
             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -142,14 +144,14 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
               ${budgetData.plannedBudget.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {userBudget.tier ? `${userBudget.tier} tier` : budgetData.currency}
+              {userBudget.tier ? t('components.budgetTab.cards.yourBudget.tier', { tier: userBudget.tier }) : budgetData.currency}
             </p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Estimated Cost</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.estimatedCost.title')}</CardTitle>
             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -157,14 +159,14 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
               ${budgetData.total.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {isOverPlannedBudget ? 'Over planned budget' : 'Within budget'}
+              {isOverPlannedBudget ? t('components.budgetTab.cards.estimatedCost.overBudget') : t('components.budgetTab.cards.estimatedCost.withinBudget')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Booked</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.booked.title')}</CardTitle>
             <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-error" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -172,14 +174,14 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
               ${budgetData.spent.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {percentageSpent.toFixed(1)}% of budget
+              {t('components.budgetTab.cards.booked.percentage', { percentage: percentageSpent.toFixed(1) })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Remaining</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.remaining.title')}</CardTitle>
             <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
@@ -187,7 +189,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
               ${Math.abs(budgetData.plannedBudget - budgetData.spent).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {isOverBudget ? 'Over budget' : 'Available to spend'}
+              {isOverBudget ? t('components.budgetTab.cards.remaining.overBudget') : t('components.budgetTab.cards.remaining.available')}
             </p>
           </CardContent>
         </Card>
@@ -199,9 +201,9 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           <CardContent className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 md:pt-6">
             <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-warning flex-shrink-0 mt-0.5" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs sm:text-sm md:text-base font-medium text-warning">Budget Alert</p>
+              <p className="text-xs sm:text-sm md:text-base font-medium text-warning">{t('components.budgetTab.alert.title')}</p>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                You've spent {percentageSpent.toFixed(1)}% of your budget. Consider adjusting your spending.
+                {t('components.budgetTab.alert.message', { percentage: percentageSpent.toFixed(1) })}
               </p>
             </div>
           </CardContent>
@@ -211,7 +213,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       {/* Category Breakdown */}
       <Card>
         <CardHeader className="p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-base sm:text-lg">Spending by Category</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t('components.budgetTab.categoryBreakdown.title')}</CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -265,7 +267,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       {/* Daily Costs */}
       <Card>
         <CardHeader className="p-3 sm:p-4 md:p-6">
-          <CardTitle className="text-base sm:text-lg">Daily Spending</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t('components.budgetTab.dailySpending.title')}</CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           <div className="h-[250px] sm:h-[300px]">
@@ -276,12 +278,12 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                 <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <Tooltip formatter={(value) => `$${value}`} />
                 {!isMobile && <Legend />}
-                <Bar dataKey="cost" fill="#002B5B" name="Daily Cost" />
+                <Bar dataKey="cost" fill="#002B5B" name={t('components.budgetTab.dailySpending.chartLabel')} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
-            Average daily cost: ${(budgetData.spent / dailyCosts.length).toFixed(2)}
+            {t('components.budgetTab.dailySpending.average', { amount: (budgetData.spent / dailyCosts.length).toFixed(2) })}
           </div>
         </CardContent>
       </Card>

@@ -12,11 +12,13 @@ import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { ChatMessageComponent } from '@/components/chat/ChatMessage';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslation } from '@/i18n';
 
 const INITIAL_DISPLAY_COUNT = 10;
 const LOAD_MORE_COUNT = 10;
 
 export function ChatTab() {
+  const { t } = useTranslation();
   const { state, sendChatMessage, clearChatHistory } = useUnifiedItinerary();
   const { chatMessages, isConnected, itinerary } = state;
 
@@ -104,9 +106,9 @@ export function ChatTab() {
       {/* Header - Smaller on mobile */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">AI Travel Assistant</h2>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{t('components.chatTab.title')}</h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-            Chat with AI to modify your itinerary
+            {t('components.chatTab.subtitle')}
           </p>
         </div>
       </div>
@@ -115,7 +117,7 @@ export function ChatTab() {
       <div className="fixed top-3 sm:top-20 right-3 sm:right-6 z-30 flex items-center gap-1.5 sm:gap-2">
         {isConnected && (
           <Badge variant="outline" className="text-green-600 border-green-600 bg-white shadow-md text-xs px-2 py-0.5">
-            Live
+            {t('components.chatTab.status.live')}
           </Badge>
         )}
         {chatMessages.length > 0 && (
@@ -144,7 +146,7 @@ export function ChatTab() {
                 className="bg-white shadow-md hover:shadow-lg transition-shadow text-xs sm:text-sm h-8 sm:h-9"
               >
                 <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 rotate-180" />
-                Load {Math.min(LOAD_MORE_COUNT, chatMessages.length - displayCount)} More
+                {t('components.chatTab.loadMore', { count: Math.min(LOAD_MORE_COUNT, chatMessages.length - displayCount) })}
               </Button>
             </div>
           )}
@@ -152,10 +154,10 @@ export function ChatTab() {
           {chatMessages.length === 0 && (
             <div className="text-center text-gray-600 py-8 sm:py-12">
               <MessageSquare className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-3 sm:mb-4 text-gray-300" />
-              <p className="text-base sm:text-lg font-medium mb-1 sm:mb-2">Start a conversation</p>
-              <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">Ask me to modify your itinerary!</p>
+              <p className="text-base sm:text-lg font-medium mb-1 sm:mb-2">{t('components.chatTab.empty.title')}</p>
+              <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">{t('components.chatTab.empty.subtitle')}</p>
               <div className="max-w-2xl mx-auto">
-                <p className="text-xs text-gray-400 mb-2 sm:mb-3">Try these examples:</p>
+                <p className="text-xs text-gray-400 mb-2 sm:mb-3">{t('components.chatTab.empty.examples')}</p>
                 <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
                   {[
                     'Move lunch to 2pm',
@@ -180,7 +182,7 @@ export function ChatTab() {
 
           {hasMoreMessages && displayedMessages.length > 0 && (
             <div className="text-center text-xs text-gray-500 mb-3 sm:mb-4 py-1.5 sm:py-2">
-              Showing {displayedMessages.length} of {chatMessages.length} messages
+              {t('components.chatTab.showing', { current: displayedMessages.length, total: chatMessages.length })}
             </div>
           )}
           
@@ -214,7 +216,7 @@ export function ChatTab() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask me about your trip..."
+                placeholder={t('components.chatTab.input.placeholder')}
                 disabled={isSending}
                 className="flex-1 min-h-[48px] sm:min-h-[60px] max-h-[150px] sm:max-h-[200px] resize-none border-gray-200 focus:border-primary text-sm"
                 maxLength={1000}
@@ -227,16 +229,16 @@ export function ChatTab() {
                 {isSending ? (
                   <>
                     <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 animate-spin" />
-                    <span className="hidden sm:inline">Sending</span>
+                    <span className="hidden sm:inline">{t('components.chatTab.input.sending')}</span>
                   </>
                 ) : (
-                  'Send'
+                  t('components.chatTab.input.send')
                 )}
               </Button>
             </div>
             <div className="mt-1.5 sm:mt-2 text-xs text-gray-500 flex justify-between">
               <span>{input.length}/1000</span>
-              <span className="hidden sm:inline">Press Enter to send, Shift+Enter for new line</span>
+              <span className="hidden sm:inline">{t('components.chatTab.input.hint')}</span>
             </div>
           </div>
         </div>
