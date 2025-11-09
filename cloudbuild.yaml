@@ -60,13 +60,13 @@ steps:
       - '-c'
       - |
         set -x
-        echo "Environment variable VITE_GOOGLE_MAPS_BROWSER_KEY is set: ${VITE_GOOGLE_MAPS_BROWSER_KEY:+YES}"
-        echo "First 10 chars: ${VITE_GOOGLE_MAPS_BROWSER_KEY:0:10}"
+        echo "Environment variable VITE_GOOGLE_MAPS_BROWSER_KEY is set: $${VITE_GOOGLE_MAPS_BROWSER_KEY:+YES}"
+        echo "First 10 chars: $${VITE_GOOGLE_MAPS_BROWSER_KEY:0:10}"
         docker build \
           -f Dockerfile.frontend \
           --build-arg BACKEND_URL=${_BACKEND_URL} \
           --build-arg VITE_WS_BASE_URL=${_BACKEND_URL} \
-          --build-arg VITE_GOOGLE_MAPS_BROWSER_KEY="${VITE_GOOGLE_MAPS_BROWSER_KEY}" \
+          --build-arg VITE_GOOGLE_MAPS_BROWSER_KEY="$$VITE_GOOGLE_MAPS_BROWSER_KEY" \
           -t gcr.io/$PROJECT_ID/agentic-itinerary-planner-frontend:latest \
           .
     secretEnv: ['VITE_GOOGLE_MAPS_BROWSER_KEY']
