@@ -5,8 +5,6 @@ availableSecrets:
   secretManager:
   - versionName: projects/tripaiplanner/secrets/_GOOGLE_MAPS_BROWSER_KEY/versions/latest
     env: 'VITE_GOOGLE_MAPS_BROWSER_KEY'
-  - versionName: projects/tripaiplanner/secrets/_GOOGLE_PLACES_API_KEY/versions/latest
-    env: 'GOOGLE_PLACES_API_KEY'
 
 steps:
   # Build and deploy backend
