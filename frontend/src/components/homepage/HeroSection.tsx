@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Globe2 } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useTranslation } from '@/i18n';
+import { AuroraBackground } from './AuroraBackground';
 
 // Lazy load the heavy globe component
 const InteractiveGlobe = lazy(() => import('./InteractiveGlobe').then(module => ({ default: module.InteractiveGlobe })));
@@ -20,17 +21,21 @@ export function HeroSection() {
   const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1024px)');
   
   return (
-    <section className="relative min-h-[60vh] md:min-h-[75vh] lg:min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <section className="relative min-h-[60vh] md:min-h-[75vh] lg:min-h-[85vh] flex items-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 overflow-hidden">
+      {/* Aurora Background Effect */}
+      <AuroraBackground />
+      
       {/* Subtle Background Glow */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="container relative z-10 px-4 sm:px-6">
+      <div className="container relative z-10 md:z-0 px-4 sm:px-6">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
           {/* Left Content */}
-          <div className="text-white space-y-4 sm:space-y-6">
+          <div className="text-white space-y-4 sm:space-y-6 md:pointer-events-none">
+            <div className="md:pointer-events-auto">
             {/* Main Heading */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -82,6 +87,7 @@ export function HeroSection() {
                 {t('pages.home.hero.explore')}
               </Button>
             </motion.div>
+            </div>
           </div>
         </div>
       </div>
@@ -89,12 +95,22 @@ export function HeroSection() {
       {/* Mobile: Simplified Globe Icon */}
       {isMobile && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="absolute top-8 right-8 opacity-20"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, delay: 0.1 }}
+          className="absolute right-0 top-0 bottom-0 w-[50%] overflow-hidden"
         >
-          <Globe2 className="w-32 h-32 text-blue-400" />
+          <div className="relative h-full w-full flex items-center justify-center">
+            <div className="relative w-[400px] h-[500px]">
+              <Suspense fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <Globe2 className="w-32 h-32 text-blue-400 opacity-30 animate-pulse" />
+                </div>
+              }>
+                <InteractiveGlobe />
+              </Suspense>
+            </div>
+          </div>
         </motion.div>
       )}
 
@@ -104,10 +120,10 @@ export function HeroSection() {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.1 }}
-          className="absolute right-0 top-0 bottom-0 w-[50%] overflow-hidden"
+          className="absolute right-0 top-0 bottom-0 w-[50%] overflow-hidden z-10"
         >
           <div className="relative h-full w-full flex items-center justify-center">
-            <div className="relative w-[600px] h-[600px]">
+            <div className="relative w-[500px] h-[500px]">
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <Globe2 className="w-48 h-48 text-blue-400 opacity-30 animate-pulse" />
@@ -126,10 +142,11 @@ export function HeroSection() {
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.1 }}
-          className="absolute right-0 top-0 bottom-0 w-[65%] overflow-visible"
+          className="absolute right-0 top-0 bottom-0 w-[70%] z-10"
+          style={{ overflow: 'visible' }}
         >
-          <div className="relative h-full w-full flex items-center justify-end overflow-visible">
-            <div className="relative w-[1400px] h-[1400px] -translate-x-[10%]">
+          <div className="relative h-full w-full flex items-center justify-end" style={{ overflow: 'visible' }}>
+            <div className="relative w-[1100px] h-[1100px] translate-x-[15%]">
               <Suspense fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <Globe2 className="w-64 h-64 text-blue-400 opacity-30 animate-pulse" />
@@ -143,7 +160,7 @@ export function HeroSection() {
       )}
 
       {/* Bottom Gradient Fade - matches bg-muted from TrendingDestinations */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-muted to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-muted to-transparent z-20 pointer-events-none" />
     </section>
   );
 }
