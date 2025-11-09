@@ -25,7 +25,204 @@ import {
   Share2,
   Download,
   CalendarPlus,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
+
+/**
+ * Destination Slideshow Component
+ * Displays a carousel of photos from the itinerary with place names
+ */
+interface PhotoWithPlace {
+  photoRef: string;
+  placeName: string;
+  placeType?: string;
+}
+
+function DestinationSlideshow({ days, destination }: { days: any[]; destination: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [photos, setPhotos] = useState<PhotoWithPlace[]>([]);
+
+  useEffect(() => {
+    console.log('[DestinationSlideshow] Days received:', days?.length);
+    console.log('[DestinationSlideshow] Destination:', destination);
+    
+    // Collect all photos with place names from all days
+    const allPhotos: PhotoWithPlace[] = [];
+    for (const day of days) {
+      const nodes = day.nodes || day.components || [];
+      console.log(`[DestinationSlideshow] Day ${day.dayNumber}: ${nodes.length} nodes`);
+      
+      for (const node of nodes) {
+        console.log(`[DestinationSlideshow] Node "${node.title}":`, {
+          hasLocation: !!node.location,
+          hasPhotos: !!node.location?.photos,
+          photoCount: node.location?.photos?.length || 0,
+          photos: node.location?.photos
+        });
+        
+        if (node.location?.photos && node.location.photos.length > 0) {
+          // Add photos with place name (limit to first 3 per node)
+          node.location.photos.slice(0, 3).forEach((photoRef: string) => {
+            allPhotos.push({
+              photoRef,
+              placeName: node.title || node.location?.name || 'Unknown Place',
+              placeType: node.type
+            });
+          });
+        }
+      }
+    }
+
+    console.log('[DestinationSlideshow] Total photos collected:', allPhotos.length);
+
+    // Remove duplicates based on photoRef
+    const uniquePhotos = allPhotos.filter((photo, index, self) =>
+      index === self.findIndex((p) => p.photoRef === photo.photoRef)
+    ).slice(0, 10);
+    
+    // If no photos, use fallback
+    if (uniquePhotos.length === 0) {
+      console.log('[DestinationSlideshow] No photos found, using fallback');
+      const searchQuery = encodeURIComponent(destination);
+      uniquePhotos.push({
+        photoRef: `https://source.unsplash.com/1600x900/?${searchQuery},travel,landmark`,
+        placeName: destination,
+        placeType: 'destination'
+      });
+    }
+
+    console.log('[DestinationSlideshow] Final photos to display:', uniquePhotos);
+    setPhotos(uniquePhotos);
+  }, [days, destination]);
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  // Auto-advance slideshow every 5 seconds
+  useEffect(() => {
+    if (photos.length <= 1) return;
+    
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, [photos.length]);
+
+  const getPhotoUrl = (photoRef: string): string => {
+    console.log('[DestinationSlideshow] Getting photo URL for:', photoRef?.substring(0, 50));
+    
+    // If it's already a full URL (Unsplash fallback), return as is
+    if (photoRef?.startsWith('http')) {
+      console.log('[DestinationSlideshow] Using full URL:', photoRef);
+      return photoRef;
+    }
+    
+    // Otherwise, it's a Google Maps photo reference
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
+    console.log('[DestinationSlideshow] API Key available:', !!apiKey);
+    
+    if (!apiKey) {
+      console.log('[DestinationSlideshow] No API key, using fallback');
+      return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200';
+    }
+    
+    const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${photoRef}&key=${apiKey}`;
+    console.log('[DestinationSlideshow] Generated Google Maps URL:', url.substring(0, 100) + '...');
+    return url;
+  };
+
+  const currentPhoto = photos[currentIndex];
+
+  return (
+    <div className="relative h-[280px] md:h-[500px] rounded-xl md:rounded-2xl overflow-hidden group shadow-xl md:shadow-2xl">
+      {/* Current Image with Ken Burns effect */}
+      <motion.img
+        key={currentIndex}
+        src={getPhotoUrl(currentPhoto?.photoRef)}
+        alt={currentPhoto?.placeName || destination}
+        className="w-full h-full object-cover"
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600';
+        }}
+      />
+      
+      {/* Enhanced Multi-layer Gradient Overlays for premium depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/30" />
+      
+      {/* Place Name with fit-content glass-morphism */}
+      <motion.div
+        key={`name-${currentIndex}`}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="absolute bottom-16 md:bottom-20 left-4 md:left-6 z-20 max-w-[calc(100%-2rem)] md:max-w-[70%]"
+      >
+        <div className="bg-gradient-to-br from-white/25 to-white/10 rounded-2xl px-4 py-3 md:px-6 md:py-4 border border-white/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] inline-block">
+          <h3 className="text-xl md:text-xl font-bold text-white mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            {currentPhoto?.placeName}
+          </h3>
+          {currentPhoto?.placeType && (
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-lg" />
+              <p className="text-xs md:text-sm text-white/95 font-semibold capitalize tracking-wide drop-shadow-lg">
+                {currentPhoto.placeType.replace('_', ' ')}
+              </p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Premium Navigation Buttons */}
+      {photos.length > 1 && (
+        <>
+          <motion.button
+            onClick={prevSlide}
+            whileHover={{ scale: 1.1, x: -2 }}
+            whileTap={{ scale: 0.95 }}
+            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-9 h-9 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-xl hover:bg-white/35 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border md:border-2 border-white/40 z-30"
+            aria-label="Previous photo"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-7 md:h-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+          </motion.button>
+          <motion.button
+            onClick={nextSlide}
+            whileHover={{ scale: 1.1, x: 2 }}
+            whileTap={{ scale: 0.95 }}
+            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-9 h-9 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-xl hover:bg-white/35 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border md:border-2 border-white/40 z-30"
+            aria-label="Next photo"
+          >
+            <ChevronRight className="w-5 h-5 md:w-7 md:h-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+          </motion.button>
+
+          {/* Premium Photo Counter - Mobile optimized */}
+          <motion.div
+            key={currentIndex}
+            initial={{ scale: 0.8, opacity: 0, y: -10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute top-4 md:top-6 right-4 md:right-6 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-black/40 backdrop-blur-xl border border-white/30 md:border-2 text-white text-xs md:text-sm font-bold shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] flex items-center gap-1.5 md:gap-2"
+          >
+            <svg className="w-3 h-3 md:w-4 md:h-4 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="drop-shadow-lg whitespace-nowrap">{currentIndex + 1} / {photos.length}</span>
+          </motion.div>
+        </>
+      )}
+    </div>
+  );
+}
 
 interface ViewTabProps {
   itinerary: any; // NormalizedItinerary type
@@ -200,94 +397,55 @@ export function ViewTab({ itinerary }: ViewTabProps) {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Trip Header */}
-      <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">{destination}</h1>
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                <span>{formatDate(startDate)}</span>
+    <div className="space-y-4 md:space-y-8">
+      {/* Trip Header - Mobile optimized */}
+      <div className="space-y-3 md:space-y-4">
+        <div className="flex items-start justify-between gap-2 md:gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-4xl font-bold text-foreground mb-1 md:mb-2 truncate">{destination}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-4 text-muted-foreground text-xs md:text-base">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <Calendar className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0" />
+                <span className="truncate">{formatDate(startDate)}</span>
               </div>
-              <span>→</span>
-              <span>{formatDate(endDate)}</span>
+              <span className="hidden sm:inline">→</span>
+              <span className="truncate sm:ml-0 ml-5">{formatDate(endDate)}</span>
             </div>
           </div>
-          <Badge variant={status.variant} className="text-sm px-3 py-1">
+          <Badge variant={status.variant} className="text-xs px-2 py-0.5 md:px-3 md:py-1 flex-shrink-0">
             {status.label}
           </Badge>
         </div>
 
-        {/* Destination Image */}
-        <div className="relative h-[300px] rounded-xl overflow-hidden">
-          {(() => {
-            // Try to get image from first day's first node with photos
-            let imageUrl: string = '';
-            
-            // Search through days for a node with photos
-            for (const day of days) {
-              const nodes = day.nodes || day.components || [];
-              for (const node of nodes) {
-                if (node.location?.photos && node.location.photos.length > 0) {
-                  imageUrl = node.location.photos[0];
-                  break;
-                }
-              }
-              if (imageUrl) break;
-            }
-            
-            // Fallback to Unsplash with destination name
-            if (!imageUrl) {
-              const searchQuery = encodeURIComponent(destination);
-              imageUrl = `https://source.unsplash.com/1200x400/?${searchQuery},travel,landmark`;
-            }
-            
-            return (
-              <>
-                <img
-                  src={imageUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200'}
-                  alt={destination}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback to generic travel image if specific destination fails
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </>
-            );
-          })()}
-        </div>
+        {/* Destination Image Slideshow */}
+        <DestinationSlideshow days={days} destination={destination} />
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
         <StatCard
           title="Total Days"
           value={dayCount}
-          subtitle={`${dayCount} days of adventure`}
+          subtitle={`${dayCount} days`}
           icon={Calendar}
           delay={0}
         />
 
         {isGenerating && activityCount === 0 ? (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card className="shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
                 Activities
               </CardTitle>
-              <MapPin className="w-5 h-5 text-primary" />
+              <MapPin className="w-4 h-4 md:w-5 md:h-5 text-primary" />
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <div className="text-2xl font-bold text-muted-foreground">...</div>
+            <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Generating activities
+              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                Generating
               </p>
             </CardContent>
           </Card>
@@ -295,59 +453,39 @@ export function ViewTab({ itinerary }: ViewTabProps) {
           <StatCard
             title="Activities"
             value={activityCount}
-            subtitle="Planned activities"
+            subtitle="Planned"
             icon={MapPin}
             delay={0.1}
           />
         )}
 
-        {isGenerating && totalBudget === 0 ? (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Budget
-              </CardTitle>
-              <IndianRupee className="w-5 h-5 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <div className="text-2xl font-bold text-muted-foreground">...</div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Calculating costs
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <StatCard
-            title="Budget"
-            value={totalBudget}
-            subtitle="Estimated total per person"
-            icon={IndianRupee}
-            prefix="₹"
-            delay={0.2}
-          />
-        )}
+        <StatCard
+          title="Budget"
+          value={totalBudget}
+          subtitle="Per person"
+          icon={IndianRupee}
+          prefix="₹"
+          delay={0.2}
+        />
 
         {/* Weather Card */}
         {isLoadingWeather ? (
-          <Card className="hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
                 Weather
               </CardTitle>
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Cloud className="w-5 h-5 text-primary" />
+              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <div className="text-2xl font-bold text-muted-foreground">...</div>
+            <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Loading weather
+              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                Loading
               </p>
             </CardContent>
           </Card>
@@ -357,44 +495,44 @@ export function ViewTab({ itinerary }: ViewTabProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <Card className="hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Weather Today
+            <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
+                  Weather
                 </CardTitle>
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Cloud className="w-5 h-5 text-primary" />
+                <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-baseline gap-1">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    {currentWeather.high}°C
+              <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+                <div className="flex items-baseline gap-0.5 md:gap-1">
+                  <div className="text-xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    {currentWeather.high}°
                   </div>
-                  <div className="text-lg text-muted-foreground">
-                    / {currentWeather.low}°C
+                  <div className="text-sm md:text-lg text-muted-foreground">
+                    / {currentWeather.low}°
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 capitalize">
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1 capitalize truncate">
                   {currentWeather.condition}
                 </p>
               </CardContent>
             </Card>
           </motion.div>
         ) : (
-          <Card className="hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+          <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
                 Weather
               </CardTitle>
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Cloud className="w-5 h-5 text-primary" />
+              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-muted-foreground">--</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Weather unavailable
+            <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+              <div className="text-xl md:text-2xl font-bold text-muted-foreground">--</div>
+              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                Unavailable
               </p>
             </CardContent>
           </Card>
@@ -402,67 +540,90 @@ export function ViewTab({ itinerary }: ViewTabProps) {
       </div>
 
       {/* Trip Map */}
-      <div className="h-[calc(100vh-32rem)] min-h-[650px]">
+      <div className="h-[300px] md:h-[calc(100vh-32rem)] md:min-h-[650px] rounded-xl md:rounded-2xl overflow-hidden">
         <TripMap itinerary={itinerary} />
       </div>
 
       {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Button variant="outline" className="justify-start h-auto py-4">
-              <Edit className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div className="font-medium">Edit Trip</div>
-                <div className="text-xs text-muted-foreground">
-                  Modify dates, travelers, or preferences
-                </div>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="justify-start h-auto py-4"
-              onClick={() => setIsShareModalOpen(true)}
-            >
-              <Share2 className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div className="font-medium">Share Trip</div>
-                <div className="text-xs text-muted-foreground">
-                  Share with friends and family
-                </div>
-              </div>
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="justify-start h-auto py-4"
-              onClick={() => setIsExportModalOpen(true)}
-            >
-              <Download className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div className="font-medium">Export PDF</div>
-                <div className="text-xs text-muted-foreground">
-                  Download printable itinerary
-                </div>
-              </div>
-            </Button>
-
-            <Button variant="outline" className="justify-start h-auto py-4">
-              <CalendarPlus className="w-5 h-5 mr-3" />
-              <div className="text-left">
-                <div className="font-medium">Add to Calendar</div>
-                <div className="text-xs text-muted-foreground">
-                  Sync with Google Calendar
-                </div>
-              </div>
-            </Button>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-blue-200/50 dark:border-blue-800/50"
+        >
+          <div className="relative z-10">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+              <Edit className="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="font-semibold text-sm md:text-base text-blue-900 dark:text-blue-100 mb-0.5 md:mb-1">
+              Edit Trip
+            </h3>
+            <p className="text-[10px] md:text-xs text-blue-700/70 dark:text-blue-300/70 line-clamp-2">
+              Modify dates or preferences
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setIsShareModalOpen(true)}
+          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-purple-200/50 dark:border-purple-800/50"
+        >
+          <div className="relative z-10">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+              <Share2 className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h3 className="font-semibold text-sm md:text-base text-purple-900 dark:text-purple-100 mb-0.5 md:mb-1">
+              Share Trip
+            </h3>
+            <p className="text-[10px] md:text-xs text-purple-700/70 dark:text-purple-300/70 line-clamp-2">
+              Share with friends
+            </p>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setIsExportModalOpen(true)}
+          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-green-200/50 dark:border-green-800/50"
+        >
+          <div className="relative z-10">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-500/10 dark:bg-green-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+              <Download className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <h3 className="font-semibold text-sm md:text-base text-green-900 dark:text-green-100 mb-0.5 md:mb-1">
+              Export PDF
+            </h3>
+            <p className="text-[10px] md:text-xs text-green-700/70 dark:text-green-300/70 line-clamp-2">
+              Download itinerary
+            </p>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-green-400/0 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-orange-200/50 dark:border-orange-800/50"
+        >
+          <div className="relative z-10">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
+              <CalendarPlus className="w-4 h-4 md:w-5 md:h-5 text-orange-600 dark:text-orange-400" />
+            </div>
+            <h3 className="font-semibold text-sm md:text-base text-orange-900 dark:text-orange-100 mb-0.5 md:mb-1">
+              Add to Calendar
+            </h3>
+            <p className="text-[10px] md:text-xs text-orange-700/70 dark:text-orange-300/70 line-clamp-2">
+              Sync with Google
+            </p>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-400/0 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </motion.button>
+      </div>
 
       {/* Export Options Modal */}
       <ExportOptionsModal
@@ -521,20 +682,20 @@ function StatCard({ title, value, subtitle, icon: Icon, prefix = '', suffix = ''
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ delay, duration: 0.5 }}
     >
-      <Card className="hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
+      <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+        <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+          <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
             {title}
           </CardTitle>
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <Icon className="w-5 h-5 text-primary" />
+          <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Icon className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+        <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+          <div className="text-xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             {prefix}{displayValue.toLocaleString()}{suffix}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1 truncate">
             {subtitle}
           </p>
         </CardContent>
