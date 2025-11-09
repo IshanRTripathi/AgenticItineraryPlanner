@@ -242,7 +242,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                             isExpanded={expandedDay === dayIndex}
                             onToggle={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
                             itineraryId={itineraryId}
-                            enableDragDrop={!isGenerating && !isRefetching}
+                            enableDragDrop={true}
                             onRefetchNeeded={handleRefetchNeeded}
                             isGenerating={isGenerating}
                           />

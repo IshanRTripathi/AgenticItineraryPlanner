@@ -7,6 +7,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import {
     MapPin,
     Clock,
@@ -17,7 +18,6 @@ import {
     Save,
     X,
     Star,
-    ExternalLink,
     Image as ImageIcon,
     Users,
     Loader2,
@@ -32,6 +32,7 @@ import { useDayActivitiesReorder } from '@/hooks/useDayActivitiesReorder';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerChildren, listItem, expandCollapse } from '@/utils/animations';
 import { getDayColor } from '@/constants/dayColors';
+import { useState } from 'react';
 
 interface DayCardProps {
     day: any; // NormalizedDay type
@@ -80,6 +81,13 @@ const formatReviewCount = (count?: number) => {
 const getGoogleMapsUrl = (placeId?: string): string | undefined => {
     if (!placeId) return undefined;
     return `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+};
+
+// Check if activity type should show booking button
+const shouldShowBookingButton = (type: string): boolean => {
+    // Hide booking for attractions and restaurants (meal)
+    const nonBookableTypes = ['attraction', 'meal'];
+    return !nonBookableTypes.includes(type.toLowerCase());
 };
 
 const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | undefined => {
@@ -193,6 +201,9 @@ export function DayCard({
     onRefetchNeeded,
     isGenerating = false
 }: DayCardProps) {
+    // Photo viewer state
+    const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(null);
+    
     // Get day color from shared palette (matches map markers)
     const dayColor = getDayColor(day.dayNumber);
     
@@ -270,6 +281,7 @@ export function DayCard({
     };
 
     return (
+        <>
         <Card
             className={cn(
                 "overflow-hidden transition-all duration-300 border-l-4",
@@ -519,6 +531,7 @@ export function DayCard({
                                                         variants={staggerChildren}
                                                         initial="initial"
                                                         animate="animate"
+                                                        className="space-y-3"
                                                     >
                                                         {displayActivities.map((node: any) => (
                                                             <SortableActivity
@@ -542,20 +555,32 @@ export function DayCard({
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                                                     <div className="relative flex items-start gap-3">
-                                                                        {/* Photo or Icon */}
+                                                                        {/* Photo or Icon - Clickable to view full size */}
                                                                         {node.location?.photos?.[0] ? (
-                                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setSelectedPhoto({
+                                                                                        url: getPhotoUrl(node.location.photos[0], 800) || '',
+                                                                                        title: node.title
+                                                                                    });
+                                                                                }}
+                                                                                className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
+                                                                            >
                                                                                 <img
                                                                                     src={getPhotoUrl(node.location.photos[0], 200) || ''}
                                                                                     alt={node.title}
-                                                                                    className="w-full h-full object-cover"
+                                                                                    className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
                                                                                     onError={(e) => {
                                                                                         const target = e.target as HTMLImageElement;
                                                                                         target.style.display = 'none';
                                                                                         target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl">${getNodeIcon(node.type)}</div>`;
                                                                                     }}
                                                                                 />
-                                                                            </div>
+                                                                                <div className="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
+                                                                                    <ImageIcon className="w-5 h-5 text-white opacity-0 group-hover/photo:opacity-100 transition-opacity" />
+                                                                                </div>
+                                                                            </button>
                                                                         ) : (
                                                                             <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                                                                                 {getNodeIcon(node.type)}
@@ -645,13 +670,12 @@ export function DayCard({
                                                                                 </p>
                                                                             )}
 
-                                                                            {/* Actions - Stack vertically on mobile */}
+                                                                            {/* Actions - Stack vertically on mobile, better styling */}
                                                                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                                                                {!node.bookingRef && (
+                                                                                {!node.bookingRef && shouldShowBookingButton(node.type) && (
                                                                                     <Button
                                                                                         size="sm"
-                                                                                        variant="outline"
-                                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors touch-manipulation active:scale-95"
+                                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                     >
                                                                                         Book Now
                                                                                     </Button>
@@ -659,19 +683,31 @@ export function DayCard({
                                                                                 {node.location?.placeId && (
                                                                                     <Button
                                                                                         size="sm"
-                                                                                        variant="ghost"
-                                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 touch-manipulation active:scale-95"
-                                                                                        onClick={() => window.open(getGoogleMapsUrl(node.location.placeId), '_blank')}
+                                                                                        variant="outline"
+                                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium border-2 hover:bg-primary/5 hover:border-primary transition-all touch-manipulation active:scale-95"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
+                                                                                        }}
                                                                                     >
-                                                                                        <ExternalLink className="w-3 h-3 mr-1" />
+                                                                                        <MapPin className="w-3.5 h-3.5 mr-1.5" />
                                                                                         View on Map
                                                                                     </Button>
                                                                                 )}
                                                                                 {node.location?.photos && node.location.photos.length > 1 && (
-                                                                                    <Badge variant="secondary" className="h-8 px-2 text-xs">
-                                                                                        <ImageIcon className="w-3 h-3 mr-1" />
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setSelectedPhoto({
+                                                                                                url: getPhotoUrl(node.location.photos[0], 800) || '',
+                                                                                                title: node.title
+                                                                                            });
+                                                                                        }}
+                                                                                        className="min-h-[44px] sm:h-9 px-3 rounded-md bg-secondary hover:bg-secondary/80 transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium touch-manipulation active:scale-95"
+                                                                                    >
+                                                                                        <ImageIcon className="w-3.5 h-3.5" />
                                                                                         {node.location.photos.length} photos
-                                                                                    </Badge>
+                                                                                    </button>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -689,6 +725,7 @@ export function DayCard({
                                             variants={staggerChildren}
                                             initial="initial"
                                             animate="animate"
+                                            className="space-y-3"
                                         >
                                             {displayActivities.map((node: any, index: number) => (
                                                 <motion.div
@@ -707,20 +744,32 @@ export function DayCard({
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                                     <div className="relative flex items-start gap-4">
-                                                        {/* Photo or Icon - Responsive sizing */}
+                                                        {/* Photo or Icon - Clickable to view full size */}
                                                         {node.location?.photos?.[0] ? (
-                                                            <div className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedPhoto({
+                                                                        url: getPhotoUrl(node.location.photos[0], 800) || '',
+                                                                        title: node.title
+                                                                    });
+                                                                }}
+                                                                className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
+                                                            >
                                                                 <img
                                                                     src={getPhotoUrl(node.location.photos[0], 200) || ''}
                                                                     alt={node.title}
-                                                                    className="w-full h-full object-cover"
+                                                                    className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
                                                                     onError={(e) => {
                                                                         const target = e.target as HTMLImageElement;
                                                                         target.style.display = 'none';
                                                                         target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl sm:text-2xl">${getNodeIcon(node.type)}</div>`;
                                                                     }}
                                                                 />
-                                                            </div>
+                                                                <div className="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
+                                                                    <ImageIcon className="w-5 h-5 text-white opacity-0 group-hover/photo:opacity-100 transition-opacity" />
+                                                                </div>
+                                                            </button>
                                                         ) : (
                                                             <div className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                                                                 {getNodeIcon(node.type)}
@@ -810,13 +859,12 @@ export function DayCard({
                                                                 </p>
                                                             )}
 
-                                                            {/* Actions - Stack vertically on mobile */}
+                                                            {/* Actions - Stack vertically on mobile, better styling */}
                                                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                                                {!node.bookingRef && (
+                                                                {!node.bookingRef && shouldShowBookingButton(node.type) && (
                                                                     <Button
                                                                         size="sm"
-                                                                        variant="outline"
-                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 hover:bg-primary hover:text-white hover:border-primary transition-colors touch-manipulation active:scale-95"
+                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                     >
                                                                         Book Now
                                                                     </Button>
@@ -824,19 +872,31 @@ export function DayCard({
                                                                 {node.location?.placeId && (
                                                                     <Button
                                                                         size="sm"
-                                                                        variant="ghost"
-                                                                        className="min-h-[44px] sm:h-8 text-xs px-3 touch-manipulation active:scale-95"
-                                                                        onClick={() => window.open(getGoogleMapsUrl(node.location.placeId), '_blank')}
+                                                                        variant="outline"
+                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium border-2 hover:bg-primary/5 hover:border-primary transition-all touch-manipulation active:scale-95"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
+                                                                        }}
                                                                     >
-                                                                        <ExternalLink className="w-3 h-3 mr-1" />
+                                                                        <MapPin className="w-3.5 h-3.5 mr-1.5" />
                                                                         View on Map
                                                                     </Button>
                                                                 )}
                                                                 {node.location?.photos && node.location.photos.length > 1 && (
-                                                                    <Badge variant="secondary" className="h-8 px-2 text-xs">
-                                                                        <ImageIcon className="w-3 h-3 mr-1" />
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedPhoto({
+                                                                                url: getPhotoUrl(node.location.photos[0], 800) || '',
+                                                                                title: node.title
+                                                                            });
+                                                                        }}
+                                                                        className="min-h-[44px] sm:h-9 px-3 rounded-md bg-secondary hover:bg-secondary/80 transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium touch-manipulation active:scale-95"
+                                                                    >
+                                                                        <ImageIcon className="w-3.5 h-3.5" />
                                                                         {node.location.photos.length} photos
-                                                                    </Badge>
+                                                                    </button>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -852,6 +912,29 @@ export function DayCard({
                 </CardContent>
             </div>
         </Card>
+
+        {/* Photo Viewer Modal */}
+        <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
+            <DialogContent className="max-w-4xl p-0 overflow-hidden">
+                {selectedPhoto && (
+                    <div className="relative">
+                        <img
+                            src={selectedPhoto.url}
+                            alt={selectedPhoto.title}
+                            className="w-full h-auto max-h-[80vh] object-contain"
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+                            }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                            <p className="text-white font-medium text-sm">{selectedPhoto.title}</p>
+                        </div>
+                    </div>
+                )}
+            </DialogContent>
+        </Dialog>
+        </>
     );
 }
 
