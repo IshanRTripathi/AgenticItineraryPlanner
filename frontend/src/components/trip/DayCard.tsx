@@ -25,7 +25,14 @@ import {
     AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import { 
+    DndContext, 
+    closestCenter, 
+    PointerSensor, 
+    TouchSensor, 
+    useSensor, 
+    useSensors 
+} from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableActivity } from './SortableActivity';
 import { useDayActivitiesReorder } from '@/hooks/useDayActivitiesReorder';
@@ -203,6 +210,21 @@ export function DayCard({
 }: DayCardProps) {
     // Photo viewer state
     const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(null);
+    
+    // Configure sensors for both desktop and mobile drag support
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Require 8px movement before drag starts
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250, // 250ms press before drag on touch devices
+                tolerance: 5, // 5px movement tolerance
+            },
+        })
+    );
     
     // Get day color from shared palette (matches map markers)
     const dayColor = getDayColor(day.dayNumber);
@@ -520,6 +542,7 @@ export function DayCard({
                                             </AnimatePresence>
 
                                             <DndContext
+                                                sensors={sensors}
                                                 collisionDetection={closestCenter}
                                                 onDragEnd={handleDragEnd}
                                             >
@@ -544,7 +567,7 @@ export function DayCard({
                                                                     whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
                                                                     transition={{ duration: 0.2 }}
                                                                     className={cn(
-                                                                        'group relative p-3 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
+                                                                        'group relative p-3 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
                                                                         getNodeColor(node.type),
                                                                         isReordering && 'opacity-50 pointer-events-none',
                                                                         // Add shimmer effect for enriching activities
@@ -554,7 +577,7 @@ export function DayCard({
                                                                     {/* Subtle gradient overlay */}
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                                                    <div className="relative flex items-start gap-3">
+                                                                    <div className="relative flex flex-col sm:flex-row items-start gap-3">
                                                                         {/* Photo or Icon - Clickable to view full size */}
                                                                         {node.location?.photos?.[0] ? (
                                                                             <button
@@ -565,7 +588,7 @@ export function DayCard({
                                                                                         title: node.title
                                                                                     });
                                                                                 }}
-                                                                                className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
+                                                                                className="flex-shrink-0 w-full sm:w-20 h-32 sm:h-20 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
                                                                             >
                                                                                 <img
                                                                                     src={getPhotoUrl(node.location.photos[0], 200) || ''}
@@ -582,7 +605,7 @@ export function DayCard({
                                                                                 </div>
                                                                             </button>
                                                                         ) : (
-                                                                            <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                                            <div className="flex-shrink-0 w-full sm:w-20 h-32 sm:h-20 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-3xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                                                                                 {getNodeIcon(node.type)}
                                                                             </div>
                                                                         )}
@@ -590,92 +613,80 @@ export function DayCard({
                                                                         {/* Content */}
                                                                         <div className="flex-1 min-w-0">
                                                                             {/* Header */}
-                                                                            <div className="flex items-start justify-between gap-2 mb-1">
+                                                                            <div className="flex items-start justify-between gap-3 mb-2">
                                                                                 <div className="flex-1 min-w-0">
-                                                                                    <h4 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
+                                                                                    <h4 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">
                                                                                         {node.title}
                                                                                     </h4>
 
-                                                                                    {/* Rating, Reviews, Price Level */}
-                                                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                                    {/* Rating & Reviews - Premium styling */}
+                                                                                    <div className="flex items-center gap-3 mb-2">
                                                                                         {node.location?.rating && (
-                                                                                            <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
-                                                                                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                                                                                <span>{formatRating(node.location.rating)}</span>
+                                                                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 rounded-md">
+                                                                                                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                                                                                                <span className="text-sm font-semibold text-amber-900">{formatRating(node.location.rating)}</span>
                                                                                             </div>
                                                                                         )}
                                                                                         {node.location?.userRatingsTotal && (
-                                                                                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                                                                <Users className="w-3 h-3" />
-                                                                                                <span>{formatReviewCount(node.location.userRatingsTotal)}</span>
-                                                                                            </div>
+                                                                                            <span className="text-xs text-gray-500">
+                                                                                                {formatReviewCount(node.location.userRatingsTotal)} reviews
+                                                                                            </span>
                                                                                         )}
                                                                                         {node.location?.priceLevel && (
-                                                                                            <span className="text-xs font-medium text-green-600">
+                                                                                            <span className="text-sm font-semibold text-emerald-600">
                                                                                                 {getPriceLevelIndicator(node.location.priceLevel)}
                                                                                             </span>
                                                                                         )}
                                                                                     </div>
 
+                                                                                    {/* Address - Clipped if overflow */}
                                                                                     {node.location?.address && (
-                                                                                        <p className="text-xs text-gray-600 flex items-center gap-1 line-clamp-1">
-                                                                                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                                                                                            <span className="truncate">{node.location.address}</span>
+                                                                                        <p className="text-xs text-gray-500 line-clamp-1">
+                                                                                            {node.location.address}
                                                                                         </p>
                                                                                     )}
                                                                                 </div>
 
                                                                                 {/* Status badges */}
-                                                                                <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
-                                                                                    {/* Show enrichment status during generation */}
-                                                                                    {isGenerating && (
-                                                                                        <EnrichmentBadge status={getEnrichmentStatus(node)} />
-                                                                                    )}
-                                                                                    {node.locked && (
-                                                                                        <Badge variant="secondary" className="h-6 px-2">
-                                                                                            <Lock className="w-3 h-3" />
-                                                                                        </Badge>
-                                                                                    )}
+                                                                                <div className="flex items-center gap-1.5 flex-shrink-0">
                                                                                     {node.bookingRef && (
-                                                                                        <Badge className="h-6 px-2 bg-green-100 text-green-700 hover:bg-green-100">
-                                                                                            ✓ Booked
+                                                                                        <Badge className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+                                                                                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                                                                                            Booked
                                                                                         </Badge>
                                                                                     )}
                                                                                 </div>
                                                                             </div>
 
-                                                                            {/* Meta information */}
-                                                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mb-2">
+                                                                            {/* Meta information - Refined */}
+                                                                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
                                                                                 {node.timing?.startTime && (
-                                                                                    <div className="flex items-center gap-1 font-medium">
-                                                                                        <Clock className="w-3.5 h-3.5" />
-                                                                                        <span>{formatTime(node.timing.startTime)}</span>
-                                                                                        {node.timing.duration && (
-                                                                                            <span className="text-gray-400">• {node.timing.duration}</span>
-                                                                                        )}
+                                                                                    <div className="flex items-center gap-1.5">
+                                                                                        <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                                                        <span className="font-medium">{formatTime(node.timing.startTime)}</span>
                                                                                     </div>
                                                                                 )}
                                                                                 {node.cost?.amount && (
-                                                                                    <div className="flex items-center gap-1 font-medium">
-                                                                                        <DollarSign className="w-3.5 h-3.5" />
-                                                                                        <span>₹{node.cost.amount.toLocaleString()}</span>
+                                                                                    <div className="flex items-center gap-1.5">
+                                                                                        <DollarSign className="w-3.5 h-3.5 text-gray-400" />
+                                                                                        <span className="font-semibold">₹{node.cost.amount.toLocaleString()}</span>
                                                                                     </div>
                                                                                 )}
                                                                             </div>
 
-                                                                            {/* Description */}
+                                                                            {/* Description - Better readability */}
                                                                             {node.details?.description && (
-                                                                                <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-3">
+                                                                                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
                                                                                     {node.details.description}
                                                                                 </p>
                                                                             )}
 
                                                                             {/* Actions - Stack vertically on mobile, better styling */}
-                                                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                                                            <div className="flex items-center gap-2">
                                                                                 {!node.bookingRef && shouldShowBookingButton(node.type) && (
                                                                                     <Button
                                                                                         size="sm"
-                                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
+                                                                                        className="h-9 text-sm px-4 font-semibold shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                     >
                                                                                         Book Now
                                                                                     </Button>
@@ -684,18 +695,22 @@ export function DayCard({
                                                                                     <Button
                                                                                         size="sm"
                                                                                         variant="outline"
-                                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium border-2 hover:bg-primary/5 hover:border-primary transition-all touch-manipulation active:scale-95"
+                                                                                        className="h-9 sm:w-auto w-9 p-0 sm:px-3 shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
                                                                                             window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
                                                                                         }}
+                                                                                        title="View on Map"
                                                                                     >
-                                                                                        <MapPin className="w-3.5 h-3.5 mr-1.5" />
-                                                                                        View on Map
+                                                                                        <MapPin className="w-4 h-4 sm:mr-2" />
+                                                                                        <span className="hidden sm:inline">View on Map</span>
                                                                                     </Button>
                                                                                 )}
                                                                                 {node.location?.photos && node.location.photos.length > 1 && (
-                                                                                    <button
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        variant="outline"
+                                                                                        className="h-9 sm:w-auto w-9 p-0 sm:px-3 shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
                                                                                             setSelectedPhoto({
@@ -703,11 +718,11 @@ export function DayCard({
                                                                                                 title: node.title
                                                                                             });
                                                                                         }}
-                                                                                        className="min-h-[44px] sm:h-9 px-3 rounded-md bg-secondary hover:bg-secondary/80 transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium touch-manipulation active:scale-95"
+                                                                                        title={`${node.location.photos.length} photos`}
                                                                                     >
-                                                                                        <ImageIcon className="w-3.5 h-3.5" />
-                                                                                        {node.location.photos.length} photos
-                                                                                    </button>
+                                                                                        <ImageIcon className="w-4 h-4 sm:mr-2" />
+                                                                                        <span className="hidden sm:inline">{node.location.photos.length} photos</span>
+                                                                                    </Button>
                                                                                 )}
                                                                             </div>
                                                                         </div>
@@ -734,7 +749,7 @@ export function DayCard({
                                                     whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
                                                     transition={{ duration: 0.2 }}
                                                     className={cn(
-                                                        'group relative p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
+                                                        'group relative p-3 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
                                                         getNodeColor(node.type),
                                                         // Add shimmer effect for enriching activities
                                                         isGenerating && getEnrichmentStatus(node) === 'enriching' && 'animate-pulse'
@@ -743,7 +758,7 @@ export function DayCard({
                                                     {/* Subtle gradient overlay */}
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                                    <div className="relative flex items-start gap-4">
+                                                    <div className="relative flex flex-col sm:flex-row items-start gap-4">
                                                         {/* Photo or Icon - Clickable to view full size */}
                                                         {node.location?.photos?.[0] ? (
                                                             <button
@@ -754,7 +769,7 @@ export function DayCard({
                                                                         title: node.title
                                                                     });
                                                                 }}
-                                                                className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
+                                                                className="flex-shrink-0 w-full sm:w-24 h-32 sm:h-24 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
                                                             >
                                                                 <img
                                                                     src={getPhotoUrl(node.location.photos[0], 200) || ''}
@@ -771,7 +786,7 @@ export function DayCard({
                                                                 </div>
                                                             </button>
                                                         ) : (
-                                                            <div className="flex-shrink-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                            <div className="flex-shrink-0 w-full sm:w-24 h-32 sm:h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-3xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
                                                                 {getNodeIcon(node.type)}
                                                             </div>
                                                         )}
@@ -860,11 +875,11 @@ export function DayCard({
                                                             )}
 
                                                             {/* Actions - Stack vertically on mobile, better styling */}
-                                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                                            <div className="flex items-center gap-2">
                                                                 {!node.bookingRef && shouldShowBookingButton(node.type) && (
                                                                     <Button
                                                                         size="sm"
-                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
+                                                                        className="h-9 text-xs px-3 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                     >
                                                                         Book Now
                                                                     </Button>
@@ -873,14 +888,14 @@ export function DayCard({
                                                                     <Button
                                                                         size="sm"
                                                                         variant="outline"
-                                                                        className="min-h-[44px] sm:h-9 text-xs sm:text-sm px-4 font-medium border-2 hover:bg-primary/5 hover:border-primary transition-all touch-manipulation active:scale-95"
+                                                                        className="h-9 w-9 p-0 border-2 hover:bg-primary/5 hover:border-primary transition-all touch-manipulation active:scale-95"
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
                                                                             window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
                                                                         }}
+                                                                        title="View on Map"
                                                                     >
-                                                                        <MapPin className="w-3.5 h-3.5 mr-1.5" />
-                                                                        View on Map
+                                                                        <MapPin className="w-4 h-4" />
                                                                     </Button>
                                                                 )}
                                                                 {node.location?.photos && node.location.photos.length > 1 && (
@@ -892,10 +907,10 @@ export function DayCard({
                                                                                 title: node.title
                                                                             });
                                                                         }}
-                                                                        className="min-h-[44px] sm:h-9 px-3 rounded-md bg-secondary hover:bg-secondary/80 transition-colors flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium touch-manipulation active:scale-95"
+                                                                        className="h-9 w-9 rounded-md bg-secondary hover:bg-secondary/80 transition-colors flex items-center justify-center touch-manipulation active:scale-95"
+                                                                        title={`${node.location.photos.length} photos`}
                                                                     >
-                                                                        <ImageIcon className="w-3.5 h-3.5" />
-                                                                        {node.location.photos.length} photos
+                                                                        <ImageIcon className="w-4 h-4" />
                                                                     </button>
                                                                 )}
                                                             </div>
