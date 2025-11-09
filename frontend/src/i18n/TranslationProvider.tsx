@@ -38,14 +38,73 @@ export function TranslationProvider({
     try {
       setIsLoading(true);
       
-      // Load all namespace files for the language
-      const [common, pages, components, errors, validation] = await Promise.all([
-        import(`./locales/${lang}/common.json`),
-        import(`./locales/${lang}/pages.json`),
-        import(`./locales/${lang}/components.json`),
-        import(`./locales/${lang}/errors.json`),
-        import(`./locales/${lang}/validation.json`)
-      ]);
+      // Vite requires explicit paths for dynamic imports
+      // Use a mapping object to load translations
+      const translationLoaders: Record<LanguageCode, () => Promise<any[]>> = {
+        en: () => Promise.all([
+          import('./locales/en/common.json'),
+          import('./locales/en/pages.json'),
+          import('./locales/en/components.json'),
+          import('./locales/en/errors.json'),
+          import('./locales/en/validation.json')
+        ]),
+        hi: () => Promise.all([
+          import('./locales/hi/common.json'),
+          import('./locales/hi/pages.json'),
+          import('./locales/hi/components.json'),
+          import('./locales/hi/errors.json'),
+          import('./locales/hi/validation.json')
+        ]),
+        es: () => Promise.all([
+          import('./locales/es/common.json'),
+          import('./locales/es/pages.json'),
+          import('./locales/es/components.json'),
+          import('./locales/es/errors.json'),
+          import('./locales/es/validation.json')
+        ]),
+        kn: () => Promise.all([
+          import('./locales/kn/common.json'),
+          import('./locales/kn/pages.json'),
+          import('./locales/kn/components.json'),
+          import('./locales/kn/errors.json'),
+          import('./locales/kn/validation.json')
+        ]),
+        te: () => Promise.all([
+          import('./locales/te/common.json'),
+          import('./locales/te/pages.json'),
+          import('./locales/te/components.json'),
+          import('./locales/te/errors.json'),
+          import('./locales/te/validation.json')
+        ]),
+        ml: () => Promise.all([
+          import('./locales/ml/common.json'),
+          import('./locales/ml/pages.json'),
+          import('./locales/ml/components.json'),
+          import('./locales/ml/errors.json'),
+          import('./locales/ml/validation.json')
+        ]),
+        pa: () => Promise.all([
+          import('./locales/pa/common.json'),
+          import('./locales/pa/pages.json'),
+          import('./locales/pa/components.json'),
+          import('./locales/pa/errors.json'),
+          import('./locales/pa/validation.json')
+        ]),
+        bn: () => Promise.all([
+          import('./locales/bn/common.json'),
+          import('./locales/bn/pages.json'),
+          import('./locales/bn/components.json'),
+          import('./locales/bn/errors.json'),
+          import('./locales/bn/validation.json')
+        ])
+      };
+
+      const loader = translationLoaders[lang];
+      if (!loader) {
+        throw new Error(`No translation loader found for language: ${lang}`);
+      }
+
+      const [common, pages, components, errors, validation] = await loader();
 
       setTranslations({
         common: common.default || common,
