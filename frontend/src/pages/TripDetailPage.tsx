@@ -19,6 +19,7 @@ import { BookingsTab } from '@/components/trip/tabs/BookingsTab';
 import { ChatTab } from '@/components/trip/tabs/ChatTab';
 import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
 import { ErrorDisplay } from '@/components/error/ErrorDisplay';
+import { GenerationProgressBanner } from '@/components/trip/GenerationProgressBanner';
 import { UnifiedItineraryProvider, useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { Eye, Map, CreditCard, DollarSign, Package, FileText, MessageSquare } from 'lucide-react';
@@ -260,7 +261,19 @@ function TripDetailContent() {
 
   return (
     <div className="min-h-screen bg-background">
-
+      {/* Generation Progress Banner - Shows on both mobile and desktop */}
+      {isGenerating && (
+        <GenerationProgressBanner
+          itineraryId={id!}
+          itineraryStatus={itinerary.status}
+          totalDays={expectedTotalDays}
+          currentPhase={(itinerary as any).currentPhase || 'skeleton'}
+          onComplete={() => {
+            console.log('[TripDetailPage] Generation complete, reloading itinerary');
+            loadItinerary(id!);
+          }}
+        />
+      )}
 
       {/* Mobile: Horizontal Tabs - Sticky at top */}
       <MobileTabs
