@@ -103,15 +103,18 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
 
   return (
     <>
-      <Card className={cn(
-        "overflow-hidden transition-all duration-300 group",
-        "hover:shadow-elevation-3 md:hover:-translate-y-0.5",
-        "active:scale-[0.98] md:active:scale-100"
-      )}>
+      <Card 
+        className={cn(
+          "overflow-hidden transition-all duration-300 group cursor-pointer",
+          "hover:shadow-elevation-3 md:hover:-translate-y-0.5",
+          "active:scale-[0.98] md:active:scale-100"
+        )}
+        onClick={() => window.location.href = `/trip/${trip.id}`}
+      >
         {/* Mobile: Horizontal layout, Desktop: Vertical */}
         <div className="flex md:block">
           {/* Image */}
-          <div className="relative w-32 md:w-full aspect-square md:aspect-video overflow-hidden flex-shrink-0">
+          <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-full md:h-auto md:aspect-video overflow-hidden flex-shrink-0">
             {trip.imageUrl ? (
               <img
                 src={trip.imageUrl}
@@ -141,8 +144,8 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
               </span>
             </div>
 
-            {/* Destination */}
-            <div className="absolute bottom-3 left-3 right-3">
+            {/* Destination - Hidden on mobile (shown in content) */}
+            <div className="hidden md:block absolute bottom-3 left-3 right-3">
               <h3 className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
                 <MapPin className="w-5 h-5" />
                 {trip.destination}
@@ -153,50 +156,53 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
 
         {/* Content */}
         <CardContent className="flex-1 p-3 md:p-4 space-y-2 md:space-y-3">
+          {/* Destination - Mobile only */}
+          <div className="md:hidden">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4" />
+              {trip.destination}
+            </h3>
+          </div>
+
           {/* Dates */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            <span>
+          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+            <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <span className="truncate">
               {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
             </span>
           </div>
 
           {/* Details */}
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm">
             <div className="flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-muted-foreground" />
+              <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-muted-foreground" />
               <span>{t('components.tripCard.travelers', { count: trip.travelers }, { count: trip.travelers })}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
+              <DollarSign className="w-3.5 h-3.5 md:w-4 md:h-4 text-muted-foreground" />
               <span className="capitalize">{t(`components.tripCard.budget`, { amount: trip.budget })}</span>
             </div>
           </div>
 
-          <div className="text-sm font-medium text-primary">
-            {getDuration()}
+          <div className="flex items-center justify-between">
+            <div className="text-xs md:text-sm font-medium text-primary">
+              {getDuration()}
+            </div>
+            
+            {/* Delete button - Positioned inline */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card click
+                handleDeleteClick();
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
           </div>
         </CardContent>
-
-        {/* Footer */}
-        <CardFooter className="p-4 pt-0 flex gap-2">
-          <Button
-            variant="outline"
-            className="flex-1 gap-2"
-            onClick={() => window.location.href = `/trip/${trip.id}`}
-          >
-            <Eye className="w-4 h-4" />
-            {t('common.actions.view')}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="px-3 hover:bg-destructive/10 hover:text-destructive"
-            onClick={handleDeleteClick}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </CardFooter>
       </Card>
 
       {/* Delete Confirmation Dialog */}

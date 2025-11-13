@@ -1,6 +1,6 @@
 /**
  * Protected Route Component
- * Redirects to login if user is not authenticated
+ * Redirects to login if user is not authenticated and not in guest mode
  */
 
 import { Navigate, useLocation } from 'react-router-dom';
@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, isGuest } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -23,7 +23,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!user) {
+  // Allow authenticated users or guest mode users
+  if (!user && !isGuest) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

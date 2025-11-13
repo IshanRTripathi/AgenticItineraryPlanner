@@ -664,7 +664,7 @@ export function TripMap({ itinerary }: TripMapProps) {
             setSelectedDays(new Set(days.map((d: any) => d.dayNumber)));
           }
           setHighlightedDay(null);
-          if (isMobile) setIsFiltersOpen(false);
+          // Don't close modal - let user continue selecting/deselecting
         }}
         className={cn(
           "w-full px-3 py-2 sm:px-4 sm:py-3 min-h-[40px] sm:min-h-[48px] rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95",

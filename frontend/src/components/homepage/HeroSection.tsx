@@ -70,7 +70,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 className="group relative text-base sm:text-lg px-8 sm:px-10 min-h-[48px] sm:h-14 md:h-16 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-size-200 bg-pos-0 hover:bg-pos-100 shadow-2xl shadow-blue-500/50 hover:shadow-purple-500/50 md:hover:scale-105 transition-all duration-500 font-semibold overflow-hidden touch-manipulation active:scale-95"
-                onClick={() => window.location.href = '/planner'}
+                onClick={() => window.location.href = '/login'}
                 style={{ backgroundSize: '200% auto' }}
               >
                 {/* Shimmer effect */}

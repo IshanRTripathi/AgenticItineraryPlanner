@@ -51,17 +51,26 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token or guest mode header
 apiClient.interceptors.request.use(
   async (config: any) => {
     try {
       const user = auth.currentUser;
       if (user) {
+        // Authenticated user - add Bearer token
         const token = await user.getIdToken();
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        // Check if in guest mode
+        const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+        if (isGuestMode) {
+          // Guest user - add anonymous header
+          config.headers['X-Guest-Session-Id'] = 'anonymous';
+          console.log('[API Client] Added anonymous guest header');
+        }
       }
     } catch (error) {
-      console.error('[API Client] Error getting auth token:', error);
+      console.error('[API Client] Error setting auth headers:', error);
     }
     return config;
   },

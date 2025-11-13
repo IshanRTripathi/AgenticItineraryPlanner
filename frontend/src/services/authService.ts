@@ -31,9 +31,13 @@ class AuthService {
   private tokenRefreshInterval: NodeJS.Timeout | null = null;
   private readonly TOKEN_REFRESH_INTERVAL = 50 * 60 * 1000; // 50 minutes
   private googleProvider: GoogleAuthProvider;
+  private isGuestMode: boolean = false;
+  private readonly GUEST_MODE_KEY = 'isGuestMode';
 
   constructor() {
     this.googleProvider = new GoogleAuthProvider();
+    // Check if user is in guest mode
+    this.isGuestMode = localStorage.getItem(this.GUEST_MODE_KEY) === 'true';
   }
 
   /**
@@ -231,6 +235,72 @@ class AuthService {
    */
   isAuthenticated() {
     return !!auth.currentUser;
+  }
+
+  /**
+   * Enable guest mode
+   */
+  enableGuestMode(): void {
+    this.isGuestMode = true;
+    localStorage.setItem(this.GUEST_MODE_KEY, 'true');
+    console.log('[Auth] Guest mode enabled');
+  }
+
+  /**
+   * Check if user is in guest mode
+   */
+  isInGuestMode(): boolean {
+    return this.isGuestMode && !this.isAuthenticated();
+  }
+
+  /**
+   * Migrate guest data to authenticated user
+   */
+  async migrateGuestData(): Promise<{ success: boolean; migratedCount?: number; error?: string }> {
+    const user = this.getCurrentUser();
+    
+    if (!user) {
+      console.error('[Auth] Cannot migrate: no authenticated user');
+      return { success: false, error: 'No authenticated user' };
+    }
+    
+    if (!this.isGuestMode) {
+      console.log('[Auth] No guest data to migrate');
+      return { success: true, migratedCount: 0 };
+    }
+    
+    try {
+      console.log('[Auth] Migrating guest data from anonymous to:', user.uid);
+      
+      const response = await apiClient.post('/users/migrate-guest', {
+        guestUserId: 'anonymous'
+      });
+      
+      // Clear guest mode after successful migration
+      localStorage.removeItem(this.GUEST_MODE_KEY);
+      this.isGuestMode = false;
+      
+      console.log('[Auth] Guest data migrated successfully:', response.data);
+      return { 
+        success: true, 
+        migratedCount: response.data.migratedCount 
+      };
+    } catch (error: any) {
+      console.error('[Auth] Failed to migrate guest data:', error);
+      return { 
+        success: false, 
+        error: error.response?.data?.message || error.message 
+      };
+    }
+  }
+
+  /**
+   * Clear guest mode (for testing/debugging)
+   */
+  clearGuestMode(): void {
+    localStorage.removeItem(this.GUEST_MODE_KEY);
+    this.isGuestMode = false;
+    console.log('[Auth] Guest mode cleared');
   }
 }
 

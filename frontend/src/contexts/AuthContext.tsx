@@ -12,10 +12,13 @@ import { logger } from '../utils/logger';
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
+  isGuest: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
   getIdToken: () => Promise<string | null>;
+  migrateGuestData: () => Promise<{ success: boolean; migratedCount?: number; error?: string }>;
+  enableGuestMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +30,13 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState<boolean>(false);
+
+  // Check guest mode on mount
+  useEffect(() => {
+    const guestMode = localStorage.getItem('isGuestMode') === 'true';
+    setIsGuest(guestMode && !user);
+  }, [user]);
 
   useEffect(() => {
     // Listen to authentication state changes
@@ -126,11 +136,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       await authService.signInWithGoogle();
+      
+      // Migrate guest data after successful sign-in
+      try {
+        const migrationResult = await authService.migrateGuestData();
+        if (migrationResult.success && migrationResult.migratedCount && migrationResult.migratedCount > 0) {
+          logger.info('Guest data migrated successfully', {
+            component: 'AuthContext',
+            migratedCount: migrationResult.migratedCount
+          });
+        }
+      } catch (migrationError) {
+        // Don't fail sign-in if migration fails
+        logger.error('Guest data migration failed', {
+          component: 'AuthContext'
+        }, migrationError as Error);
+      }
+      
       // User state will be updated via onAuthStateChanged
     } catch (error) {
       setLoading(false);
       throw error;
     }
+  };
+
+  const migrateGuestData = async () => {
+    return await authService.migrateGuestData();
   };
 
   const signOut = async (): Promise<void> => {
@@ -152,13 +183,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return await authService.getIdToken();
   };
 
+  const enableGuestMode = () => {
+    authService.enableGuestMode();
+    setIsGuest(true);
+  };
+
   const value: AuthContextType = {
     user,
     loading,
+    isGuest,
     signInWithGoogle,
     signOut,
     isAuthenticated,
-    getIdToken
+    getIdToken,
+    migrateGuestData,
+    enableGuestMode
   };
 
   return (

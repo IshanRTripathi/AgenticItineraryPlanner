@@ -81,9 +81,16 @@ public class ItinerariesController {
         try {
             // Extract userId from request attributes (set by FirebaseAuthConfig)
             String userId = (String) httpRequest.getAttribute("userId");
+            Boolean isGuest = (Boolean) httpRequest.getAttribute("isGuest");
+            
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request - this should not happen");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ItineraryCreationResponse.error("User identification failed"));
+            }
+            
+            if (isGuest != null && isGuest) {
+                logger.info("Guest user creating itinerary: {}", userId);
             }
             
             // Validate required fields
@@ -212,9 +219,10 @@ public class ItinerariesController {
         try {
             // Extract userId from request attributes (set by FirebaseAuthConfig)
             String userId = (String) httpRequest.getAttribute("userId");
+            
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             List<ItineraryDto> itineraries = itineraryService.getUserItineraries(userId, 0, 10);
@@ -237,9 +245,10 @@ public class ItinerariesController {
         
         // Extract userId from request attributes (set by FirebaseAuthConfig)
         String userId = (String) httpRequest.getAttribute("userId");
+        
         if (userId == null) {
-            logger.warn("User ID not found in request, using anonymous for development");
-            userId = "anonymous"; // Temporary fallback for development
+            logger.error("User ID not found in request");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         
         try {
@@ -268,9 +277,10 @@ public class ItinerariesController {
         
         // Extract userId from request attributes (set by FirebaseAuthConfig)
         String userId = (String) httpRequest.getAttribute("userId");
+        
         if (userId == null) {
-            logger.warn("User ID not found in request, using anonymous for development");
-            userId = "anonymous"; // Temporary fallback for development
+            logger.error("User ID not found in request");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         
         try {
@@ -451,11 +461,13 @@ public class ItinerariesController {
                                                              HttpServletRequest httpRequest) {
         logger.info("Toggling lock for node {} in itinerary: {}", nodeId, id);
         
-        // Get user ID from request (temporarily allow anonymous for testing)
+        // Get user ID from request
         String userId = (String) httpRequest.getAttribute("userId");
+        
         if (userId == null) {
-            logger.warn("User ID not found in request, using anonymous for testing");
-            userId = "anonymous"; // Temporary fallback for testing
+            logger.error("User ID not found in request");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "User identification failed"));
         }
         
         try {
@@ -474,20 +486,13 @@ public class ItinerariesController {
             
             NormalizedItinerary itinerary = itineraryOpt.get();
             
-            // Check ownership (allow access to anonymous itineraries for testing)
+            // Check ownership
             String itineraryUserId = itinerary.getUserId();
-            boolean isAnonymousItinerary = "anonymous".equals(itineraryUserId) || itineraryUserId == null;
-            boolean hasAccess = userId.equals(itineraryUserId) || isAnonymousItinerary;
+            boolean hasAccess = userId.equals(itineraryUserId);
             
             if (!hasAccess) {
                 logger.warn("User {} does not have access to itinerary {} (owner: {})", userId, id, itineraryUserId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-            
-            // If accessing anonymous itinerary, optionally transfer ownership
-            if (isAnonymousItinerary && !"anonymous".equals(userId)) {
-                logger.info("Transferring ownership of itinerary {} from '{}' to '{}'", id, itineraryUserId, userId);
-                itinerary.setUserId(userId);
             }
             
             // Find and update the node
@@ -647,8 +652,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Get the itinerary
@@ -689,8 +694,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Get agent status from registry
@@ -713,8 +718,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Cancel agent execution
@@ -737,8 +742,11 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous";
+                logger.error("User ID not found in request");
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "User identification failed");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
             }
             
             logger.info("=== MANUAL ENRICHMENT TRIGGERED ===");
@@ -789,8 +797,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             List<RevisionRecord> revisions = revisionService.getRevisionHistory(id);
@@ -812,8 +820,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Rollback to revision
@@ -846,8 +854,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             Optional<RevisionRecord> revisionOpt = revisionService.getRevision(id, revisionId);
@@ -913,8 +921,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Verify itinerary exists and user has access
@@ -943,8 +951,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Verify itinerary exists
@@ -972,8 +980,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous"; // Temporary fallback for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Verify itinerary exists
@@ -1004,8 +1012,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request for workflow update, using anonymous for development");
-                userId = "anonymous"; // Allow anonymous access for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Get current itinerary
@@ -1049,8 +1057,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request, using anonymous for development");
-                userId = "anonymous";
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Get metadata from UserDataService
@@ -1076,8 +1084,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request for workflow get, using anonymous for development");
-                userId = "anonymous"; // Allow anonymous access for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
@@ -1110,8 +1118,8 @@ public class ItinerariesController {
         try {
             String userId = (String) request.getAttribute("userId");
             if (userId == null) {
-                logger.warn("User ID not found in request for node update, using anonymous for development");
-                userId = "anonymous"; // Allow anonymous access for development
+                logger.error("User ID not found in request");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
             
             // Get current itinerary

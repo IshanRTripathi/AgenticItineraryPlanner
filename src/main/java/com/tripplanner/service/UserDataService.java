@@ -495,4 +495,130 @@ public class UserDataService {
         }
     }
 
+    // ===== GUEST USER METHODS =====
+    
+    /**
+     * Check if a user ID represents a guest user.
+     * 
+     * @param userId The user ID to check
+     * @return true if the user ID is "anonymous"
+     */
+    public boolean isGuestUser(String userId) {
+        return "anonymous".equals(userId);
+    }
+    
+    /**
+     * Migrate all data from a guest user to an authenticated user.
+     * This transfers all itineraries and associated data.
+     * 
+     * @param guestUserId The guest user ID
+     * @param authenticatedUserId The authenticated user ID
+     * @return Number of itineraries migrated
+     */
+    public int migrateGuestDataToUser(String guestUserId, String authenticatedUserId) {
+        logger.info("Migrating guest data from {} to {}", guestUserId, authenticatedUserId);
+        
+        try {
+            // Get all guest user's trip metadata
+            List<TripMetadata> guestTrips = getUserTripMetadata(guestUserId);
+            
+            if (guestTrips.isEmpty()) {
+                logger.info("No trips to migrate for guest user: {}", guestUserId);
+                return 0;
+            }
+            
+            int migratedCount = 0;
+            
+            for (TripMetadata trip : guestTrips) {
+                try {
+                    String itineraryId = trip.getItineraryId();
+                    logger.info("Migrating itinerary: {} from guest {} to user {}", 
+                               itineraryId, guestUserId, authenticatedUserId);
+                    
+                    // Update the trip metadata with new user ID
+                    trip.setUserId(authenticatedUserId);
+                    trip.setUpdatedAt(System.currentTimeMillis());
+                    
+                    // Save under authenticated user
+                    saveUserTripMetadata(authenticatedUserId, trip);
+                    
+                    // Delete from guest user
+                    deleteUserTripMetadata(guestUserId, itineraryId);
+                    
+                    // IMPORTANT: Also update the NormalizedItinerary userId in the main itineraries collection
+                    // This is handled by the ItineraryJsonService which will be called by the frontend
+                    // after migration to update the master itinerary document
+                    
+                    migratedCount++;
+                    logger.info("Successfully migrated itinerary: {}", itineraryId);
+                    
+                } catch (Exception e) {
+                    logger.error("Failed to migrate itinerary: {}", trip.getItineraryId(), e);
+                    // Continue with other itineraries
+                }
+            }
+            
+            logger.info("Migration complete: {} itineraries migrated from {} to {}", 
+                       migratedCount, guestUserId, authenticatedUserId);
+            
+            return migratedCount;
+            
+        } catch (Exception e) {
+            logger.error("Failed to migrate guest data from {} to {}", guestUserId, authenticatedUserId, e);
+            throw new RuntimeException("Failed to migrate guest data", e);
+        }
+    }
+    
+    /**
+     * Delete all data for a user (used for guest cleanup).
+     * 
+     * @param userId The user ID to delete
+     */
+    public void deleteUserData(String userId) {
+        try {
+            logger.info("Deleting all data for user: {}", userId);
+            
+            // Get all trip metadata
+            List<TripMetadata> trips = getUserTripMetadata(userId);
+            
+            // Delete each trip metadata
+            for (TripMetadata trip : trips) {
+                deleteUserTripMetadata(userId, trip.getItineraryId());
+            }
+            
+            logger.info("Successfully deleted all data for user: {}", userId);
+            
+        } catch (Exception e) {
+            logger.error("Failed to delete user data for: {}", userId, e);
+            throw new RuntimeException("Failed to delete user data", e);
+        }
+    }
+    
+    /**
+     * Get the creation time of the oldest trip for a user.
+     * Used to determine if guest data should be cleaned up.
+     * 
+     * @param userId The user ID
+     * @return The creation timestamp of the oldest trip, or null if no trips exist
+     */
+    public Long getOldestTripCreationTime(String userId) {
+        try {
+            List<TripMetadata> trips = getUserTripMetadata(userId);
+            
+            if (trips.isEmpty()) {
+                return null;
+            }
+            
+            return trips.stream()
+                    .map(TripMetadata::getCreatedAt)
+                    .filter(createdAt -> createdAt != null)
+                    .min(Long::compareTo)
+                    .orElse(null);
+                    
+        } catch (Exception e) {
+            logger.error("Failed to get oldest trip creation time for user: {}", userId, e);
+            return null;
+        }
+    }
+
 }

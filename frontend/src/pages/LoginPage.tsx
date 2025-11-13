@@ -39,7 +39,7 @@ const FEATURES = [
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signInWithGoogle, isAuthenticated, loading } = useAuth();
+  const { signInWithGoogle, isAuthenticated, loading, enableGuestMode } = useAuth();
   const { toast } = useToast();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -84,6 +84,16 @@ export function LoginPage() {
     }
   };
 
+  const handleContinueAsGuest = () => {
+    enableGuestMode();
+    toast({
+      title: 'Guest Mode',
+      description: 'You can start planning without signing in.',
+    });
+    const from = (location.state as any)?.from?.pathname || '/planner';
+    navigate(from, { replace: true });
+  };
+
 
 
   if (loading) {
@@ -124,7 +134,7 @@ export function LoginPage() {
             <Button
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
-              className="w-full h-14 text-base font-semibold bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95"
+              className="w-full h-14 text-base font-semibold bg-white text-primary hover:bg-white/95 shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 mb-4"
             >
               {isSigningIn ? (
                 <>
@@ -143,6 +153,24 @@ export function LoginPage() {
                 </>
               )}
             </Button>
+
+            {/* Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/20"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-white/15 text-white/70 rounded-full">or</span>
+              </div>
+            </div>
+
+            {/* Continue as Guest Link */}
+            <button
+              onClick={handleContinueAsGuest}
+              className="w-full text-center text-sm text-white/90 hover:text-white underline-offset-4 hover:underline transition-all duration-200 py-2 touch-manipulation"
+            >
+              Continue as Guest
+            </button>
           </div>
 
           {/* Feature Carousel - Compact */}
@@ -265,7 +293,7 @@ export function LoginPage() {
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
               size="lg"
-              className="w-full h-16 text-lg font-semibold shadow-lg hover:shadow-2xl transition-all duration-300"
+              className="w-full h-16 text-lg font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 mb-6"
             >
               {isSigningIn ? (
                 <>
@@ -284,6 +312,24 @@ export function LoginPage() {
                 </>
               )}
             </Button>
+
+            {/* Divider */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-3 bg-white text-muted-foreground">or</span>
+              </div>
+            </div>
+
+            {/* Continue as Guest Link */}
+            <button
+              onClick={handleContinueAsGuest}
+              className="w-full text-center text-base text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-all duration-200 py-2"
+            >
+              Continue as Guest
+            </button>
 
             {/* Privacy Notice */}
             <p className="mt-6 text-xs text-center text-muted-foreground">
