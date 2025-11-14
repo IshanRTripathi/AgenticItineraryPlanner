@@ -44,6 +44,15 @@
     "humidity": "আর্দ্রতা",
     "wind": "বাতাস"
   },
+  "dateRangePicker": {
+    "maxDaysTitle": "সর্বোচ্চ ৭ দিন",
+    "maxDaysDescription": "অনুগ্রহ করে ৭ দিন বা তার কম সময়ের ভ্রমণ নির্বাচন করুন",
+    "duration": "{{nights}} রাত, {{days}} দিন",
+    "duration_plural": "{{nights}} রাত, {{days}} দিন",
+    "selectDates": "তারিখ নির্বাচন করুন",
+    "suggesting": "সুপারিশ করা হচ্ছে...",
+    "suggestDates": "তারিখ সুপারিশ করুন"
+  },
   "tripList": {
     "loading": "লোড হচ্ছে...",
     "tryAgain": "আবার চেষ্টা করুন",

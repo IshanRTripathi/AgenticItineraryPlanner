@@ -13,6 +13,7 @@ import {
   isDateDisabled,
   getDaysBetween,
 } from '@/utils/calendar';
+import { useTranslation } from '@/i18n';
 
 interface DateRangePickerProps {
   startDate: Date | null;
@@ -154,9 +155,11 @@ export function DateRangePicker({
   onChange,
   priceData = {},
 }: DateRangePickerProps) {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   const [showMaxDaysWarning, setShowMaxDaysWarning] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
 
   const handleDateClick = (date: Date) => {
     if (!startDate || (startDate && endDate)) {
@@ -200,6 +203,37 @@ export function DateRangePicker({
     : null;
   const wouldExceedLimit = potentialDuration !== null && potentialDuration > 7;
 
+  // Suggest best travel dates - randomly select 3-5 days in next 2 months
+  const handleSuggestDates = async () => {
+    setIsSuggesting(true);
+    
+    // Simulate AI thinking
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const today = new Date();
+    const twoMonthsFromNow = new Date(today);
+    twoMonthsFromNow.setMonth(today.getMonth() + 2);
+    
+    // Random start date between 7 days from now and 2 months from now
+    const minDaysFromNow = 7;
+    const maxDaysFromNow = 60; // ~2 months
+    const randomStartOffset = Math.floor(Math.random() * (maxDaysFromNow - minDaysFromNow)) + minDaysFromNow;
+    
+    const suggestedStart = new Date(today);
+    suggestedStart.setDate(today.getDate() + randomStartOffset);
+    
+    // Random duration between 3-5 days
+    const randomDuration = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5 days
+    const suggestedEnd = new Date(suggestedStart);
+    suggestedEnd.setDate(suggestedStart.getDate() + randomDuration);
+    
+    // Navigate calendar to show the suggested start date
+    setCurrentMonth(new Date(suggestedStart.getFullYear(), suggestedStart.getMonth(), 1));
+    
+    onChange(suggestedStart, suggestedEnd);
+    setIsSuggesting(false);
+  };
+
   return (
     <motion.div
       className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 w-full"
@@ -220,9 +254,9 @@ export function DateRangePicker({
               !
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-900">Maximum 7 days</p>
+              <p className="text-sm font-medium text-amber-900">{t('components.dateRangePicker.maxDaysTitle')}</p>
               <p className="text-xs text-amber-700 mt-0.5">
-                Please select a trip duration of 7 days or less
+                {t('components.dateRangePicker.maxDaysDescription')}
               </p>
             </div>
           </motion.div>
@@ -278,30 +312,63 @@ export function DateRangePicker({
         </div>
       </div>
 
-      {/* Duration Display + Clear Button */}
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-        <div className="text-xs text-gray-600 font-medium">
+      {/* Duration Display + Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 pt-4 border-t border-gray-200">
+        {/* Duration Display */}
+        <div className="text-xs text-gray-600 font-medium flex-1 min-w-0">
           {startDate && endDate && duration !== null && duration >= 0 ? (
             <motion.span
               key={`${startDate.toISOString()}-${endDate.toISOString()}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2 }}
+              className="block truncate"
             >
-              {duration} night{duration !== 1 ? 's' : ''}, {duration + 1} day{duration + 1 !== 1 ? 's' : ''}
+              {t('components.dateRangePicker.duration', { nights: duration, days: duration + 1 })}
             </motion.span>
           ) : (
-            <span className="text-gray-400">Select dates</span>
+            <span className="text-gray-400">{t('components.dateRangePicker.selectDates')}</span>
           )}
         </div>
         
-        <button
-          onClick={() => onChange(null, null)}
-          disabled={!startDate && !endDate}
-          className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Clear Dates
-        </button>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <motion.button
+            onClick={handleSuggestDates}
+            disabled={isSuggesting}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-2.5 sm:px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white rounded-md shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap touch-manipulation active:scale-95"
+          >
+            {isSuggesting ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="w-3 h-3 border-2 border-white border-t-transparent rounded-full flex-shrink-0"
+                />
+                <span className="hidden sm:inline">{t('components.dateRangePicker.suggesting')}</span>
+                <span className="sm:hidden">...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span className="hidden sm:inline">{t('components.dateRangePicker.suggestDates')}</span>
+                <span className="sm:hidden">Suggest</span>
+              </>
+            )}
+          </motion.button>
+          
+          <button
+            onClick={() => onChange(null, null)}
+            disabled={!startDate && !endDate}
+            className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed px-2 py-1.5 whitespace-nowrap touch-manipulation active:scale-95"
+          >
+            {t('common.actions.clear')}
+          </button>
+        </div>
       </div>
     </motion.div>
   );

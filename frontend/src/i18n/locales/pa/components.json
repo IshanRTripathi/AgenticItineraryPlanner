@@ -39,6 +39,15 @@
     "humidity": "ਨਮੀ",
     "wind": "ਹਵਾ"
   },
+  "dateRangePicker": {
+    "maxDaysTitle": "ਵੱਧ ਤੋਂ ਵੱਧ 7 ਦਿਨ",
+    "maxDaysDescription": "ਕਿਰਪਾ ਕਰਕੇ 7 ਦਿਨ ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਦੀ ਯਾਤਰਾ ਚੁਣੋ",
+    "duration": "{{nights}} ਰਾਤ, {{days}} ਦਿਨ",
+    "duration_plural": "{{nights}} ਰਾਤਾਂ, {{days}} ਦਿਨ",
+    "selectDates": "ਤਾਰੀਖਾਂ ਚੁਣੋ",
+    "suggesting": "ਸੁਝਾਅ ਦਿੱਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+    "suggestDates": "ਤਾਰੀਖਾਂ ਸੁਝਾਓ"
+  },
   "tripList": {
     "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
     "tryAgain": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",

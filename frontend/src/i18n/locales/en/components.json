@@ -44,6 +44,15 @@
     "humidity": "humidity",
     "wind": "wind"
   },
+  "dateRangePicker": {
+    "maxDaysTitle": "Maximum 7 days",
+    "maxDaysDescription": "Please select a trip duration of 7 days or less",
+    "duration": "{{nights}} night, {{days}} day",
+    "duration_plural": "{{nights}} nights, {{days}} days",
+    "selectDates": "Select dates",
+    "suggesting": "Suggesting...",
+    "suggestDates": "Suggest Dates"
+  },
   "tripList": {
     "loading": "Loading...",
     "tryAgain": "Try Again",

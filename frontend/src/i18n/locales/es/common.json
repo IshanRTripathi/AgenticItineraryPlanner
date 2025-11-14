@@ -15,7 +15,8 @@
     "signIn": "Iniciar sesión",
     "signOut": "Cerrar sesión",
     "signUp": "Registrarse",
-    "view": "Ver detalles"
+    "view": "Ver detalles",
+    "clear": "Limpiar"
   },
   "status": {
     "loading": "Cargando...",

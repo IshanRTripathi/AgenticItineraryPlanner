@@ -15,7 +15,8 @@
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "signUp": "Sign Up",
-    "view": "View Details"
+    "view": "View Details",
+    "clear": "Clear"
   },
   "status": {
     "loading": "Loading...",

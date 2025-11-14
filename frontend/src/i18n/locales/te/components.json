@@ -39,6 +39,15 @@
     "humidity": "తేమ",
     "wind": "గాలి"
   },
+  "dateRangePicker": {
+    "maxDaysTitle": "గరిష్టంగా 7 రోజులు",
+    "maxDaysDescription": "దయచేసి 7 రోజులు లేదా అంతకంటే తక్కువ యాత్ర వ్యవధిని ఎంచుకోండి",
+    "duration": "{{nights}} రాత్రి, {{days}} రోజు",
+    "duration_plural": "{{nights}} రాత్రులు, {{days}} రోజులు",
+    "selectDates": "తేదీలను ఎంచుకోండి",
+    "suggesting": "సూచిస్తోంది...",
+    "suggestDates": "తేదీలను సూచించండి"
+  },
   "tripList": {
     "loading": "లోడ్ అవుతోంది...",
     "tryAgain": "మళ్లీ ప్రయత్నించండి",

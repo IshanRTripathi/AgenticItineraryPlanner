@@ -39,6 +39,15 @@
     "humidity": "ಆರ್ದ್ರತೆ",
     "wind": "ಗಾಳಿ"
   },
+  "dateRangePicker": {
+    "maxDaysTitle": "ಗರಿಷ್ಠ 7 ದಿನಗಳು",
+    "maxDaysDescription": "ದಯವಿಟ್ಟು 7 ದಿನಗಳು ಅಥವಾ ಅದಕ್ಕಿಂತ ಕಡಿಮೆ ಪ್ರವಾಸದ ಅವಧಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "duration": "{{nights}} ರಾತ್ರಿ, {{days}} ದಿನ",
+    "duration_plural": "{{nights}} ರಾತ್ರಿಗಳು, {{days}} ದಿನಗಳು",
+    "selectDates": "ದಿನಾಂಕಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "suggesting": "ಸೂಚಿಸಲಾಗುತ್ತಿದೆ...",
+    "suggestDates": "ದಿನಾಂಕಗಳನ್ನು ಸೂಚಿಸಿ"
+  },
   "tripList": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "tryAgain": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",

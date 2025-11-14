@@ -90,7 +90,7 @@ export function LoginPage() {
       title: 'Guest Mode',
       description: 'You can start planning without signing in.',
     });
-    const from = (location.state as any)?.from?.pathname || '/planner';
+    const from = (location.state as any)?.from?.pathname || '/dashboard';
     navigate(from, { replace: true });
   };
 
