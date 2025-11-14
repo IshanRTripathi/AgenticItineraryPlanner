@@ -76,22 +76,34 @@ public class ActivityAgent extends BaseAgent {
         logger.info("Populating attraction nodes for itinerary: {}", itineraryId);
         
         try {
+            emitProgress(itineraryId, 10, "Loading attraction data", "loading");
+            
             // Extract all attraction nodes from skeleton
             List<AttractionContext> attractionContexts = extractAttractionNodes(skeleton);
             
             if (attractionContexts.isEmpty()) {
                 logger.info("No attraction nodes to populate");
+                emitProgress(itineraryId, 100, "No attractions to populate", "complete");
                 return;
             }
             
             logger.info("Found {} attraction nodes to populate", attractionContexts.size());
+            emitProgress(itineraryId, 30, 
+                String.format("Populating %d attractions", attractionContexts.size()), 
+                "populating");
             
             // Populate attractions with AI
             List<PopulatedAttraction> populatedAttractions = populateAttractionsWithAI(
                 skeleton, attractionContexts);
             
+            emitProgress(itineraryId, 70, "Saving attraction data", "saving");
+            
             // Update the itinerary with populated data
             updateItineraryWithAttractions(itineraryId, skeleton, populatedAttractions);
+            
+            emitProgress(itineraryId, 100, 
+                String.format("Populated %d attractions", populatedAttractions.size()), 
+                "complete");
             
             logger.info("=== ACTIVITY AGENT COMPLETE ===");
             logger.info("Populated {} attractions", populatedAttractions.size());
@@ -105,6 +117,7 @@ public class ActivityAgent extends BaseAgent {
             
         } catch (Exception e) {
             logger.error("Failed to populate attractions for itinerary: {}", itineraryId, e);
+            emitProgress(itineraryId, 0, "Failed to populate attractions", "error");
             // Don't throw - graceful degradation (keep placeholders)
         }
     }

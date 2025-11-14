@@ -388,8 +388,8 @@ class WebSocketService {
     try {
       const data = JSON.parse(message.body);
       
-      // Backend sends 'updateType', not 'type' - check both
-      const messageType = data.updateType || data.type || 'connection_status';
+      // Backend now sends 'type' field consistently
+      const messageType = data.type || 'connection_status';
       
       // Create message fingerprint for deduplication
       const messageFingerprint = `${messageType}_${data.timestamp}_${data.progress || ''}_${JSON.stringify(data.data || {}).substring(0, 100)}`;

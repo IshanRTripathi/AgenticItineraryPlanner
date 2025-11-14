@@ -75,6 +75,8 @@ public class TransportAgent extends BaseAgent {
         logger.info("Populating transport nodes for itinerary: {}", itineraryId);
         
         try {
+            emitProgress(itineraryId, 10, "Loading transport data", "loading");
+            
             // IMPORTANT: Ensure all nodes have IDs BEFORE extracting contexts
             // This prevents duplicate key errors when collecting into a Map
             for (NormalizedDay day : skeleton.getDays()) {
@@ -89,17 +91,27 @@ public class TransportAgent extends BaseAgent {
             
             if (transportContexts.isEmpty()) {
                 logger.info("No transport nodes to populate");
+                emitProgress(itineraryId, 100, "No transport to populate", "complete");
                 return;
             }
             
             logger.info("Found {} transport nodes to populate", transportContexts.size());
+            emitProgress(itineraryId, 30, 
+                String.format("Populating %d transport segments", transportContexts.size()), 
+                "populating");
             
             // Populate transport with AI
             List<PopulatedTransport> populatedTransport = populateTransportWithAI(
                 skeleton, transportContexts);
             
+            emitProgress(itineraryId, 70, "Saving transport data", "saving");
+            
             // Update the itinerary with populated data
             updateItineraryWithTransport(itineraryId, skeleton, populatedTransport);
+            
+            emitProgress(itineraryId, 100, 
+                String.format("Populated %d transport segments", populatedTransport.size()), 
+                "complete");
             
             logger.info("=== TRANSPORT AGENT COMPLETE ===");
             logger.info("Populated {} transport segments", populatedTransport.size());
@@ -113,6 +125,7 @@ public class TransportAgent extends BaseAgent {
             
         } catch (Exception e) {
             logger.error("Failed to populate transport for itinerary: {}", itineraryId, e);
+            emitProgress(itineraryId, 0, "Failed to populate transport", "error");
             // Don't throw - graceful degradation (keep placeholders)
         }
     }

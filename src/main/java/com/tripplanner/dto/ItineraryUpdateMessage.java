@@ -21,6 +21,13 @@ public class ItineraryUpdateMessage {
      * Type of update being broadcast
      * Examples: node_update, agent_progress, revision_created, chat_message, error
      */
+    @JsonProperty("type")
+    private String type;
+    
+    /**
+     * Deprecated: Use 'type' instead. Kept for backward compatibility.
+     */
+    @Deprecated
     @JsonProperty("updateType")
     private String updateType;
 
@@ -65,15 +72,24 @@ public class ItineraryUpdateMessage {
      * Builder class for ItineraryUpdateMessage
      */
     public static class ItineraryUpdateMessageBuilder {
-        private String updateType;
+        private String type;
         private String itineraryId;
         private Object data;
         private String userId;
         private Instant timestamp;
         private Object metadata;
 
+        public ItineraryUpdateMessageBuilder type(String type) {
+            this.type = type;
+            return this;
+        }
+        
+        /**
+         * Deprecated: Use type() instead
+         */
+        @Deprecated
         public ItineraryUpdateMessageBuilder updateType(String updateType) {
-            this.updateType = updateType;
+            this.type = updateType;
             return this;
         }
 
@@ -104,7 +120,8 @@ public class ItineraryUpdateMessage {
 
         public ItineraryUpdateMessage build() {
             ItineraryUpdateMessage message = new ItineraryUpdateMessage();
-            message.updateType = this.updateType;
+            message.type = this.type;
+            message.updateType = this.type; // Set both for backward compatibility
             message.itineraryId = this.itineraryId;
             message.data = this.data;
             message.userId = this.userId;
@@ -119,7 +136,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createAgentProgress(String itineraryId, String agentId, int progress, String status) {
         return ItineraryUpdateMessage.builder()
-                .updateType("agent_progress")
+                .type("agent_progress")
                 .itineraryId(itineraryId)
                 .data(java.util.Map.of(
                         "agentId", agentId,
@@ -135,7 +152,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createNodeUpdate(String itineraryId, String nodeId, Object nodeData, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("node_update")
+                .type("node_update")
                 .itineraryId(itineraryId)
                 .data(java.util.Map.of(
                         "nodeId", nodeId,
@@ -151,7 +168,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createRevisionCreated(String itineraryId, String revisionId, String description, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("revision_created")
+                .type("revision_created")
                 .itineraryId(itineraryId)
                 .data(java.util.Map.of(
                         "revisionId", revisionId,
@@ -167,7 +184,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createChatMessage(String itineraryId, String messageId, String content, String sender) {
         return ItineraryUpdateMessage.builder()
-                .updateType("chat_message")
+                .type("chat_message")
                 .itineraryId(itineraryId)
                 .data(java.util.Map.of(
                         "messageId", messageId,
@@ -184,7 +201,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createError(String itineraryId, String errorMessage, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("error")
+                .type("error")
                 .itineraryId(itineraryId)
                 .data(java.util.Map.of("error", errorMessage))
                 .userId(userId)
@@ -197,7 +214,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createConnectionStatus(String itineraryId, String status) {
         return ItineraryUpdateMessage.builder()
-                .updateType("connection_status")
+                .type("connection_status")
                 .itineraryId(itineraryId)
                 .data(java.util.Map.of("status", status))
                 .timestamp(Instant.now())
@@ -209,7 +226,7 @@ public class ItineraryUpdateMessage {
      */
     public static ItineraryUpdateMessage createItineraryUpdated(String itineraryId, Object itineraryData, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("itinerary_updated")
+                .type("itinerary_updated")
                 .itineraryId(itineraryId)
                 .data(itineraryData)
                 .userId(userId)

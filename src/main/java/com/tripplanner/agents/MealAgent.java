@@ -76,21 +76,33 @@ public class MealAgent extends BaseAgent {
         logger.info("Populating meal nodes for itinerary: {}", itineraryId);
         
         try {
+            emitProgress(itineraryId, 10, "Loading meal data", "loading");
+            
             // Extract all meal nodes from skeleton
             List<MealContext> mealContexts = extractMealNodes(skeleton);
             
             if (mealContexts.isEmpty()) {
                 logger.info("No meal nodes to populate");
+                emitProgress(itineraryId, 100, "No meals to populate", "complete");
                 return;
             }
             
             logger.info("Found {} meal nodes to populate", mealContexts.size());
+            emitProgress(itineraryId, 30, 
+                String.format("Populating %d meals", mealContexts.size()), 
+                "populating");
             
             // Populate meals with AI
             List<PopulatedMeal> populatedMeals = populateMealsWithAI(skeleton, mealContexts);
             
+            emitProgress(itineraryId, 70, "Saving meal data", "saving");
+            
             // Update the itinerary with populated data
             updateItineraryWithMeals(itineraryId, skeleton, populatedMeals);
+            
+            emitProgress(itineraryId, 100, 
+                String.format("Populated %d meals", populatedMeals.size()), 
+                "complete");
             
             logger.info("=== MEAL AGENT COMPLETE ===");
             logger.info("Populated {} meals", populatedMeals.size());
@@ -104,6 +116,7 @@ public class MealAgent extends BaseAgent {
             
         } catch (Exception e) {
             logger.error("Failed to populate meals for itinerary: {}", itineraryId, e);
+            emitProgress(itineraryId, 0, "Failed to populate meals", "error");
             // Don't throw - graceful degradation (keep placeholders)
         }
     }

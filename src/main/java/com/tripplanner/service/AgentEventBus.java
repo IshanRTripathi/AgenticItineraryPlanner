@@ -35,15 +35,26 @@ public class AgentEventBus {
         logger.info("Timestamp: {}", event.updatedAt());
         
         try {
-            // Send via WebSocket
-            webSocketEventPublisher.publishAgentProgress(
+            // Build complete event data including message and step
+            java.util.Map<String, Object> eventData = new java.util.HashMap<>();
+            // Use agent kind (e.g., "PLANNER", "ENRICHMENT") as agentId instead of UUID
+            // This makes it human-readable in the UI
+            eventData.put("agentId", event.kind().name());
+            eventData.put("kind", event.kind().name());
+            eventData.put("status", event.status().name());
+            eventData.put("progress", event.progress() != null ? event.progress() : 0);
+            eventData.put("message", event.message() != null ? event.message() : "");
+            eventData.put("step", event.step() != null ? event.step() : "");
+            eventData.put("timestamp", event.updatedAt().toString());
+            
+            // Send complete event data via WebSocket
+            webSocketEventPublisher.publishItineraryUpdate(
                 itineraryId,
-                event.agentId(),
-                event.progress() != null ? event.progress() : 0,
-                event.status().name()
+                "agent_progress",
+                eventData
             );
             
-            logger.debug("Agent event published successfully via WebSocket");
+            logger.debug("Agent event published successfully via WebSocket with complete data");
         } catch (Exception e) {
             logger.error("Failed to publish agent event via WebSocket for itinerary: {}", itineraryId, e);
         }

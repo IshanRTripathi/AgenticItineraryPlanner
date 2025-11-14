@@ -98,7 +98,7 @@ public class WebSocketController {
         
         // Send initial connection confirmation
         return ItineraryUpdateMessage.builder()
-                .updateType("connection_established")
+                .type("connection_established")
                 .itineraryId(itineraryId)
                 .data(Map.of("status", "connected", "timestamp", Instant.now().toString()))
                 .timestamp(Instant.now())
@@ -172,7 +172,7 @@ public class WebSocketController {
             
             // Create WebSocket response message
             ItineraryUpdateMessage response = ItineraryUpdateMessage.builder()
-                    .updateType("chat_response")
+                    .type("chat_response")
                     .itineraryId(itineraryId)
                     .data(responseData)
                     .timestamp(Instant.now())
@@ -188,7 +188,7 @@ public class WebSocketController {
                 updateData.put("changes", chatResponse.getChangeSet());
                 
                 ItineraryUpdateMessage updateMessage = ItineraryUpdateMessage.builder()
-                        .updateType("chat_update")
+                        .type("chat_update")
                         .itineraryId(itineraryId)
                         .data(updateData)
                         .timestamp(Instant.now())
@@ -214,7 +214,7 @@ public class WebSocketController {
                 errorData.put("data", errorInnerData);
                 
                 ItineraryUpdateMessage errorResponse = ItineraryUpdateMessage.builder()
-                        .updateType("chat_response")
+                        .type("chat_response")
                         .itineraryId(itineraryId)
                         .data(errorData)
                         .timestamp(Instant.now())
@@ -255,7 +255,7 @@ public class WebSocketController {
             // For now, we'll just broadcast the update
             
             return ItineraryUpdateMessage.builder()
-                    .updateType("node_update")
+                    .type("node_update")
                     .itineraryId(itineraryId)
                     .data(data)
                     .userId(userId)
@@ -273,7 +273,7 @@ public class WebSocketController {
      */
     private ItineraryUpdateMessage processAgentProgress(String itineraryId, Object data, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("agent_progress")
+                .type("agent_progress")
                 .itineraryId(itineraryId)
                 .data(data)
                 .userId(userId)
@@ -286,7 +286,7 @@ public class WebSocketController {
      */
     private ItineraryUpdateMessage processRevisionCreated(String itineraryId, Object data, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("revision_created")
+                .type("revision_created")
                 .itineraryId(itineraryId)
                 .data(data)
                 .userId(userId)
@@ -299,7 +299,7 @@ public class WebSocketController {
      */
     private ItineraryUpdateMessage processChatMessage(String itineraryId, Object data, String userId) {
         return ItineraryUpdateMessage.builder()
-                .updateType("chat_message")
+                .type("chat_message")
                 .itineraryId(itineraryId)
                 .data(data)
                 .userId(userId)
@@ -312,7 +312,7 @@ public class WebSocketController {
      */
     private ItineraryUpdateMessage createGenericUpdate(String itineraryId, String updateType, Object data) {
         return ItineraryUpdateMessage.builder()
-                .updateType(updateType)
+                .type(updateType)
                 .itineraryId(itineraryId)
                 .data(data)
                 .timestamp(Instant.now())
@@ -324,7 +324,7 @@ public class WebSocketController {
      */
     private ItineraryUpdateMessage createErrorMessage(String itineraryId, String errorMessage) {
         return ItineraryUpdateMessage.builder()
-                .updateType("error")
+                .type("error")
                 .itineraryId(itineraryId)
                 .data(Map.of("error", errorMessage))
                 .timestamp(Instant.now())
@@ -358,7 +358,7 @@ public class WebSocketController {
         );
         
         ItineraryUpdateMessage message = ItineraryUpdateMessage.builder()
-                .updateType("agent_progress")
+                .type("agent_progress")
                 .itineraryId(itineraryId)
                 .data(data)
                 .timestamp(Instant.now())
@@ -375,7 +375,7 @@ public class WebSocketController {
      */
     public void broadcastItineraryUpdate(String itineraryId, String updateType, Object data) {
         ItineraryUpdateMessage message = ItineraryUpdateMessage.builder()
-                .updateType(updateType)
+                .type(updateType)
                 .itineraryId(itineraryId)
                 .data(data)
                 .timestamp(Instant.now())

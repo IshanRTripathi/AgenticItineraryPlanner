@@ -184,7 +184,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
         if (isActive) {
           loadItinerary(itineraryId);
         }
-      }, 2000); // Wait 2 seconds after last event before reloading
+      }, 500); // Wait 500ms after last event before reloading (reduced from 2000ms for better responsiveness)
     };
 
     // Delay connection to prevent immediate reconnection loops
@@ -215,8 +215,8 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
     const handleMessage = (message: any) => {
       if (!isActive) return;
 
-      // Backend sends 'updateType', frontend expects 'type' - handle both
-      const messageType = message.type || message.updateType;
+      // Backend now sends 'type' field consistently
+      const messageType = message.type;
       
       logInfo(`WebSocket message received: ${messageType}`, {
         component: 'UnifiedItineraryProvider',
