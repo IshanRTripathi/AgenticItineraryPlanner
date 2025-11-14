@@ -33,6 +33,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { ExportOptionsModal, ExportOptions } from '@/components/export/ExportOptionsModal';
 import { ShareModal } from '@/components/share/ShareModal';
 import { useTranslation } from '@/i18n';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TripSidebarProps {
   tripId: string;
@@ -56,6 +57,7 @@ export function TripSidebar({
   onClose,
 }: TripSidebarProps) {
   const { t } = useTranslation();
+  const { isGuest } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { state } = useUnifiedItinerary();
@@ -220,15 +222,18 @@ export function TripSidebar({
             <span className="text-xs">{t('pages.tripDetail.sidebar.export')}</span>
           </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex flex-col items-center gap-1 h-auto py-3 text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive touch-manipulation active:scale-95"
-            onClick={handleDelete}
-          >
-            <Trash2 className="w-5 h-5" />
-            <span className="text-xs">{t('pages.tripDetail.sidebar.delete')}</span>
-          </Button>
+          {/* Delete button - Only show for authenticated users, not guests */}
+          {!isGuest && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex flex-col items-center gap-1 h-auto py-3 text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive touch-manipulation active:scale-95"
+              onClick={handleDelete}
+            >
+              <Trash2 className="w-5 h-5" />
+              <span className="text-xs">{t('pages.tripDetail.sidebar.delete')}</span>
+            </Button>
+          )}
         </div>
       </div>
 

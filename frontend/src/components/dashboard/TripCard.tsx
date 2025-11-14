@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Users, DollarSign, MapPin, MoreVertical, Trash2, Eye, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,7 @@ interface TripCardProps {
 
 export function TripCard({ trip, onDelete }: TripCardProps) {
   const { t } = useTranslation();
+  const { isGuest } = useAuth();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const formatDate = (date: string) => {
@@ -181,18 +183,20 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
               {getDuration()}
             </div>
             
-            {/* Delete button - Positioned inline */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent card click
-                handleDeleteClick();
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {/* Delete button - Only show for authenticated users, not guests */}
+            {!isGuest && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card click
+                  handleDeleteClick();
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

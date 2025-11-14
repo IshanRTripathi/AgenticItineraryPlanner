@@ -3,6 +3,9 @@ package com.tripplanner.service.openrouter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.service.ai.AiClient;
+import com.tripplanner.service.ai.CircuitBreaker;
+import com.tripplanner.service.ai.exception.TransientAiException;
+import com.tripplanner.service.ai.exception.PermanentAiException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -49,10 +52,12 @@ public class OpenRouterClient implements AiClient {
 
 	private HttpClient httpClient;
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private CircuitBreaker circuitBreaker;
 
 	@PostConstruct
 	public void initialize() {
 		this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
+		this.circuitBreaker = new CircuitBreaker("OpenRouterClient");
         String keyStatus = (apiKey == null || apiKey.isBlank()) ? "MISSING" : ("SET(len=" + apiKey.trim().length() + ")");
         logger.info("Initialized OpenRouter client with model: {} | apiKey={}",
                 modelName, keyStatus);
@@ -65,14 +70,26 @@ public class OpenRouterClient implements AiClient {
 
 	@Override
 	public String generateContent(String userPrompt, String systemPrompt) {
+		// Check circuit breaker before attempting request
+		if (!circuitBreaker.allowRequest()) {
+			logger.warn("Circuit breaker is OPEN for OpenRouterClient, throwing TransientAiException");
+			throw new TransientAiException(
+				"Circuit breaker is open for OpenRouter",
+				"OpenRouterClient",
+				503
+			);
+		}
+		
 		logger.info("🤖 OpenRouterClient: Starting content generation");
 		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
+		logger.debug("Circuit Breaker State: {}", circuitBreaker.getState());
 		logger.debug("User prompt length: {} chars", userPrompt != null ? userPrompt.length() : 0);
 		logger.debug("System prompt length: {} chars", systemPrompt != null ? systemPrompt.length() : 0);
 		
 		try {
 			if (mockMode) {
 				logger.info("OpenRouter mock mode enabled; returning empty response");
+				circuitBreaker.recordSuccess();
 				return "";
 			}
 
@@ -100,10 +117,35 @@ public class OpenRouterClient implements AiClient {
 			long responseTime = System.currentTimeMillis() - startTime;
 			logger.info("OpenRouter API response: {} ({}ms)", response.statusCode(), responseTime);
 			
+			// Classify errors and throw typed exceptions
+			if (isTransientError(response.statusCode())) {
+				circuitBreaker.recordFailure();
+				logger.error("❌ OpenRouter API transient error: {} - {}", response.statusCode(), response.body());
+				throw new TransientAiException(
+					"OpenRouter API returned transient error: " + response.statusCode(),
+					"OpenRouterClient",
+					response.statusCode()
+				);
+			}
+			
+			if (isPermanentError(response.statusCode())) {
+				// Don't count permanent errors against circuit breaker
+				logger.error("❌ OpenRouter API permanent error: {} - {}", response.statusCode(), response.body());
+				throw new PermanentAiException(
+					"OpenRouter API returned permanent error: " + response.statusCode(),
+					"OpenRouterClient",
+					response.statusCode()
+				);
+			}
+			
 			if (response.statusCode() != 200) {
-				logger.error("❌ OpenRouter API error: {} - {}", response.statusCode(), response.body());
-				logger.error("Request that failed - endpoint: {}, payload size: {}", endpoint, body.length());
-				throw new RuntimeException("OpenRouter API error: " + response.statusCode());
+				circuitBreaker.recordFailure();
+				logger.error("❌ OpenRouter API unexpected error: {} - {}", response.statusCode(), response.body());
+				throw new TransientAiException(
+					"OpenRouter API returned unexpected status: " + response.statusCode(),
+					"OpenRouterClient",
+					response.statusCode()
+				);
 			}
 
 			logger.debug("Response body size: {} chars", response.body().length());
@@ -115,18 +157,40 @@ public class OpenRouterClient implements AiClient {
 				if (message != null && message.get("content") != null) {
 					String content = message.get("content").asText("");
 					logger.info("✅ OpenRouter content generation successful - {} chars returned", content.length());
+					circuitBreaker.recordSuccess();
 					return content;
 				}
 			}
 			
 			logger.warn("❌ OpenRouter returned empty content - no valid choices found");
 			logger.debug("Response structure: {}", root.toString());
+			circuitBreaker.recordSuccess(); // Empty response is still a success
 			return "";
+		} catch (TransientAiException | PermanentAiException e) {
+			// Re-throw typed exceptions as-is
+			throw e;
+		} catch (java.io.IOException | InterruptedException e) {
+			// Network errors are transient
+			circuitBreaker.recordFailure();
+			logger.error("❌ OpenRouter network error: {}", e.getMessage(), e);
+			throw new TransientAiException(
+				"Network error calling OpenRouter: " + e.getMessage(),
+				"OpenRouterClient",
+				0,
+				e
+			);
 		} catch (Exception e) {
+			// Unknown errors are treated as transient
+			circuitBreaker.recordFailure();
 			logger.error("❌ OpenRouter content generation failed: {}", e.getMessage(), e);
 			logger.error("Provider: OpenRouterClient, Model: {}, Available: {}", modelName, isAvailable());
 			logger.error("Configuration - Base URL: {}, Timeout: {}s, Mock mode: {}", baseUrl, timeoutSeconds, mockMode);
-			throw new RuntimeException("Failed to generate content via OpenRouter: " + e.getMessage(), e);
+			throw new TransientAiException(
+				"Failed to generate content via OpenRouter: " + e.getMessage(),
+				"OpenRouterClient",
+				0,
+				e
+			);
 		}
 	}
 
@@ -268,6 +332,26 @@ public class OpenRouterClient implements AiClient {
 
 	private String jsonEscape(String s) {
 		return objectMapper.valueToTree(s).toString();
+	}
+	
+	/**
+	 * Check if an HTTP status code represents a transient error.
+	 * Transient errors may succeed on retry or with a different provider.
+	 */
+	private boolean isTransientError(int statusCode) {
+		return statusCode == 503 || // Service Unavailable (overloaded)
+			   statusCode == 429 || // Too Many Requests (rate limit)
+			   statusCode == 500;   // Internal Server Error (may be transient)
+	}
+	
+	/**
+	 * Check if an HTTP status code represents a permanent error.
+	 * Permanent errors indicate configuration or request problems that won't be fixed by retrying.
+	 */
+	private boolean isPermanentError(int statusCode) {
+		return statusCode == 401 || // Unauthorized (invalid API key)
+			   statusCode == 403 || // Forbidden (insufficient permissions)
+			   (statusCode >= 400 && statusCode < 500 && statusCode != 429); // Other client errors except rate limit
 	}
 	
 	/**

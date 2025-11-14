@@ -8,6 +8,8 @@ import com.tripplanner.service.AgentEventPublisher;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.NodeIdGenerator;
 import com.tripplanner.service.ai.AiClient;
+import com.tripplanner.service.ai.ResilientAiClient;
+import com.tripplanner.service.ai.RetryStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
@@ -150,15 +152,25 @@ public class SkeletonPlannerAgent extends BaseAgent {
     
     /**
      * Generate skeleton for a single day.
+     * Uses FAST_FAIL strategy for immediate failover without retries.
      */
     private NormalizedDay generateDaySkeleton(CreateItineraryReq request, int dayNumber) {
         String systemPrompt = buildSkeletonSystemPrompt();
         String userPrompt = buildSkeletonUserPrompt(request, dayNumber);
         String schema = buildSkeletonJsonSchema();
         
-        logger.info("Generating skeleton for day {} with minimal prompt", dayNumber);
+        logger.info("Generating skeleton for day {} with FAST_FAIL strategy (no retries, immediate failover)", dayNumber);
         
-        String response = aiClient.generateStructuredContent(userPrompt, schema, systemPrompt);
+        // Use FAST_FAIL strategy for critical path (trip creation)
+        // This ensures immediate failover to backup provider without retry delays
+        String response;
+        if (aiClient instanceof ResilientAiClient) {
+            ResilientAiClient resilientClient = (ResilientAiClient) aiClient;
+            response = resilientClient.generateStructuredContent(userPrompt, schema, systemPrompt, RetryStrategy.FAST_FAIL);
+        } else {
+            // Fallback for non-resilient clients
+            response = aiClient.generateStructuredContent(userPrompt, schema, systemPrompt);
+        }
         
         // Log full LLM response for analysis
         logger.info("=== SKELETON PLANNER AGENT - FULL LLM RESPONSE ===");

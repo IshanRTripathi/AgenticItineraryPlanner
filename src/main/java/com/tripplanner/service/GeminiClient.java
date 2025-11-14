@@ -21,6 +21,9 @@ import java.time.format.DateTimeFormatter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tripplanner.service.ai.AiClient;
+import com.tripplanner.service.ai.CircuitBreaker;
+import com.tripplanner.service.ai.exception.TransientAiException;
+import com.tripplanner.service.ai.exception.PermanentAiException;
 
 /**
  * Service for interacting with Google's Gemini AI model via REST API.
@@ -57,6 +60,7 @@ public class GeminiClient implements AiClient {
     
     private HttpClient httpClient;
     private ObjectMapper objectMapper;
+    private CircuitBreaker circuitBreaker;
     
     @PostConstruct
     public void initialize() {
@@ -68,6 +72,7 @@ public class GeminiClient implements AiClient {
                 .build();
         
         this.objectMapper = new ObjectMapper();
+        this.circuitBreaker = new CircuitBreaker("GeminiClient");
         
         logger.info("Gemini client initialized successfully with 150s request timeout");
     }
@@ -93,9 +98,20 @@ public class GeminiClient implements AiClient {
     }
     
     /**
-     * Generate content with retry logic for transient errors.
+     * Generate content with circuit breaker and typed exception handling.
+     * Note: Retry logic is now handled by ResilientAiClient based on RetryStrategy.
      */
     private String generateContentWithRetry(String userPrompt, String systemPrompt, int attemptNumber) {
+        // Check circuit breaker before attempting request
+        if (!circuitBreaker.allowRequest()) {
+            logger.warn("Circuit breaker is OPEN for GeminiClient, throwing TransientAiException");
+            throw new TransientAiException(
+                "Circuit breaker is open for Gemini",
+                "GeminiClient",
+                503
+            );
+        }
+        
         try {
             if (attemptNumber == 0) {
                 logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
@@ -103,11 +119,10 @@ public class GeminiClient implements AiClient {
                 logger.info("Temperature: {}", temperature);
                 logger.info("Max Tokens: {}", maxTokens);
                 logger.info("Mock Mode: {}", mockMode);
+                logger.info("Circuit Breaker State: {}", circuitBreaker.getState());
                 logger.info("User Prompt Length: {}", userPrompt.length());
                 logger.info("System Prompt Length: {}", systemPrompt != null ? systemPrompt.length() : 0);
                 logger.info("User Prompt Preview: {}", userPrompt.length() > 200 ? userPrompt.substring(0, 200) + "..." : userPrompt);
-            } else {
-                logger.info("=== GEMINI RETRY ATTEMPT {} ===", attemptNumber + 1);
             }
             
             // Build request payload
@@ -122,6 +137,7 @@ public class GeminiClient implements AiClient {
                 logger.info("=== MOCK MODE: Returning cached response ===");
                 generatedText = getMockResponse(userPrompt, systemPrompt);
                 logger.info("Mock response length: {}", generatedText.length());
+                circuitBreaker.recordSuccess();
             } else {
                 // Make HTTP request to Gemini API with 150 second timeout
                 String apiUrl = GEMINI_API_BASE_URL + modelName + ":generateContent";
@@ -138,29 +154,37 @@ public class GeminiClient implements AiClient {
                 logger.info("=== GEMINI API RESPONSE ===");
                 logger.info("Status Code: {}", response.statusCode());
                 logger.info("Response Length: {}", response.body().length());
-                
-                // Check for transient errors that should be retried
-                if (isTransientError(response.statusCode())) {
-                    if (attemptNumber < MAX_RETRIES - 1) {
-                        int delayMs = calculateRetryDelay(attemptNumber);
-                        logger.warn("Gemini API transient error ({}), retrying in {}ms (attempt {}/{})", 
-                            response.statusCode(), delayMs, attemptNumber + 1, MAX_RETRIES);
-                        logger.info("Response Body: {}", response.body());
-                        
-                        Thread.sleep(delayMs);
-                        return generateContentWithRetry(userPrompt, systemPrompt, attemptNumber + 1);
-                    } else {
-                        logger.error("Gemini API error after {} retries: {} - {}", 
-                            MAX_RETRIES, response.statusCode(), response.body());
-                        throw new RuntimeException("Gemini API error after retries: " + response.statusCode());
-                    }
-                }
-                
                 logger.info("Response Body: {}", response.body());
                 
+                // Classify errors and throw typed exceptions
+                if (isTransientError(response.statusCode())) {
+                    circuitBreaker.recordFailure();
+                    logger.error("Gemini API transient error: {} - {}", response.statusCode(), response.body());
+                    throw new TransientAiException(
+                        "Gemini API returned transient error: " + response.statusCode(),
+                        "GeminiClient",
+                        response.statusCode()
+                    );
+                }
+                
+                if (isPermanentError(response.statusCode())) {
+                    // Don't count permanent errors against circuit breaker
+                    logger.error("Gemini API permanent error: {} - {}", response.statusCode(), response.body());
+                    throw new PermanentAiException(
+                        "Gemini API returned permanent error: " + response.statusCode(),
+                        "GeminiClient",
+                        response.statusCode()
+                    );
+                }
+                
                 if (response.statusCode() != 200) {
-                    logger.error("Gemini API error: {} - {}", response.statusCode(), response.body());
-                    throw new RuntimeException("Gemini API error: " + response.statusCode());
+                    circuitBreaker.recordFailure();
+                    logger.error("Gemini API unexpected error: {} - {}", response.statusCode(), response.body());
+                    throw new TransientAiException(
+                        "Gemini API returned unexpected status: " + response.statusCode(),
+                        "GeminiClient",
+                        response.statusCode()
+                    );
                 }
                 
                 // Save the full response to file for later use
@@ -183,24 +207,50 @@ public class GeminiClient implements AiClient {
                         logger.info("Generated content preview: {}", 
                                    generatedText.length() > 300 ? generatedText.substring(0, 300) + "..." : generatedText);
                         logger.info("=========================================");
+                        
+                        circuitBreaker.recordSuccess();
                     } else {
                         logger.warn("No parts found in response");
                         generatedText = "";
+                        circuitBreaker.recordSuccess(); // Empty response is still a success
                     }
                 } else {
                     logger.warn("No content found in response");
                     generatedText = "";
+                    circuitBreaker.recordSuccess(); // Empty response is still a success
                 }
             }
             
             return generatedText;
             
+        } catch (TransientAiException | PermanentAiException e) {
+            // Re-throw typed exceptions as-is
+            throw e;
+        } catch (IOException | InterruptedException e) {
+            // Network errors are transient
+            circuitBreaker.recordFailure();
+            logger.error("=== GEMINI NETWORK ERROR ===");
+            logger.error("Error: {}", e.getMessage(), e);
+            logger.error("============================");
+            throw new TransientAiException(
+                "Network error calling Gemini: " + e.getMessage(),
+                "GeminiClient",
+                0,
+                e
+            );
         } catch (Exception e) {
+            // Unknown errors are treated as transient
+            circuitBreaker.recordFailure();
             logger.error("=== GEMINI CONTENT GENERATION FAILED ===");
             logger.error("User Prompt: {}", userPrompt.length() > 100 ? userPrompt.substring(0, 100) + "..." : userPrompt);
             logger.error("Error: {}", e.getMessage(), e);
             logger.error("=======================================");
-            throw new RuntimeException("Failed to generate content with Gemini: " + e.getMessage(), e);
+            throw new TransientAiException(
+                "Failed to generate content with Gemini: " + e.getMessage(),
+                "GeminiClient",
+                0,
+                e
+            );
         }
     }
     
@@ -384,7 +434,8 @@ public class GeminiClient implements AiClient {
     }
     
     /**
-     * Check if an HTTP status code represents a transient error that should be retried.
+     * Check if an HTTP status code represents a transient error.
+     * Transient errors may succeed on retry or with a different provider.
      */
     private boolean isTransientError(int statusCode) {
         return statusCode == 503 || // Service Unavailable (overloaded)
@@ -393,7 +444,18 @@ public class GeminiClient implements AiClient {
     }
     
     /**
+     * Check if an HTTP status code represents a permanent error.
+     * Permanent errors indicate configuration or request problems that won't be fixed by retrying.
+     */
+    private boolean isPermanentError(int statusCode) {
+        return statusCode == 401 || // Unauthorized (invalid API key)
+               statusCode == 403 || // Forbidden (insufficient permissions)
+               (statusCode >= 400 && statusCode < 500 && statusCode != 429); // Other client errors except rate limit
+    }
+    
+    /**
      * Calculate retry delay with exponential backoff.
+     * Note: This is kept for backward compatibility but retry logic is now in ResilientAiClient.
      */
     private int calculateRetryDelay(int attemptNumber) {
         int delay = INITIAL_RETRY_DELAY_MS * (int) Math.pow(2, attemptNumber);
