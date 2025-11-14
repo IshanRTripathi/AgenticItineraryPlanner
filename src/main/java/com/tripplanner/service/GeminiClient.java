@@ -35,6 +35,11 @@ public class GeminiClient implements AiClient {
     private static final Logger logger = LoggerFactory.getLogger(GeminiClient.class);
     private static final String GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
     
+    // Retry configuration for transient errors (503, 429, etc.)
+    private static final int MAX_RETRIES = 3;
+    private static final int INITIAL_RETRY_DELAY_MS = 2000; // 2 seconds
+    private static final int MAX_RETRY_DELAY_MS = 10000; // 10 seconds
+    
     @Value("${google.ai.api-key}")
     private String apiKey;
     
@@ -84,19 +89,32 @@ public class GeminiClient implements AiClient {
      */
     @Override
     public String generateContent(String userPrompt, String systemPrompt) {
+        return generateContentWithRetry(userPrompt, systemPrompt, 0);
+    }
+    
+    /**
+     * Generate content with retry logic for transient errors.
+     */
+    private String generateContentWithRetry(String userPrompt, String systemPrompt, int attemptNumber) {
         try {
-            logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
-            logger.info("Model: {}", modelName);
-            logger.info("Temperature: {}", temperature);
-            logger.info("Max Tokens: {}", maxTokens);
-            logger.info("Mock Mode: {}", mockMode);
-            logger.info("User Prompt Length: {}", userPrompt.length());
-            logger.info("System Prompt Length: {}", systemPrompt != null ? systemPrompt.length() : 0);
-            logger.info("User Prompt Preview: {}", userPrompt.length() > 200 ? userPrompt.substring(0, 200) + "..." : userPrompt);
+            if (attemptNumber == 0) {
+                logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
+                logger.info("Model: {}", modelName);
+                logger.info("Temperature: {}", temperature);
+                logger.info("Max Tokens: {}", maxTokens);
+                logger.info("Mock Mode: {}", mockMode);
+                logger.info("User Prompt Length: {}", userPrompt.length());
+                logger.info("System Prompt Length: {}", systemPrompt != null ? systemPrompt.length() : 0);
+                logger.info("User Prompt Preview: {}", userPrompt.length() > 200 ? userPrompt.substring(0, 200) + "..." : userPrompt);
+            } else {
+                logger.info("=== GEMINI RETRY ATTEMPT {} ===", attemptNumber + 1);
+            }
             
             // Build request payload
             String requestBody = buildRequestPayload(userPrompt, systemPrompt);
-            logger.info("Request Body Length: {}", requestBody.length());
+            if (attemptNumber == 0) {
+                logger.info("Request Body Length: {}", requestBody.length());
+            }
             
             String generatedText;
             
@@ -120,6 +138,24 @@ public class GeminiClient implements AiClient {
                 logger.info("=== GEMINI API RESPONSE ===");
                 logger.info("Status Code: {}", response.statusCode());
                 logger.info("Response Length: {}", response.body().length());
+                
+                // Check for transient errors that should be retried
+                if (isTransientError(response.statusCode())) {
+                    if (attemptNumber < MAX_RETRIES - 1) {
+                        int delayMs = calculateRetryDelay(attemptNumber);
+                        logger.warn("Gemini API transient error ({}), retrying in {}ms (attempt {}/{})", 
+                            response.statusCode(), delayMs, attemptNumber + 1, MAX_RETRIES);
+                        logger.info("Response Body: {}", response.body());
+                        
+                        Thread.sleep(delayMs);
+                        return generateContentWithRetry(userPrompt, systemPrompt, attemptNumber + 1);
+                    } else {
+                        logger.error("Gemini API error after {} retries: {} - {}", 
+                            MAX_RETRIES, response.statusCode(), response.body());
+                        throw new RuntimeException("Gemini API error after retries: " + response.statusCode());
+                    }
+                }
+                
                 logger.info("Response Body: {}", response.body());
                 
                 if (response.statusCode() != 200) {
@@ -345,6 +381,23 @@ public class GeminiClient implements AiClient {
             logger.error("Failed to get mock response", e);
             return getDefaultMockResponse();
         }
+    }
+    
+    /**
+     * Check if an HTTP status code represents a transient error that should be retried.
+     */
+    private boolean isTransientError(int statusCode) {
+        return statusCode == 503 || // Service Unavailable (overloaded)
+               statusCode == 429 || // Too Many Requests (rate limit)
+               statusCode == 500;   // Internal Server Error (may be transient)
+    }
+    
+    /**
+     * Calculate retry delay with exponential backoff.
+     */
+    private int calculateRetryDelay(int attemptNumber) {
+        int delay = INITIAL_RETRY_DELAY_MS * (int) Math.pow(2, attemptNumber);
+        return Math.min(delay, MAX_RETRY_DELAY_MS);
     }
     
     /**

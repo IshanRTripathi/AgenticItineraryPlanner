@@ -28,12 +28,27 @@ public class ResilientAiClient implements AiClient {
         this.providers = new ArrayList<>(providers);
         this.modelInfo = buildModelInfo();
         
-        logger.info("ResilientAiClient initialized with {} providers", providers.size());
+        int availableCount = (int) providers.stream().filter(AiClient::isAvailable).count();
+        
+        logger.info("=== RESILIENT AI CLIENT INITIALIZATION ===");
+        logger.info("Total providers configured: {}", providers.size());
+        logger.info("Available providers: {}", availableCount);
+        
         for (int i = 0; i < providers.size(); i++) {
             AiClient provider = providers.get(i);
-            logger.info("  Provider {}: {} (available: {})", 
-                i + 1, provider.getClass().getSimpleName(), provider.isAvailable());
+            String status = provider.isAvailable() ? "✅ AVAILABLE" : "❌ NOT AVAILABLE";
+            logger.info("  Provider {}: {} - {}", 
+                i + 1, provider.getClass().getSimpleName(), status);
         }
+        
+        if (availableCount == 0) {
+            logger.error("❌ CRITICAL: NO AI PROVIDERS AVAILABLE - Service will fail!");
+        } else if (availableCount == 1) {
+            logger.warn("⚠️ WARNING: Only 1 AI provider available - no redundancy!");
+        } else {
+            logger.info("✅ {} AI providers available - redundancy enabled", availableCount);
+        }
+        logger.info("==========================================");
     }
     
     @Override
@@ -67,8 +82,15 @@ public class ResilientAiClient implements AiClient {
             }
         }
         
-        logger.error("🚨 All {} providers failed for content generation", providers.size());
-        throw new RuntimeException("All AI providers failed to generate content");
+        int availableCount = (int) providers.stream().filter(AiClient::isAvailable).count();
+        logger.error("🚨 All {} available providers failed for content generation (total configured: {})", 
+            availableCount, providers.size());
+        
+        if (availableCount == 0) {
+            throw new RuntimeException("No AI providers available - check configuration");
+        } else {
+            throw new RuntimeException(String.format("All %d AI provider(s) failed to generate content", availableCount));
+        }
     }
     
     @Override
@@ -102,8 +124,15 @@ public class ResilientAiClient implements AiClient {
             }
         }
         
-        logger.error("🚨 All {} providers failed for structured content generation", providers.size());
-        throw new RuntimeException("All AI providers failed to generate structured content");
+        int availableCount = (int) providers.stream().filter(AiClient::isAvailable).count();
+        logger.error("🚨 All {} available providers failed for structured content generation (total configured: {})", 
+            availableCount, providers.size());
+        
+        if (availableCount == 0) {
+            throw new RuntimeException("No AI providers available - check configuration");
+        } else {
+            throw new RuntimeException(String.format("All %d AI provider(s) failed to generate structured content", availableCount));
+        }
     }
     
     @Override

@@ -111,58 +111,50 @@ export function TripCard({ trip, onDelete }: TripCardProps) {
         )}
         onClick={() => window.location.href = `/trip/${trip.id}`}
       >
-        {/* Mobile: Horizontal layout, Desktop: Vertical */}
-        <div className="flex md:block">
-          {/* Image */}
-          <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-full md:h-auto md:aspect-video overflow-hidden flex-shrink-0">
-            {trip.imageUrl ? (
-              <img
-                src={trip.imageUrl}
-                alt={trip.destination}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            ) : (
-              <div className={cn(
-                'w-full h-full bg-gradient-to-br',
-                getPlaceholderImage(),
-                'transition-transform duration-300 group-hover:scale-105'
-              )} />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            
-            {/* Status Badge */}
-            <div className="absolute top-3 right-3">
-              <span
-                className={cn(
-                  'px-3 py-1 rounded-full text-xs font-semibold shadow-sm',
-                  trip.status === 'upcoming'
-                    ? 'bg-primary text-white'
-                    : 'bg-white/90 text-muted-foreground'
-                )}
-              >
-                {trip.status === 'upcoming' ? t('common.status.upcoming') : t('common.status.completed')}
-              </span>
-            </div>
-
-            {/* Destination - Hidden on mobile (shown in content) */}
-            <div className="hidden md:block absolute bottom-3 left-3 right-3">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2 drop-shadow-lg">
-                <MapPin className="w-5 h-5" />
-                {trip.destination}
-              </h3>
-            </div>
+        {/* Image/Background - Full width on mobile, aspect-video on desktop */}
+        <div className="relative h-32 sm:h-36 md:h-auto md:aspect-video overflow-hidden">
+          {trip.imageUrl ? (
+            <img
+              src={trip.imageUrl}
+              alt={trip.destination}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div className={cn(
+              'w-full h-full bg-gradient-to-br',
+              getPlaceholderImage(),
+              'transition-transform duration-300 group-hover:scale-105'
+            )} />
+          )}
+          
+          {/* Gradient overlay for text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          
+          {/* Status Badge */}
+          <div className="absolute top-2 right-2 md:top-3 md:right-3 z-10">
+            <span
+              className={cn(
+                'px-2.5 py-1 md:px-3 rounded-full text-xs font-semibold shadow-sm',
+                trip.status === 'upcoming'
+                  ? 'bg-primary text-white'
+                  : 'bg-white/90 text-muted-foreground'
+              )}
+            >
+              {trip.status === 'upcoming' ? t('common.status.upcoming') : t('common.status.completed')}
+            </span>
+          </div>
+          
+          {/* Destination - On gradient overlay */}
+          <div className="absolute bottom-2 left-2 right-2 md:bottom-3 md:left-3 md:right-3 z-10">
+            <h3 className="text-sm md:text-xl font-bold text-white flex items-center gap-1 md:gap-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+              <MapPin className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0" />
+              <span className="truncate">{trip.destination}</span>
+            </h3>
           </div>
         </div>
 
         {/* Content */}
         <CardContent className="flex-1 p-3 md:p-4 space-y-2 md:space-y-3">
-          {/* Destination - Mobile only */}
-          <div className="md:hidden">
-            <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-2">
-              <MapPin className="w-4 h-4" />
-              {trip.destination}
-            </h3>
-          </div>
 
           {/* Dates */}
           <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">

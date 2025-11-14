@@ -139,13 +139,13 @@ function DestinationSlideshow({ days, destination }: { days: any[]; destination:
   const currentPhoto = photos[currentIndex];
 
   return (
-    <div className="relative h-[280px] md:h-[500px] rounded-xl md:rounded-2xl overflow-hidden group shadow-xl md:shadow-2xl">
+    <div className="relative h-[320px] md:h-[500px] rounded-xl md:rounded-2xl overflow-hidden group shadow-xl md:shadow-2xl">
       {/* Current Image with Ken Burns effect */}
       <motion.img
         key={currentIndex}
         src={getPhotoUrl(currentPhoto?.photoRef)}
         alt={currentPhoto?.placeName || destination}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover object-center"
         initial={{ scale: 1.1, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.7, ease: 'easeOut' }}
