@@ -89,28 +89,28 @@ export const createSaveItinerary = (
       return;
     }
     
-    const timer = startTimer(`Save itinerary ${state.itinerary.id}`, {
+    const timer = startTimer(`Save itinerary ${state.itinerary.itineraryId}`, {
       component: 'UnifiedItineraryProvider',
       action: 'save_itinerary',
-      itineraryId: state.itinerary.id
+      itineraryId: state.itinerary.itineraryId
     });
     
-    logInfo(`Saving itinerary: ${state.itinerary.id}`, {
+    logInfo(`Saving itinerary: ${state.itinerary.itineraryId}`, {
       component: 'UnifiedItineraryProvider',
       action: 'save_itinerary_start',
-      itineraryId: state.itinerary.id,
+      itineraryId: state.itinerary.itineraryId,
       hasUnsavedChanges: state.pendingChanges.length > 0
     });
     
     dispatch({ type: 'SET_SYNC_STATUS', payload: 'syncing' });
     
     try {
-      await itineraryApi.updateItinerary(state.itinerary.id, state.itinerary);
+      await itineraryApi.updateItinerary(state.itinerary.itineraryId, state.itinerary as any);
       
-      logInfo(`Successfully saved itinerary: ${state.itinerary.id}`, {
+      logInfo(`Successfully saved itinerary: ${state.itinerary.itineraryId}`, {
         component: 'UnifiedItineraryProvider',
         action: 'save_itinerary_success',
-        itineraryId: state.itinerary.id
+        itineraryId: state.itinerary.itineraryId
       });
       
       dispatch({ type: 'SET_SYNC_STATUS', payload: 'idle' });
@@ -120,10 +120,10 @@ export const createSaveItinerary = (
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save itinerary';
       
-      logError(`Failed to save itinerary: ${state.itinerary.id}`, {
+      logError(`Failed to save itinerary: ${state.itinerary.itineraryId}`, {
         component: 'UnifiedItineraryProvider',
         action: 'save_itinerary_error',
-        itineraryId: state.itinerary.id,
+        itineraryId: state.itinerary.itineraryId,
         errorType: error instanceof Error ? error.constructor.name : 'Unknown',
         errorMessage
       }, error);
@@ -191,14 +191,14 @@ export const createRemoveNode = (
       nodeIndex 
     });
     
-    if (!state.itinerary?.itinerary?.days) {
+    if (!state.itinerary?.days) {
       logger.error('No itinerary days data found', { 
         component: 'UnifiedItineraryContext' 
       });
       return;
     }
     
-    const day = state.itinerary.itinerary.days[dayIndex];
+    const day = state.itinerary.days[dayIndex];
     if (!day) {
       logger.error('Day not found at index', { 
         component: 'UnifiedItineraryContext',
@@ -241,7 +241,7 @@ export const createMoveNode = (
   dispatch: Dispatch<UnifiedItineraryAction>
 ) => {
   return (fromDay: number, fromIndex: number, toDay: number, toIndex: number) => {
-    const node = state.itinerary?.itinerary?.days[fromDay]?.nodes[fromIndex];
+    const node = state.itinerary?.days[fromDay]?.nodes[fromIndex];
     if (node) {
       dispatch({ type: 'MOVE_NODE', payload: { fromDay, fromIndex, toDay, toIndex } });
       dispatch({ type: 'ADD_PENDING_CHANGE', payload: {
@@ -319,7 +319,7 @@ export const createSendChatMessage = (
     try {
       // Create ChatRequest for the backend
       const chatRequest: ChatRequest = {
-        itineraryId: state.itinerary.id,
+        itineraryId: state.itinerary.itineraryId,
         scope: state.selectedDay !== null ? 'day' : 'trip',
         day: state.selectedDay || undefined,
         selectedNodeId,
@@ -356,7 +356,7 @@ export const createSendChatMessage = (
         itineraryId
       });
       
-      const response = await itineraryApi.sendChatMessage(state.itinerary.id, chatRequest);
+      const response = await itineraryApi.sendChatMessage(state.itinerary.itineraryId, chatRequest);
       
       // Add assistant response to chat
       const assistantMessage: ChatMessage = {

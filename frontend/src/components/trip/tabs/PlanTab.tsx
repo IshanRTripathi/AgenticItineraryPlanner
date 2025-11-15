@@ -58,7 +58,7 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   const days = currentItinerary?.days || currentItinerary?.itinerary?.days || [];
   
   console.log('[PlanTab] ✅ Days count:', days.length);
-  console.log('[PlanTab] ✅ State itinerary:', state.itinerary?.id);
+  console.log('[PlanTab] ✅ State itinerary:', state.itinerary?.itineraryId);
   console.log('[PlanTab] ✅ Prop itinerary:', itinerary?.id);
   console.log('[PlanTab] ✅ Using:', currentItinerary?.id);
   console.log('[PlanTab] ✅ Days path check:', {

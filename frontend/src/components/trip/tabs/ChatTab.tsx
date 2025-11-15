@@ -94,7 +94,7 @@ export function ChatTab() {
   const handleExportHistory = () => {
     const dataStr = JSON.stringify(chatMessages, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `chat-history-${itinerary?.id}-${Date.now()}.json`;
+    const exportFileDefaultName = `chat-history-${itinerary?.itineraryId}-${Date.now()}.json`;
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);

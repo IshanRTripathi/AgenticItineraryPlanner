@@ -165,7 +165,7 @@ function TripDetailContent() {
   
   // Debug logging
   console.log('[TripDetailPage] Itinerary status:', {
-    id: itinerary.id,
+    id: itinerary.itineraryId,
     status: itinerary.status,
     isGenerating,
     daysCount: days.length,

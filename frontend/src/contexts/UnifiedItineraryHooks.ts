@@ -42,7 +42,7 @@ export const createGetSelectedNodes = (state: UnifiedItineraryState) => {
     if (!state.itinerary || state.selectedNodeIds.length === 0) return [];
     
     const nodes: NormalizedNode[] = [];
-    state.itinerary.itinerary?.days.forEach(day => {
+    state.itinerary.days?.forEach(day => {
       day.nodes?.forEach(node => {
         if (state.selectedNodeIds.includes(node.id)) {
           nodes.push(node);
@@ -55,10 +55,10 @@ export const createGetSelectedNodes = (state: UnifiedItineraryState) => {
 
 export const createGetCurrentDay = (state: UnifiedItineraryState) => {
   return (): any | null => {
-    if (!state.itinerary?.itinerary || state.selectedDay < 0 || state.selectedDay >= state.itinerary.itinerary.days.length) {
+    if (!state.itinerary?.days || state.selectedDay < 0 || state.selectedDay >= state.itinerary.days.length) {
       return null;
     }
-    return state.itinerary.itinerary.days[state.selectedDay];
+    return state.itinerary.days[state.selectedDay];
   };
 };
 
