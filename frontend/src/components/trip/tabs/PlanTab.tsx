@@ -86,17 +86,12 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   }
   
   // Map to format expected by DayCard
-  // Backend returns 'nodes', ensure we use them directly
+  // Backend returns 'nodes', use them directly
   const mappedDays = days.map((day: any) => ({
     dayNumber: day.dayNumber,
     date: day.date,
     location: day.location || day.theme,
-    // Use nodes directly from backend (already in correct format)
-    // Fallback to components for backward compatibility - preserve ALL fields
-    nodes: day.nodes || (day.components || []).map((component: any) => ({
-      ...component,  // ✅ Spread ALL fields including location, timing, cost, etc.
-      title: component.name || component.title,  // Normalize title field
-    }))
+    nodes: day.nodes || []
   }));
   
   console.log('[PlanTab] 🎯 Mapped days (what DayCard receives):', mappedDays);

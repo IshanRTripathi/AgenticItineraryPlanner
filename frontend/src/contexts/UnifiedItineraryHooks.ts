@@ -43,15 +43,8 @@ export const createGetSelectedNodes = (state: UnifiedItineraryState) => {
     
     const nodes: NormalizedNode[] = [];
     state.itinerary.itinerary?.days.forEach(day => {
-      day.components?.forEach(component => {
-        if (state.selectedNodeIds.includes(component.id)) {
-          // Convert component to NormalizedNode format
-          const node: NormalizedNode = {
-            id: component.id,
-            title: component.name,
-            type: component.type as any,
-            locked: component.locked
-          };
+      day.nodes?.forEach(node => {
+        if (state.selectedNodeIds.includes(node.id)) {
           nodes.push(node);
         }
       });

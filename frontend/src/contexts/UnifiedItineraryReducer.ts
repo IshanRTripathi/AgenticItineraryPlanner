@@ -79,112 +79,79 @@ export function unifiedItineraryReducer(
       };
     
     case 'UPDATE_DAY':
-      if (!state.itinerary?.itinerary) return state;
-      const updatedDays = [...state.itinerary.itinerary.days];
-      // For now, just update the day directly (type compatibility will be handled by data transformers)
-      updatedDays[action.payload.dayIndex] = action.payload.day as any;
+      if (!state.itinerary?.days) return state;
+      const updatedDays = [...state.itinerary.days];
+      updatedDays[action.payload.dayIndex] = action.payload.day;
       return {
         ...state,
         itinerary: { 
           ...state.itinerary, 
-          itinerary: { ...state.itinerary.itinerary, days: updatedDays }
+          days: updatedDays
         }
       };
     
     case 'UPDATE_NODE':
-      if (!state.itinerary?.itinerary) return state;
-      const daysCopy = [...state.itinerary.itinerary.days];
-      const componentsCopy = [...daysCopy[action.payload.dayIndex].components];
-      // Convert NormalizedNode back to TripComponent format
-      const updatedComponent = {
-        ...componentsCopy[action.payload.nodeIndex],
-        name: action.payload.node.title,
-        locked: action.payload.node.locked
-      };
-      componentsCopy[action.payload.nodeIndex] = updatedComponent;
-      daysCopy[action.payload.dayIndex] = { ...daysCopy[action.payload.dayIndex], components: componentsCopy };
+      if (!state.itinerary?.days) return state;
+      const daysCopy = [...state.itinerary.days];
+      const nodesCopy = [...daysCopy[action.payload.dayIndex].nodes];
+      nodesCopy[action.payload.nodeIndex] = action.payload.node;
+      daysCopy[action.payload.dayIndex] = { ...daysCopy[action.payload.dayIndex], nodes: nodesCopy };
       return {
         ...state,
         itinerary: { 
           ...state.itinerary, 
-          itinerary: { ...state.itinerary.itinerary, days: daysCopy }
+          days: daysCopy
         }
       };
     
     case 'ADD_NODE':
-      if (!state.itinerary?.itinerary) return state;
-      const daysForAdd = [...state.itinerary.itinerary.days];
-      const componentsForAdd = [...daysForAdd[action.payload.dayIndex].components];
-      const position = action.payload.position ?? componentsForAdd.length;
-      // Convert NormalizedNode to component format (minimal implementation)
-      const newComponent = {
-        id: action.payload.node.id,
-        name: action.payload.node.title,
-        type: action.payload.node.type,
-        locked: action.payload.node.locked,
-        // Add required TripComponent properties with defaults
-        description: (action.payload.node as any).description || '',
-        location: action.payload.node.location || { name: '', address: '', coordinates: { lat: null, lng: null } },
-        timing: { startTime: new Date().toISOString(), endTime: new Date().toISOString(), duration: 60, suggestedDuration: 60 },
-        cost: { pricePerPerson: 0, currency: 'EUR', priceRange: 'mid-range' as const, includesWhat: [], additionalCosts: [] },
-        travel: { distanceFromPrevious: 0, travelTimeFromPrevious: 0, transportMode: 'walking' as const, transportCost: 0 },
-        details: { rating: 0, reviewCount: 0, category: '', tags: [], openingHours: {}, contact: {}, accessibility: { wheelchairAccessible: false, elevatorAccess: false, restrooms: false, parking: false }, amenities: [] },
-        booking: { required: false, notes: '' },
-        media: { images: [], videos: [], virtualTour: undefined },
-        tips: { bestTimeToVisit: '', whatToBring: [], insider: [], warnings: [] },
-        priority: 'recommended' as const
-      } as any;
-      componentsForAdd.splice(position, 0, newComponent);
-      daysForAdd[action.payload.dayIndex] = { ...daysForAdd[action.payload.dayIndex], components: componentsForAdd };
+      if (!state.itinerary?.days) return state;
+      const daysForAdd = [...state.itinerary.days];
+      const nodesForAdd = [...daysForAdd[action.payload.dayIndex].nodes];
+      const position = action.payload.position ?? nodesForAdd.length;
+      nodesForAdd.splice(position, 0, action.payload.node);
+      daysForAdd[action.payload.dayIndex] = { ...daysForAdd[action.payload.dayIndex], nodes: nodesForAdd };
       return {
         ...state,
         itinerary: { 
           ...state.itinerary, 
-          itinerary: { ...state.itinerary.itinerary, days: daysForAdd }
+          days: daysForAdd
         }
       };
     
     case 'REMOVE_NODE':
-      if (!state.itinerary?.itinerary) return state;
-      
-      // Simplified to only handle TripData structure
-      const itineraryForRemove = { ...state.itinerary.itinerary };
-      const daysForRemove = [...itineraryForRemove.days];
-      const dayForRemove = daysForRemove[action.payload.dayIndex];
-      
-      if (dayForRemove.components) {
-        const componentsForRemove = [...dayForRemove.components];
-        componentsForRemove.splice(action.payload.nodeIndex, 1);
-        daysForRemove[action.payload.dayIndex] = { ...dayForRemove, components: componentsForRemove };
-      }
-      
+      if (!state.itinerary?.days) return state;
+      const daysForRemove = [...state.itinerary.days];
+      const nodesForRemove = [...daysForRemove[action.payload.dayIndex].nodes];
+      nodesForRemove.splice(action.payload.nodeIndex, 1);
+      daysForRemove[action.payload.dayIndex] = { ...daysForRemove[action.payload.dayIndex], nodes: nodesForRemove };
       return {
         ...state,
         itinerary: { 
           ...state.itinerary, 
-          itinerary: { ...itineraryForRemove, days: daysForRemove }
+          days: daysForRemove
         }
       };
     
     case 'MOVE_NODE':
-      if (!state.itinerary?.itinerary) return state;
-      const daysForMove = [...state.itinerary.itinerary.days];
-      const sourceComponents = [...daysForMove[action.payload.fromDay].components];
-      const targetComponents = action.payload.fromDay === action.payload.toDay ? sourceComponents : [...daysForMove[action.payload.toDay].components];
+      if (!state.itinerary?.days) return state;
+      const daysForMove = [...state.itinerary.days];
+      const sourceNodes = [...daysForMove[action.payload.fromDay].nodes];
+      const targetNodes = action.payload.fromDay === action.payload.toDay ? sourceNodes : [...daysForMove[action.payload.toDay].nodes];
       
-      const [movedComponent] = sourceComponents.splice(action.payload.fromIndex, 1);
-      targetComponents.splice(action.payload.toIndex, 0, movedComponent);
+      const [movedNode] = sourceNodes.splice(action.payload.fromIndex, 1);
+      targetNodes.splice(action.payload.toIndex, 0, movedNode);
       
-      daysForMove[action.payload.fromDay] = { ...daysForMove[action.payload.fromDay], components: sourceComponents };
+      daysForMove[action.payload.fromDay] = { ...daysForMove[action.payload.fromDay], nodes: sourceNodes };
       if (action.payload.fromDay !== action.payload.toDay) {
-        daysForMove[action.payload.toDay] = { ...daysForMove[action.payload.toDay], components: targetComponents };
+        daysForMove[action.payload.toDay] = { ...daysForMove[action.payload.toDay], nodes: targetNodes };
       }
       
       return {
         ...state,
         itinerary: { 
           ...state.itinerary, 
-          itinerary: { ...state.itinerary.itinerary, days: daysForMove }
+          days: daysForMove
         }
       };
     

@@ -85,7 +85,7 @@ export function categorizeBookings(itinerary: any): BookingCategoryGroup[] {
   
   // Extract all nodes from all days
   days.forEach((day: any) => {
-    const nodes = day.nodes || day.components || [];
+    const nodes = day.nodes || [];
     
     nodes.forEach((node: any) => {
       const category = getCategoryFromType(node.type);

@@ -181,20 +181,35 @@ public class WebSocketController {
             // Broadcast to chat topic
             messagingTemplate.convertAndSend("/topic/chat/" + itineraryId, response);
             
-            // If changes were applied, also broadcast itinerary update
+            // If changes were applied, also broadcast itinerary update with the updated itinerary
             if (chatResponse.getChangeSet() != null && chatResponse.isApplied()) {
-                Map<String, Object> updateData = new HashMap<>();
-                updateData.put("chatResponse", chatResponse);
-                updateData.put("changes", chatResponse.getChangeSet());
-                
-                ItineraryUpdateMessage updateMessage = ItineraryUpdateMessage.builder()
-                        .type("chat_update")
-                        .itineraryId(itineraryId)
-                        .data(updateData)
-                        .timestamp(Instant.now())
-                        .build();
-                
-                messagingTemplate.convertAndSend("/topic/itinerary/" + itineraryId, updateMessage);
+                try {
+                    // Fetch the updated itinerary from the database
+                    var updatedItinerary = itineraryJsonService.getItinerary(itineraryId);
+                    
+                    Map<String, Object> updateData = new HashMap<>();
+                    updateData.put("chatResponse", chatResponse);
+                    updateData.put("changes", chatResponse.getChangeSet());
+                    
+                    // Include the full updated itinerary to avoid extra API call
+                    if (updatedItinerary.isPresent()) {
+                        updateData.put("itinerary", updatedItinerary.get());
+                        logger.info("Broadcasting updated itinerary via WebSocket after chat changes");
+                    } else {
+                        logger.warn("Could not fetch updated itinerary {} after chat changes", itineraryId);
+                    }
+                    
+                    ItineraryUpdateMessage updateMessage = ItineraryUpdateMessage.builder()
+                            .type("chat_update")
+                            .itineraryId(itineraryId)
+                            .data(updateData)
+                            .timestamp(Instant.now())
+                            .build();
+                    
+                    messagingTemplate.convertAndSend("/topic/itinerary/" + itineraryId, updateMessage);
+                } catch (Exception e) {
+                    logger.error("Failed to broadcast updated itinerary after chat changes: {}", e.getMessage(), e);
+                }
             }
             
         } catch (Exception e) {

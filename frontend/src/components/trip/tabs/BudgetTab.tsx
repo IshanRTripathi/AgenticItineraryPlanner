@@ -7,12 +7,13 @@
 import { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
 import { useItinerary } from '@/hooks/useItinerary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { api, endpoints } from '@/services/api';
 import { useTranslation } from '@/i18n';
+import { NestedBudgetPieChart } from '../charts/NestedBudgetPieChart';
 
 interface BudgetTabProps {
   tripId: string;
@@ -67,18 +68,25 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       };
     }
     
-    // NormalizedItinerary has days with nodes directly
-    const total = itinerary.days.reduce((sum, day) => sum + (day.totals?.cost || 0), 0);
+    const currency = itinerary.currency || 'USD';
+    
+    // Calculate total from day totalCost (backend field)
+    const total = itinerary.days.reduce((sum, day: any) => sum + (day.totalCost || 0), 0);
+    
+    // Calculate spent from booked nodes
     const spent = itinerary.days.reduce((sum, day) => 
-      sum + (day.nodes || []).filter(n => n.bookingRef).reduce((s, n) => s + (n.cost?.amount || 0), 0), 0
+      sum + (day.nodes || [])
+        .filter((n: any) => n.bookingRef)
+        .reduce((s, n: any) => s + (n.cost?.amountPerPerson || n.cost?.amount || 0), 0), 
+      0
     );
     
     return {
       total,
       spent,
       remaining: total - spent,
-      currency: itinerary.currency || 'USD',
-      plannedBudget: userBudget.max || total, // Use user's max budget or calculated total
+      currency,
+      plannedBudget: userBudget.max || total,
     };
   }, [itinerary, userBudget]);
   
@@ -89,11 +97,12 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
     const categories: Record<string, number> = {};
     itinerary.days.forEach(day => {
       (day.nodes || []).forEach((node: any) => {
-        const category = (node.type === 'accommodation' || node.type === 'hotel') ? 'Accommodation' :
-                        (node.type === 'transport' || node.type === 'transit') ? 'Transportation' :
+        const category = node.type === 'accommodation' ? 'Accommodation' :
+                        node.type === 'transport' ? 'Transportation' :
                         node.type === 'meal' ? 'Food & Dining' :
-                        (node.type === 'attraction' || node.type === 'activity') ? 'Activities' : 'Other';
-        categories[category] = (categories[category] || 0) + (node.cost?.amount || 0);
+                        (node.type === 'activity' || node.type === 'place' || node.type === 'attraction') ? 'Activities' : 'Other';
+        const cost = node.cost?.amountPerPerson || node.cost?.amount || 0;
+        categories[category] = (categories[category] || 0) + cost;
       });
     });
     
@@ -105,20 +114,54 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       'Other': '#EF4444',
     };
     
-    return Object.entries(categories).map(([name, value]) => ({
-      name,
-      value,
-      color: colors[name as keyof typeof colors] || '#999',
-    }));
+    // Define consistent order for categories
+    const categoryOrder = ['Accommodation', 'Food & Dining', 'Activities', 'Transportation', 'Other'];
+    
+    return categoryOrder
+      .filter(name => categories[name] > 0)
+      .map(name => ({
+        name,
+        value: categories[name],
+        color: colors[name as keyof typeof colors] || '#999',
+      }));
+  }, [itinerary]);
+
+  // Calculate per-day category breakdown for nested chart
+  const dayBreakdown = useMemo(() => {
+    if (!itinerary) return [];
+    
+    return itinerary.days.map((day: any) => {
+      const categories: Record<string, number> = {
+        'Accommodation': 0,
+        'Transportation': 0,
+        'Food & Dining': 0,
+        'Activities': 0,
+        'Other': 0,
+      };
+      
+      (day.nodes || []).forEach((node: any) => {
+        const category = node.type === 'accommodation' ? 'Accommodation' :
+                        node.type === 'transport' ? 'Transportation' :
+                        node.type === 'meal' ? 'Food & Dining' :
+                        (node.type === 'activity' || node.type === 'place' || node.type === 'attraction') ? 'Activities' : 'Other';
+        const cost = node.cost?.amountPerPerson || node.cost?.amount || 0;
+        categories[category] += cost;
+      });
+      
+      return {
+        day: day.dayNumber,
+        categories,
+      };
+    });
   }, [itinerary]);
   
   // Calculate daily costs
   const dailyCosts = useMemo(() => {
     if (!itinerary) return [];
     
-    return itinerary.days.map(day => ({
+    return itinerary.days.map((day: any) => ({
       day: `Day ${day.dayNumber}`,
-      cost: day.totals?.cost || 0,
+      cost: day.totalCost || 0,
     }));
   }, [itinerary]);
   
@@ -141,10 +184,10 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className="text-lg sm:text-xl md:text-2xl font-bold">
-              ${budgetData.plannedBudget.toLocaleString()}
+              {budgetData.currency} {budgetData.plannedBudget.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {userBudget.tier ? t('components.budgetTab.cards.yourBudget.tier', { tier: userBudget.tier }) : budgetData.currency}
+              {userBudget.tier ? t('components.budgetTab.cards.yourBudget.tier', { tier: userBudget.tier }) : 'Planned budget'}
             </p>
           </CardContent>
         </Card>
@@ -156,7 +199,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverPlannedBudget ? 'text-warning' : ''}`}>
-              ${budgetData.total.toLocaleString()}
+              {budgetData.currency} {budgetData.total.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
               {isOverPlannedBudget ? t('components.budgetTab.cards.estimatedCost.overBudget') : t('components.budgetTab.cards.estimatedCost.withinBudget')}
@@ -171,7 +214,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className="text-lg sm:text-xl md:text-2xl font-bold text-error">
-              ${budgetData.spent.toLocaleString()}
+              {budgetData.currency} {budgetData.spent.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
               {t('components.budgetTab.cards.booked.percentage', { percentage: percentageSpent.toFixed(1) })}
@@ -186,7 +229,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
             <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
-              ${Math.abs(budgetData.plannedBudget - budgetData.spent).toLocaleString()}
+              {budgetData.currency} {Math.abs(budgetData.plannedBudget - budgetData.spent).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
               {isOverBudget ? t('components.budgetTab.cards.remaining.overBudget') : t('components.budgetTab.cards.remaining.available')}
@@ -210,34 +253,23 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
         </Card>
       )}
 
-      {/* Category Breakdown */}
+      {/* Category Breakdown - Nested Pie Chart */}
       <Card>
         <CardHeader className="p-3 sm:p-4 md:p-6">
           <CardTitle className="text-base sm:text-lg">{t('components.budgetTab.categoryBreakdown.title')}</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Inner circle shows category totals, outer circle shows per-day breakdown
+          </p>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Pie Chart */}
-            <div className="h-[250px] sm:h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={isMobile ? false : (entry: any) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
-                    outerRadius={isMobile ? 60 : 80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `$${value}`} />
-                </PieChart>
-              </ResponsiveContainer>
+            {/* Nested Pie Chart */}
+            <div className="h-[350px] sm:h-[400px]">
+              <NestedBudgetPieChart
+                categoryData={categoryData}
+                days={dayBreakdown}
+                currency={budgetData.currency}
+              />
             </div>
 
             {/* Category List */}
@@ -252,9 +284,9 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                     <span className="text-xs sm:text-sm font-medium truncate">{category.name}</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                    <span className="text-xs sm:text-sm font-bold">${category.value}</span>
+                    <span className="text-xs sm:text-sm font-bold">{budgetData.currency} {category.value.toLocaleString()}</span>
                     <Badge variant="outline" className="text-xs">
-                      {((category.value / budgetData.spent) * 100).toFixed(0)}%
+                      {budgetData.total > 0 ? ((category.value / budgetData.total) * 100).toFixed(0) : 0}%
                     </Badge>
                   </div>
                 </div>
@@ -276,14 +308,14 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
-                <Tooltip formatter={(value) => `$${value}`} />
+                <Tooltip formatter={(value) => `${budgetData.currency} ${value}`} />
                 {!isMobile && <Legend />}
                 <Bar dataKey="cost" fill="#002B5B" name={t('components.budgetTab.dailySpending.chartLabel')} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
-            {t('components.budgetTab.dailySpending.average', { amount: (budgetData.spent / dailyCosts.length).toFixed(2) })}
+            {t('components.budgetTab.dailySpending.average', { amount: `${budgetData.currency} ${(budgetData.total / dailyCosts.length).toFixed(2)}` })}
           </div>
         </CardContent>
       </Card>

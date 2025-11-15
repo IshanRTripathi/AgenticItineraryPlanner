@@ -336,9 +336,20 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
             itineraryId
           });
 
-          // Reload itinerary when chat updates are received
-          if (message.data?.changes) {
-            logInfo('Chat update contains changes, reloading itinerary', {
+          // If the update includes the full itinerary, use it directly (optimization)
+          if (message.data?.itinerary) {
+            logInfo('Chat update includes full itinerary, updating state directly', {
+              component: 'UnifiedItineraryProvider',
+              action: 'chat_update_direct',
+              itineraryId
+            });
+            
+            loggedDispatch({ type: 'SET_ITINERARY', payload: message.data.itinerary });
+            loggedDispatch({ type: 'SET_LAST_SYNC_TIME', payload: new Date() });
+          } 
+          // Fallback: Reload itinerary when chat updates are received (for backward compatibility)
+          else if (message.data?.changes) {
+            logInfo('Chat update contains changes, reloading itinerary via API', {
               component: 'UnifiedItineraryProvider',
               action: 'chat_update_reload',
               itineraryId

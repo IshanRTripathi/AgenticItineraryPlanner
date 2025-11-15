@@ -16,7 +16,7 @@ export const debugActivityData = (itinerary: any) => {
   }
   
   const firstDay = days[0];
-  const activities = firstDay.nodes || firstDay.components || [];
+  const activities = firstDay.nodes || [];
   
   console.log('Day 1 activities:', activities.length);
   

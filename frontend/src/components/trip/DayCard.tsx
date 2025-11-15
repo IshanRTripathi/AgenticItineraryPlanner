@@ -341,7 +341,7 @@ export function DayCard({
     const displayActivities = enableDragDrop && itineraryId ? activities : (day.nodes || []);
     const activityCount = displayActivities.length;
     const totalCost = displayActivities.reduce(
-        (sum: number, node: any) => sum + (node.cost?.amount || 0),
+        (sum: number, node: any) => sum + (node.cost?.amountPerPerson || node.cost?.pricePerPerson || 0),
         0
     );
 

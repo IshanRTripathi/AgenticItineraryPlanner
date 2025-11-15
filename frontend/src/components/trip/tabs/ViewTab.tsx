@@ -51,7 +51,7 @@ function DestinationSlideshow({ days, destination }: { days: any[]; destination:
     // Collect all photos with place names from all days
     const allPhotos: PhotoWithPlace[] = [];
     for (const day of days) {
-      const nodes = day.nodes || day.components || [];
+      const nodes = day.nodes || [];
       console.log(`[DestinationSlideshow] Day ${day.dayNumber}: ${nodes.length} nodes`);
       
       for (const node of nodes) {
@@ -271,22 +271,16 @@ export function ViewTab({ itinerary }: ViewTabProps) {
   
   // Calculate statistics
   const activityCount = days.reduce((total: number, day: any) => {
-    // Backend uses 'nodes', fallback to 'components' for backward compatibility
-    const nodes = day.nodes || day.components || [];
+    const nodes = day.nodes || [];
     return total + nodes.length;
   }, 0);
   
   // Calculate total budget from all nodes across all days
   const totalBudget = days.reduce((total: number, day: any) => {
-    const nodes = day.nodes || day.components || [];
+    const nodes = day.nodes || [];
     const dayTotal = nodes.reduce((daySum: number, node: any) => {
-      // Try multiple cost field locations
-      const cost = node.cost?.amountPerPerson 
-        || node.cost?.amount 
-        || node.estimatedCost?.amountPerPerson
-        || node.estimatedCost?.amount
-        || node.price
-        || 0;
+      // Support both field names for backward compatibility
+      const cost = node.cost?.amountPerPerson || node.cost?.pricePerPerson || 0;
       
       console.log('[ViewTab] Node cost:', {
         title: node.title || node.name,

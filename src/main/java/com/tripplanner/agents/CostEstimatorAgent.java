@@ -98,14 +98,24 @@ public class CostEstimatorAgent extends BaseAgent {
         logger.info("Estimating costs for itinerary: {}", itineraryId);
         
         try {
+            emitProgress(itineraryId, 10, "Loading cost data", "loading");
+            
             double budgetMultiplier = BUDGET_MULTIPLIERS.getOrDefault(
                 budgetTier != null ? budgetTier.toLowerCase() : "medium", 1.0);
             
             int totalNodes = 0;
             double totalCost = 0;
+            int totalDays = itinerary.getDays().size();
+            int processedDays = 0;
+            
+            emitProgress(itineraryId, 30, 
+                String.format("Estimating costs for %d days", totalDays), 
+                "estimating");
             
             for (NormalizedDay day : itinerary.getDays()) {
                 if (day.getNodes() == null) continue;
+                
+                double dayCost = 0.0;
                 
                 for (NormalizedNode node : day.getNodes()) {
                     if (node.getCost() == null || node.getCost().getAmountPerPerson() == null) {
@@ -117,15 +127,35 @@ public class CostEstimatorAgent extends BaseAgent {
                         node.getCost().setAmountPerPerson((double) estimatedCost);
                         node.getCost().setCurrency("INR");
                         
+                        dayCost += estimatedCost;
                         totalCost += estimatedCost;
                         totalNodes++;
+                    } else {
+                        // Node already has cost, add to day total
+                        dayCost += node.getCost().getAmountPerPerson();
                     }
                 }
+                
+                // Set day total cost
+                day.setTotalCost(dayCost);
+                
+                // Send progress update
+                processedDays++;
+                int progress = 30 + (int) ((processedDays / (double) totalDays) * 40);
+                emitProgress(itineraryId, progress, 
+                    String.format("Estimated costs for day %d/%d", processedDays, totalDays), 
+                    "estimating");
             }
+            
+            emitProgress(itineraryId, 70, "Saving cost data", "saving");
             
             // Save updated itinerary
             itinerary.setUpdatedAt(System.currentTimeMillis());
             itineraryJsonService.updateItinerary(itinerary);
+            
+            emitProgress(itineraryId, 100, 
+                String.format("Estimated costs for %d nodes", totalNodes), 
+                "complete");
             
             logger.info("=== COST ESTIMATOR COMPLETE ===");
             logger.info("Estimated costs for {} nodes", totalNodes);
@@ -133,6 +163,7 @@ public class CostEstimatorAgent extends BaseAgent {
             
         } catch (Exception e) {
             logger.error("Failed to estimate costs for itinerary: {}", itineraryId, e);
+            emitProgress(itineraryId, 0, "Failed to estimate costs", "error");
             // Don't throw - costs are optional
         }
     }

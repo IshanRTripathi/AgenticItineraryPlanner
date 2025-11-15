@@ -209,7 +209,7 @@ export function TripMap({ itinerary }: TripMapProps) {
       }> = [];
 
       for (const day of days) {
-        const nodes = day.nodes || day.components || [];
+        const nodes = day.nodes || [];
         for (const node of nodes) {
           // Skip transport/transit and hotel/accommodation nodes from map
           // Hotels are not booked at itinerary generation time

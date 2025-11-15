@@ -1,5 +1,4 @@
-import { NormalizedDay, NormalizedNode } from '../types/NormalizedItinerary';
-import { TripData } from '../types/TripData';
+import { NormalizedDay, NormalizedNode, NormalizedItinerary } from '../types/NormalizedItinerary';
 
 /**
  * Type definitions for the Unified Itinerary Context
@@ -79,11 +78,11 @@ export interface RevisionInfo {
 
 /**
  * Unified state interface for the entire itinerary system
- * Now uses TripData as the primary format for frontend compatibility
+ * Now uses NormalizedItinerary to match backend schema
  */
 export interface UnifiedItineraryState {
-  // Core itinerary data - using TripData for frontend compatibility
-  itinerary: TripData | null;
+  // Core itinerary data - using NormalizedItinerary to match backend
+  itinerary: NormalizedItinerary | null;
   loading: boolean;
   error: string | null;
   
@@ -130,7 +129,7 @@ export type UnifiedItineraryAction =
   // Itinerary actions
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_ITINERARY'; payload: TripData }
+  | { type: 'SET_ITINERARY'; payload: NormalizedItinerary }
   | { type: 'SET_CURRENT_PHASE'; payload: string | null }
   | { type: 'UPDATE_DAY'; payload: { dayIndex: number; day: NormalizedDay } }
   | { type: 'UPDATE_NODE'; payload: { dayIndex: number; nodeIndex: number; node: NormalizedNode } }

@@ -44,13 +44,13 @@ export const createLoadItinerary = (
         component: 'UnifiedItineraryProvider',
         action: 'load_itinerary_success',
         itineraryId: id,
-        daysCount: itinerary.itinerary?.days?.length || 0,
-        totalComponents: itinerary.itinerary?.days?.reduce((total, day) => total + (day.components?.length || 0), 0) || 0
+        daysCount: itinerary.days?.length || 0,
+        totalNodes: itinerary.days?.reduce((total, day) => total + (day.nodes?.length || 0), 0) || 0
       }, {
         itinerarySummary: {
-          id: itinerary.id,
+          id: itinerary.itineraryId,
           summary: itinerary.summary,
-          daysCount: itinerary.itinerary?.days?.length,
+          daysCount: itinerary.days?.length,
           destination: itinerary.destination
         }
       });
@@ -207,27 +207,27 @@ export const createRemoveNode = (
       return;
     }
     
-    const component = day.components[nodeIndex];
-    if (component) {
-      logger.debug('Component found, dispatching REMOVE_NODE action', { 
+    const node = day.nodes[nodeIndex];
+    if (node) {
+      logger.debug('Node found, dispatching REMOVE_NODE action', { 
         component: 'UnifiedItineraryContext',
-        componentId: component.id 
+        nodeId: node.id 
       });
       dispatch({ type: 'REMOVE_NODE', payload: { dayIndex, nodeIndex } });
       dispatch({ type: 'ADD_PENDING_CHANGE', payload: {
         id: `remove_node_${dayIndex}_${nodeIndex}_${Date.now()}`,
         type: 'delete',
         scope: 'node',
-        target: component.id,
-        description: `Removed ${component.name}`,
+        target: node.id,
+        description: `Removed ${node.title}`,
         timestamp: new Date(),
-        data: component
+        data: node
       }});
       logger.debug('REMOVE_NODE action dispatched successfully', { 
         component: 'UnifiedItineraryContext' 
       });
     } else {
-      logger.error('Component not found', { 
+      logger.error('Node not found', { 
         component: 'UnifiedItineraryContext',
         dayIndex, 
         nodeIndex 
@@ -241,15 +241,15 @@ export const createMoveNode = (
   dispatch: Dispatch<UnifiedItineraryAction>
 ) => {
   return (fromDay: number, fromIndex: number, toDay: number, toIndex: number) => {
-    const component = state.itinerary?.itinerary?.days[fromDay]?.components[fromIndex];
-    if (component) {
+    const node = state.itinerary?.itinerary?.days[fromDay]?.nodes[fromIndex];
+    if (node) {
       dispatch({ type: 'MOVE_NODE', payload: { fromDay, fromIndex, toDay, toIndex } });
       dispatch({ type: 'ADD_PENDING_CHANGE', payload: {
         id: `move_node_${fromDay}_${fromIndex}_${Date.now()}`,
         type: 'move',
         scope: 'node',
-        target: component.id,
-        description: `Moved ${component.name} from day ${fromDay + 1} to day ${toDay + 1}`,
+        target: node.id,
+        description: `Moved ${node.title} from day ${fromDay + 1} to day ${toDay + 1}`,
         timestamp: new Date(),
         data: { fromDay, fromIndex, toDay, toIndex }
       }});

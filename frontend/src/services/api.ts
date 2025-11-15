@@ -357,7 +357,7 @@ class ApiService {
     }
   }
 
-  async getItinerary(itineraryId: string, retryConfig?: Partial<RetryConfig>): Promise<TripData> {
+  async getItinerary(itineraryId: string, retryConfig?: Partial<RetryConfig>): Promise<NormalizedItinerary> {
     const config = { ...this.retryConfig, ...retryConfig };
 
     try {
@@ -367,23 +367,22 @@ class ApiService {
         itineraryId
       });
 
-      // Backend returns NormalizedItinerary, transform to TripData for frontend
+      // Backend returns NormalizedItinerary, return it directly (no conversion needed)
       const normalized = await this.requestWithRetryForItinerary<NormalizedItinerary>(
         `/itineraries/${itineraryId}/json`,
         { method: 'GET' },
         config
       );
 
-      const tripData = convertNormalizedToTripData(normalized);
-
       logInfo(`Successfully fetched itinerary: ${itineraryId}`, {
         component: 'ApiService',
         action: 'get_itinerary_success',
         itineraryId,
-        daysCount: (tripData as any).days?.length || 0
+        daysCount: normalized.days?.length || 0,
+        totalNodes: normalized.days?.reduce((total, day) => total + (day.nodes?.length || 0), 0) || 0
       });
 
-      return tripData;
+      return normalized;
     } catch (error) {
       logError(`Failed to fetch itinerary: ${itineraryId}`, {
         component: 'ApiService',
