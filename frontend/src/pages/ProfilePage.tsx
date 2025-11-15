@@ -97,17 +97,6 @@ export function ProfilePage() {
 
         <div className="container max-w-5xl px-3 sm:px-6 relative">
           {/* Back Button - Properly positioned at top */}
-          <div className="pt-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(-1)}
-              className="text-white hover:bg-white/20 min-h-[40px] sm:min-h-[44px] touch-manipulation active:scale-95 transition-all text-sm -ml-2"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('common.actions.back')}
-            </Button>
-          </div>
-
           {/* Profile Header - Centered */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

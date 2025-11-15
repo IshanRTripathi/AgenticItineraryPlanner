@@ -133,26 +133,41 @@ export function TripList() {
 
   return (
     <div>
-      {/* Filter Tabs */}
+      {/* Filter Tabs - Colorful UI with Gradient */}
       <Tabs value={filter} onValueChange={(v) => setFilter(v as any)} className="mb-4 sm:mb-6 md:mb-8">
-        <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-grid">
-          <TabsTrigger value="all" className="gap-1 sm:gap-2 min-h-[44px] text-xs sm:text-sm">
-            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">{t('pages.dashboard.filters.all')}</span>
-            <span className="sm:hidden">{t('pages.dashboard.filters.allMobile')}</span>
-            <span>({trips.length})</span>
+        <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-grid bg-gradient-to-r from-purple-100 via-blue-100 to-green-100 p-1.5 rounded-lg shadow-md">
+          <TabsTrigger 
+            value="all" 
+            className="gap-1.5 sm:gap-2 min-h-[44px] text-xs sm:text-sm rounded-md transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-600 data-[state=active]:to-purple-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-200"
+          >
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline font-semibold">{t('pages.dashboard.filters.all')}</span>
+            <span className="sm:hidden font-semibold">{t('pages.dashboard.filters.allMobile')}</span>
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-purple-200 text-purple-800 data-[state=active]:bg-white/25 data-[state=active]:text-white text-xs font-bold">
+              {trips.length}
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="upcoming" className="gap-1 sm:gap-2 min-h-[44px] text-xs sm:text-sm">
-            <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">{t('pages.dashboard.filters.upcoming')}</span>
-            <span className="sm:hidden">{t('pages.dashboard.filters.upcomingMobile')}</span>
-            <span>({upcomingCount})</span>
+          <TabsTrigger 
+            value="upcoming" 
+            className="gap-1.5 sm:gap-2 min-h-[44px] text-xs sm:text-sm rounded-md transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-blue-200"
+          >
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline font-semibold">{t('pages.dashboard.filters.upcoming')}</span>
+            <span className="sm:hidden font-semibold">{t('pages.dashboard.filters.upcomingMobile')}</span>
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-blue-200 text-blue-800 data-[state=active]:bg-white/25 data-[state=active]:text-white text-xs font-bold">
+              {upcomingCount}
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="completed" className="gap-1 sm:gap-2 min-h-[44px] text-xs sm:text-sm">
-            <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">{t('pages.dashboard.filters.completed')}</span>
-            <span className="sm:hidden">{t('pages.dashboard.filters.completedMobile')}</span>
-            <span>({completedCount})</span>
+          <TabsTrigger 
+            value="completed" 
+            className="gap-1.5 sm:gap-2 min-h-[44px] text-xs sm:text-sm rounded-md transition-all data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-600 data-[state=active]:to-green-700 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-green-200"
+          >
+            <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline font-semibold">{t('pages.dashboard.filters.completed')}</span>
+            <span className="sm:hidden font-semibold">{t('pages.dashboard.filters.completedMobile')}</span>
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-green-200 text-green-800 data-[state=active]:bg-white/25 data-[state=active]:text-white text-xs font-bold">
+              {completedCount}
+            </span>
           </TabsTrigger>
         </TabsList>
       </Tabs>

@@ -91,8 +91,17 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
   const centerIndex = finalItems.findIndex(item => item.isCenter);
   const centerItem = centerIndex >= 0 ? finalItems[centerIndex] : null;
 
+  const menuStyle = useMemo(() => {
+    return {
+      ...navStyle,
+      transform: isHidden ? 'translateX(-50%) translateY(120px)' : 'translateX(-50%) translateY(0)',
+      opacity: isHidden ? 0 : 1,
+      pointerEvents: isHidden ? 'none' as const : 'auto' as const,
+    };
+  }, [isHidden, navStyle]);
+
   return (
-    <div className={`menu ${isHidden ? 'hidden' : ''}`}>
+    <div className="menu" style={menuStyle}>
       {/* Center floating button */}
       {centerItem && (
         <button
@@ -110,7 +119,6 @@ const InteractiveMenu: React.FC<InteractiveMenuProps> = ({
       <nav
         className="menu__bar"
         role="navigation"
-        style={navStyle}
       >
         {finalItems.map((item, index) => {
           const isActive = index === activeIndex;

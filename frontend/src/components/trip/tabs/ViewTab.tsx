@@ -20,6 +20,7 @@ import {
   Calendar,
   MapPin,
   IndianRupee,
+  Coins,
   CreditCard,
   Cloud,
   Edit,
@@ -229,6 +230,31 @@ interface ViewTabProps {
   itinerary: any; // NormalizedItinerary type
 }
 
+// Helper function to get currency symbol
+const getCurrencySymbol = (currency?: string): string => {
+  if (!currency) return '$';
+  switch (currency.toUpperCase()) {
+    case 'INR':
+      return '₹';
+    case 'USD':
+      return '$';
+    case 'EUR':
+      return '€';
+    case 'GBP':
+      return '£';
+    case 'JPY':
+      return '¥';
+    case 'CNY':
+      return '¥';
+    case 'AUD':
+      return 'A$';
+    case 'CAD':
+      return 'C$';
+    default:
+      return currency + ' ';
+  }
+};
+
 export function ViewTab({ itinerary }: ViewTabProps) {
   const { t } = useTranslation();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -280,7 +306,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     const nodes = day.nodes || [];
     const dayTotal = nodes.reduce((daySum: number, node: any) => {
       // Support both field names for backward compatibility
-      const cost = node.cost?.amountPerPerson || node.cost?.pricePerPerson || 0;
+      const cost = node.cost?.amountPerPerson || node.cost?.pricePerPerson || node.cost?.amount || 0;
       
       console.log('[ViewTab] Node cost:', {
         title: node.title || node.name,
@@ -294,6 +320,12 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     }, 0);
     return total + dayTotal;
   }, 0);
+  
+  // Get currency from itinerary or first node with cost
+  const itineraryCurrency = itinerary?.currency || 
+    days.flatMap((day: any) => day.nodes || [])
+      .find((node: any) => node.cost?.currency)?.cost?.currency || 
+    'USD';
   
   console.log('[ViewTab] Budget calculation:', {
     daysCount: days.length,
@@ -459,8 +491,8 @@ export function ViewTab({ itinerary }: ViewTabProps) {
           title={t('components.viewTab.stats.budget')}
           value={totalBudget}
           subtitle={t('components.viewTab.stats.perPerson')}
-          icon={IndianRupee}
-          prefix="₹"
+          icon={Coins}
+          prefix={getCurrencySymbol(itineraryCurrency)}
           delay={0.2}
         />
 

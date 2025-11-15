@@ -262,6 +262,68 @@ public class GooglePlacesService {
     }
     
     /**
+     * Geocode a location string to get its coordinates using Google Geocoding API.
+     * Results are cached to avoid repeated API calls for the same location.
+     * 
+     * @param location The location string to geocode (e.g., "Jammu Kashmir, India")
+     * @return Coordinates object with lat/lng, or null if geocoding fails
+     */
+    @Cacheable(value = "geocoding", key = "#location")
+    private com.tripplanner.dto.Coordinates geocodeLocation(String location) {
+        if (location == null || location.trim().isEmpty()) {
+            return null;
+        }
+        
+        logger.debug("Geocoding location: {}", location);
+        
+        try {
+            // Build geocoding API URL
+            String url = UriComponentsBuilder.fromHttpUrl("https://maps.googleapis.com/maps/api/geocode/json")
+                    .queryParam("address", location)
+                    .queryParam("key", apiKey)
+                    .build(false)
+                    .toUriString();
+            
+            // Make request (no retry needed for geocoding, it's fast and reliable)
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                // Parse response
+                com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(response.getBody());
+                String status = root.path("status").asText();
+                
+                if ("OK".equals(status)) {
+                    com.fasterxml.jackson.databind.JsonNode results = root.path("results");
+                    if (results.isArray() && results.size() > 0) {
+                        com.fasterxml.jackson.databind.JsonNode firstResult = results.get(0);
+                        com.fasterxml.jackson.databind.JsonNode locationNode = firstResult
+                                .path("geometry")
+                                .path("location");
+                        
+                        double lat = locationNode.path("lat").asDouble();
+                        double lng = locationNode.path("lng").asDouble();
+                        
+                        com.tripplanner.dto.Coordinates coords = new com.tripplanner.dto.Coordinates();
+                        coords.setLat(lat);
+                        coords.setLng(lng);
+                        
+                        logger.info("Geocoded '{}' to coordinates: ({}, {})", location, lat, lng);
+                        return coords;
+                    }
+                } else if ("ZERO_RESULTS".equals(status)) {
+                    logger.warn("No geocoding results found for location: {}", location);
+                } else {
+                    logger.warn("Geocoding API returned status: {} for location: {}", status, location);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Failed to geocode location '{}': {}", location, e.getMessage());
+        }
+        
+        return null;
+    }
+    
+    /**
      * Check if we're within rate limits.
      */
     private void checkRateLimit() {
@@ -468,19 +530,37 @@ public class GooglePlacesService {
         checkCircuitBreaker();
         
         try {
-            // Build search query
+            // Build search query - include location for better context
             String searchQuery = query;
             if (location != null && !location.trim().isEmpty()) {
                 searchQuery = query + " " + location;
             }
             
-            // Build URL using UriComponentsBuilder to handle encoding properly
-            // This avoids double-encoding issues when RestTemplate makes the request
-            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
+            // Build URL with location bias using destination coordinates
+            UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
                     .queryParam("query", searchQuery)
-                    .queryParam("key", apiKey)
-                    .build(false) // Don't encode - let RestTemplate handle it
-                    .toUriString();
+                    .queryParam("key", apiKey);
+            
+            // Add location bias using destination coordinates
+            // This is much more accurate than region codes
+            if (location != null && !location.trim().isEmpty()) {
+                try {
+                    // Geocode the destination to get its coordinates
+                    com.tripplanner.dto.Coordinates destCoords = geocodeLocation(location);
+                    if (destCoords != null && destCoords.getLat() != null && destCoords.getLng() != null) {
+                        // Add location bias with a 200km radius around destination
+                        String locationBias = String.format("circle:200000@%f,%f", 
+                            destCoords.getLat(), destCoords.getLng());
+                        urlBuilder.queryParam("locationbias", locationBias);
+                        logger.debug("Added location bias: {} for destination: {}", locationBias, location);
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to geocode destination '{}', searching without location bias: {}", 
+                        location, e.getMessage());
+                }
+            }
+            
+            String url = urlBuilder.build(false).toUriString();
             
             logger.debug("Requesting Google Places API: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
             

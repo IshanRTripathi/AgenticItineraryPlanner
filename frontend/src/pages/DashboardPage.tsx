@@ -50,8 +50,8 @@ export function DashboardPage() {
       <main className="flex-1 bg-muted/30 py-4 sm:py-6 md:py-8">
         <div className="container px-3 sm:px-4">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div className="flex-1 min-w-0">
+          <div className="flex flex-col md:flex-row justify-between items-center md:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="flex-1 min-w-0 text-center md:text-left w-full md:w-auto">
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">
                 {t('pages.dashboard.title')}
               </h1>

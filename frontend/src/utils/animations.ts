@@ -86,19 +86,21 @@ export const staggerChildrenFast: Variants = {
  */
 export const expandCollapse: Variants = {
   collapsed: {
-    height: 0,
     opacity: 0,
+    height: 0,
+    overflow: 'hidden',
     transition: {
-      height: { duration: 0.3 },
       opacity: { duration: 0.2 },
+      height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
     },
   },
   expanded: {
-    height: 'auto',
     opacity: 1,
+    height: 'auto',
+    overflow: 'visible',
     transition: {
-      height: { duration: 0.3 },
-      opacity: { duration: 0.2, delay: 0.1 },
+      height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
+      opacity: { duration: 0.25, delay: 0.05 },
     },
   },
 };

@@ -70,7 +70,7 @@ export function NestedBudgetPieChart({ categoryData, days, currency }: NestedBud
   }, [categoryData, days]);
 
   const commonProps = {
-    margin: { top: 40, right: 80, bottom: 80, left: 80 },
+    margin: { top: 20, right: 20, bottom: 20, left: 20 },
     sortByValue: false, // Disable sorting to maintain consistent order between inner and outer
     activeOuterRadiusOffset: 8,
     borderWidth: 1,
@@ -84,12 +84,12 @@ export function NestedBudgetPieChart({ categoryData, days, currency }: NestedBud
 
   return (
     <div className="relative w-full h-full">
-      {/* Inner Circle - Categories (scaled down to 60%) */}
+      {/* Inner Circle - Categories (larger size for better visibility) */}
       <div 
         className="absolute inset-0 flex items-center justify-center" 
         style={{ zIndex: 1 }}
       >
-        <div style={{ width: '60%', height: '60%' }}>
+        <div className="w-[70%] h-[70%]">
           <ResponsivePie
             {...commonProps}
             data={innerData}
@@ -101,8 +101,15 @@ export function NestedBudgetPieChart({ categoryData, days, currency }: NestedBud
             colors={{ datum: 'data.color' }}
             arcLabel={(d) => `${((d.value / innerData.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(0)}%`}
             arcLabelsTextColor="#ffffff"
+            arcLabelsSkipAngle={12}
             layers={['arcs', 'arcLabels']}
             theme={{
+              labels: {
+                text: {
+                  fontSize: 12,
+                  fontWeight: 600,
+                },
+              },
               tooltip: {
                 container: {
                   background: 'hsl(var(--background))',
@@ -138,8 +145,8 @@ export function NestedBudgetPieChart({ categoryData, days, currency }: NestedBud
           sortByValue={false}
           startAngle={0}
           endAngle={360}
-          innerRadius={0.65}
-          padAngle={1}
+          innerRadius={0.72}
+          padAngle={0.5}
           cornerRadius={2}
           colors={(d) => d.data.color}
           arcLabel={() => ''}

@@ -88,16 +88,59 @@ export function BookingCategoryCard({
   const hasBookings = group.bookedCount > 0;
   const progressPercentage = totalItems > 0 ? Math.round((group.bookedCount / totalItems) * 100) : 0;
 
+  // Category-specific colors - subtle and elegant
+  const categoryStyles = {
+    accommodation: {
+      accent: 'border-l-blue-500',
+      background: 'bg-blue-50/30',
+      cardBorder: 'border-l-blue-400',
+      icon: 'text-blue-600',
+      progress: 'bg-blue-500',
+    },
+    transport: {
+      accent: 'border-l-purple-500',
+      background: 'bg-purple-50/30',
+      cardBorder: 'border-l-purple-400',
+      icon: 'text-purple-600',
+      progress: 'bg-purple-500',
+    },
+    activity: {
+      accent: 'border-l-green-500',
+      background: 'bg-green-50/30',
+      cardBorder: 'border-l-green-400',
+      icon: 'text-green-600',
+      progress: 'bg-green-500',
+    },
+    meal: {
+      accent: 'border-l-orange-500',
+      background: 'bg-orange-50/30',
+      cardBorder: 'border-l-orange-400',
+      icon: 'text-orange-600',
+      progress: 'bg-orange-500',
+    },
+  };
+
+  const styles = categoryStyles[group.category as keyof typeof categoryStyles] || {
+    accent: 'border-l-gray-500',
+    background: 'bg-gray-50/30',
+    cardBorder: 'border-l-gray-400',
+    icon: 'text-gray-600',
+    progress: 'bg-gray-500',
+  };
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      {/* Header */}
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      {/* Header with subtle left accent */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+        className={cn(
+          'w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-l-4',
+          styles.accent
+        )}
       >
         <div className="flex items-center gap-3">
-          {/* Icon */}
-          <div className="text-2xl">{group.icon}</div>
+          {/* Icon with category color */}
+          <div className={cn('text-2xl', styles.icon)}>{group.icon}</div>
           
           {/* Label and Stats */}
           <div className="text-left">
@@ -115,13 +158,13 @@ export function BookingCategoryCard({
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-primary rounded-full"
+                    className={cn('h-full rounded-full', styles.progress)}
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercentage}%` }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   />
                 </div>
-                <span className="text-xs font-semibold text-primary min-w-[3ch]">
+                <span className="text-xs font-semibold text-gray-700 min-w-[3ch]">
                   {progressPercentage}%
                 </span>
               </div>
@@ -153,16 +196,18 @@ export function BookingCategoryCard({
             transition={{ duration: 0.3 }}
             className="border-t border-gray-200"
           >
-            <div className="p-3 space-y-2 bg-gray-50/50">
-              {/* Items List - Like DayCard Activities */}
-              {group.items.map((booking) => (
+            <div className={cn('p-3 space-y-2', styles.background)}>
+              {/* Items List - White Cards with colored left border */}
+              {group.items.map((booking) => {
+                return (
                 <div key={booking.id} className="space-y-2">
                   <motion.div
                     className={cn(
-                      'p-3 rounded-lg transition-all',
+                      'p-3 rounded-lg transition-all border bg-white border-l-4',
+                      styles.cardBorder,
                       booking.status === 'booked'
-                        ? 'bg-primary/5 border-2 border-primary/20'
-                        : 'bg-white border-2 border-transparent hover:border-primary/30'
+                        ? 'shadow-md border-r border-t border-b border-gray-200'
+                        : 'border-r border-t border-b border-gray-100 hover:shadow-sm'
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -291,7 +336,8 @@ export function BookingCategoryCard({
                     )}
                   </AnimatePresence>
                 </div>
-              ))}
+              );
+              })}
 
               {/* Empty State */}
               {group.items.length === 0 && (

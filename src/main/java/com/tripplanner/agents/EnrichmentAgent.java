@@ -1008,13 +1008,14 @@ public class EnrichmentAgent extends BaseAgent {
         // *** NEW: Update location object with photos, ratings, and price level for frontend ***
         logger.info("📝 [EnrichmentAgent] Updating NodeLocation fields for node: {}", node.getId());
         
-        // Set photos directly in location (extract photo references)
+        // Set photos directly in location (extract photo references, limit to 5)
         if (placeDetails.getPhotos() != null && !placeDetails.getPhotos().isEmpty()) {
             List<String> photoReferences = placeDetails.getPhotos().stream()
+                    .limit(5) // Limit to 5 photos to reduce data size
                     .map(Photo::getPhotoReference)
                     .collect(java.util.stream.Collectors.toList());
             node.getLocation().setPhotos(photoReferences);
-            logger.info("   ✅ Set {} photo references in location.photos", photoReferences.size());
+            logger.info("   ✅ Set {} photo references in location.photos (limited to 5)", photoReferences.size());
             logger.info("      First photo ref: {}", photoReferences.get(0).substring(0, Math.min(30, photoReferences.get(0).length())) + "...");
         } else {
             logger.warn("   ⚠️ No photos to set in location.photos");

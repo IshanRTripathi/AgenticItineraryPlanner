@@ -2,8 +2,10 @@
  * Sortable Activity Component
  * Wraps activity cards with drag-and-drop functionality using @dnd-kit
  * Drag zone is the top portion of the card, buttons remain clickable
+ * Mobile: Click to show tooltip, click again to hide (prevents accidental dragging while scrolling)
  */
 
+import { useState, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
@@ -16,6 +18,20 @@ interface SortableActivityProps {
 }
 
 export function SortableActivity({ id, children, disabled = false }: SortableActivityProps) {
+  const [showTooltipMobile, setShowTooltipMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // On mobile: disable dragging unless tooltip is visible
+  const isDragDisabled = disabled || (isMobile && !showTooltipMobile);
+  
   const {
     attributes,
     listeners,
@@ -26,7 +42,7 @@ export function SortableActivity({ id, children, disabled = false }: SortableAct
     isDragging,
   } = useSortable({ 
     id,
-    disabled 
+    disabled: isDragDisabled
   });
 
   const style = {
@@ -47,7 +63,7 @@ export function SortableActivity({ id, children, disabled = false }: SortableAct
       )}
     >
       {/* Drag Zone - Top 80px of card (header area only) */}
-      {!disabled && (
+      {!isDragDisabled && (
         <div
           ref={setActivatorNodeRef}
           {...attributes}
@@ -59,8 +75,12 @@ export function SortableActivity({ id, children, disabled = false }: SortableAct
             'cursor-grab active:cursor-grabbing',
             // Layout
             'flex items-center justify-center',
-            // Visibility: hidden by default, show on hover
-            'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+            // Visibility: 
+            // - Desktop: hidden by default, show on hover
+            // - Mobile: controlled by state (click to toggle)
+            'opacity-0 transition-opacity duration-200',
+            'sm:group-hover:opacity-100', // Desktop hover
+            showTooltipMobile && 'sm:opacity-0 opacity-100', // Mobile click state (hide on desktop)
             // Visual styling
             'bg-gradient-to-b from-primary/5 to-transparent',
             // Touch handling
@@ -77,7 +97,21 @@ export function SortableActivity({ id, children, disabled = false }: SortableAct
         </div>
       )}
       
-      {children}
+      {/* Wrapper to capture clicks on mobile */}
+      <div
+        onClick={(e) => {
+          // On mobile, toggle tooltip visibility on card click
+          // Ignore clicks on buttons and interactive elements
+          const target = e.target as HTMLElement;
+          const isButton = target.closest('button, a, input, select, textarea');
+          
+          if (window.innerWidth < 640 && !isButton) {
+            setShowTooltipMobile(!showTooltipMobile);
+          }
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

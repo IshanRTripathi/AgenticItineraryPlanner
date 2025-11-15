@@ -176,7 +176,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6">
       {/* Budget Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.yourBudget.title')}</CardTitle>

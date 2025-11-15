@@ -13,7 +13,6 @@ import {
     Clock,
     DollarSign,
     ChevronDown,
-    ChevronUp,
     Lock,
     Save,
     X,
@@ -36,10 +35,9 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableActivity } from './SortableActivity';
 import { useDayActivitiesReorder } from '@/hooks/useDayActivitiesReorder';
-import { motion, AnimatePresence } from 'framer-motion';
-import { staggerChildren, listItem, expandCollapse } from '@/utils/animations';
+import { motion } from 'framer-motion';
 import { getDayColor } from '@/constants/dayColors';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { buildHotelUrl, buildActivityUrl, buildBusUrl, buildTrainUrl } from '@/utils/easemytripUrlBuilder';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { useTranslation } from '@/i18n';
@@ -69,6 +67,37 @@ const getNodeIcon = (type: string) => {
         default:
             return '📍';
     }
+};
+
+const getCurrencySymbol = (currency?: string): string => {
+    if (!currency) return '$';
+    switch (currency.toUpperCase()) {
+        case 'INR':
+            return '₹';
+        case 'USD':
+            return '$';
+        case 'EUR':
+            return '€';
+        case 'GBP':
+            return '£';
+        case 'JPY':
+            return '¥';
+        case 'CNY':
+            return '¥';
+        case 'AUD':
+            return 'A$';
+        case 'CAD':
+            return 'C$';
+        default:
+            return currency + ' ';
+    }
+};
+
+// Helper component for currency icon (replaces DollarSign with appropriate icon)
+const CurrencyIcon = ({ currency, className }: { currency?: string; className?: string }) => {
+    // For now, we'll use DollarSign for all currencies since lucide-react doesn't have currency-specific icons
+    // The actual symbol is shown in the text
+    return <DollarSign className={className} />;
 };
 
 const getPriceLevelIndicator = (priceLevel?: number) => {
@@ -261,12 +290,44 @@ export function DayCard({
     isGenerating = false
 }: DayCardProps) {
     const { t } = useTranslation();
-    // Photo viewer state
-    const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(null);
+    // Photo viewer state - now supports gallery with description
+    const [selectedPhoto, setSelectedPhoto] = useState<{ photos: string[]; title: string; description?: string; currentIndex: number } | null>(null);
     // Booking modal state
     const [bookingModal, setBookingModal] = useState<{ isOpen: boolean; url: string; itemName: string } | null>(null);
     
-    // Configure sensors for both desktop and mobile drag support
+    // State to track if we're on mobile
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+    
+    // Get hasUnsavedChanges early to use in sensor configuration
+    const {
+        activities,
+        isReordering,
+        hasUnsavedChanges,
+        handleDragEnd,
+        saveReorder,
+        discardChanges
+    } = useDayActivitiesReorder({
+        itineraryId: itineraryId || '',
+        dayNumber: day.dayNumber,
+        initialActivities: day.nodes || [],
+        onReorderSuccess: () => {
+            console.log('[DayCard] Reorder successful, waiting for refetch');
+        },
+        onRefetchNeeded,
+        autoSave: false,
+    });
+    
+    // Configure sensors - always call both to maintain hook count
+    // On mobile: require longer press initially, shorter once in edit mode
+    const touchDelay = isMobile ? (hasUnsavedChanges ? 250 : 500) : 250;
+    
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -275,8 +336,8 @@ export function DayCard({
         }),
         useSensor(TouchSensor, {
             activationConstraint: {
-                delay: 250, // 250ms press before drag on touch devices
-                tolerance: 5, // 5px movement tolerance
+                delay: touchDelay, // Longer delay on mobile without changes
+                tolerance: 5,
             },
         })
     );
@@ -317,33 +378,16 @@ export function DayCard({
     dayDate.setHours(0, 0, 0, 0);
 
     const dayStatus = dayDate < today ? 'past' : dayDate.getTime() === today.getTime() ? 'current' : 'future';
-    // Use drag & drop hook if enabled and itineraryId is provided
-    const {
-        activities,
-        isReordering,
-        hasUnsavedChanges,
-        handleDragEnd,
-        saveReorder,
-        discardChanges
-    } = useDayActivitiesReorder({
-        itineraryId: itineraryId || '',
-        dayNumber: day.dayNumber,
-        initialActivities: day.nodes || [],
-        onReorderSuccess: () => {
-            // Don't mutate props - the refetch will update the data
-            console.log('[DayCard] Reorder successful, waiting for refetch');
-        },
-        onRefetchNeeded,
-        autoSave: false, // Manual save mode
-    });
 
-    // Use activities from hook if drag & drop is enabled, otherwise use day.nodes
-    const displayActivities = enableDragDrop && itineraryId ? activities : (day.nodes || []);
+    // Always use activities from drag & drop hook
+    const displayActivities = activities;
     const activityCount = displayActivities.length;
     const totalCost = displayActivities.reduce(
-        (sum: number, node: any) => sum + (node.cost?.amountPerPerson || node.cost?.pricePerPerson || 0),
+        (sum: number, node: any) => sum + (node.cost?.amountPerPerson || node.cost?.pricePerPerson || node.cost?.amount || 0),
         0
     );
+    // Get currency from first activity with cost, fallback to USD
+    const dayCurrency = displayActivities.find((node: any) => node.cost?.currency)?.cost?.currency || 'USD';
 
     // Show placeholder activities if generating and no activities yet
     const hasActivities = activityCount > 0;
@@ -380,12 +424,12 @@ export function DayCard({
             >
                 <CardContent className="flex-1 p-0">
                     {/* Collapsed View - Summary */}
-                    <div className="flex items-center justify-between gap-4">
-                        {/* Day Number Badge */}
+                    <div className="flex items-center justify-between gap-3">
+                        {/* Left Section: Day Badge & Title */}
                         <div className="flex items-center gap-3">
                             <div
                                 className={cn(
-                                    "flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all",
+                                    "flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all flex-shrink-0",
                                     dayStatus === 'current' ? 'shadow-lg scale-110 text-white' :
                                         dayStatus === 'past' ? 'bg-muted text-muted-foreground' :
                                             'text-white'
@@ -398,7 +442,7 @@ export function DayCard({
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-base">{t('components.dayCard.day', { number: day.dayNumber })}</h3>
+                                    <h3 className="font-semibold text-base sm:text-lg">{t('components.dayCard.day', { number: day.dayNumber })}</h3>
                                     {dayStatus === 'current' && (
                                         <span
                                             className="text-xs px-2 py-0.5 rounded-full font-medium"
@@ -411,81 +455,66 @@ export function DayCard({
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-xs text-muted-foreground">{formatDate(day.date)}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground">{formatDate(day.date)}</p>
                             </div>
                         </div>
 
-                        {/* Summary Stats */}
-                        <div className="flex items-center gap-4 text-sm flex-wrap">
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                                <MapPin className="w-4 h-4" />
-                                <span className="hidden sm:inline">{day.location || t('components.dayCard.planning')}</span>
-                            </div>
-                            {isGenerating && !hasActivities ? (
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-xs">{t('components.dayCard.generatingActivities')}</span>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex items-center gap-1 text-muted-foreground">
-                                        <Clock className="w-4 h-4" />
-                                        <span>{t('components.dayCard.activitiesCount', { count: activityCount })}</span>
+                        {/* Right Section: Stats (hidden when expanded) & Toggle */}
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                            {/* Summary Stats - Only show when collapsed */}
+                            {!isExpanded && (
+                                <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-1.5">
+                                        <MapPin className="w-4 h-4" />
+                                        <span className="max-w-[120px] truncate">{day.location || t('components.dayCard.planning')}</span>
                                     </div>
-                                    {totalCost > 0 && (
-                                        <div className="flex items-center gap-1 text-muted-foreground">
-                                            <DollarSign className="w-4 h-4" />
-                                            <span>${totalCost.toLocaleString()}</span>
+                                    {isGenerating && !hasActivities ? (
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+                                            <span className="text-xs">{t('components.dayCard.generatingActivities')}</span>
                                         </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-center gap-1.5">
+                                                <Clock className="w-4 h-4" />
+                                                <span>{activityCount}</span>
+                                            </div>
+                                            {totalCost > 0 && (
+                                                <div className="flex items-center gap-1.5">
+                                                    <CurrencyIcon currency={dayCurrency} className="w-4 h-4" />
+                                                    <span>{getCurrencySymbol(dayCurrency)}{totalCost.toLocaleString()}</span>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
-                                </>
+                                </div>
                             )}
-                        </div>
 
-                        {/* Activity Preview Icons - Show in collapsed state */}
-                        {!isExpanded && hasActivities && (
-                            <div className="flex items-center gap-1 mt-2">
-                                {displayActivities.slice(0, 6).map((activity: any, i: number) => (
-                                    <motion.div
-                                        key={activity.id}
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm border-2 border-background shadow-sm"
-                                        title={activity.title}
-                                    >
-                                        {getNodeIcon(activity.type)}
-                                    </motion.div>
-                                ))}
-                                {displayActivities.length > 6 && (
-                                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground border-2 border-background">
-                                        +{displayActivities.length - 6}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Expand/Collapse Icon */}
-                        <div className="shrink-0 w-10 h-10 flex items-center justify-center rounded-md hover:bg-muted/80 transition-colors">
-                            {isExpanded ? (
-                                <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                            ) : (
+                            {/* Expand/Collapse Icon */}
+                            <motion.div 
+                                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-muted/80 transition-colors"
+                                animate={{ rotate: isExpanded ? 180 : 0 }}
+                                transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                            >
                                 <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                            )}
+                            </motion.div>
                         </div>
                     </div>
 
                     {/* Expanded View - Full Details */}
-                    <AnimatePresence>
-                        {isExpanded && (
-                            <motion.div
-                                className="mt-4 pt-4 border-t space-y-4"
-                                onClick={(e) => e.stopPropagation()}
-                                initial="collapsed"
-                                animate="expanded"
-                                exit="collapsed"
-                                variants={expandCollapse}
-                            >
+                    {isExpanded && (
+                        <div
+                            className="mt-4 pt-4 border-t space-y-4"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                                {/* Location Header */}
+                                {day.location && (
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <MapPin className="w-4 h-4" />
+                                        <span className="text-sm font-medium">{day.location}</span>
+                                    </div>
+                                )}
+
                                 {/* Day Summary Panel */}
                                 {hasActivities && !showPlaceholder && (
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-muted/30 rounded-lg">
@@ -495,7 +524,7 @@ export function DayCard({
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.budget')}</div>
-                                            <div className="text-lg font-semibold">${totalCost.toLocaleString()}</div>
+                                            <div className="text-lg font-semibold">{getCurrencySymbol(dayCurrency)}{totalCost.toLocaleString()}</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.duration')}</div>
@@ -546,18 +575,14 @@ export function DayCard({
                                                 </p>
                                             </div>
                                         </div>
-                                    ) : enableDragDrop && itineraryId ? (
-                                        /* Drag & Drop Enabled */
+                                    ) : (
+                                        /* Activity List with Drag & Drop */
                                         <>
-                                            {/* Save/Discard Bar */}
-                                            <AnimatePresence>
-                                                {hasUnsavedChanges && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, y: -10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        exit={{ opacity: 0, y: -10 }}
-                                                        className="flex items-center justify-between gap-3 p-3 mb-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg"
-                                                    >
+                                            {/* Save/Discard Bar - Floating on Mobile, Inline on Desktop */}
+                                            {hasUnsavedChanges && (
+                                                <>
+                                                    {/* Desktop: Inline bar */}
+                                                    <div className="hidden sm:flex items-center justify-between gap-3 p-3 mb-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg transition-all duration-200">
                                                         <div className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-100">
                                                             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
                                                             <span className="font-medium">{t('components.dayCard.unsavedChanges')}</span>
@@ -592,9 +617,36 @@ export function DayCard({
                                                                 )}
                                                             </Button>
                                                         </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
+                                                    </div>
+                                                    
+                                                    {/* Mobile: Floating icon buttons */}
+                                                    <div className="sm:hidden fixed bottom-24 right-4 z-50 flex flex-col gap-2">
+                                                        <Button
+                                                            size="icon"
+                                                            variant="outline"
+                                                            onClick={discardChanges}
+                                                            disabled={isReordering}
+                                                            className="h-4 w-4 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl active:scale-90 transition-all"
+                                                            title={t('components.dayCard.discard')}
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </Button>
+                                                        <Button
+                                                            size="icon"
+                                                            onClick={saveReorder}
+                                                            disabled={isReordering}
+                                                            className="h-4 w-4 rounded-full bg-amber-500 hover:bg-amber-600 shadow-lg hover:shadow-xl active:scale-90 transition-all"
+                                                            title={t('components.dayCard.saveChanges')}
+                                                        >
+                                                            {isReordering ? (
+                                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                            ) : (
+                                                                <Save className="w-3 h-3" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </>
+                                            )}
 
                                             <DndContext
                                                 sensors={sensors}
@@ -605,24 +657,16 @@ export function DayCard({
                                                     items={displayActivities.map((a: any) => a.id)}
                                                     strategy={verticalListSortingStrategy}
                                                 >
-                                                    <motion.div
-                                                        variants={staggerChildren}
-                                                        initial="initial"
-                                                        animate="animate"
-                                                        className="space-y-3"
-                                                    >
+                                                    <div className="space-y-3">
                                                         {displayActivities.map((node: any) => (
                                                             <SortableActivity
                                                                 key={node.id}
                                                                 id={node.id}
                                                                 disabled={node.locked || isReordering}
                                                             >
-                                                                <motion.div
-                                                                    variants={listItem}
-                                                                    whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
-                                                                    transition={{ duration: 0.2 }}
+                                                                <div
                                                                     className={cn(
-                                                                        'group relative p-3 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
+                                                                        'group relative p-3 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md',
                                                                         getNodeColor(node.type),
                                                                         isReordering && 'opacity-50 pointer-events-none',
                                                                         // Add shimmer effect for enriching activities
@@ -632,112 +676,161 @@ export function DayCard({
                                                                     {/* Subtle gradient overlay */}
                                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                                                    <div className="relative flex flex-col sm:flex-row items-start gap-3">
-                                                                        {/* Photo or Icon - Clickable to view full size */}
-                                                                        {node.location?.photos?.[0] ? (
-                                                                            <button
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    setSelectedPhoto({
-                                                                                        url: getPhotoUrl(node.location.photos[0], 800) || '',
-                                                                                        title: node.title
-                                                                                    });
-                                                                                }}
-                                                                                className="flex-shrink-0 w-full sm:w-20 h-32 sm:h-20 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
-                                                                            >
-                                                                                <img
-                                                                                    src={getPhotoUrl(node.location.photos[0], 200) || ''}
-                                                                                    alt={node.title}
-                                                                                    className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
-                                                                                    onError={(e) => {
-                                                                                        const target = e.target as HTMLImageElement;
-                                                                                        target.style.display = 'none';
-                                                                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl">${getNodeIcon(node.type)}</div>`;
-                                                                                    }}
-                                                                                />
-                                                                                <div className="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
-                                                                                    <ImageIcon className="w-5 h-5 text-white opacity-0 group-hover/photo:opacity-100 transition-opacity" />
-                                                                                </div>
-                                                                            </button>
-                                                                        ) : (
-                                                                            <div className="flex-shrink-0 w-full sm:w-20 h-32 sm:h-20 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-3xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
-                                                                                {getNodeIcon(node.type)}
-                                                                            </div>
-                                                                        )}
-
-                                                                        {/* Content */}
-                                                                        <div className="flex-1 min-w-0">
-                                                                            {/* Header */}
-                                                                            <div className="flex items-start justify-between gap-3 mb-2">
-                                                                                <div className="flex-1 min-w-0">
-                                                                                    <h4 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">
-                                                                                        {node.title}
-                                                                                    </h4>
-
-                                                                                    {/* Rating & Reviews - Premium styling */}
-                                                                                    <div className="flex items-center gap-3 mb-2">
-                                                                                        {node.location?.rating && (
-                                                                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 rounded-md">
-                                                                                                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                                                                                                <span className="text-sm font-semibold text-amber-900">{formatRating(node.location.rating)}</span>
-                                                                                            </div>
-                                                                                        )}
-                                                                                        {node.location?.userRatingsTotal && (
-                                                                                            <span className="text-xs text-gray-500">
-                                                                                                {t('components.dayCard.reviews', { count: formatReviewCount(node.location.userRatingsTotal) || '0' })}
-                                                                                            </span>
-                                                                                        )}
-                                                                                        {node.location?.priceLevel && (
-                                                                                            <span className="text-sm font-semibold text-emerald-600">
-                                                                                                {getPriceLevelIndicator(node.location.priceLevel)}
-                                                                                            </span>
-                                                                                        )}
+                                                                    <div className="relative">
+                                                                        {/* Mobile: Vertical layout, Desktop: Horizontal layout */}
+                                                                        <div className="flex sm:flex-row flex-col sm:items-start gap-3">
+                                                                            {/* Photo or Icon */}
+                                                                            <div className="flex sm:flex-col gap-3 items-start">
+                                                                                {node.location?.photos?.[0] ? (
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setSelectedPhoto({
+                                                                                                photos: node.location.photos,
+                                                                                                title: node.title,
+                                                                                                description: node.details?.description,
+                                                                                                currentIndex: 0
+                                                                                            });
+                                                                                        }}
+                                                                                        className="flex-shrink-0 w-20 h-20 sm:w-16 sm:h-16 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
+                                                                                    >
+                                                                                        <img
+                                                                                            src={getPhotoUrl(node.location.photos[0], 200) || ''}
+                                                                                            alt={node.title}
+                                                                                            className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
+                                                                                            onError={(e) => {
+                                                                                                const target = e.target as HTMLImageElement;
+                                                                                                target.style.display = 'none';
+                                                                                                target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl">${getNodeIcon(node.type)}</div>`;
+                                                                                            }}
+                                                                                        />
+                                                                                        <div className="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
+                                                                                            <ImageIcon className="w-4 h-4 text-white opacity-0 group-hover/photo:opacity-100 transition-opacity" />
+                                                                                        </div>
+                                                                                    </button>
+                                                                                ) : (
+                                                                                    <div className="flex-shrink-0 w-20 h-20 sm:w-16 sm:h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                                                        {getNodeIcon(node.type)}
                                                                                     </div>
-
-                                                                                    {/* Address - Clipped if overflow */}
-                                                                                    {node.location?.address && (
-                                                                                        <p className="text-xs text-gray-500 line-clamp-1">
-                                                                                            {node.location.address}
-                                                                                        </p>
+                                                                                )}
+                                                                                
+                                                                                {/* Mobile: Rating & Meta next to image */}
+                                                                                <div className="sm:hidden flex-1 flex flex-col justify-center gap-2.5 min-w-0 py-1">
+                                                                                    {/* Rating & Reviews */}
+                                                                                    {node.location?.rating && (
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <div className="w-4 flex justify-center">
+                                                                                                <Star className="w-2 h-2 fill-amber-500 text-amber-500 flex-shrink-0" />
+                                                                                            </div>
+                                                                                            <span className="text-xs font-bold text-amber-900 leading-none">{formatRating(node.location.rating)}</span>
+                                                                                            {node.location?.userRatingsTotal && (
+                                                                                                <span className="text-xs text-gray-500 leading-none">
+                                                                                                    ({formatReviewCount(node.location.userRatingsTotal)})
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+                                                                                    
+                                                                                    {/* Time */}
+                                                                                    {node.timing?.startTime && (
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <div className="w-4 flex justify-center">
+                                                                                                <Clock className="w-2 h-2 text-blue-500 flex-shrink-0" />
+                                                                                            </div>
+                                                                                            <span className="text-xs font-semibold text-gray-700 leading-none">{formatTime(node.timing.startTime)}</span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                    
+                                                                                    {/* Cost & Price Level */}
+                                                                                    {(node.cost?.amount || node.location?.priceLevel) && (
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <div className="w-4 flex justify-center">
+                                                                                                <CurrencyIcon currency={node.cost.currency} className="w-2 h-2 text-emerald-600 flex-shrink-0" />
+                                                                                            </div>
+                                                                                            {node.cost?.amount ? (
+                                                                                                <span className="text-xs font-bold text-emerald-700 leading-none">
+                                                                                                    {getCurrencySymbol(node.cost.currency)}{node.cost.amount.toLocaleString()}
+                                                                                                </span>
+                                                                                            ) : node.location?.priceLevel ? (
+                                                                                                <span className="text-xs font-bold text-emerald-600 leading-none">
+                                                                                                    {getPriceLevelIndicator(node.location.priceLevel)}
+                                                                                                </span>
+                                                                                            ) : null}
+                                                                                        </div>
                                                                                     )}
                                                                                 </div>
+                                                                            </div>
 
-                                                                                {/* Status badges */}
-                                                                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                                                            {/* Content */}
+                                                                            <div className="flex-1 min-w-0">
+                                                                                {/* Title */}
+                                                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                                                    <h4 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">
+                                                                                        {node.title}
+                                                                                    </h4>
                                                                                     {node.bookingRef && (
-                                                                                        <Badge className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50">
+                                                                                        <Badge className="px-2 py-0.5 text-xs bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50 flex-shrink-0">
                                                                                             <CheckCircle2 className="w-3 h-3 mr-1" />
                                                                                             {t('components.dayCard.booked')}
                                                                                         </Badge>
                                                                                     )}
                                                                                 </div>
-                                                                            </div>
 
-                                                                            {/* Meta information - Refined */}
-                                                                            <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                                                                                {node.timing?.startTime && (
-                                                                                    <div className="flex items-center gap-1.5">
-                                                                                        <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                                                        <span className="font-medium">{formatTime(node.timing.startTime)}</span>
-                                                                                    </div>
+                                                                                {/* Desktop: Rating & Reviews */}
+                                                                                <div className="hidden sm:flex flex-wrap items-center gap-2 mb-2">
+                                                                                    {node.location?.rating && (
+                                                                                        <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-md">
+                                                                                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                                                                            <span className="text-xs font-semibold text-amber-900">{formatRating(node.location.rating)}</span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                    {node.location?.userRatingsTotal && (
+                                                                                        <span className="text-xs text-gray-500">
+                                                                                            {t('components.dayCard.reviews', { count: formatReviewCount(node.location.userRatingsTotal) || '0' })}
+                                                                                        </span>
+                                                                                    )}
+                                                                                    {node.location?.priceLevel && (
+                                                                                        <span className="text-xs font-semibold text-emerald-600">
+                                                                                            {getPriceLevelIndicator(node.location.priceLevel)}
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
+
+                                                                                {/* Address */}
+                                                                                {node.location?.address && (
+                                                                                    <p className="text-xs text-gray-600 flex items-start gap-1 line-clamp-1 mb-2">
+                                                                                        <MapPin className="w-3 h-3 flex-shrink-0 text-gray-400 mt-0.5" />
+                                                                                        <span className="truncate">{node.location.address}</span>
+                                                                                    </p>
                                                                                 )}
-                                                                                {node.cost?.amount && (
-                                                                                    <div className="flex items-center gap-1.5">
-                                                                                        <DollarSign className="w-3.5 h-3.5 text-gray-400" />
-                                                                                        <span className="font-semibold">₹{node.cost.amount.toLocaleString()}</span>
-                                                                                    </div>
+
+                                                                                {/* Desktop: Meta information */}
+                                                                                <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-600 mb-2">
+                                                                                    {node.timing?.startTime && (
+                                                                                        <div className="flex items-center gap-1">
+                                                                                            <Clock className="w-3 h-3 text-gray-400" />
+                                                                                            <span className="font-medium">{formatTime(node.timing.startTime)}</span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                    {node.cost?.amount && (
+                                                                                        <div className="flex items-center gap-1">
+                                                                                            <CurrencyIcon currency={node.cost.currency} className="w-3 h-3 text-gray-400" />
+                                                                                            <span className="font-semibold">
+                                                                                                {getCurrencySymbol(node.cost.currency)}{node.cost.amount.toLocaleString()}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+
+                                                                                {/* Description */}
+                                                                                {node.details?.description && (
+                                                                                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
+                                                                                        {node.details.description}
+                                                                                    </p>
                                                                                 )}
-                                                                            </div>
 
-                                                                            {/* Description - Better readability */}
-                                                                            {node.details?.description && (
-                                                                                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
-                                                                                    {node.details.description}
-                                                                                </p>
-                                                                            )}
-
-                                                                            {/* Actions - Stack vertically on mobile, better styling */}
-                                                                            <div className="flex items-center gap-2">
+                                                                                {/* Actions */}
+                                                                                <div className="flex items-center gap-2">
                                                                                 {!node.bookingRef && shouldShowBookingButton(node.type) && (
                                                                                     <Button
                                                                                         size="sm"
@@ -777,8 +870,9 @@ export function DayCard({
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
                                                                                             setSelectedPhoto({
-                                                                                                url: getPhotoUrl(node.location.photos[0], 800) || '',
-                                                                                                title: node.title
+                                                                                                photos: node.location.photos,
+                                                                                                title: node.title,
+                                                                                                currentIndex: 0
                                                                                             });
                                                                                         }}
                                                                                         title={t('components.dayCard.photos', { count: node.location.photos.length })}
@@ -787,206 +881,21 @@ export function DayCard({
                                                                                         <span className="hidden sm:inline">{t('components.dayCard.photos', { count: node.location.photos.length })}</span>
                                                                                     </Button>
                                                                                 )}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </motion.div>
+                                                                </div>
                                                             </SortableActivity>
                                                         ))}
-                                                    </motion.div>
+                                                    </div>
                                                 </SortableContext>
                                             </DndContext>
                                         </>
-                                    ) : (
-                                        /* Drag & Drop Disabled - Original View */
-                                        <motion.div
-                                            variants={staggerChildren}
-                                            initial="initial"
-                                            animate="animate"
-                                            className="space-y-3"
-                                        >
-                                            {displayActivities.map((node: any, index: number) => (
-                                                <motion.div
-                                                    key={index}
-                                                    variants={listItem}
-                                                    whileHover={{ y: -2, boxShadow: "0 8px 16px rgba(0,0,0,0.08)" }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className={cn(
-                                                        'group relative p-3 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50/50 transition-all cursor-pointer overflow-hidden',
-                                                        getNodeColor(node.type),
-                                                        // Add shimmer effect for enriching activities
-                                                        isGenerating && getEnrichmentStatus(node) === 'enriching' && 'animate-pulse'
-                                                    )}
-                                                >
-                                                    {/* Subtle gradient overlay */}
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-gray-50/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                                    <div className="relative flex flex-col sm:flex-row items-start gap-4">
-                                                        {/* Photo or Icon - Clickable to view full size */}
-                                                        {node.location?.photos?.[0] ? (
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setSelectedPhoto({
-                                                                        url: getPhotoUrl(node.location.photos[0], 800) || '',
-                                                                        title: node.title
-                                                                    });
-                                                                }}
-                                                                className="flex-shrink-0 w-full sm:w-24 h-32 sm:h-24 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
-                                                            >
-                                                                <img
-                                                                    src={getPhotoUrl(node.location.photos[0], 200) || ''}
-                                                                    alt={node.title}
-                                                                    className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
-                                                                    onError={(e) => {
-                                                                        const target = e.target as HTMLImageElement;
-                                                                        target.style.display = 'none';
-                                                                        target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-xl sm:text-2xl">${getNodeIcon(node.type)}</div>`;
-                                                                    }}
-                                                                />
-                                                                <div className="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
-                                                                    <ImageIcon className="w-5 h-5 text-white opacity-0 group-hover/photo:opacity-100 transition-opacity" />
-                                                                </div>
-                                                            </button>
-                                                        ) : (
-                                                            <div className="flex-shrink-0 w-full sm:w-24 h-32 sm:h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-3xl sm:text-2xl shadow-sm group-hover:shadow-md transition-shadow">
-                                                                {getNodeIcon(node.type)}
-                                                            </div>
-                                                        )}
-
-                                                        {/* Content */}
-                                                        <div className="flex-1 min-w-0">
-                                                            {/* Header */}
-                                                            <div className="flex items-start justify-between gap-2 mb-1">
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h4 className="font-semibold text-base text-gray-900 mb-1 line-clamp-1">
-                                                                        {node.title}
-                                                                    </h4>
-
-                                                                    {/* Rating, Reviews, Price Level - Stack on mobile */}
-                                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
-                                                                        {node.location?.rating && (
-                                                                            <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
-                                                                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                                                                <span>{formatRating(node.location.rating)}</span>
-                                                                            </div>
-                                                                        )}
-                                                                        {node.location?.userRatingsTotal && (
-                                                                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                                                <Users className="w-3 h-3" />
-                                                                                <span>{formatReviewCount(node.location.userRatingsTotal)}</span>
-                                                                            </div>
-                                                                        )}
-                                                                        {node.location?.priceLevel && (
-                                                                            <span className="text-xs font-medium text-green-600">
-                                                                                {getPriceLevelIndicator(node.location.priceLevel)}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-
-                                                                    {node.location?.address && (
-                                                                        <p className="text-xs text-gray-600 flex items-center gap-1 line-clamp-1">
-                                                                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                                                                            <span className="truncate">{node.location.address}</span>
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* Status badges */}
-                                                                <div className="flex items-center gap-1 flex-shrink-0 flex-wrap">
-                                                                    {/* Show enrichment status during generation */}
-                                                                    {isGenerating && (
-                                                                        <EnrichmentBadge status={getEnrichmentStatus(node)} t={t} />
-                                                                    )}
-                                                                    {node.locked && (
-                                                                        <Badge variant="secondary" className="h-6 px-2">
-                                                                            <Lock className="w-3 h-3" />
-                                                                        </Badge>
-                                                                    )}
-                                                                    {node.bookingRef && (
-                                                                        <Badge className="h-6 px-2 bg-green-100 text-green-700 hover:bg-green-100">
-                                                                            ✓ {t('components.dayCard.booked')}
-                                                                        </Badge>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Meta information */}
-                                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mb-2">
-                                                                {node.timing?.startTime && (
-                                                                    <div className="flex items-center gap-1 font-medium">
-                                                                        <Clock className="w-3.5 h-3.5" />
-                                                                        <span>{formatTime(node.timing.startTime)}</span>
-                                                                        {node.timing.duration && (
-                                                                            <span className="text-gray-400">• {node.timing.duration}</span>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                                {node.cost?.amount && (
-                                                                    <div className="flex items-center gap-1 font-medium">
-                                                                        <DollarSign className="w-3.5 h-3.5" />
-                                                                        <span>₹{node.cost.amount.toLocaleString()}</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Description */}
-                                                            {node.details?.description && (
-                                                                <p className="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-3">
-                                                                    {node.details.description}
-                                                                </p>
-                                                            )}
-
-                                                            {/* Actions - Stack vertically on mobile, better styling */}
-                                                            <div className="flex items-center gap-2">
-                                                                {!node.bookingRef && shouldShowBookingButton(node.type) && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        className="h-9 text-xs px-3 font-medium shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
-                                                                    >
-                                                                        {t('components.dayCard.bookNow')}
-                                                                    </Button>
-                                                                )}
-                                                                {node.location?.placeId && (
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="outline"
-                                                                        className="h-9 w-9 p-0 border-2 hover:bg-primary/5 hover:border-primary transition-all touch-manipulation active:scale-95"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
-                                                                        }}
-                                                                        title="View on Map"
-                                                                    >
-                                                                        <MapPin className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
-                                                                {node.location?.photos && node.location.photos.length > 1 && (
-                                                                    <button
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setSelectedPhoto({
-                                                                                url: getPhotoUrl(node.location.photos[0], 800) || '',
-                                                                                title: node.title
-                                                                            });
-                                                                        }}
-                                                                        className="h-9 w-9 rounded-md bg-secondary hover:bg-secondary/80 transition-colors flex items-center justify-center touch-manipulation active:scale-95"
-                                                                        title={`${node.location.photos.length} photos`}
-                                                                    >
-                                                                        <ImageIcon className="w-4 h-4" />
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            ))}
-                                        </motion.div>
                                     )}
                                 </div>
-                            </motion.div>
+                            </div>
                         )}
-                    </AnimatePresence>
                 </CardContent>
             </div>
         </Card>
@@ -1002,22 +911,133 @@ export function DayCard({
             />
         )}
 
-        {/* Photo Viewer Modal */}
+        {/* Photo Gallery Modal - Proper Modal with Fixed Bounds */}
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-            <DialogContent className="max-w-4xl p-0 overflow-hidden">
+            <DialogContent className="max-w-4xl p-0 overflow-hidden max-h-[90vh]">
                 {selectedPhoto && (
-                    <div className="relative">
-                        <img
-                            src={selectedPhoto.url}
-                            alt={selectedPhoto.title}
-                            className="w-full h-auto max-h-[80vh] object-contain"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+                    <div className="relative bg-black flex flex-col">
+                        {/* Main Photo Container - Swipeable */}
+                        <div 
+                            className="relative flex items-center justify-center overflow-hidden touch-pan-y"
+                            style={{ height: '60vh', minHeight: '300px', maxHeight: '400px' }}
+                            onTouchStart={(e) => {
+                                const touch = e.touches[0];
+                                (e.currentTarget as any).touchStartX = touch.clientX;
                             }}
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-                            <p className="text-white font-medium text-sm">{selectedPhoto.title}</p>
+                            onTouchEnd={(e) => {
+                                const touch = e.changedTouches[0];
+                                const startX = (e.currentTarget as any).touchStartX;
+                                const diff = touch.clientX - startX;
+                                
+                                // Swipe threshold: 50px
+                                if (Math.abs(diff) > 50 && selectedPhoto.photos.length > 1) {
+                                    if (diff > 0) {
+                                        // Swipe right - previous photo
+                                        setSelectedPhoto({
+                                            ...selectedPhoto,
+                                            currentIndex: (selectedPhoto.currentIndex - 1 + selectedPhoto.photos.length) % selectedPhoto.photos.length
+                                        });
+                                    } else {
+                                        // Swipe left - next photo
+                                        setSelectedPhoto({
+                                            ...selectedPhoto,
+                                            currentIndex: (selectedPhoto.currentIndex + 1) % selectedPhoto.photos.length
+                                        });
+                                    }
+                                }
+                            }}
+                        >
+                            <img
+                                src={getPhotoUrl(selectedPhoto.photos[selectedPhoto.currentIndex], 1200) || ''}
+                                alt={`${selectedPhoto.title} - Photo ${selectedPhoto.currentIndex + 1}`}
+                                className="w-full h-full object-contain select-none"
+                                draggable={false}
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f0f0f0" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
+                                }}
+                            />
+                            
+                            {/* Navigation Arrows - Desktop only */}
+                            {selectedPhoto.photos.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPhoto({
+                                                ...selectedPhoto,
+                                                currentIndex: (selectedPhoto.currentIndex - 1 + selectedPhoto.photos.length) % selectedPhoto.photos.length
+                                            });
+                                        }}
+                                        className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-sm items-center justify-center text-white transition-all active:scale-95"
+                                        aria-label="Previous photo"
+                                    >
+                                        <ChevronDown className="w-7 h-7 rotate-90" />
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPhoto({
+                                                ...selectedPhoto,
+                                                currentIndex: (selectedPhoto.currentIndex + 1) % selectedPhoto.photos.length
+                                            });
+                                        }}
+                                        className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-sm items-center justify-center text-white transition-all active:scale-95"
+                                        aria-label="Next photo"
+                                    >
+                                        <ChevronDown className="w-7 h-7 -rotate-90" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                        
+                        {/* Bottom Section - Info, Description and Thumbnails */}
+                        <div className="bg-black p-4 max-h-[30vh] overflow-y-auto">
+                            {/* Title and Counter */}
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                                <h3 className="text-white font-semibold text-base flex-1">
+                                    {selectedPhoto.title}
+                                </h3>
+                                {selectedPhoto.photos.length > 1 && (
+                                    <p className="text-white/80 text-sm font-medium whitespace-nowrap">
+                                        {selectedPhoto.currentIndex + 1} / {selectedPhoto.photos.length}
+                                    </p>
+                                )}
+                            </div>
+                            
+                            {/* Description */}
+                            {selectedPhoto.description && (
+                                <p className="text-white/80 text-sm leading-relaxed mb-3">
+                                    {selectedPhoto.description}
+                                </p>
+                            )}
+                            
+                            {/* Thumbnail Strip - Inside Modal */}
+                            {selectedPhoto.photos.length > 1 && (
+                                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                                    {selectedPhoto.photos.map((photo, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedPhoto({ ...selectedPhoto, currentIndex: index });
+                                            }}
+                                            className={cn(
+                                                "w-16 h-16 rounded-md overflow-hidden flex-shrink-0 transition-all active:scale-95",
+                                                index === selectedPhoto.currentIndex 
+                                                    ? "ring-2 ring-white" 
+                                                    : "opacity-50 hover:opacity-75"
+                                            )}
+                                        >
+                                            <img
+                                                src={getPhotoUrl(photo, 200) || ''}
+                                                alt={`Thumbnail ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
