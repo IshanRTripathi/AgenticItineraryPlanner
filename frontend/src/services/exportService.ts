@@ -134,10 +134,34 @@ class ExportService {
       return icons[type] || '📍';
     };
 
-    // Calculate trip statistics
+    // Calculate trip statistics - using correct field names from backend
     const totalActivities = days.reduce((sum, day) => sum + (day.nodes?.length || 0), 0);
-    const totalCost = days.reduce((sum, day) => sum + (day.totals?.cost || 0), 0);
-    const totalDistance = days.reduce((sum, day) => sum + (day.totals?.distanceKm || 0), 0);
+    
+    // Use day.totalCost (backend field) not day.totals.cost
+    const totalCost = days.reduce((sum, day) => {
+      const dayCost = (day as any).totalCost || 0;
+      console.log(`Day ${(day as any).dayNumber} cost:`, dayCost);
+      return sum + dayCost;
+    }, 0);
+    console.log('Total cost calculated:', totalCost);
+    
+    // Calculate distance from edges (transit between nodes)
+    const totalDistance = days.reduce((sum, day) => {
+      // Try day.totals.distanceKm first
+      if (day.totals?.distanceKm) {
+        return sum + day.totals.distanceKm;
+      }
+      
+      // Fallback: calculate from edges
+      const edgeDistance = (day.edges || []).reduce((edgeSum, edge) => {
+        return edgeSum + (edge.transitInfo?.distanceKm || 0);
+      }, 0);
+      
+      console.log(`Day ${day.dayNumber} distance:`, edgeDistance, 'from', day.edges?.length || 0, 'edges');
+      return sum + edgeDistance;
+    }, 0);
+    console.log('Total distance calculated:', totalDistance);
+    
     const bookedCount = days.reduce((sum, day) => 
       sum + (day.nodes?.filter(n => n.bookingRef).length || 0), 0
     );
@@ -278,8 +302,8 @@ class ExportService {
               <p style="color: #666; font-size: 16px; margin: 0;">${formatDate(day.date)}</p>
             </div>
             <div style="text-align: right;">
-              ${day.totals?.cost ? `
-                <div style="font-size: 24px; font-weight: 700; color: #002B5B;">${itinerary.currency} ${day.totals.cost.toLocaleString()}</div>
+              ${(day as any).totalCost ? `
+                <div style="font-size: 24px; font-weight: 700; color: #002B5B;">${itinerary.currency} ${((day as any).totalCost).toLocaleString()}</div>
                 <div style="font-size: 13px; color: #666;">Daily Budget</div>
               ` : ''}
             </div>
@@ -287,12 +311,18 @@ class ExportService {
 
           <!-- Day Stats -->
           <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            ${day.totals?.distanceKm ? `
-              <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #f8f9fa; border-radius: 20px;">
-                <span style="font-size: 16px;">🗺️</span>
-                <span style="font-size: 14px; color: #666; font-weight: 500;">${day.totals.distanceKm.toFixed(1)} km</span>
-              </div>
-            ` : ''}
+            ${(() => {
+              // Calculate day distance from edges
+              const dayDistance = day.totals?.distanceKm || 
+                (day.edges || []).reduce((sum, edge) => sum + (edge.transitInfo?.distanceKm || 0), 0);
+              
+              return dayDistance > 0 ? `
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #f8f9fa; border-radius: 20px;">
+                  <span style="font-size: 16px;">🗺️</span>
+                  <span style="font-size: 14px; color: #666; font-weight: 500;">${dayDistance.toFixed(1)} km</span>
+                </div>
+              ` : '';
+            })()}
             ${day.totals?.durationHr ? `
               <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #f8f9fa; border-radius: 20px;">
                 <span style="font-size: 16px;">⏱️</span>
@@ -426,7 +456,7 @@ class ExportService {
     `)
       .join('');
 
-    // Generate budget summary page
+    // Generate budget summary page with chart
     const categoryBreakdown: Record<string, number> = {};
     days.forEach(day => {
       (day.nodes || []).forEach(node => {
@@ -435,10 +465,12 @@ class ExportService {
                         nodeType === 'transport' || nodeType === 'transit' ? 'Transportation' :
                         nodeType === 'meal' ? 'Food & Dining' :
                         'Activities';
-        const cost = node.cost?.amount || 0;
+        const cost = node.cost?.amount || (node.cost as any)?.amountPerPerson || 0;
         categoryBreakdown[category] = (categoryBreakdown[category] || 0) + cost;
       });
     });
+    
+    console.log('Category breakdown:', categoryBreakdown);
 
     const budgetPageHTML = totalCost > 0 ? `
       <div class="budget-page" style="page-break-before: always; padding: 60px 80px;">
@@ -464,9 +496,46 @@ class ExportService {
           </div>
         </div>
 
-        <!-- Category Breakdown -->
+        <!-- Category Breakdown with Pie Chart -->
         <div style="margin-bottom: 40px;">
           <h3 style="color: #002B5B; font-size: 24px; font-weight: 700; margin: 0 0 20px 0;">Spending by Category</h3>
+          
+          <!-- Pie Chart -->
+          <div style="display: flex; gap: 40px; align-items: center; margin-bottom: 30px;">
+            <div style="flex-shrink: 0;">
+              ${this.generatePieChartSVG(categoryBreakdown, totalCost)}
+            </div>
+            <div style="flex: 1;">
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                ${Object.entries(categoryBreakdown)
+                  .filter(([, amount]) => amount > 0)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([category, amount]) => {
+                    const percentage = (amount / totalCost) * 100;
+                    const colors: Record<string, string> = {
+                      'Accommodation': '#8B5CF6',
+                      'Transportation': '#F5C542',
+                      'Food & Dining': '#10B981',
+                      'Activities': '#3B82F6',
+                    };
+                    const color = colors[category] || '#6B7280';
+                    
+                    return `
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 16px; height: 16px; background: ${color}; border-radius: 3px; flex-shrink: 0;"></div>
+                        <div style="flex: 1; min-width: 0;">
+                          <div style="font-size: 13px; font-weight: 600; color: #002B5B;">${category}</div>
+                          <div style="font-size: 12px; color: #666;">${itinerary.currency} ${amount.toLocaleString()} (${percentage.toFixed(1)}%)</div>
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join('')}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Progress Bars -->
           <div style="display: flex; flex-direction: column; gap: 15px;">
             ${Object.entries(categoryBreakdown)
               .sort(([, a], [, b]) => b - a)
@@ -506,7 +575,7 @@ class ExportService {
             ${days.map(day => `
               <div style="padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; text-align: center;">
                 <div style="font-size: 14px; color: #666; font-weight: 600; margin-bottom: 8px;">Day ${day.dayNumber}</div>
-                <div style="font-size: 24px; font-weight: 700; color: #002B5B;">${itinerary.currency} ${(day.totals?.cost || 0).toLocaleString()}</div>
+                <div style="font-size: 24px; font-weight: 700; color: #002B5B;">${itinerary.currency} ${((day as any).totalCost || 0).toLocaleString()}</div>
               </div>
             `).join('')}
           </div>
@@ -525,9 +594,20 @@ class ExportService {
               body { margin: 0; }
               .no-print { display: none; }
               @page { margin: 0; size: A4; }
+              
+              /* Force background graphics to print */
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
             }
             * {
               box-sizing: border-box;
+              /* Enable background graphics for PDF */
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              color-adjust: exact;
             }
             body {
               font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
@@ -574,6 +654,60 @@ class ExportService {
           </div>
         </body>
       </html>
+    `;
+  }
+
+  /**
+   * Generate SVG pie chart
+   */
+  private generatePieChartSVG(categories: Record<string, number>, total: number): string {
+    const colors: Record<string, string> = {
+      'Accommodation': '#8B5CF6',
+      'Transportation': '#F5C542',
+      'Food & Dining': '#10B981',
+      'Activities': '#3B82F6',
+    };
+    
+    const size = 200;
+    const center = size / 2;
+    const radius = 80;
+    
+    let currentAngle = -90; // Start from top
+    const slices: string[] = [];
+    
+    Object.entries(categories)
+      .filter(([, amount]) => amount > 0)
+      .sort(([, a], [, b]) => b - a)
+      .forEach(([category, amount]) => {
+        const percentage = amount / total;
+        const angle = percentage * 360;
+        const endAngle = currentAngle + angle;
+        
+        // Calculate arc path
+        const startX = center + radius * Math.cos((currentAngle * Math.PI) / 180);
+        const startY = center + radius * Math.sin((currentAngle * Math.PI) / 180);
+        const endX = center + radius * Math.cos((endAngle * Math.PI) / 180);
+        const endY = center + radius * Math.sin((endAngle * Math.PI) / 180);
+        
+        const largeArcFlag = angle > 180 ? 1 : 0;
+        
+        const pathData = [
+          `M ${center} ${center}`,
+          `L ${startX} ${startY}`,
+          `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+          'Z'
+        ].join(' ');
+        
+        const color = colors[category] || '#6B7280';
+        slices.push(`<path d="${pathData}" fill="${color}" stroke="white" stroke-width="2"/>`);
+        
+        currentAngle = endAngle;
+      });
+    
+    return `
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+        ${slices.join('\n')}
+      </svg>
     `;
   }
 
