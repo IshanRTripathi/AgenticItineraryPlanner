@@ -59,7 +59,7 @@ ai:
   provider: ${AI_PROVIDER:openrouter}
   model: ${AI_MODEL:qwen/qwen-2.5-72b-instruct:free}
   temperature: ${AI_TEMPERATURE:0.7}
-  max-tokens: ${AI_MAX_TOKENS:8192}
+  max-tokens: ${AI_MAX_TOKENS:65535}
   mock-mode: ${AI_MOCK_MODE:false}
 
 
@@ -67,13 +67,13 @@ openrouter:
   # Single key (backward compatibility)
   api-key: ${OPENROUTER_API_KEY:}
   # Multiple keys (JSON array format: ["key1","key2","key3"])
-  api-keys: ${OPENROUTER_API_KEYS:}
+  api-keys: ${OPENROUTER_API_KEYS:["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"]}
   base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
   timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:150}
 
 # Firestore Configuration
 firestore:
-  project-id: ${FIRESTORE_PROJECT_ID:}
+  project-id: ${FIRESTORE_PROJECT_ID:tripaiplanner-4c951}
   credentials: ${FIRESTORE_CREDENTIALS:}
   credentials-file: ${FIRESTORE_CREDENTIALS_FILE:}
   emulator-host: ${FIRESTORE_EMULATOR_HOST:localhost:8080}

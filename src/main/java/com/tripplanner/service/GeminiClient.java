@@ -66,6 +66,8 @@ public class GeminiClient implements AiClient {
     @PostConstruct
     public void initialize() {
         logger.info("Initializing Gemini client with model: {}", modelName);
+        logger.info("API Key Rotation Service available: {}", apiKeyRotationService != null);
+        logger.info("Available Gemini keys: {}", apiKeyRotationService != null ? apiKeyRotationService.getAvailableKeyCount("gemini") : 0);
         
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
@@ -199,17 +201,28 @@ public class GeminiClient implements AiClient {
                 circuitBreaker.recordSuccess();
                 apiKeyRotationService.reportSuccess("gemini", apiKey);
             } else {
-                // Make HTTP request to Gemini API with 150 second timeout
+                // Make HTTP request to Gemini API with 45 second timeout (reduced for faster failover)
                 String apiUrl = GEMINI_API_BASE_URL + modelName + ":generateContent";
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "?key=" + apiKey))
                         .header("Content-Type", "application/json")
-                        .timeout(Duration.ofSeconds(150))
+                        .timeout(Duration.ofSeconds(45))  // Reduced from 150s to 45 for faster failover
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                         .build();
                 
-                logger.info("Sending request to Gemini API...");
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                logger.info("Sending request to Gemini API with 45s timeout...");
+                long startTime = System.currentTimeMillis();
+                
+                HttpResponse<String> response;
+                try {
+                    response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                    long duration = System.currentTimeMillis() - startTime;
+                    logger.info("Received response from Gemini API in {}ms", duration);
+                } catch (java.net.http.HttpTimeoutException e) {
+                    long duration = System.currentTimeMillis() - startTime;
+                    logger.error("Gemini API request timed out after {}ms", duration);
+                    throw e;
+                }
                 
                 logger.info("=== GEMINI API RESPONSE ===");
                 logger.info("Status Code: {}", response.statusCode());
