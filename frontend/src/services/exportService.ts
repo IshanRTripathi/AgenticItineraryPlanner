@@ -208,8 +208,8 @@ class ExportService {
         <!-- Gradient Overlay -->
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to bottom, rgba(0,43,91,0.3) 0%, rgba(0,43,91,0.8) 100%);"></div>
 
-        <!-- Content -->
-        <div style="position: relative; z-index: 10; flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 60px 80px;">
+        <!-- Content - Positioned higher to overlay on images -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 40%; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; padding: 60px 80px;">
           <!-- Header -->
           <div>
             <div style="display: inline-block; padding: 8px 20px; background: rgba(245,197,66,0.95); border-radius: 20px; margin-bottom: 30px;">
@@ -218,22 +218,22 @@ class ExportService {
           </div>
 
           <!-- Main Title -->
-          <div style="margin-top: auto; margin-bottom: 40px;">
+          <div style="margin-top: auto;">
             <h1 style="color: white; font-size: 72px; font-weight: 800; margin: 0 0 20px 0; line-height: 1.1; text-shadow: 0 4px 20px rgba(0,0,0,0.3);">
               ${destination}
             </h1>
             <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">📅</span>
-                <span style="color: white; font-size: 20px; font-weight: 500;">${formatDateShort(startDate)} - ${formatDateShort(endDate)}</span>
+                <span style="color: white; font-size: 20px; font-weight: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">${formatDateShort(startDate)} - ${formatDateShort(endDate)}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">🗓️</span>
-                <span style="color: white; font-size: 20px; font-weight: 500;">${days.length} Days</span>
+                <span style="color: white; font-size: 20px; font-weight: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">${days.length} Days</span>
               </div>
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">🎯</span>
-                <span style="color: white; font-size: 20px; font-weight: 500;">${totalActivities} Activities</span>
+                <span style="color: white; font-size: 20px; font-weight: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">${totalActivities} Activities</span>
               </div>
             </div>
           </div>
@@ -428,9 +428,14 @@ class ExportService {
                 ` : ''}
 
                 <!-- Google Maps Link -->
-                ${node.location?.placeId ? `
+                ${node.location?.placeId || node.location?.coordinates ? `
                   <div style="margin-top: 12px;">
-                    <a href="https://www.google.com/maps/place/?q=place_id:${node.location.placeId}" 
+                    <a href="${node.location.placeId 
+                      ? `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${node.location.placeId}`
+                      : `https://www.google.com/maps/search/?api=1&query=${node.location.coordinates.lat},${node.location.coordinates.lng}`
+                    }" 
+                       target="_blank"
+                       rel="noopener noreferrer"
                        style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: #002B5B; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600;">
                       <span>🗺️</span>
                       <span>View on Google Maps</span>

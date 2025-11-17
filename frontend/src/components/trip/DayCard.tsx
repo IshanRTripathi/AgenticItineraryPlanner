@@ -117,9 +117,16 @@ const formatReviewCount = (count?: number) => {
     return count.toString();
 };
 
-const getGoogleMapsUrl = (placeId?: string): string | undefined => {
-    if (!placeId) return undefined;
-    return `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+const getGoogleMapsUrl = (placeId?: string, coordinates?: { lat: number; lng: number }): string | undefined => {
+    if (placeId) {
+        // Use Google Maps API format that works better on mobile
+        return `https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${placeId}`;
+    }
+    if (coordinates) {
+        // Fallback to coordinates
+        return `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
+    }
+    return undefined;
 };
 
 // Check if activity type should show booking button
@@ -847,14 +854,15 @@ export function DayCard({
                                                                                         {t('components.dayCard.bookNow')}
                                                                                     </Button>
                                                                                 )}
-                                                                                {node.location?.placeId && (
+                                                                                {(node.location?.placeId || node.location?.coordinates) && (
                                                                                     <Button
                                                                                         size="sm"
                                                                                         variant="outline"
                                                                                         className="h-9 sm:w-auto w-9 p-0 sm:px-3 shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
-                                                                                            window.open(getGoogleMapsUrl(node.location.placeId), '_blank');
+                                                                                            const url = getGoogleMapsUrl(node.location?.placeId, node.location?.coordinates);
+                                                                                            if (url) window.open(url, '_blank', 'noopener,noreferrer');
                                                                                         }}
                                                                                         title={t('components.dayCard.viewOnMap')}
                                                                                     >
