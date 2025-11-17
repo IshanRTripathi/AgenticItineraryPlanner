@@ -135,7 +135,9 @@
       "enriched": "সমৃদ্ধ করা হয়েছে",
       "limitedData": "সীমিত ডেটা",
       "pending": "মুলতুবি"
-    }
+    },
+    "readMore": "আরও পড়ুন",
+    "readLess": "কম পড়ুন"
   },
   "bottomNav": {
     "home": "হোম",

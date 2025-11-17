@@ -130,7 +130,9 @@
       "enriched": "ಸಮೃದ್ಧಗೊಳಿಸಲಾಗಿದೆ",
       "limitedData": "ಸೀಮಿತ ಡೇಟಾ",
       "pending": "ಬಾಕಿ ಉಳಿದಿದೆ"
-    }
+    },
+    "readMore": "ಇನ್ನಷ್ಟು ಓದಿ",
+    "readLess": "ಕಡಿಮೆ ಓದಿ"
   },
   "bottomNav": {
     "home": "ಮುಖಪುಟ",

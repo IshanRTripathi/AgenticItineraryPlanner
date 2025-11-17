@@ -42,6 +42,37 @@ import { buildHotelUrl, buildActivityUrl, buildBusUrl, buildTrainUrl } from '@/u
 import { BookingModal } from '@/components/booking/BookingModal';
 import { useTranslation } from '@/i18n';
 
+// Expandable Description Component
+function ExpandableDescription({ description }: { description: string }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const { t } = useTranslation();
+    
+    // Check if description is long enough to need expansion (more than ~150 characters)
+    const needsExpansion = description.length > 150;
+    
+    return (
+        <div className="mb-3">
+            <p className={cn(
+                "text-sm text-gray-600 leading-relaxed",
+                !isExpanded && needsExpansion && "line-clamp-2"
+            )}>
+                {description}
+            </p>
+            {needsExpansion && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}
+                    className="text-xs text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                >
+                    {isExpanded ? t('components.dayCard.readLess') : t('components.dayCard.readMore')}
+                </button>
+            )}
+        </div>
+    );
+}
+
 interface DayCardProps {
     day: any; // NormalizedDay type
     isExpanded: boolean;
@@ -831,9 +862,7 @@ export function DayCard({
 
                                                                                 {/* Description */}
                                                                                 {node.details?.description && (
-                                                                                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
-                                                                                        {node.details.description}
-                                                                                    </p>
+                                                                                    <ExpandableDescription description={node.details.description} />
                                                                                 )}
 
                                                                                 {/* Actions */}

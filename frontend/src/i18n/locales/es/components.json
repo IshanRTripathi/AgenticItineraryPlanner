@@ -135,7 +135,9 @@
       "enriched": "Enriquecido",
       "limitedData": "Datos limitados",
       "pending": "Pendiente"
-    }
+    },
+    "readMore": "Leer más",
+    "readLess": "Leer menos"
   },
   "chatTab": {
     "title": "Asistente de Viaje IA",

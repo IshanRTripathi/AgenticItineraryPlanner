@@ -135,7 +135,9 @@
       "enriched": "Enriched",
       "limitedData": "Limited data",
       "pending": "Pending"
-    }
+    },
+    "readMore": "Read more",
+    "readLess": "Read less"
   },
   "bottomNav": {
     "home": "Home",

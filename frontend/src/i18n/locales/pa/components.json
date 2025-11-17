@@ -130,7 +130,9 @@
       "enriched": "ਸਮ੍ਰਿੱਧ ਕੀਤਾ ਗਿਆ",
       "limitedData": "ਸੀਮਤ ਡੇਟਾ",
       "pending": "ਬਕਾਇਆ"
-    }
+    },
+    "readMore": "ਹੋਰ ਪੜ੍ਹੋ",
+    "readLess": "ਘੱਟ ਪੜ੍ਹੋ"
   },
   "bottomNav": {
     "home": "ਹੋਮ",

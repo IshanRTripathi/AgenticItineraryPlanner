@@ -135,7 +135,9 @@
       "enriched": "समृद्ध",
       "limitedData": "सीमित डेटा",
       "pending": "लंबित"
-    }
+    },
+    "readMore": "और पढ़ें",
+    "readLess": "कम पढ़ें"
   },
   "chatTab": {
     "title": "AI यात्रा सहायक",
