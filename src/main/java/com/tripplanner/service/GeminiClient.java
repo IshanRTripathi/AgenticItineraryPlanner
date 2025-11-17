@@ -22,17 +22,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ai.CircuitBreaker;
+import com.tripplanner.service.ai.ApiKeyRotationService;
 import com.tripplanner.service.ai.exception.TransientAiException;
 import com.tripplanner.service.ai.exception.PermanentAiException;
 
 /**
  * Service for interacting with Google's Gemini AI model via REST API.
+ * Supports multiple API keys with automatic rotation and failover.
  */
 @Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-    value = "google.ai.api-key",
-    matchIfMissing = false
-)
 public class GeminiClient implements AiClient {
     
     private static final Logger logger = LoggerFactory.getLogger(GeminiClient.class);
@@ -43,8 +41,7 @@ public class GeminiClient implements AiClient {
     private static final int INITIAL_RETRY_DELAY_MS = 2000; // 2 seconds
     private static final int MAX_RETRY_DELAY_MS = 10000; // 10 seconds
     
-    @Value("${google.ai.api-key}")
-    private String apiKey;
+    private final ApiKeyRotationService apiKeyRotationService;
     
     @Value("${google.ai.model:gemini-2.5-flash}")
     private String modelName;
@@ -61,6 +58,10 @@ public class GeminiClient implements AiClient {
     private HttpClient httpClient;
     private ObjectMapper objectMapper;
     private CircuitBreaker circuitBreaker;
+    
+    public GeminiClient(ApiKeyRotationService apiKeyRotationService) {
+        this.apiKeyRotationService = apiKeyRotationService;
+    }
     
     @PostConstruct
     public void initialize() {
@@ -112,6 +113,19 @@ public class GeminiClient implements AiClient {
             );
         }
         
+        // Get working API key from rotation service
+        String apiKey;
+        try {
+            apiKey = apiKeyRotationService.getWorkingKey("gemini");
+        } catch (RuntimeException e) {
+            logger.error("Failed to get working Gemini API key: {}", e.getMessage());
+            throw new TransientAiException(
+                "No available Gemini API keys: " + e.getMessage(),
+                "GeminiClient",
+                503
+            );
+        }
+        
         try {
             if (attemptNumber == 0) {
                 logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
@@ -138,6 +152,7 @@ public class GeminiClient implements AiClient {
                 generatedText = getMockResponse(userPrompt, systemPrompt);
                 logger.info("Mock response length: {}", generatedText.length());
                 circuitBreaker.recordSuccess();
+                apiKeyRotationService.reportSuccess("gemini", apiKey);
             } else {
                 // Make HTTP request to Gemini API with 150 second timeout
                 String apiUrl = GEMINI_API_BASE_URL + modelName + ":generateContent";
@@ -159,6 +174,7 @@ public class GeminiClient implements AiClient {
                 // Classify errors and throw typed exceptions
                 if (isTransientError(response.statusCode())) {
                     circuitBreaker.recordFailure();
+                    apiKeyRotationService.reportFailure("gemini", apiKey);
                     logger.error("Gemini API transient error: {} - {}", response.statusCode(), response.body());
                     throw new TransientAiException(
                         "Gemini API returned transient error: " + response.statusCode(),
@@ -168,7 +184,7 @@ public class GeminiClient implements AiClient {
                 }
                 
                 if (isPermanentError(response.statusCode())) {
-                    // Don't count permanent errors against circuit breaker
+                    // Don't count permanent errors against circuit breaker or key rotation
                     logger.error("Gemini API permanent error: {} - {}", response.statusCode(), response.body());
                     throw new PermanentAiException(
                         "Gemini API returned permanent error: " + response.statusCode(),
@@ -179,6 +195,7 @@ public class GeminiClient implements AiClient {
                 
                 if (response.statusCode() != 200) {
                     circuitBreaker.recordFailure();
+                    apiKeyRotationService.reportFailure("gemini", apiKey);
                     logger.error("Gemini API unexpected error: {} - {}", response.statusCode(), response.body());
                     throw new TransientAiException(
                         "Gemini API returned unexpected status: " + response.statusCode(),
@@ -209,6 +226,7 @@ public class GeminiClient implements AiClient {
                         logger.info("=========================================");
                         
                         circuitBreaker.recordSuccess();
+                        apiKeyRotationService.reportSuccess("gemini", apiKey);
                     } else {
                         logger.warn("No parts found in response");
                         generatedText = "";
@@ -224,11 +242,16 @@ public class GeminiClient implements AiClient {
             return generatedText;
             
         } catch (TransientAiException | PermanentAiException e) {
-            // Re-throw typed exceptions as-is
+            // Re-throw typed exceptions as-is (key failure already reported above)
             throw e;
         } catch (IOException | InterruptedException e) {
-            // Network errors are transient
+            // Network errors are transient - report key failure
             circuitBreaker.recordFailure();
+            try {
+                apiKeyRotationService.reportFailure("gemini", apiKey);
+            } catch (Exception ex) {
+                logger.warn("Failed to report key failure: {}", ex.getMessage());
+            }
             logger.error("=== GEMINI NETWORK ERROR ===");
             logger.error("Error: {}", e.getMessage(), e);
             logger.error("============================");
@@ -239,8 +262,13 @@ public class GeminiClient implements AiClient {
                 e
             );
         } catch (Exception e) {
-            // Unknown errors are treated as transient
+            // Unknown errors are treated as transient - report key failure
             circuitBreaker.recordFailure();
+            try {
+                apiKeyRotationService.reportFailure("gemini", apiKey);
+            } catch (Exception ex) {
+                logger.warn("Failed to report key failure: {}", ex.getMessage());
+            }
             logger.error("=== GEMINI CONTENT GENERATION FAILED ===");
             logger.error("User Prompt: {}", userPrompt.length() > 100 ? userPrompt.substring(0, 100) + "..." : userPrompt);
             logger.error("Error: {}", e.getMessage(), e);
@@ -319,7 +347,7 @@ public class GeminiClient implements AiClient {
      */
     @Override
     public boolean isAvailable() {
-        return httpClient != null && apiKey != null && !apiKey.trim().isEmpty();
+        return httpClient != null && apiKeyRotationService.hasAvailableKeys("gemini");
     }
     
     /**

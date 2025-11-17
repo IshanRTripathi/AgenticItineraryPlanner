@@ -39,14 +39,17 @@ spring:
 
 google:
   ai:
+    # Single key (backward compatibility)
     api-key: ${GEMINI_API_KEY:}
+    # Multiple keys (JSON array format: ["key1","key2","key3"])
+    api-keys: ${GEMINI_API_KEYS:}
     model: ${GEMINI_MODEL:gemini-2.5-flash}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:65535}
     mock-mode: ${GEMINI_MOCK_MODE:false}
   places:
     api:
-      key: ${GOOGLE_PLACES_API_KEY:AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss}
+      key: ${GOOGLE_PLACES_API_KEY:}
     daily:
       limit: ${GOOGLE_PLACES_DAILY_LIMIT:1000}
     rate-limit:
@@ -61,13 +64,16 @@ ai:
 
 
 openrouter:
+  # Single key (backward compatibility)
   api-key: ${OPENROUTER_API_KEY:}
+  # Multiple keys (JSON array format: ["key1","key2","key3"])
+  api-keys: ${OPENROUTER_API_KEYS:}
   base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
   timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:150}
 
 # Firestore Configuration
 firestore:
-  project-id: ${FIRESTORE_PROJECT_ID:tripaiplanner-4c951}
+  project-id: ${FIRESTORE_PROJECT_ID:}
   credentials: ${FIRESTORE_CREDENTIALS:}
   credentials-file: ${FIRESTORE_CREDENTIALS_FILE:}
   emulator-host: ${FIRESTORE_EMULATOR_HOST:localhost:8080}

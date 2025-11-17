@@ -155,22 +155,22 @@ export function LoginPage() {
             </Button>
 
             {/* Divider */}
-            <div className="relative my-4">
+            {/* <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-white/20"></div>
               </div>
               <div className="relative flex justify-center text-xs">
                 <span className="px-2 bg-white/15 text-white/70 rounded-full">or</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Continue as Guest Link */}
-            <button
+            {/* <button
               onClick={handleContinueAsGuest}
               className="w-full text-center text-sm text-white/90 hover:text-white underline-offset-4 hover:underline transition-all duration-200 py-2 touch-manipulation"
             >
               Continue as Guest
-            </button>
+            </button> */}
           </div>
 
           {/* Feature Carousel - Compact */}
@@ -314,22 +314,22 @@ export function LoginPage() {
             </Button>
 
             {/* Divider */}
-            <div className="relative mb-6">
+            {/* <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-3 bg-white text-muted-foreground">or</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Continue as Guest Link */}
-            <button
+            {/* <button
               onClick={handleContinueAsGuest}
               className="w-full text-center text-base text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-all duration-200 py-2"
             >
               Continue as Guest
-            </button>
+            </button> */}
 
             {/* Privacy Notice */}
             <p className="mt-6 text-xs text-center text-muted-foreground">

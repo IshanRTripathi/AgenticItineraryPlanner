@@ -46,7 +46,9 @@ steps:
       '--set-env-vars', 'GCP_PROJECT_ID=${_GCP_PROJECT_ID}',
       '--set-env-vars', 'FRONTEND_URL=${_FRONTEND_URL}',
       '--set-secrets', 'GEMINI_API_KEY=_GEMINI_API_KEY:latest',
+      '--set-secrets', 'GEMINI_API_KEYS=_GEMINI_API_KEYS:latest',
       '--set-secrets', 'OPENROUTER_API_KEY=_OPENROUTER_API_KEY:latest',
+      '--set-secrets', 'OPENROUTER_API_KEYS=_OPENROUTER_API_KEYS:latest',
       '--set-secrets', 'GOOGLE_PLACES_API_KEY=_GOOGLE_PLACES_API_KEY:latest',
       '--set-secrets', 'firestore.credentials=_FIRESTORE_CREDENTIALS:latest'
     ]

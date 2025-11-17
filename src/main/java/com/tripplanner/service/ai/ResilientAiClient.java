@@ -103,6 +103,18 @@ public class ResilientAiClient implements AiClient {
                            i + 1, providerName, e.getStatusCode());
                 failures.add(e);
                 
+                // Add delay before trying next provider for transient errors
+                if (i < providers.size() - 1) {
+                    int delayMs = calculateProviderSwitchDelay(i, e.getStatusCode());
+                    logger.info("⏳ Waiting {}ms before trying next provider due to transient error", delayMs);
+                    try {
+                        Thread.sleep(delayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        logger.warn("Provider switch delay interrupted");
+                    }
+                }
+                
             } catch (PermanentAiException e) {
                 logger.error("❌ Provider {} ({}) has permanent error, skipping: {}", 
                             i + 1, providerName, e.getMessage());
@@ -178,6 +190,18 @@ public class ResilientAiClient implements AiClient {
                 logger.warn("⚠️ Provider {} ({}) has transient error ({}), trying next provider", 
                            i + 1, providerName, e.getStatusCode());
                 failures.add(e);
+                
+                // Add delay before trying next provider for transient errors
+                if (i < providers.size() - 1) {
+                    int delayMs = calculateProviderSwitchDelay(i, e.getStatusCode());
+                    logger.info("⏳ Waiting {}ms before trying next provider due to transient error", delayMs);
+                    try {
+                        Thread.sleep(delayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        logger.warn("Provider switch delay interrupted");
+                    }
+                }
                 
             } catch (PermanentAiException e) {
                 logger.error("❌ Provider {} ({}) has permanent error, skipping: {}", 
@@ -366,5 +390,38 @@ public class ResilientAiClient implements AiClient {
         }
         
         return details.toString();
+    }
+    
+    /**
+     * Calculate delay before switching to next provider after a transient error.
+     * Uses exponential backoff based on provider index and error type.
+     * 
+     * @param providerIndex Index of the failed provider
+     * @param statusCode HTTP status code of the error
+     * @return Delay in milliseconds
+     */
+    private int calculateProviderSwitchDelay(int providerIndex, int statusCode) {
+        // Base delays for different error types
+        int baseDelay;
+        if (statusCode == 429) {
+            // Rate limit - longer delay
+            baseDelay = 5000; // 5 seconds
+        } else if (statusCode == 503) {
+            // Service unavailable - medium delay
+            baseDelay = 3000; // 3 seconds
+        } else {
+            // Other transient errors - shorter delay
+            baseDelay = 2000; // 2 seconds
+        }
+        
+        // Add exponential backoff based on provider index
+        int delay = baseDelay * (int) Math.pow(1.5, providerIndex);
+        
+        // Add jitter (±20%) to avoid thundering herd
+        int jitter = (int) (delay * 0.2 * (Math.random() - 0.5));
+        delay += jitter;
+        
+        // Cap at 15 seconds
+        return Math.min(delay, 15000);
     }
 }

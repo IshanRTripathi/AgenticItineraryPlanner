@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ai.CircuitBreaker;
+import com.tripplanner.service.ai.ApiKeyRotationService;
 import com.tripplanner.service.ai.exception.TransientAiException;
 import com.tripplanner.service.ai.exception.PermanentAiException;
 import jakarta.annotation.PostConstruct;
@@ -19,11 +20,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+/**
+ * OpenRouter AI client with support for multiple API keys and automatic rotation.
+ */
 @Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-		value = "openrouter.api-key",
-		matchIfMissing = false
-)
 public class OpenRouterClient implements AiClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(OpenRouterClient.class);
@@ -31,8 +31,7 @@ public class OpenRouterClient implements AiClient {
 	@Value("${openrouter.base-url:https://openrouter.ai/api/v1}")
 	private String baseUrl;
 
-	@Value("${openrouter.api-key:}")
-	private String apiKey;
+	private final ApiKeyRotationService apiKeyRotationService;
 
 
 	@Value("${ai.model:}")
@@ -54,13 +53,17 @@ public class OpenRouterClient implements AiClient {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private CircuitBreaker circuitBreaker;
 
+	public OpenRouterClient(ApiKeyRotationService apiKeyRotationService) {
+		this.apiKeyRotationService = apiKeyRotationService;
+	}
+
 	@PostConstruct
 	public void initialize() {
 		this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
 		this.circuitBreaker = new CircuitBreaker("OpenRouterClient");
-        String keyStatus = (apiKey == null || apiKey.isBlank()) ? "MISSING" : ("SET(len=" + apiKey.trim().length() + ")");
-        logger.info("Initialized OpenRouter client with model: {} | apiKey={}",
-                modelName, keyStatus);
+		int keyCount = apiKeyRotationService.getAvailableKeyCount("openrouter");
+        logger.info("Initialized OpenRouter client with model: {} | Available keys: {}",
+                modelName, keyCount);
 	}
 
 	@PreDestroy
@@ -80,6 +83,19 @@ public class OpenRouterClient implements AiClient {
 			);
 		}
 		
+		// Get working API key from rotation service
+		String apiKey;
+		try {
+			apiKey = apiKeyRotationService.getWorkingKey("openrouter");
+		} catch (RuntimeException e) {
+			logger.error("Failed to get working OpenRouter API key: {}", e.getMessage());
+			throw new TransientAiException(
+				"No available OpenRouter API keys: " + e.getMessage(),
+				"OpenRouterClient",
+				503
+			);
+		}
+		
 		logger.info("🤖 OpenRouterClient: Starting content generation");
 		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
 		logger.debug("Circuit Breaker State: {}", circuitBreaker.getState());
@@ -90,6 +106,7 @@ public class OpenRouterClient implements AiClient {
 			if (mockMode) {
 				logger.info("OpenRouter mock mode enabled; returning empty response");
 				circuitBreaker.recordSuccess();
+				apiKeyRotationService.reportSuccess("openrouter", apiKey);
 				return "";
 			}
 
@@ -120,6 +137,7 @@ public class OpenRouterClient implements AiClient {
 			// Classify errors and throw typed exceptions
 			if (isTransientError(response.statusCode())) {
 				circuitBreaker.recordFailure();
+				apiKeyRotationService.reportFailure("openrouter", apiKey);
 				logger.error("❌ OpenRouter API transient error: {} - {}", response.statusCode(), response.body());
 				throw new TransientAiException(
 					"OpenRouter API returned transient error: " + response.statusCode(),
@@ -129,7 +147,7 @@ public class OpenRouterClient implements AiClient {
 			}
 			
 			if (isPermanentError(response.statusCode())) {
-				// Don't count permanent errors against circuit breaker
+				// Don't count permanent errors against circuit breaker or key rotation
 				logger.error("❌ OpenRouter API permanent error: {} - {}", response.statusCode(), response.body());
 				throw new PermanentAiException(
 					"OpenRouter API returned permanent error: " + response.statusCode(),
@@ -140,6 +158,7 @@ public class OpenRouterClient implements AiClient {
 			
 			if (response.statusCode() != 200) {
 				circuitBreaker.recordFailure();
+				apiKeyRotationService.reportFailure("openrouter", apiKey);
 				logger.error("❌ OpenRouter API unexpected error: {} - {}", response.statusCode(), response.body());
 				throw new TransientAiException(
 					"OpenRouter API returned unexpected status: " + response.statusCode(),
@@ -158,6 +177,7 @@ public class OpenRouterClient implements AiClient {
 					String content = message.get("content").asText("");
 					logger.info("✅ OpenRouter content generation successful - {} chars returned", content.length());
 					circuitBreaker.recordSuccess();
+					apiKeyRotationService.reportSuccess("openrouter", apiKey);
 					return content;
 				}
 			}
@@ -165,13 +185,19 @@ public class OpenRouterClient implements AiClient {
 			logger.warn("❌ OpenRouter returned empty content - no valid choices found");
 			logger.debug("Response structure: {}", root.toString());
 			circuitBreaker.recordSuccess(); // Empty response is still a success
+			apiKeyRotationService.reportSuccess("openrouter", apiKey);
 			return "";
 		} catch (TransientAiException | PermanentAiException e) {
-			// Re-throw typed exceptions as-is
+			// Re-throw typed exceptions as-is (key failure already reported above)
 			throw e;
 		} catch (java.io.IOException | InterruptedException e) {
 			// Network errors are transient
 			circuitBreaker.recordFailure();
+			try {
+				apiKeyRotationService.reportFailure("openrouter", apiKey);
+			} catch (Exception ex) {
+				logger.warn("Failed to report key failure: {}", ex.getMessage());
+			}
 			logger.error("❌ OpenRouter network error: {}", e.getMessage(), e);
 			throw new TransientAiException(
 				"Network error calling OpenRouter: " + e.getMessage(),
@@ -182,6 +208,11 @@ public class OpenRouterClient implements AiClient {
 		} catch (Exception e) {
 			// Unknown errors are treated as transient
 			circuitBreaker.recordFailure();
+			try {
+				apiKeyRotationService.reportFailure("openrouter", apiKey);
+			} catch (Exception ex) {
+				logger.warn("Failed to report key failure: {}", ex.getMessage());
+			}
 			logger.error("❌ OpenRouter content generation failed: {}", e.getMessage(), e);
 			logger.error("Provider: OpenRouterClient, Model: {}, Available: {}", modelName, isAvailable());
 			logger.error("Configuration - Base URL: {}, Timeout: {}s, Mock mode: {}", baseUrl, timeoutSeconds, mockMode);
@@ -196,6 +227,15 @@ public class OpenRouterClient implements AiClient {
 
 	@Override
 	public String generateStructuredContent(String userPrompt, String jsonSchema, String systemPrompt) {
+		// Get working API key from rotation service
+		String apiKey;
+		try {
+			apiKey = apiKeyRotationService.getWorkingKey("openrouter");
+		} catch (RuntimeException e) {
+			logger.error("Failed to get working OpenRouter API key: {}", e.getMessage());
+			throw new RuntimeException("No available OpenRouter API keys: " + e.getMessage(), e);
+		}
+		
 		logger.info("🤖 OpenRouterClient: Starting structured content generation");
 		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
 		logger.debug("User prompt length: {} chars", userPrompt != null ? userPrompt.length() : 0);
@@ -205,6 +245,7 @@ public class OpenRouterClient implements AiClient {
 		try {
 			if (mockMode) {
 				logger.info("OpenRouter mock mode enabled; returning mock itinerary");
+				apiKeyRotationService.reportSuccess("openrouter", apiKey);
 				return getMockItineraryResponse(userPrompt);
 			}
 
@@ -233,6 +274,7 @@ public class OpenRouterClient implements AiClient {
 			logger.info("OpenRouter API structured response: {} ({}ms)", response.statusCode(), responseTime);
 			
 			if (response.statusCode() != 200) {
+				apiKeyRotationService.reportFailure("openrouter", apiKey);
 				logger.error("❌ OpenRouter API structured error: {} - {}", response.statusCode(), response.body());
 				logger.error("Request that failed - endpoint: {}, payload size: {}", endpoint, body.length());
 				throw new RuntimeException("OpenRouter API error: " + response.statusCode());
@@ -247,14 +289,21 @@ public class OpenRouterClient implements AiClient {
 				if (message != null && message.get("content") != null) {
 					String content = message.get("content").asText("");
 					logger.info("✅ OpenRouter structured content generation successful - {} chars returned", content.length());
+					apiKeyRotationService.reportSuccess("openrouter", apiKey);
 					return content;
 				}
 			}
 			
 			logger.warn("❌ OpenRouter returned empty structured content - no valid choices found");
 			logger.debug("Response structure: {}", root.toString());
+			apiKeyRotationService.reportSuccess("openrouter", apiKey);
 			return "";
 		} catch (Exception e) {
+			try {
+				apiKeyRotationService.reportFailure("openrouter", apiKey);
+			} catch (Exception ex) {
+				logger.warn("Failed to report key failure: {}", ex.getMessage());
+			}
 			logger.error("❌ OpenRouter structured content generation failed: {}", e.getMessage(), e);
 			logger.error("Provider: OpenRouterClient, Model: {}, Available: {}", modelName, isAvailable());
 			logger.error("Configuration - Base URL: {}, Timeout: {}s, Mock mode: {}", baseUrl, timeoutSeconds, mockMode);
@@ -264,7 +313,7 @@ public class OpenRouterClient implements AiClient {
 
 	@Override
 	public boolean isAvailable() {
-		return httpClient != null && apiKey != null && !apiKey.isBlank();
+		return httpClient != null && apiKeyRotationService.hasAvailableKeys("openrouter");
 	}
 
 	@Override
