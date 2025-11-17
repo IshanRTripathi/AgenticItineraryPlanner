@@ -100,7 +100,7 @@ public class GeminiClient implements AiClient {
     
     /**
      * Generate content with circuit breaker and typed exception handling.
-     * Note: Retry logic is now handled by ResilientAiClient based on RetryStrategy.
+     * Tries all available API keys before giving up.
      */
     private String generateContentWithRetry(String userPrompt, String systemPrompt, int attemptNumber) {
         // Check circuit breaker before attempting request
@@ -113,31 +113,76 @@ public class GeminiClient implements AiClient {
             );
         }
         
-        // Get working API key from rotation service
-        String apiKey;
-        try {
-            apiKey = apiKeyRotationService.getWorkingKey("gemini");
-        } catch (RuntimeException e) {
-            logger.error("Failed to get working Gemini API key: {}", e.getMessage());
-            throw new TransientAiException(
-                "No available Gemini API keys: " + e.getMessage(),
-                "GeminiClient",
-                503
-            );
+        // Try all available keys before giving up
+        int maxKeyAttempts = 5; // Safety limit to prevent infinite loops
+        int keyAttempt = 0;
+        Exception lastException = null;
+        
+        while (keyAttempt < maxKeyAttempts) {
+            keyAttempt++;
+            
+            // Get working API key from rotation service
+            String apiKey;
+            try {
+                apiKey = apiKeyRotationService.getWorkingKey("gemini");
+                logger.info("Trying Gemini key attempt {}/{}", keyAttempt, maxKeyAttempts);
+            } catch (RuntimeException e) {
+                logger.error("No more available Gemini API keys after {} attempts: {}", keyAttempt - 1, e.getMessage());
+                if (lastException != null) {
+                    throw new TransientAiException(
+                        "All Gemini API keys exhausted: " + e.getMessage(),
+                        "GeminiClient",
+                        503,
+                        lastException
+                    );
+                } else {
+                    throw new TransientAiException(
+                        "No available Gemini API keys: " + e.getMessage(),
+                        "GeminiClient",
+                        503
+                    );
+                }
+            }
+            
+            try {
+                return attemptRequestWithKey(apiKey, userPrompt, systemPrompt, attemptNumber);
+            } catch (TransientAiException e) {
+                // Key failed with transient error - try next key
+                lastException = e;
+                logger.warn("Gemini key attempt {} failed with transient error, trying next key if available", keyAttempt);
+                continue;
+            } catch (PermanentAiException e) {
+                // Permanent error - don't try other keys
+                throw e;
+            }
+        }
+        
+        // Exhausted all attempts
+        throw new TransientAiException(
+            "Exhausted all Gemini key attempts",
+            "GeminiClient",
+            503,
+            lastException
+        );
+    }
+    
+    /**
+     * Attempt request with a specific API key.
+     */
+    private String attemptRequestWithKey(String apiKey, String userPrompt, String systemPrompt, int attemptNumber) {
+        if (attemptNumber == 0) {
+            logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
+            logger.info("Model: {}", modelName);
+            logger.info("Temperature: {}", temperature);
+            logger.info("Max Tokens: {}", maxTokens);
+            logger.info("Mock Mode: {}", mockMode);
+            logger.info("Circuit Breaker State: {}", circuitBreaker.getState());
+            logger.info("User Prompt Length: {}", userPrompt.length());
+            logger.info("System Prompt Length: {}", systemPrompt != null ? systemPrompt.length() : 0);
+            logger.info("User Prompt Preview: {}", userPrompt.length() > 200 ? userPrompt.substring(0, 200) + "..." : userPrompt);
         }
         
         try {
-            if (attemptNumber == 0) {
-                logger.info("=== GEMINI CONTENT GENERATION REQUEST ===");
-                logger.info("Model: {}", modelName);
-                logger.info("Temperature: {}", temperature);
-                logger.info("Max Tokens: {}", maxTokens);
-                logger.info("Mock Mode: {}", mockMode);
-                logger.info("Circuit Breaker State: {}", circuitBreaker.getState());
-                logger.info("User Prompt Length: {}", userPrompt.length());
-                logger.info("System Prompt Length: {}", systemPrompt != null ? systemPrompt.length() : 0);
-                logger.info("User Prompt Preview: {}", userPrompt.length() > 200 ? userPrompt.substring(0, 200) + "..." : userPrompt);
-            }
             
             // Build request payload
             String requestBody = buildRequestPayload(userPrompt, systemPrompt);

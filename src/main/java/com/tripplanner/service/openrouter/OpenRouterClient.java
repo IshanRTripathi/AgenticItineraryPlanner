@@ -83,25 +83,63 @@ public class OpenRouterClient implements AiClient {
 			);
 		}
 		
-		// Get working API key from rotation service
-		String apiKey;
-		try {
-			apiKey = apiKeyRotationService.getWorkingKey("openrouter");
-		} catch (RuntimeException e) {
-			logger.error("Failed to get working OpenRouter API key: {}", e.getMessage());
-			throw new TransientAiException(
-				"No available OpenRouter API keys: " + e.getMessage(),
-				"OpenRouterClient",
-				503
-			);
-		}
-		
 		logger.info("🤖 OpenRouterClient: Starting content generation");
 		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
 		logger.debug("Circuit Breaker State: {}", circuitBreaker.getState());
 		logger.debug("User prompt length: {} chars", userPrompt != null ? userPrompt.length() : 0);
 		logger.debug("System prompt length: {} chars", systemPrompt != null ? systemPrompt.length() : 0);
 		
+		// Try all available keys before giving up
+		int maxKeyAttempts = 5;
+		int keyAttempt = 0;
+		Exception lastException = null;
+		
+		while (keyAttempt < maxKeyAttempts) {
+			keyAttempt++;
+			
+			// Get working API key from rotation service
+			String apiKey;
+			try {
+				apiKey = apiKeyRotationService.getWorkingKey("openrouter");
+				logger.info("Trying OpenRouter key attempt {}/{}", keyAttempt, maxKeyAttempts);
+			} catch (RuntimeException e) {
+				logger.error("No more available OpenRouter API keys after {} attempts: {}", keyAttempt - 1, e.getMessage());
+				if (lastException != null) {
+					throw new TransientAiException(
+						"All OpenRouter API keys exhausted: " + e.getMessage(),
+						"OpenRouterClient",
+						503,
+						lastException
+					);
+				} else {
+					throw new TransientAiException(
+						"No available OpenRouter API keys: " + e.getMessage(),
+						"OpenRouterClient",
+						503
+					);
+				}
+			}
+			
+			try {
+				return attemptContentGenerationWithKey(apiKey, userPrompt, systemPrompt);
+			} catch (TransientAiException e) {
+				lastException = e;
+				logger.warn("OpenRouter key attempt {} failed with transient error, trying next key if available", keyAttempt);
+				continue;
+			} catch (PermanentAiException e) {
+				throw e;
+			}
+		}
+		
+		throw new TransientAiException(
+			"Exhausted all OpenRouter key attempts",
+			"OpenRouterClient",
+			503,
+			lastException
+		);
+	}
+	
+	private String attemptContentGenerationWithKey(String apiKey, String userPrompt, String systemPrompt) {
 		try {
 			if (mockMode) {
 				logger.info("OpenRouter mock mode enabled; returning empty response");
@@ -227,21 +265,53 @@ public class OpenRouterClient implements AiClient {
 
 	@Override
 	public String generateStructuredContent(String userPrompt, String jsonSchema, String systemPrompt) {
-		// Get working API key from rotation service
-		String apiKey;
-		try {
-			apiKey = apiKeyRotationService.getWorkingKey("openrouter");
-		} catch (RuntimeException e) {
-			logger.error("Failed to get working OpenRouter API key: {}", e.getMessage());
-			throw new RuntimeException("No available OpenRouter API keys: " + e.getMessage(), e);
-		}
-		
 		logger.info("🤖 OpenRouterClient: Starting structured content generation");
 		logger.debug("Request details - Model: {}, Temperature: {}, Max tokens: {}", modelName, temperature, maxTokens);
 		logger.debug("User prompt length: {} chars", userPrompt != null ? userPrompt.length() : 0);
 		logger.debug("System prompt length: {} chars", systemPrompt != null ? systemPrompt.length() : 0);
 		logger.debug("JSON schema length: {} chars", jsonSchema != null ? jsonSchema.length() : 0);
 		
+		// Try all available keys before giving up
+		int maxKeyAttempts = 5;
+		int keyAttempt = 0;
+		Exception lastException = null;
+		
+		while (keyAttempt < maxKeyAttempts) {
+			keyAttempt++;
+			
+			// Get working API key from rotation service
+			String apiKey;
+			try {
+				apiKey = apiKeyRotationService.getWorkingKey("openrouter");
+				logger.info("Trying OpenRouter key attempt {}/{} for structured content", keyAttempt, maxKeyAttempts);
+			} catch (RuntimeException e) {
+				logger.error("No more available OpenRouter API keys after {} attempts: {}", keyAttempt - 1, e.getMessage());
+				if (lastException != null) {
+					throw new RuntimeException("All OpenRouter API keys exhausted: " + e.getMessage(), lastException);
+				} else {
+					throw new RuntimeException("No available OpenRouter API keys: " + e.getMessage(), e);
+				}
+			}
+			
+			try {
+				return attemptStructuredContentWithKey(apiKey, userPrompt, jsonSchema, systemPrompt);
+			} catch (RuntimeException e) {
+				lastException = e;
+				// Check if it's a transient error (429, 503, etc.)
+				if (e.getMessage().contains("429") || e.getMessage().contains("503") || e.getMessage().contains("500")) {
+					logger.warn("OpenRouter key attempt {} failed with transient error, trying next key if available", keyAttempt);
+					continue;
+				} else {
+					// Permanent error - don't try other keys
+					throw e;
+				}
+			}
+		}
+		
+		throw new RuntimeException("Exhausted all OpenRouter key attempts", lastException);
+	}
+	
+	private String attemptStructuredContentWithKey(String apiKey, String userPrompt, String jsonSchema, String systemPrompt) {
 		try {
 			if (mockMode) {
 				logger.info("OpenRouter mock mode enabled; returning mock itinerary");

@@ -174,8 +174,8 @@ public class ApiKeyRotationService {
         preferredKeyMap.put(provider.toLowerCase(), key);
         status.markAsPreferred();
         
-        logger.info("✅ Key success for {}: {} (now preferred, success rate: {:.1f}%)",
-            provider, status.getMaskedKey(), status.getSuccessRate());
+        logger.info("✅ Key success for {}: {} (now preferred, success rate: {}%)",
+            provider, status.getMaskedKey(), String.format("%.1f", status.getSuccessRate()));
     }
     
     /**
@@ -207,8 +207,8 @@ public class ApiKeyRotationService {
             logger.warn("Removed preferred status from failed key for {}", provider);
         }
         
-        logger.warn("❌ Key failure for {}: {} (entering 30min cooldown, failures: {}, success rate: {:.1f}%)",
-            provider, status.getMaskedKey(), status.getFailureCount(), status.getSuccessRate());
+        logger.warn("❌ Key failure for {}: {} (entering 30min cooldown, failures: {}, success rate: {}%)",
+            provider, status.getMaskedKey(), status.getFailureCount(), String.format("%.1f", status.getSuccessRate()));
         
         // Check if all keys are now in cooldown
         long availableKeys = statuses.stream()
