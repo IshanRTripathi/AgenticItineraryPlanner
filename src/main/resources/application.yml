@@ -40,16 +40,16 @@ spring:
 google:
   ai:
     # Single key (backward compatibility)
-    api-key: ${GEMINI_API_KEY:AIzaSyDyqGAyMztQpfZtBpXORymVO4uM3aDsTQ4}
+    api-key: ${GEMINI_API_KEY:}
     # Multiple keys (JSON array format: ["key1","key2","key3"])
-    api-keys: ${GEMINI_API_KEYS:["AIzaSyBrBHKZLkBTPjrHeHmjMJI8gmu8Q5mUNAc", "AIzaSyDyqGAyMztQpfZtBpXORymVO4uM3aDsTQ4", "AIzaSyB0TtykrEta06Ohjh201WRbl8KEDI2jibE"]}
+    api-keys: ${GEMINI_API_KEYS:[]}
     model: ${GEMINI_MODEL:gemini-2.5-flash}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:65535}
     mock-mode: ${GEMINI_MOCK_MODE:false}
   places:
     api:
-      key: ${GOOGLE_PLACES_API_KEY:AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss}
+      key: ${GOOGLE_PLACES_API_KEY:}
     daily:
       limit: ${GOOGLE_PLACES_DAILY_LIMIT:1000}
     rate-limit:
@@ -67,7 +67,7 @@ openrouter:
   # Single key (backward compatibility)
   api-key: ${OPENROUTER_API_KEY:}
   # Multiple keys (JSON array format: ["key1","key2","key3"])
-  api-keys: ${OPENROUTER_API_KEYS:["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"]}
+  api-keys: ${OPENROUTER_API_KEYS:[]}
   base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
   timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:150}
 
