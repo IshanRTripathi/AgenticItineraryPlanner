@@ -13,13 +13,17 @@ COPY src/ src/
 # Build the application using gradle directly
 RUN gradle bootJar --no-daemon
 
-# Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+# Runtime stage - Use Debian instead of Alpine for glibc compatibility
+# Alpine uses musl libc which is incompatible with gRPC native libraries
+FROM eclipse-temurin:17-jre-jammy
 
-# No additional packages needed
+# Install required system libraries for gRPC native support
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create app user
-RUN addgroup -g 1001 -S appuser && adduser -u 1001 -S appuser -G appuser
+RUN groupadd -g 1001 appuser && useradd -u 1001 -g appuser appuser
 
 # Set working directory
 WORKDIR /app

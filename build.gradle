@@ -29,23 +29,14 @@ dependencies {
 	// H2 Database
 	runtimeOnly 'com.h2database:h2'
 	
-	// Google Cloud Firestore (exclude problematic native library)
-	implementation('com.google.cloud:google-cloud-firestore:3.14.0') {
-		exclude group: 'io.grpc', module: 'grpc-netty-shaded'
-		exclude group: 'io.netty', module: 'netty-tcnative-boringssl-static'
-	}
+	// Google Cloud Firestore
+	implementation 'com.google.cloud:google-cloud-firestore:3.14.0'
 	
 	// Firebase Admin SDK
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
 	
-	// Google Cloud Pub/Sub for analytics (exclude problematic native library)
-	implementation('com.google.cloud:spring-cloud-gcp-starter-pubsub:5.8.0') {
-		exclude group: 'io.grpc', module: 'grpc-netty-shaded'
-		exclude group: 'io.netty', module: 'netty-tcnative-boringssl-static'
-	}
-	
-	// Add grpc-okhttp as replacement (no native libraries)
-	implementation 'io.grpc:grpc-okhttp:1.67.1'
+	// Google Cloud Pub/Sub for analytics
+	implementation 'com.google.cloud:spring-cloud-gcp-starter-pubsub:5.8.0'
 	
 	// Gson for JSON serialization (analytics events)
 	implementation 'com.google.code.gson:gson:2.10.1'
