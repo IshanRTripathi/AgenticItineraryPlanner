@@ -35,6 +35,12 @@ dependencies {
 	// Firebase Admin SDK
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
 	
+	// Google Cloud Pub/Sub for analytics (includes Spring Integration)
+	implementation 'com.google.cloud:spring-cloud-gcp-starter-pubsub:5.8.0'
+	
+	// Gson for JSON serialization (analytics events)
+	implementation 'com.google.code.gson:gson:2.10.1'
+	
 	// Razorpay Java SDK
 	implementation 'com.razorpay:razorpay-java:1.4.3'
 	

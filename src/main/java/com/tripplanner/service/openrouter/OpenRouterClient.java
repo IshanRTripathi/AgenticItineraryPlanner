@@ -7,6 +7,8 @@ import com.tripplanner.service.ai.CircuitBreaker;
 import com.tripplanner.service.ai.ApiKeyRotationService;
 import com.tripplanner.service.ai.exception.TransientAiException;
 import com.tripplanner.service.ai.exception.PermanentAiException;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -32,7 +34,9 @@ public class OpenRouterClient implements AiClient {
 	private String baseUrl;
 
 	private final ApiKeyRotationService apiKeyRotationService;
-
+	
+	@Autowired(required = false)
+	private PubSubTemplate pubSubTemplate;
 
 	@Value("${ai.model:}")
 	private String modelName;
@@ -214,6 +218,10 @@ public class OpenRouterClient implements AiClient {
 				if (message != null && message.get("content") != null) {
 					String content = message.get("content").asText("");
 					logger.info("✅ OpenRouter content generation successful - {} chars returned", content.length());
+					
+					// Track token usage
+					trackTokenUsage(root, responseTime);
+					
 					circuitBreaker.recordSuccess();
 					apiKeyRotationService.reportSuccess("openrouter", apiKey);
 					return content;
@@ -471,6 +479,76 @@ public class OpenRouterClient implements AiClient {
 		return statusCode == 401 || // Unauthorized (invalid API key)
 			   statusCode == 403 || // Forbidden (insufficient permissions)
 			   (statusCode >= 400 && statusCode < 500 && statusCode != 429); // Other client errors except rate limit
+	}
+	
+	/**
+	 * Track token usage to analytics.
+	 */
+	private void trackTokenUsage(JsonNode responseJson, long latencyMs) {
+		if (pubSubTemplate == null) {
+			return; // Analytics not configured
+		}
+		
+		try {
+			JsonNode usage = responseJson.get("usage");
+			if (usage == null) {
+				return;
+			}
+			
+			int promptTokens = usage.has("prompt_tokens") 
+				? usage.get("prompt_tokens").asInt() : 0;
+			int completionTokens = usage.has("completion_tokens") 
+				? usage.get("completion_tokens").asInt() : 0;
+			int totalTokens = promptTokens + completionTokens;
+			
+			// Calculate cost based on model
+			double inputCost = 0;
+			double outputCost = 0;
+			
+			if (modelName.contains("free")) {
+				// Free tier - no cost
+				inputCost = 0;
+				outputCost = 0;
+			} else if (modelName.contains("qwen")) {
+				// Qwen pricing: $0.35 input, $0.40 output per 1M tokens
+				inputCost = (promptTokens / 1_000_000.0) * 0.35;
+				outputCost = (completionTokens / 1_000_000.0) * 0.40;
+			} else {
+				// Default pricing
+				inputCost = (promptTokens / 1_000_000.0) * 0.50;
+				outputCost = (completionTokens / 1_000_000.0) * 1.00;
+			}
+			
+			double totalCost = inputCost + outputCost;
+			
+			// Create analytics event
+			java.util.Map<String, Object> event = new java.util.HashMap<>();
+			event.put("eventName", "llm_token_usage");
+			event.put("timestamp", System.currentTimeMillis());
+			event.put("userId", null);
+			event.put("sessionId", null);
+			event.put("platform", "backend");
+			
+			java.util.Map<String, Object> properties = new java.util.HashMap<>();
+			properties.put("provider", "openrouter");
+			properties.put("model", modelName);
+			properties.put("promptTokens", promptTokens);
+			properties.put("completionTokens", completionTokens);
+			properties.put("totalTokens", totalTokens);
+			properties.put("llmCostUsd", totalCost);
+			properties.put("latencyMs", latencyMs);
+			event.put("properties", properties);
+			
+			// Publish to Pub/Sub
+			String eventJson = objectMapper.writeValueAsString(event);
+			pubSubTemplate.publish("analytics-events", eventJson);
+			
+			logger.debug("Tracked token usage: {} tokens, ${}", totalTokens, String.format("%.6f", totalCost));
+			
+		} catch (Exception e) {
+			logger.warn("Failed to track token usage", e);
+			// Don't fail the request if analytics fails
+		}
 	}
 	
 	/**

@@ -17,6 +17,7 @@ import { api, endpoints } from '@/services/api';
 import { fadeInUp, slideInRight, slideInLeft } from '@/lib/animations/variants';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
+import { analytics } from '@/services/analytics';
 
 interface TripFormData {
     origin?: string;
@@ -64,7 +65,23 @@ export function PremiumTripWizard() {
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
+        
+        // Calculate trip duration
+        const startDate = new Date(formData.startDate || '');
+        const endDate = new Date(formData.endDate || '');
+        const durationDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        
         try {
+            // Track trip creation initiated
+            analytics.track('trip_creation_initiated', {
+                destination: formData.destination,
+                origin: formData.origin,
+                durationDays,
+                travelers: (formData.adults || 2) + (formData.children || 0),
+                budget: formData.budgetRange ? `${formData.budgetRange[0]}-${formData.budgetRange[1]}` : 'moderate',
+                interests: formData.interests?.join(',')
+            });
+            
             // Call backend API to create itinerary
             // Note: Backend currently only uses destination, origin is stored for future use
             const budgetMin = formData.budgetRange?.[0] || 500;
@@ -102,16 +119,35 @@ export function PremiumTripWizard() {
             const itineraryId = itinerary?.id;
 
             if (itineraryId) {
+                // Track trip creation completed
+                analytics.track('trip_creation_completed', {
+                    itineraryId,
+                    destination: formData.destination,
+                    durationDays
+                });
+                
                 console.log('[PremiumTripWizard] Navigating to planner progress:', { itineraryId });
                 // Only pass itineraryId - it's the only identifier needed for WebSocket
                 window.location.href = `/planner-progress?itineraryId=${itineraryId}`;
             } else {
                 console.error('Missing itineraryId in response:', response);
+                
+                // Track trip creation failed
+                analytics.track('trip_creation_failed', {
+                    error: 'Missing itineraryId in response'
+                });
+                
                 alert('Failed to create itinerary. Missing required data.');
             }
         } catch (error) {
             console.error('Error creating itinerary:', error);
             const errorMessage = error instanceof Error ? error.message : 'An error occurred. Please try again.';
+            
+            // Track trip creation failed
+            analytics.track('trip_creation_failed', {
+                error: errorMessage
+            });
+            
             alert(errorMessage);
         } finally {
             setIsSubmitting(false);

@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { BookingCategoryGroup, CategorizedBooking, getNodeIcon } from '@/utils/categorizeBookings';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { buildEaseMyTripUrl } from '@/utils/easemytripUrlBuilder';
+import { analytics } from '@/services/analytics';
 
 /**
  * Format time string to be more user-friendly
@@ -77,6 +78,15 @@ export function BookingCategoryCard({
   }>({ isOpen: false, booking: null });
 
   const handleBookNow = (booking: CategorizedBooking) => {
+    // Track booking initiated
+    analytics.trackBooking('initiated', {
+      provider: 'easemytrip',
+      category: booking.category,
+      itineraryId: booking.id,
+      amount: booking.cost?.amount,
+      currency: booking.cost?.currency
+    });
+    
     setBookingModalState({ isOpen: true, booking });
   };
 

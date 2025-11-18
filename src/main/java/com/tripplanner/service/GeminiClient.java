@@ -18,6 +18,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tripplanner.service.ai.AiClient;
@@ -25,6 +28,8 @@ import com.tripplanner.service.ai.CircuitBreaker;
 import com.tripplanner.service.ai.ApiKeyRotationService;
 import com.tripplanner.service.ai.exception.TransientAiException;
 import com.tripplanner.service.ai.exception.PermanentAiException;
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Service for interacting with Google's Gemini AI model via REST API.
@@ -42,6 +47,9 @@ public class GeminiClient implements AiClient {
     private static final int MAX_RETRY_DELAY_MS = 10000; // 10 seconds
     
     private final ApiKeyRotationService apiKeyRotationService;
+    
+    @Autowired(required = false)
+    private PubSubTemplate pubSubTemplate;
     
     @Value("${google.ai.model:gemini-2.5-flash}")
     private String modelName;
@@ -282,6 +290,9 @@ public class GeminiClient implements AiClient {
                         logger.info("Generated content preview: {}", 
                                    generatedText.length() > 300 ? generatedText.substring(0, 300) + "..." : generatedText);
                         logger.info("=========================================");
+                        
+                        // Track token usage
+                        trackTokenUsage(responseJson, System.currentTimeMillis() - startTime);
                         
                         circuitBreaker.recordSuccess();
                         apiKeyRotationService.reportSuccess("gemini", apiKey);
@@ -610,6 +621,61 @@ public class GeminiClient implements AiClient {
               ]
             }
             """;
+        }
+    }
+    
+    /**
+     * Track token usage to analytics.
+     */
+    private void trackTokenUsage(JsonNode responseJson, long latencyMs) {
+        if (pubSubTemplate == null) {
+            return; // Analytics not configured
+        }
+        
+        try {
+            JsonNode usageMetadata = responseJson.get("usageMetadata");
+            if (usageMetadata == null) {
+                return;
+            }
+            
+            int promptTokens = usageMetadata.has("promptTokenCount") 
+                ? usageMetadata.get("promptTokenCount").asInt() : 0;
+            int completionTokens = usageMetadata.has("candidatesTokenCount") 
+                ? usageMetadata.get("candidatesTokenCount").asInt() : 0;
+            int totalTokens = promptTokens + completionTokens;
+            
+            // Calculate cost (Gemini 2.5 Flash pricing: $0.075 input, $0.30 output per 1M tokens)
+            double inputCost = (promptTokens / 1_000_000.0) * 0.075;
+            double outputCost = (completionTokens / 1_000_000.0) * 0.30;
+            double totalCost = inputCost + outputCost;
+            
+            // Create analytics event
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventName", "llm_token_usage");
+            event.put("timestamp", System.currentTimeMillis());
+            event.put("userId", null);
+            event.put("sessionId", null);
+            event.put("platform", "backend");
+            
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("provider", "gemini");
+            properties.put("model", modelName);
+            properties.put("promptTokens", promptTokens);
+            properties.put("completionTokens", completionTokens);
+            properties.put("totalTokens", totalTokens);
+            properties.put("llmCostUsd", totalCost);
+            properties.put("latencyMs", latencyMs);
+            event.put("properties", properties);
+            
+            // Publish to Pub/Sub
+            String eventJson = objectMapper.writeValueAsString(event);
+            pubSubTemplate.publish("analytics-events", eventJson);
+            
+            logger.debug("Tracked token usage: {} tokens, ${}", totalTokens, String.format("%.6f", totalCost));
+            
+        } catch (Exception e) {
+            logger.warn("Failed to track token usage", e);
+            // Don't fail the request if analytics fails
         }
     }
     

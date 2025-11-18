@@ -1,0 +1,15 @@
+{
+  "name": "analytics-ingestion",
+  "version": "1.0.0",
+  "description": "Cloud Function to ingest analytics events from Pub/Sub to BigQuery",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

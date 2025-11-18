@@ -1,221 +1,121 @@
 /**
- * Analytics Service
- * Tracks user events to Google Analytics 4 and backend
+ * Simplified Analytics Service
+ * Sends events to backend Pub/Sub → BigQuery pipeline
+ * 
+ * This is intentionally minimal - no complex logic, just event tracking.
  */
 
 interface AnalyticsEvent {
-  event: string;
+  eventName: string;
+  timestamp: number;
+  userId: string | null;
+  sessionId: string;
+  platform: string;
   properties?: Record<string, any>;
 }
 
-interface UserProperties {
-  userId?: string;
-  email?: string;
-  [key: string]: any;
-}
-
 class AnalyticsService {
-  private isInitialized = false;
   private userId: string | null = null;
+  private sessionId: string;
+  private enabled: boolean;
+  private apiUrl: string;
 
-  /**
-   * Initialize analytics
-   */
-  initialize(trackingId?: string) {
-    if (this.isInitialized) return;
-
-    // Initialize Google Analytics 4 if tracking ID provided
-    if (trackingId && typeof window !== 'undefined') {
-      // Load gtag script
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${trackingId}`;
-      document.head.appendChild(script);
-
-      // Initialize gtag
-      window.dataLayer = window.dataLayer || [];
-      function gtag(...args: any[]) {
-        window.dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-      gtag('config', trackingId);
-
-      this.isInitialized = true;
-      console.log('[Analytics] Initialized with tracking ID:', trackingId);
+  constructor() {
+    this.sessionId = this.generateSessionId();
+    this.enabled = import.meta.env.VITE_ENABLE_ANALYTICS !== 'false';
+    this.apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+    
+    if (this.enabled) {
+      console.log('[Analytics] Initialized - Session:', this.sessionId);
     }
   }
 
   /**
-   * Track an event
+   * Track an analytics event.
+   * This is the main method - all other methods call this.
    */
-  track(event: string, properties?: Record<string, any>) {
-    // Send to Google Analytics
-    if (this.isInitialized && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', event, properties);
-    }
+  track(eventName: string, properties?: Record<string, any>) {
+    if (!this.enabled) return;
 
-    // Send to backend analytics endpoint
-    this.sendToBackend({ event, properties });
+    const event: AnalyticsEvent = {
+      eventName,
+      timestamp: Date.now(),
+      userId: this.userId,
+      sessionId: this.sessionId,
+      platform: 'web',
+      properties: properties || {}
+    };
 
-    console.log('[Analytics] Event tracked:', event, properties);
+    // Send to backend (async, non-blocking)
+    this.sendEvent(event);
   }
 
   /**
-   * Track page view
+   * Track page view.
    */
-  page(path: string, title?: string, referrer?: string) {
+  page(path: string, title?: string) {
     this.track('page_view', {
-      page_path: path,
-      page_title: title || document.title,
-      page_referrer: referrer || document.referrer,
+      path,
+      title: title || document.title,
+      referrer: document.referrer
     });
   }
 
   /**
-   * Identify user
+   * Identify user.
    */
-  identify(userId: string, properties?: UserProperties) {
+  identify(userId: string) {
     this.userId = userId;
-
-    if (this.isInitialized && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('set', 'user_properties', {
-        user_id: userId,
-        ...properties,
-      });
-    }
-
     console.log('[Analytics] User identified:', userId);
   }
 
   /**
-   * Track booking events
+   * Track booking events.
    */
-  trackBooking(type: 'initiated' | 'iframe_loaded' | 'confirmed', data: {
+  trackBooking(type: 'initiated' | 'completed' | 'failed', data: {
     provider: string;
-    vertical: string;
+    category: string;
     itineraryId?: string;
     amount?: number;
     currency?: string;
   }) {
-    const eventName = `booking_${type}`;
-    this.track(eventName, {
-      provider: data.provider,
-      vertical: data.vertical,
-      itinerary_id: data.itineraryId,
-      amount: data.amount,
-      currency: data.currency,
-      timestamp: new Date().toISOString(),
-    });
+    this.track(`booking_${type}`, data);
   }
 
   /**
-   * Track search events
+   * Send event to backend.
+   * Uses keepalive to ensure delivery even if page unloads.
    */
-  trackSearch(data: {
-    searchType: string;
-    origin?: string;
-    destination?: string;
-    startDate?: string;
-    endDate?: string;
-    travelers?: number;
-  }) {
-    this.track('search_performed', {
-      search_type: data.searchType,
-      origin: data.origin,
-      destination: data.destination,
-      start_date: data.startDate,
-      end_date: data.endDate,
-      travelers: data.travelers,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  /**
-   * Track AI trip creation
-   */
-  trackAITrip(data: {
-    destination: string;
-    duration: number;
-    travelers: number;
-    budget?: string;
-    executionId?: string;
-  }) {
-    this.track('ai_trip_created', {
-      destination: data.destination,
-      duration: data.duration,
-      travelers: data.travelers,
-      budget: data.budget,
-      execution_id: data.executionId,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  /**
-   * Track agent progress
-   */
-  trackAgentProgress(data: {
-    executionId: string;
-    progress: number;
-    currentStep?: string;
-    status: string;
-  }) {
-    this.track('agent_progress', {
-      execution_id: data.executionId,
-      progress: data.progress,
-      current_step: data.currentStep,
-      status: data.status,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  /**
-   * Track feature usage
-   */
-  trackFeature(featureName: string, context?: Record<string, any>) {
-    this.track('feature_used', {
-      feature_name: featureName,
-      ...context,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  /**
-   * Send event to backend analytics endpoint
-   */
-  private async sendToBackend(event: AnalyticsEvent) {
+  private sendEvent(event: AnalyticsEvent) {
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
-      await fetch(`${apiUrl}/analytics/events`, {
+      fetch(`${this.apiUrl}/analytics/events`, {
         method: 'POST',
+        keepalive: true, // Ensures delivery even if page closes
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...event,
-          userId: this.userId,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        }),
+        body: JSON.stringify(event)
+      }).catch(() => {
+        // Silent failure - analytics should never break the app
       });
     } catch (error) {
-      // Silently fail - don't break app if analytics fails
-      console.warn('[Analytics] Failed to send to backend:', error);
+      // Silent failure
     }
   }
-}
 
-// Extend Window interface for gtag
-declare global {
-  interface Window {
-    dataLayer: any[];
-    gtag: (...args: any[]) => void;
+  /**
+   * Generate a unique session ID.
+   */
+  private generateSessionId(): string {
+    // Check if session ID exists in sessionStorage
+    const stored = sessionStorage.getItem('analytics_session_id');
+    if (stored) return stored;
+
+    // Generate new session ID
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    sessionStorage.setItem('analytics_session_id', sessionId);
+    return sessionId;
   }
 }
 
 export const analytics = new AnalyticsService();
-
-// Initialize with tracking ID from environment
-if (import.meta.env.VITE_GA_TRACKING_ID) {
-  analytics.initialize(import.meta.env.VITE_GA_TRACKING_ID);
-}
