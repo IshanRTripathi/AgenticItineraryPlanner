@@ -6,7 +6,7 @@
 
 set -e
 
-PROJECT_ID=${GCP_PROJECT_ID:-"tripaiplanner-4c951"}
+PROJECT_ID=${GCP_PROJECT_ID:-"tripaiplanner"}
 
 echo "🔔 Setting up BigQuery-based Cloud Monitoring Alerts..."
 echo "   Project: $PROJECT_ID"

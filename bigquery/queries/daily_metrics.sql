@@ -2,7 +2,7 @@
 -- Scheduled to run daily at 2 AM UTC
 -- Aggregates key business metrics from raw events
 
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.daily_metrics`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.daily_metrics`
 PARTITION BY date
 CLUSTER BY date
 AS
@@ -52,14 +52,14 @@ SELECT
   -- Metadata
   CURRENT_TIMESTAMP() as last_updated
 
-FROM `tripaiplanner-4c951.analytics.raw_events`
+FROM `tripaiplanner.analytics.raw_events`
 WHERE DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
 GROUP BY date
 ORDER BY date DESC;
 
 -- Create or update today's metrics (for scheduled query)
 -- This query should be scheduled to run daily at 2 AM UTC
-MERGE `tripaiplanner-4c951.analytics.daily_metrics` T
+MERGE `tripaiplanner.analytics.daily_metrics` T
 USING (
   SELECT
     DATE(TIMESTAMP_MILLIS(timestamp)) as date,
@@ -89,7 +89,7 @@ USING (
       COUNT(DISTINCT CASE WHEN eventName = 'booking_initiated' THEN userId END)
     ) * 100 as booking_conversion_rate,
     CURRENT_TIMESTAMP() as last_updated
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE DATE(TIMESTAMP_MILLIS(timestamp)) = CURRENT_DATE() - 1
   GROUP BY date
 ) S

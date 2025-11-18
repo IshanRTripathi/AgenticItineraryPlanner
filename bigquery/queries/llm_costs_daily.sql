@@ -2,7 +2,7 @@
 -- Scheduled to run daily at 2 AM UTC
 -- Tracks token consumption and estimated costs by provider, model, and agent
 
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.llm_costs_daily`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.llm_costs_daily`
 PARTITION BY date
 CLUSTER BY date, provider
 AS
@@ -35,14 +35,14 @@ SELECT
   -- Metadata
   CURRENT_TIMESTAMP() as last_updated
 
-FROM `tripaiplanner-4c951.analytics.raw_events`
+FROM `tripaiplanner.analytics.raw_events`
 WHERE eventName = 'llm_token_usage'
   AND DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
 GROUP BY date, provider, model, agent_type
 ORDER BY date DESC, total_cost_usd DESC;
 
 -- Daily summary (all providers combined)
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.llm_costs_daily_summary`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.llm_costs_daily_summary`
 PARTITION BY date
 CLUSTER BY date
 AS
@@ -83,20 +83,20 @@ SELECT
   -- Metadata
   CURRENT_TIMESTAMP() as last_updated
 
-FROM `tripaiplanner-4c951.analytics.raw_events`
+FROM `tripaiplanner.analytics.raw_events`
 WHERE eventName = 'llm_token_usage'
   AND DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
 GROUP BY date
 ORDER BY date DESC;
 
 -- Monthly cost projection
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.llm_costs_monthly_projection`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.llm_costs_monthly_projection`
 AS
 WITH daily_costs AS (
   SELECT
     DATE(TIMESTAMP_MILLIS(timestamp)) as date,
     SUM(CAST(JSON_EXTRACT_SCALAR(properties, '$.llmCostUsd') AS FLOAT64)) as daily_cost
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE eventName = 'llm_token_usage'
     AND DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_TRUNC(CURRENT_DATE(), MONTH)
   GROUP BY date

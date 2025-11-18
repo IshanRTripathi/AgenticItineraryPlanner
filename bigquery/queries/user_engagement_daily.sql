@@ -2,7 +2,7 @@
 -- Scheduled to run daily at 2 AM UTC
 -- Tracks user activity, retention, and engagement patterns
 
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.user_engagement_daily`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.user_engagement_daily`
 PARTITION BY date
 CLUSTER BY date
 AS
@@ -48,19 +48,19 @@ SELECT
   -- Metadata
   CURRENT_TIMESTAMP() as last_updated
 
-FROM `tripaiplanner-4c951.analytics.raw_events`
+FROM `tripaiplanner.analytics.raw_events`
 WHERE DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
 GROUP BY date
 ORDER BY date DESC;
 
 -- User Retention Cohorts
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.user_retention_cohorts`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.user_retention_cohorts`
 AS
 WITH user_first_seen AS (
   SELECT
     userId,
     DATE(TIMESTAMP_MILLIS(MIN(timestamp))) as cohort_date
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE userId IS NOT NULL
   GROUP BY userId
 ),
@@ -68,7 +68,7 @@ user_activity AS (
   SELECT DISTINCT
     userId,
     DATE(TIMESTAMP_MILLIS(timestamp)) as activity_date
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE userId IS NOT NULL
 ),
 retention_data AS (
@@ -121,7 +121,7 @@ GROUP BY cohort_date
 ORDER BY cohort_date DESC;
 
 -- Weekly Active Users (WAU) and Monthly Active Users (MAU)
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.wau_mau_metrics`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.wau_mau_metrics`
 AS
 WITH date_range AS (
   SELECT date
@@ -131,7 +131,7 @@ daily_users AS (
   SELECT
     DATE(TIMESTAMP_MILLIS(timestamp)) as date,
     userId
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE userId IS NOT NULL
     AND DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
   GROUP BY date, userId

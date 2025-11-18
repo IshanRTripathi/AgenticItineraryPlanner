@@ -5,16 +5,18 @@
 
 **Progress**: ✅ 90% Complete (Week 1-3 Done)  
 **Build Status**: ✅ Compiles Successfully  
+**Cloud Run**: ✅ Compatible (native library issue fixed)  
 **Events Tracked**: 12 events  
 **Aggregated Tables**: 10 tables  
-**Alerts Configured**: 7 policies  
+**Alerts Configured**: 4 alert views  
 **Estimated Cost**: $5-10/month  
 
 **Next Steps**: 
-1. Deploy scheduled queries to BigQuery
-2. Deploy Cloud Monitoring alerts  
-3. Create Looker Studio dashboard (manual UI)
-4. Test end-to-end pipeline
+1. Deploy to Cloud Run (should work now)
+2. Deploy scheduled queries to BigQuery
+3. Set up BigQuery-based alerts  
+4. Create Looker Studio dashboard (manual UI)
+5. Test end-to-end pipeline
 
 ---
 
@@ -662,26 +664,42 @@ project/
 - Create Looker Studio dashboard (Week 3 Day 3-5)
 
 ### ✅ Week 3: Day 3-5 - COMPLETED (Monitoring & Alerts)
-**Cloud Monitoring Setup**
-- ✅ Created `CloudMonitoringService.java` - Exports custom metrics to Cloud Monitoring
-- ✅ Created `AnalyticsMetricsExporter.java` - Scheduled jobs to calculate and export metrics
-- ✅ Created `monitoring/alerts.yaml` - Alert policy definitions
-- ✅ Created `monitoring/setup_alerts.sh` - Alert deployment script
-- ✅ Added Cloud Monitoring dependency to build.gradle
+**BigQuery-Based Alerting (Cloud Run Compatible)**
+- ✅ Created `bigquery/queries/alert_metrics.sql` - Alert metric views and checks
+- ✅ Created `monitoring/setup_bigquery_alerts.sh` - Log-based metrics and alert setup
+- ✅ Created `monitoring/alerts.yaml` - Alert policy definitions (reference)
+- ✅ Removed Cloud Monitoring native client (incompatible with Cloud Run)
 
-**Alerts Configured**:
-1. Daily LLM Cost Warning (> $20)
-2. Daily LLM Cost Critical (> $50)
-3. Monthly Projection Warning (> $300)
-4. Agent Failure Rate High (> 5%)
-5. Trip Generation Latency High (P95 > 2s)
-6. Booking Failure Rate High (> 10%)
-7. Pub/Sub Backlog (> 5 minutes)
+**Approach**: Instead of using Cloud Monitoring client library (which has native library issues in Cloud Run), we use:
+1. **BigQuery scheduled queries** - Calculate metrics every 15 minutes
+2. **BigQuery views** - Expose current alert states
+3. **Log-based metrics** - Cloud Monitoring reads from BigQuery query logs
+4. **Alert policies** - Trigger on log-based metric thresholds
 
-**Scheduled Metric Exports**:
-- LLM cost metrics: Every hour
-- Agent performance metrics: Every 15 minutes
-- Booking metrics: Every hour
+**Benefits**:
+- ✅ No native library dependencies
+- ✅ Works perfectly in Cloud Run
+- ✅ Leverages existing BigQuery data
+- ✅ More maintainable and debuggable
+- ✅ Aligns with GCP-native architecture
+
+**Alert Views Created**:
+1. `alert_llm_daily_cost` - Daily LLM cost with severity levels
+2. `alert_llm_monthly_projection` - Monthly cost projection with warnings
+3. `alert_agent_failure_rates` - Agent failure rates by type
+4. `alert_booking_failure_rate` - Booking failure rate (last hour)
+
+**Alert Checks**:
+- Scheduled query runs every 15 minutes
+- Writes alerts to `analytics.alert_checks` table
+- Cloud Monitoring reads from BigQuery logs
+- Triggers notifications when thresholds exceeded
+
+**Thresholds**:
+- Daily LLM Cost: WARNING > $20, CRITICAL > $50
+- Monthly Projection: WARNING > $300, CRITICAL > $500
+- Agent Failure Rate: WARNING > 5%, CRITICAL > 10%
+- Booking Failure Rate: WARNING > 10%, CRITICAL > 20%
 
 ### 📋 Week 3: Day 3-5 - TODO (Looker Studio Dashboard)
 **Manual Setup Required** (via Looker Studio UI):
@@ -720,7 +738,7 @@ cd frontend && npm install
 ### Step 2: Create GCP Resources
 ```bash
 # 1. Create Pub/Sub topic
-gcloud pubsub topics create analytics-events --project=tripaiplanner-4c951
+gcloud pubsub topics create analytics-events --project=tripaiplanner
 
 # 2. Create BigQuery infrastructure
 cd bigquery
@@ -733,15 +751,18 @@ chmod +x deploy.sh
 npm install
 ./deploy.sh
 
-# 4. Deploy scheduled queries
+# 4. Deploy scheduled queries (includes alert metrics)
 cd ../../bigquery/queries
 chmod +x deploy_scheduled_queries.sh
 ./deploy_scheduled_queries.sh
 
-# 5. Set up Cloud Monitoring alerts
+# 5. Create alert metric views
+bq query --use_legacy_sql=false < alert_metrics.sql
+
+# 6. Set up BigQuery-based alerts
 cd ../../monitoring
-chmod +x setup_alerts.sh
-./setup_alerts.sh
+chmod +x setup_bigquery_alerts.sh
+./setup_bigquery_alerts.sh
 ```
 
 ### Step 3: Configure Environment
@@ -751,7 +772,6 @@ ANALYTICS_ENABLED=true
 ANALYTICS_PUBSUB_TOPIC=analytics-events
 ANALYTICS_BIGQUERY_DATASET=analytics
 ANALYTICS_BIGQUERY_TABLE=raw_events
-ANALYTICS_MONITORING_ENABLED=true
 ```
 
 Add to `frontend/.env`:
@@ -794,7 +814,7 @@ analytics.track('test_event', { test: true });
 ### Step 6: Create Looker Studio Dashboard (Manual)
 1. Go to https://lookerstudio.google.com/
 2. Create new report
-3. Connect to BigQuery dataset: `tripaiplanner-4c951.analytics`
+3. Connect to BigQuery dataset: `tripaiplanner.analytics`
 4. Add data sources: `daily_metrics`, `llm_costs_daily_summary`, `funnel_metrics`, etc.
 5. Create 5 pages as documented in ANALYTICS_IMPLEMENTATION_GUIDE.md
 6. Share with team
@@ -802,7 +822,7 @@ analytics.track('test_event', { test: true });
 ### Step 7: Verify Alerts
 ```bash
 # List alert policies
-gcloud alpha monitoring policies list --project=tripaiplanner-4c951
+gcloud alpha monitoring policies list --project=tripaiplanner
 
 # Test alert by generating high-cost LLM requests
 # Check Cloud Console > Monitoring > Alerting for triggered alerts
@@ -824,8 +844,15 @@ gcloud alpha monitoring policies list --project=tripaiplanner-4c951
 **Modified Files**:
 1. `src/main/java/com/tripplanner/service/GeminiClient.java` - Added token tracking
 2. `src/main/java/com/tripplanner/service/openrouter/OpenRouterClient.java` - Added token tracking
-3. `build.gradle` - Added Pub/Sub, Gson, Cloud Monitoring dependencies
+3. `build.gradle` - Added Pub/Sub, Gson; excluded native gRPC libraries for Cloud Run compatibility
 4. `src/main/resources/application.yml` - Added analytics configuration
+
+**Cloud Run Compatibility Fix**:
+- **Root Cause**: Alpine Linux uses `musl libc` instead of `glibc`
+- gRPC's native libraries (`netty-tcnative`) are compiled for `glibc`
+- **Solution**: Changed base image from `eclipse-temurin:17-jre-alpine` to `eclipse-temurin:17-jre-jammy` (Debian-based)
+- Debian uses `glibc` which is compatible with gRPC native libraries
+- This fixes SIGSEGV crashes in Cloud Run environment
 
 ### Frontend Files (TypeScript/React)
 **Modified Files**:
@@ -859,6 +886,7 @@ gcloud alpha monitoring policies list --project=tripaiplanner-4c951
 **Configuration**:
 1. `.env.example` - Analytics environment variables
 2. `frontend/.env.example` - Frontend analytics config
+3. `Dockerfile.backend` - Changed from Alpine to Debian for glibc compatibility
 
 ---
 

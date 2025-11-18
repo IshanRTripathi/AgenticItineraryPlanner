@@ -783,11 +783,11 @@ export function DayCard({
                                                                                     {(node.cost?.amount || node.location?.priceLevel) && (
                                                                                         <div className="flex items-center gap-2">
                                                                                             <div className="w-4 flex justify-center">
-                                                                                                <CurrencyIcon currency={node.cost.currency} className="w-2 h-2 text-emerald-600 flex-shrink-0" />
+                                                                                                <CurrencyIcon currency={node.cost?.currency || 'USD'} className="w-2 h-2 text-emerald-600 flex-shrink-0" />
                                                                                             </div>
                                                                                             {node.cost?.amount ? (
                                                                                                 <span className="text-xs font-bold text-emerald-700 leading-none">
-                                                                                                    {getCurrencySymbol(node.cost.currency)}{node.cost.amount.toLocaleString()}
+                                                                                                    {getCurrencySymbol(node.cost?.currency || 'USD')}{node.cost.amount.toLocaleString()}
                                                                                                 </span>
                                                                                             ) : node.location?.priceLevel ? (
                                                                                                 <span className="text-xs font-bold text-emerald-600 leading-none">

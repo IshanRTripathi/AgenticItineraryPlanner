@@ -1,7 +1,7 @@
 -- Agent Performance Metrics
 -- Tracks AI agent execution performance, success rates, and latency
 
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.agent_performance_daily`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.agent_performance_daily`
 PARTITION BY date
 CLUSTER BY date, agent_type
 AS
@@ -29,7 +29,7 @@ SELECT
   -- Metadata
   CURRENT_TIMESTAMP() as last_updated
 
-FROM `tripaiplanner-4c951.analytics.raw_events`
+FROM `tripaiplanner.analytics.raw_events`
 WHERE eventName IN ('agent_started', 'agent_completed', 'agent_failed')
   AND DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
 GROUP BY date, agent_type

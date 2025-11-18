@@ -5,7 +5,7 @@
 
 set -e
 
-PROJECT_ID=${GCP_PROJECT_ID:-"tripaiplanner-4c951"}
+PROJECT_ID=${GCP_PROJECT_ID:-"tripaiplanner"}
 DATASET_ID="analytics"
 LOCATION="US"
 

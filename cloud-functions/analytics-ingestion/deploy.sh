@@ -5,7 +5,7 @@
 
 set -e
 
-PROJECT_ID=${GCP_PROJECT_ID:-"tripaiplanner-4c951"}
+PROJECT_ID=${GCP_PROJECT_ID:-"tripaiplanner"}
 REGION=${REGION:-"us-central1"}
 FUNCTION_NAME="analytics-ingestion"
 TOPIC_NAME="analytics-events"

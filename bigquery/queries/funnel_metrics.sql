@@ -2,7 +2,7 @@
 -- Scheduled to run daily at 2 AM UTC
 -- Tracks user journey through key conversion funnels
 
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.funnel_metrics`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.funnel_metrics`
 PARTITION BY date
 CLUSTER BY date
 AS
@@ -13,7 +13,7 @@ WITH daily_events AS (
     sessionId,
     eventName,
     timestamp
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAYS)
 )
 SELECT
@@ -78,7 +78,7 @@ GROUP BY date
 ORDER BY date DESC;
 
 -- User Journey Analysis (Session-based)
-CREATE OR REPLACE TABLE `tripaiplanner-4c951.analytics.user_journey_sessions`
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.user_journey_sessions`
 PARTITION BY date
 CLUSTER BY date
 AS
@@ -90,7 +90,7 @@ WITH session_events AS (
     eventName,
     timestamp,
     ROW_NUMBER() OVER (PARTITION BY sessionId ORDER BY timestamp) as event_sequence
-  FROM `tripaiplanner-4c951.analytics.raw_events`
+  FROM `tripaiplanner.analytics.raw_events`
   WHERE DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAYS)
 ),
 session_summary AS (
