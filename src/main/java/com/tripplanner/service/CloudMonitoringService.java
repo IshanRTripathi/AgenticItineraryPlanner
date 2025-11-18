@@ -20,17 +20,34 @@ import java.util.Map;
 /**
  * Service for exporting custom metrics to Google Cloud Monitoring.
  * Used for alerting on analytics metrics (LLM costs, failure rates, etc.)
+ * 
+ * Note: This service is optional and will gracefully degrade if Cloud Monitoring
+ * client fails to initialize (e.g., in certain Cloud Run environments).
  */
 @Service
 public class CloudMonitoringService {
     
     private static final Logger logger = LoggerFactory.getLogger(CloudMonitoringService.class);
     
-    @Value("${spring.cloud.gcp.project-id}")
+    @Value("${spring.cloud.gcp.project-id:}")
     private String projectId;
     
-    @Value("${analytics.monitoring.enabled:true}")
+    @Value("${analytics.monitoring.enabled:false}")
     private boolean monitoringEnabled;
+    
+    private volatile boolean clientAvailable = false;
+    
+    public CloudMonitoringService() {
+        // Test if Cloud Monitoring client can be initialized
+        try {
+            MetricServiceClient.create().close();
+            clientAvailable = true;
+            logger.info("Cloud Monitoring client initialized successfully");
+        } catch (Exception e) {
+            clientAvailable = false;
+            logger.warn("Cloud Monitoring client not available: {}. Metrics export will be disabled.", e.getMessage());
+        }
+    }
     
     /**
      * Export LLM daily cost metric to Cloud Monitoring.
@@ -38,7 +55,7 @@ public class CloudMonitoringService {
      */
     @Async
     public void exportLlmDailyCost(double costUsd) {
-        if (!monitoringEnabled) {
+        if (!monitoringEnabled || !clientAvailable) {
             return;
         }
         
@@ -59,7 +76,7 @@ public class CloudMonitoringService {
      */
     @Async
     public void exportMonthlyProjection(double projectedCostUsd) {
-        if (!monitoringEnabled) {
+        if (!monitoringEnabled || !clientAvailable) {
             return;
         }
         
@@ -80,7 +97,7 @@ public class CloudMonitoringService {
      */
     @Async
     public void exportAgentFailureRate(String agentType, double failureRate) {
-        if (!monitoringEnabled) {
+        if (!monitoringEnabled || !clientAvailable) {
             return;
         }
         
@@ -101,7 +118,7 @@ public class CloudMonitoringService {
      */
     @Async
     public void exportBookingFailureRate(double failureRate) {
-        if (!monitoringEnabled) {
+        if (!monitoringEnabled || !clientAvailable) {
             return;
         }
         
@@ -118,9 +135,21 @@ public class CloudMonitoringService {
     }
     
     /**
+     * Check if Cloud Monitoring is available.
+     */
+    public boolean isAvailable() {
+        return monitoringEnabled && clientAvailable;
+    }
+    
+    /**
      * Write a custom metric to Cloud Monitoring.
      */
     private void writeCustomMetric(String metricType, double value, String description, Map<String, String> labels) {
+        if (!clientAvailable) {
+            logger.debug("Skipping metric export (client not available): {}", metricType);
+            return;
+        }
+        
         try (MetricServiceClient metricServiceClient = MetricServiceClient.create()) {
             
             String projectName = ProjectName.of(projectId).toString();
