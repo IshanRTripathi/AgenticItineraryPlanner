@@ -273,16 +273,17 @@ public class EnrichmentAgent extends BaseAgent {
                 }
 
                 // Calculate time between nodes
-                if (currentNode.getTiming() != null && nextNode.getTiming() != null) {
+                if (currentNode.getTiming() != null && nextNode.getTiming() != null 
+                    && currentNode.getTiming().getEndTime() != null 
+                    && nextNode.getTiming().getStartTime() != null) {
                     String currentEndTime = currentNode.getTiming().getEndTime().toString();
                     String nextStartTime = nextNode.getTiming().getStartTime().toString();
 
-                    if (currentEndTime != null && nextStartTime != null) {
-                        int timeBetween = calculateTimeBetween(currentEndTime, nextStartTime);
+                    int timeBetween = calculateTimeBetween(currentEndTime, nextStartTime);
 
-                        // Add pacing information
-                        if (timeBetween < 30) {
-                            // Very tight schedule
+                    // Add pacing information
+                    if (timeBetween < 30) {
+                        // Very tight schedule
                             ChangeOperation pacingOp = createPacingOperation(nextNode.getId(),
                                     "Very tight schedule - only " + timeBetween + " minutes between activities");
                             operations.add(pacingOp);
@@ -295,7 +296,6 @@ public class EnrichmentAgent extends BaseAgent {
                     }
                 }
             }
-        }
 
         return operations;
     }
