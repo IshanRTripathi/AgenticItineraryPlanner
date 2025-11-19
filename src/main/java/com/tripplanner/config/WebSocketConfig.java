@@ -2,7 +2,6 @@ package com.tripplanner.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -10,20 +9,15 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 /**
- * WebSocket configuration for real-time communication.
- * Provides messaging capabilities for itinerary updates and agent coordination.
+ * Simple WebSocket configuration that works for both local development and production.
  */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
-    
-    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000}")
-    private String allowedOrigins;
     
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -45,37 +39,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         logger.info("=== WEBSOCKET CONFIG: REGISTERING STOMP ENDPOINTS ===");
         
-        // Parse and clean origins
-        String[] origins = java.util.Arrays.stream(allowedOrigins.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .toArray(String[]::new);
-        
-        // Fallback to localhost if no origins configured
-        if (origins.length == 0) {
-            origins = new String[]{
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:3000"
-            };
-        }
-        
-        logger.info("Allowed origins: {}", String.join(", ", origins));
-        
-        // Register STOMP endpoint with SockJS fallback
-        // Use specific origins from configuration to allow credentials
+        // Use wildcard patterns for simplicity - works for any localhost port + production
         registry.addEndpoint("/ws")
-                .setAllowedOrigins(origins)
+                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://*.run.app", "https://*.a.run.app")
                 .withSockJS()
-                .setSessionCookieNeeded(false)
-                .setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js");
+                .setSessionCookieNeeded(false);
         
-        // Also register without SockJS for native WebSocket support
         registry.addEndpoint("/ws")
-                .setAllowedOrigins(origins);
+                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://*.run.app", "https://*.a.run.app");
         
-        logger.info("STOMP endpoints registered successfully with configured origins");
+        logger.info("STOMP endpoints registered with wildcard patterns");
     }
     
     /**
