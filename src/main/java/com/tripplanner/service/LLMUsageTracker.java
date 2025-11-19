@@ -88,6 +88,8 @@ public class LLMUsageTracker {
             Map<String, Object> event = new HashMap<>();
             event.put("eventName", "llm_token_usage");
             event.put("timestamp", System.currentTimeMillis());
+            event.put("userId", com.tripplanner.util.UserContext.getUserId());
+            event.put("sessionId", null);
             event.put("platform", "backend");
             event.put("properties", properties);
             

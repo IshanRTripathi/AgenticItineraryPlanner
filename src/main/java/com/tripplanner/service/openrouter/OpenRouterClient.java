@@ -525,7 +525,7 @@ public class OpenRouterClient implements AiClient {
 			java.util.Map<String, Object> event = new java.util.HashMap<>();
 			event.put("eventName", "llm_token_usage");
 			event.put("timestamp", System.currentTimeMillis());
-			event.put("userId", null);
+			event.put("userId", com.tripplanner.util.UserContext.getUserId());
 			event.put("sessionId", null);
 			event.put("platform", "backend");
 			

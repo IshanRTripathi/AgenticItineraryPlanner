@@ -504,9 +504,12 @@ public class OrchestratorService {
                     null, null, false, applyResult.getToVersion()
                 );
             } else {
+                // Try to get descriptive message from the diff or generate a generic one
+                String responseMessage = generateDescriptiveMessage(applyResult.getDiff());
+                
                 return ChatResponse.success(
                     "Changes applied successfully",
-                    "Your itinerary has been updated.",
+                    responseMessage,
                     null, applyResult.getDiff(), true, applyResult.getToVersion()
                 );
             }
@@ -1054,5 +1057,67 @@ public class OrchestratorService {
                         agent.getClass().getSimpleName(), 
                         agent.getClass().getPackage().getName());
         }
+    }
+    
+    /**
+     * Generate a descriptive message from the ItineraryDiff.
+     * Extracts information about what changed to provide specific feedback to the user.
+     */
+    private String generateDescriptiveMessage(ItineraryDiff diff) {
+        if (diff == null) {
+            return "Your itinerary has been updated.";
+        }
+        
+        List<String> messages = new ArrayList<>();
+        
+        // Check for added items
+        if (diff.getAdded() != null && !diff.getAdded().isEmpty()) {
+            for (DiffItem item : diff.getAdded()) {
+                String title = extractTitleFromDiffItem(item);
+                messages.add("✅ Added: " + title);
+            }
+        }
+        
+        // Check for removed items
+        if (diff.getRemoved() != null && !diff.getRemoved().isEmpty()) {
+            for (DiffItem item : diff.getRemoved()) {
+                String title = extractTitleFromDiffItem(item);
+                messages.add("🗑️ Removed: " + title);
+            }
+        }
+        
+        // Check for updated items
+        if (diff.getUpdated() != null && !diff.getUpdated().isEmpty()) {
+            for (DiffItem item : diff.getUpdated()) {
+                String title = extractTitleFromDiffItem(item);
+                messages.add("🔄 Updated: " + title);
+            }
+        }
+        
+        // If we have specific messages, return them
+        if (!messages.isEmpty()) {
+            return String.join("\n", messages);
+        }
+        
+        // Fallback to generic message
+        return "Your itinerary has been updated.";
+    }
+    
+    /**
+     * Extract a readable title from a DiffItem.
+     */
+    private String extractTitleFromDiffItem(DiffItem item) {
+        if (item == null) {
+            return "Unknown item";
+        }
+        
+        // Try to get title from the item's ID or data
+        String id = item.getId();
+        if (id != null && !id.trim().isEmpty()) {
+            // Try to make the ID more readable
+            return id.replace("_", " ").replace("node", "").trim();
+        }
+        
+        return "Item";
     }
 }

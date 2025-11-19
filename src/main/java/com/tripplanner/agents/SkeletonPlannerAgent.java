@@ -301,9 +301,11 @@ public class SkeletonPlannerAgent extends BaseAgent {
             - Make titles informative enough to understand the plan flow
             
             Location Guidelines:
-            - For location.name, use the destination city name (e.g., "Tokyo, Japan")
+            - For location.name, use SPECIFIC area/district names within the destination (e.g., "Shibuya, Tokyo" not just "Tokyo")
+            - If the activity is in a specific neighborhood or district, include that in location.name
+            - Examples: "Chowk, Lucknow", "Hazratganj, Lucknow", "Shibuya, Tokyo", "Asakusa, Tokyo"
             - Do NOT use generic names like "Breakfast Spot" or "Morning Activity Area"
-            - The enrichment agent will add specific place details later
+            - The enrichment agent will add exact place details later, but specific area names help with accurate place search
             
             Budget & Pricing Guidelines:
             - ALL cost estimates must be PER PERSON

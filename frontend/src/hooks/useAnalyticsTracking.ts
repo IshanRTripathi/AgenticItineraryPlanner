@@ -9,7 +9,7 @@ import { analytics } from '@/services/analytics';
 export function useAnalyticsTracking() {
   // Track activity view
   const trackActivityView = useCallback((activityId: string, activityName: string, itineraryId?: string) => {
-    analytics.trackInteraction('activity_viewed', {
+    analytics.track('activity_viewed', {
       activityId,
       activityName,
       itineraryId
@@ -18,7 +18,7 @@ export function useAnalyticsTracking() {
 
   // Track day expansion
   const trackDayExpansion = useCallback((dayNumber: number, itineraryId?: string) => {
-    analytics.trackInteraction('day_expanded', {
+    analytics.track('day_expanded', {
       dayNumber,
       itineraryId
     });
@@ -26,7 +26,7 @@ export function useAnalyticsTracking() {
 
   // Track chat message
   const trackChatMessage = useCallback((messageLength: number, itineraryId?: string) => {
-    analytics.trackInteraction('chat_message_sent', {
+    analytics.track('chat_message_sent', {
       messageLength,
       itineraryId
     });
@@ -34,7 +34,7 @@ export function useAnalyticsTracking() {
 
   // Track search
   const trackSearch = useCallback((query: string, resultCount?: number, itineraryId?: string) => {
-    analytics.trackInteraction('search_initiated', {
+    analytics.track('search_initiated', {
       query,
       queryLength: query.length,
       resultCount,
@@ -44,12 +44,12 @@ export function useAnalyticsTracking() {
 
   // Track public link creation
   const trackPublicLinkCreation = useCallback((itineraryId: string, linkId?: string) => {
-    analytics.trackPublicLink(itineraryId, { linkId });
+    analytics.track('public_link_created', { itineraryId, linkId });
   }, []);
 
   // Track payment
   const trackPaymentInitiated = useCallback((amount: number, currency: string, itineraryId?: string) => {
-    analytics.trackPayment('initiated', {
+    analytics.track('payment_initiated', {
       amount,
       currency,
       itineraryId
@@ -57,7 +57,7 @@ export function useAnalyticsTracking() {
   }, []);
 
   const trackPaymentCompleted = useCallback((amount: number, currency: string, itineraryId?: string, provider?: string) => {
-    analytics.trackPayment('completed', {
+    analytics.track('payment_completed', {
       amount,
       currency,
       itineraryId,
@@ -66,7 +66,7 @@ export function useAnalyticsTracking() {
   }, []);
 
   const trackPaymentFailed = useCallback((amount: number, currency: string, error: string, itineraryId?: string) => {
-    analytics.trackPayment('failed', {
+    analytics.track('payment_failed', {
       amount,
       currency,
       error,
@@ -76,7 +76,7 @@ export function useAnalyticsTracking() {
 
   // Track booking completion
   const trackBookingCompleted = useCallback((provider: string, category: string, itineraryId?: string, amount?: number) => {
-    analytics.trackBooking('completed', {
+    analytics.track('booking_completed', {
       provider,
       category,
       itineraryId,
@@ -86,7 +86,7 @@ export function useAnalyticsTracking() {
   }, []);
 
   const trackBookingFailed = useCallback((provider: string, category: string, error: string, itineraryId?: string) => {
-    analytics.trackBooking('failed', {
+    analytics.track('booking_failed', {
       provider,
       category,
       error,

@@ -44,7 +44,7 @@ export function PremiumTripWizard() {
 
     // Track wizard started on mount
     useEffect(() => {
-        analytics.trackTripWizard('started');
+        analytics.track('trip_wizard_started');
     }, []);
 
     const STEPS = [

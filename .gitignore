@@ -76,3 +76,5 @@ application-local.properties
 application-secrets.yml
 application-secrets.properties
 frontend/dist/*
+LOOKER_STUDIO_DASHBOARD_DESIGN.md
+cloud-functions/analytics-ingestion/node_modules/*

@@ -44,6 +44,7 @@ public class PipelineOrchestrator {
     private final AgentEventPublisher agentEventPublisher;
     private final ExecutorService pipelineExecutor;
     private final UserDataService userDataService;
+    private final AgentTracker agentTracker;
 
     @Value("${itinerary.generation.pipeline.parallel:true}")
     private boolean enableParallel;
@@ -68,7 +69,9 @@ public class PipelineOrchestrator {
                                 CostEstimatorAgent costEstimatorAgent,
                                 EnrichmentAgent enrichmentAgent,
                                 ItineraryJsonService itineraryJsonService,
-                                AgentEventPublisher agentEventPublisher, UserDataService userDataService) {
+                                AgentEventPublisher agentEventPublisher, 
+                                UserDataService userDataService,
+                                AgentTracker agentTracker) {
         this.skeletonPlannerAgent = skeletonPlannerAgent;
         this.activityAgent = activityAgent;
         this.mealAgent = mealAgent;
@@ -77,6 +80,7 @@ public class PipelineOrchestrator {
         this.enrichmentAgent = enrichmentAgent;
         this.itineraryJsonService = itineraryJsonService;
         this.agentEventPublisher = agentEventPublisher;
+        this.agentTracker = agentTracker;
         
         // Create dedicated thread pool for pipeline execution
         this.pipelineExecutor = Executors.newFixedThreadPool(4, r -> {
@@ -180,8 +184,13 @@ public class PipelineOrchestrator {
                 
                 long costTime = 0;
                 try {
-                    String budgetTier = request.getBudgetTier() != null ? request.getBudgetTier() : "medium";
-                    costEstimatorAgent.estimateCosts(itineraryId, skeleton, budgetTier);
+                    final String budgetTier = request.getBudgetTier() != null ? request.getBudgetTier() : "medium";
+                    final NormalizedItinerary skeletonForCost = skeleton; // Create final copy for lambda
+                    Map<String, Object> context = new HashMap<>();
+                    context.put("itineraryId", itineraryId);
+                    context.put("budgetTier", budgetTier);
+                    agentTracker.trackAgentExecution("cost_estimator", context, 
+                        () -> { costEstimatorAgent.estimateCosts(itineraryId, skeletonForCost, budgetTier); return null; });
                     costTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime;
                     logger.info("Phase 4 complete ({} ms)", costTime);
                     publishPhaseComplete(itineraryId, executionId, "cost_estimation", costTime);
@@ -245,7 +254,11 @@ public class PipelineOrchestrator {
         try {
             CompletableFuture<NormalizedItinerary> skeletonFuture = CompletableFuture.supplyAsync(() -> {
                 logger.info("SkeletonPlannerAgent.generateSkeleton() started for itinerary: {}", itineraryId);
-                return skeletonPlannerAgent.generateSkeleton(itineraryId, request);
+                Map<String, Object> context = new HashMap<>();
+                context.put("itineraryId", itineraryId);
+                context.put("destination", request.getDestination());
+                return agentTracker.trackAgentExecution("skeleton_planner", context, 
+                    () -> skeletonPlannerAgent.generateSkeleton(itineraryId, request));
             }, pipelineExecutor);
             
             NormalizedItinerary result = skeletonFuture.get(skeletonTimeoutMs, TimeUnit.MILLISECONDS);
@@ -273,11 +286,15 @@ public class PipelineOrchestrator {
                 // Run all population agents in parallel
                 logger.info("Running population agents in PARALLEL");
                 
+                Map<String, Object> context = new HashMap<>();
+                context.put("itineraryId", itineraryId);
+                
                 CompletableFuture<Void> populationPhase = CompletableFuture.allOf(
                     CompletableFuture.runAsync(() -> {
                         try {
                             logger.info("[ActivityAgent] Starting...");
-                            activityAgent.populateAttractions(itineraryId, skeleton);
+                            agentTracker.trackAgentExecution("activity_agent", context, 
+                                () -> { activityAgent.populateAttractions(itineraryId, skeleton); return null; });
                             logger.info("[ActivityAgent] Complete");
                         } catch (Exception e) {
                             logger.warn("[ActivityAgent] Failed: {}", e.getMessage());
@@ -287,7 +304,8 @@ public class PipelineOrchestrator {
                     CompletableFuture.runAsync(() -> {
                         try {
                             logger.info("[MealAgent] Starting...");
-                            mealAgent.populateMeals(itineraryId, skeleton);
+                            agentTracker.trackAgentExecution("meal_agent", context, 
+                                () -> { mealAgent.populateMeals(itineraryId, skeleton); return null; });
                             logger.info("[MealAgent] Complete");
                         } catch (Exception e) {
                             logger.warn("[MealAgent] Failed: {}", e.getMessage());
@@ -297,7 +315,8 @@ public class PipelineOrchestrator {
                     CompletableFuture.runAsync(() -> {
                         try {
                             logger.info("[TransportAgent] Starting...");
-                            transportAgent.populateTransport(itineraryId, skeleton);
+                            agentTracker.trackAgentExecution("transport_agent", context, 
+                                () -> { transportAgent.populateTransport(itineraryId, skeleton); return null; });
                             logger.info("[TransportAgent] Complete");
                         } catch (Exception e) {
                             logger.warn("[TransportAgent] Failed: {}", e.getMessage());
@@ -351,20 +370,26 @@ public class PipelineOrchestrator {
             // Enrichment is optional - if it fails, we continue with basic data
             CompletableFuture<Void> enrichmentFuture = CompletableFuture.runAsync(() -> {
                 try {
-                    // Call EnrichmentAgent's executeInternal method directly
-                    Map<String, Object> enrichmentData = new HashMap<>();
-                    enrichmentData.put("taskType", "enrich");
-                    BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = 
-                        new BaseAgent.AgentRequest<>(enrichmentData, ChangeEngine.ApplyResult.class);
+                    Map<String, Object> context = new HashMap<>();
+                    context.put("itineraryId", itineraryId);
                     
-                    logger.info("Calling EnrichmentAgent.execute() for itinerary: {}", itineraryId);
-                    ChangeEngine.ApplyResult result = enrichmentAgent.execute(itineraryId, enrichmentRequest);
-                    
-                    if (result != null) {
-                        logger.info("Enrichment completed successfully. Version: {}", result.getToVersion());
-                    } else {
-                        logger.info("Enrichment completed with no changes");
-                    }
+                    agentTracker.trackAgentExecution("enrichment_agent", context, () -> {
+                        // Call EnrichmentAgent's executeInternal method directly
+                        Map<String, Object> enrichmentData = new HashMap<>();
+                        enrichmentData.put("taskType", "enrich");
+                        BaseAgent.AgentRequest<ChangeEngine.ApplyResult> enrichmentRequest = 
+                            new BaseAgent.AgentRequest<>(enrichmentData, ChangeEngine.ApplyResult.class);
+                        
+                        logger.info("Calling EnrichmentAgent.execute() for itinerary: {}", itineraryId);
+                        ChangeEngine.ApplyResult result = enrichmentAgent.execute(itineraryId, enrichmentRequest);
+                        
+                        if (result != null) {
+                            logger.info("Enrichment completed successfully. Version: {}", result.getToVersion());
+                        } else {
+                            logger.info("Enrichment completed with no changes");
+                        }
+                        return null;
+                    });
                 } catch (Exception e) {
                     logger.error("Enrichment failed for itinerary: {}", itineraryId, e);
                     logger.warn("Continuing with basic data (no coordinates/photos)");

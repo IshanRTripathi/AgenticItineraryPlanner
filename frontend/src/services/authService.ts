@@ -150,8 +150,8 @@ class AuthService {
       const isNewUser = result.user.metadata.creationTime === result.user.metadata.lastSignInTime;
       
       if (isNewUser) {
-        analytics.trackSignup('completed', { method: 'google' });
         analytics.identify(result.user.uid);
+        analytics.track('user_signup_completed', { method: 'google' });
       } else {
         analytics.identify(result.user.uid);
       }
@@ -203,6 +203,7 @@ class AuthService {
       this.clearTokenRefresh();
       await firebaseSignOut(auth);
       this.updateApiClientToken('');
+      analytics.clearIdentity();
       return { success: true };
     } catch (error: any) {
       console.error('[Auth] Sign out failed:', error);

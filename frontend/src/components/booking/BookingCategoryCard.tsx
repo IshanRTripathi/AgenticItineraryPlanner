@@ -81,7 +81,7 @@ export function BookingCategoryCard({
 
   const handleBookNow = (booking: CategorizedBooking) => {
     // Track booking initiated
-    analytics.trackBooking('initiated', {
+    analytics.track('booking_initiated', {
       provider: 'easemytrip',
       category: booking.category,
       itineraryId: booking.id,

@@ -22,11 +22,12 @@ class AnalyticsService {
 
   constructor() {
     this.sessionId = this.generateSessionId();
+    this.userId = this.restoreUserId();
     this.enabled = import.meta.env.VITE_ENABLE_ANALYTICS !== 'false';
     this.apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
     
     if (this.enabled) {
-      console.log('[Analytics] Initialized - Session:', this.sessionId);
+      console.log('[Analytics] Initialized - Session:', this.sessionId, 'User:', this.userId || 'anonymous');
     }
   }
 
@@ -66,7 +67,24 @@ class AnalyticsService {
    */
   identify(userId: string) {
     this.userId = userId;
+    localStorage.setItem('analytics_user_id', userId);
     console.log('[Analytics] User identified:', userId);
+  }
+
+  /**
+   * Clear user identity (on logout).
+   */
+  clearIdentity() {
+    this.userId = null;
+    localStorage.removeItem('analytics_user_id');
+    console.log('[Analytics] User identity cleared');
+  }
+
+  /**
+   * Restore userId from localStorage.
+   */
+  private restoreUserId(): string | null {
+    return localStorage.getItem('analytics_user_id');
   }
 
   /**

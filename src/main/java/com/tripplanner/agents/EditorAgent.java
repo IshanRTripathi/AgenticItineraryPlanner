@@ -25,6 +25,8 @@ public class EditorAgent extends BaseAgent {
     private final ObjectMapper objectMapper;
     private final LLMResponseHandler llmResponseHandler;
     private final ItineraryMigrationService migrationService;
+    private final EnrichmentAgent enrichmentAgent;
+    private final GooglePlacesService googlePlacesService;
     
     public EditorAgent(AgentEventBus eventBus,
                       SummarizationService summarizationService,
@@ -33,7 +35,9 @@ public class EditorAgent extends BaseAgent {
                       ItineraryJsonService itineraryJsonService,
                       ObjectMapper objectMapper,
                       LLMResponseHandler llmResponseHandler,
-                      ItineraryMigrationService migrationService) {
+                      ItineraryMigrationService migrationService,
+                      EnrichmentAgent enrichmentAgent,
+                      GooglePlacesService googlePlacesService) {
         super(eventBus, AgentEvent.AgentKind.EDITOR);
         this.summarizationService = summarizationService;
         this.changeEngine = changeEngine;
@@ -42,6 +46,8 @@ public class EditorAgent extends BaseAgent {
         this.objectMapper = objectMapper;
         this.llmResponseHandler = llmResponseHandler;
         this.migrationService = migrationService;
+        this.enrichmentAgent = enrichmentAgent;
+        this.googlePlacesService = googlePlacesService;
     }
     
     @Override
@@ -145,10 +151,26 @@ public class EditorAgent extends BaseAgent {
             
             emitProgress(itineraryId, 80, "Applying changes", "apply");
             
+            // Generate descriptive response message BEFORE applying (so we can use it)
+            String responseMessage = generateResponseMessage(changeSet, itinerary);
+            
+            // Update the changeSet reason with the descriptive message
+            // This will be available to the frontend in the response
+            if (changeSet.getReason() == null || changeSet.getReason().trim().isEmpty()) {
+                changeSet.setReason(responseMessage);
+            } else {
+                // Append to existing reason
+                changeSet.setReason(changeSet.getReason() + "\n\n" + responseMessage);
+            }
+            
             // Apply changes using changeEngine with the itinerary object to ensure consistency
             ChangeEngine.ApplyResult applyResult = changeEngine.apply(itinerary, changeSet);
             
-            emitProgress(itineraryId, 100, "Changes applied successfully", "complete");
+            // Enrich newly added/replaced nodes with Google Places data
+            emitProgress(itineraryId, 90, "Enriching new nodes", "enrichment");
+            enrichNewlyAddedNodes(itineraryId, changeSet);
+            
+            emitProgress(itineraryId, 100, responseMessage, "complete");
             
             // Return ApplyResult cast to generic type T
             @SuppressWarnings("unchecked")
@@ -988,5 +1010,268 @@ public class EditorAgent extends BaseAgent {
             logger.error("Failed to create ChangeSet schema", e);
             return null;
         }
+    }
+    
+    /**
+     * Enrich newly added or replaced nodes with Google Places data.
+     * This ensures chat-added nodes have the same rich data as pipeline-generated nodes.
+     */
+    private void enrichNewlyAddedNodes(String itineraryId, ChangeSet changeSet) {
+        if (changeSet == null || changeSet.getOps() == null || changeSet.getOps().isEmpty()) {
+            return;
+        }
+        
+        logger.info("🔍 [EditorAgent] Enriching newly added/replaced nodes for itinerary: {}", itineraryId);
+        
+        try {
+            // Reload itinerary to get the latest state after changes
+            Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+            if (itineraryOpt.isEmpty()) {
+                logger.warn("⚠️ [EditorAgent] Cannot enrich nodes - itinerary not found: {}", itineraryId);
+                return;
+            }
+            
+            NormalizedItinerary itinerary = itineraryOpt.get();
+            String destination = itinerary.getDestination();
+            
+            // Track nodes that need enrichment
+            java.util.List<NormalizedNode> nodesToEnrich = new java.util.ArrayList<>();
+            
+            // Find nodes that were added or replaced
+            for (ChangeOperation op : changeSet.getOps()) {
+                String opType = op.getOp().toLowerCase();
+                
+                if ("insert".equals(opType) || "replace".equals(opType)) {
+                    // Find the node in the itinerary
+                    NormalizedNode node = findNodeById(itinerary, op.getId());
+                    if (node != null && node.getLocation() != null) {
+                        nodesToEnrich.add(node);
+                        logger.info("📝 [EditorAgent] Node {} needs enrichment: {}", node.getId(), node.getTitle());
+                    }
+                }
+            }
+            
+            if (nodesToEnrich.isEmpty()) {
+                logger.info("✅ [EditorAgent] No nodes need enrichment");
+                return;
+            }
+            
+            logger.info("🔄 [EditorAgent] Enriching {} nodes", nodesToEnrich.size());
+            
+            // Enrich each node
+            for (NormalizedNode node : nodesToEnrich) {
+                try {
+                    enrichNode(itineraryId, node, destination);
+                } catch (Exception e) {
+                    logger.error("❌ [EditorAgent] Failed to enrich node {}: {}", node.getId(), e.getMessage(), e);
+                    // Continue with other nodes even if one fails
+                }
+            }
+            
+            // Save the enriched itinerary once after all nodes are enriched
+            logger.info("💾 [EditorAgent] Saving enriched itinerary");
+            itineraryJsonService.updateItinerary(itinerary);
+            logger.info("✅ [EditorAgent] Node enrichment complete and saved");
+            
+        } catch (Exception e) {
+            logger.error("❌ [EditorAgent] Failed to enrich nodes: {}", e.getMessage(), e);
+            // Don't throw - enrichment failure shouldn't break the edit operation
+        }
+    }
+    
+    /**
+     * Enrich a single node with Google Places data.
+     * Uses caching to avoid duplicate API calls.
+     */
+    private void enrichNode(String itineraryId, NormalizedNode node, String destination) {
+        logger.info("🔍 [EditorAgent] Enriching node: {} - {}", node.getId(), node.getTitle());
+        
+        // Check if node already has enrichment data (photos, rating, etc.)
+        boolean hasPhotos = node.getLocation().getPhotos() != null && !node.getLocation().getPhotos().isEmpty();
+        boolean hasRating = node.getLocation().getRating() != null;
+        boolean hasUserRatings = node.getLocation().getUserRatingsTotal() != null;
+        
+        if (hasPhotos && hasRating && hasUserRatings) {
+            logger.info("✅ [EditorAgent] Node already enriched, skipping");
+            return;
+        }
+        
+        // Step 1: Search for place if no placeId
+        if (node.getLocation().getPlaceId() == null || node.getLocation().getPlaceId().trim().isEmpty()) {
+            String searchQuery = node.getTitle();
+            if (node.getLocation().getName() != null && !node.getLocation().getName().trim().isEmpty()) {
+                searchQuery = node.getLocation().getName();
+            }
+            
+            logger.info("🔍 [EditorAgent] Searching for place: '{}' in '{}'", searchQuery, destination);
+            
+            try {
+                // searchPlace is @Cacheable, so duplicate calls are cached
+                PlaceSearchResult searchResult = googlePlacesService.searchPlace(searchQuery, destination);
+                
+                if (searchResult != null) {
+                    // Update node title with actual place name from Google
+                    node.setTitle(searchResult.getName());
+                    logger.info("📝 [EditorAgent] Updated node title to: {}", searchResult.getName());
+                    
+                    // Update node with search results
+                    if (node.getLocation().getCoordinates() == null) {
+                        node.getLocation().setCoordinates(new Coordinates());
+                    }
+                    node.getLocation().getCoordinates().setLat(
+                        searchResult.getGeometry().getLocation().getLatitude());
+                    node.getLocation().getCoordinates().setLng(
+                        searchResult.getGeometry().getLocation().getLongitude());
+                    node.getLocation().setPlaceId(searchResult.getPlaceId());
+                    node.getLocation().setName(searchResult.getName());
+                    node.getLocation().setAddress(searchResult.getFormattedAddress());
+                    
+                    if (searchResult.getRating() != null) {
+                        node.getLocation().setRating(searchResult.getRating());
+                    }
+                    
+                    logger.info("✅ [EditorAgent] Found place: {} [{}]", searchResult.getName(), searchResult.getPlaceId());
+                }
+            } catch (Exception e) {
+                logger.warn("⚠️ [EditorAgent] Place search failed for '{}': {}", searchQuery, e.getMessage());
+                return; // Don't proceed to details if search failed
+            }
+        }
+        
+        // Step 2: Get place details if we have a placeId and missing enrichment data
+        if (node.getLocation().getPlaceId() != null && !node.getLocation().getPlaceId().trim().isEmpty()) {
+            try {
+                logger.info("📸 [EditorAgent] Getting place details for placeId: {}", node.getLocation().getPlaceId());
+                
+                // getPlaceDetails is @Cacheable, so duplicate calls are cached
+                PlaceDetails placeDetails = googlePlacesService.getPlaceDetails(node.getLocation().getPlaceId());
+                
+                if (placeDetails != null) {
+                    // Update node title with actual place name from Google if available
+                    if (placeDetails.getName() != null && !placeDetails.getName().trim().isEmpty()) {
+                        node.setTitle(placeDetails.getName());
+                        node.getLocation().setName(placeDetails.getName());
+                        logger.info("📝 [EditorAgent] Updated node title to: {}", placeDetails.getName());
+                    }
+                    
+                    // Update address if more detailed
+                    if (placeDetails.getFormattedAddress() != null && !placeDetails.getFormattedAddress().trim().isEmpty()) {
+                        node.getLocation().setAddress(placeDetails.getFormattedAddress());
+                    }
+                    
+                    // Set photos only if missing
+                    if (!hasPhotos && placeDetails.getPhotos() != null && !placeDetails.getPhotos().isEmpty()) {
+                        java.util.List<String> photoRefs = placeDetails.getPhotos().stream()
+                            .limit(5)
+                            .map(Photo::getPhotoReference)
+                            .collect(java.util.stream.Collectors.toList());
+                        node.getLocation().setPhotos(photoRefs);
+                        logger.info("📸 [EditorAgent] Set {} photos", photoRefs.size());
+                    }
+                    
+                    // Set rating and reviews only if missing
+                    if (!hasRating && placeDetails.getRating() != null) {
+                        node.getLocation().setRating(placeDetails.getRating());
+                    }
+                    if (!hasUserRatings && placeDetails.getUserRatingsTotal() != null) {
+                        node.getLocation().setUserRatingsTotal(placeDetails.getUserRatingsTotal());
+                    }
+                    if (placeDetails.getPriceLevel() != null) {
+                        node.getLocation().setPriceLevel(placeDetails.getPriceLevel());
+                    }
+                    
+                    logger.info("✅ [EditorAgent] Enriched node with rating: {}, reviews: {}, photos: {}", 
+                        placeDetails.getRating(), 
+                        placeDetails.getUserRatingsTotal(),
+                        placeDetails.getPhotos() != null ? placeDetails.getPhotos().size() : 0);
+                }
+            } catch (Exception e) {
+                logger.warn("⚠️ [EditorAgent] Failed to get place details: {}", e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Find a node by ID in the itinerary.
+     */
+    private NormalizedNode findNodeById(NormalizedItinerary itinerary, String nodeId) {
+        if (itinerary.getDays() == null) {
+            return null;
+        }
+        
+        for (NormalizedDay day : itinerary.getDays()) {
+            if (day.getNodes() == null) {
+                continue;
+            }
+            
+            for (NormalizedNode node : day.getNodes()) {
+                if (nodeId.equals(node.getId())) {
+                    return node;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Generate a descriptive response message based on the changes made.
+     * This provides specific feedback to the user about what was changed.
+     */
+    private String generateResponseMessage(ChangeSet changeSet, NormalizedItinerary itinerary) {
+        if (changeSet == null || changeSet.getOps() == null || changeSet.getOps().isEmpty()) {
+            return "No changes were made to your itinerary";
+        }
+        
+        java.util.List<String> messages = new java.util.ArrayList<>();
+        
+        for (ChangeOperation op : changeSet.getOps()) {
+            String opType = op.getOp().toLowerCase();
+            String nodeTitle = getNodeTitle(op, itinerary);
+            Integer dayNumber = changeSet.getDay();
+            
+            switch (opType) {
+                case "insert":
+                    messages.add(String.format("✅ Added '%s' to Day %d", nodeTitle, dayNumber));
+                    break;
+                case "delete":
+                    messages.add(String.format("🗑️ Removed '%s' from Day %d", nodeTitle, dayNumber));
+                    break;
+                case "replace":
+                    messages.add(String.format("🔄 Updated '%s' on Day %d", nodeTitle, dayNumber));
+                    break;
+                case "move":
+                    messages.add(String.format("⏰ Rescheduled '%s' on Day %d", nodeTitle, dayNumber));
+                    break;
+                default:
+                    messages.add(String.format("Modified '%s' on Day %d", nodeTitle, dayNumber));
+            }
+        }
+        
+        // If we have a reason from the ChangeSet, add it
+        if (changeSet.getReason() != null && !changeSet.getReason().trim().isEmpty()) {
+            messages.add("Reason: " + changeSet.getReason());
+        }
+        
+        return String.join("\n", messages);
+    }
+    
+    /**
+     * Get the title of a node from the operation or itinerary.
+     */
+    private String getNodeTitle(ChangeOperation op, NormalizedItinerary itinerary) {
+        // First try to get title from the operation's node data
+        if (op.getNode() != null && op.getNode().getTitle() != null) {
+            return op.getNode().getTitle();
+        }
+        
+        // Otherwise, look up the node in the itinerary
+        NormalizedNode node = findNodeById(itinerary, op.getId());
+        if (node != null && node.getTitle() != null) {
+            return node.getTitle();
+        }
+        
+        // Fallback to node ID
+        return op.getId();
     }
 }

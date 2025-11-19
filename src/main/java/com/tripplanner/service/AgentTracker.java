@@ -104,6 +104,8 @@ public class AgentTracker {
             Map<String, Object> event = new HashMap<>();
             event.put("eventName", eventName);
             event.put("timestamp", System.currentTimeMillis());
+            event.put("userId", com.tripplanner.util.UserContext.getUserId());
+            event.put("sessionId", null);
             event.put("platform", "backend");
             event.put("properties", properties);
             

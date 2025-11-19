@@ -268,13 +268,13 @@ public class GooglePlacesService {
      * @param location The location string to geocode (e.g., "Jammu Kashmir, India")
      * @return Coordinates object with lat/lng, or null if geocoding fails
      */
-    @Cacheable(value = "geocoding", key = "#location")
-    private com.tripplanner.dto.Coordinates geocodeLocation(String location) {
+    @Cacheable(value = "geocoding", key = "#location.toLowerCase().trim()")
+    public com.tripplanner.dto.Coordinates geocodeLocation(String location) {
         if (location == null || location.trim().isEmpty()) {
             return null;
         }
         
-        logger.debug("Geocoding location: {}", location);
+        logger.info("🔍 [GooglePlacesService] Geocoding location: '{}'", location);
         
         try {
             // Build geocoding API URL
@@ -284,6 +284,8 @@ public class GooglePlacesService {
                     .build(false)
                     .toUriString();
             
+            logger.debug("Geocoding API URL: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
+            
             // Make request (no retry needed for geocoding, it's fast and reliable)
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             
@@ -292,10 +294,13 @@ public class GooglePlacesService {
                 com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(response.getBody());
                 String status = root.path("status").asText();
                 
+                logger.debug("Geocoding API status: {}", status);
+                
                 if ("OK".equals(status)) {
                     com.fasterxml.jackson.databind.JsonNode results = root.path("results");
                     if (results.isArray() && results.size() > 0) {
                         com.fasterxml.jackson.databind.JsonNode firstResult = results.get(0);
+                        String formattedAddress = firstResult.path("formatted_address").asText();
                         com.fasterxml.jackson.databind.JsonNode locationNode = firstResult
                                 .path("geometry")
                                 .path("location");
@@ -307,17 +312,18 @@ public class GooglePlacesService {
                         coords.setLat(lat);
                         coords.setLng(lng);
                         
-                        logger.info("Geocoded '{}' to coordinates: ({}, {})", location, lat, lng);
+                        logger.info("✅ [GooglePlacesService] Geocoded '{}' to: '{}' at ({}, {})", 
+                            location, formattedAddress, lat, lng);
                         return coords;
                     }
                 } else if ("ZERO_RESULTS".equals(status)) {
-                    logger.warn("No geocoding results found for location: {}", location);
+                    logger.warn("⚠️ [GooglePlacesService] No geocoding results found for location: '{}'", location);
                 } else {
-                    logger.warn("Geocoding API returned status: {} for location: {}", status, location);
+                    logger.warn("⚠️ [GooglePlacesService] Geocoding API returned status: {} for location: '{}'", status, location);
                 }
             }
         } catch (Exception e) {
-            logger.error("Failed to geocode location '{}': {}", location, e.getMessage());
+            logger.error("❌ [GooglePlacesService] Failed to geocode location '{}': {}", location, e.getMessage(), e);
         }
         
         return null;
@@ -518,10 +524,10 @@ public class GooglePlacesService {
      */
     @Cacheable(value = "placeSearch", key = "#query + '_' + #location")
     public PlaceSearchResult searchPlace(String query, String location) {
-        logger.debug("Searching place: query='{}', location='{}'", query, location);
+        logger.info("🔍 [GooglePlacesService] Searching place: query='{}', location='{}'", query, location);
         
         if (query == null || query.trim().isEmpty()) {
-            logger.warn("Empty query provided to searchPlace");
+            logger.warn("⚠️ [GooglePlacesService] Empty query provided to searchPlace");
             return null;
         }
         
@@ -530,10 +536,22 @@ public class GooglePlacesService {
         checkCircuitBreaker();
         
         try {
-            // Build search query - include location for better context
+            // Build search query - ALWAYS include location for better context
+            // This ensures we search for "place name + city" which is more specific
             String searchQuery = query;
             if (location != null && !location.trim().isEmpty()) {
-                searchQuery = query + " " + location;
+                // Check if query already contains the location to avoid duplication
+                String queryLower = query.toLowerCase();
+                String locationLower = location.toLowerCase();
+                
+                if (!queryLower.contains(locationLower)) {
+                    searchQuery = query + ", " + location;
+                    logger.info("📝 [GooglePlacesService] Combined search query: '{}'", searchQuery);
+                } else {
+                    logger.info("📝 [GooglePlacesService] Query already contains location, using as-is: '{}'", searchQuery);
+                }
+            } else {
+                logger.warn("⚠️ [GooglePlacesService] No location provided, searching with query only");
             }
             
             // Build URL with location bias using destination coordinates
@@ -546,18 +564,24 @@ public class GooglePlacesService {
             if (location != null && !location.trim().isEmpty()) {
                 try {
                     // Geocode the destination to get its coordinates
+                    logger.info("🌍 [GooglePlacesService] Geocoding destination: '{}'", location);
                     com.tripplanner.dto.Coordinates destCoords = geocodeLocation(location);
                     if (destCoords != null && destCoords.getLat() != null && destCoords.getLng() != null) {
-                        // Add location bias with a 200km radius around destination
-                        String locationBias = String.format("circle:200000@%f,%f", 
+                        // Add location bias with a 50km radius around destination (tighter radius for better accuracy)
+                        String locationBias = String.format("circle:50000@%f,%f", 
                             destCoords.getLat(), destCoords.getLng());
                         urlBuilder.queryParam("locationbias", locationBias);
-                        logger.debug("Added location bias: {} for destination: {}", locationBias, location);
+                        logger.info("✅ [GooglePlacesService] Added location bias: {} for destination: '{}' (coords: {}, {})", 
+                            locationBias, location, destCoords.getLat(), destCoords.getLng());
+                    } else {
+                        logger.warn("⚠️ [GooglePlacesService] Geocoding returned null coordinates for destination: '{}'", location);
                     }
                 } catch (Exception e) {
-                    logger.warn("Failed to geocode destination '{}', searching without location bias: {}", 
-                        location, e.getMessage());
+                    logger.error("❌ [GooglePlacesService] Failed to geocode destination '{}', searching without location bias: {}", 
+                        location, e.getMessage(), e);
                 }
+            } else {
+                logger.warn("⚠️ [GooglePlacesService] No destination provided for location bias");
             }
             
             String url = urlBuilder.build(false).toUriString();
@@ -580,11 +604,14 @@ public class GooglePlacesService {
                 response.getResults() != null && !response.getResults().isEmpty()) {
                 
                 PlaceSearchResult firstResult = response.getResults().get(0);
-                logger.info("Found place: {} at ({}, {}) [placeId: {}]", 
+                logger.info("✅ [GooglePlacesService] Found place: '{}' at ({}, {}) [placeId: {}]", 
                     firstResult.getName(),
                     firstResult.getGeometry().getLocation().getLatitude(),
                     firstResult.getGeometry().getLocation().getLongitude(),
                     firstResult.getPlaceId());
+                logger.info("   📍 Address: {}", firstResult.getFormattedAddress());
+                logger.info("   🔍 Search query was: '{}'", searchQuery);
+                logger.info("   🌍 Location bias was: {}", location);
                 recordSuccess();
                 return firstResult;
                 
