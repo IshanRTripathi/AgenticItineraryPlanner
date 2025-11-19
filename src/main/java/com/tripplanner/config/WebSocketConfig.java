@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
     
-    @Value("${app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000}")
     private String allowedOrigins;
     
     @Override
@@ -45,7 +45,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         logger.info("=== WEBSOCKET CONFIG: REGISTERING STOMP ENDPOINTS ===");
         
-        String[] origins = allowedOrigins.split(",");
+        // Parse and clean origins
+        String[] origins = java.util.Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toArray(String[]::new);
+        
+        // Fallback to localhost if no origins configured
+        if (origins.length == 0) {
+            origins = new String[]{
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:3000"
+            };
+        }
+        
         logger.info("Allowed origins: {}", String.join(", ", origins));
         
         // Register STOMP endpoint with SockJS fallback

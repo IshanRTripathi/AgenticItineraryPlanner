@@ -18,7 +18,7 @@ import java.util.List;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
     
-    @Value("${app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:3000}")
     private String allowedOrigins;
 
     @Override
@@ -36,7 +36,22 @@ public class CorsConfig implements WebMvcConfigurer {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Use specific origins from configuration (supports both dev and production)
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        // Trim whitespace and filter empty strings
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toList();
+        
+        if (origins.isEmpty()) {
+            // Fallback to localhost if no origins configured
+            origins = Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://127.0.0.1:5173",
+                "http://127.0.0.1:3000"
+            );
+        }
+        
         configuration.setAllowedOrigins(origins);
         
         // Allow all HTTP methods including WebSocket upgrade

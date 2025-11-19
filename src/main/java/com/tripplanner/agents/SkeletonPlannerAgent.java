@@ -283,6 +283,8 @@ public class SkeletonPlannerAgent extends BaseAgent {
             3. Set rough timing (start/end times)
             4. Use DESCRIPTIVE placeholder titles that indicate the type of activity
             5. CRITICAL: Use consistent node ID format: "day{dayNumber}_node{sequenceNumber}"
+            6. Consider party size when planning activities (group-friendly vs individual)
+            7. Respect budget tier and ensure activities match the budget level
             
             Node ID Format Rules:
             - Day 1: "day1_node1", "day1_node2", "day1_node3", etc.
@@ -303,10 +305,19 @@ public class SkeletonPlannerAgent extends BaseAgent {
             - Do NOT use generic names like "Breakfast Spot" or "Morning Activity Area"
             - The enrichment agent will add specific place details later
             
+            Budget & Pricing Guidelines:
+            - ALL cost estimates must be PER PERSON
+            - Consider the destination's local currency and cost of living
+            - Budget tiers should reflect realistic local prices:
+              * Low: Budget-friendly options (hostels, street food, free attractions)
+              * Medium: Mid-range options (3-star hotels, casual dining, paid attractions)
+              * High: Premium options (4-5 star hotels, fine dining, exclusive experiences)
+            - When party size is provided, plan activities that work well for groups
+            
             Do NOT include:
             - Specific place names or addresses
             - Detailed descriptions
-            - Costs
+            - Exact costs (other agents will calculate these)
             - Exact coordinates
             - Reviews or ratings
             
@@ -336,10 +347,56 @@ public class SkeletonPlannerAgent extends BaseAgent {
         prompt.append("Day ").append(dayNumber).append(" of ").append(request.getDurationDays()).append("\n");
         prompt.append("Date: ").append(dayDate.format(DateTimeFormatter.ISO_LOCAL_DATE)).append("\n");
         prompt.append("Destination: ").append(request.getDestination()).append("\n");
-        prompt.append("Budget: ").append(request.getBudgetTier()).append("\n");
         
+        // Add start location if provided
+        if (request.getStartLocation() != null && !request.getStartLocation().isEmpty()) {
+            prompt.append("Starting from: ").append(request.getStartLocation()).append("\n");
+        }
+        
+        // Add party details
+        if (request.getParty() != null) {
+            int totalGuests = request.getParty().getTotalGuests();
+            prompt.append("Party size: ").append(totalGuests).append(" people");
+            prompt.append(" (").append(request.getParty().getAdults()).append(" adults");
+            if (request.getParty().getChildren() > 0) {
+                prompt.append(", ").append(request.getParty().getChildren()).append(" children");
+            }
+            if (request.getParty().getInfants() > 0) {
+                prompt.append(", ").append(request.getParty().getInfants()).append(" infants");
+            }
+            prompt.append(")\n");
+            
+            // Add note about group-appropriate activities
+            if (totalGuests > 1) {
+                prompt.append("NOTE: Plan activities suitable for groups of ").append(totalGuests).append(" people.\n");
+            }
+        }
+        
+        // Enhanced budget information with currency context
+        String budgetTier = request.getBudgetTier() != null ? request.getBudgetTier() : "medium";
+        prompt.append("\nBudget tier: ").append(budgetTier).append("\n");
+        prompt.append("IMPORTANT: Determine appropriate budget ranges for ").append(request.getDestination());
+        prompt.append(" in the local currency based on the '").append(budgetTier).append("' tier.\n");
+        prompt.append("All cost estimates should be PER PERSON.\n");
+        
+        // Add specific budget amounts if provided
+        if (request.getBudgetMin() != null || request.getBudgetMax() != null) {
+            prompt.append("User's budget range: ");
+            if (request.getBudgetMin() != null) {
+                prompt.append(request.getBudgetMin());
+            }
+            if (request.getBudgetMax() != null) {
+                if (request.getBudgetMin() != null) {
+                    prompt.append(" - ");
+                }
+                prompt.append(request.getBudgetMax());
+            }
+            prompt.append(" per person\n");
+        }
+        
+        // Add interests
         if (request.getInterests() != null && !request.getInterests().isEmpty()) {
-            prompt.append("Interests: ").append(String.join(", ", request.getInterests())).append("\n");
+            prompt.append("\nInterests: ").append(String.join(", ", request.getInterests())).append("\n");
         }
         
         // CRITICAL: Include user's custom instructions/constraints
@@ -354,6 +411,9 @@ public class SkeletonPlannerAgent extends BaseAgent {
         prompt.append("\nGenerate time slots with node type placeholders.\n");
         prompt.append("Use descriptive titles like 'Morning Cultural Exploration', 'Lunch at Local Restaurant', etc.\n");
         prompt.append("Focus on timing and logical flow, not specific places.\n");
+        prompt.append("Consider the party size when planning activities and meal venues.\n");
+        prompt.append("Consider multiple cities if destination is a general location like a state or country\n");
+        prompt.append("Day 1 Start and Day last end must be travel (flight/train/bus applicable based on distance and time) from origin to destination and vice versa.\n");
         prompt.append("CRITICAL: Use node IDs in format 'day").append(dayNumber).append("_node1', 'day").append(dayNumber).append("_node2', etc.\n");
         
         return prompt.toString();
