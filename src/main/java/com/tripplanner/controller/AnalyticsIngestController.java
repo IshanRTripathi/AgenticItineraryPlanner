@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -20,6 +21,12 @@ import java.util.concurrent.CompletableFuture;
  */
 @RestController
 @RequestMapping("/api/v1/analytics")
+@CrossOrigin(
+    origins = "*",
+    allowedHeaders = "*",
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS},
+    maxAge = 3600
+)
 public class AnalyticsIngestController {
     
     private static final Logger logger = LoggerFactory.getLogger(AnalyticsIngestController.class);
@@ -36,6 +43,10 @@ public class AnalyticsIngestController {
     public AnalyticsIngestController(PubSubTemplate pubSubTemplate) {
         this.pubSubTemplate = pubSubTemplate;
         this.gson = new Gson();
+        
+        if (pubSubTemplate == null) {
+            logger.warn("PubSubTemplate is null - analytics events will be logged but not published");
+        }
     }
     
     /**
@@ -54,7 +65,11 @@ public class AnalyticsIngestController {
      */
     @PostMapping("/events")
     public ResponseEntity<Map<String, Object>> trackEvent(@RequestBody Map<String, Object> event) {
+        logger.info("=== ANALYTICS EVENT RECEIVED ===");
+        logger.info("Event: {}", event);
+        
         if (!analyticsEnabled) {
+            logger.warn("Analytics is disabled");
             return ResponseEntity.ok(Map.of("success", false, "message", "Analytics disabled"));
         }
         
@@ -66,9 +81,16 @@ public class AnalyticsIngestController {
         }
         
         try {
-            // Publish to Pub/Sub asynchronously (non-blocking)
             String eventJson = gson.toJson(event);
             
+            // If PubSub is not available, just log the event
+            if (pubSubTemplate == null) {
+                logger.info("Analytics event (PubSub unavailable): {} - {}", 
+                           event.get("eventName"), eventJson);
+                return ResponseEntity.ok(Map.of("success", true, "mode", "logging"));
+            }
+            
+            // Publish to Pub/Sub asynchronously (non-blocking)
             CompletableFuture<String> future = pubSubTemplate.publish(analyticsTopic, eventJson);
             
             // Don't wait for publish to complete - return immediately
@@ -99,6 +121,7 @@ public class AnalyticsIngestController {
      *   "events": [ {...}, {...}, ... ]
      * }
      */
+    @CrossOrigin(origins = "*", allowedHeaders = "*")
     @PostMapping("/events/batch")
     public ResponseEntity<Map<String, Object>> trackEventsBatch(@RequestBody Map<String, Object> request) {
         if (!analyticsEnabled) {
@@ -149,6 +172,15 @@ public class AnalyticsIngestController {
             "status", analyticsEnabled ? "enabled" : "disabled",
             "topic", analyticsTopic
         ));
+    }
+    
+    /**
+     * Handle CORS preflight requests explicitly.
+     */
+    @RequestMapping(value = "/events", method = RequestMethod.OPTIONS)
+    public ResponseEntity<Void> handleOptions() {
+        logger.info("=== ANALYTICS PREFLIGHT OPTIONS REQUEST ===");
+        return ResponseEntity.ok().build();
     }
     
     /**

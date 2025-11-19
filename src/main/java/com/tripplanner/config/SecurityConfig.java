@@ -17,6 +17,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/v1/analytics/**").permitAll()  // Allow analytics without auth
                 .anyRequest().permitAll()
             );
         return http.build();

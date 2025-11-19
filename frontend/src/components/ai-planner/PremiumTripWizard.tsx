@@ -3,7 +3,7 @@
  * Enhanced 4-step wizard using premium UI components
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { WizardProgress } from './WizardProgress';
@@ -41,6 +41,11 @@ export function PremiumTripWizard() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+
+    // Track wizard started on mount
+    useEffect(() => {
+        analytics.trackTripWizard('started');
+    }, []);
 
     const STEPS = [
         { id: 1, title: t('pages.planner.steps.destination'), component: PremiumDestinationStep },

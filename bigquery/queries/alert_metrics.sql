@@ -8,8 +8,8 @@ SELECT
   date,
   total_cost_usd as cost,
   CASE
-    WHEN total_cost_usd > 50 THEN 'CRITICAL'
-    WHEN total_cost_usd > 20 THEN 'WARNING'
+    WHEN total_cost_usd > 15 THEN 'CRITICAL'
+    WHEN total_cost_usd > 5 THEN 'WARNING'
     ELSE 'NORMAL'
   END as severity,
   CURRENT_TIMESTAMP() as check_time
@@ -27,8 +27,8 @@ SELECT
   days_elapsed,
   days_remaining,
   CASE
-    WHEN projected_monthly_cost > 500 THEN 'CRITICAL'
-    WHEN projected_monthly_cost > 300 THEN 'WARNING'
+    WHEN projected_monthly_cost > 200 THEN 'CRITICAL'
+    WHEN projected_monthly_cost > 100 THEN 'WARNING'
     ELSE 'NORMAL'
   END as severity,
   CURRENT_TIMESTAMP() as check_time

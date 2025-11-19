@@ -2,6 +2,7 @@ package com.tripplanner.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -9,6 +10,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 /**
  * WebSocket configuration for real-time communication.
@@ -19,6 +21,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
+    
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
     
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -40,14 +45,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         logger.info("=== WEBSOCKET CONFIG: REGISTERING STOMP ENDPOINTS ===");
         
-        // Register STOMP endpoint for WebSocket connections
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // Allow all origins for development
-                .withSockJS()
-                .setSessionCookieNeeded(false) // Prevent session cookie issues
-                .setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"); // Use CDN for consistency
+        String[] origins = allowedOrigins.split(",");
+        logger.info("Allowed origins: {}", String.join(", ", origins));
         
-        logger.info("STOMP endpoints registered successfully with session management optimizations");
+        // Register STOMP endpoint with SockJS fallback
+        // Use specific origins from configuration to allow credentials
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins(origins)
+                .withSockJS()
+                .setSessionCookieNeeded(false)
+                .setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js");
+        
+        // Also register without SockJS for native WebSocket support
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins(origins);
+        
+        logger.info("STOMP endpoints registered successfully with configured origins");
     }
     
     /**

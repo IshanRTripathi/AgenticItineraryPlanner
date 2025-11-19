@@ -1,5 +1,6 @@
 package com.tripplanner.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -9,12 +10,16 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * CORS configuration for allowing cross-origin requests from the frontend
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
+    
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -22,7 +27,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns("*")  // Allow all origins temporarily
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true)  // Allow credentials for authenticated requests
+                .allowCredentials(false)  // Disable credentials to allow wildcard origins
                 .maxAge(3600);
     }
 
@@ -30,17 +35,9 @@ public class CorsConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow specific origins for production and development
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:*",
-            "http://127.0.0.1:*",
-            "https://*.run.app",  // Google Cloud Run domains
-            "https://*.a.run.app", // Google Cloud Run domains (alternative)
-            "*" // Fallback for any other origins
-        ));
-        
-        // Explicitly set allowed origins (without credentials, more permissive)
-        configuration.addAllowedOrigin("https://agentic-itinerary-planner-frontend-7cbftguaga-vp.a.run.app");
+        // Use specific origins from configuration (supports both dev and production)
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
         
         // Allow all HTTP methods including WebSocket upgrade
         configuration.setAllowedMethods(Arrays.asList(
@@ -63,7 +60,7 @@ public class CorsConfig implements WebMvcConfigurer {
             "Access-Control-Allow-Credentials"
         ));
         
-        // Allow credentials for authenticated requests
+        // Enable credentials for WebSocket
         configuration.setAllowCredentials(true);
         
         // Cache preflight response for 1 hour

@@ -11,6 +11,7 @@ import { BookingCategoryGroup, CategorizedBooking, getNodeIcon } from '@/utils/c
 import { BookingModal } from '@/components/booking/BookingModal';
 import { buildEaseMyTripUrl } from '@/utils/easemytripUrlBuilder';
 import { analytics } from '@/services/analytics';
+import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 
 /**
  * Format time string to be more user-friendly
@@ -76,6 +77,7 @@ export function BookingCategoryCard({
     isOpen: boolean;
     booking: CategorizedBooking | null;
   }>({ isOpen: false, booking: null });
+  const { trackBookingCompleted } = useAnalyticsTracking();
 
   const handleBookNow = (booking: CategorizedBooking) => {
     // Track booking initiated
@@ -322,6 +324,14 @@ export function BookingCategoryCard({
                             <button
                               onClick={() => {
                                 if (confirmationCode.trim() && onMarkBooked) {
+                                  // Track booking completion
+                                  trackBookingCompleted(
+                                    'easemytrip',
+                                    booking.category,
+                                    itinerary?.itineraryId,
+                                    booking.cost?.amount
+                                  );
+                                  
                                   onMarkBooked(booking, confirmationCode.trim());
                                   setEditingBooking(null);
                                   setConfirmationCode('');

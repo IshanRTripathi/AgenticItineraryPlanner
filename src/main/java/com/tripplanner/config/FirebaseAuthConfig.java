@@ -144,6 +144,8 @@ public class FirebaseAuthConfig {
             // Define public endpoints that don't require authentication
             return path.startsWith("/api/v1/health") ||
                    path.startsWith("/api/v1/public") ||
+                   path.startsWith("/api/v1/analytics") ||  // Analytics endpoints are public
+                   path.startsWith("/ws") ||  // WebSocket endpoints
                    path.startsWith("/swagger") ||
                    path.startsWith("/v3/api-docs") ||
                    path.startsWith("/actuator") ||

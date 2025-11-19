@@ -15,6 +15,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { exportService } from '@/services/exportService';
 import { Copy, Check, Mail, Link as LinkIcon, Share2 } from 'lucide-react';
 import { EmailShareForm } from '@/components/share/EmailShareForm';
+import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -34,12 +35,17 @@ export function ShareModal({
   const [isCopied, setIsCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { trackPublicLinkCreation } = useAnalyticsTracking();
 
   const generateLink = async () => {
     setIsGenerating(true);
     try {
       const link = await exportService.generateShareLink(itineraryId);
       setShareLink(link);
+      
+      // Track public link creation
+      trackPublicLinkCreation(itineraryId, link);
+      
       toast({
         title: 'Link generated',
         description: 'Share link has been copied to clipboard',

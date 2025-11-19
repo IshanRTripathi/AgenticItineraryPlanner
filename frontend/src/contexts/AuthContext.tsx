@@ -49,6 +49,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         userEmail: user?.email
       });
 
+      // Identify user for analytics
+      if (user) {
+        const { analytics } = await import('../services/analytics');
+        analytics.identify(user.uid);
+        logger.info('User identified for analytics', {
+          component: 'AuthContext',
+          userId: user.uid
+        });
+      }
+
       // Set or clear auth token in API clients
       if (user) {
         try {

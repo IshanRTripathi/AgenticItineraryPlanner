@@ -13,6 +13,7 @@ import { ChatMessageComponent } from '@/components/chat/ChatMessage';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
 import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/i18n';
+import { analytics } from '@/services/analytics';
 
 const INITIAL_DISPLAY_COUNT = 10;
 const LOAD_MORE_COUNT = 10;
@@ -61,9 +62,42 @@ export function ChatTab() {
     setIsSending(true);
     setInput('');
 
+    const startTime = Date.now();
+    const messageLength = text.length;
+    const wordCount = text.split(/\s+/).length;
+
+    // Track chat message sent
+    analytics.track('chat_message_sent', {
+      messageLength,
+      wordCount,
+      itineraryId: itinerary?.itineraryId,
+      timestamp: startTime
+    });
+
     try {
       await sendChatMessage(text);
+      
+      const duration = Date.now() - startTime;
+      
+      // Track successful response
+      analytics.track('chat_response_received', {
+        messageLength,
+        wordCount,
+        duration,
+        itineraryId: itinerary?.itineraryId
+      });
     } catch (error) {
+      const duration = Date.now() - startTime;
+      
+      // Track failed response
+      analytics.track('chat_response_failed', {
+        messageLength,
+        wordCount,
+        duration,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        itineraryId: itinerary?.itineraryId
+      });
+      
       console.error('Failed to send message:', error);
     } finally {
       setIsSending(false);
@@ -79,12 +113,42 @@ export function ChatTab() {
 
   const handleApplyChanges = async (messageId: string, changeSet: any) => {
     setApplyingMessageId(messageId);
+    const startTime = Date.now();
+    
+    // Track apply changes initiated
+    analytics.track('chat_changes_apply_initiated', {
+      messageId,
+      changeCount: changeSet?.ops?.length || 0,
+      itineraryId: itinerary?.itineraryId
+    });
+    
     try {
       // Apply changes through context
       // The UnifiedItineraryContext will handle the API call
       console.log('Applying changes:', changeSet);
       // TODO: Implement apply changes in context
+      
+      const duration = Date.now() - startTime;
+      
+      // Track successful application
+      analytics.track('chat_changes_applied', {
+        messageId,
+        changeCount: changeSet?.ops?.length || 0,
+        duration,
+        itineraryId: itinerary?.itineraryId
+      });
     } catch (error) {
+      const duration = Date.now() - startTime;
+      
+      // Track failed application
+      analytics.track('chat_changes_apply_failed', {
+        messageId,
+        changeCount: changeSet?.ops?.length || 0,
+        duration,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        itineraryId: itinerary?.itineraryId
+      });
+      
       console.error('Failed to apply changes:', error);
     } finally {
       setApplyingMessageId(undefined);
