@@ -1112,7 +1112,7 @@ public class OrchestratorService {
         }
         
         // Try to get title from the item's ID or data
-        String id = item.getId();
+        String id = item.getNodeId();
         if (id != null && !id.trim().isEmpty()) {
             // Try to make the ID more readable
             return id.replace("_", " ").replace("node", "").trim();
