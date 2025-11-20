@@ -330,6 +330,9 @@ public class OrchestratorService {
         // Convert ChatRequest to appropriate AgentRequest based on agent type
         BaseAgent.AgentRequest<?> agentRequest = convertToAgentRequest(request, plan, agent);
         
+        // Store the request for later use in response generation
+        plan.addParameter("originalChatRequest", request);
+        
         // Execute agent
         return agent.execute(request.getItineraryId(), agentRequest);
     }
@@ -504,14 +507,25 @@ public class OrchestratorService {
                     null, null, false, applyResult.getToVersion()
                 );
             } else {
-                // Try to get descriptive message from the diff or generate a generic one
-                String responseMessage = generateDescriptiveMessage(applyResult.getDiff());
+                // The detailed message with actual place names is in the ChangeSet reason field
+                // which EditorAgent populates. We'll use that if available, otherwise generate a generic message.
+                // Note: The ChangeSet is not directly available here, so we generate from diff
+                String responseMessage = "Your itinerary has been updated.";
                 
-                return ChatResponse.success(
+                ChatResponse response = ChatResponse.success(
                     "Changes applied successfully",
                     responseMessage,
                     null, applyResult.getDiff(), true, applyResult.getToVersion()
                 );
+                
+                // Add action button to view the changes in the Plan tab
+                response.setActionButton(new ChatResponse.ActionButton(
+                    "View Changes",
+                    "VIEW_PLAN",
+                    "plan"
+                ));
+                
+                return response;
             }
         } else if (result instanceof String) {
             return ChatResponse.success("Request processed", (String) result, null, null, false, null);
@@ -1119,5 +1133,54 @@ public class OrchestratorService {
         }
         
         return "Item";
+    }
+
+    /**
+     * Generate a user-friendly message from the ItineraryDiff.
+     * Provides simple, clear feedback about what changed.
+     */
+    private String generateUserFriendlyMessage(ItineraryDiff diff) {
+        if (diff == null) {
+            return "Your itinerary has been updated.";
+        }
+        
+        // Count the types of changes
+        int addedCount = (diff.getAdded() != null) ? diff.getAdded().size() : 0;
+        int removedCount = (diff.getRemoved() != null) ? diff.getRemoved().size() : 0;
+        int updatedCount = (diff.getUpdated() != null) ? diff.getUpdated().size() : 0;
+        
+        // Generate a simple, clear message based on the primary action
+        if (addedCount > 0 && removedCount == 0 && updatedCount == 0) {
+            // Pure add operation
+            if (addedCount == 1) {
+                return "✅ Added 1 activity to your itinerary";
+            } else {
+                return String.format("✅ Added %d activities to your itinerary", addedCount);
+            }
+        } else if (removedCount > 0 && addedCount == 0 && updatedCount == 0) {
+            // Pure remove operation
+            if (removedCount == 1) {
+                return "🗑️ Removed 1 activity from your itinerary";
+            } else {
+                return String.format("🗑️ Removed %d activities from your itinerary", removedCount);
+            }
+        } else if (updatedCount > 0 && addedCount == 0 && removedCount == 0) {
+            // Pure update operation
+            if (updatedCount == 1) {
+                return "🔄 Updated 1 activity in your itinerary";
+            } else {
+                return String.format("🔄 Updated %d activities in your itinerary", updatedCount);
+            }
+        } else if (addedCount > 0 && removedCount > 0) {
+            // Replace operation (add + remove)
+            return String.format("🔄 Replaced %d activity with %d new activity", removedCount, addedCount);
+        } else {
+            // Mixed operations
+            List<String> parts = new ArrayList<>();
+            if (addedCount > 0) parts.add(addedCount + " added");
+            if (removedCount > 0) parts.add(removedCount + " removed");
+            if (updatedCount > 0) parts.add(updatedCount + " updated");
+            return "✅ Updated your itinerary (" + String.join(", ", parts) + ")";
+        }
     }
 }

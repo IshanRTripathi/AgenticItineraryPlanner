@@ -27,6 +27,7 @@ public class EditorAgent extends BaseAgent {
     private final ItineraryMigrationService migrationService;
     private final EnrichmentAgent enrichmentAgent;
     private final GooglePlacesService googlePlacesService;
+    private final ChatHistoryService chatHistoryService;
     
     public EditorAgent(AgentEventBus eventBus,
                       SummarizationService summarizationService,
@@ -37,7 +38,8 @@ public class EditorAgent extends BaseAgent {
                       LLMResponseHandler llmResponseHandler,
                       ItineraryMigrationService migrationService,
                       EnrichmentAgent enrichmentAgent,
-                      GooglePlacesService googlePlacesService) {
+                      GooglePlacesService googlePlacesService,
+                      ChatHistoryService chatHistoryService) {
         super(eventBus, AgentEvent.AgentKind.EDITOR);
         this.summarizationService = summarizationService;
         this.changeEngine = changeEngine;
@@ -48,6 +50,7 @@ public class EditorAgent extends BaseAgent {
         this.migrationService = migrationService;
         this.enrichmentAgent = enrichmentAgent;
         this.googlePlacesService = googlePlacesService;
+        this.chatHistoryService = chatHistoryService;
     }
     
     @Override
@@ -351,11 +354,28 @@ public class EditorAgent extends BaseAgent {
         prompt.append("Based on the user's request and the current itinerary context, ");
         prompt.append("generate a ChangeSet in JSON format to modify the itinerary.\n\n");
         
+        prompt.append("=== CRITICAL: INTENT PRESERVATION RULES ===\n");
+        prompt.append("1. ONLY perform the EXACT action the user requested - nothing more, nothing less\n");
+        prompt.append("2. If user says 'add X', ONLY add X - do NOT remove or modify anything else\n");
+        prompt.append("3. If user says 'remove X', ONLY remove X - do NOT add anything\n");
+        prompt.append("4. If user says 'replace X with Y', remove X and add Y - but touch nothing else\n");
+        prompt.append("5. DO NOT make 'helpful' additions or removals the user didn't ask for\n");
+        prompt.append("6. If the user uses pronouns like 'it', 'that', 'this' - refer to the IMMEDIATELY PRECEDING conversation to understand what they mean\n");
+        prompt.append("7. The itinerary context shows what EXISTS - the user request shows what to CHANGE\n\n");
+        
         prompt.append("=== TIME FORMAT RULES ===\n");
         prompt.append("1. Use 24-hour time format for startTime and endTime (e.g., \"14:30\", \"18:00\")\n");
         prompt.append("2. Format: \"HH:mm\" where HH is 00-23 and mm is 00-59\n");
         prompt.append("3. Examples: \"09:00\" for 9am, \"14:30\" for 2:30pm, \"18:00\" for 6pm\n");
         prompt.append("4. Always use leading zeros (\"09:00\" not \"9:00\")\n\n");
+        
+        // Add recent chat history for context (if available)
+        String chatHistory = getChatHistoryContext(chatRequest.getItineraryId());
+        if (chatHistory != null && !chatHistory.trim().isEmpty()) {
+            prompt.append("RECENT CONVERSATION:\n");
+            prompt.append(chatHistory).append("\n\n");
+            prompt.append("IMPORTANT: If the current request uses pronouns like 'it', 'that', 'this', refer to the conversation above!\n\n");
+        }
         
         prompt.append("USER REQUEST:\n");
         prompt.append(chatRequest.getText()).append("\n\n");
@@ -364,41 +384,66 @@ public class EditorAgent extends BaseAgent {
         prompt.append(context).append("\n\n");
         
         prompt.append("INSTRUCTIONS:\n");
-        prompt.append("1. Analyze the user's request and determine what changes are needed\n");
-        prompt.append("2. CRITICAL: Look for nodes in the itinerary context marked as [ID: xxxxx] - you MUST use this EXACT ID in your operation\n");
-        prompt.append("3. NEVER generate your own node IDs - always use the exact IDs from the context\n");
-        prompt.append("4. For 'add'/'insert' requests: Choose 'insert' operation and specify 'after' with an existing node ID from context\n");
-        prompt.append("5. For 'replace'/'change' requests: Choose 'replace' operation with the exact node ID from context\n");
-        prompt.append("6. For 'delete'/'remove' requests: Choose 'delete' operation with the exact node ID from context\n");
-        prompt.append("7. For 'move'/'reschedule' requests: Choose 'move' operation with new startTime/endTime\n");
-        prompt.append("8. For timing: Use 24-hour format (e.g., \"14:30\") for startTime and endTime\n");
-        prompt.append("9. Set 'day' to the specific day number (e.g., 1, 2, 3)\n");
-        prompt.append("10. Always set agent to 'EditorAgent'\n\n");
+        prompt.append("1. Read the USER REQUEST carefully - what EXACTLY did they ask for?\n");
+        prompt.append("2. If the request uses 'it', 'that', 'this' - look at the conversation context above to understand the reference\n");
+        prompt.append("3. Determine the MINIMAL change needed to fulfill ONLY what was requested\n");
+        prompt.append("4. CRITICAL: Look for nodes in the itinerary context marked as [ID: xxxxx] - you MUST use this EXACT ID in your operation\n");
+        prompt.append("5. NEVER generate your own node IDs - always use the exact IDs from the context\n");
+        prompt.append("6. For 'add'/'insert' requests: Choose 'insert' operation and specify 'after' with an existing node ID from context\n");
+        prompt.append("7. For 'replace'/'change' requests: Choose 'replace' operation with the exact node ID from context\n");
+        prompt.append("8. For 'delete'/'remove' requests: Choose 'delete' operation with the exact node ID from context\n");
+        prompt.append("9. For 'move'/'reschedule' requests: Choose 'move' operation with new startTime/endTime\n");
+        prompt.append("10. For timing: Use 24-hour format (e.g., \"14:30\") for startTime and endTime\n");
+        prompt.append("11. Set 'day' to the specific day number (e.g., 1, 2, 3)\n");
+        prompt.append("12. Always set agent to 'EditorAgent'\n");
+        prompt.append("13. In the 'reason' field, clearly state what you're doing and why\n\n");
         
-        prompt.append("=== CORRECT JSON FORMAT EXAMPLE ===\n");
+        prompt.append("=== EXAMPLES OF CORRECT INTENT HANDLING ===\n\n");
+        
+        prompt.append("Example 1 - ADD ONLY:\n");
+        prompt.append("User: \"Add Gomti Riverfront to day 3\"\n");
+        prompt.append("Correct: Insert ONE new node for Gomti Riverfront\n");
+        prompt.append("Wrong: Insert Gomti Riverfront AND remove/modify other nodes\n\n");
+        
+        prompt.append("Example 2 - PRONOUN REFERENCE:\n");
+        prompt.append("Previous: User asked about \"Gomti Riverfront\"\n");
+        prompt.append("Current: \"Add it to the most appropriate day\"\n");
+        prompt.append("Correct: Add Gomti Riverfront (from previous context)\n");
+        prompt.append("Wrong: Add something else or multiple things\n\n");
+        
+        prompt.append("Example 3 - REPLACE:\n");
+        prompt.append("User: \"Replace lunch with pizza\"\n");
+        prompt.append("Correct: Replace the lunch node with pizza\n");
+        prompt.append("Wrong: Add pizza AND keep lunch, or remove other meals\n\n");
+        
+        prompt.append("=== JSON FORMAT EXAMPLE ===\n");
+        prompt.append("For \"Add Gomti Riverfront to Day 3\":\n");
         prompt.append("{\n");
         prompt.append("  \"ops\": [\n");
         prompt.append("    {\n");
-        prompt.append("      \"op\": \"replace\",\n");
-        prompt.append("      \"id\": \"day1_att_1\",\n");
-        prompt.append("      \"startTime\": \"18:30\",\n");
-        prompt.append("      \"endTime\": \"19:30\",\n");
+        prompt.append("      \"op\": \"insert\",\n");
+        prompt.append("      \"after\": \"day3_att_2\",\n");
         prompt.append("      \"node\": {\n");
-        prompt.append("        \"title\": \"Sushi Dinner in Hadibo\",\n");
-        prompt.append("        \"type\": \"meal\",\n");
+        prompt.append("        \"title\": \"Gomti Riverfront\",\n");
+        prompt.append("        \"type\": \"attraction\",\n");
         prompt.append("        \"location\": {\n");
-        prompt.append("          \"name\": \"Hadibo\",\n");
-        prompt.append("          \"address\": \"Hadibo, Socotra Island\"\n");
+        prompt.append("          \"name\": \"Gomti Riverfront, Lucknow\",\n");
+        prompt.append("          \"address\": \"Gomti Riverfront, Lucknow\"\n");
         prompt.append("        }\n");
         prompt.append("      }\n");
         prompt.append("    }\n");
         prompt.append("  ],\n");
-        prompt.append("  \"day\": 2,\n");
-        prompt.append("  \"reason\": \"Replacing dinner with sushi place as requested\",\n");
+        prompt.append("  \"day\": 3,\n");
+        prompt.append("  \"reason\": \"Adding Gomti Riverfront to Day 3 as requested by user\",\n");
         prompt.append("  \"agent\": \"EditorAgent\"\n");
         prompt.append("}\n\n");
-        prompt.append("CRITICAL: 'node' must have 'title' (not 'name'), 'type', and 'location' as an object with 'name' and 'address' fields!\n");
-        prompt.append("CRITICAL: Use the EXACT node ID from the context (e.g., 'day1_att_1', 'node_mea_day1_1234_abcd1234') - never generate your own!\n\n");
+        
+        prompt.append("CRITICAL REMINDERS:\n");
+        prompt.append("- 'node' must have 'title' (not 'name'), 'type', and 'location' as an object\n");
+        prompt.append("- Use EXACT node IDs from context for 'id' and 'after' fields\n");
+        prompt.append("- ONLY generate operations for what user explicitly requested\n");
+        prompt.append("- If user says 'add', use 'insert' operation - do NOT use 'delete' or 'replace'\n");
+        prompt.append("- The 'reason' field should explain what you're doing in plain English\n\n");
         
         prompt.append("Generate ONLY the JSON ChangeSet, no additional text:");
         
@@ -1273,5 +1318,36 @@ public class EditorAgent extends BaseAgent {
         
         // Fallback to node ID
         return op.getId();
+    }
+}
+    
+/**
+     * Get recent chat history for context.
+     * Returns last 3 messages to help LLM understand pronouns and references.
+     */
+    private String getChatHistoryContext(String itineraryId) {
+        try {
+            java.util.List<java.util.Map<String, Object>> history = chatHistoryService.getChatHistory(itineraryId);
+            if (history == null || history.isEmpty()) {
+                return null;
+            }
+            
+            StringBuilder chatContext = new StringBuilder();
+            
+            // Get last 3 messages for context (not too much to avoid token waste)
+            int start = Math.max(0, history.size() - 3);
+            for (int i = start; i < history.size(); i++) {
+                java.util.Map<String, Object> msg = history.get(i);
+                String sender = "user".equals(msg.get("sender")) ? "User" : "Assistant";
+                String message = (String) msg.get("message");
+                chatContext.append(sender).append(": ").append(message).append("\n");
+            }
+            
+            return chatContext.toString();
+            
+        } catch (Exception e) {
+            logger.warn("Could not load chat history for context: {}", e.getMessage());
+            return null;
+        }
     }
 }

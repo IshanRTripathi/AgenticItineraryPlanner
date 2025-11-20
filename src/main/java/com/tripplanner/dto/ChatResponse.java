@@ -17,6 +17,7 @@ public class ChatResponse {
     private boolean needsDisambiguation;
     private List<NodeCandidate> candidates;
     private List<String> errors; // List of error messages
+    private ActionButton actionButton; // Optional action button for the response
     
     // Constructors
     public ChatResponse() {}
@@ -138,6 +139,14 @@ public class ChatResponse {
         this.errors = errors;
     }
     
+    public ActionButton getActionButton() {
+        return actionButton;
+    }
+    
+    public void setActionButton(ActionButton actionButton) {
+        this.actionButton = actionButton;
+    }
+    
     /**
      * Check if this response represents an error.
      */
@@ -158,6 +167,38 @@ public class ChatResponse {
                 ", needsDisambiguation=" + needsDisambiguation +
                 ", candidates=" + candidates +
                 ", errors=" + errors +
+                ", actionButton=" + actionButton +
                 '}';
+    }
+    
+    /**
+     * Action button for chat responses.
+     */
+    public static class ActionButton {
+        private String label;
+        private String action; // e.g., "VIEW_PLAN", "VIEW_DAY"
+        private String target; // e.g., tab name or day number
+        
+        public ActionButton() {}
+        
+        public ActionButton(String label, String action, String target) {
+            this.label = label;
+            this.action = action;
+            this.target = target;
+        }
+        
+        public String getLabel() { return label; }
+        public void setLabel(String label) { this.label = label; }
+        
+        public String getAction() { return action; }
+        public void setAction(String action) { this.action = action; }
+        
+        public String getTarget() { return target; }
+        public void setTarget(String target) { this.target = target; }
+        
+        @Override
+        public String toString() {
+            return "ActionButton{label='" + label + "', action='" + action + "', target='" + target + "'}";
+        }
     }
 }
