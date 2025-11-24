@@ -7,13 +7,15 @@ import com.tripplanner.dto.*;
 import com.tripplanner.exception.ItineraryNotFoundException;
 import com.tripplanner.exception.VersionConflictException;
 import com.tripplanner.exception.SerializationException;
+import com.tripplanner.service.firebase.DatabaseService;
+import com.tripplanner.service.firebase.FirestoreDatabaseService;
+import com.tripplanner.service.utilities.MapBoundsCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service for managing normalized JSON itineraries using Firestore database.
@@ -61,6 +63,50 @@ public class ItineraryJsonService {
             return databaseService.save(entity);
         } catch (JsonProcessingException e) {
             logger.error("Failed to serialize itinerary to JSON", e);
+            throw new RuntimeException("Failed to update itinerary", e);
+        }
+    }
+    
+    /**
+     * NEW: Update itinerary with optimistic locking
+     * Throws ConcurrentModificationException if version mismatch
+     */
+    public FirestoreItinerary updateItineraryWithLock(NormalizedItinerary itinerary) {
+        try {
+            // Get current version from database
+            Optional<NormalizedItinerary> currentOpt = getItinerary(itinerary.getItineraryId());
+            
+            if (currentOpt.isPresent()) {
+                NormalizedItinerary current = currentOpt.get();
+                Long currentLockVersion = current.getLockVersion();
+                Long expectedLockVersion = itinerary.getLockVersion();
+                
+                // Check for concurrent modification
+                if (currentLockVersion != null && expectedLockVersion != null) {
+                    if (!currentLockVersion.equals(expectedLockVersion)) {
+                        throw new com.tripplanner.exception.ConcurrentModificationException(
+                            itinerary.getItineraryId(), expectedLockVersion, currentLockVersion);
+                    }
+                }
+                
+                // Increment lock version
+                itinerary.incrementLockVersion();
+                logger.info("Updating itinerary {} with lock version {}", 
+                           itinerary.getItineraryId(), itinerary.getLockVersion());
+            } else {
+                // New itinerary - initialize lock version
+                itinerary.setLockVersion(1L);
+            }
+            
+            // Perform update
+            return updateItinerary(itinerary);
+            
+        } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+            logger.error("Concurrent modification detected for itinerary {}: {}", 
+                        itinerary.getItineraryId(), e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Failed to update itinerary with lock", e);
             throw new RuntimeException("Failed to update itinerary", e);
         }
     }
@@ -127,31 +173,7 @@ public class ItineraryJsonService {
      */
     private Optional<NormalizedItinerary> deserializeItinerary(FirestoreItinerary entity) {
         try {
-            // 🔍 DEBUG: Check if JSON contains photos field
-            String json = entity.getJson();
-            if (json.contains("\"photos\"")) {
-                logger.info("🔍 [deserializeItinerary] JSON from DB contains 'photos' field ✅");
-            } else {
-                logger.warn("🔍 [deserializeItinerary] JSON from DB does NOT contain 'photos' field ❌");
-            }
-            
             NormalizedItinerary itinerary = objectMapper.readValue(entity.getJson(), NormalizedItinerary.class);
-            
-            // 🔍 DEBUG: Check if deserialized object has photos
-            if (itinerary.getDays() != null && !itinerary.getDays().isEmpty()) {
-                NormalizedDay firstDay = itinerary.getDays().get(0);
-                if (firstDay.getNodes() != null && !firstDay.getNodes().isEmpty()) {
-                    NormalizedNode firstNode = firstDay.getNodes().get(0);
-                    logger.info("🔍 [deserializeItinerary] After deserialization - First node:");
-                    logger.info("   Title: {}", firstNode.getTitle());
-                    if (firstNode.getLocation() != null) {
-                        logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
-                        logger.info("   location.rating: {}", firstNode.getLocation().getRating());
-                        logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
-                    }
-                }
-            }
-            
             // Populate map fields if not already present
             populateMapFields(itinerary);
             

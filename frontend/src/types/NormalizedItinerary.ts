@@ -12,9 +12,14 @@ export interface NormalizedItinerary {
   summary: string;
   currency: string;
   themes: string[];
+  constraints?: string[]; // User's custom instructions/requirements
   destination?: string;
   startDate?: string;
   endDate?: string;
+  budgetMin?: number; // Minimum budget per person
+  budgetMax?: number; // Maximum budget per person
+  partySize?: number; // Total number of people
+  budgetSummary?: BudgetSummary; // Budget tracking information
   days: NormalizedDay[];
   settings: ItinerarySettings;
   agents: Record<string, AgentStatus>;
@@ -26,11 +31,16 @@ export interface NormalizedDay {
   dayNumber: number;
   date: string; // ISO date
   location: string;
+  summary?: string;
+  pace?: string; // "relaxed", "balanced", "intense"
+  totalDistance?: number;
+  totalCost?: number;
+  totalDuration?: number;
+  timeWindowStart?: string; // e.g., "09:00"
+  timeWindowEnd?: string; // e.g., "18:00"
+  timeZone?: string; // e.g., "UTC", "IST"
   nodes: NormalizedNode[];
   edges?: Edge[];
-  pacing?: Pacing;
-  timeWindow?: TimeWindow;
-  totals?: DayTotals;
   warnings?: string[];
   notes?: string;
 }
@@ -81,9 +91,8 @@ export interface NodeTiming {
 }
 
 export interface NodeCost {
-  amount: number;
+  amountPerPerson: number; // CRITICAL: Must match backend field name
   currency: string;
-  per: string; // "person", "group", "night", etc.
 }
 
 export interface NodeDetails {
@@ -125,22 +134,7 @@ export interface TransitInfo {
   bookingUrl?: string;
 }
 
-export interface Pacing {
-  style: string; // "relaxed", "balanced", "intensive"
-  avgDurationMin: number;
-  maxNodesPerDay: number;
-}
-
-export interface TimeWindow {
-  start: string; // HH:MM
-  end: string; // HH:MM
-}
-
-export interface DayTotals {
-  distanceKm: number;
-  cost: number;
-  durationHr: number;
-}
+// Removed obsolete interfaces - fields are now directly on NormalizedDay
 
 export interface ItinerarySettings {
   autoApply: boolean;
@@ -272,6 +266,34 @@ export interface MockBookingResponse {
   message: string;
 }
 
+// Budget tracking types
+export interface BudgetSummary {
+  totalCostPerPerson: number;
+  totalCostForParty: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  currency: string;
+  partySize: number;
+  warnings: string[];
+  percentageUsed: number;
+  dayBreakdown: DayBudget[];
+  categoryBreakdown: CategoryBudget;
+}
+
+export interface DayBudget {
+  dayNumber: number;
+  costPerPerson: number;
+  nodeCount: number;
+}
+
+export interface CategoryBudget {
+  attractions: number;
+  meals: number;
+  transport: number;
+  accommodation: number;
+  other: number;
+}
+
 // Map-related types
 export interface MapBounds {
   south: number;
@@ -293,6 +315,8 @@ export interface CreateItineraryRequest {
     rooms: number;
   };
   budgetTier: string;
+  budgetMin?: number; // Minimum budget per person
+  budgetMax?: number; // Maximum budget per person
   interests: string[];
   constraints: string[];
   language: string;

@@ -54,6 +54,9 @@ dependencies {
 	// JSON processing
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	
+	// JSON Schema Validation for LLM responses
+	implementation 'com.networknt:json-schema-validator:1.0.87'
 
 	// Lombok for reducing boilerplate code
 	compileOnly 'org.projectlombok:lombok'

@@ -2,10 +2,12 @@ package com.tripplanner.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.tripplanner.enums.ProcessingState;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,9 +79,36 @@ public class NormalizedNode {
     @JsonProperty("agentData")
     private java.util.Map<String, Object> agentData;
     
+    // NEW: Explicit metadata layer (replaces string parsing)
+    @Valid
+    @JsonProperty("metadata")
+    private NodeMetadata metadata;
+    
+    // NEW: Processing state tracking
+    @JsonProperty("processingState")
+    private ProcessingState processingState;
+    
+    // NEW: Validation results
+    @JsonProperty("validationErrors")
+    private List<String> validationErrors;
+    
+    // NEW: Error tracking
+    @JsonProperty("lastError")
+    private String lastError;
+    
+    @JsonProperty("retryCount")
+    private Integer retryCount = 0;
+    
+    // NEW: Processing history
+    @JsonProperty("processedBy")
+    private List<String> processedBy;
+    
     public NormalizedNode() {
         this.updatedAt = System.currentTimeMillis();
         this.agentData = new java.util.HashMap<>();
+        this.processingState = ProcessingState.CREATED;
+        this.validationErrors = new ArrayList<>();
+        this.processedBy = new ArrayList<>();
     }
     
     public NormalizedNode(String id, String type, String title) {
@@ -224,6 +253,74 @@ public class NormalizedNode {
     
     public void setAgentData(java.util.Map<String, Object> agentData) {
         this.agentData = agentData;
+    }
+    
+    public NodeMetadata getMetadata() {
+        return metadata;
+    }
+    
+    public void setMetadata(NodeMetadata metadata) {
+        this.metadata = metadata;
+    }
+    
+    public ProcessingState getProcessingState() {
+        return processingState;
+    }
+    
+    public void setProcessingState(ProcessingState processingState) {
+        this.processingState = processingState;
+    }
+    
+    public List<String> getValidationErrors() {
+        return validationErrors;
+    }
+    
+    public void setValidationErrors(List<String> validationErrors) {
+        this.validationErrors = validationErrors;
+    }
+    
+    public void addValidationError(String error) {
+        if (this.validationErrors == null) {
+            this.validationErrors = new ArrayList<>();
+        }
+        this.validationErrors.add(error);
+    }
+    
+    public String getLastError() {
+        return lastError;
+    }
+    
+    public void setLastError(String lastError) {
+        this.lastError = lastError;
+    }
+    
+    public Integer getRetryCount() {
+        return retryCount;
+    }
+    
+    public void setRetryCount(Integer retryCount) {
+        this.retryCount = retryCount;
+    }
+    
+    public void incrementRetryCount() {
+        this.retryCount = (this.retryCount == null ? 0 : this.retryCount) + 1;
+    }
+    
+    public List<String> getProcessedBy() {
+        return processedBy;
+    }
+    
+    public void setProcessedBy(List<String> processedBy) {
+        this.processedBy = processedBy;
+    }
+    
+    public void addProcessedBy(String agentName) {
+        if (this.processedBy == null) {
+            this.processedBy = new ArrayList<>();
+        }
+        if (!this.processedBy.contains(agentName)) {
+            this.processedBy.add(agentName);
+        }
     }
     
     // Helper method to get Instant object

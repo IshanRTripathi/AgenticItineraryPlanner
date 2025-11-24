@@ -5,17 +5,17 @@ import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.ItineraryService;
 import com.tripplanner.service.UserDataService;
-import com.tripplanner.service.AgentRegistry;
+import com.tripplanner.service.agents.AgentRegistry;
 import com.tripplanner.service.RevisionService;
 import com.tripplanner.service.OrchestratorService;
 import com.tripplanner.service.WebSocketBroadcastService;
 import com.tripplanner.service.ChatHistoryService;
+import com.tripplanner.service.analytics.ItineraryMetricsTracker;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -34,9 +33,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/itineraries")
 public class ItinerariesController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ItinerariesController.class);
-    
+
     private final ItineraryService itineraryService;
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
@@ -46,18 +45,20 @@ public class ItinerariesController {
     private final OrchestratorService orchestratorService;
     private final WebSocketBroadcastService webSocketBroadcastService;
     private final ChatHistoryService chatHistoryService;
-    
+    private final ItineraryMetricsTracker metricsTracker;
+
     // Real-time updates managed by WebSocket
-    
-    public ItinerariesController(ItineraryService itineraryService, 
-                               ItineraryJsonService itineraryJsonService,
-                               ChangeEngine changeEngine,
-                               UserDataService userDataService,
-                               AgentRegistry agentRegistry,
-                               RevisionService revisionService,
-                               OrchestratorService orchestratorService,
-                               WebSocketBroadcastService webSocketBroadcastService,
-                               ChatHistoryService chatHistoryService) {
+
+    public ItinerariesController(ItineraryService itineraryService,
+            ItineraryJsonService itineraryJsonService,
+            ChangeEngine changeEngine,
+            UserDataService userDataService,
+            AgentRegistry agentRegistry,
+            RevisionService revisionService,
+            OrchestratorService orchestratorService,
+            WebSocketBroadcastService webSocketBroadcastService,
+            ChatHistoryService chatHistoryService,
+            ItineraryMetricsTracker metricsTracker) {
         this.itineraryService = itineraryService;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
@@ -67,190 +68,194 @@ public class ItinerariesController {
         this.orchestratorService = orchestratorService;
         this.webSocketBroadcastService = webSocketBroadcastService;
         this.chatHistoryService = chatHistoryService;
+        this.metricsTracker = metricsTracker;
     }
-    
+
     /**
      * Create a new itinerary with immediate response and real-time updates.
      */
     @PostMapping
-    public ResponseEntity<ItineraryCreationResponse> create(@Valid @RequestBody CreateItineraryReq request, 
-                                                          HttpServletRequest httpRequest) {
+    public ResponseEntity<ItineraryCreationResponse> create(@Valid @RequestBody CreateItineraryReq request,
+            HttpServletRequest httpRequest) {
         logger.info("Creating itinerary with real-time updates");
         logger.info("Request: {}", request);
-        
+
         try {
             // Extract userId from request attributes (set by FirebaseAuthConfig)
             String userId = (String) httpRequest.getAttribute("userId");
             Boolean isGuest = (Boolean) httpRequest.getAttribute("isGuest");
-            
+
             if (userId == null) {
                 logger.error("User ID not found in request - this should not happen");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ItineraryCreationResponse.error("User identification failed"));
+                        .body(ItineraryCreationResponse.error("User identification failed"));
             }
-            
+
             if (isGuest != null && isGuest) {
                 logger.info("Guest user creating itinerary: {}", userId);
             }
-            
+
             // Validate required fields
             if (request.getDestination() == null || request.getDestination().isBlank()) {
                 logger.error("Destination is required");
                 return ResponseEntity.badRequest()
-                    .body(ItineraryCreationResponse.error("Destination is required"));
+                        .body(ItineraryCreationResponse.error("Destination is required"));
             }
             if (request.getStartDate() == null) {
                 logger.error("Start date is required");
                 return ResponseEntity.badRequest()
-                    .body(ItineraryCreationResponse.error("Start date is required"));
+                        .body(ItineraryCreationResponse.error("Start date is required"));
             }
-            
+
             // Create initial itinerary structure (this is synchronous)
             ItineraryDto initialItinerary = itineraryService.create(request, userId);
-            
+
+            // Track creation initiation
+            metricsTracker.trackItineraryCreated(initialItinerary.getId(), request);
+
             // Generate unique execution ID for this creation process
             String executionId = "exec_" + UUID.randomUUID().toString();
-            
+
             // Calculate estimated completion time based on duration
             LocalDateTime estimatedCompletion = calculateEstimatedCompletion(request);
-            
+
             // Create execution stages for progress tracking
             List<AgentExecutionStage> stages = buildExecutionStages(request);
-            
+
             // Build enhanced response (WebSocket handles real-time updates)
             ItineraryCreationResponse response = ItineraryCreationResponse.builder()
-                .itinerary(initialItinerary)
-                .executionId(executionId)
-                .estimatedCompletion(estimatedCompletion)
-                .status(CreationStatus.PROCESSING)
-                .stages(stages)
-                .build();
-            
-            logger.info("Enhanced itinerary creation response prepared: {} for user: {}", 
-                       initialItinerary.getId(), userId);
+                    .itinerary(initialItinerary)
+                    .executionId(executionId)
+                    .estimatedCompletion(estimatedCompletion)
+                    .status(CreationStatus.PROCESSING)
+                    .stages(stages)
+                    .build();
+
+            logger.info("Enhanced itinerary creation response prepared: {} for user: {}",
+                    initialItinerary.getId(), userId);
             logger.info("Execution ID: {}", executionId);
             logger.info("Real-time updates will be sent via WebSocket");
             logger.info("Estimated completion: {}", estimatedCompletion);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             // Bad request errors (validation failures)
             logger.error("Invalid request for itinerary creation: {}", e.getMessage());
             return ResponseEntity.badRequest()
-                .body(ItineraryCreationResponse.error(e.getMessage()));
+                    .body(ItineraryCreationResponse.error(e.getMessage()));
         } catch (Exception e) {
             // Internal server errors
             logger.error("Failed to create itinerary", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ItineraryCreationResponse.error("Failed to create itinerary: " + e.getMessage()));
+                    .body(ItineraryCreationResponse.error("Failed to create itinerary: " + e.getMessage()));
         }
     }
-    
+
     /**
      * Calculate estimated completion time based on request complexity.
      */
     private LocalDateTime calculateEstimatedCompletion(CreateItineraryReq request) {
         // Base time: 30 seconds
         int baseSeconds = 30;
-        
+
         // Add time based on duration (5 seconds per day)
         int durationSeconds = request.getDurationDays() * 5;
-        
+
         // Add time based on interests (2 seconds per interest)
         int interestSeconds = request.getInterests() != null ? request.getInterests().size() * 2 : 0;
-        
+
         // Add time based on constraints (3 seconds per constraint)
         int constraintSeconds = request.getConstraints() != null ? request.getConstraints().size() * 3 : 0;
-        
+
         int totalSeconds = baseSeconds + durationSeconds + interestSeconds + constraintSeconds;
-        
+
         return LocalDateTime.now().plusSeconds(totalSeconds);
     }
-    
+
     /**
      * Build execution stages for progress tracking.
      */
     private List<AgentExecutionStage> buildExecutionStages(CreateItineraryReq request) {
         List<AgentExecutionStage> stages = new ArrayList<>();
-        
+
         // Planning stage
         stages.add(new AgentExecutionStage(
-            "Planning", 
-            "PLANNER",
-            "Creating day-by-day itinerary",
-            (long) (request.getDurationDays() * 3000) // 3 seconds per day
+                "Planning",
+                "PLANNER",
+                "Creating day-by-day itinerary",
+                (long) (request.getDurationDays() * 3000) // 3 seconds per day
         ));
-        
+
         // Enrichment stage
         stages.add(new AgentExecutionStage(
-            "Enrichment", 
-            "ENRICHMENT",
-            "Adding location details and photos",
-            15000L // 15 seconds
+                "Enrichment",
+                "ENRICHMENT",
+                "Adding location details and photos",
+                15000L // 15 seconds
         ));
-        
+
         // Places validation stage
         stages.add(new AgentExecutionStage(
-            "Places Validation", 
-            "places", 
-            "Validating locations and adding details",
-            10000L // 10 seconds
+                "Places Validation",
+                "places",
+                "Validating locations and adding details",
+                10000L // 10 seconds
         ));
-        
+
         // Final optimization stage
         stages.add(new AgentExecutionStage(
-            "Optimization", 
-            "orchestrator", 
-            "Final optimization and cleanup",
-            5000L // 5 seconds
+                "Optimization",
+                "orchestrator",
+                "Final optimization and cleanup",
+                5000L // 5 seconds
         ));
-        
+
         return stages;
     }
-    
+
     /**
      * Get all itineraries for the authenticated user.
      */
     @GetMapping
     public ResponseEntity<List<ItineraryDto>> getAll(HttpServletRequest httpRequest) {
         logger.info("Getting all itineraries");
-        
+
         try {
             // Extract userId from request attributes (set by FirebaseAuthConfig)
             String userId = (String) httpRequest.getAttribute("userId");
-            
+
             if (userId == null) {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             List<ItineraryDto> itineraries = itineraryService.getUserItineraries(userId, 0, 10);
-            
+
             logger.info("Found {} itineraries for user: {}", itineraries.size(), userId);
             return ResponseEntity.ok(itineraries);
-            
+
         } catch (Exception e) {
             logger.error("Failed to get itineraries", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Get itinerary by ID for the authenticated user.
      */
     @GetMapping("/{id}")
     public ResponseEntity<ItineraryDto> getById(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Getting itinerary: {}", id);
-        
+
         // Extract userId from request attributes (set by FirebaseAuthConfig)
         String userId = (String) httpRequest.getAttribute("userId");
-        
+
         if (userId == null) {
             logger.error("User ID not found in request");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        
+
         try {
             ItineraryDto itinerary = itineraryService.get(id, userId);
             logger.info("Itinerary found: {} for user: {}", itinerary.getId(), userId);
@@ -267,48 +272,49 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Delete itinerary for the authenticated user.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Deleting itinerary: {}", id);
-        
+
         // Extract userId from request attributes (set by FirebaseAuthConfig)
         String userId = (String) httpRequest.getAttribute("userId");
-        
+
         if (userId == null) {
             logger.error("User ID not found in request");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        
+
         try {
             itineraryService.delete(id, userId);
-            
+
             logger.info("Itinerary deleted successfully: {} for user: {}", id, userId);
             return ResponseEntity.noContent().build();
-            
+
         } catch (Exception e) {
             logger.error("Failed to delete itinerary: {} for user: {}", id, userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     // ===== NEW MVP CONTRACT ENDPOINTS =====
-    
+
     /**
      * Get itinerary by ID (returns master JSON).
      * GET /itineraries/{id} → 200 → returns master JSON
      * This endpoint is public (no authentication required)
      */
     @GetMapping("/{id}/json")
-    public ResponseEntity<NormalizedItinerary> getItineraryJson(@PathVariable String id, HttpServletRequest httpRequest) {
+    public ResponseEntity<NormalizedItinerary> getItineraryJson(@PathVariable String id,
+            HttpServletRequest httpRequest) {
         logger.info("Getting normalized itinerary JSON: {}", id);
-        
+
         // Extract userId from request attributes (set by FirebaseAuthConfig) - optional
         String userId = (String) httpRequest.getAttribute("userId");
-        
+
         try {
             // If user is authenticated, check if they own this trip
             if (userId != null) {
@@ -318,19 +324,19 @@ public class ItinerariesController {
                     return ResponseEntity.notFound().build();
                 }
             }
-            
+
             // Get itinerary from ItineraryJsonService (single source of truth)
             var itinerary = itineraryJsonService.getItinerary(id);
-            
+
             if (itinerary.isPresent()) {
                 NormalizedItinerary normalizedItinerary = itinerary.get();
-                
+
                 // Calculate and set status based on current state
                 String status = itineraryService.calculateItineraryStatus(normalizedItinerary);
                 normalizedItinerary.setStatus(status);
-                
+
                 logger.info("Normalized itinerary found: {}, status: {}", id, status);
-                
+
                 // 🔍 DEBUG: Log first activity's location data to verify API response
                 if (normalizedItinerary.getDays() != null && !normalizedItinerary.getDays().isEmpty()) {
                     NormalizedDay firstDay = normalizedItinerary.getDays().get(0);
@@ -339,9 +345,13 @@ public class ItinerariesController {
                         logger.info("🔍 [API Response] First activity location data:");
                         logger.info("   Title: {}", firstNode.getTitle());
                         if (firstNode.getLocation() != null) {
-                            logger.info("   location.photos: {}", firstNode.getLocation().getPhotos() != null ? firstNode.getLocation().getPhotos().size() + " items" : "null");
+                            logger.info("   location.photos: {}",
+                                    firstNode.getLocation().getPhotos() != null
+                                            ? firstNode.getLocation().getPhotos().size() + " items"
+                                            : "null");
                             logger.info("   location.rating: {}", firstNode.getLocation().getRating());
-                            logger.info("   location.userRatingsTotal: {}", firstNode.getLocation().getUserRatingsTotal());
+                            logger.info("   location.userRatingsTotal: {}",
+                                    firstNode.getLocation().getUserRatingsTotal());
                             logger.info("   location.priceLevel: {}", firstNode.getLocation().getPriceLevel());
                             logger.info("   location.placeId: {}", firstNode.getLocation().getPlaceId());
                         } else {
@@ -349,152 +359,151 @@ public class ItinerariesController {
                         }
                     }
                 }
-                
+
                 return ResponseEntity.ok(normalizedItinerary);
             } else {
                 logger.warn("Normalized itinerary not found: {}", id);
                 return ResponseEntity.notFound().build();
             }
-            
+
         } catch (Exception e) {
             logger.error("Failed to get normalized itinerary: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Propose changes (preview without writing to DB).
-     * POST /itineraries/{id}:propose → 200 → body: ChangeSet → {proposed, diff, previewVersion}
+     * POST /itineraries/{id}:propose → 200 → body: ChangeSet → {proposed, diff,
+     * previewVersion}
      */
     @PostMapping("/{id}:propose")
-    public ResponseEntity<ProposeResponse> proposeChanges(@PathVariable String id, 
-                                                         @Valid @RequestBody ChangeSet changeSet) {
+    public ResponseEntity<ProposeResponse> proposeChanges(@PathVariable String id,
+            @Valid @RequestBody ChangeSet changeSet) {
         logger.info("Proposing changes for itinerary: {}", id);
-        
+
         try {
             ChangeEngine.ProposeResult result = changeEngine.propose(id, changeSet);
-            
+
             ProposeResponse response = new ProposeResponse(
-                result.getProposed(),
-                result.getDiff(),
-                result.getPreviewVersion()
-            );
-            
+                    result.getProposed(),
+                    result.getDiff(),
+                    result.getPreviewVersion());
+
             logger.info("Changes proposed successfully for itinerary: {}", id);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             logger.error("Failed to propose changes for itinerary: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Apply changes (writes to DB and increments version).
-     * POST /itineraries/{id}:apply → 200 → body: {changeSetId | changeSet} → {toVersion, diff}
+     * POST /itineraries/{id}:apply → 200 → body: {changeSetId | changeSet} →
+     * {toVersion, diff}
      */
     @PostMapping("/{id}:apply")
-    public ResponseEntity<ApplyResponse> applyChanges(@PathVariable String id, 
-                                                     @Valid @RequestBody ApplyRequest request) {
+    public ResponseEntity<ApplyResponse> applyChanges(@PathVariable String id,
+            @Valid @RequestBody ApplyRequest request) {
         logger.info("Applying changes for itinerary: {}", id);
-        
+
         try {
             ChangeSet changeSet = request.getChangeSet();
             if (changeSet == null) {
                 return ResponseEntity.badRequest().build();
             }
-            
+
             ChangeEngine.ApplyResult result = changeEngine.apply(id, changeSet);
-            
+
             ApplyResponse response = new ApplyResponse(
-                result.getToVersion(),
-                result.getDiff()
-            );
-            
+                    result.getToVersion(),
+                    result.getDiff());
+
             // WebSocket handles real-time updates automatically
             logger.info("Changes applied successfully for itinerary: {}", id);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             logger.error("Failed to apply changes for itinerary: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Undo changes (restores from revision).
      * POST /itineraries/{id}:undo → 200 → body: {toVersion?} → {toVersion, diff}
      */
     @PostMapping("/{id}:undo")
-    public ResponseEntity<UndoResponse> undoChanges(@PathVariable String id, 
-                                                   @Valid @RequestBody UndoRequest request) {
+    public ResponseEntity<UndoResponse> undoChanges(@PathVariable String id,
+            @Valid @RequestBody UndoRequest request) {
         logger.info("Undoing changes for itinerary: {} to version: {}", id, request.getToVersion());
-        
+
         try {
             ChangeEngine.UndoResult result = changeEngine.undo(id, request.getToVersion());
-            
+
             UndoResponse response = new UndoResponse(
-                result.getToVersion(),
-                result.getDiff()
-            );
-            
+                    result.getToVersion(),
+                    result.getDiff());
+
             // WebSocket handles real-time updates automatically
             logger.info("Changes undone successfully for itinerary: {}", id);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             logger.error("Failed to undo changes for itinerary: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     // SSE endpoints removed - WebSocket handles all real-time communication
-    
+
     /**
      * Lock or unlock a specific node in an itinerary.
      * PUT /itineraries/{id}/nodes/{nodeId}/lock
      */
     @PutMapping("/{id}/nodes/{nodeId}/lock")
-    public ResponseEntity<Map<String, Object>> toggleNodeLock(@PathVariable String id, 
-                                                             @PathVariable String nodeId,
-                                                             @RequestBody Map<String, Boolean> request,
-                                                             HttpServletRequest httpRequest) {
+    public ResponseEntity<Map<String, Object>> toggleNodeLock(@PathVariable String id,
+            @PathVariable String nodeId,
+            @RequestBody Map<String, Boolean> request,
+            HttpServletRequest httpRequest) {
         logger.info("Toggling lock for node {} in itinerary: {}", nodeId, id);
-        
+
         // Get user ID from request
         String userId = (String) httpRequest.getAttribute("userId");
-        
+
         if (userId == null) {
             logger.error("User ID not found in request");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "User identification failed"));
         }
-        
+
         try {
             // Get the locked state from request body
             Boolean locked = request.get("locked");
             if (locked == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Missing 'locked' field in request body"));
             }
-            
+
             // Get current itinerary
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 logger.warn("Itinerary not found: {}", id);
                 return ResponseEntity.notFound().build();
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
-            
+
             // Check ownership
             String itineraryUserId = itinerary.getUserId();
             boolean hasAccess = userId.equals(itineraryUserId);
-            
+
             if (!hasAccess) {
                 logger.warn("User {} does not have access to itinerary {} (owner: {})", userId, id, itineraryUserId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            
+
             // Find and update the node
             boolean nodeFound = false;
             for (NormalizedDay day : itinerary.getDays()) {
@@ -506,34 +515,34 @@ public class ItinerariesController {
                         break;
                     }
                 }
-                if (nodeFound) break;
+                if (nodeFound)
+                    break;
             }
-            
+
             if (!nodeFound) {
                 logger.warn("Node not found: {} in itinerary: {}", nodeId, id);
                 return ResponseEntity.notFound().build();
             }
-            
+
             // Save the updated itinerary
             itinerary.setUpdatedAt(System.currentTimeMillis());
             itineraryJsonService.saveMasterItinerary(id, itinerary);
-            
+
             logger.info("Node {} lock status updated to {} in itinerary: {}", nodeId, locked, id);
-            
+
             return ResponseEntity.ok(Map.of(
-                "success", true,
-                "nodeId", nodeId,
-                "locked", locked,
-                "message", locked ? "Node locked successfully" : "Node unlocked successfully"
-            ));
-            
+                    "success", true,
+                    "nodeId", nodeId,
+                    "locked", locked,
+                    "message", locked ? "Node locked successfully" : "Node unlocked successfully"));
+
         } catch (Exception e) {
             logger.error("Failed to toggle lock for node {} in itinerary: {}", nodeId, id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to update node lock status"));
         }
     }
-    
+
     /**
      * Get lock states of all nodes in an itinerary for debugging.
      * GET /itineraries/{id}/lock-states
@@ -541,7 +550,7 @@ public class ItinerariesController {
     @GetMapping("/{id}/lock-states")
     public ResponseEntity<Map<String, Object>> getLockStates(@PathVariable String id, HttpServletRequest httpRequest) {
         logger.info("Getting lock states for itinerary: {}", id);
-        
+
         try {
             // Get current itinerary
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
@@ -549,10 +558,10 @@ public class ItinerariesController {
                 logger.warn("Itinerary not found: {}", id);
                 return ResponseEntity.notFound().build();
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
             Map<String, Object> lockStates = new HashMap<>();
-            
+
             // Collect lock states for all nodes
             for (int dayIndex = 0; dayIndex < itinerary.getDays().size(); dayIndex++) {
                 NormalizedDay day = itinerary.getDays().get(dayIndex);
@@ -564,82 +573,115 @@ public class ItinerariesController {
                     lockStates.put(node.getId(), nodeInfo);
                 }
             }
-            
+
             return ResponseEntity.ok(Map.of(
-                "success", true,
-                "itineraryId", id,
-                "lockStates", lockStates
-            ));
-            
+                    "success", true,
+                    "itineraryId", id,
+                    "lockStates", lockStates));
+
         } catch (Exception e) {
             logger.error("Failed to get lock states for itinerary: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to get lock states"));
         }
     }
-    
+
     // Response DTOs
     public static class ProposeResponse {
         private final NormalizedItinerary proposed;
         private final ItineraryDiff diff;
         private final Integer previewVersion;
-        
+
         public ProposeResponse(NormalizedItinerary proposed, ItineraryDiff diff, Integer previewVersion) {
             this.proposed = proposed;
             this.diff = diff;
             this.previewVersion = previewVersion;
         }
-        
-        public NormalizedItinerary getProposed() { return proposed; }
-        public ItineraryDiff getDiff() { return diff; }
-        public Integer getPreviewVersion() { return previewVersion; }
+
+        public NormalizedItinerary getProposed() {
+            return proposed;
+        }
+
+        public ItineraryDiff getDiff() {
+            return diff;
+        }
+
+        public Integer getPreviewVersion() {
+            return previewVersion;
+        }
     }
-    
+
     public static class ApplyRequest {
         private String changeSetId;
         private ChangeSet changeSet;
-        
-        public String getChangeSetId() { return changeSetId; }
-        public void setChangeSetId(String changeSetId) { this.changeSetId = changeSetId; }
-        public ChangeSet getChangeSet() { return changeSet; }
-        public void setChangeSet(ChangeSet changeSet) { this.changeSet = changeSet; }
+
+        public String getChangeSetId() {
+            return changeSetId;
+        }
+
+        public void setChangeSetId(String changeSetId) {
+            this.changeSetId = changeSetId;
+        }
+
+        public ChangeSet getChangeSet() {
+            return changeSet;
+        }
+
+        public void setChangeSet(ChangeSet changeSet) {
+            this.changeSet = changeSet;
+        }
     }
-    
+
     public static class ApplyResponse {
         private final Integer toVersion;
         private final ItineraryDiff diff;
-        
+
         public ApplyResponse(Integer toVersion, ItineraryDiff diff) {
             this.toVersion = toVersion;
             this.diff = diff;
         }
-        
-        public Integer getToVersion() { return toVersion; }
-        public ItineraryDiff getDiff() { return diff; }
+
+        public Integer getToVersion() {
+            return toVersion;
+        }
+
+        public ItineraryDiff getDiff() {
+            return diff;
+        }
     }
-    
+
     public static class UndoRequest {
         private Integer toVersion;
-        
-        public Integer getToVersion() { return toVersion; }
-        public void setToVersion(Integer toVersion) { this.toVersion = toVersion; }
+
+        public Integer getToVersion() {
+            return toVersion;
+        }
+
+        public void setToVersion(Integer toVersion) {
+            this.toVersion = toVersion;
+        }
     }
-    
+
     public static class UndoResponse {
         private final Integer toVersion;
         private final ItineraryDiff diff;
-        
+
         public UndoResponse(Integer toVersion, ItineraryDiff diff) {
             this.toVersion = toVersion;
             this.diff = diff;
         }
-        
-        public Integer getToVersion() { return toVersion; }
-        public ItineraryDiff getDiff() { return diff; }
+
+        public Integer getToVersion() {
+            return toVersion;
+        }
+
+        public ItineraryDiff getDiff() {
+            return diff;
+        }
     }
-    
+
     // ===== AGENT EXECUTION ENDPOINTS =====
-    
+
     /**
      * Execute an agent on an itinerary
      */
@@ -655,34 +697,33 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Get the itinerary
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
-            
+
             // Execute agent via registry
             Map<String, Object> result = agentRegistry.executeAgent(agentType, itinerary, parameters);
-            
+
             // Broadcast update if changes were made
             if (result.containsKey("changes") && (Boolean) result.getOrDefault("applied", false)) {
                 webSocketBroadcastService.broadcastUpdate(id, "agent_execution", result, userId);
             }
-            
+
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             logger.error("Error executing agent {} for itinerary {}: {}", agentType, id, e.getMessage());
             Map<String, Object> error = Map.of(
-                "error", "Agent execution failed",
-                "message", e.getMessage()
-            );
+                    "error", "Agent execution failed",
+                    "message", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
-    
+
     /**
      * Get agent execution status
      */
@@ -697,7 +738,7 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Get agent status from registry
             Map<String, Object> status = agentRegistry.getAgentStatus(agentType, id);
             return ResponseEntity.ok(status);
@@ -706,7 +747,7 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Cancel agent execution
      */
@@ -721,7 +762,7 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Cancel agent execution
             agentRegistry.cancelAgentExecution(agentType, id);
             return ResponseEntity.ok().build();
@@ -730,10 +771,11 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Manually trigger enrichment for an existing itinerary
-     * This is useful for re-enriching old itineraries that were created before enrichment was implemented
+     * This is useful for re-enriching old itineraries that were created before
+     * enrichment was implemented
      */
     @PostMapping("/{id}/enrich")
     public ResponseEntity<Map<String, Object>> enrichItinerary(
@@ -748,11 +790,11 @@ public class ItinerariesController {
                 errorResponse.put("error", "User identification failed");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
             }
-            
+
             logger.info("=== MANUAL ENRICHMENT TRIGGERED ===");
             logger.info("Itinerary ID: {}", id);
             logger.info("User ID: {}", userId);
-            
+
             // Load the itinerary
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
@@ -761,20 +803,20 @@ public class ItinerariesController {
                 errorResponse.put("error", "Itinerary not found: " + id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
-            
+
             // Execute enrichment agent
             Map<String, Object> result = agentRegistry.executeAgent("ENRICHMENT", itinerary, new HashMap<>());
-            
+
             logger.info("Enrichment completed for itinerary: {}", id);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Enrichment triggered successfully");
             response.put("itineraryId", id);
             response.put("result", result);
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error enriching itinerary {}: {}", id, e.getMessage(), e);
@@ -784,9 +826,9 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-    
+
     // ===== REVISION MANAGEMENT ENDPOINTS =====
-    
+
     /**
      * Get revision history for an itinerary
      */
@@ -800,7 +842,7 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             List<RevisionRecord> revisions = revisionService.getRevisionHistory(id);
             return ResponseEntity.ok(revisions);
         } catch (Exception e) {
@@ -808,7 +850,7 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Rollback to a specific revision
      */
@@ -823,26 +865,25 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Rollback to revision
             NormalizedItinerary rolledBack = revisionService.rollbackToVersion(id, revisionId);
-            
+
             // Save the rolled back version
             itineraryJsonService.saveMasterItinerary(id, rolledBack);
-            
+
             // Broadcast update
             webSocketBroadcastService.broadcastUpdate(id, "rollback", Map.of(
-                "revisionId", revisionId,
-                "itinerary", rolledBack
-            ), userId);
-            
+                    "revisionId", revisionId,
+                    "itinerary", rolledBack), userId);
+
             return ResponseEntity.ok(rolledBack);
         } catch (Exception e) {
             logger.error("Error rolling back itinerary {} to revision {}: {}", id, revisionId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Get a specific revision
      */
@@ -857,21 +898,21 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             Optional<RevisionRecord> revisionOpt = revisionService.getRevision(id, revisionId);
             if (revisionOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             return ResponseEntity.ok(revisionOpt.get());
         } catch (Exception e) {
             logger.error("Error getting revision {} for itinerary {}: {}", revisionId, id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     // ===== CHAT INTEGRATION ENDPOINTS =====
-    
+
     /**
      * Send a chat message and process with orchestrator
      */
@@ -885,22 +926,21 @@ public class ItinerariesController {
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-            
+
             // Set the itinerary ID and user ID
             request.setItineraryId(id);
             request.setUserId(userId);
-            
+
             // Process chat request with orchestrator
             ChatResponse response = orchestratorService.route(request);
-            
+
             // Broadcast chat response if needed
             if (response.getChangeSet() != null && response.isApplied()) {
                 webSocketBroadcastService.broadcastUpdate(id, "chat_update", Map.of(
-                    "chatResponse", response,
-                    "changes", response.getChangeSet()
-                ), userId);
+                        "chatResponse", response,
+                        "changes", response.getChangeSet()), userId);
             }
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error processing chat message for itinerary {}: {}", id, e.getMessage());
@@ -910,7 +950,7 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-    
+
     /**
      * Get chat history for an itinerary
      */
@@ -924,13 +964,13 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Verify itinerary exists and user has access
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             // Retrieve chat history using service
             List<Map<String, Object>> chatHistory = chatHistoryService.getChatHistory(id);
             return ResponseEntity.ok(chatHistory);
@@ -939,7 +979,7 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Save a chat message to history
      */
@@ -954,13 +994,13 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Verify itinerary exists
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             // Save chat message using service
             Map<String, Object> response = chatHistoryService.saveChatMessage(id, message, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -969,7 +1009,7 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Clear chat history for an itinerary
      */
@@ -983,13 +1023,13 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Verify itinerary exists
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             // Clear chat history using service
             chatHistoryService.clearChatHistory(id);
             return ResponseEntity.noContent().build();
@@ -998,9 +1038,9 @@ public class ItinerariesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     // ===== WORKFLOW MANAGEMENT ENDPOINTS =====
-    
+
     /**
      * Update workflow data for an itinerary
      */
@@ -1015,38 +1055,37 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Get current itinerary
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
-            
+
             // Update workflow section
             if (itinerary.getWorkflow() == null) {
                 itinerary.setWorkflow(new WorkflowData());
             }
-            
+
             // Update workflow data (simplified - you may want more specific handling)
             // This would need proper WorkflowData mapping based on your requirements
-            
+
             // Save updated itinerary
             itineraryJsonService.saveMasterItinerary(id, itinerary);
-            
+
             // Broadcast update
             webSocketBroadcastService.broadcastUpdate(id, "workflow_update", Map.of(
-                "workflow", workflowData
-            ), userId);
-            
+                    "workflow", workflowData), userId);
+
             return ResponseEntity.ok(itinerary);
         } catch (Exception e) {
             logger.error("Error updating workflow for itinerary {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Get trip metadata for an itinerary
      */
@@ -1060,20 +1099,20 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Get metadata from UserDataService
             Optional<TripMetadata> metadataOpt = userDataService.getUserTripMetadata(userId, id);
             if (metadataOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             return ResponseEntity.ok(metadataOpt.get());
         } catch (Exception e) {
             logger.error("Error getting metadata for itinerary {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Get workflow data for an itinerary
      */
@@ -1087,25 +1126,25 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
             WorkflowData workflow = itinerary.getWorkflow();
             if (workflow == null) {
                 workflow = new WorkflowData(); // Return empty workflow if none exists
             }
-            
+
             return ResponseEntity.ok(workflow);
         } catch (Exception e) {
             logger.error("Error getting workflow for itinerary {}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+
     /**
      * Update a specific node in an itinerary (used by workflow sync)
      */
@@ -1121,15 +1160,15 @@ public class ItinerariesController {
                 logger.error("User ID not found in request");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            
+
             // Get current itinerary
             Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(id);
             if (itineraryOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             NormalizedItinerary itinerary = itineraryOpt.get();
-            
+
             // Find and update the node
             boolean nodeFound = false;
             for (NormalizedDay day : itinerary.getDays()) {
@@ -1139,7 +1178,7 @@ public class ItinerariesController {
                         if (nodeData.containsKey("title")) {
                             node.setTitle((String) nodeData.get("title"));
                         }
-                        
+
                         // Update timing information
                         if (nodeData.containsKey("startTime") || nodeData.containsKey("endTime")) {
                             if (node.getTiming() == null) {
@@ -1170,7 +1209,7 @@ public class ItinerariesController {
                                 }
                             }
                         }
-                        
+
                         // Update details (description)
                         if (nodeData.containsKey("description")) {
                             if (node.getDetails() == null) {
@@ -1178,45 +1217,206 @@ public class ItinerariesController {
                             }
                             node.getDetails().setDescription((String) nodeData.get("description"));
                         }
-                        
+
                         // Update cost information
                         if (nodeData.containsKey("cost")) {
                             // Handle cost update if needed - would need proper mapping
                         }
-                        
+
                         // Update location information
                         if (nodeData.containsKey("location")) {
                             // Handle location update if needed - would need proper mapping
                         }
-                        
+
                         // Mark as updated by user
                         node.markAsUpdated("user");
                         nodeFound = true;
                         break;
                     }
                 }
-                if (nodeFound) break;
+                if (nodeFound)
+                    break;
             }
-            
+
             if (!nodeFound) {
                 logger.warn("Node {} not found in itinerary {}", nodeId, id);
                 return ResponseEntity.notFound().build();
             }
-            
-            // Save updated itinerary
-            itinerary.setUpdatedAt(System.currentTimeMillis());
-            itineraryJsonService.updateItinerary(itinerary);
-            
+
+            // Save updated itinerary with optimistic locking and retry
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean saved = false;
+
+            while (!saved && retryCount < maxRetries) {
+                try {
+                    itinerary.setUpdatedAt(System.currentTimeMillis());
+                    itineraryJsonService.updateItineraryWithLock(itinerary);
+                    saved = true;
+                } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                    retryCount++;
+                    logger.error("Concurrent modification detected for itinerary {} (attempt {}/{}): {}",
+                            id, retryCount, maxRetries, e.getMessage());
+
+                    if (retryCount < maxRetries) {
+                        logger.info("Reloading itinerary and retrying save...");
+                        Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(id);
+                        if (reloaded.isPresent()) {
+                            itinerary = reloaded.get();
+                            // Re-apply node update to reloaded itinerary
+                            NormalizedNode nodeToUpdate = findNodeById(itinerary, nodeId);
+                            if (nodeToUpdate != null) {
+                                updateNodeWithData(nodeToUpdate, nodeData);
+                                logger.info("Re-applied node update to reloaded itinerary");
+                            } else {
+                                logger.error("Node {} not found in reloaded itinerary", nodeId);
+                                return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+                            }
+                        } else {
+                            logger.error("Failed to reload itinerary for retry");
+                            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+                        }
+                    } else {
+                        logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+                    }
+                }
+            }
+
             // Broadcast update
             webSocketBroadcastService.broadcastUpdate(id, "node_update", Map.of(
-                "nodeId", nodeId,
-                "nodeData", nodeData
-            ), userId);
-            
+                    "nodeId", nodeId,
+                    "nodeData", nodeData), userId);
+
             return ResponseEntity.ok(itinerary);
         } catch (Exception e) {
             logger.error("Error updating node {} in itinerary {}: {}", nodeId, id, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    /**
+     * Helper method to find a node by ID in an itinerary
+     */
+    private NormalizedNode findNodeById(NormalizedItinerary itinerary, String nodeId) {
+        if (itinerary.getDays() == null) {
+            return null;
+        }
+
+        for (NormalizedDay day : itinerary.getDays()) {
+            if (day.getNodes() == null) {
+                continue;
+            }
+
+            for (NormalizedNode node : day.getNodes()) {
+                if (nodeId.equals(node.getId())) {
+                    return node;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Helper method to update a node with data from a map
+     */
+    private void updateNodeWithData(NormalizedNode node, Map<String, Object> nodeData) {
+        if (nodeData == null || node == null) {
+            return;
+        }
+
+        // Update basic fields
+        if (nodeData.containsKey("title")) {
+            node.setTitle((String) nodeData.get("title"));
+        }
+
+        if (nodeData.containsKey("locked")) {
+            node.setLocked((Boolean) nodeData.get("locked"));
+        }
+
+        if (nodeData.containsKey("status")) {
+            node.setStatus((String) nodeData.get("status"));
+        }
+
+        // Update location if provided
+        if (nodeData.containsKey("location")) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> locationData = (Map<String, Object>) nodeData.get("location");
+            if (node.getLocation() == null) {
+                node.setLocation(new NodeLocation());
+            }
+            updateNodeLocation(node.getLocation(), locationData);
+        }
+
+        // Update timing if provided
+        if (nodeData.containsKey("timing")) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> timingData = (Map<String, Object>) nodeData.get("timing");
+            if (node.getTiming() == null) {
+                node.setTiming(new NodeTiming());
+            }
+            updateNodeTiming(node.getTiming(), timingData);
+        }
+
+        // Update cost if provided
+        if (nodeData.containsKey("cost")) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> costData = (Map<String, Object>) nodeData.get("cost");
+            if (node.getCost() == null) {
+                node.setCost(new NodeCost());
+            }
+            updateNodeCost(node.getCost(), costData);
+        }
+
+        // Mark as updated by user
+        node.markAsUpdated("user");
+    }
+
+    private void updateNodeLocation(NodeLocation location, Map<String, Object> data) {
+        if (data.containsKey("name")) {
+            location.setName((String) data.get("name"));
+        }
+        if (data.containsKey("address")) {
+            location.setAddress((String) data.get("address"));
+        }
+
+        // Update coordinates
+        if (data.containsKey("lat") || data.containsKey("lng")) {
+            Coordinates coords = location.getCoordinates();
+            if (coords == null) {
+                coords = new Coordinates();
+                location.setCoordinates(coords);
+            }
+
+            if (data.containsKey("lat")) {
+                coords.setLat(((Number) data.get("lat")).doubleValue());
+            }
+            if (data.containsKey("lng")) {
+                coords.setLng(((Number) data.get("lng")).doubleValue());
+            }
+        }
+    }
+
+    private void updateNodeTiming(NodeTiming timing, Map<String, Object> data) {
+        if (data.containsKey("startTime")) {
+            timing.setStartTime(((Number) data.get("startTime")).longValue());
+        }
+        if (data.containsKey("endTime")) {
+            timing.setEndTime(((Number) data.get("endTime")).longValue());
+        }
+        if (data.containsKey("durationMin")) {
+            timing.setDurationMin(((Number) data.get("durationMin")).intValue());
+        }
+    }
+
+    private void updateNodeCost(NodeCost cost, Map<String, Object> data) {
+        if (data.containsKey("amountPerPerson")) {
+            cost.setAmountPerPerson(((Number) data.get("amountPerPerson")).doubleValue());
+        }
+        if (data.containsKey("currency")) {
+            cost.setCurrency((String) data.get("currency"));
+        }
+        // Note: NodeCost doesn't have a category field, it's in NodeDetails
     }
 }

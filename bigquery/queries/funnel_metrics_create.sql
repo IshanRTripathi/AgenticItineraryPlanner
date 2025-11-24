@@ -1,7 +1,7 @@
 -- Funnel Metrics Table Creation - RUN ONCE
 -- Creates the funnel_metrics table with initial data from last 90 days
 
-CREATE OR REPLACE TABLE `tripaiplanner.analytics.funnel_metrics`
+CREATE TABLE IF NOT EXISTS `tripaiplanner.analytics.funnel_metrics`
 PARTITION BY date
 CLUSTER BY date
 AS

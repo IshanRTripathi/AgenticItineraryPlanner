@@ -74,14 +74,14 @@ export class ItineraryAdapter {
    * Calculate total cost from all days
    */
   static getTotalCost(itinerary: NormalizedItinerary): number {
-    return itinerary.days.reduce((total, day) => total + (day.totals?.cost || 0), 0);
+    return itinerary.days.reduce((total, day) => total + (day.totalCost || 0), 0);
   }
   
   /**
    * Get cost for a specific day
    */
   static getDayCost(day: NormalizedDay): number {
-    return day.totals?.cost || 0;
+    return day.totalCost || 0;
   }
   
   // ============================================================================
@@ -92,14 +92,14 @@ export class ItineraryAdapter {
    * Calculate total distance from all days
    */
   static getTotalDistance(itinerary: NormalizedItinerary): number {
-    return itinerary.days.reduce((total, day) => total + (day.totals?.distanceKm || 0), 0);
+    return itinerary.days.reduce((total, day) => total + (day.totalDistance || 0), 0);
   }
   
   /**
    * Get distance for a specific day
    */
   static getDayDistance(day: NormalizedDay): number {
-    return day.totals?.distanceKm || 0;
+    return day.totalDistance || 0;
   }
   
   // ============================================================================

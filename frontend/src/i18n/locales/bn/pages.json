@@ -107,6 +107,8 @@
     "languagePreferences": "ভাষা পছন্দ",
     "selectLanguage": "আপনার ভাষা নির্বাচন করুন",
     "languageDescription": "পরিবর্তনগুলি অবিলম্বে সমস্ত পৃষ্ঠায় প্রয়োগ করা হবে",
+    "currencyPreferences": "মুদ্রার পছন্দ",
+    "currencyDescription": "খরচ এবং বাজেট প্রদর্শনের জন্য আপনার পছন্দের মুদ্রা নির্বাচন করুন",
     "accountDetails": "অ্যাকাউন্টের বিবরণ",
     "accountDetailsDescription": "আপনার ব্যক্তিগত তথ্য এবং অ্যাকাউন্ট স্থিতি",
     "authProvider": "প্রমাণীকরণ প্রদানকারী",
@@ -124,7 +126,7 @@
       "description": "আপনার অ্যাকাউন্ট এবং পছন্দ পরিচালনা করুন",
       "myTrips": "আমার ভ্রমণ",
       "planTrip": "ভ্রমণ পরিকল্পনা করুন",
-      "upgrade": "আপগ্রেড করুন",
+      "currency": "মুদ্রা",
       "language": "ভাষা"
     }
   },

@@ -45,8 +45,8 @@
     "wind": "viento"
   },
   "dateRangePicker": {
-    "maxDaysTitle": "Máximo 7 días",
-    "maxDaysDescription": "Por favor seleccione una duración de viaje de 7 días o menos",
+    "maxDaysTitle": "Máximo 12 días",
+    "maxDaysDescription": "Por favor seleccione una duración de viaje de 12 días o menos",
     "duration": "{{nights}} noche, {{days}} día",
     "duration_plural": "{{nights}} noches, {{days}} días",
     "selectDates": "Seleccionar fechas",

@@ -28,6 +28,10 @@ public class NormalizedItinerary {
     @JsonProperty("version")
     private Integer version;
     
+    // NEW: Optimistic locking version
+    @JsonProperty("lockVersion")
+    private Long lockVersion;
+    
     @JsonProperty("userId")
     private String userId;
     
@@ -48,6 +52,15 @@ public class NormalizedItinerary {
     
     @JsonProperty("constraints")
     private List<String> constraints; // User's custom instructions/requirements
+    
+    @JsonProperty("budgetMin")
+    private Double budgetMin; // Minimum budget per person
+    
+    @JsonProperty("budgetMax")
+    private Double budgetMax; // Maximum budget per person
+    
+    @JsonProperty("partySize")
+    private Integer partySize; // Total number of people
 
     // Explicit trip meta to avoid parsing from summary
     @JsonProperty("origin")
@@ -133,6 +146,18 @@ public class NormalizedItinerary {
         this.version = version;
     }
     
+    public Long getLockVersion() {
+        return lockVersion;
+    }
+    
+    public void setLockVersion(Long lockVersion) {
+        this.lockVersion = lockVersion;
+    }
+    
+    public void incrementLockVersion() {
+        this.lockVersion = (this.lockVersion == null ? 0L : this.lockVersion) + 1;
+    }
+    
     public String getUserId() {
         return userId;
     }
@@ -187,6 +212,30 @@ public class NormalizedItinerary {
     
     public void setConstraints(List<String> constraints) {
         this.constraints = constraints;
+    }
+    
+    public Double getBudgetMin() {
+        return budgetMin;
+    }
+    
+    public void setBudgetMin(Double budgetMin) {
+        this.budgetMin = budgetMin;
+    }
+    
+    public Double getBudgetMax() {
+        return budgetMax;
+    }
+    
+    public void setBudgetMax(Double budgetMax) {
+        this.budgetMax = budgetMax;
+    }
+    
+    public Integer getPartySize() {
+        return partySize;
+    }
+    
+    public void setPartySize(Integer partySize) {
+        this.partySize = partySize;
     }
 
     public String getOrigin() {

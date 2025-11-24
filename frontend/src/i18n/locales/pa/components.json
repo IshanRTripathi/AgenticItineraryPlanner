@@ -40,8 +40,8 @@
     "wind": "ਹਵਾ"
   },
   "dateRangePicker": {
-    "maxDaysTitle": "ਵੱਧ ਤੋਂ ਵੱਧ 7 ਦਿਨ",
-    "maxDaysDescription": "ਕਿਰਪਾ ਕਰਕੇ 7 ਦਿਨ ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਦੀ ਯਾਤਰਾ ਚੁਣੋ",
+    "maxDaysTitle": "ਵੱਧ ਤੋਂ ਵੱਧ 12 ਦਿਨ",
+    "maxDaysDescription": "ਕਿਰਪਾ ਕਰਕੇ 12 ਦਿਨ ਜਾਂ ਇਸ ਤੋਂ ਘੱਟ ਦੀ ਯਾਤਰਾ ਚੁਣੋ",
     "duration": "{{nights}} ਰਾਤ, {{days}} ਦਿਨ",
     "duration_plural": "{{nights}} ਰਾਤਾਂ, {{days}} ਦਿਨ",
     "selectDates": "ਤਾਰੀਖਾਂ ਚੁਣੋ",

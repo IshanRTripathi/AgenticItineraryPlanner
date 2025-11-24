@@ -55,7 +55,18 @@ bq query \
   --replace=true \
   "$(cat queries/llm_costs_daily.sql)"
 
-# 5. Agent Performance - Runs daily at 2:00 AM
+# 5. LLM Costs Daily Summary - Runs daily at 1:50 AM
+echo "Creating scheduled query: llm_costs_daily_summary..."
+bq query \
+  --project_id=$PROJECT_ID \
+  --use_legacy_sql=false \
+  --display_name="Analytics - LLM Costs Daily Summary" \
+  --schedule="every day 01:50" \
+  --destination_table="${PROJECT_ID}:${DATASET}.llm_costs_daily_summary" \
+  --replace=true \
+  "$(cat queries/llm_costs_daily_summary.sql)"
+
+# 6. Agent Performance - Runs daily at 2:00 AM
 echo "Creating scheduled query: agent_performance..."
 bq query \
   --project_id=$PROJECT_ID \

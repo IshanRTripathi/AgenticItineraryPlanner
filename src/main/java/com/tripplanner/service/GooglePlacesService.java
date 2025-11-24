@@ -1,11 +1,12 @@
 package com.tripplanner.service;
 
 import com.tripplanner.dto.*;
+import com.tripplanner.service.analytics.ItineraryMetricsTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,52 +23,55 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Service for integrating with Google Places API.
- * Provides place details, photos, and reviews with rate limiting and error handling.
+ * Provides place details, photos, and reviews with rate limiting and error
+ * handling.
  */
 @Service
 public class GooglePlacesService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(GooglePlacesService.class);
     private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place";
-    
+
     // Place Details API fields to request
     private static final String PLACE_DETAILS_FIELDS = "photos,reviews,opening_hours,price_level,rating,user_ratings_total,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number";
-    
+
     // Retry configuration
     private static final int MAX_RETRIES = 5;
     private static final int INITIAL_RETRY_DELAY_MS = 1000;
     private static final int MAX_RETRY_DELAY_MS = 8000;
-    
+
     // Rate limiting tracking
     private final AtomicInteger dailyRequestCount = new AtomicInteger(0);
     private final AtomicLong lastResetTime = new AtomicLong(System.currentTimeMillis());
     private static final int DAILY_LIMIT_FREE = 1000;
     private static final int DAILY_LIMIT_PAID = 100000;
-    
+
     // Circuit breaker pattern
     private final AtomicInteger consecutiveFailures = new AtomicInteger(0);
     private final AtomicLong circuitBreakerOpenTime = new AtomicLong(0);
     private final AtomicBoolean circuitBreakerOpen = new AtomicBoolean(false);
     private static final int FAILURE_THRESHOLD = 5;
     private static final long CIRCUIT_BREAKER_TIMEOUT = 60000; // 1 minute
-    
+
     @Value("${google.places.api.key:}")
     private String apiKey;
-    
+
     @Value("${google.places.daily.limit:1000}")
     private int dailyLimit;
-    
+
     @Value("${google.places.rate.limit.enabled:true}")
     private boolean rateLimitEnabled;
 
     private final RestTemplate restTemplate;
     private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    private final ItineraryMetricsTracker metricsTracker;
 
-    public GooglePlacesService(RestTemplate restTemplate) {
+    public GooglePlacesService(RestTemplate restTemplate, ItineraryMetricsTracker metricsTracker) {
         this.restTemplate = restTemplate;
         this.objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        this.metricsTracker = metricsTracker;
     }
-    
+
     /**
      * Get detailed information about a place by place ID.
      * Includes photos, reviews, opening hours, rating, and price level.
@@ -75,17 +79,17 @@ public class GooglePlacesService {
     @Cacheable(value = "placeDetails", key = "#placeId")
     public PlaceDetails getPlaceDetails(String placeId) {
         logger.debug("Getting place details for placeId: {}", placeId);
-        
+
         if (placeId == null || placeId.trim().isEmpty()) {
             throw new IllegalArgumentException("Place ID cannot be null or empty");
         }
-        
+
         // Check rate limits
         checkRateLimit();
-        
+
         // Check circuit breaker
         checkCircuitBreaker();
-        
+
         try {
             // Build URL using UriComponentsBuilder to handle encoding properly
             // This avoids double-encoding issues when RestTemplate makes the request
@@ -95,13 +99,19 @@ public class GooglePlacesService {
                     .queryParam("key", apiKey)
                     .build(false) // Don't encode - let RestTemplate handle it
                     .toUriString();
-            
+
+            // Track API call start time
+            long startTime = System.currentTimeMillis();
+
             // Make GET request with retry logic
             PlaceDetailsResponse response = makeRequestWithRetry(url, PlaceDetailsResponse.class);
-            
+
+            // Calculate duration
+            long durationMs = System.currentTimeMillis() - startTime;
+
             // Increment request count
             incrementRequestCount();
-            
+
             // Handle API response
             if (response.isSuccessful() && response.getResult() != null) {
                 PlaceDetails result = response.getResult();
@@ -113,29 +123,52 @@ public class GooglePlacesService {
                 logger.info("   📸 Photos: {} photos", result.getPhotos() != null ? result.getPhotos().size() : 0);
                 logger.info("   💬 Reviews: {} reviews", result.getReviews() != null ? result.getReviews().size() : 0);
                 if (result.getPhotos() != null && !result.getPhotos().isEmpty()) {
-                    logger.info("   📸 First photo reference: {}", result.getPhotos().get(0).getPhotoReference().substring(0, Math.min(30, result.getPhotos().get(0).getPhotoReference().length())) + "...");
+                    logger.info("   📸 First photo reference: {}",
+                            result.getPhotos().get(0).getPhotoReference().substring(0,
+                                    Math.min(30, result.getPhotos().get(0).getPhotoReference().length())) + "...");
                 }
                 recordSuccess(); // Reset circuit breaker on success
+
+                // Track successful API call
+                String itineraryId = MDC.get("itineraryId");
+                metricsTracker.trackAPICall(itineraryId, "GooglePlaces", "/place/details", durationMs, true, 200, null);
+
                 return result;
             } else if (response.isRateLimited()) {
                 recordFailure();
+                // Track rate limited API call
+                String itineraryId = MDC.get("itineraryId");
+                metricsTracker.trackAPICall(itineraryId, "GooglePlaces", "/place/details", durationMs, false, 429,
+                        "Rate limit exceeded");
                 throw new RuntimeException("Google Places API rate limit exceeded");
             } else if (response.isNotFound()) {
+                // Track not found API call
+                String itineraryId = MDC.get("itineraryId");
+                metricsTracker.trackAPICall(itineraryId, "GooglePlaces", "/place/details", durationMs, false, 404,
+                        "Place not found");
                 // Not found is not considered a failure for circuit breaker
                 throw new RuntimeException("Place not found: " + placeId);
             } else {
                 recordFailure();
-                throw new RuntimeException("Google Places API error: " + response.getStatus() + 
-                    (response.getErrorMessage() != null ? " - " + response.getErrorMessage() : ""));
+                String errorMsg = "Google Places API error: " + response.getStatus() +
+                        (response.getErrorMessage() != null ? " - " + response.getErrorMessage() : "");
+                // Track failed API call
+                String itineraryId = MDC.get("itineraryId");
+                metricsTracker.trackAPICall(itineraryId, "GooglePlaces", "/place/details", durationMs, false, null,
+                        errorMsg);
+                throw new RuntimeException(errorMsg);
             }
-            
+
         } catch (Exception e) {
             logger.error("Failed to get place details for {}: {}", placeId, e.getMessage(), e);
             recordFailure();
+            // Track failed API call (exception case)
+            String itineraryId = MDC.get("itineraryId");
+            metricsTracker.trackAPICall(itineraryId, "GooglePlaces", "/place/details", 0, false, null, e.getMessage());
             throw new RuntimeException("Failed to get place details: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Get photos for a place by place ID.
      * Returns a list of Photo objects with URLs and metadata.
@@ -143,10 +176,10 @@ public class GooglePlacesService {
     @Cacheable(value = "placePhotos", key = "#placeId")
     public List<Photo> getPlacePhotos(String placeId) {
         logger.debug("Getting place photos for placeId: {}", placeId);
-        
+
         try {
             PlaceDetails placeDetails = getPlaceDetails(placeId);
-            
+
             if (placeDetails != null && placeDetails.getPhotos() != null) {
                 logger.debug("Found {} photos for place {}", placeDetails.getPhotos().size(), placeId);
                 return placeDetails.getPhotos();
@@ -154,13 +187,13 @@ public class GooglePlacesService {
                 logger.debug("No photos found for place {}", placeId);
                 return new ArrayList<>();
             }
-            
+
         } catch (Exception e) {
             logger.error("Failed to get place photos for {}: {}", placeId, e.getMessage(), e);
             return new ArrayList<>(); // Return empty list on error
         }
     }
-    
+
     /**
      * Get reviews for a place by place ID.
      * Returns a list of Review objects with ratings and text.
@@ -168,10 +201,10 @@ public class GooglePlacesService {
     @Cacheable(value = "placeReviews", key = "#placeId")
     public List<Review> getPlaceReviews(String placeId) {
         logger.debug("Getting place reviews for placeId: {}", placeId);
-        
+
         try {
             PlaceDetails placeDetails = getPlaceDetails(placeId);
-            
+
             if (placeDetails != null && placeDetails.getReviews() != null) {
                 logger.debug("Found {} reviews for place {}", placeDetails.getReviews().size(), placeId);
                 return placeDetails.getReviews();
@@ -179,26 +212,26 @@ public class GooglePlacesService {
                 logger.debug("No reviews found for place {}", placeId);
                 return new ArrayList<>();
             }
-            
+
         } catch (Exception e) {
             logger.error("Failed to get place reviews for {}: {}", placeId, e.getMessage(), e);
             return new ArrayList<>(); // Return empty list on error
         }
     }
-    
+
     /**
      * Make HTTP request with exponential backoff retry mechanism.
      */
     private <T> T makeRequestWithRetry(String url, Class<T> responseType) {
         int retryDelay = INITIAL_RETRY_DELAY_MS;
-        
+
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
                 ResponseEntity<String> rawResponse = restTemplate.getForEntity(url, String.class);
-                
+
                 if (rawResponse.getStatusCode().is2xxSuccessful()) {
                     String rawBody = rawResponse.getBody();
-                    
+
                     // Parse response
                     try {
                         return objectMapper.readValue(rawBody, responseType);
@@ -212,18 +245,19 @@ public class GooglePlacesService {
                 } else {
                     throw new RuntimeException("HTTP " + rawResponse.getStatusCode() + " from Google Places API");
                 }
-                
+
             } catch (HttpClientErrorException e) {
                 if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS && attempt < MAX_RETRIES) {
                     logger.warn("Rate limit hit, retrying in {}ms (attempt {}/{})", retryDelay, attempt, MAX_RETRIES);
                     sleepWithInterruptHandling(retryDelay);
                     retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY_MS);
                 } else if (attempt == MAX_RETRIES) {
-                    throw new RuntimeException("Google Places API failed after " + MAX_RETRIES + " attempts: " + e.getStatusCode(), e);
+                    throw new RuntimeException(
+                            "Google Places API failed after " + MAX_RETRIES + " attempts: " + e.getStatusCode(), e);
                 } else {
                     throw new RuntimeException("Google Places API error: " + e.getStatusCode(), e);
                 }
-                
+
             } catch (HttpServerErrorException e) {
                 if (attempt < MAX_RETRIES) {
                     logger.warn("Server error, retrying in {}ms (attempt {}/{})", retryDelay, attempt, MAX_RETRIES);
@@ -232,23 +266,25 @@ public class GooglePlacesService {
                 } else {
                     throw new RuntimeException("Google Places API server error after " + MAX_RETRIES + " attempts", e);
                 }
-                
+
             } catch (RuntimeException e) {
                 throw e; // Re-throw runtime exceptions
             } catch (Exception e) {
                 if (attempt < MAX_RETRIES) {
-                    logger.warn("Request failed, retrying in {}ms (attempt {}/{}): {}", retryDelay, attempt, MAX_RETRIES, e.getMessage());
+                    logger.warn("Request failed, retrying in {}ms (attempt {}/{}): {}", retryDelay, attempt,
+                            MAX_RETRIES, e.getMessage());
                     sleepWithInterruptHandling(retryDelay);
                     retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY_MS);
                 } else {
-                    throw new RuntimeException("Request failed after " + MAX_RETRIES + " attempts: " + e.getMessage(), e);
+                    throw new RuntimeException("Request failed after " + MAX_RETRIES + " attempts: " + e.getMessage(),
+                            e);
                 }
             }
         }
-        
+
         throw new RuntimeException("Unexpected error in retry logic");
     }
-    
+
     /**
      * Sleep with proper interrupt handling.
      */
@@ -260,7 +296,7 @@ public class GooglePlacesService {
             throw new RuntimeException("Request interrupted during retry", ie);
         }
     }
-    
+
     /**
      * Geocode a location string to get its coordinates using Google Geocoding API.
      * Results are cached to avoid repeated API calls for the same location.
@@ -273,9 +309,9 @@ public class GooglePlacesService {
         if (location == null || location.trim().isEmpty()) {
             return null;
         }
-        
+
         logger.info("🔍 [GooglePlacesService] Geocoding location: '{}'", location);
-        
+
         try {
             // Build geocoding API URL
             String url = UriComponentsBuilder.fromHttpUrl("https://maps.googleapis.com/maps/api/geocode/json")
@@ -283,19 +319,19 @@ public class GooglePlacesService {
                     .queryParam("key", apiKey)
                     .build(false)
                     .toUriString();
-            
+
             logger.debug("Geocoding API URL: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
-            
+
             // Make request (no retry needed for geocoding, it's fast and reliable)
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            
+
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 // Parse response
                 com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(response.getBody());
                 String status = root.path("status").asText();
-                
+
                 logger.debug("Geocoding API status: {}", status);
-                
+
                 if ("OK".equals(status)) {
                     com.fasterxml.jackson.databind.JsonNode results = root.path("results");
                     if (results.isArray() && results.size() > 0) {
@@ -304,31 +340,32 @@ public class GooglePlacesService {
                         com.fasterxml.jackson.databind.JsonNode locationNode = firstResult
                                 .path("geometry")
                                 .path("location");
-                        
+
                         double lat = locationNode.path("lat").asDouble();
                         double lng = locationNode.path("lng").asDouble();
-                        
+
                         com.tripplanner.dto.Coordinates coords = new com.tripplanner.dto.Coordinates();
                         coords.setLat(lat);
                         coords.setLng(lng);
-                        
-                        logger.info("✅ [GooglePlacesService] Geocoded '{}' to: '{}' at ({}, {})", 
-                            location, formattedAddress, lat, lng);
+
+                        logger.info("✅ [GooglePlacesService] Geocoded '{}' to: '{}' at ({}, {})",
+                                location, formattedAddress, lat, lng);
                         return coords;
                     }
                 } else if ("ZERO_RESULTS".equals(status)) {
                     logger.warn("⚠️ [GooglePlacesService] No geocoding results found for location: '{}'", location);
                 } else {
-                    logger.warn("⚠️ [GooglePlacesService] Geocoding API returned status: {} for location: '{}'", status, location);
+                    logger.warn("⚠️ [GooglePlacesService] Geocoding API returned status: {} for location: '{}'", status,
+                            location);
                 }
             }
         } catch (Exception e) {
             logger.error("❌ [GooglePlacesService] Failed to geocode location '{}': {}", location, e.getMessage(), e);
         }
-        
+
         return null;
     }
-    
+
     /**
      * Check if we're within rate limits.
      */
@@ -336,30 +373,31 @@ public class GooglePlacesService {
         if (!rateLimitEnabled) {
             return;
         }
-        
+
         // Reset daily counter if it's a new day
         long currentTime = System.currentTimeMillis();
         long lastReset = lastResetTime.get();
-        
+
         if (currentTime - lastReset > 24 * 60 * 60 * 1000) { // 24 hours
             if (lastResetTime.compareAndSet(lastReset, currentTime)) {
                 dailyRequestCount.set(0);
                 logger.info("Reset daily request count for Google Places API");
             }
         }
-        
+
         // Check if we're approaching the limit
         int currentCount = dailyRequestCount.get();
         if (currentCount >= dailyLimit) {
-            throw new RuntimeException("Daily rate limit exceeded for Google Places API: " + currentCount + "/" + dailyLimit);
+            throw new RuntimeException(
+                    "Daily rate limit exceeded for Google Places API: " + currentCount + "/" + dailyLimit);
         }
-        
+
         // Warn when approaching limit
         if (currentCount > dailyLimit * 0.9) {
             logger.warn("Approaching Google Places API daily limit: {}/{}", currentCount, dailyLimit);
         }
     }
-    
+
     /**
      * Increment the daily request count.
      */
@@ -367,18 +405,14 @@ public class GooglePlacesService {
         int newCount = dailyRequestCount.incrementAndGet();
         logger.debug("Google Places API request count: {}/{}", newCount, dailyLimit);
     }
-    
+
     /**
      * Get current rate limit statistics.
      */
     public RateLimitStats getRateLimitStats() {
-        return new RateLimitStats(
-            dailyRequestCount.get(),
-            dailyLimit,
-            lastResetTime.get()
-        );
+        return new RateLimitStats(dailyRequestCount.get(), dailyLimit, lastResetTime.get());
     }
-    
+
     /**
      * Rate limit statistics for monitoring.
      */
@@ -386,36 +420,36 @@ public class GooglePlacesService {
         private final int currentCount;
         private final int dailyLimit;
         private final long lastResetTime;
-        
+
         public RateLimitStats(int currentCount, int dailyLimit, long lastResetTime) {
             this.currentCount = currentCount;
             this.dailyLimit = dailyLimit;
             this.lastResetTime = lastResetTime;
         }
-        
+
         public int getCurrentCount() {
             return currentCount;
         }
-        
+
         public int getDailyLimit() {
             return dailyLimit;
         }
-        
+
         public long getLastResetTime() {
             return lastResetTime;
         }
-        
+
         public double getUsagePercentage() {
             return dailyLimit > 0 ? (double) currentCount / dailyLimit * 100 : 0;
         }
-        
+
         @Override
         public String toString() {
-            return String.format("RateLimitStats{currentCount=%d, dailyLimit=%d, usage=%.1f%%}", 
-                               currentCount, dailyLimit, getUsagePercentage());
+            return String.format("RateLimitStats{currentCount=%d, dailyLimit=%d, usage=%.1f%%}",
+                    currentCount, dailyLimit, getUsagePercentage());
         }
     }
-    
+
     /**
      * Check circuit breaker state before making requests.
      */
@@ -423,10 +457,10 @@ public class GooglePlacesService {
         if (!circuitBreakerOpen.get()) {
             return; // Circuit is closed, proceed normally
         }
-        
+
         long currentTime = System.currentTimeMillis();
         long openTime = circuitBreakerOpenTime.get();
-        
+
         if (currentTime - openTime > CIRCUIT_BREAKER_TIMEOUT) {
             // Try to close the circuit breaker (half-open state)
             logger.info("Circuit breaker timeout reached, attempting to close circuit breaker");
@@ -436,7 +470,7 @@ public class GooglePlacesService {
             throw new RuntimeException("Google Places API circuit breaker is open. Service temporarily unavailable.");
         }
     }
-    
+
     /**
      * Record a successful API call.
      */
@@ -445,38 +479,38 @@ public class GooglePlacesService {
             logger.info("Google Places API call succeeded, resetting failure count");
             consecutiveFailures.set(0);
         }
-        
+
         if (circuitBreakerOpen.get()) {
             logger.info("Google Places API call succeeded, closing circuit breaker");
             circuitBreakerOpen.set(false);
         }
     }
-    
+
     /**
      * Record a failed API call and potentially open circuit breaker.
      */
     private void recordFailure() {
         int failures = consecutiveFailures.incrementAndGet();
         logger.warn("Google Places API failure recorded. Consecutive failures: {}", failures);
-        
+
         if (failures >= FAILURE_THRESHOLD && !circuitBreakerOpen.get()) {
-            logger.error("Google Places API failure threshold reached ({}), opening circuit breaker", FAILURE_THRESHOLD);
+            logger.error("Google Places API failure threshold reached ({}), opening circuit breaker",
+                    FAILURE_THRESHOLD);
             circuitBreakerOpen.set(true);
             circuitBreakerOpenTime.set(System.currentTimeMillis());
         }
     }
-    
+
     /**
      * Get circuit breaker statistics for monitoring.
      */
     public CircuitBreakerStats getCircuitBreakerStats() {
         return new CircuitBreakerStats(
-            circuitBreakerOpen.get(),
-            consecutiveFailures.get(),
-            circuitBreakerOpenTime.get()
-        );
+                circuitBreakerOpen.get(),
+                consecutiveFailures.get(),
+                circuitBreakerOpenTime.get());
     }
-    
+
     /**
      * Circuit breaker statistics for monitoring.
      */
@@ -484,25 +518,25 @@ public class GooglePlacesService {
         private final boolean isOpen;
         private final int consecutiveFailures;
         private final long openTime;
-        
+
         public CircuitBreakerStats(boolean isOpen, int consecutiveFailures, long openTime) {
             this.isOpen = isOpen;
             this.consecutiveFailures = consecutiveFailures;
             this.openTime = openTime;
         }
-        
+
         public boolean isOpen() {
             return isOpen;
         }
-        
+
         public int getConsecutiveFailures() {
             return consecutiveFailures;
         }
-        
+
         public long getOpenTime() {
             return openTime;
         }
-        
+
         public long getTimeUntilRetry() {
             if (!isOpen) {
                 return 0;
@@ -510,14 +544,14 @@ public class GooglePlacesService {
             long elapsed = System.currentTimeMillis() - openTime;
             return Math.max(0, CIRCUIT_BREAKER_TIMEOUT - elapsed);
         }
-        
+
         @Override
         public String toString() {
-            return String.format("CircuitBreakerStats{isOpen=%s, consecutiveFailures=%d, timeUntilRetry=%dms}", 
-                               isOpen, consecutiveFailures, getTimeUntilRetry());
+            return String.format("CircuitBreakerStats{isOpen=%s, consecutiveFailures=%d, timeUntilRetry=%dms}",
+                    isOpen, consecutiveFailures, getTimeUntilRetry());
         }
     }
-    
+
     /**
      * Search for a place by name and location.
      * Returns the first matching place with coordinates.
@@ -525,16 +559,16 @@ public class GooglePlacesService {
     @Cacheable(value = "placeSearch", key = "#query + '_' + #location")
     public PlaceSearchResult searchPlace(String query, String location) {
         logger.info("🔍 [GooglePlacesService] Searching place: query='{}', location='{}'", query, location);
-        
+
         if (query == null || query.trim().isEmpty()) {
             logger.warn("⚠️ [GooglePlacesService] Empty query provided to searchPlace");
             return null;
         }
-        
+
         // Check rate limits and circuit breaker
         checkRateLimit();
         checkCircuitBreaker();
-        
+
         try {
             // Build search query - ALWAYS include location for better context
             // This ensures we search for "place name + city" which is more specific
@@ -543,22 +577,23 @@ public class GooglePlacesService {
                 // Check if query already contains the location to avoid duplication
                 String queryLower = query.toLowerCase();
                 String locationLower = location.toLowerCase();
-                
+
                 if (!queryLower.contains(locationLower)) {
                     searchQuery = query + ", " + location;
                     logger.info("📝 [GooglePlacesService] Combined search query: '{}'", searchQuery);
                 } else {
-                    logger.info("📝 [GooglePlacesService] Query already contains location, using as-is: '{}'", searchQuery);
+                    logger.info("📝 [GooglePlacesService] Query already contains location, using as-is: '{}'",
+                            searchQuery);
                 }
             } else {
                 logger.warn("⚠️ [GooglePlacesService] No location provided, searching with query only");
             }
-            
+
             // Build URL with location bias using destination coordinates
             UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
                     .queryParam("query", searchQuery)
                     .queryParam("key", apiKey);
-            
+
             // Add location bias using destination coordinates
             // This is much more accurate than region codes
             if (location != null && !location.trim().isEmpty()) {
@@ -567,58 +602,63 @@ public class GooglePlacesService {
                     logger.info("🌍 [GooglePlacesService] Geocoding destination: '{}'", location);
                     com.tripplanner.dto.Coordinates destCoords = geocodeLocation(location);
                     if (destCoords != null && destCoords.getLat() != null && destCoords.getLng() != null) {
-                        // Add location bias with a 50km radius around destination (tighter radius for better accuracy)
-                        String locationBias = String.format("circle:50000@%f,%f", 
-                            destCoords.getLat(), destCoords.getLng());
+                        // Add location bias with a 50km radius around destination (tighter radius for
+                        // better accuracy)
+                        String locationBias = String.format("circle:50000@%f,%f",
+                                destCoords.getLat(), destCoords.getLng());
                         urlBuilder.queryParam("locationbias", locationBias);
-                        logger.info("✅ [GooglePlacesService] Added location bias: {} for destination: '{}' (coords: {}, {})", 
-                            locationBias, location, destCoords.getLat(), destCoords.getLng());
+                        logger.info(
+                                "✅ [GooglePlacesService] Added location bias: {} for destination: '{}' (coords: {}, {})",
+                                locationBias, location, destCoords.getLat(), destCoords.getLng());
                     } else {
-                        logger.warn("⚠️ [GooglePlacesService] Geocoding returned null coordinates for destination: '{}'", location);
+                        logger.warn(
+                                "⚠️ [GooglePlacesService] Geocoding returned null coordinates for destination: '{}'",
+                                location);
                     }
                 } catch (Exception e) {
-                    logger.error("❌ [GooglePlacesService] Failed to geocode destination '{}', searching without location bias: {}", 
-                        location, e.getMessage(), e);
+                    logger.error(
+                            "❌ [GooglePlacesService] Failed to geocode destination '{}', searching without location bias: {}",
+                            location, e.getMessage(), e);
                 }
             } else {
                 logger.warn("⚠️ [GooglePlacesService] No destination provided for location bias");
             }
-            
+
             String url = urlBuilder.build(false).toUriString();
-            
+
             logger.debug("Requesting Google Places API: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
-            
+
             // Make GET request with retry logic
             PlaceSearchResponse response = makeRequestWithRetry(url, PlaceSearchResponse.class);
-            
-            if (response != null && response.getStatus() != null && 
-                !response.getStatus().equals("OK") && !response.getStatus().equals("ZERO_RESULTS")) {
+
+            if (response != null && response.getStatus() != null &&
+                    !response.getStatus().equals("OK") && !response.getStatus().equals("ZERO_RESULTS")) {
                 logger.warn("Unexpected Google Places API status: {}", response.getStatus());
             }
-            
+
             // Increment request count
             incrementRequestCount();
-            
+
             // Handle API response
-            if (response != null && "OK".equals(response.getStatus()) && 
-                response.getResults() != null && !response.getResults().isEmpty()) {
-                
+            if (response != null && "OK".equals(response.getStatus()) &&
+                    response.getResults() != null && !response.getResults().isEmpty()) {
+
                 PlaceSearchResult firstResult = response.getResults().get(0);
-                logger.info("✅ [GooglePlacesService] Found place: '{}' at ({}, {}) [placeId: {}]", 
-                    firstResult.getName(),
-                    firstResult.getGeometry().getLocation().getLatitude(),
-                    firstResult.getGeometry().getLocation().getLongitude(),
-                    firstResult.getPlaceId());
+                logger.info("✅ [GooglePlacesService] Found place: '{}' at ({}, {}) [placeId: {}]",
+                        firstResult.getName(),
+                        firstResult.getGeometry().getLocation().getLatitude(),
+                        firstResult.getGeometry().getLocation().getLongitude(),
+                        firstResult.getPlaceId());
                 logger.info("   📍 Address: {}", firstResult.getFormattedAddress());
                 logger.info("   🔍 Search query was: '{}'", searchQuery);
                 logger.info("   🌍 Location bias was: {}", location);
                 recordSuccess();
                 return firstResult;
-                
+
             } else if (response != null && "ZERO_RESULTS".equals(response.getStatus())) {
                 logger.debug("No results found for query: {}", searchQuery);
                 return null;
-                
+
             } else {
                 String status = response != null ? response.getStatus() : "null";
                 String errorMsg = response != null ? response.getErrorMessage() : "null";
@@ -626,7 +666,7 @@ public class GooglePlacesService {
                 recordFailure();
                 return null;
             }
-            
+
         } catch (Exception e) {
             logger.error("Failed to search for place {}: {}", query, e.getMessage());
             recordFailure();

@@ -76,9 +76,9 @@ export function ChatTab() {
 
     try {
       await sendChatMessage(text);
-      
+
       const duration = Date.now() - startTime;
-      
+
       // Track successful response
       analytics.track('chat_response_received', {
         messageLength,
@@ -88,16 +88,31 @@ export function ChatTab() {
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      
-      // Track failed response
+
+      // Classify error for better tracking
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const statusCode = (error as any)?.response?.status || (error as any)?.status;
+      const errorType =
+        statusCode === 429 ? 'rate_limit' :
+          statusCode >= 500 ? 'server_error' :
+            statusCode >= 400 ? 'client_error' :
+              error instanceof Error && error.message.includes('timeout') ? 'timeout' :
+                error instanceof Error && error.message.includes('network') ? 'network' :
+                  'unknown';
+      const retryable = errorType === 'rate_limit' || errorType === 'server_error' || errorType === 'timeout' || errorType === 'network';
+
+      // Track failed response with classification
       analytics.track('chat_response_failed', {
         messageLength,
         wordCount,
         duration,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
+        errorType,
+        statusCode: statusCode || null,
+        retryable,
         itineraryId: itinerary?.itineraryId
       });
-      
+
       console.error('Failed to send message:', error);
     } finally {
       setIsSending(false);
@@ -114,22 +129,22 @@ export function ChatTab() {
   const handleApplyChanges = async (messageId: string, changeSet: any) => {
     setApplyingMessageId(messageId);
     const startTime = Date.now();
-    
+
     // Track apply changes initiated
     analytics.track('chat_changes_apply_initiated', {
       messageId,
       changeCount: changeSet?.ops?.length || 0,
       itineraryId: itinerary?.itineraryId
     });
-    
+
     try {
       // Apply changes through context
       // The UnifiedItineraryContext will handle the API call
       console.log('Applying changes:', changeSet);
       // TODO: Implement apply changes in context
-      
+
       const duration = Date.now() - startTime;
-      
+
       // Track successful application
       analytics.track('chat_changes_applied', {
         messageId,
@@ -139,7 +154,7 @@ export function ChatTab() {
       });
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // Track failed application
       analytics.track('chat_changes_apply_failed', {
         messageId,
@@ -148,7 +163,7 @@ export function ChatTab() {
         error: error instanceof Error ? error.message : 'Unknown error',
         itineraryId: itinerary?.itineraryId
       });
-      
+
       console.error('Failed to apply changes:', error);
     } finally {
       setApplyingMessageId(undefined);
@@ -185,8 +200,8 @@ export function ChatTab() {
           </Badge>
         )}
         {chatMessages.length > 0 && (
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             variant="outline"
             onClick={handleExportHistory}
             title="Export chat history"
@@ -231,8 +246,8 @@ export function ChatTab() {
                     'Find a romantic restaurant',
                     'Add more outdoor activities'
                   ].map(s => (
-                    <button 
-                      key={s} 
+                    <button
+                      key={s}
                       className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-primary/5 hover:border-primary text-xs sm:text-sm transition-all shadow-sm hover:shadow touch-manipulation active:scale-95"
                       onClick={() => setInput(s)}
                     >
@@ -249,7 +264,7 @@ export function ChatTab() {
               {t('components.chatTab.showing', { current: displayedMessages.length, total: chatMessages.length })}
             </div>
           )}
-          
+
           {displayedMessages.map((message, index) => {
             const messageId = message.id || `msg-${index}`;
             // Create unique key combining id, timestamp, and index to prevent duplicates

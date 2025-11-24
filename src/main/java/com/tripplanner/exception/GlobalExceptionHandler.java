@@ -129,8 +129,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex, WebRequest request) {
         logger.warn("=== VALIDATION EXCEPTION ===");
-        logger.warn("Field: {}", ex.getField());
-        logger.warn("Value: {}", ex.getValue());
+        logger.warn("Validation error: {}", ex.getValidationErrors());
         logger.warn("Error: {}", ex.getMessage());
         logger.warn("Request: {}", request.getDescription(false));
         logger.warn("============================");
@@ -142,8 +141,7 @@ public class GlobalExceptionHandler {
                 .message("The provided information is invalid. Please check your input and try again.")
                 .path(request.getDescription(false).replace("uri=", ""))
                 .details(ErrorDetails.builder()
-                        .field(ex.getField())
-                        .value(ex.getValue())
+                        .value(ex.getValidationErrors().toString())
                         .retryable(false)
                         .suggestedAction("Check your input and correct any errors")
                         .build())

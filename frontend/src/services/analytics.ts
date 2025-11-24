@@ -5,6 +5,8 @@
  * This is intentionally minimal - no complex logic, just event tracking.
  */
 
+import { getSessionId } from '../utils/session';
+
 interface AnalyticsEvent {
   eventName: string;
   timestamp: number;
@@ -21,11 +23,11 @@ class AnalyticsService {
   private apiUrl: string;
 
   constructor() {
-    this.sessionId = this.generateSessionId();
+    this.sessionId = getSessionId();
     this.userId = this.restoreUserId();
     this.enabled = import.meta.env.VITE_ENABLE_ANALYTICS !== 'false';
     this.apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
-    
+
     if (this.enabled) {
       console.log('[Analytics] Initialized - Session:', this.sessionId, 'User:', this.userId || 'anonymous');
     }
@@ -173,36 +175,25 @@ class AnalyticsService {
         method: 'POST',
         keepalive: true, // Ensures delivery even if page closes
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Session-ID': this.sessionId
         },
         body: JSON.stringify(event)
       })
-      .then(response => {
-        if (!response.ok) {
-          console.warn(`[Analytics] Event failed: ${event.eventName} (${response.status})`);
-        }
-      })
-      .catch((error) => {
-        console.warn(`[Analytics] Network error for event: ${event.eventName}`, error);
-      });
+        .then(response => {
+          if (!response.ok) {
+            console.warn(`[Analytics] Event failed: ${event.eventName} (${response.status})`);
+          }
+        })
+        .catch((error) => {
+          console.warn(`[Analytics] Network error for event: ${event.eventName}`, error);
+        });
     } catch (error) {
       console.warn(`[Analytics] Failed to send event: ${event.eventName}`, error);
     }
   }
 
-  /**
-   * Generate a unique session ID.
-   */
-  private generateSessionId(): string {
-    // Check if session ID exists in sessionStorage
-    const stored = sessionStorage.getItem('analytics_session_id');
-    if (stored) return stored;
 
-    // Generate new session ID
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    sessionStorage.setItem('analytics_session_id', sessionId);
-    return sessionId;
-  }
 }
 
 export const analytics = new AnalyticsService();

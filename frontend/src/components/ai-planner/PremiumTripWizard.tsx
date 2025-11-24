@@ -71,10 +71,10 @@ export function PremiumTripWizard() {
     const handleSubmit = async () => {
         setIsSubmitting(true);
         
-        // Calculate trip duration
+        // Calculate trip duration (inclusive of both start and end dates)
         const startDate = new Date(formData.startDate || '');
         const endDate = new Date(formData.endDate || '');
-        const durationDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const durationDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         
         try {
             // Track trip creation initiated

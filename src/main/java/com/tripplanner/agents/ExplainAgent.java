@@ -5,15 +5,14 @@ import com.tripplanner.dto.AgentEvent;
 import com.tripplanner.dto.NormalizedItinerary;
 import com.tripplanner.dto.NormalizedDay;
 import com.tripplanner.dto.NormalizedNode;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.SummarizationService;
-import com.tripplanner.service.AgentEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,7 +33,7 @@ public class ExplainAgent extends BaseAgent {
             AiClient aiClient,
             ItineraryJsonService itineraryJsonService,
             SummarizationService summarizationService,
-            com.tripplanner.service.AgentEventBus eventBus) {
+            AgentEventBus eventBus) {
         super(eventBus, AgentEvent.AgentKind.EXPLAINER);
         this.aiClient = aiClient;
         this.itineraryJsonService = itineraryJsonService;
@@ -137,10 +136,14 @@ public class ExplainAgent extends BaseAgent {
     private String buildItineraryContext(NormalizedItinerary itinerary) {
         StringBuilder context = new StringBuilder();
         
+        // Get currency for proper formatting
+        String currency = itinerary.getCurrency() != null ? itinerary.getCurrency() : "USD";
+        
         // Trip overview
         context.append("TRIP OVERVIEW:\n");
         context.append("Destination: ").append(itinerary.getSummary()).append("\n");
-        context.append("Duration: ").append(itinerary.getDays().size()).append(" days\n\n");
+        context.append("Duration: ").append(itinerary.getDays().size()).append(" days\n");
+        context.append("Currency: ").append(currency).append("\n\n");
         
         // Day-by-day details
         context.append("DAY-BY-DAY ITINERARY:\n\n");
@@ -159,16 +162,22 @@ public class ExplainAgent extends BaseAgent {
                     context.append(" (").append(node.getType()).append(")");
                 }
                 
+                // Format timing properly
                 if (node.getTiming() != null && node.getTiming().getStartTime() != null) {
-                    context.append(" at ").append(node.getTiming().getStartTime());
+                    String formattedTime = formatTime(node.getTiming().getStartTime());
+                    context.append(" at ").append(formattedTime);
                 }
                 
                 if (node.getLocation() != null && node.getLocation().getAddress() != null) {
                     context.append(" - ").append(node.getLocation().getAddress());
                 }
                 
+                // Format cost with proper currency
                 if (node.getCost() != null && node.getCost().getAmountPerPerson() != null) {
-                    context.append(" ($").append(node.getCost().getAmountPerPerson()).append(")");
+                    String costCurrency = node.getCost().getCurrency() != null ? 
+                                         node.getCost().getCurrency() : currency;
+                    context.append(" (").append(costCurrency).append(" ")
+                           .append(String.format("%.2f", node.getCost().getAmountPerPerson())).append(")");
                 }
                 
                 context.append("\n");
@@ -178,6 +187,13 @@ public class ExplainAgent extends BaseAgent {
         }
         
         return context.toString();
+    }
+    
+    /**
+     * Format timestamp to readable time string.
+     */
+    private String formatTime(Long timestamp) {
+        return com.tripplanner.util.TimeFormatter.formatFor12HourDisplay(timestamp);
     }
     
     /**
@@ -197,7 +213,8 @@ public class ExplainAgent extends BaseAgent {
             
             IMPORTANT:
             - Use ONLY the information provided in the itinerary context
-            - If information is not available, say so politely
+            - If information is not available but relevant to travel, find most accurate general advice
+            - Do NOT make up details about the itinerary
             - Format your response in a friendly, readable way
             - Use bullet points or short paragraphs for clarity
             - Include relevant details like times, costs, locations

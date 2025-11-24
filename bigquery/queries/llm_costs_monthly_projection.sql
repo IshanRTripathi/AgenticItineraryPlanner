@@ -1,39 +1,78 @@
--- LLM Costs Monthly Projection - SCHEDULED QUERY
--- Run daily at 2 AM UTC to update monthly cost projection
+-- LLM Costs Monthly Projection - FIXED VERSION
 -- Projects end-of-month costs based on current usage
+-- FIXED: Now uses llm_requests_detailed with proper token breakdown
 
-CREATE OR REPLACE TABLE `tripaiplanner.analytics.llm_costs_monthly_projection`
-AS
-WITH daily_costs AS (
+CREATE OR REPLACE TABLE `tripaiplanner.analytics.llm_costs_monthly_projection` AS
+WITH daily_tokens AS (
   SELECT
-    DATE(TIMESTAMP_MILLIS(timestamp)) as date,
-    COALESCE(SUM(SAFE_CAST(JSON_EXTRACT_SCALAR(properties, '$.llmCostUsd') AS FLOAT64)), 0) as daily_cost
-  FROM `tripaiplanner.analytics.raw_events`
-  WHERE eventName = 'llm_token_usage'
-    AND DATE(TIMESTAMP_MILLIS(timestamp)) >= DATE_TRUNC(CURRENT_DATE(), MONTH)
+    date,
+    SUM(total_prompt_tokens) as daily_prompt_tokens,
+    SUM(total_response_tokens) as daily_response_tokens,
+    SUM(total_thoughts_tokens) as daily_thoughts_tokens,
+    SUM(total_tokens) as daily_total_tokens
+  FROM `tripaiplanner.analytics.llm_requests_detailed`
+  WHERE DATE_TRUNC(date, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
   GROUP BY date
 ),
-current_month_stats AS (
+monthly_summary AS (
   SELECT
-    FORMAT_DATE('%Y-%m', CURRENT_DATE()) as month,
-    COALESCE(SUM(daily_cost), 0) as current_cost,
-    COALESCE(AVG(daily_cost), 0) as avg_daily_cost,
-    COUNT(*) as days_elapsed,
-    EXTRACT(DAY FROM LAST_DAY(CURRENT_DATE())) as days_in_month
-  FROM daily_costs
+    DATE_TRUNC(CURRENT_DATE(), MONTH) as month,
+    SUM(daily_prompt_tokens) as month_to_date_prompt_tokens,
+    SUM(daily_response_tokens) as month_to_date_response_tokens,
+    SUM(daily_thoughts_tokens) as month_to_date_thoughts_tokens,
+    SUM(daily_total_tokens) as month_to_date_total_tokens,
+    COUNT(DISTINCT date) as days_elapsed,
+    DATE_DIFF(LAST_DAY(CURRENT_DATE()), CURRENT_DATE(), DAY) + 1 as days_remaining,
+    DATE_DIFF(LAST_DAY(CURRENT_DATE()), DATE_TRUNC(CURRENT_DATE(), MONTH), DAY) + 1 as days_in_month
+  FROM daily_tokens
 )
 SELECT
   month,
-  current_cost,
-  avg_daily_cost,
+  
+  -- Current Usage
+  month_to_date_prompt_tokens as current_prompt_tokens,
+  month_to_date_response_tokens as current_response_tokens,
+  month_to_date_thoughts_tokens as current_thoughts_tokens,
+  month_to_date_total_tokens as current_total_tokens,
+  
+  -- Time Metrics
   days_elapsed,
+  days_remaining,
   days_in_month,
-  days_in_month - days_elapsed as days_remaining,
-  avg_daily_cost * days_in_month as projected_monthly_cost,
+  
+  -- Daily Averages
+  SAFE_DIVIDE(month_to_date_prompt_tokens, days_elapsed) as avg_daily_prompt_tokens,
+  SAFE_DIVIDE(month_to_date_response_tokens, days_elapsed) as avg_daily_response_tokens,
+  SAFE_DIVIDE(month_to_date_total_tokens, days_elapsed) as avg_daily_total_tokens,
+  
+  -- Projected Monthly Totals
+  SAFE_DIVIDE(month_to_date_prompt_tokens, days_elapsed) * days_in_month as projected_monthly_prompt_tokens,
+  SAFE_DIVIDE(month_to_date_response_tokens, days_elapsed) * days_in_month as projected_monthly_response_tokens,
+  SAFE_DIVIDE(month_to_date_total_tokens, days_elapsed) * days_in_month as projected_monthly_total_tokens,
+  
+  -- Cost Calculation (Gemini 2.5 Flash pricing)
+  -- Prompt: $0.10 per 1M tokens, Response: $0.40 per 1M tokens
+  (SAFE_DIVIDE(month_to_date_prompt_tokens, days_elapsed) * days_in_month * 0.10 / 1000000) as projected_prompt_cost_usd,
+  (SAFE_DIVIDE(month_to_date_response_tokens, days_elapsed) * days_in_month * 0.40 / 1000000) as projected_response_cost_usd,
+  
+  -- Total Projected Cost
+  (SAFE_DIVIDE(month_to_date_prompt_tokens, days_elapsed) * days_in_month * 0.10 / 1000000) +
+  (SAFE_DIVIDE(month_to_date_response_tokens, days_elapsed) * days_in_month * 0.40 / 1000000) as projected_monthly_cost,
+  
+  -- Current Month-to-Date Cost
+  (month_to_date_prompt_tokens * 0.10 / 1000000) +
+  (month_to_date_response_tokens * 0.40 / 1000000) as current_cost,
+  
+  -- Cost Status
   CASE
-    WHEN avg_daily_cost * days_in_month > 200 THEN 'CRITICAL'
-    WHEN avg_daily_cost * days_in_month > 100 THEN 'WARNING'
+    WHEN (SAFE_DIVIDE(month_to_date_prompt_tokens, days_elapsed) * days_in_month * 0.10 / 1000000) +
+         (SAFE_DIVIDE(month_to_date_response_tokens, days_elapsed) * days_in_month * 0.40 / 1000000) > 200 THEN 'CRITICAL'
+    WHEN (SAFE_DIVIDE(month_to_date_prompt_tokens, days_elapsed) * days_in_month * 0.10 / 1000000) +
+         (SAFE_DIVIDE(month_to_date_response_tokens, days_elapsed) * days_in_month * 0.40 / 1000000) > 100 THEN 'WARNING'
     ELSE 'NORMAL'
   END as cost_status,
+  
+  -- Metadata
   CURRENT_TIMESTAMP() as last_updated
-FROM current_month_stats;
+  
+FROM monthly_summary;

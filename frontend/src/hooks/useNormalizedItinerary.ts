@@ -189,7 +189,8 @@ export function useNormalizedDay(
       // Computed values
       cost: ItineraryAdapter.getDayCost(day),
       distance: ItineraryAdapter.getDayDistance(day),
-      timeWindow: day.timeWindow,
+      timeWindowStart: day.timeWindowStart,
+      timeWindowEnd: day.timeWindowEnd,
       
       // Filtered nodes
       mealNodes: ItineraryAdapter.getMealNodes(day),

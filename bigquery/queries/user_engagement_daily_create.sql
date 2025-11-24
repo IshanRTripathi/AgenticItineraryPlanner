@@ -1,7 +1,7 @@
 -- User Engagement Daily Table Creation - RUN ONCE
 -- Creates the user_engagement_daily table with initial data from last 90 days
 
-CREATE OR REPLACE TABLE `tripaiplanner.analytics.user_engagement_daily`
+CREATE TABLE IF NOT EXISTS `tripaiplanner.analytics.user_engagement_daily`
 PARTITION BY date
 CLUSTER BY date
 AS

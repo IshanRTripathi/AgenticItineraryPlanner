@@ -47,6 +47,11 @@ create_scheduled_query \
   "Tracks LLM token usage and costs by provider/model/agent"
 
 create_scheduled_query \
+  "LLM Costs Daily Summary" \
+  "llm_costs_daily_summary.sql" \
+  "Aggregates all providers into daily totals"
+
+create_scheduled_query \
   "Funnel Metrics" \
   "funnel_metrics.sql" \
   "Analyzes conversion funnels and user journeys"

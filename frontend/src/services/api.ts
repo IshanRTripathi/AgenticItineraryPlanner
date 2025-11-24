@@ -8,6 +8,7 @@ import { ChatRequest, ChatResponse } from '../types/ChatTypes';
 import { logger, logInfo, logError, logWarn } from '../utils/logger';
 import { convertNormalizedToTripData } from '../utils/normalizedToTripDataAdapter';
 import { isNormalizedItinerary } from '../utils/typeGuards';
+import { getSessionId } from '../utils/session';
 
 // Retry configuration
 interface RetryConfig {
@@ -211,11 +212,12 @@ class ApiService {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
-    // Build headers with auth token if available
+    // Build headers with auth token and session ID
     const headers: HeadersInit = { ...this.defaultHeaders, ...options.headers };
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
+    headers['X-Session-ID'] = getSessionId();
 
     const config: RequestInit = {
       ...options,
@@ -405,11 +407,12 @@ class ApiService {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
-    // Build headers with auth token if available
+    // Build headers with auth token and session ID
     const headers: HeadersInit = { ...this.defaultHeaders, ...options.headers };
     if (this.authToken) {
       headers['Authorization'] = `Bearer ${this.authToken}`;
     }
+    headers['X-Session-ID'] = getSessionId();
 
     const requestConfig: RequestInit = {
       ...options,

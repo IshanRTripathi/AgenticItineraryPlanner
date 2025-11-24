@@ -184,6 +184,8 @@
     "languagePreferences": "Language Preferences",
     "selectLanguage": "Select Your Language",
     "languageDescription": "Changes will be applied immediately across all pages",
+    "currencyPreferences": "Currency Preferences",
+    "currencyDescription": "Select your preferred currency for displaying costs and budgets",
     "accountDetails": "Account Details",
     "accountDetailsDescription": "Your personal information and account status",
     "authProvider": "Authentication Provider",
@@ -201,7 +203,7 @@
       "description": "Manage your account and preferences",
       "myTrips": "My Trips",
       "planTrip": "Plan Trip",
-      "upgrade": "Upgrade",
+      "currency": "Currency",
       "language": "Language"
     }
   }

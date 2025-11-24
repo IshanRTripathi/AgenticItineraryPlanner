@@ -79,41 +79,41 @@
 2025-11-15 17:12:55.928 [WebSocket-1] DEBUG org.springframework.web.SimpLogging - Processing SUBSCRIBE /topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 id=sub-0 session=session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880
 2025-11-15 17:12:56.763 [Pipeline-70] WARN  com.tripplanner.service.ItineraryJsonService - 🔍 [deserializeItinerary] JSON from DB does NOT contain 'photos' field ❌
 2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Loaded existing itinerary with userId: anonymous
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 1 structure
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
-2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:42:56.784636700Z
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: PLANNER
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 20
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Creating day 1 structure
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: skeleton_generation
+2025-11-15 17:12:56.784 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:42:56.784636700Z
 2025-11-15 17:12:56.785 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:12:56.785 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 1 with FAST_FAIL strategy (no retries, immediate failover)
 2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating structured content with strategy: FAST_FAIL (2 providers available)
 2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient) using strategy FAST_FAIL
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Circuit Breaker State: CLOSED
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 3528
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3528
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
 
 IMPORTANT: Generate ONLY the basic structure with DESCRIPTIVE placeholder titles.
 
 Your job:
 1. Create time slots for the day (m...
-2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3965
-2025-11-15 17:12:56.787 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
-2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
-2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
-2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Length: 2730
-2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+2025-11-15 17:12:56.785 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3965
+2025-11-15 17:12:56.787 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API...
+2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 2730
+2025-11-15 17:13:03.646 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Body: {
   "candidates": [
     {
       "content": {
@@ -144,10 +144,10 @@ Your job:
   "responseId": "R2cYacTBDZ3-4-EPrLydyQo"
 }
 
-2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-1440482106_20251115_171303.json
-2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
-2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1899
-2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_-1440482106_20251115_171303.json
+2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 1899
+2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content preview: ```json
 {
   "dayNumber": 1,
   "date": "2025-12-09",
@@ -160,7 +160,7 @@ Your job:
       "title": "Morning Hotel Breakfast",
       "location": {
        ...
-2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - =========================================
 2025-11-15 17:13:03.650 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
 2025-11-15 17:13:03.651 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
 2025-11-15 17:13:03.651 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 1
@@ -341,43 +341,43 @@ Your job:
 }
 2025-11-15 17:13:04.081 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"day_completed","updateType":"day_completed","itineraryId":"it_7bcaebb6-...(truncated)
 2025-11-15 17:13:04.081 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventPublisher - Published day completed event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, day=1, activities=6
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published day completed event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, day=1, activities=6
 2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 1 created and saved
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 40
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 2 structure
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:04.081678300Z
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: PLANNER
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 40
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Creating day 2 structure
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: skeleton_generation
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:04.081678300Z
 2025-11-15 17:13:04.081 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:04.081 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 2 with FAST_FAIL strategy (no retries, immediate failover)
 2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating structured content with strategy: FAST_FAIL (2 providers available)
 2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient) using strategy FAST_FAIL
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Circuit Breaker State: CLOSED
-2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 3528
-2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
-2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-15 17:13:04.081 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3528
+2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
 
 IMPORTANT: Generate ONLY the basic structure with DESCRIPTIVE placeholder titles.
 
 Your job:
 1. Create time slots for the day (m...
-2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3965
-2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
-2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
-2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
-2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Length: 3105
-2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3965
+2025-11-15 17:13:04.082 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API...
+2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 3105
+2025-11-15 17:13:13.350 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Body: {
   "candidates": [
     {
       "content": {
@@ -408,10 +408,10 @@ Your job:
   "responseId": "UGcYacOkOvyM4-EPjeuTkQs"
 }
 
-2025-11-15 17:13:13.352 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_1805805197_20251115_171313.json
-2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
-2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content length: 2231
-2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+2025-11-15 17:13:13.352 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_1805805197_20251115_171313.json
+2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 2231
+2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content preview: ```json
 {
   "dayNumber": 2,
   "date": "2025-12-10",
@@ -423,7 +423,7 @@ Your job:
       "type": "meal",
       "title": "Morning Hotel Breakfast",
       "...
-2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - =========================================
 2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
 2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
 2025-11-15 17:13:13.353 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 2
@@ -630,43 +630,43 @@ Your job:
 }
 2025-11-15 17:13:13.800 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"day_completed","updateType":"day_completed","itineraryId":"it_7bcaebb6-...(truncated)
 2025-11-15 17:13:13.800 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventPublisher - Published day completed event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, day=2, activities=7
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published day completed event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, day=2, activities=7
 2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 2 created and saved
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 60
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Creating day 3 structure
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_generation
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:13.800023800Z
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: PLANNER
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 60
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Creating day 3 structure
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: skeleton_generation
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:13.800023800Z
 2025-11-15 17:13:13.800 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:13.800 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:13.800 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generating skeleton for day 3 with FAST_FAIL strategy (no retries, immediate failover)
 2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating structured content with strategy: FAST_FAIL (2 providers available)
 2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient) using strategy FAST_FAIL
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Circuit Breaker State: CLOSED
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 3528
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3528
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Preview: You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
 
 IMPORTANT: Generate ONLY the basic structure with DESCRIPTIVE placeholder titles.
 
 Your job:
 1. Create time slots for the day (m...
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3965
-2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
-2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
-2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
-2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Length: 2440
-2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3965
+2025-11-15 17:13:13.801 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API...
+2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 2440
+2025-11-15 17:13:21.971 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Body: {
   "candidates": [
     {
       "content": {
@@ -697,10 +697,10 @@ Your job:
   "responseId": "WWcYaeGtJtSyjuMP4Krx0Ao"
 }
 
-2025-11-15 17:13:21.973 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-1030538231_20251115_171321.json
-2025-11-15 17:13:21.973 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
-2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content length: 1651
-2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+2025-11-15 17:13:21.973 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_-1030538231_20251115_171321.json
+2025-11-15 17:13:21.973 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 1651
+2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content preview: ```json
 {
   "dayNumber": 3,
   "date": "2025-12-11",
@@ -711,7 +711,7 @@ Your job:
       "id": "day3_node1",
       "type": "meal",
       "title": "Morning Hotel ...
-2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - =========================================
 2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
 2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON PLANNER AGENT - FULL LLM RESPONSE ===
 2025-11-15 17:13:21.974 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Day: 3
@@ -866,20 +866,20 @@ Your job:
 }
 2025-11-15 17:13:22.429 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"day_completed","updateType":"day_completed","itineraryId":"it_7bcaebb6-...(truncated)
 2025-11-15 17:13:22.429 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventPublisher - Published day completed event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, day=3, activities=5
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published day completed event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, day=3, activities=5
 2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Skeleton day 3 created and saved
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: PLANNER
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
-2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Skeleton complete
-2025-11-15 17:13:22.430 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: skeleton_complete
-2025-11-15 17:13:22.430 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:22.429593200Z
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f4698ad0-7e93-46a4-9139-4ee81bd8f007
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: PLANNER
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 80
+2025-11-15 17:13:22.429 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Skeleton complete
+2025-11-15 17:13:22.430 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: skeleton_complete
+2025-11-15 17:13:22.430 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:22.429593200Z
 2025-11-15 17:13:22.430 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:22.430 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:22.430 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:22.430 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:23.772 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - === SKELETON COMPLETE ===
 2025-11-15 17:13:23.772 [Pipeline-70] INFO  com.tripplanner.agents.SkeletonPlannerAgent - Generated 3 days with 18 total node placeholders
 2025-11-15 17:13:23.772 [Pipeline-69] INFO  com.tripplanner.service.PipelineOrchestrator - Skeleton generation completed successfully for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
@@ -895,7 +895,7 @@ Your job:
 2025-11-15 17:13:23.773 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:13:23.774 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"phase_transition","updateType":"phase_transition","itineraryId":"it_7bc...(truncated)
 2025-11-15 17:13:23.774 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:23.774 [Pipeline-69] INFO  com.tripplanner.service.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, skeleton→population, progress=40%
+2025-11-15 17:13:23.774 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, skeleton→population, progress=40%
 2025-11-15 17:13:23.774 [Pipeline-69] INFO  com.tripplanner.service.PipelineOrchestrator - Running population agents in PARALLEL
 2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.PipelineOrchestrator - [ActivityAgent] Starting...
 2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.PipelineOrchestrator - [MealAgent] Starting...
@@ -906,140 +906,140 @@ Your job:
 2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT ===
 2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - Populating meal nodes for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
 2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - Populating transport nodes for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Loading attraction data
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Loading transport data
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Message: Loading meal data
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: loading
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Step: loading
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: loading
-2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:23.775324100Z
-2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:23.775324100Z
-2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:23.775324100Z
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 10
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 10
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 10
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Loading attraction data
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Loading transport data
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Loading meal data
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: loading
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Step: loading
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: loading
+2025-11-15 17:13:23.775 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:23.775324100Z
+2025-11-15 17:13:23.775 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:23.775324100Z
+2025-11-15 17:13:23.775 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:23.775324100Z
 2025-11-15 17:13:23.775 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:23.775 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:23.775 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:13:23.775 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:23.775 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:23.776 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - Found 2 transport nodes to populate
 2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - Found 6 attraction nodes to populate
 2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - Found 8 meal nodes to populate
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 30
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 30
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Populating 6 attractions
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Populating 2 transport segments
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: populating
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Progress: 30
-2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:23.776323800Z
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Message: Populating 8 meals
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: populating
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Step: populating
-2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:23.776323800Z
-2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:23.776323800Z
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 30
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 30
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Populating 6 attractions
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Populating 2 transport segments
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: populating
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 30
+2025-11-15 17:13:23.776 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:23.776323800Z
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Populating 8 meals
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: populating
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Step: populating
+2025-11-15 17:13:23.776 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:23.776323800Z
+2025-11-15 17:13:23.776 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:23.776323800Z
 2025-11-15 17:13:23.777 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:23.777 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - Calling AI to populate 6 attractions
 2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating structured content with strategy: RETRY_WITH_BACKOFF (2 providers available)
 2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient) using strategy RETRY_WITH_BACKOFF
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Circuit Breaker State: CLOSED
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 3005
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a travel expert specializing in attractions and activities.
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3005
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Preview: You are a travel expert specializing in attractions and activities.
 
 Your task: Suggest SPECIFIC attractions for placeholder activity nodes.
 
 CRITICAL: Use the EXACT node IDs provided in the user prom...
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3342
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3342
 2025-11-15 17:13:23.777 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:23.777 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
-2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
+2025-11-15 17:13:23.777 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API...
 2025-11-15 17:13:23.777 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:13:23.777 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:23.777 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:23.777 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:23.777 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:23.777 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:23.777 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - Calling AI to populate 2 transport segments
 2025-11-15 17:13:23.777 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating structured content with strategy: RETRY_WITH_BACKOFF (2 providers available)
 2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient) using strategy RETRY_WITH_BACKOFF
 2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - Calling AI to populate 8 meals
 2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating structured content with strategy: RETRY_WITH_BACKOFF (2 providers available)
 2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting structured content generation with provider 1 (GeminiClient) using strategy RETRY_WITH_BACKOFF
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Model: gemini-2.5-flash
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Temperature: 0.7
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Circuit Breaker State: CLOSED
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 3397
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Max Tokens: 65535
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Mock Mode: false
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a culinary travel expert specializing in dining recommendations.
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3397
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Preview: You are a culinary travel expert specializing in dining recommendations.
 
 Your task: Suggest SPECIFIC restaurants and dining places for meal slots.
 
 CRITICAL: Use the EXACT node IDs provided in the us...
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Circuit Breaker State: CLOSED
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Length: 2131
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - System Prompt Length: 0
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - User Prompt Preview: You are a transportation and logistics expert for travel planning.
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 2131
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Preview: You are a transportation and logistics expert for travel planning.
 
 Your task: Suggest SPECIFIC transport modes and routes for getting around.
 
 Guidelines:
 1. Suggest practical transport modes based o...
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 3752
-2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
-2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Request Body Length: 2439
-2025-11-15 17:13:23.779 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Sending request to Gemini API...
-2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
-2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
-2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Response Length: 4176
-2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3752
+2025-11-15 17:13:23.778 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API...
+2025-11-15 17:13:23.778 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 2439
+2025-11-15 17:13:23.779 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API...
+2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 4176
+2025-11-15 17:13:34.099 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Response Body: {
   "candidates": [
     {
       "content": {
@@ -1070,17 +1070,17 @@ Guidelines:
   "responseId": "ZWcYacDOL7T_4-EP8--R0Qo"
 }
 
-2025-11-15 17:13:34.101 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_-1416112342_20251115_171334.json
-2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
-2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Generated content length: 3441
-2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+2025-11-15 17:13:34.101 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_-1416112342_20251115_171334.json
+2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 3441
+2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - Generated content preview: ```json
 {
   "attractions": [
     {
       "nodeId": "day1_node2",
       "title": "Uluwatu Temple (Pura Luhur Uluwatu)",
       "description": "Perched dramatically on a steep cliff 70 meters above the Indian Ocean, Uluwatu Temple offers breathtaking panoramic views, especially at sunset. It's one of B...
-2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.client.GeminiClient - =========================================
 2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
 2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - === ACTIVITY AGENT - FULL LLM RESPONSE ===
 2025-11-15 17:13:34.102 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - Contexts to populate: 6
@@ -1191,41 +1191,41 @@ Guidelines:
     }
   ]
 }
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 70
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Saving attraction data
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: saving
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:34.103240900Z
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 70
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Saving attraction data
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: saving
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:34.103240900Z
 2025-11-15 17:13:34.103 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:34.103 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:34.103 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - Saved itinerary with populated attractions
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Populated 6 attractions
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: complete
-2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:34.602998800Z
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: f158c6ac-1bd5-4f9d-a057-a54bc6cf0a1e
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 100
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Populated 6 attractions
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: complete
+2025-11-15 17:13:34.602 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:34.602998800Z
 2025-11-15 17:13:34.603 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:34.603 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - === ACTIVITY AGENT COMPLETE ===
 2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.agents.ActivityAgent - Populated 6 attractions
 2025-11-15 17:13:34.603 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_complete","updateType":"agent_complete","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:34.603 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.service.AgentEventPublisher - Published agent completion event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, agent=ActivityAgent, items=6
+2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published agent completion event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, agent=ActivityAgent, items=6
 2025-11-15 17:13:34.603 [Pipeline-107] INFO  com.tripplanner.service.PipelineOrchestrator - [ActivityAgent] Complete
-2025-11-15 17:13:35.762 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
-2025-11-15 17:13:35.763 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
-2025-11-15 17:13:35.763 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Response Length: 4412
-2025-11-15 17:13:35.763 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+2025-11-15 17:13:35.762 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-15 17:13:35.763 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-15 17:13:35.763 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 4412
+2025-11-15 17:13:35.763 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Response Body: {
   "candidates": [
     {
       "content": {
@@ -1256,17 +1256,17 @@ Guidelines:
   "responseId": "Z2cYadnxGIuUg8UPkfupgAs"
 }
 
-2025-11-15 17:13:35.764 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_2092680718_20251115_171335.json
-2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
-2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Generated content length: 3598
-2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+2025-11-15 17:13:35.764 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_2092680718_20251115_171335.json
+2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 3598
+2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - Generated content preview: ```json
 {
   "meals": [
     {
       "nodeId": "day1_node1",
       "title": "Healthy & Refreshing Lunch in Canggu",
       "description": "Start your Bali adventure with a vibrant, health-conscious lunch at The Shady Shack. Enjoy delicious smoothie bowls, fresh salads, and organic delights in a lush ga...
-2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.client.GeminiClient - =========================================
 2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
 2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - === MEAL AGENT - FULL LLM RESPONSE ===
 2025-11-15 17:13:35.765 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - Contexts to populate: 8
@@ -1409,41 +1409,41 @@ Guidelines:
     }
   ]
 }
-2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
-2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Progress: 70
-2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Message: Saving meal data
-2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Step: saving
-2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:35.766098400Z
+2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
+2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:35.766 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 70
+2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Saving meal data
+2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Step: saving
+2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:35.766098400Z
 2025-11-15 17:13:35.767 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:35.767 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:35.767 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:36.258 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - Saved itinerary with populated meals
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Message: Populated 8 meals
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Step: complete
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:36.259872500Z
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 00d1d413-7bb3-41cd-b303-82359089e004
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 100
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Populated 8 meals
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Step: complete
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:36.259872500Z
 2025-11-15 17:13:36.259 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:36.259 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - === MEAL AGENT COMPLETE ===
 2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.agents.MealAgent - Populated 8 meals
 2025-11-15 17:13:36.259 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_complete","updateType":"agent_complete","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:36.259 [Pipeline-108] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.AgentEventPublisher - Published agent completion event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, agent=MealAgent, items=8
+2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published agent completion event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, agent=MealAgent, items=8
 2025-11-15 17:13:36.259 [Pipeline-108] INFO  com.tripplanner.service.PipelineOrchestrator - [MealAgent] Complete
-2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI API RESPONSE ===
-2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Status Code: 200
-2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Length: 3468
-2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Response Body: {
+2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 3468
+2025-11-15 17:13:40.936 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Response Body: {
   "candidates": [
     {
       "content": {
@@ -1474,17 +1474,17 @@ Guidelines:
   "responseId": "bGcYaf-RI7bdqfkPq8WT0Ac"
 }
 
-2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Saved Gemini response to: responses\gemini_response_2031968388_20251115_171340.json
-2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
-2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content length: 2812
-2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - Generated content preview: ```json
+2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_2031968388_20251115_171340.json
+2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 2812
+2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - Generated content preview: ```json
 {
   "transports": [
     {
       "nodeId": "day2_node5",
       "title": "Gojek/Grab (Rideshare)",
       "description": "For convenient point-to-point travel within Bali. Use the Gojek or Grab mobile applications to book cars (GoCar/GrabCar) or motorbikes (GoRide/GrabBike). These services are ...
-2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.GeminiClient - =========================================
+2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.client.GeminiClient - =========================================
 2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
 2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT - FULL LLM RESPONSE ===
 2025-11-15 17:13:40.937 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - Contexts to populate: 2
@@ -1555,38 +1555,38 @@ Guidelines:
     }
   ]
 }
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 70
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Saving transport data
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: saving
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:40.938397900Z
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 70
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Saving transport data
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: saving
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:40.938397900Z
 2025-11-15 17:13:40.938 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:40.938 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:40.938 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:40.939 [Pipeline-70] WARN  com.tripplanner.agents.TransportAgent - Duplicate transport nodeId found: day2_node5, keeping first occurrence
 2025-11-15 17:13:40.939 [Pipeline-70] WARN  com.tripplanner.agents.TransportAgent - Duplicate transport nodeId found: day3_node5, keeping first occurrence
 2025-11-15 17:13:41.437 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - Saved itinerary with populated transport
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Message: Populated 4 transport segments
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Step: complete
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:41.438906300Z
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 3bb8148b-2b66-41ac-a2ef-605a231c557f
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 100
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Populated 4 transport segments
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Step: complete
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:41.438906300Z
 2025-11-15 17:13:41.438 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:41.438 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - === TRANSPORT AGENT COMPLETE ===
 2025-11-15 17:13:41.438 [Pipeline-70] INFO  com.tripplanner.agents.TransportAgent - Populated 4 transport segments
 2025-11-15 17:13:41.438 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_complete","updateType":"agent_complete","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:41.438 [Pipeline-70] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:41.439 [Pipeline-70] INFO  com.tripplanner.service.AgentEventPublisher - Published agent completion event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, agent=TransportAgent, items=4
+2025-11-15 17:13:41.439 [Pipeline-70] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published agent completion event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, agent=TransportAgent, items=4
 2025-11-15 17:13:41.439 [Pipeline-70] INFO  com.tripplanner.service.PipelineOrchestrator - [TransportAgent] Complete
 2025-11-15 17:13:41.439 [Pipeline-69] INFO  com.tripplanner.service.PipelineOrchestrator - All population agents completed successfully
 2025-11-15 17:13:41.439 [Pipeline-69] INFO  com.tripplanner.service.PipelineOrchestrator - Phase 2 complete (17667 ms)
@@ -1601,7 +1601,7 @@ Guidelines:
 2025-11-15 17:13:41.439 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:13:41.439 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"phase_transition","updateType":"phase_transition","itineraryId":"it_7bc...(truncated)
 2025-11-15 17:13:41.439 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:41.439 [Pipeline-69] INFO  com.tripplanner.service.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, population→enrichment, progress=70%
+2025-11-15 17:13:41.439 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, population→enrichment, progress=70%
 2025-11-15 17:13:41.439 [Pipeline-69] INFO  com.tripplanner.service.PipelineOrchestrator - Starting enrichment phase for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
 2025-11-15 17:13:41.439 [Pipeline-69] INFO  com.tripplanner.service.PipelineOrchestrator - Enrichment will add: coordinates, place IDs, photos, reviews, ratings
 2025-11-15 17:13:41.439 [Pipeline-107] INFO  com.tripplanner.service.PipelineOrchestrator - Calling EnrichmentAgent.execute() for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
@@ -1613,30 +1613,30 @@ Guidelines:
 2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Request Data: {taskType=enrich}
 2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Request Details: {taskType=enrich}
 2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - =============================
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: queued
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 0
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Agent queued for execution
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: null
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:41.440907800Z
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: queued
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 0
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent queued for execution
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:41.440907800Z
 2025-11-15 17:13:41.440 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:41.440 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Agent started
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: null
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:41.440907800Z
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 10
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent started
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:41.440907800Z
 2025-11-15 17:13:41.440 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:41.440 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Executing agent-specific logic for: ENRICHMENT
 2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - === ENRICHMENT AGENT PROCESSING ===
 2025-11-15 17:13:41.440 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
@@ -1646,30 +1646,30 @@ Guidelines:
 2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.ItineraryJsonService -    location.photos: null
 2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.ItineraryJsonService -    location.rating: null
 2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.ItineraryJsonService -    location.priceLevel: null
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Loading itinerary
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: loading
-2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:42.734850800Z
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 10
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Loading itinerary
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: loading
+2025-11-15 17:13:42.734 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:42.734850800Z
 2025-11-15 17:13:42.735 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:42.735 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 20
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Enriching places with Google Places data
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: ENRICHMENT
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:42.735851700Z
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 20
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Enriching places with Google Places data
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: ENRICHMENT
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:42.735851700Z
 2025-11-15 17:13:42.735 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:42.735 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - ========== ENRICHING NODE WITH PLACE SEARCH ==========
 2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Node ID: day1_node1
 2025-11-15 17:13:42.735 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Node title: Healthy & Refreshing Lunch in Canggu
@@ -2400,54 +2400,54 @@ Guidelines:
 2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent -    Enriched node location.priceLevel: null
 2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - ✅ [EnrichmentAgent] Created ChangeOperation for node day3_node4
 2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - 📊 [EnrichmentAgent] Created 28 ENRICHMENT operations total
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 40
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Validating opening hours
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: validation
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:51.441551100Z
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 40
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Validating opening hours
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: validation
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:51.441551100Z
 2025-11-15 17:13:51.441 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:51.441 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 60
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Calculating pacing
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: pacing
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:51.442550900Z
+2025-11-15 17:13:51.441 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 60
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Calculating pacing
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: pacing
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:51.442550900Z
 2025-11-15 17:13:51.442 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:51.442 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 80
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Computing transit durations
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: transit
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:51.442550900Z
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 80
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Computing transit durations
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: transit
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:51.442550900Z
 2025-11-15 17:13:51.442 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:51.442 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 90
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Applying enrichments
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: applying
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:43:51.443551100Z
+2025-11-15 17:13:51.442 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 90
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Applying enrichments
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: applying
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:43:51.443551100Z
 2025-11-15 17:13:51.443 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:13:51.443 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:13:51.443 [Pipeline-107] INFO  com.tripplanner.service.ChangeEngine - Applying changes for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
 2025-11-15 17:13:51.897 [Pipeline-107] INFO  com.tripplanner.service.ItineraryJsonService - 🔍 [deserializeItinerary] JSON from DB contains 'photos' field ✅
 2025-11-15 17:13:51.897 [Pipeline-107] INFO  com.tripplanner.service.ItineraryJsonService - 🔍 [deserializeItinerary] After deserialization - First node:
@@ -3019,34 +3019,34 @@ Guidelines:
 2025-11-15 17:14:31.389 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:14:31.389 [Pipeline-107] INFO  com.tripplanner.service.ChangeEngine - Published itinerary change event: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, added=0, updated=58, removed=0
 2025-11-15 17:14:31.389 [Pipeline-107] INFO  com.tripplanner.service.ChangeEngine - Triggering auto-enrichment for 58 nodes in itinerary it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Enrichment complete
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: complete
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:31.390434800Z
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 100
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Enrichment complete
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: complete
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:31.390434800Z
 2025-11-15 17:14:31.390 [AsyncTask-2] INFO  com.tripplanner.service.EnrichmentService - Starting async enrichment for 58 nodes in itinerary it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
 2025-11-15 17:14:31.390 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:31.390 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - === ENRICHMENT COMPLETE ===
 2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Applied 58 ENRICHMENT operations
 2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - New version: 2
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Status: completed
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Message: Agent completed successfully
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Step: null
-2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:31.390434800Z
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 30f9c85f-97ce-4562-aaaf-fcf6c3ebc9aa
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Status: completed
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 100
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent completed successfully
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-15 17:14:31.390 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:31.390434800Z
 2025-11-15 17:14:31.390 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:31.390 [Pipeline-107] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:31.391 [Pipeline-107] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:14:31.391 [Pipeline-107] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:14:31.391 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - === AGENT EXECUTION COMPLETED ===
 2025-11-15 17:14:31.391 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Agent Kind: ENRICHMENT
 2025-11-15 17:14:31.391 [Pipeline-107] INFO  com.tripplanner.agents.EnrichmentAgent - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
@@ -3083,93 +3083,93 @@ Guidelines:
 2025-11-15 17:14:34.515 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:14:34.515 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"phase_transition","updateType":"phase_transition","itineraryId":"it_7bc...(truncated)
 2025-11-15 17:14:34.515 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, unknown→cost_estimation, progress=0%
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, unknown→cost_estimation, progress=0%
 2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.agents.CostEstimatorAgent - === COST ESTIMATOR AGENT ===
 2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.agents.CostEstimatorAgent - Estimating costs for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 10
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Loading cost data
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: loading
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:34.515921800Z
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 10
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Loading cost data
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: loading
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:34.515921800Z
 2025-11-15 17:14:34.515 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:34.515 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 30
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Estimating costs for 3 days
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: estimating
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:34.516920100Z
+2025-11-15 17:14:34.515 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 30
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Estimating costs for 3 days
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: estimating
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:34.516920100Z
 2025-11-15 17:14:34.516 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:34.516 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 43
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Estimated costs for day 1/3
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: estimating
-2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:34.519920900Z
+2025-11-15 17:14:34.516 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 43
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Estimated costs for day 1/3
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: estimating
+2025-11-15 17:14:34.519 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:34.519920900Z
 2025-11-15 17:14:34.519 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:34.519 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 56
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Estimated costs for day 2/3
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: estimating
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:34.520922Z
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 56
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Estimated costs for day 2/3
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: estimating
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:34.520922Z
 2025-11-15 17:14:34.520 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:34.520 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 70
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Estimated costs for day 3/3
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: estimating
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:34.520922Z
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 70
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Estimated costs for day 3/3
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: estimating
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:34.520922Z
 2025-11-15 17:14:34.520 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:34.520 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 70
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Saving cost data
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: saving
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:34.520922Z
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 70
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Saving cost data
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: saving
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:34.520922Z
 2025-11-15 17:14:34.520 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:34.520 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Agent Kind: ENRICHMENT
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Status: running
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Progress: 100
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Message: Estimated costs for 18 nodes
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Step: complete
-2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - Timestamp: 2025-11-15T11:44:37.291075800Z
+2025-11-15 17:14:34.520 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: d64a0af8-03b9-4b00-bfd3-34c9459404ac
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: ENRICHMENT
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Progress: 100
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Estimated costs for 18 nodes
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Step: complete
+2025-11-15 17:14:37.291 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-15T11:44:37.291075800Z
 2025-11-15 17:14:37.292 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_7bcaebb...(truncated)
 2025-11-15 17:14:37.292 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:37.292 [Pipeline-69] INFO  com.tripplanner.service.AgentEventBus - ==========================================
+2025-11-15 17:14:37.292 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
 2025-11-15 17:14:37.292 [Pipeline-69] INFO  com.tripplanner.agents.CostEstimatorAgent - === COST ESTIMATOR COMPLETE ===
 2025-11-15 17:14:37.292 [Pipeline-69] INFO  com.tripplanner.agents.CostEstimatorAgent - Estimated costs for 18 nodes
 2025-11-15 17:14:37.292 [Pipeline-69] INFO  com.tripplanner.agents.CostEstimatorAgent - Total estimated cost: ₹13900 per person
@@ -3185,7 +3185,7 @@ Guidelines:
 2025-11-15 17:14:37.292 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
 2025-11-15 17:14:37.293 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"phase_transition","updateType":"phase_transition","itineraryId":"it_7bc...(truncated)
 2025-11-15 17:14:37.293 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:37.293 [Pipeline-69] INFO  com.tripplanner.service.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, enrichment→finalization, progress=90%
+2025-11-15 17:14:37.293 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published phase transition event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, enrichment→finalization, progress=90%
 2025-11-15 17:14:39.067 [Pipeline-69] INFO  com.tripplanner.service.ItineraryJsonService - 🔍 [deserializeItinerary] JSON from DB contains 'photos' field ✅
 2025-11-15 17:14:39.069 [Pipeline-69] INFO  com.tripplanner.service.ItineraryJsonService - 🔍 [deserializeItinerary] After deserialization - First node:
 2025-11-15 17:14:39.070 [Pipeline-69] INFO  com.tripplanner.service.ItineraryJsonService -    Title: Healthy & Refreshing Lunch in Canggu
@@ -3223,7 +3223,7 @@ Guidelines:
 2025-11-15 17:14:49.742 [Pipeline-69] INFO  com.tripplanner.service.ItineraryJsonService -    location.priceLevel: 2
 2025-11-15 17:14:49.746 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340 session=null payload={"type":"generation_complete","updateType":"generation_complete","itineraryId":"...(truncated)
 2025-11-15 17:14:49.746 [Pipeline-69] DEBUG org.springframework.web.SimpLogging - Broadcasting to 2 sessions.
-2025-11-15 17:14:49.746 [Pipeline-69] INFO  com.tripplanner.service.AgentEventPublisher - Published generation complete event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, days=3, total_nodes=18
+2025-11-15 17:14:49.746 [Pipeline-69] INFO  com.tripplanner.service.agents.AgentEventPublisher - Published generation complete event via WebSocket: itinerary=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, days=3, total_nodes=18
 2025-11-15 17:14:49.746 [AsyncTask-1] INFO  com.tripplanner.service.ItineraryService - Pipeline generation completed successfully for itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340, executionId: exec_1763206975048
 2025-11-15 17:14:49.746 [AsyncTask-1] INFO  com.tripplanner.service.ItineraryService - Sending WebSocket update for completed itinerary: it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
 2025-11-15 17:14:51.522 [AsyncTask-1] INFO  com.tripplanner.service.ItineraryJsonService - 🔍 [deserializeItinerary] JSON from DB contains 'photos' field ✅

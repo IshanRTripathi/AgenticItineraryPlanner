@@ -3,7 +3,7 @@
  * Task 25: Enhanced with statistics, weather, map, and quick actions
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useInView, useSpring, useTransform } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,8 @@ import { exportService } from '@/services/exportService';
 import { fetchWeatherForecast } from '@/services/weatherService';
 import { useToast } from '@/components/ui/use-toast';
 import { useTranslation } from '@/i18n';
+import { useCurrency } from '@/hooks/useCurrency';
+import { CurrencySelector } from '@/components/common/CurrencySelector';
 import {
   Calendar,
   MapPin,
@@ -257,6 +259,14 @@ const getCurrencySymbol = (currency?: string): string => {
 
 export function ViewTab({ itinerary }: ViewTabProps) {
   const { t } = useTranslation();
+  const { preferredCurrency, convert, getCurrencySymbol } = useCurrency();
+  
+  console.log('[ViewTab] 🎯 Hook Values:', {
+    preferredCurrency,
+    hasConvert: !!convert,
+    hasGetSymbol: !!getCurrencySymbol
+  });
+  
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -327,10 +337,47 @@ export function ViewTab({ itinerary }: ViewTabProps) {
       .find((node: any) => node.cost?.currency)?.cost?.currency || 
     'USD';
   
+  // Display currency: use preferred currency or itinerary currency
+  const displayCurrency = useMemo(() => {
+    const result = preferredCurrency || itineraryCurrency;
+    console.log('[ViewTab] 💱 Display Currency Calculation:', {
+      preferredCurrency,
+      itineraryCurrency,
+      displayCurrency: result,
+      usingPreferred: !!preferredCurrency
+    });
+    return result;
+  }, [preferredCurrency, itineraryCurrency]);
+  
+  // Convert total budget to display currency
+  const convertedTotalBudget = useMemo(() => {
+    console.log('[ViewTab] 🔄 CONVERSION STARTING:', {
+      totalBudget,
+      itineraryCurrency,
+      displayCurrency,
+      preferredCurrency,
+      areEqual: itineraryCurrency === displayCurrency
+    });
+    
+    const result = convert(totalBudget, itineraryCurrency, displayCurrency);
+    
+    console.log('[ViewTab] ✅ CONVERSION RESULT:', {
+      input: `${totalBudget} ${itineraryCurrency}`,
+      output: `${result} ${displayCurrency}`,
+      changed: result !== totalBudget
+    });
+    
+    return result;
+  }, [totalBudget, itineraryCurrency, displayCurrency, preferredCurrency, convert]);
+  
   console.log('[ViewTab] Budget calculation:', {
     daysCount: days.length,
     activityCount,
     totalBudget,
+    itineraryCurrency,
+    displayCurrency,
+    convertedTotalBudget,
+    preferredCurrency,
     firstDay: days[0],
     firstDayNodes: days[0]?.nodes || days[0]?.components
   });
@@ -449,6 +496,11 @@ export function ViewTab({ itinerary }: ViewTabProps) {
         <DestinationSlideshow days={days} destination={destination} />
       </div>
 
+      {/* Currency Selector */}
+      <div className="flex justify-end">
+        <CurrencySelector variant="compact" showFlags={true} />
+      </div>
+
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
         <StatCard
@@ -489,10 +541,10 @@ export function ViewTab({ itinerary }: ViewTabProps) {
 
         <StatCard
           title={t('components.viewTab.stats.budget')}
-          value={totalBudget}
+          value={Math.round(convertedTotalBudget)}
           subtitle={t('components.viewTab.stats.perPerson')}
           icon={Coins}
-          prefix={getCurrencySymbol(itineraryCurrency)}
+          prefix={getCurrencySymbol(displayCurrency)}
           delay={0.2}
         />
 

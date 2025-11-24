@@ -75,13 +75,13 @@ export function useAnalyticsTracking() {
   }, []);
 
   // Track booking completion
-  const trackBookingCompleted = useCallback((provider: string, category: string, itineraryId?: string, amount?: number) => {
+  const trackBookingCompleted = useCallback((provider: string, category: string, itineraryId?: string, amount?: number, currency: string = 'USD') => {
     analytics.track('booking_completed', {
       provider,
       category,
       itineraryId,
       amount,
-      currency: 'USD'
+      currency
     });
   }, []);
 

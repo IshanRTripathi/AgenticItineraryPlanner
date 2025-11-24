@@ -1,9 +1,19 @@
--- Alert Metrics View
+-- Alert Metrics View - FIXED VERSION
 -- Creates materialized views for Cloud Monitoring alerts
--- These views are queried by scheduled queries that write to Cloud Logging
+-- FIXED: Updated to use new table names (llm_requests_detailed, phase_performance_daily)
 
 -- View 1: Current Daily LLM Cost
 CREATE OR REPLACE VIEW `tripaiplanner.analytics.alert_llm_daily_cost` AS
+WITH daily_cost AS (
+  SELECT
+    date,
+    -- Calculate cost from tokens (Gemini 2.5 Flash pricing)
+    (SUM(total_prompt_tokens) * 0.10 / 1000000) +
+    (SUM(total_response_tokens) * 0.40 / 1000000) as total_cost_usd
+  FROM `tripaiplanner.analytics.llm_requests_detailed`
+  WHERE date = CURRENT_DATE()
+  GROUP BY date
+)
 SELECT
   date,
   total_cost_usd as cost,
@@ -13,8 +23,7 @@ SELECT
     ELSE 'NORMAL'
   END as severity,
   CURRENT_TIMESTAMP() as check_time
-FROM `tripaiplanner.analytics.llm_costs_daily_summary`
-WHERE date = CURRENT_DATE()
+FROM daily_cost
 ORDER BY date DESC
 LIMIT 1;
 
@@ -24,6 +33,7 @@ SELECT
   month,
   projected_monthly_cost as projected_cost,
   current_cost,
+  avg_daily_cost,
   days_elapsed,
   days_remaining,
   CASE
@@ -33,62 +43,67 @@ SELECT
   END as severity,
   CURRENT_TIMESTAMP() as check_time
 FROM `tripaiplanner.analytics.llm_costs_monthly_projection`
-ORDER BY month DESC
 LIMIT 1;
 
--- View 3: Agent Failure Rates (Last Hour)
-CREATE OR REPLACE VIEW `tripaiplanner.analytics.alert_agent_failure_rates` AS
+-- View 3: Phase Failure Rates (Replaces agent_performance)
+CREATE OR REPLACE VIEW `tripaiplanner.analytics.alert_phase_failure_rates` AS
 SELECT
-  agent_type,
-  100 - success_rate as failure_rate,
-  executions_started,
-  executions_failed,
+  phase_name,
+  100 - success_rate_percent as failure_rate,
+  executions,
+  failed_executions,
   CASE
-    WHEN (100 - success_rate) > 10 THEN 'CRITICAL'
-    WHEN (100 - success_rate) > 5 THEN 'WARNING'
+    WHEN (100 - success_rate_percent) > 10 THEN 'CRITICAL'
+    WHEN (100 - success_rate_percent) > 5 THEN 'WARNING'
     ELSE 'NORMAL'
   END as severity,
   CURRENT_TIMESTAMP() as check_time
-FROM `tripaiplanner.analytics.agent_performance_daily`
+FROM `tripaiplanner.analytics.phase_performance_daily`
 WHERE date = CURRENT_DATE()
-  AND (100 - success_rate) > 0
+  AND (100 - success_rate_percent) > 0
 ORDER BY failure_rate DESC;
 
--- View 4: Booking Failure Rate (Last Hour)
-CREATE OR REPLACE VIEW `tripaiplanner.analytics.alert_booking_failure_rate` AS
-WITH recent_bookings AS (
-  SELECT
-    COUNT(CASE WHEN eventName = 'booking_initiated' THEN 1 END) as initiated,
-    COUNT(CASE WHEN eventName = 'booking_failed' THEN 1 END) as failed
-  FROM `tripaiplanner.analytics.raw_events`
-  WHERE DATE(TIMESTAMP_MILLIS(timestamp)) = CURRENT_DATE()
-    AND TIMESTAMP_MILLIS(timestamp) >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
-    AND eventName IN ('booking_initiated', 'booking_failed')
-)
+-- View 4: Itinerary Failure Rate (NEW)
+CREATE OR REPLACE VIEW `tripaiplanner.analytics.alert_itinerary_failure_rate` AS
 SELECT
-  SAFE_DIVIDE(failed, initiated) * 100 as failure_rate_percent,
-  initiated,
-  failed,
+  date,
+  100 - completion_rate_percent as failure_rate,
+  itineraries_created,
+  itineraries_completed,
   CASE
-    WHEN SAFE_DIVIDE(failed, initiated) * 100 > 20 THEN 'CRITICAL'
-    WHEN SAFE_DIVIDE(failed, initiated) * 100 > 10 THEN 'WARNING'
+    WHEN (100 - completion_rate_percent) > 20 THEN 'CRITICAL'
+    WHEN (100 - completion_rate_percent) > 10 THEN 'WARNING'
     ELSE 'NORMAL'
   END as severity,
   CURRENT_TIMESTAMP() as check_time
-FROM recent_bookings
-WHERE initiated > 0;
+FROM `tripaiplanner.analytics.itinerary_metrics_daily`
+WHERE date = CURRENT_DATE()
+  AND itineraries_created > 0
+ORDER BY date DESC
+LIMIT 1;
+
+-- View 5: Excessive Validation Warnings (NEW)
+CREATE OR REPLACE VIEW `tripaiplanner.analytics.alert_validation_warnings` AS
+SELECT
+  date,
+  total_validation_warnings,
+  avg_warnings_per_itinerary,
+  CASE
+    WHEN avg_warnings_per_itinerary > 50 THEN 'CRITICAL'
+    WHEN avg_warnings_per_itinerary > 20 THEN 'WARNING'
+    ELSE 'NORMAL'
+  END as severity,
+  CURRENT_TIMESTAMP() as check_time
+FROM `tripaiplanner.analytics.itinerary_metrics_daily`
+WHERE date = CURRENT_DATE()
+  AND itineraries_completed > 0
+ORDER BY date DESC
+LIMIT 1;
 
 -- Scheduled Query: Check and Log Alerts
--- This query runs every 15 minutes and writes to Cloud Logging
--- Cloud Monitoring can then alert based on these log entries
+-- This query runs every 15 minutes and writes alerts to a table
 
--- To deploy as scheduled query:
--- bq query --use_legacy_sql=false --schedule='every 15 minutes' \
---   --display_name='Alert Metrics Check' \
---   --destination_table='analytics.alert_checks' \
---   --replace=true < alert_metrics_check.sql
-
-CREATE OR REPLACE TABLE `tripaiplanner.analytics.alert_checks`
+CREATE TABLE IF NOT EXISTS `tripaiplanner.analytics.alert_checks`
 PARTITION BY DATE(check_time)
 AS
 SELECT
@@ -96,10 +111,10 @@ SELECT
   CAST(cost AS STRING) as value,
   severity,
   check_time,
-  STRUCT(
+  TO_JSON_STRING(STRUCT(
     date,
     cost
-  ) as details
+  )) as details
 FROM `tripaiplanner.analytics.alert_llm_daily_cost`
 WHERE severity IN ('WARNING', 'CRITICAL')
 
@@ -110,42 +125,58 @@ SELECT
   CAST(projected_cost AS STRING) as value,
   severity,
   check_time,
-  STRUCT(
+  TO_JSON_STRING(STRUCT(
     month,
     projected_cost,
     current_cost,
     days_remaining
-  ) as details
+  )) as details
 FROM `tripaiplanner.analytics.alert_llm_monthly_projection`
 WHERE severity IN ('WARNING', 'CRITICAL')
 
 UNION ALL
 
 SELECT
-  'agent_failure_rate' as alert_type,
-  CONCAT(agent_type, ': ', CAST(failure_rate AS STRING), '%') as value,
+  'phase_failure_rate' as alert_type,
+  CONCAT(phase_name, ': ', CAST(failure_rate AS STRING), '%') as value,
   severity,
   check_time,
-  STRUCT(
-    agent_type,
+  TO_JSON_STRING(STRUCT(
+    phase_name,
     failure_rate,
-    executions_started,
-    executions_failed
-  ) as details
-FROM `tripaiplanner.analytics.alert_agent_failure_rates`
+    executions,
+    failed_executions
+  )) as details
+FROM `tripaiplanner.analytics.alert_phase_failure_rates`
 WHERE severity IN ('WARNING', 'CRITICAL')
 
 UNION ALL
 
 SELECT
-  'booking_failure_rate' as alert_type,
-  CAST(failure_rate_percent AS STRING) as value,
+  'itinerary_failure_rate' as alert_type,
+  CAST(failure_rate AS STRING) as value,
   severity,
   check_time,
-  STRUCT(
-    failure_rate_percent,
-    initiated,
-    failed
-  ) as details
-FROM `tripaiplanner.analytics.alert_booking_failure_rate`
+  TO_JSON_STRING(STRUCT(
+    date,
+    failure_rate,
+    itineraries_created,
+    itineraries_completed
+  )) as details
+FROM `tripaiplanner.analytics.alert_itinerary_failure_rate`
+WHERE severity IN ('WARNING', 'CRITICAL')
+
+UNION ALL
+
+SELECT
+  'validation_warnings' as alert_type,
+  CAST(avg_warnings_per_itinerary AS STRING) as value,
+  severity,
+  check_time,
+  TO_JSON_STRING(STRUCT(
+    date,
+    total_validation_warnings,
+    avg_warnings_per_itinerary
+  )) as details
+FROM `tripaiplanner.analytics.alert_validation_warnings`
 WHERE severity IN ('WARNING', 'CRITICAL');

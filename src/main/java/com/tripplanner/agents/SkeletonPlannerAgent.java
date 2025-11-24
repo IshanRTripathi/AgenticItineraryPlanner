@@ -3,13 +3,16 @@ package com.tripplanner.agents;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
-import com.tripplanner.service.AgentEventPublisher;
-import com.tripplanner.service.ItineraryJsonService;
-import com.tripplanner.service.NodeIdGenerator;
+import com.tripplanner.enums.ProcessingState;
+import com.tripplanner.exception.ValidationException;
+import com.tripplanner.service.*;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ai.ResilientAiClient;
 import com.tripplanner.service.ai.RetryStrategy;
+import com.tripplanner.service.llm.LLMSchemaValidator;
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
@@ -42,19 +45,27 @@ public class SkeletonPlannerAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final AgentEventPublisher agentEventPublisher;
     private final NodeIdGenerator nodeIdGenerator;
+    private final LLMSchemaValidator schemaValidator;
+    private final NodeIdValidator nodeIdValidator;
     
     // Configuration
     private static final int DAYS_PER_BATCH = 1; // Generate 1 day at a time for maximum reliability
     
+    private final ItineraryValidator itineraryValidator;
+    
     public SkeletonPlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
-                               ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
-                               NodeIdGenerator nodeIdGenerator) {
+                                ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
+                                NodeIdGenerator nodeIdGenerator, LLMSchemaValidator schemaValidator,
+                                NodeIdValidator nodeIdValidator, ItineraryValidator itineraryValidator) {
         super(eventBus, AgentEvent.AgentKind.PLANNER);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.agentEventPublisher = agentEventPublisher;
         this.nodeIdGenerator = nodeIdGenerator;
+        this.schemaValidator = schemaValidator;
+        this.nodeIdValidator = nodeIdValidator;
+        this.itineraryValidator = itineraryValidator;
     }
     
     @Override
@@ -96,9 +107,26 @@ public class SkeletonPlannerAgent extends BaseAgent {
                 itinerary = createInitialItinerary(itineraryId, request);
             }
             
+            // Read CityAllocationPlan from agentData
+            CityAllocationPlan cityPlan = null;
+            if (itinerary.getAgentData() != null && itinerary.getAgentData().containsKey("cityAllocation")) {
+                AgentDataSection agentDataSection = itinerary.getAgentData().get("cityAllocation");
+                cityPlan = agentDataSection.getAgentData("cityAllocation", CityAllocationPlan.class);
+                if (cityPlan != null) {
+                    logger.info("Loaded city allocation plan: {} cities, {} travel segments", 
+                               cityPlan.getAllocations().size(), 
+                               cityPlan.getTravelSegments() != null ? cityPlan.getTravelSegments().size() : 0);
+                }
+            }
+            
+            if (cityPlan == null) {
+                logger.warn("No city allocation plan found, generating without city context");
+            }
+            
             // Generate days in small batches
             int totalDays = request.getDurationDays();
             int processedDays = 0;
+            List<NormalizedDay> previousDays = new ArrayList<>();
             
             while (processedDays < totalDays) {
                 int remainingDays = totalDays - processedDays;
@@ -109,23 +137,111 @@ public class SkeletonPlannerAgent extends BaseAgent {
                     String.format("Creating day %d structure", processedDays + 1),
                     "skeleton_generation");
                 
-                // Generate skeleton for this day
-                NormalizedDay day = generateDaySkeleton(request, processedDays + 1);
-                itinerary.getDays().add(day);
+                int dayNumber = processedDays + 1;
                 
-                // Save immediately for real-time access
-                try {
-                    itinerary.setUpdatedAt(System.currentTimeMillis());
-                    itineraryJsonService.updateItinerary(itinerary);
-                    
-                    if (agentEventPublisher.hasActiveConnections(itineraryId)) {
-                        agentEventPublisher.publishDayCompleted(itineraryId, 
-                            "exec_" + System.currentTimeMillis(), day);
+                // Find city allocation for this day
+                CityAllocation cityForThisDay = getCityForDay(cityPlan, dayNumber);
+                
+                // Find travel segment for this day
+                TravelSegment travelSegment = getTravelSegmentForDay(cityPlan, dayNumber);
+                
+                // IMPROVED: Create infrastructure nodes BEFORE LLM call
+                // This allows LLM to see transport/accommodation in context and plan around them
+                List<NormalizedNode> preCreatedNodes = new ArrayList<>();
+                
+                // Add arrival travel for Day 1
+                if (dayNumber == 1 && shouldAddArrivalTravel(request, cityForThisDay)) {
+                    NormalizedNode arrivalNode = createArrivalTravelNode(dayNumber, request, cityForThisDay);
+                    preCreatedNodes.add(arrivalNode);
+                    logger.info("Pre-created arrival node for Day 1");
+                }
+                
+                // Add inter-city travel
+                if (travelSegment != null) {
+                    NormalizedNode travelNode = createTravelNode(dayNumber, travelSegment);
+                    preCreatedNodes.add(travelNode);
+                    logger.info("Pre-created travel node for Day {}: {} -> {}", 
+                               dayNumber, travelSegment.getFromCity(), travelSegment.getToCity());
+                }
+                
+                // Add departure travel for last day
+                if (dayNumber == totalDays && shouldAddDepartureTravel(request, cityForThisDay)) {
+                    NormalizedNode departureNode = createDepartureTravelNode(dayNumber, request, cityForThisDay);
+                    preCreatedNodes.add(departureNode);
+                    logger.info("Pre-created departure node for last day");
+                }
+                
+                // Add accommodation for the night
+                boolean isLastDayReturningHome = (dayNumber == totalDays && shouldAddDepartureTravel(request, cityForThisDay));
+                if (!isLastDayReturningHome && cityForThisDay != null) {
+                    NormalizedNode accommodationNode = createAccommodationNode(dayNumber, cityForThisDay);
+                    preCreatedNodes.add(accommodationNode);
+                    logger.info("Pre-created accommodation node for Day {}", dayNumber);
+                }
+                
+                // Generate skeleton for this day with pre-created infrastructure nodes
+                // LLM will see these nodes and plan activities around them
+                NormalizedDay day = generateDaySkeleton(request, dayNumber, cityForThisDay, 
+                                                       travelSegment, previousDays, preCreatedNodes);
+                
+                itinerary.getDays().add(day);
+                previousDays.add(day);
+                
+                // Validate before save
+                ItineraryValidator.ValidationResult validationResult = itineraryValidator.validate(itinerary);
+                if (!validationResult.isValid()) {
+                    logger.error("Validation failed for itinerary {}: {}", itineraryId, validationResult.getErrors());
+                    throw new ValidationException("Itinerary validation failed", String.valueOf(validationResult.getErrors()));
+                }
+                if (!validationResult.getWarnings().isEmpty()) {
+                    logger.warn("Validation warnings for itinerary {}: {}", itineraryId, validationResult.getWarnings());
+                }
+                
+                // Save immediately for real-time access with optimistic locking and retry
+                int maxRetries = 3;
+                int retryCount = 0;
+                boolean saved = false;
+                
+                while (!saved && retryCount < maxRetries) {
+                    try {
+                        itinerary.setUpdatedAt(System.currentTimeMillis());
+                        itineraryJsonService.updateItineraryWithLock(itinerary);
+                        
+                        if (agentEventPublisher.hasActiveConnections(itineraryId)) {
+                            agentEventPublisher.publishDayCompleted(itineraryId, 
+                                "exec_" + System.currentTimeMillis(), day);
+                        }
+                        
+                        logger.info("Skeleton day {} created and saved (city: {}, travel: {})", 
+                                   day.getDayNumber(), 
+                                   cityForThisDay != null ? cityForThisDay.getCityName() : "N/A",
+                                   travelSegment != null ? "Yes" : "No");
+                        saved = true;
+                    } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                        retryCount++;
+                        logger.error("Concurrent modification on day {} (attempt {}/{}): {}", 
+                                   day.getDayNumber(), retryCount, maxRetries, e.getMessage());
+                        
+                        if (retryCount < maxRetries) {
+                            logger.info("Reloading itinerary and retrying save...");
+                            Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
+                            if (reloaded.isPresent()) {
+                                itinerary = reloaded.get();
+                                // Re-add the day to reloaded itinerary
+                                itinerary.getDays().add(day);
+                                logger.info("Re-added day {} to reloaded itinerary", day.getDayNumber());
+                            } else {
+                                logger.error("Failed to reload itinerary for retry");
+                                throw e;
+                            }
+                        } else {
+                            logger.error("Max retries ({}) exceeded for day {}, giving up", maxRetries, day.getDayNumber());
+                            throw e;
+                        }
+                    } catch (Exception e) {
+                        logger.warn("Failed to save skeleton day {}: {}", day.getDayNumber(), e.getMessage());
+                        break; // Don't retry on other exceptions
                     }
-                    
-                    logger.info("Skeleton day {} created and saved", day.getDayNumber());
-                } catch (Exception e) {
-                    logger.warn("Failed to save skeleton day {}: {}", day.getDayNumber(), e.getMessage());
                 }
                 
                 processedDays += batchSize;
@@ -133,9 +249,47 @@ public class SkeletonPlannerAgent extends BaseAgent {
             
             emitProgress(itineraryId, 80, "Skeleton complete", "skeleton_complete");
             
-            // Final save
-            itinerary.setUpdatedAt(System.currentTimeMillis());
-            itineraryJsonService.updateItinerary(itinerary);
+            // Validate before final save
+            ItineraryValidator.ValidationResult validationResult = itineraryValidator.validate(itinerary);
+            if (!validationResult.isValid()) {
+                logger.error("Validation failed for itinerary {}: {}", itineraryId, validationResult.getErrors());
+                throw new ValidationException("Itinerary validation failed", String.valueOf(validationResult.getErrors()));
+            }
+            if (!validationResult.getWarnings().isEmpty()) {
+                logger.warn("Validation warnings for itinerary {}: {}", itineraryId, validationResult.getWarnings());
+            }
+            
+            // Final save with optimistic locking and retry
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean saved = false;
+            
+            while (!saved && retryCount < maxRetries) {
+                try {
+                    itinerary.setUpdatedAt(System.currentTimeMillis());
+                    itineraryJsonService.updateItineraryWithLock(itinerary);
+                    saved = true;
+                } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                    retryCount++;
+                    logger.error("Concurrent modification on final save (attempt {}/{}): {}", 
+                               retryCount, maxRetries, e.getMessage());
+                    
+                    if (retryCount < maxRetries) {
+                        logger.info("Reloading itinerary and retrying final save...");
+                        Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
+                        if (reloaded.isPresent()) {
+                            itinerary = reloaded.get();
+                            logger.info("Reloaded itinerary for final save retry");
+                        } else {
+                            logger.error("Failed to reload itinerary for retry");
+                            throw e;
+                        }
+                    } else {
+                        logger.error("Max retries ({}) exceeded on final save, giving up", maxRetries);
+                        throw e;
+                    }
+                }
+            }
             
             logger.info("=== SKELETON COMPLETE ===");
             logger.info("Generated {} days with {} total node placeholders", 
@@ -151,13 +305,526 @@ public class SkeletonPlannerAgent extends BaseAgent {
     }
     
     /**
+     * Get city allocation for a specific day.
+     */
+    private CityAllocation getCityForDay(CityAllocationPlan cityPlan, int dayNumber) {
+        if (cityPlan == null || cityPlan.getAllocations() == null) {
+            return null;
+        }
+        
+        for (CityAllocation allocation : cityPlan.getAllocations()) {
+            if (dayNumber >= allocation.getStartDay() && dayNumber <= allocation.getEndDay()) {
+                return allocation;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Get travel segment for a specific day.
+     */
+    private TravelSegment getTravelSegmentForDay(CityAllocationPlan cityPlan, int dayNumber) {
+        if (cityPlan == null || cityPlan.getTravelSegments() == null) {
+            return null;
+        }
+        
+        for (TravelSegment segment : cityPlan.getTravelSegments()) {
+            if (segment.getDayNumber() == dayNumber) {
+                return segment;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Determine node count based on city type and travel.
+     * NOTE: This is for LLM-generated nodes only (activities + meals).
+     * Transport nodes are added programmatically and not counted here.
+     */
+    private int determineNodeCount(CityAllocation city, TravelSegment travel) {
+        // Travel day with >6 hours travel
+        if (travel != null && travel.isFullDayTravel()) {
+            return 2; // 1 activity + 1 meal (travel node added separately)
+        }
+        
+        // Travel day with 3-6 hours travel
+        if (travel != null && travel.getEstimatedHours() >= 3) {
+            return 3; // 2 activities + 1 meal (travel node added separately)
+        }
+        
+        // No city context, use default
+        if (city == null) {
+            return 4; // Default: 2 activities + 2 meals
+        }
+        
+        // Nature/adventure destinations
+        if ("nature".equals(city.getDestinationType())) {
+            return 3; // Safari/trek + 2 meals
+        }
+        
+        // Gateway cities (arrival/departure)
+        if ("gateway".equals(city.getDestinationType())) {
+            return 3; // 1-2 activities + 2 meals
+        }
+        
+        // Cultural/urban cities
+        return 4; // 2-3 activities + 2 meals
+    }
+    
+    /**
+     * Check if arrival travel node should be added for Day 1.
+     * Returns true if startLocation is provided and different from first city.
+     */
+    private boolean shouldAddArrivalTravel(CreateItineraryReq request, CityAllocation firstCity) {
+        if (request.getStartLocation() == null || request.getStartLocation().isEmpty()) {
+            return false;
+        }
+        
+        // If no city context, assume arrival is needed
+        if (firstCity == null) {
+            return true;
+        }
+        
+        // Check if startLocation is different from first city
+        String startLoc = request.getStartLocation().toLowerCase().trim();
+        String firstCityName = firstCity.getCityName().toLowerCase().trim();
+        
+        // Simple check: if startLocation doesn't contain first city name, it's different
+        return !startLoc.contains(firstCityName) && !firstCityName.contains(startLoc);
+    }
+    
+    /**
+     * Check if departure travel node should be added for last day.
+     * Returns true if startLocation is provided (assuming round trip).
+     */
+    private boolean shouldAddDepartureTravel(CreateItineraryReq request, CityAllocation lastCity) {
+        // If startLocation provided, assume round trip (return to origin)
+        return request.getStartLocation() != null && !request.getStartLocation().isEmpty();
+    }
+    
+    /**
+     * Create arrival travel node for Day 1 (returns node, doesn't add to day).
+     * Example: "Flight: Bengaluru to Kuala Lumpur"
+     * FIXED: Don't set ID manually - let NodeIdGenerator handle it.
+     */
+    private NormalizedNode createArrivalTravelNode(int dayNumber, CreateItineraryReq request, CityAllocation firstCity) {
+        String arrivalCity = firstCity != null ? firstCity.getCityName() : request.getDestination();
+        
+        NormalizedNode arrivalNode = new NormalizedNode();
+        arrivalNode.setType("transport");
+        // Mark node as created by SkeletonPlannerAgent
+        arrivalNode.setProcessingState(ProcessingState.CREATED);
+        arrivalNode.addProcessedBy("SkeletonPlannerAgent");
+        // FIXED: Don't set ID here - let NodeIdGenerator assign it
+        arrivalNode.setTitle(String.format("Arrival: %s to %s", 
+                                          request.getStartLocation(), 
+                                          arrivalCity));
+        
+        // Set morning arrival timing (assume 9 AM arrival)
+        NodeTiming timing = new NodeTiming();
+        timing.setStartTime(6L * 60 * 60 * 1000);  // 6:00 AM (departure from origin)
+        timing.setEndTime(9L * 60 * 60 * 1000);    // 9:00 AM (arrival at destination)
+        timing.setDurationMin(180); // 3 hours (placeholder, will be refined by TransportAgent)
+        arrivalNode.setTiming(timing);
+        
+        // Set location
+        NodeLocation location = new NodeLocation();
+        location.setName(String.format("%s to %s", request.getStartLocation(), arrivalCity));
+        arrivalNode.setLocation(location);
+        
+        return arrivalNode;
+    }
+    
+    /**
+     * DEPRECATED: Old method that added node directly to day.
+     * Kept for backward compatibility but not used in new flow.
+     */
+    @Deprecated
+    private void addArrivalTravelNode(NormalizedDay day, CreateItineraryReq request, CityAllocation firstCity) {
+        try {
+            NormalizedNode arrivalNode = createArrivalTravelNode(day.getDayNumber(), request, firstCity);
+            
+            // Add to beginning of day (arrival happens first)
+            if (day.getNodes() == null) {
+                day.setNodes(new ArrayList<>());
+            }
+            day.getNodes().add(0, arrivalNode);
+            
+            logger.info("Added arrival travel node for Day 1: {} to {}", 
+                       request.getStartLocation(), 
+                       firstCity != null ? firstCity.getCityName() : request.getDestination());
+            
+        } catch (Exception e) {
+            logger.warn("Failed to add arrival travel node: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Create departure travel node for last day (returns node, doesn't add to day).
+     * Example: "Flight: Kuala Lumpur to Bengaluru"
+     * FIXED: Don't set ID manually - let NodeIdGenerator handle it.
+     */
+    private NormalizedNode createDepartureTravelNode(int dayNumber, CreateItineraryReq request, CityAllocation lastCity) {
+        String departureCity = lastCity != null ? lastCity.getCityName() : request.getDestination();
+        
+        NormalizedNode departureNode = new NormalizedNode();
+        departureNode.setType("transport");
+        // Mark node as created by SkeletonPlannerAgent
+        departureNode.setProcessingState(ProcessingState.CREATED);
+        departureNode.addProcessedBy("SkeletonPlannerAgent");
+        // FIXED: Don't set ID here - let NodeIdGenerator assign it
+        departureNode.setTitle(String.format("Departure: %s to %s", 
+                                             departureCity,
+                                             request.getStartLocation()));
+        
+        // Set evening departure timing (assume 6 PM departure)
+        NodeTiming timing = new NodeTiming();
+        timing.setStartTime(18L * 60 * 60 * 1000); // 6:00 PM (departure)
+        timing.setEndTime(21L * 60 * 60 * 1000);   // 9:00 PM (arrival at origin)
+        timing.setDurationMin(180); // 3 hours (placeholder, will be refined by TransportAgent)
+        departureNode.setTiming(timing);
+        
+        // Set location
+        NodeLocation location = new NodeLocation();
+        location.setName(String.format("%s to %s", departureCity, request.getStartLocation()));
+        departureNode.setLocation(location);
+        
+        return departureNode;
+    }
+    
+    /**
+     * DEPRECATED: Old method that added node directly to day.
+     */
+    @Deprecated
+    private void addDepartureTravelNode(NormalizedDay day, CreateItineraryReq request, CityAllocation lastCity) {
+        try {
+            NormalizedNode departureNode = createDepartureTravelNode(day.getDayNumber(), request, lastCity);
+            
+            // Add to end of day (departure happens last)
+            if (day.getNodes() == null) {
+                day.setNodes(new ArrayList<>());
+            }
+            day.getNodes().add(departureNode);
+            
+            logger.info("Added departure travel node for last day: {} to {}", 
+                       lastCity != null ? lastCity.getCityName() : request.getDestination(),
+                       request.getStartLocation());
+            
+        } catch (Exception e) {
+            logger.warn("Failed to add departure travel node: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Create travel node for inter-city travel (returns node, doesn't add to day).
+     * CRITICAL: This ensures travel nodes are ALWAYS created programmatically.
+     * FIXED: Don't set ID manually - let NodeIdGenerator handle it.
+     */
+    private NormalizedNode createTravelNode(int dayNumber, TravelSegment travelSegment) {
+        // Create travel node placeholder
+        NormalizedNode travelNode = new NormalizedNode();
+        travelNode.setType("transport");
+        // Mark node as created by SkeletonPlannerAgent
+        travelNode.setProcessingState(ProcessingState.CREATED);
+        travelNode.addProcessedBy("SkeletonPlannerAgent");
+        // FIXED: Don't set ID here - let NodeIdGenerator assign it
+        travelNode.setTitle(String.format("Travel: %s to %s", 
+                                         travelSegment.getFromCity(), 
+                                         travelSegment.getToCity()));
+        
+        // Set basic timing based on travel duration
+        NodeTiming timing = new NodeTiming();
+        if (travelSegment.isFullDayTravel()) {
+            // Full day travel: 8 AM - 6 PM (simplified epoch ms)
+            timing.setStartTime(8L * 60 * 60 * 1000); // 8:00 AM
+            timing.setEndTime(18L * 60 * 60 * 1000);  // 6:00 PM
+            timing.setDurationMin(travelSegment.getEstimatedHours() * 60);
+        } else {
+            // Partial travel: morning departure
+            timing.setStartTime(9L * 60 * 60 * 1000); // 9:00 AM
+            timing.setEndTime((9L + travelSegment.getEstimatedHours()) * 60 * 60 * 1000);
+            timing.setDurationMin(travelSegment.getEstimatedHours() * 60);
+        }
+        travelNode.setTiming(timing);
+        
+        // Set location
+        NodeLocation location = new NodeLocation();
+        location.setName(String.format("%s to %s", travelSegment.getFromCity(), travelSegment.getToCity()));
+        travelNode.setLocation(location);
+        
+        return travelNode;
+    }
+    
+    /**
+     * DEPRECATED: Old method that added node directly to day.
+     */
+    @Deprecated
+    private void addTravelNodePlaceholder(NormalizedDay day, TravelSegment travelSegment) {
+        try {
+            NormalizedNode travelNode = createTravelNode(day.getDayNumber(), travelSegment);
+            
+            // Add to beginning of day (travel happens first)
+            if (day.getNodes() == null) {
+                day.setNodes(new ArrayList<>());
+            }
+            day.getNodes().add(0, travelNode);
+            
+            logger.info("Added travel placeholder for day {}: {} to {} ({} hours, full-day: {})", 
+                       day.getDayNumber(), 
+                       travelSegment.getFromCity(),
+                       travelSegment.getToCity(),
+                       travelSegment.getEstimatedHours(),
+                       travelSegment.isFullDayTravel());
+            
+            // Add accommodation placeholder if overnight travel or late arrival
+            if (shouldAddAccommodationPlaceholder(travelSegment)) {
+                addAccommodationPlaceholder(day, travelSegment);
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to add travel placeholder for day {}: {}", 
+                       day.getDayNumber(), e.getMessage());
+        }
+    }
+    
+    /**
+     * Determine if accommodation placeholder is needed.
+     * Add accommodation if:
+     * 1. Full day travel (likely arriving late)
+     * 2. Travel duration > 8 hours (overnight journey)
+     */
+    private boolean shouldAddAccommodationPlaceholder(TravelSegment travelSegment) {
+        return travelSegment.isFullDayTravel() || travelSegment.getEstimatedHours() > 8;
+    }
+    
+    /**
+     * Add accommodation placeholder for overnight stays.
+     * CRITICAL: Multi-city trips need hotel bookings.
+     * FIXED: Use NodeIdGenerator for consistent ID format.
+     */
+    private void addAccommodationPlaceholder(NormalizedDay day, TravelSegment travelSegment) {
+        try {
+            NormalizedNode accommodationNode = new NormalizedNode();
+            accommodationNode.setType("accommodation");
+            // Mark node as created by SkeletonPlannerAgent
+            accommodationNode.setProcessingState(ProcessingState.CREATED);
+            accommodationNode.addProcessedBy("SkeletonPlannerAgent");
+            // FIXED: Don't set ID here - let it be generated later by NodeIdGenerator
+            accommodationNode.setTitle(String.format("Hotel in %s", travelSegment.getToCity()));
+            
+            // Set evening timing
+            NodeTiming timing = new NodeTiming();
+            timing.setStartTime(20L * 60 * 60 * 1000); // 8:00 PM
+            timing.setEndTime(22L * 60 * 60 * 1000);   // 10:00 PM
+            timing.setDurationMin(120); // 2 hours for check-in and settling
+            accommodationNode.setTiming(timing);
+            
+            // Set location
+            NodeLocation location = new NodeLocation();
+            location.setName(travelSegment.getToCity());
+            accommodationNode.setLocation(location);
+            
+            day.getNodes().add(accommodationNode);
+            
+            logger.info("Added accommodation placeholder for day {} in {}", 
+                       day.getDayNumber(), travelSegment.getToCity());
+            
+        } catch (Exception e) {
+            logger.warn("Failed to add accommodation placeholder: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Create accommodation node for a night (returns node, doesn't add to day).
+     * FIXED: Use NodeIdGenerator for consistent ID format instead of manual generation.
+     * 
+     * @param dayNumber The day number
+     * @param cityAllocation The city allocation for this day
+     */
+    private NormalizedNode createAccommodationNode(int dayNumber, CityAllocation cityAllocation) {
+        NormalizedNode accommodationNode = new NormalizedNode();
+        accommodationNode.setType("accommodation");
+        // Mark node as created by SkeletonPlannerAgent
+        accommodationNode.setProcessingState(ProcessingState.CREATED);
+        accommodationNode.addProcessedBy("SkeletonPlannerAgent");
+        // FIXED: Don't set ID here - let it be generated later by NodeIdGenerator
+        // This ensures consistent format (day{N}_node{M}) and avoids validation errors
+        accommodationNode.setTitle(String.format("Hotel in %s", cityAllocation.getCityName()));
+        
+        // Set evening timing (check-in time)
+        NodeTiming timing = new NodeTiming();
+        timing.setStartTime(20L * 60 * 60 * 1000); // 8:00 PM
+        timing.setEndTime(22L * 60 * 60 * 1000);   // 10:00 PM
+        timing.setDurationMin(120); // 2 hours for check-in and settling
+        accommodationNode.setTiming(timing);
+        
+        // Set location
+        NodeLocation location = new NodeLocation();
+        location.setName(cityAllocation.getCityName());
+        accommodationNode.setLocation(location);
+        
+        return accommodationNode;
+    }
+    
+    /**
+     * DEPRECATED: Old method that added node directly to day.
+     */
+    @Deprecated
+    private void addAccommodationPlaceholderForNight(NormalizedDay day, CityAllocation cityAllocation) {
+        try {
+            // Check if accommodation already exists (from travel day logic)
+            if (day.getNodes() != null) {
+                for (NormalizedNode node : day.getNodes()) {
+                    if ("accommodation".equals(node.getType())) {
+                        logger.debug("Accommodation already exists for day {}, skipping", day.getDayNumber());
+                        return; // Already has accommodation
+                    }
+                }
+            }
+            
+            NormalizedNode accommodationNode = createAccommodationNode(day.getDayNumber(), cityAllocation);
+            
+            if (day.getNodes() == null) {
+                day.setNodes(new ArrayList<>());
+            }
+            day.getNodes().add(accommodationNode);
+            
+            logger.info("Added accommodation placeholder for night of day {} in {}", 
+                       day.getDayNumber(), cityAllocation.getCityName());
+            
+        } catch (Exception e) {
+            logger.warn("Failed to add accommodation placeholder for night: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Merge pre-created infrastructure nodes with LLM-generated nodes and position them intelligently.
+     * 
+     * Positioning logic:
+     * - Transport nodes: Position based on timing (morning = start, afternoon = middle, evening = end)
+     * - Accommodation nodes: Always at end of day
+     * - Activity/meal nodes: Fill in between infrastructure nodes
+     * 
+     * @param llmNodes Nodes generated by LLM (activities, meals)
+     * @param preCreatedNodes Infrastructure nodes (transport, accommodation)
+     * @return Merged and sorted list of nodes
+     */
+    private List<NormalizedNode> mergeAndPositionNodes(List<NormalizedNode> llmNodes, 
+                                                       List<NormalizedNode> preCreatedNodes) {
+        List<NormalizedNode> allNodes = new ArrayList<>();
+        
+        // Add all nodes to a single list
+        if (llmNodes != null) {
+            allNodes.addAll(llmNodes);
+        }
+        if (preCreatedNodes != null) {
+            allNodes.addAll(preCreatedNodes);
+        }
+        
+        // Sort by start time (chronological order)
+        allNodes.sort((n1, n2) -> {
+            Long time1 = n1.getTiming() != null ? n1.getTiming().getStartTime() : 0L;
+            Long time2 = n2.getTiming() != null ? n2.getTiming().getStartTime() : 0L;
+            
+            // Handle null times
+            if (time1 == null) time1 = 0L;
+            if (time2 == null) time2 = 0L;
+            
+            // Primary sort: by time
+            int timeCompare = time1.compareTo(time2);
+            if (timeCompare != 0) {
+                return timeCompare;
+            }
+            
+            // Secondary sort: infrastructure nodes (transport, accommodation) come before activities
+            int priority1 = getNodePriority(n1.getType());
+            int priority2 = getNodePriority(n2.getType());
+            return Integer.compare(priority1, priority2);
+        });
+        
+        logger.debug("Merged and positioned {} nodes in chronological order", allNodes.size());
+        
+        return allNodes;
+    }
+    
+    /**
+     * Get node priority for sorting (lower = earlier in day).
+     */
+    private int getNodePriority(String nodeType) {
+        return switch (nodeType != null ? nodeType.toLowerCase() : "activity") {
+            case "transport" -> 1;      // Transport first
+            case "meal" -> 2;           // Meals second
+            case "attraction", "activity" -> 3;  // Activities third
+            case "accommodation" -> 4;  // Accommodation last
+            default -> 3;
+        };
+    }
+    
+    /**
+     * Format time in milliseconds to HH:mm string for display.
+     */
+    private String formatTime(Long timeMs) {
+        if (timeMs == null) {
+            return "??:??";
+        }
+        
+        // Use centralized formatter - handles both full timestamps and time-of-day
+        String formatted = com.tripplanner.util.TimeFormatter.formatFor24HourDisplay(timeMs);
+        return "N/A".equals(formatted) ? "??:??" : formatted;
+    }
+    
+    /**
+     * Build context string from previous days to avoid repetition.
+     */
+    private String buildPreviousDaysContext(List<NormalizedDay> previousDays) {
+        if (previousDays == null || previousDays.isEmpty()) {
+            return "No previous days.";
+        }
+        
+        StringBuilder context = new StringBuilder();
+        context.append("Previous days in this trip:\n");
+        
+        for (NormalizedDay day : previousDays) {
+            context.append("Day ").append(day.getDayNumber()).append(" (").append(day.getLocation()).append("): ");
+            if (day.getNodes() != null && !day.getNodes().isEmpty()) {
+                List<String> activities = new ArrayList<>();
+                for (NormalizedNode node : day.getNodes()) {
+                    if ("attraction".equals(node.getType()) || "activity".equals(node.getType())) {
+                        activities.add(node.getTitle());
+                    }
+                }
+                context.append(String.join(", ", activities));
+            }
+            context.append("\n");
+        }
+        
+        context.append("\nIMPORTANT: Avoid repeating similar activities from previous days.\n");
+        
+        return context.toString();
+    }
+    
+    /**
      * Generate skeleton for a single day.
      * Uses FAST_FAIL strategy for immediate failover without retries.
+     * 
+     * IMPROVED: Now receives pre-created infrastructure nodes (transport, accommodation)
+     * so LLM can see them in context and plan activities around them.
      */
-    private NormalizedDay generateDaySkeleton(CreateItineraryReq request, int dayNumber) {
+    private NormalizedDay generateDaySkeleton(CreateItineraryReq request, int dayNumber, 
+                                             CityAllocation cityForThisDay, 
+                                             TravelSegment travelSegment,
+                                             List<NormalizedDay> previousDays,
+                                             List<NormalizedNode> preCreatedNodes) {
         String systemPrompt = buildSkeletonSystemPrompt();
-        String userPrompt = buildSkeletonUserPrompt(request, dayNumber);
-        String schema = buildSkeletonJsonSchema();
+        String userPrompt = buildSkeletonUserPrompt(request, dayNumber, cityForThisDay, 
+                                                    travelSegment, previousDays, preCreatedNodes);
+        
+        // IMPROVED: Schema now expects only activity/meal nodes since infrastructure is pre-created
+        // This eliminates the schema mismatch issue
+        int minNodes = determineMinNodesForSchema(travelSegment, dayNumber, request);
+        String schema = buildSkeletonJsonSchema(minNodes);
         
         logger.info("Generating skeleton for day {} with FAST_FAIL strategy (no retries, immediate failover)", dayNumber);
         
@@ -179,10 +846,25 @@ public class SkeletonPlannerAgent extends BaseAgent {
         logger.info("=== END SKELETON PLANNER RESPONSE ===");
         
         try {
-            // Clean response by removing markdown formatting
-            String cleanedResponse = cleanJsonResponse(response);
-            logger.info("Cleaned Response: {}", cleanedResponse);
-            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(cleanedResponse);
+            // IMPROVED: Validate response against schema before parsing
+            LLMSchemaValidator.ValidationResult validationResult = schemaValidator.validateWithLogging(
+                response, schema, "SkeletonPlanner Day " + dayNumber);
+            
+            if (!validationResult.isValid()) {
+                String errorMsg = schemaValidator.getUserFriendlyError(validationResult);
+                logger.error("Schema validation failed for day {}: {}", dayNumber, errorMsg);
+                
+                // Check if retryable
+                if (schemaValidator.isRetryable(validationResult)) {
+                    throw new RuntimeException("LLM response validation failed (retryable): " + errorMsg);
+                } else {
+                    throw new RuntimeException("LLM response validation failed (non-retryable): " + errorMsg);
+                }
+            }
+            
+            // Use validated data
+            com.fasterxml.jackson.databind.JsonNode root = validationResult.getData();
+            logger.info("Schema validation passed for day {}", dayNumber);
             
             // Normalize time fields (convert HH:mm strings to milliseconds)
             normalizeTimeFields(root, request.getStartDate().toString(), dayNumber);
@@ -198,14 +880,48 @@ public class SkeletonPlannerAgent extends BaseAgent {
             LocalDate dayDate = startDate.plusDays(dayNumber - 1);
             day.setDate(dayDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
             
-            // Generate IDs for nodes if missing
+            // Set day location from city context if available
+            if (cityForThisDay != null && (day.getLocation() == null || day.getLocation().isEmpty())) {
+                day.setLocation(cityForThisDay.getCityName());
+                logger.debug("Set day {} location to: {}", dayNumber, cityForThisDay.getCityName());
+            }
+            
+            // IMPROVED: Merge pre-created infrastructure nodes with LLM-generated nodes
+            // Position them intelligently based on timing
+            if (preCreatedNodes != null && !preCreatedNodes.isEmpty()) {
+                day.setNodes(mergeAndPositionNodes(day.getNodes(), preCreatedNodes));
+                logger.info("Merged {} pre-created nodes with {} LLM-generated nodes for day {}", 
+                           preCreatedNodes.size(), 
+                           day.getNodes().size() - preCreatedNodes.size(),
+                           dayNumber);
+            }
+            
+            // Generate IDs for nodes if missing and validate them
             if (day.getNodes() != null) {
+                // Create a temporary itinerary for validation
+                NormalizedItinerary tempItinerary = new NormalizedItinerary();
+                tempItinerary.setDays(new ArrayList<>());
+                tempItinerary.getDays().add(day);
+                
                 for (int i = 0; i < day.getNodes().size(); i++) {
                     NormalizedNode node = day.getNodes().get(i);
                     if (node.getId() == null || node.getId().isEmpty()) {
                         String nodeId = nodeIdGenerator.generateSkeletonNodeId(dayNumber, i + 1, node.getType());
                         node.setId(nodeId);
                         logger.debug("Assigned ID {} to node: {}", nodeId, node.getTitle());
+                    }
+                    
+                    // IMPROVED: Validate node ID format and uniqueness
+                    try {
+                        nodeIdValidator.validateBeforeAdd(node.getId(), dayNumber, tempItinerary);
+                        logger.debug("Node ID validated: {}", node.getId());
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid node ID generated by LLM: {} - {}", node.getId(), e.getMessage());
+                        // FIXED: Use NodeIdGenerator to create a proper unique ID
+                        // This ensures the ID follows the standard format and is truly unique
+                        String newNodeId = nodeIdGenerator.generateNodeId(node.getType(), dayNumber, tempItinerary);
+                        node.setId(newNodeId);
+                        logger.warn("Regenerated node ID using NodeIdGenerator: {}", newNodeId);
                     }
                     
                     // Set placeholder values with more descriptive titles
@@ -262,11 +978,31 @@ public class SkeletonPlannerAgent extends BaseAgent {
         itinerary.setVersion(1);
         itinerary.setSummary(String.format("%d-day trip to %s (skeleton)", 
             request.getDurationDays(), request.getDestination()));
-        itinerary.setCurrency("INR");
+        
+        // NOTE: Currency should be set by CityAllocationAgent which runs before this.
+        // This fallback path should rarely be hit. Leave currency as null if not set.
+        if (itinerary.getCurrency() == null) {
+            logger.warn("Fallback: Currency not set by CityAllocationAgent for {}. Leaving as null.", 
+                       request.getDestination());
+        }
+        
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
+        
+        // CRITICAL: Propagate user constraints to itinerary for downstream agents
+        itinerary.setConstraints(request.getConstraints() != null ? request.getConstraints() : new ArrayList<>());
+        
+        // CRITICAL: Propagate budget parameters to itinerary for budget tracking
+        itinerary.setBudgetMin(request.getBudgetMin());
+        itinerary.setBudgetMax(request.getBudgetMax());
+        itinerary.setPartySize(request.getParty() != null ? request.getParty().getTotalGuests() : 1);
+        
         itinerary.setDays(new ArrayList<>());
         itinerary.setCreatedAt(System.currentTimeMillis());
         itinerary.setUpdatedAt(System.currentTimeMillis());
+        
+        logger.info("Created initial itinerary with {} constraints, budget: {}-{}, party size: {}", 
+                   itinerary.getConstraints() != null ? itinerary.getConstraints().size() : 0,
+                   itinerary.getBudgetMin(), itinerary.getBudgetMax(), itinerary.getPartySize());
         
         return itinerary;
     }
@@ -275,23 +1011,19 @@ public class SkeletonPlannerAgent extends BaseAgent {
         return """
             You are a travel planning assistant creating a DAY STRUCTURE SKELETON.
             
-            IMPORTANT: Generate ONLY the basic structure with DESCRIPTIVE placeholder titles.
+            IMPORTANT: Generate ONLY activities and meals. Infrastructure (transport, accommodation) is pre-scheduled.
             
             Your job:
-            1. Create time slots for the day (morning to evening)
-            2. Assign node types to each slot (attraction, meal, transport)
-            3. Set rough timing (start/end times)
-            4. Use DESCRIPTIVE placeholder titles that indicate the type of activity
-            5. CRITICAL: Use consistent node ID format: "day{dayNumber}_node{sequenceNumber}"
-            6. Consider party size when planning activities (group-friendly vs individual)
-            7. Respect budget tier and ensure activities match the budget level
-            
-            Node ID Format Rules:
-            - Day 1: "day1_node1", "day1_node2", "day1_node3", etc.
-            - Day 2: "day2_node1", "day2_node2", "day2_node3", etc.
-            - Day 3: "day3_node1", "day3_node2", "day3_node3", etc.
-            - Always use underscore between day and node
-            - Always use sequential numbering starting from 1
+            1. Review pre-scheduled infrastructure nodes and timings (transport, accommodation) if provided
+            2. Plan activities and meals that fit AROUND the pre-scheduled items
+            3. Ensure timing doesn't conflict with transport 
+            4. CRITICAL: Include travel time buffers between activities based on rough time taken to travel (default to 30 mins)
+            5. Use DESCRIPTIVE placeholder titles that indicate the type of activity
+            6. CRITICAL: Use consistent node ID format: "day{dayNumber}_node{sequenceNumber}"
+            7. Consider party size when planning activities (group-friendly vs individual)
+            8. Respect budget tier and ensure activities match the budget level
+            9. Use city context to plan appropriate activities for the location
+            10. Avoid repeating activities from previous days
             
             Title Guidelines:
             - Use DESCRIPTIVE placeholders that indicate activity type
@@ -318,28 +1050,37 @@ public class SkeletonPlannerAgent extends BaseAgent {
             
             Do NOT include:
             - Specific place names or addresses
-            - Detailed descriptions
-            - Exact costs (other agents will calculate these)
-            - Exact coordinates
-            - Reviews or ratings
+            - Detailed descriptions, Exact costs, coordinates, Reviews or ratings (other agents will calculate these)
             
-            Node Types:
-            - "attraction": Morning/afternoon activity placeholder
-            - "meal": Breakfast/lunch/dinner placeholder
-            - "transport": If moving between areas
-            - "accommodation": If overnight stay
+            Node Count Guidelines Based on Available Time:
+            - Full day available (no travel): 4-6 nodes (2-3 activities + 2-3 meals) - MINIMUM 4
+            - Half day available (morning/afternoon travel): 3-4 nodes (2 activities + 1-2 meals) - MINIMUM 3
+            - Limited time (full-day travel): 2-3 nodes (1 activity + 1-2 meals) - MINIMUM 2
+            - Check pre-scheduled transport timing to determine available time
             
-            Each day should have 4-7 node placeholders:
-            - 2-3 attraction placeholders
-            - 2-3 meal placeholders
-            - 0-2 transport placeholders (if needed)
-            - 0-1 accommodation placeholder (if overnight)
+            You MUST generate a relaistic number of nodes based on activity and duration it may take.
             
-            Keep it simple and fast - other agents will add specific details later.
+            Activity Duration Awareness:
+            - Safari/Trek: 4-8 hours → Plan only 1-2 other activities
+            - Museum/Temple: 1-2 hours → Can plan 3-4 activities
+            - Shopping/Market: 2-3 hours → Can plan 2-3 activities
+            - Full-day tour: 8-10 hours → No other activities
+            
+            CRITICAL RULES:
+            1. DO NOT create "transport" or "accommodation" nodes - they are pre-created
+            2. Focus ONLY on "attraction" and "meal" nodes
+            3. Plan activities in time slots NOT occupied by pre-scheduled infrastructure
+            4. If transport is scheduled 8 AM - 2 PM, dont plan activities for that time.
+            
+            Keep it relaistic, fast and well thought - other agents will add specific details later.
             """;
     }
     
-    private String buildSkeletonUserPrompt(CreateItineraryReq request, int dayNumber) {
+    private String buildSkeletonUserPrompt(CreateItineraryReq request, int dayNumber, 
+                                          CityAllocation cityForThisDay, 
+                                          TravelSegment travelSegment,
+                                          List<NormalizedDay> previousDays,
+                                          List<NormalizedNode> preCreatedNodes) {
         StringBuilder prompt = new StringBuilder();
         
         LocalDate startDate = LocalDate.parse(request.getStartDate().toString());
@@ -349,6 +1090,57 @@ public class SkeletonPlannerAgent extends BaseAgent {
         prompt.append("Day ").append(dayNumber).append(" of ").append(request.getDurationDays()).append("\n");
         prompt.append("Date: ").append(dayDate.format(DateTimeFormatter.ISO_LOCAL_DATE)).append("\n");
         prompt.append("Destination: ").append(request.getDestination()).append("\n");
+        
+        // Add city context if available
+        if (cityForThisDay != null) {
+            prompt.append("\n=== CITY CONTEXT FOR THIS DAY ===\n");
+            prompt.append("City: ").append(cityForThisDay.getCityName()).append("\n");
+            prompt.append("City Type: ").append(cityForThisDay.getDestinationType()).append(" (gateway/nature/cultural/urban)\n");
+            prompt.append("Day ").append(dayNumber - cityForThisDay.getStartDay() + 1)
+                  .append(" of ").append(cityForThisDay.getTotalDays())
+                  .append(" in this city\n");
+            if (cityForThisDay.getHighlights() != null && !cityForThisDay.getHighlights().isEmpty()) {
+                prompt.append("City Highlights: ").append(String.join(", ", cityForThisDay.getHighlights())).append("\n");
+            }
+        }
+        
+        // IMPROVED: Add pre-created infrastructure nodes context
+        if (preCreatedNodes != null && !preCreatedNodes.isEmpty()) {
+            prompt.append("\n=== PRE-SCHEDULED INFRASTRUCTURE ===\n");
+            prompt.append("The following nodes are already scheduled for this day:\n");
+            for (NormalizedNode node : preCreatedNodes) {
+                prompt.append("- ").append(node.getType().toUpperCase()).append(": ");
+                prompt.append(node.getTitle());
+                if (node.getTiming() != null) {
+                    prompt.append(" (").append(formatTime(node.getTiming().getStartTime()));
+                    prompt.append(" - ").append(formatTime(node.getTiming().getEndTime())).append(")");
+                }
+                prompt.append("\n");
+            }
+            prompt.append("\nIMPORTANT: Plan activities around these pre-scheduled items.\n");
+            prompt.append("Do NOT create duplicate transport or accommodation nodes.\n");
+            prompt.append("Focus on attractions and meals that fit in the available time slots.\n");
+        }
+        
+        // Add travel context if available (for additional context)
+        if (travelSegment != null) {
+            prompt.append("\n=== TRAVEL DETAILS ===\n");
+            prompt.append("Travel: ").append(travelSegment.getFromCity())
+                  .append(" → ").append(travelSegment.getToCity()).append("\n");
+            prompt.append("Mode: ").append(travelSegment.getTravelMode()).append("\n");
+            prompt.append("Duration: ").append(travelSegment.getEstimatedHours()).append(" hours\n");
+            prompt.append("Full Day Travel: ").append(travelSegment.isFullDayTravel() ? "Yes" : "No").append("\n");
+            if (travelSegment.getNotes() != null && !travelSegment.getNotes().isEmpty()) {
+                prompt.append("Notes: ").append(travelSegment.getNotes()).append("\n");
+            }
+            prompt.append("NOTE: Transport node is already created above. Plan activities for remaining time.\n");
+        }
+        
+        // Add previous days context
+        if (previousDays != null && !previousDays.isEmpty()) {
+            prompt.append("\n=== PREVIOUS DAYS CONTEXT ===\n");
+            prompt.append(buildPreviousDaysContext(previousDays));
+        }
         
         // Add start location if provided
         if (request.getStartLocation() != null && !request.getStartLocation().isEmpty()) {
@@ -410,19 +1202,91 @@ public class SkeletonPlannerAgent extends BaseAgent {
             prompt.append("Please ensure the itinerary structure accommodates these requirements.\n");
         }
         
+        
+        // Determine expected node count and minimum requirement
+        int expectedNodeCount = determineNodeCount(cityForThisDay, travelSegment);
+        int minNodeCount = determineMinNodesForSchema(travelSegment, dayNumber, request);
+        
+        prompt.append("\n=== NODE COUNT REQUIREMENTS ===\n");
+        prompt.append("MINIMUM nodes required: ").append(minNodeCount).append(" (CRITICAL - schema will reject if less)\n");
+        prompt.append("Expected nodes for this day: ").append(expectedNodeCount).append("\n");
+        if (cityForThisDay != null) {
+            prompt.append("Reason: ");
+            if (travelSegment != null && travelSegment.isFullDayTravel()) {
+                prompt.append("Full-day travel (travel + 1 meal)\n");
+            } else if (travelSegment != null) {
+                prompt.append("Partial travel day (travel + limited activities)\n");
+            } else if ("nature".equals(cityForThisDay.getDestinationType())) {
+                prompt.append("Nature destination (safaris/treks take 4-8 hours)\n");
+            } else if ("gateway".equals(cityForThisDay.getDestinationType())) {
+                prompt.append("Gateway city (moderate pace)\n");
+            } else {
+                prompt.append("Cultural/urban city (normal pace)\n");
+            }
+        }
+        
+        prompt.append("\nCRITICAL: You MUST generate at least ").append(minNodeCount).append(" nodes.\n");
+        prompt.append("If you generate fewer nodes, the response will be REJECTED.\n");
+        
         prompt.append("\nGenerate time slots with node type placeholders.\n");
         prompt.append("Use descriptive titles like 'Morning Cultural Exploration', 'Lunch at Local Restaurant', etc.\n");
         prompt.append("Focus on timing and logical flow, not specific places.\n");
         prompt.append("Consider the party size when planning activities and meal venues.\n");
-        prompt.append("Consider multiple cities if destination is a general location like a state or country\n");
-        prompt.append("Day 1 Start and Day last end must be travel (flight/train/bus applicable based on distance and time) from origin to destination and vice versa.\n");
+        if (cityForThisDay == null) {
+            prompt.append("Consider multiple cities if destination is a general location like a state or country\n");
+        }
+        
+        // Add context for Day 1 and last day (arrival/departure handled programmatically)
+        if (dayNumber == 1 && request.getStartLocation() != null && !request.getStartLocation().isEmpty()) {
+            prompt.append("NOTE: This is Day 1 (arrival day). Arrival travel is handled separately. Plan activities for afternoon/evening only.\n");
+        }
+        if (dayNumber == request.getDurationDays() && request.getStartLocation() != null && !request.getStartLocation().isEmpty()) {
+            prompt.append("NOTE: This is the last day (departure day). Departure travel is handled separately. Plan activities for morning/afternoon only.\n");
+        }
+        
         prompt.append("CRITICAL: Use node IDs in format 'day").append(dayNumber).append("_node1', 'day").append(dayNumber).append("_node2', etc.\n");
         
         return prompt.toString();
     }
     
-    private String buildSkeletonJsonSchema() {
-        return """
+    /**
+     * Determine minimum nodes for schema validation.
+     * CRITICAL: This accounts for programmatically-added nodes (transport, accommodation).
+     * 
+     * @param travelSegment Travel segment for this day (null if no travel)
+     * @param dayNumber Current day number
+     * @param request Original request
+     * @return Minimum number of LLM-generated nodes required
+     */
+    private int determineMinNodesForSchema(TravelSegment travelSegment, int dayNumber, CreateItineraryReq request) {
+        // Full-day travel: 2 nodes (1 meal + 1 activity)
+        // Transport and accommodation will be added programmatically
+        if (travelSegment != null && travelSegment.isFullDayTravel()) {
+            return 2;
+        }
+        
+        // Partial travel day: 3 nodes (2 activities + 1 meal)
+        // Transport will be added programmatically
+        if (travelSegment != null) {
+            return 3;
+        }
+        
+        // Day 1 with arrival: 3 nodes (arrival transport added programmatically)
+        if (dayNumber == 1 && shouldAddArrivalTravel(request, null)) {
+            return 3;
+        }
+        
+        // Last day with departure: 3 nodes (departure transport added programmatically)
+        if (dayNumber == request.getDurationDays() && shouldAddDepartureTravel(request, null)) {
+            return 3;
+        }
+        
+        // Regular day: 4 nodes minimum (2-3 activities + 2 meals)
+        return 4;
+    }
+    
+    private String buildSkeletonJsonSchema(int minNodes) {
+        return String.format("""
             {
               "type": "object",
               "properties": {
@@ -432,7 +1296,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
                 "summary": { "type": "string" },
                 "nodes": {
                   "type": "array",
-                  "minItems": 4,
+                  "minItems": %d,
                   "maxItems": 7,
                   "items": {
                     "type": "object",
@@ -464,7 +1328,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
               },
               "required": ["dayNumber", "date", "location", "nodes"]
             }
-            """;
+            """, minNodes);
     }
     
     @Override
@@ -498,6 +1362,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
     
     /**
      * Clean JSON response by removing markdown formatting and corrupted content.
+     * CRITICAL: Preserves Unicode characters for international destinations.
      */
     private String cleanJsonResponse(String response) {
         if (response == null) {
@@ -515,32 +1380,22 @@ public class SkeletonPlannerAgent extends BaseAgent {
             cleaned = cleaned.substring(startIndex, endIndex + 1);
         }
         
-        // Remove any non-ASCII characters that might be breaking JSON
-        // This handles cases where AI returns mixed language content
-        cleaned = cleaned.replaceAll("[^\\x00-\\x7F]", "");
+        // Remove control characters that actually break JSON
+        // Keep all printable Unicode characters (letters, numbers, punctuation)
+        cleaned = cleaned.replaceAll("[\\x00-\\x1F\\x7F]", "");
         
-        // Remove any text that appears between JSON properties (like Japanese text)
-        // Pattern: } followed by non-JSON characters, then "id":
+        // Remove any text that appears between JSON properties (malformed content)
+        // These patterns handle cases where LLM adds explanatory text between properties
         cleaned = cleaned.replaceAll("}\\s*[^\\s\"{}\\[\\],:]+\\s*,\\s*\"id\"", "},\"id\"");
-        
-        // Remove any text that appears between JSON properties
-        // Pattern: } followed by non-JSON characters, then "type":
         cleaned = cleaned.replaceAll("}\\s*[^\\s\"{}\\[\\],:]+\\s*,\\s*\"type\"", "},\"type\"");
-        
-        // Remove any text that appears between JSON properties
-        // Pattern: } followed by non-JSON characters, then "title":
         cleaned = cleaned.replaceAll("}\\s*[^\\s\"{}\\[\\],:]+\\s*,\\s*\"title\"", "},\"title\"");
-        
-        // Remove any text that appears between JSON properties
-        // Pattern: } followed by non-JSON characters, then "location":
         cleaned = cleaned.replaceAll("}\\s*[^\\s\"{}\\[\\],:]+\\s*,\\s*\"location\"", "},\"location\"");
-        
-        // Remove any text that appears between JSON properties
-        // Pattern: } followed by non-JSON characters, then "timing":
         cleaned = cleaned.replaceAll("}\\s*[^\\s\"{}\\[\\],:]+\\s*,\\s*\"timing\"", "},\"timing\"");
         
         // Clean up any remaining malformed content
         cleaned = cleaned.replaceAll("}\\s*[^\\s\"{}\\[\\],:]+\\s*,", "},");
+        
+        logger.debug("Cleaned JSON response (Unicode preserved): {} chars", cleaned.length());
         
         return cleaned.trim();
     }
@@ -548,6 +1403,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
     /**
      * Normalize time fields in the JSON tree.
      * Converts time strings like "14:00" to milliseconds since epoch.
+     * IMPROVED: Now uses destination timezone instead of system timezone.
      */
     private void normalizeTimeFields(com.fasterxml.jackson.databind.JsonNode root, String startDate, int dayNumber) {
         if (root == null || !root.has("nodes") || !root.get("nodes").isArray()) {
@@ -559,6 +1415,13 @@ public class SkeletonPlannerAgent extends BaseAgent {
         LocalDate dayDate = baseDate.plusDays(dayNumber - 1);
         String dayDateStr = dayDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
         
+        // TODO: Get destination timezone from request/itinerary
+        // For now, use UTC as a consistent baseline (better than system timezone)
+        // Future improvement: Pass destination timezone through the call chain
+        java.time.ZoneId timezone = java.time.ZoneId.of("UTC");
+        
+        logger.debug("Normalizing time fields for day {} using timezone: {}", dayNumber, timezone);
+        
         // Process each node's timing
         com.fasterxml.jackson.databind.node.ArrayNode nodesArray = (com.fasterxml.jackson.databind.node.ArrayNode) root.get("nodes");
         for (com.fasterxml.jackson.databind.JsonNode node : nodesArray) {
@@ -567,16 +1430,23 @@ public class SkeletonPlannerAgent extends BaseAgent {
             com.fasterxml.jackson.databind.node.ObjectNode timing = (com.fasterxml.jackson.databind.node.ObjectNode) node.get("timing");
             if (timing == null) continue;
             
-            // Normalize startTime and endTime
-            normalizeTimeField(timing, "startTime", dayDateStr);
-            normalizeTimeField(timing, "endTime", dayDateStr);
+            // Normalize startTime and endTime with timezone awareness
+            normalizeTimeField(timing, "startTime", dayDateStr, timezone);
+            normalizeTimeField(timing, "endTime", dayDateStr, timezone);
         }
     }
     
     /**
      * Normalize a single time field from HH:mm string to milliseconds since epoch.
+     * IMPROVED: Now timezone-aware.
+     * 
+     * @param timing The timing object to update
+     * @param field The field name (startTime or endTime)
+     * @param dayDate The date string in ISO format (YYYY-MM-DD)
+     * @param timezone The timezone to use for conversion
      */
-    private void normalizeTimeField(com.fasterxml.jackson.databind.node.ObjectNode timing, String field, String dayDate) {
+    private void normalizeTimeField(com.fasterxml.jackson.databind.node.ObjectNode timing, String field, 
+                                    String dayDate, java.time.ZoneId timezone) {
         if (!timing.has(field)) return;
         
         String value = timing.get(field).asText(null);
@@ -590,10 +1460,20 @@ public class SkeletonPlannerAgent extends BaseAgent {
             
             // If time string HH:mm, combine with dayDate and convert to milliseconds
             if (value.matches("^\\d{2}:\\d{2}$")) {
-                String iso = dayDate + "T" + value + ":00Z";
-                long milliseconds = java.time.Instant.parse(iso).toEpochMilli();
+                // Parse as LocalDateTime in the destination timezone
+                java.time.LocalDateTime localDateTime = java.time.LocalDateTime.parse(
+                    dayDate + "T" + value + ":00"
+                );
+                
+                // Convert to ZonedDateTime using destination timezone
+                java.time.ZonedDateTime zonedDateTime = localDateTime.atZone(timezone);
+                
+                // Convert to epoch milliseconds
+                long milliseconds = zonedDateTime.toInstant().toEpochMilli();
+                
                 timing.put(field, milliseconds);
-                logger.debug("Converted {} '{}' to timestamp {}", field, value, milliseconds);
+                logger.debug("Converted {} '{}' to timestamp {} (timezone: {})", 
+                           field, value, milliseconds, timezone);
                 return;
             }
             

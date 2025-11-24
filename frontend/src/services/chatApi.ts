@@ -37,23 +37,28 @@ import { authService } from './authService';
 // Use the same API base URL as the main apiClient
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
+import { getSessionId } from '../utils/session';
+
+// ... existing imports ...
+
 // Helper function to get authentication headers
 async function getAuthHeaders(): Promise<HeadersInit> {
   const token = await authService.getIdToken();
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    'X-Session-ID': getSessionId(),
   };
-  
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   return headers;
 }
 
 async function safeJsonParse<T>(response: Response, allowEmpty: boolean = false): Promise<T> {
   const text = await response.text();
-  
+
   // Handle empty responses
   if (!text || text.trim() === '') {
     if (allowEmpty) {
@@ -61,7 +66,7 @@ async function safeJsonParse<T>(response: Response, allowEmpty: boolean = false)
     }
     throw new Error('Empty response from server');
   }
-  
+
   try {
     return JSON.parse(text) as T;
   } catch (e) {
@@ -85,7 +90,7 @@ export const chatApi = {
         credentials: 'include',
         body: JSON.stringify(req),
       });
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         if (errorText.includes('<!DOCTYPE') || errorText.includes('<html')) {
@@ -93,7 +98,7 @@ export const chatApi = {
         }
         throw new Error(`Failed to send message (${res.status}): ${errorText || res.statusText}`);
       }
-      
+
       return await safeJsonParse<ChatMessageDTO>(res);
     } catch (error: any) {
       console.error('[chatApi.send] Error:', error);
@@ -104,11 +109,11 @@ export const chatApi = {
   async history(itineraryId: string): Promise<ChatMessageDTO[]> {
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/itineraries/${itineraryId}/chat/history`, { 
+      const res = await fetch(`${API_BASE_URL}/itineraries/${itineraryId}/chat/history`, {
         headers,
-        credentials: 'include' 
+        credentials: 'include'
       });
-      
+
       if (!res.ok) {
         if (res.status === 404) return []; // No history yet
         const errorText = await res.text();
@@ -118,14 +123,14 @@ export const chatApi = {
         }
         throw new Error(`Failed to load history (${res.status}): ${res.statusText}`);
       }
-      
+
       // Check content type before parsing
       const contentType = res.headers.get('content-type');
       if (contentType && !contentType.includes('application/json')) {
         console.warn('[chatApi.history] Response is not JSON (content-type:', contentType, '), assuming empty history');
         return [];
       }
-      
+
       return await safeJsonParse<ChatMessageDTO[]>(res, true);
     } catch (error: any) {
       // Gracefully handle HTML responses (backend endpoint may not be implemented yet)
@@ -133,7 +138,7 @@ export const chatApi = {
         console.warn('[chatApi.history] Chat history endpoint returned HTML, assuming empty history. Backend may not have this endpoint implemented.');
         return [];
       }
-      
+
       console.error('[chatApi.history] Error loading chat history:', error);
       throw error;
     }
@@ -148,7 +153,7 @@ export const chatApi = {
         credentials: 'include',
         body: JSON.stringify(msg),
       });
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         console.warn('[chatApi.persist] Failed to persist message:', res.status, errorText);
@@ -167,7 +172,7 @@ export const chatApi = {
         headers,
         credentials: 'include',
       });
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         if (errorText.includes('<!DOCTYPE') || errorText.includes('<html')) {
@@ -190,7 +195,7 @@ export const chatApi = {
         credentials: 'include',
         body: JSON.stringify(request),
       });
-      
+
       if (!res.ok) {
         const errorText = await res.text();
         if (errorText.includes('<!DOCTYPE') || errorText.includes('<html')) {
@@ -198,7 +203,7 @@ export const chatApi = {
         }
         throw new Error(`Failed to apply changes (${res.status}): ${errorText || res.statusText}`);
       }
-      
+
       return await safeJsonParse<ApplyChangeSetResponse>(res);
     } catch (error: any) {
       console.error('[chatApi.applyChangeSet] Error:', error);

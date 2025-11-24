@@ -45,8 +45,8 @@
     "wind": "हवा"
   },
   "dateRangePicker": {
-    "maxDaysTitle": "अधिकतम 7 दिन",
-    "maxDaysDescription": "कृपया 7 दिन या उससे कम की यात्रा अवधि चुनें",
+    "maxDaysTitle": "अधिकतम 12 दिन",
+    "maxDaysDescription": "कृपया 12 दिन या उससे कम की यात्रा अवधि चुनें",
     "duration": "{{nights}} रात, {{days}} दिन",
     "duration_plural": "{{nights}} रातें, {{days}} दिन",
     "selectDates": "तिथियां चुनें",

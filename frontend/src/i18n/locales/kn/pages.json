@@ -107,6 +107,8 @@
     "languagePreferences": "ಭಾಷಾ ಆದ್ಯತೆಗಳು",
     "selectLanguage": "ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
     "languageDescription": "ಬದಲಾವಣೆಗಳು ತಕ್ಷಣ ಎಲ್ಲಾ ಪುಟಗಳಲ್ಲಿ ಅನ್ವಯಿಸಲ್ಪಡುತ್ತವೆ",
+    "currencyPreferences": "ಕರೆನ್ಸಿ ಆದ್ಯತೆಗಳು",
+    "currencyDescription": "ವೆಚ್ಚಗಳು ಮತ್ತು ಬಜೆಟ್‌ಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲು ನಿಮ್ಮ ಆದ್ಯತೆಯ ಕರೆನ್ಸಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
     "accountDetails": "ಖಾತೆ ವಿವರಗಳು",
     "accountDetailsDescription": "ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿ ಮತ್ತು ಖಾತೆ ಸ್ಥಿತಿ",
     "authProvider": "ದೃಢೀಕರಣ ಪೂರೈಕೆದಾರ",
@@ -124,7 +126,7 @@
       "description": "ನಿಮ್ಮ ಖಾತೆ ಮತ್ತು ಆದ್ಯತೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
       "myTrips": "ನನ್ನ ಪ್ರವಾಸಗಳು",
       "planTrip": "ಪ್ರವಾಸ ಯೋಜಿಸಿ",
-      "upgrade": "ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ",
+      "currency": "ಕರೆನ್ಸಿ",
       "language": "ಭಾಷೆ"
     }
   },

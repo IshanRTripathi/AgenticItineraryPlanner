@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageSelector } from '@/i18n/components/LanguageSelector';
+import { CurrencySelector } from '@/components/common/CurrencySelector';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { motion } from 'framer-motion';
 
@@ -33,6 +34,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [languageSheetOpen, setLanguageSheetOpen] = useState(false);
+  const [currencySheetOpen, setCurrencySheetOpen] = useState(false);
 
   if (!isAuthenticated || !user) {
     return (
@@ -239,11 +241,12 @@ export function ProfilePage() {
                 <Button
                   variant="outline"
                   className="flex-col h-auto py-3 hover:bg-amber-50 hover:border-amber-500 transition-all group"
+                  onClick={() => setCurrencySheetOpen(true)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors mb-2">
                     <CreditCard className="w-4 h-4 text-amber-600" />
                   </div>
-                  <p className="font-semibold text-xs">{t('pages.profile.quickActions.upgrade')}</p>
+                  <p className="font-semibold text-xs">{t('pages.profile.quickActions.currency')}</p>
                 </Button>
 
                 <Button
@@ -318,6 +321,20 @@ export function ProfilePage() {
             {t('pages.profile.languageDescription')}
           </p>
           <LanguageSelector variant="inline" showFlags={true} />
+        </div>
+      </BottomSheet>
+
+      {/* Currency Selection Bottom Sheet */}
+      <BottomSheet
+        open={currencySheetOpen}
+        onOpenChange={setCurrencySheetOpen}
+        title={t('pages.profile.currencyPreferences')}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t('pages.profile.currencyDescription')}
+          </p>
+          <CurrencySelector variant="inline" showFlags={true} />
         </div>
       </BottomSheet>
     </div>

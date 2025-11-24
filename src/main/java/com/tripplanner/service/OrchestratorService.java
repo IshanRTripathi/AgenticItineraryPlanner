@@ -1,8 +1,9 @@
 package com.tripplanner.service;
 
-import com.tripplanner.agents.EditorAgent;
 import com.tripplanner.dto.*;
 import com.tripplanner.agents.BaseAgent;
+import com.tripplanner.service.agents.AgentRegistry;
+import com.tripplanner.service.llm.LLMService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -507,10 +508,9 @@ public class OrchestratorService {
                     null, null, false, applyResult.getToVersion()
                 );
             } else {
-                // The detailed message with actual place names is in the ChangeSet reason field
-                // which EditorAgent populates. We'll use that if available, otherwise generate a generic message.
-                // Note: The ChangeSet is not directly available here, so we generate from diff
-                String responseMessage = "Your itinerary has been updated.";
+                // FIXED: Generate descriptive message from diff instead of generic message
+                // This shows users exactly what changed (added/removed/updated)
+                String responseMessage = generateDescriptiveMessage(applyResult.getDiff());
                 
                 ChatResponse response = ChatResponse.success(
                     "Changes applied successfully",
@@ -1119,17 +1119,31 @@ public class OrchestratorService {
     
     /**
      * Extract a readable title from a DiffItem.
+     * FIXED: Use the actual title field instead of trying to parse the ID.
      */
     private String extractTitleFromDiffItem(DiffItem item) {
         if (item == null) {
             return "Unknown item";
         }
         
-        // Try to get title from the item's ID or data
+        // FIXED: Use the title field if available
+        if (item.getTitle() != null && !item.getTitle().trim().isEmpty()) {
+            // Include day number for context
+            if (item.getDay() != null) {
+                return String.format("%s (Day %d)", item.getTitle(), item.getDay());
+            }
+            return item.getTitle();
+        }
+        
+        // Fallback: Try to get title from the item's ID
         String id = item.getNodeId();
         if (id != null && !id.trim().isEmpty()) {
             // Try to make the ID more readable
-            return id.replace("_", " ").replace("node", "").trim();
+            String readable = id.replace("_", " ").replace("node", "").trim();
+            if (item.getDay() != null) {
+                return String.format("%s (Day %d)", readable, item.getDay());
+            }
+            return readable;
         }
         
         return "Item";

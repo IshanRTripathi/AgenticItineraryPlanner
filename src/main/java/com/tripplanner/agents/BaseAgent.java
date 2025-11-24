@@ -2,7 +2,7 @@ package com.tripplanner.agents;
 
 import com.tripplanner.dto.AgentCapabilities;
 import com.tripplanner.dto.AgentEvent;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

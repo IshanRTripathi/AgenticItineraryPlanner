@@ -1,7 +1,9 @@
 package com.tripplanner.agents;
 
 import com.tripplanner.dto.*;
+import com.tripplanner.enums.ProcessingState;
 import com.tripplanner.service.*;
+import com.tripplanner.service.agents.AgentEventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,11 +24,15 @@ public class EnrichmentAgent extends BaseAgent {
     private static final Set<String> EXCLUDED_NODE_TYPES = Set.of("accommodation", "hotel", "transport", "transit");
     
     // Coordinate validation constants
-    private static final double COORDINATE_ZERO_THRESHOLD = 0.0001;
+    // IMPROVED: Stricter threshold to catch fake coordinates near (0,0)
+    private static final double COORDINATE_ZERO_THRESHOLD = 1.0; // 1 degree from (0,0) is suspicious
     private static final double MIN_LATITUDE = -90.0;
     private static final double MAX_LATITUDE = 90.0;
     private static final double MIN_LONGITUDE = -180.0;
     private static final double MAX_LONGITUDE = 180.0;
+    
+    // Additional validation: coordinates that are suspiciously round numbers
+    private static final double ROUND_NUMBER_THRESHOLD = 0.01; // e.g., exactly 10.0, 20.0
 
     private final ItineraryJsonService itineraryJsonService;
     private final ChangeEngine changeEngine;
@@ -179,10 +185,252 @@ public class EnrichmentAgent extends BaseAgent {
             throw new RuntimeException("Failed to enrich itinerary: " + e.getMessage(), e);
         }
     }
+    
+    /**
+     * Enrich a single day's nodes (for sequential per-day enrichment).
+     * This method is called by PipelineOrchestrator when sequential enrichment is enabled.
+     */
+    public void enrichDay(String itineraryId, NormalizedDay day) {
+        try {
+            logger.info("=== ENRICHING SINGLE DAY ===");
+            logger.info("Itinerary ID: {}", itineraryId);
+            logger.info("Day Number: {}", day.getDayNumber());
+            logger.info("Nodes in day: {}", day.getNodes() != null ? day.getNodes().size() : 0);
+            
+            if (day.getNodes() == null || day.getNodes().isEmpty()) {
+                logger.info("No nodes to enrich in day {}", day.getDayNumber());
+                return;
+            }
+            
+            // Load the current itinerary to get destination context
+            var currentItinerary = itineraryJsonService.getItinerary(itineraryId);
+            if (currentItinerary.isEmpty()) {
+                throw new RuntimeException("Itinerary not found: " + itineraryId);
+            }
+            
+            NormalizedItinerary itinerary = currentItinerary.get();
+            String destination = itinerary.getDestination();
+            
+            // Read city context for this day
+            String cityContext = getCityForDay(itinerary, day.getDayNumber());
+            if (cityContext != null) {
+                logger.info("Using city context for day {}: {}", day.getDayNumber(), cityContext);
+            }
+            
+            // Collect enrichment operations for this day
+            List<ChangeOperation> dayEnrichmentOps = new ArrayList<>();
+            
+            int nodeCount = 0;
+            for (NormalizedNode node : day.getNodes()) {
+                nodeCount++;
+                
+                // Skip locked nodes
+                if (Boolean.TRUE.equals(node.getLocked())) {
+                    logger.debug("⏭️ Skipping locked node: {}", node.getId());
+                    continue;
+                }
+                
+                // Skip transport nodes (no Google Places enrichment needed)
+                if ("transport".equals(node.getType())) {
+                    logger.debug("⏭️ Skipping transport node: {}", node.getId());
+                    continue;
+                }
+                
+                // Skip accommodation nodes (handled separately)
+                if ("accommodation".equals(node.getType()) || "hotel".equals(node.getType())) {
+                    logger.debug("⏭️ Skipping accommodation node: {}", node.getId());
+                    continue;
+                }
+                
+                // Skip excluded node types
+                if (isExcludedNodeType(node.getType())) {
+                    logger.debug("⏭️ Skipping excluded node type '{}': {}", node.getType(), node.getTitle());
+                    continue;
+                }
+                
+                logger.info("🔄 Processing node {}/{} in day {}: {} ({})", 
+                           nodeCount, day.getNodes().size(), day.getDayNumber(), 
+                           node.getTitle(), node.getId());
+                
+                // First, search for place if needed
+                if (needsPlaceSearch(node)) {
+                    try {
+                        // Use city context if available, otherwise use destination
+                        String searchLocation = cityContext != null ? cityContext : destination;
+                        NormalizedNode searchedNode = searchAndSetPlaceId(node, searchLocation);
+                        if (searchedNode != null) {
+                            ChangeOperation searchOp = createEnrichmentOperation(searchedNode);
+                            dayEnrichmentOps.add(searchOp);
+                            node = searchedNode; // Update reference for further enrichment
+                            logger.info("✅ Place search complete for node: {}", node.getId());
+                        }
+                    } catch (Exception e) {
+                        logger.warn("⚠️ Failed to search place for node {}: {}", node.getId(), e.getMessage());
+                    }
+                }
+                
+                // Then, enrich with photos/reviews if needed
+                if (needsEnrichment(node)) {
+                    try {
+                        logger.info("🔄 Enriching node {} with Google Places data", node.getId());
+                        NormalizedNode enrichedNode = enrichNode(node);
+                        if (enrichedNode != null) {
+                            ChangeOperation enrichOp = createEnrichmentOperation(enrichedNode);
+                            dayEnrichmentOps.add(enrichOp);
+                            logger.info("✅ Enrichment complete for node: {}", node.getId());
+                        }
+                    } catch (Exception e) {
+                        logger.error("❌ Failed to enrich node {}: {}", node.getId(), e.getMessage());
+                    }
+                }
+            }
+            
+            // Apply enrichments for this day if any
+            if (!dayEnrichmentOps.isEmpty()) {
+                logger.info("📝 Applying {} enrichment operations for day {}", 
+                           dayEnrichmentOps.size(), day.getDayNumber());
+                
+                ChangeSet dayChangeSet = new ChangeSet();
+                dayChangeSet.setScope("day");
+                dayChangeSet.setOps(dayEnrichmentOps);
+                
+                ChangePreferences preferences = new ChangePreferences();
+                preferences.setRespectLocks(true);
+                preferences.setUserFirst(false);
+                dayChangeSet.setPreferences(preferences);
+                
+                ChangeEngine.ApplyResult result = changeEngine.apply(itineraryId, dayChangeSet);
+                
+                logger.info("✅ Day {} enrichment applied successfully. New version: {}", 
+                           day.getDayNumber(), result.getToVersion());
+            } else {
+                logger.info("ℹ️ No enrichments needed for day {}", day.getDayNumber());
+            }
+            
+        } catch (Exception e) {
+            logger.error("❌ Failed to enrich day {}: {}", day.getDayNumber(), e.getMessage(), e);
+            throw new RuntimeException("Failed to enrich day: " + e.getMessage(), e);
+        }
+    }
 
+    /**
+     * Collect enrichments for a single day WITHOUT saving to Firestore.
+     * Returns enrichment data that can be applied later.
+     * Used by BatchEnrichmentService for race-condition-free parallel enrichment.
+     */
+    public DayEnrichmentResult collectEnrichments(NormalizedItinerary itinerary, NormalizedDay day) {
+        DayEnrichmentResult result = new DayEnrichmentResult(day.getDayNumber());
+        
+        try {
+            logger.info("  📥 [Day {}] Collecting enrichments (no save)", day.getDayNumber());
+            
+            if (day.getNodes() == null || day.getNodes().isEmpty()) {
+                logger.info("  ℹ️ [Day {}] No nodes to enrich", day.getDayNumber());
+                return result;
+            }
+            
+            String destination = itinerary.getDestination();
+            int nodeCount = 0;
+            
+            for (NormalizedNode node : day.getNodes()) {
+                nodeCount++;
+                
+                // Skip locked nodes
+                if (Boolean.TRUE.equals(node.getLocked())) {
+                    continue;
+                }
+                
+                // Skip excluded node types
+                if (isExcludedNodeType(node.getType())) {
+                    continue;
+                }
+                
+                logger.debug("  🔄 [Day {}] Processing node {}/{}: {}", 
+                            day.getDayNumber(), nodeCount, day.getNodes().size(), node.getTitle());
+                
+                // Enrich this node and collect data
+                EnrichedNodeData enrichedData = enrichNodeAndCollect(node, destination);
+                if (enrichedData != null) {
+                    result.addEnrichedNode(enrichedData);
+                }
+            }
+            
+            logger.info("  ✅ [Day {}] Collected {} enrichments", 
+                       day.getDayNumber(), result.getEnrichedNodes().size());
+            
+        } catch (Exception e) {
+            logger.error("  ❌ [Day {}] Failed to collect enrichments: {}", 
+                        day.getDayNumber(), e.getMessage());
+            return DayEnrichmentResult.failure(day.getDayNumber(), e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Enrich a single node and return the enrichment data (without modifying the node).
+     */
+    private EnrichedNodeData enrichNodeAndCollect(NormalizedNode node, String destination) {
+        try {
+            // First, search for place if needed
+            NormalizedNode workingNode = node;
+            if (needsPlaceSearch(node)) {
+                NormalizedNode searchedNode = searchAndSetPlaceId(node, destination);
+                if (searchedNode != null) {
+                    workingNode = searchedNode;
+                }
+            }
+            
+            // Then, enrich with photos/reviews if needed
+            if (needsEnrichment(workingNode)) {
+                NormalizedNode enrichedNode = enrichNode(workingNode);
+                if (enrichedNode != null) {
+                    // Create enrichment data object
+                    EnrichedNodeData enrichedData = new EnrichedNodeData(node.getId());
+                    enrichedData.setLocation(enrichedNode.getLocation());
+                    enrichedData.setAgentData(enrichedNode.getAgentData());
+                    return enrichedData;
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.warn("  ⚠️ Failed to enrich node {}: {}", node.getId(), e.getMessage());
+        }
+        
+        return null;
+    }
+    
     @Override
     protected String getAgentName() {
         return "Enrichment Agent";
+    }
+
+    /**
+     * Get city context for a specific day from city allocation plan.
+     */
+    private String getCityForDay(NormalizedItinerary itinerary, int dayNumber) {
+        try {
+            if (itinerary.getAgentData() == null || !itinerary.getAgentData().containsKey("cityAllocation")) {
+                return null;
+            }
+            
+            AgentDataSection agentDataSection = itinerary.getAgentData().get("cityAllocation");
+            CityAllocationPlan cityPlan = agentDataSection.getAgentData("cityAllocation", CityAllocationPlan.class);
+            
+            if (cityPlan == null || cityPlan.getAllocations() == null) {
+                return null;
+            }
+            
+            for (CityAllocation allocation : cityPlan.getAllocations()) {
+                if (dayNumber >= allocation.getStartDay() && dayNumber <= allocation.getEndDay()) {
+                    return allocation.getCityName();
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to get city context for day {}: {}", dayNumber, e.getMessage());
+        }
+        
+        return null;
     }
 
     /**
@@ -711,7 +959,8 @@ public class EnrichmentAgent extends BaseAgent {
     }
     
     /**
-     * Check if coordinates are invalid (0,0, out of range, or NaN).
+     * Check if coordinates are invalid (0,0, out of range, NaN, or suspicious).
+     * IMPROVED: Stricter validation to catch fake/placeholder coordinates.
      */
     private boolean isInvalidCoordinate(Coordinates coords) {
         if (coords == null || coords.getLat() == null || coords.getLng() == null) {
@@ -721,18 +970,37 @@ public class EnrichmentAgent extends BaseAgent {
         double lat = coords.getLat();
         double lng = coords.getLng();
         
-        // Check for NaN
-        if (Double.isNaN(lat) || Double.isNaN(lng)) {
-            return true;
-        }
-        
-        // Check for (0,0) - center of earth
-        if (Math.abs(lat) < COORDINATE_ZERO_THRESHOLD && Math.abs(lng) < COORDINATE_ZERO_THRESHOLD) {
+        // Check for NaN or Infinity
+        if (Double.isNaN(lat) || Double.isNaN(lng) || 
+            Double.isInfinite(lat) || Double.isInfinite(lng)) {
+            logger.warn("Invalid coordinates: NaN or Infinite - lat={}, lng={}", lat, lng);
             return true;
         }
         
         // Check for out of range
-        return lat < MIN_LATITUDE || lat > MAX_LATITUDE || lng < MIN_LONGITUDE || lng > MAX_LONGITUDE;
+        if (lat < MIN_LATITUDE || lat > MAX_LATITUDE || lng < MIN_LONGITUDE || lng > MAX_LONGITUDE) {
+            logger.warn("Coordinates out of range - lat={}, lng={}", lat, lng);
+            return true;
+        }
+        
+        // IMPROVED: Check for (0,0) or very close to it (Gulf of Guinea)
+        // This catches fake coordinates like (0.0001, 0.0002)
+        if (Math.abs(lat) < COORDINATE_ZERO_THRESHOLD && Math.abs(lng) < COORDINATE_ZERO_THRESHOLD) {
+            logger.warn("Suspicious coordinates near (0,0) - lat={}, lng={}", lat, lng);
+            return true;
+        }
+        
+        // IMPROVED: Check for suspiciously round numbers (often placeholders)
+        // e.g., exactly (10.0, 20.0) or (50.0, 100.0)
+        double latFraction = Math.abs(lat - Math.round(lat));
+        double lngFraction = Math.abs(lng - Math.round(lng));
+        if (latFraction < ROUND_NUMBER_THRESHOLD && lngFraction < ROUND_NUMBER_THRESHOLD &&
+            (Math.abs(lat) >= 10.0 || Math.abs(lng) >= 10.0)) {
+            logger.warn("Suspicious round number coordinates - lat={}, lng={}", lat, lng);
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -865,6 +1133,10 @@ public class EnrichmentAgent extends BaseAgent {
         String placeId = node.getLocation().getPlaceId();
         logger.info("🔄 [EnrichmentAgent] Starting enrichment for node: {} ({})", node.getId(), node.getTitle());
         logger.info("   📍 Place ID: {}", placeId);
+        
+        // Mark node as being processed
+        node.setProcessingState(ProcessingState.ENRICHING);
+        node.addProcessedBy("EnrichmentAgent");
 
         try {
             // Get place details from Google Places API
@@ -891,13 +1163,22 @@ public class EnrichmentAgent extends BaseAgent {
                         placeDetails.getPhotos() != null ? placeDetails.getPhotos().size() : 0,
                         placeDetails.getReviews() != null ? placeDetails.getReviews().size() : 0);
 
+                // Mark node as successfully processed
+                enrichedNode.setProcessingState(ProcessingState.ENRICHED);
+                
                 return enrichedNode;
             } else {
                 logger.warn("⚠️ [EnrichmentAgent] PlaceDetails returned null for placeId: {}", placeId);
+                // Mark node as failed
+                node.setProcessingState(ProcessingState.FAILED);
+                node.setLastError("PlaceDetails returned null");
             }
 
         } catch (Exception e) {
             logger.error("❌ [EnrichmentAgent] Failed to enrich node {} with place ID {}: {}", node.getId(), placeId, e.getMessage(), e);
+            // Mark node as failed
+            node.setProcessingState(ProcessingState.FAILED);
+            node.setLastError("Enrichment failed: " + e.getMessage());
         }
 
         return null;

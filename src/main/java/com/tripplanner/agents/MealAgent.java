@@ -2,10 +2,16 @@ package com.tripplanner.agents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
-import com.tripplanner.service.AgentEventPublisher;
+import com.tripplanner.enums.ProcessingState;
+import com.tripplanner.exception.ValidationException;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ItineraryJsonService;
-import com.tripplanner.service.NodeIdGenerator;
+import com.tripplanner.service.ItineraryValidator;
+import com.tripplanner.service.ItineraryValidator.ValidationResult;
+import com.tripplanner.service.llm.LLMSchemaValidator;
+import com.tripplanner.service.MealMetadataService;
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import com.tripplanner.service.ai.AiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -41,16 +47,23 @@ public class MealAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final AgentEventPublisher agentEventPublisher;
     private final NodeIdGenerator nodeIdGenerator;
+    private final LLMSchemaValidator schemaValidator;
+    private final ItineraryValidator itineraryValidator;
+    private final MealMetadataService mealMetadataService;
     
     public MealAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                     ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
-                    NodeIdGenerator nodeIdGenerator) {
+                    NodeIdGenerator nodeIdGenerator, LLMSchemaValidator schemaValidator,
+                    ItineraryValidator itineraryValidator, MealMetadataService mealMetadataService) {
         super(eventBus, AgentEvent.AgentKind.ENRICHMENT);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.agentEventPublisher = agentEventPublisher;
         this.nodeIdGenerator = nodeIdGenerator;
+        this.schemaValidator = schemaValidator;
+        this.itineraryValidator = itineraryValidator;
+        this.mealMetadataService = mealMetadataService;
     }
     
     @Override
@@ -130,21 +143,66 @@ public class MealAgent extends BaseAgent {
         for (NormalizedDay day : skeleton.getDays()) {
             if (day.getNodes() == null) continue;
             
-            for (NormalizedNode node : day.getNodes()) {
+            for (int i = 0; i < day.getNodes().size(); i++) {
+                NormalizedNode node = day.getNodes().get(i);
+                
                 if ("meal".equals(node.getType())) {
                     String mealType = determineMealType(node.getTiming());
+                    
+                    // Find nearby activities
+                    NormalizedNode previousActivity = findPreviousActivity(day, i);
+                    NormalizedNode nextActivity = findNextActivity(day, i);
+                    
                     contexts.add(new MealContext(
                         node.getId(),
                         day.getDayNumber(),
                         day.getLocation(),
                         node.getTiming(),
-                        mealType
+                        mealType,
+                        previousActivity,  // NEW
+                        nextActivity       // NEW
                     ));
                 }
             }
         }
         
         return contexts;
+    }
+    
+    /**
+     * Find the previous activity node before a meal.
+     */
+    private NormalizedNode findPreviousActivity(NormalizedDay day, int mealIndex) {
+        try {
+            // Look backwards for the nearest activity node
+            for (int i = mealIndex - 1; i >= 0; i--) {
+                NormalizedNode node = day.getNodes().get(i);
+                if ("attraction".equals(node.getType()) || "activity".equals(node.getType())) {
+                    return node;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Error finding previous activity: {}", e.getMessage());
+        }
+        return null;
+    }
+    
+    /**
+     * Find the next activity node after a meal.
+     */
+    private NormalizedNode findNextActivity(NormalizedDay day, int mealIndex) {
+        try {
+            // Look forwards for the nearest activity node
+            for (int i = mealIndex + 1; i < day.getNodes().size(); i++) {
+                NormalizedNode node = day.getNodes().get(i);
+                if ("attraction".equals(node.getType()) || "activity".equals(node.getType())) {
+                    return node;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Error finding next activity: {}", e.getMessage());
+        }
+        return null;
     }
     
     /**
@@ -193,10 +251,22 @@ public class MealAgent extends BaseAgent {
         logger.info("=== END MEAL AGENT RESPONSE ===");
         
         try {
-            // Clean response by removing markdown formatting
-            String cleanedResponse = cleanJsonResponse(response);
-            logger.info("Cleaned Response: {}", cleanedResponse);
-            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(cleanedResponse);
+            // IMPROVED: Validate response against schema before parsing
+            LLMSchemaValidator.ValidationResult validationResult = schemaValidator.validateWithLogging(
+                response, schema, "MealAgent");
+            
+            if (!validationResult.isValid()) {
+                String errorMsg = schemaValidator.getUserFriendlyError(validationResult);
+                logger.error("Schema validation failed for MealAgent: {}", errorMsg);
+                
+                // Return empty list on validation failure (graceful degradation)
+                return new ArrayList<>();
+            }
+            
+            // Use validated data
+            com.fasterxml.jackson.databind.JsonNode root = validationResult.getData();
+            logger.info("Schema validation passed for MealAgent");
+            
             List<PopulatedMeal> meals = new ArrayList<>();
             
             if (root.has("meals") && root.get("meals").isArray()) {
@@ -215,11 +285,10 @@ public class MealAgent extends BaseAgent {
     }
     
     /**
-     * Update itinerary with populated meal data.
+     * Apply meal data to skeleton nodes (extracted for retry logic).
      */
-    private void updateItineraryWithMeals(String itineraryId, NormalizedItinerary skeleton,
-                                          List<PopulatedMeal> populatedMeals) {
-        
+    private void applyMealsToSkeleton(NormalizedItinerary skeleton,
+                                     List<PopulatedMeal> populatedMeals) {
         Map<String, PopulatedMeal> mealMap = populatedMeals.stream()
             .collect(Collectors.toMap(PopulatedMeal::getNodeId, m -> m));
         
@@ -232,6 +301,10 @@ public class MealAgent extends BaseAgent {
                 logger.debug("Ensuring node {} has ID for day {}", node.getTitle(), day.getDayNumber());
                 
                 if ("meal".equals(node.getType())) {
+                    // Mark node as being processed
+                    node.setProcessingState(ProcessingState.ENRICHING);
+                    node.addProcessedBy("MealAgent");
+                    
                     PopulatedMeal populated = mealMap.get(node.getId());
                     if (populated != null) {
                         node.setTitle(populated.getTitle());
@@ -252,17 +325,99 @@ public class MealAgent extends BaseAgent {
                             }
                             node.getLocation().setName(locationName);
                         }
+                        
+                        // Mark node as successfully processed
+                        node.setProcessingState(ProcessingState.ENRICHED);
+                    } else {
+                        // Mark node as failed if no populated data found
+                        node.setProcessingState(ProcessingState.FAILED);
+                        node.setLastError("No meal data found for node");
                     }
                 }
             }
         }
+    }
+    
+    /**
+     * Update itinerary with populated meal data.
+     */
+    private void updateItineraryWithMeals(String itineraryId, NormalizedItinerary skeleton,
+                                          List<PopulatedMeal> populatedMeals) {
         
-        try {
-            skeleton.setUpdatedAt(System.currentTimeMillis());
-            itineraryJsonService.updateItinerary(skeleton);
-            logger.info("Saved itinerary with populated meals");
-        } catch (Exception e) {
-            logger.error("Failed to save itinerary with meals: {}", e.getMessage());
+        // Apply meals to skeleton
+        applyMealsToSkeleton(skeleton, populatedMeals);
+        
+        // Populate metadata for all meal nodes
+        // Determine budget tier from budget range
+        String budgetTier = "medium";
+        if (skeleton.getBudgetMax() != null) {
+            if (skeleton.getBudgetMax() < 1000) {
+                budgetTier = "budget";
+            } else if (skeleton.getBudgetMax() > 3000) {
+                budgetTier = "luxury";
+            }
+        }
+        
+        for (NormalizedDay day : skeleton.getDays()) {
+            if (day.getNodes() != null) {
+                for (NormalizedNode node : day.getNodes()) {
+                    if ("meal".equals(node.getType())) {
+                        mealMetadataService.populateNodeMetadata(node, budgetTier);
+                    }
+                }
+            }
+        }
+        logger.info("Populated metadata for all meal nodes");
+        
+        // Validate before save
+        ValidationResult validationResult = itineraryValidator.validate(skeleton);
+        if (!validationResult.isValid()) {
+            logger.error("Validation failed for itinerary {}: {}", itineraryId, validationResult.getErrors());
+            List<String> errorMessages = validationResult.getErrors().stream()
+                .map(error -> error.getCategory() + ": " + error.getMessage())
+                .collect(java.util.stream.Collectors.toList());
+            throw new ValidationException(errorMessages, "Itinerary validation failed");
+        }
+        if (!validationResult.getWarnings().isEmpty()) {
+            logger.warn("Validation warnings for itinerary {}: {}", itineraryId, validationResult.getWarnings());
+        }
+        
+        // Save with optimistic locking and retry
+        int maxRetries = 3;
+        int retryCount = 0;
+        boolean saved = false;
+        
+        while (!saved && retryCount < maxRetries) {
+            try {
+                skeleton.setUpdatedAt(System.currentTimeMillis());
+                itineraryJsonService.updateItineraryWithLock(skeleton);
+                logger.info("Saved itinerary with populated meals (with lock)");
+                saved = true;
+            } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                retryCount++;
+                logger.error("Concurrent modification detected (attempt {}/{}): {}", 
+                           retryCount, maxRetries, e.getMessage());
+                
+                if (retryCount < maxRetries) {
+                    logger.info("Reloading itinerary and retrying save...");
+                    Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(skeleton.getItineraryId());
+                    if (reloaded.isPresent()) {
+                        skeleton = reloaded.get();
+                        // Re-apply meal changes to reloaded skeleton
+                        applyMealsToSkeleton(skeleton, populatedMeals);
+                        logger.info("Re-applied meal changes to reloaded itinerary");
+                    } else {
+                        logger.error("Failed to reload itinerary for retry");
+                        throw e;
+                    }
+                } else {
+                    logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                    throw e;
+                }
+            } catch (Exception e) {
+                logger.error("Failed to save itinerary with meals: {}", e.getMessage());
+                throw new RuntimeException("Failed to save meal data", e);
+            }
         }
     }
     
@@ -286,6 +441,20 @@ public class MealAgent extends BaseAgent {
                - GOOD: "Sushi Zanmai Tsukiji", "Ichiran Ramen Shibuya", "Gonpachi Nishi-Azabu"
                - BAD: "Tsukiji", "Shibuya", "Nishi-Azabu"
             
+            Location Awareness (CRITICAL):
+            - ALWAYS suggest restaurants near the previous or next activity
+            - Minimize travel time between activities and meals
+            - If previous activity is in Asakusa, suggest restaurants in Asakusa
+            - If next activity is in Shibuya, suggest restaurants in Shibuya or nearby
+            - DO NOT suggest restaurants in distant areas (>30 minutes travel)
+            
+            Example:
+            Previous activity: Senso-ji Temple (Asakusa)
+            Next activity: Tokyo Skytree (Sumida)
+            → Suggest: Restaurants in Asakusa or Sumida, NOT in Shibuya or Shinjuku
+            
+            If no activity context available, suggest restaurants in the day's main location.
+            
             Cuisine Types:
             - local: Traditional local cuisine
             - japanese: Sushi, ramen, izakaya
@@ -307,23 +476,82 @@ public class MealAgent extends BaseAgent {
     private String buildMealUserPrompt(NormalizedItinerary skeleton, List<MealContext> contexts) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("Destination: ").append(skeleton.getDays().get(0).getLocation()).append("\n");
+        // IMPROVED: Group contexts by day to show city-specific context
+        Map<Integer, List<MealContext>> contextsByDay = new HashMap<>();
+        for (MealContext ctx : contexts) {
+            contextsByDay.computeIfAbsent(ctx.dayNumber, k -> new ArrayList<>()).add(ctx);
+        }
+        
+        prompt.append("Trip Overview:\n");
         prompt.append("Total Days: ").append(skeleton.getDays().size()).append("\n");
         
         if (skeleton.getThemes() != null && skeleton.getThemes().contains("food")) {
             prompt.append("Traveler is interested in food experiences\n");
         }
         
-        prompt.append("\nMeal slots to populate:\n");
-        for (MealContext ctx : contexts) {
-            prompt.append(String.format("- Day %d, Node ID: %s, Type: %s, Time: %s\n",
-                ctx.dayNumber, ctx.nodeId, ctx.mealType,
-                ctx.timing != null ? ctx.timing.getStartTime() : "TBD"));
+        // CRITICAL: Include user's custom instructions/constraints
+        // Pay special attention to dietary restrictions
+        if (skeleton.getConstraints() != null && !skeleton.getConstraints().isEmpty()) {
+            prompt.append("\n=== CRITICAL USER REQUIREMENTS (MUST FOLLOW) ===\n");
+            for (String constraint : skeleton.getConstraints()) {
+                prompt.append("- ").append(constraint).append("\n");
+            }
+            prompt.append("All meal recommendations MUST comply with these requirements.\n");
+            prompt.append("Pay special attention to dietary restrictions (vegetarian, vegan, halal, kosher, allergies).\n");
+            prompt.append("If a requirement cannot be met, skip that meal slot.\n\n");
         }
         
-        prompt.append("\nCRITICAL: Use the EXACT node IDs listed above. Do NOT generate your own node IDs.");
-        prompt.append("\nProvide specific restaurant/dining recommendations for each slot.");
-        prompt.append("\nEnsure variety and include both local specialties and familiar options.");
+        prompt.append("\n=== MEAL SLOTS TO POPULATE (BY DAY) ===\n");
+        
+        // CRITICAL: Show each day's location explicitly to prevent wrong-city restaurants
+        for (Map.Entry<Integer, List<MealContext>> entry : contextsByDay.entrySet()) {
+            int dayNum = entry.getKey();
+            List<MealContext> dayContexts = entry.getValue();
+            
+            // Get the day's location
+            String dayLocation = dayContexts.get(0).dayLocation;
+            
+            prompt.append(String.format("\n** DAY %d - LOCATION: %s **\n", dayNum, dayLocation));
+            prompt.append(String.format("CRITICAL: All restaurants for Day %d MUST be in %s, NOT in any other city!\n", 
+                                       dayNum, dayLocation));
+            
+            for (MealContext ctx : dayContexts) {
+                prompt.append(String.format("  - Node ID: %s, Type: %s, Time: %s\n",
+                    ctx.nodeId, ctx.mealType,
+                    ctx.timing != null ? ctx.timing.getStartTime() : "TBD"));
+                
+                // Add activity context for location awareness
+                if (ctx.previousActivity != null) {
+                    prompt.append("    Previous activity: ")
+                          .append(ctx.previousActivity.getTitle());
+                    if (ctx.previousActivity.getLocation() != null && ctx.previousActivity.getLocation().getName() != null) {
+                        prompt.append(" at ").append(ctx.previousActivity.getLocation().getName());
+                    }
+                    prompt.append("\n");
+                }
+                
+                if (ctx.nextActivity != null) {
+                    prompt.append("    Next activity: ")
+                          .append(ctx.nextActivity.getTitle());
+                    if (ctx.nextActivity.getLocation() != null && ctx.nextActivity.getLocation().getName() != null) {
+                        prompt.append(" at ").append(ctx.nextActivity.getLocation().getName());
+                    }
+                    prompt.append("\n");
+                }
+                
+                if (ctx.previousActivity != null || ctx.nextActivity != null) {
+                    prompt.append("    IMPORTANT: Suggest restaurant near these activity locations in ").append(dayLocation).append("\n");
+                }
+            }
+        }
+        
+        prompt.append("\n=== CRITICAL RULES ===\n");
+        prompt.append("1. Use the EXACT node IDs listed above. Do NOT generate your own node IDs.\n");
+        prompt.append("2. Each restaurant MUST be in the CORRECT CITY for that day.\n");
+        prompt.append("3. Do NOT suggest restaurants from other cities (e.g., no Kuala Lumpur restaurants on Penang days).\n");
+        prompt.append("4. Provide specific restaurant names that are searchable on Google Maps.\n");
+        prompt.append("5. Ensure variety and include both local specialties and familiar options.\n");
+        prompt.append("6. All selections must respect the user requirements listed above, especially dietary restrictions.\n");
         
         return prompt.toString();
     }
@@ -406,6 +634,8 @@ public class MealAgent extends BaseAgent {
         String dayLocation;
         NodeTiming timing;
         String mealType;
+        NormalizedNode previousActivity;  // NEW
+        NormalizedNode nextActivity;      // NEW
         
         public MealContext(String nodeId, int dayNumber, String dayLocation, 
                           NodeTiming timing, String mealType) {
@@ -414,6 +644,18 @@ public class MealAgent extends BaseAgent {
             this.dayLocation = dayLocation;
             this.timing = timing;
             this.mealType = mealType;
+        }
+        
+        public MealContext(String nodeId, int dayNumber, String dayLocation, 
+                          NodeTiming timing, String mealType,
+                          NormalizedNode previousActivity, NormalizedNode nextActivity) {
+            this.nodeId = nodeId;
+            this.dayNumber = dayNumber;
+            this.dayLocation = dayLocation;
+            this.timing = timing;
+            this.mealType = mealType;
+            this.previousActivity = previousActivity;
+            this.nextActivity = nextActivity;
         }
     }
     

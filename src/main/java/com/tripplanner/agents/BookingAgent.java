@@ -2,6 +2,10 @@ package com.tripplanner.agents;
 
 import com.tripplanner.dto.*;
 import com.tripplanner.service.*;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.external.BookingComService;
+import com.tripplanner.service.external.ExpediaService;
+import com.tripplanner.service.external.RazorpayService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -9,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -27,10 +30,10 @@ public class BookingAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     
     public BookingAgent(AgentEventBus eventBus,
-                       BookingComService bookingComService,
-                       ExpediaService expediaService,
-                       RazorpayService razorpayService,
-                       ItineraryJsonService itineraryJsonService) {
+                        BookingComService bookingComService,
+                        ExpediaService expediaService,
+                        RazorpayService razorpayService,
+                        ItineraryJsonService itineraryJsonService) {
         super(eventBus, AgentEvent.AgentKind.BOOKING);
         this.bookingComService = bookingComService;
         this.expediaService = expediaService;

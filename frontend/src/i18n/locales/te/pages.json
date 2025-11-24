@@ -107,6 +107,8 @@
     "languagePreferences": "భాషా ప్రాధాన్యతలు",
     "selectLanguage": "మీ భాషను ఎంచుకోండి",
     "languageDescription": "మార్పులు వెంటనే అన్ని పేజీలలో వర్తించబడతాయి",
+    "currencyPreferences": "కరెన్సీ ప్రాధాన్యతలు",
+    "currencyDescription": "ఖర్చులు మరియు బడ్జెట్‌లను ప్రదర్శించడానికి మీ ఇష్టమైన కరెన్సీని ఎంచుకోండి",
     "accountDetails": "ఖాతా వివరాలు",
     "accountDetailsDescription": "మీ వ్యక్తిగత సమాచారం మరియు ఖాతా స్థితి",
     "authProvider": "ప్రమాణీకరణ ప్రొవైడర్",
@@ -124,7 +126,7 @@
       "description": "మీ ఖాతా మరియు ప్రాధాన్యతలను నిర్వహించండి",
       "myTrips": "నా యాత్రలు",
       "planTrip": "యాత్ర ప్లాన్ చేయండి",
-      "upgrade": "అప్‌గ్రేడ్ చేయండి",
+      "currency": "కరెన్సీ",
       "language": "భాష"
     }
   },
