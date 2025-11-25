@@ -36,13 +36,22 @@ spring:
       name: disabled
       password: disabled
       roles: DISABLED
+  # Spring Cloud GCP Configuration
+  cloud:
+    gcp:
+      project-id: tripaiplanner
+      # Use Application Default Credentials (set via gcloud auth application-default login)
+      credentials:
+        location: ${GOOGLE_APPLICATION_CREDENTIALS:}
+      pubsub:
+        project-id: tripaiplanner
 
 google:
   ai:
     # Single key (backward compatibility)
     api-key: ${GEMINI_API_KEY:}
     # Multiple keys (JSON array format: ["key1","key2","key3"])
-    api-keys: ${GEMINI_API_KEYS:}
+    api-keys: ${GEMINI_API_KEYS:[]}
     model: ${GEMINI_MODEL:gemini-2.5-flash}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:65535}
@@ -67,7 +76,7 @@ openrouter:
   # Single key (backward compatibility)
   api-key: ${OPENROUTER_API_KEY:}
   # Multiple keys (JSON array format: ["key1","key2","key3"])
-  api-keys: ${OPENROUTER_API_KEYS:["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"]}
+  api-keys: ${OPENROUTER_API_KEYS:[]}
   base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
   timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:150}
 
@@ -164,23 +173,77 @@ logging:
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
   max-itinerary-days: ${MAX_ITINERARY_DAYS:30}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,
 
+# Analytics Configuration (GCP Pub/Sub → BigQuery)
+analytics:
+  enabled: ${ANALYTICS_ENABLED:true}
+  pubsub:
+    topic: ${ANALYTICS_PUBSUB_TOPIC:analytics-events}
+  bigquery:
+    dataset: ${ANALYTICS_BIGQUERY_DATASET:analytics}
+    table: ${ANALYTICS_BIGQUERY_TABLE:raw_events}
+  monitoring:
+    # Cloud Monitoring disabled by default (native library issues in some environments)
+    enabled: ${ANALYTICS_MONITORING_ENABLED:false}
+
+# Itinerary Generation Pipeline Configuration
 itinerary:
   # Pipeline mode is now the only generation mode
   # Monolithic mode removed in migration (2025-10-18)
   generation:
     pipeline:
-      parallel: ${ITINERARY_PIPELINE_PARALLEL:true}
-      skeleton:
-        timeout-ms: ${ITINERARY_SKELETON_TIMEOUT_MS:120000}  # 2 minutes
-      population:
-        timeout-ms: ${ITINERARY_POPULATION_TIMEOUT_MS:180000}  # 3 minutes
+      # Enable parallel execution for population phase (ActivityAgent, MealAgent, TransportAgent)
+      parallel: ${PIPELINE_PARALLEL:true}
+      
+      # Enrichment mode configuration
       enrichment:
-        timeout-ms: ${ITINERARY_ENRICHMENT_TIMEOUT_MS:60000}  # 1 minute
+        # Enable batched parallel enrichment vs sequential (one-by-one)
+        # BATCHED PARALLEL (parallel: true): Enriches N days at a time (balanced approach)
+        #   - Example: 8-day trip with batch-size 3 → enriches 3+3+2 days
+        #   - Faster than sequential, safer than full parallel
+        # SEQUENTIAL (parallel: false): Enriches one day at a time (safest)
+        #   - Slowest but completely avoids rate limits
+        parallel: ${PIPELINE_ENRICHMENT_PARALLEL:true}
+        
+        # Batch size for parallel enrichment (how many days to enrich simultaneously)
+        # batch-size: 1 = Sequential (safest, slowest)
+        # batch-size: 2-3 = Batched parallel (balanced - RECOMMENDED)
+        # batch-size: 4+ = Aggressive parallel (faster but may hit rate limits)
+        # Race condition fix implemented via collect-then-save pattern
+        batch-size: ${PIPELINE_ENRICHMENT_BATCH_SIZE:3}
+        
+        # Maximum retry attempts for failed days
+        # If a day fails to enrich, it will be retried up to this many times
+        # Recommended: 2 (gives 3 total attempts: initial + 2 retries)
+        max-retries: ${PIPELINE_ENRICHMENT_MAX_RETRIES:2}
+        
+        # Timeout for entire enrichment phase
+        timeout-ms: ${PIPELINE_ENRICHMENT_TIMEOUT_MS:90000}
+        
+        # Timeout per batch (parallel mode) or per day (sequential mode)
+        per-batch-timeout-ms: ${PIPELINE_ENRICHMENT_PER_BATCH_TIMEOUT_MS:45000}
+      
+      # Phase timeouts
+      city-allocation:
+        timeout-ms: ${PIPELINE_CITY_ALLOCATION_TIMEOUT_MS:30000}
+      
+      skeleton:
+        timeout-ms: ${PIPELINE_SKELETON_TIMEOUT_MS:120000}
+        batch-size: ${ITINERARY_SKELETON_BATCH_SIZE:1}
+      
+      population:
+        timeout-ms: ${PIPELINE_POPULATION_TIMEOUT_MS:180000}
+      
       finalization:
-        timeout-ms: ${ITINERARY_FINALIZATION_TIMEOUT_MS:30000}  # 30 seconds
-    skeleton:
-      batch-size: ${ITINERARY_SKELETON_BATCH_SIZE:1}
+        timeout-ms: ${PIPELINE_FINALIZATION_TIMEOUT_MS:30000}
+      
+      # Validation hook (extensibility for future ItineraryValidator)
+      validation:
+        enabled: ${PIPELINE_VALIDATION_ENABLED:false}
+  
+  # General itinerary settings
   max-party-size: ${MAX_PARTY_SIZE:20}
   default-language: ${DEFAULT_LANGUAGE:en}
   supported-languages: ${SUPPORTED_LANGUAGES:en,es,fr,de,it,pt,ja,ko,zh}
@@ -196,5 +259,3 @@ itinerary:
 enrichment:
   auto-enrich:
     enabled: ${ENRICHMENT_AUTO_ENRICH_ENABLED:true}
-
-

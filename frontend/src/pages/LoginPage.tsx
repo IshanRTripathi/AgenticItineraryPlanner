@@ -14,6 +14,7 @@ import { Plane, Sparkles, Shield, Calendar, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/services/analytics';
 
 const FEATURES = [
   {
@@ -67,13 +68,28 @@ export function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       setIsSigningIn(true);
+      
+      // Track login started
+      analytics.track('user_login_started', { method: 'google' });
+      
       await signInWithGoogle();
+      
+      // Track login completed
+      analytics.track('user_login_completed', { method: 'google' });
+      
       toast({
         title: 'Welcome back!',
         description: 'You have successfully signed in.',
       });
     } catch (error: any) {
       console.error('Sign in error:', error);
+      
+      // Track login failed
+      analytics.track('user_login_failed', {
+        method: 'google',
+        error: error.message
+      });
+      
       toast({
         title: 'Sign in failed',
         description: error.message || 'Please try again later.',

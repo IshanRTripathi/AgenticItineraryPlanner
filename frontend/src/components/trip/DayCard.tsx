@@ -41,6 +41,7 @@ import { useState, useEffect } from 'react';
 import { buildHotelUrl, buildActivityUrl, buildBusUrl, buildTrainUrl } from '@/utils/easemytripUrlBuilder';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { useTranslation } from '@/i18n';
+import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 
 // Expandable Description Component
 function ExpandableDescription({ description }: { description: string }) {
@@ -328,6 +329,8 @@ export function DayCard({
     isGenerating = false
 }: DayCardProps) {
     const { t } = useTranslation();
+    const { trackDayExpansion, trackActivityView } = useAnalyticsTracking();
+    
     // Photo viewer state - now supports gallery with description
     const [selectedPhoto, setSelectedPhoto] = useState<{ photos: string[]; title: string; description?: string; currentIndex: number } | null>(null);
     // Booking modal state
@@ -335,6 +338,14 @@ export function DayCard({
     
     // State to track if we're on mobile
     const [isMobile, setIsMobile] = useState(false);
+    
+    // Track day expansion
+    const handleToggle = () => {
+        if (!isExpanded) {
+            trackDayExpansion(day.dayNumber, itineraryId);
+        }
+        onToggle();
+    };
     
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -454,7 +465,7 @@ export function DayCard({
             }}
         >
             <div
-                onClick={onToggle}
+                onClick={handleToggle}
                 className={cn(
                     'w-full text-left p-4',
                     'cursor-pointer hover:bg-muted/50 active:bg-muted transition-colors'
@@ -723,6 +734,12 @@ export function DayCard({
                                                                                     <button
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
+                                                                                            // Track activity view
+                                                                                            trackActivityView(
+                                                                                                node.id || node.title,
+                                                                                                node.title,
+                                                                                                itineraryId
+                                                                                            );
                                                                                             setSelectedPhoto({
                                                                                                 photos: node.location.photos,
                                                                                                 title: node.title,
@@ -783,11 +800,11 @@ export function DayCard({
                                                                                     {(node.cost?.amount || node.location?.priceLevel) && (
                                                                                         <div className="flex items-center gap-2">
                                                                                             <div className="w-4 flex justify-center">
-                                                                                                <CurrencyIcon currency={node.cost.currency} className="w-2 h-2 text-emerald-600 flex-shrink-0" />
+                                                                                                <CurrencyIcon currency={node.cost?.currency || 'USD'} className="w-2 h-2 text-emerald-600 flex-shrink-0" />
                                                                                             </div>
                                                                                             {node.cost?.amount ? (
                                                                                                 <span className="text-xs font-bold text-emerald-700 leading-none">
-                                                                                                    {getCurrencySymbol(node.cost.currency)}{node.cost.amount.toLocaleString()}
+                                                                                                    {getCurrencySymbol(node.cost?.currency || 'USD')}{node.cost.amount.toLocaleString()}
                                                                                                 </span>
                                                                                             ) : node.location?.priceLevel ? (
                                                                                                 <span className="text-xs font-bold text-emerald-600 leading-none">
@@ -906,6 +923,12 @@ export function DayCard({
                                                                                         className="h-9 sm:w-auto w-9 p-0 sm:px-3 shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
+                                                                                            // Track activity view
+                                                                                            trackActivityView(
+                                                                                                node.id || node.title,
+                                                                                                node.title,
+                                                                                                itineraryId
+                                                                                            );
                                                                                             setSelectedPhoto({
                                                                                                 photos: node.location.photos,
                                                                                                 title: node.title,

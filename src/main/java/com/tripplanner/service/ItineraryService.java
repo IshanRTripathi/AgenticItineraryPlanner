@@ -3,6 +3,7 @@ package com.tripplanner.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tripplanner.dto.*;
 import com.tripplanner.dto.ErrorEvent;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -111,16 +112,6 @@ public class ItineraryService {
                     .status("generating")
                     .build();
             
-            // NOW start async agent processing (after ownership is established)
-            // Add a small delay to allow frontend SSE connection to establish
-            logger.info("Waiting 2 seconds for frontend SSE connection to establish...");
-            try {
-                Thread.sleep(2000); // 2 second delay
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.warn("Sleep interrupted while waiting for SSE connection");
-            }
-            
             logger.info("Starting async itinerary generation for user: {} with ID: {}", userId, itineraryId);
             logger.info("Starting pipeline generation");
             
@@ -128,9 +119,18 @@ public class ItineraryService {
             String executionId = "exec_" + System.currentTimeMillis();
             logger.info("Generated executionId: {} for itinerary: {}", executionId, itineraryId);
             
-            // Start pipeline generation (always use pipeline flow)
-            CompletableFuture<NormalizedItinerary> future = 
-                pipelineOrchestrator.generateItinerary(itineraryId, request, userId);
+            // FIXED: Start pipeline generation asynchronously with delay inside the async block
+            // This allows HTTP response to return immediately without blocking
+            CompletableFuture<NormalizedItinerary> future = CompletableFuture.runAsync(() -> {
+                // Add a small delay to allow frontend WebSocket connection to establish
+                logger.info("Waiting 2 seconds for frontend WebSocket connection to establish...");
+                try {
+                    Thread.sleep(2000); // 2 second delay - now non-blocking
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.warn("Sleep interrupted while waiting for WebSocket connection");
+                }
+            }).thenCompose(v -> pipelineOrchestrator.generateItinerary(itineraryId, request, userId));
             
             // Attach completion callback for error handling and tracking
             future.whenComplete((pipelineResult, throwable) -> {

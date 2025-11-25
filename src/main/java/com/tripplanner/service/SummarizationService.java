@@ -150,7 +150,9 @@ public class SummarizationService {
         // Add timing information
         if (node.getTiming() != null) {
             if (node.getTiming().getStartTime() != null) {
-                nodeSummary.append(" at ").append(node.getTiming().getStartTime());
+                String formattedTime = com.tripplanner.util.TimeFormatter.formatFor12HourDisplay(
+                    node.getTiming().getStartTime());
+                nodeSummary.append(" at ").append(formattedTime);
             }
             if (node.getTiming().getDurationMin() != null) {
                 nodeSummary.append(" for ").append(node.getTiming().getDurationMin()).append("min");
@@ -393,9 +395,11 @@ public class SummarizationService {
                 // Show timing for editing context in bracket format
                 if (node.getTiming() != null) {
                     String startTime = node.getTiming().getStartTime() != null ? 
-                                      String.valueOf(node.getTiming().getStartTime()) : "?";
+                                      com.tripplanner.util.TimeFormatter.formatFor12HourDisplay(
+                                          node.getTiming().getStartTime()) : "?";
                     String endTime = node.getTiming().getEndTime() != null ? 
-                                    String.valueOf(node.getTiming().getEndTime()) : "?";
+                                    com.tripplanner.util.TimeFormatter.formatFor12HourDisplay(
+                                        node.getTiming().getEndTime()) : "?";
                     summary.append(" [").append(startTime).append("-").append(endTime).append("]");
                 }
                 

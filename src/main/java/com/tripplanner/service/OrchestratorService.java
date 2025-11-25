@@ -1,8 +1,9 @@
 package com.tripplanner.service;
 
-import com.tripplanner.agents.EditorAgent;
 import com.tripplanner.dto.*;
 import com.tripplanner.agents.BaseAgent;
+import com.tripplanner.service.agents.AgentRegistry;
+import com.tripplanner.service.llm.LLMService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -330,6 +331,9 @@ public class OrchestratorService {
         // Convert ChatRequest to appropriate AgentRequest based on agent type
         BaseAgent.AgentRequest<?> agentRequest = convertToAgentRequest(request, plan, agent);
         
+        // Store the request for later use in response generation
+        plan.addParameter("originalChatRequest", request);
+        
         // Execute agent
         return agent.execute(request.getItineraryId(), agentRequest);
     }
@@ -504,11 +508,24 @@ public class OrchestratorService {
                     null, null, false, applyResult.getToVersion()
                 );
             } else {
-                return ChatResponse.success(
+                // FIXED: Generate descriptive message from diff instead of generic message
+                // This shows users exactly what changed (added/removed/updated)
+                String responseMessage = generateDescriptiveMessage(applyResult.getDiff());
+                
+                ChatResponse response = ChatResponse.success(
                     "Changes applied successfully",
-                    "Your itinerary has been updated.",
+                    responseMessage,
                     null, applyResult.getDiff(), true, applyResult.getToVersion()
                 );
+                
+                // Add action button to view the changes in the Plan tab
+                response.setActionButton(new ChatResponse.ActionButton(
+                    "View Changes",
+                    "VIEW_PLAN",
+                    "plan"
+                ));
+                
+                return response;
             }
         } else if (result instanceof String) {
             return ChatResponse.success("Request processed", (String) result, null, null, false, null);
@@ -1053,6 +1070,131 @@ public class OrchestratorService {
             logger.debug("Agent used: {} ({})", 
                         agent.getClass().getSimpleName(), 
                         agent.getClass().getPackage().getName());
+        }
+    }
+    
+    /**
+     * Generate a descriptive message from the ItineraryDiff.
+     * Extracts information about what changed to provide specific feedback to the user.
+     */
+    private String generateDescriptiveMessage(ItineraryDiff diff) {
+        if (diff == null) {
+            return "Your itinerary has been updated.";
+        }
+        
+        List<String> messages = new ArrayList<>();
+        
+        // Check for added items
+        if (diff.getAdded() != null && !diff.getAdded().isEmpty()) {
+            for (DiffItem item : diff.getAdded()) {
+                String title = extractTitleFromDiffItem(item);
+                messages.add("✅ Added: " + title);
+            }
+        }
+        
+        // Check for removed items
+        if (diff.getRemoved() != null && !diff.getRemoved().isEmpty()) {
+            for (DiffItem item : diff.getRemoved()) {
+                String title = extractTitleFromDiffItem(item);
+                messages.add("🗑️ Removed: " + title);
+            }
+        }
+        
+        // Check for updated items
+        if (diff.getUpdated() != null && !diff.getUpdated().isEmpty()) {
+            for (DiffItem item : diff.getUpdated()) {
+                String title = extractTitleFromDiffItem(item);
+                messages.add("🔄 Updated: " + title);
+            }
+        }
+        
+        // If we have specific messages, return them
+        if (!messages.isEmpty()) {
+            return String.join("\n", messages);
+        }
+        
+        // Fallback to generic message
+        return "Your itinerary has been updated.";
+    }
+    
+    /**
+     * Extract a readable title from a DiffItem.
+     * FIXED: Use the actual title field instead of trying to parse the ID.
+     */
+    private String extractTitleFromDiffItem(DiffItem item) {
+        if (item == null) {
+            return "Unknown item";
+        }
+        
+        // FIXED: Use the title field if available
+        if (item.getTitle() != null && !item.getTitle().trim().isEmpty()) {
+            // Include day number for context
+            if (item.getDay() != null) {
+                return String.format("%s (Day %d)", item.getTitle(), item.getDay());
+            }
+            return item.getTitle();
+        }
+        
+        // Fallback: Try to get title from the item's ID
+        String id = item.getNodeId();
+        if (id != null && !id.trim().isEmpty()) {
+            // Try to make the ID more readable
+            String readable = id.replace("_", " ").replace("node", "").trim();
+            if (item.getDay() != null) {
+                return String.format("%s (Day %d)", readable, item.getDay());
+            }
+            return readable;
+        }
+        
+        return "Item";
+    }
+
+    /**
+     * Generate a user-friendly message from the ItineraryDiff.
+     * Provides simple, clear feedback about what changed.
+     */
+    private String generateUserFriendlyMessage(ItineraryDiff diff) {
+        if (diff == null) {
+            return "Your itinerary has been updated.";
+        }
+        
+        // Count the types of changes
+        int addedCount = (diff.getAdded() != null) ? diff.getAdded().size() : 0;
+        int removedCount = (diff.getRemoved() != null) ? diff.getRemoved().size() : 0;
+        int updatedCount = (diff.getUpdated() != null) ? diff.getUpdated().size() : 0;
+        
+        // Generate a simple, clear message based on the primary action
+        if (addedCount > 0 && removedCount == 0 && updatedCount == 0) {
+            // Pure add operation
+            if (addedCount == 1) {
+                return "✅ Added 1 activity to your itinerary";
+            } else {
+                return String.format("✅ Added %d activities to your itinerary", addedCount);
+            }
+        } else if (removedCount > 0 && addedCount == 0 && updatedCount == 0) {
+            // Pure remove operation
+            if (removedCount == 1) {
+                return "🗑️ Removed 1 activity from your itinerary";
+            } else {
+                return String.format("🗑️ Removed %d activities from your itinerary", removedCount);
+            }
+        } else if (updatedCount > 0 && addedCount == 0 && removedCount == 0) {
+            // Pure update operation
+            if (updatedCount == 1) {
+                return "🔄 Updated 1 activity in your itinerary";
+            } else {
+                return String.format("🔄 Updated %d activities in your itinerary", updatedCount);
+            }
+        } else if (addedCount > 0 && removedCount > 0) {
+            // Replace operation (add + remove)
+            return String.format("🔄 Replaced %d activity with %d new activity", removedCount, addedCount);
+        } else {
+            // Mixed operations
+            List<String> parts = new ArrayList<>();
+            if (addedCount > 0) parts.add(addedCount + " added");
+            if (removedCount > 0) parts.add(removedCount + " removed");
+            if (updatedCount > 0) parts.add(updatedCount + " updated");
+            return "✅ Updated your itinerary (" + String.join(", ", parts) + ")";
         }
     }
 }

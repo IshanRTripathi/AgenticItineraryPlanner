@@ -8,12 +8,19 @@ import { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, AlertCircle, Info } from 'lucide-react';
 import { useItinerary } from '@/hooks/useItinerary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useCurrency } from '@/hooks/useCurrency';
+import { CurrencySelector } from '@/components/common/CurrencySelector';
 import { api, endpoints } from '@/services/api';
 import { useTranslation } from '@/i18n';
 import { NestedBudgetPieChart } from '../charts/NestedBudgetPieChart';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface BudgetTabProps {
   tripId: string;
@@ -23,7 +30,27 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
   const { t } = useTranslation();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { data: itinerary } = useItinerary(tripId);
+  const { preferredCurrency, convert, formatCurrency } = useCurrency();
   const [metadata, setMetadata] = useState<any>(null);
+  
+  console.log('[BudgetTab] 🎯 Hook Values:', {
+    preferredCurrency,
+    hasConvert: !!convert,
+    itineraryCurrency: itinerary?.currency
+  });
+  
+  // Display currency: use preferred currency or itinerary currency
+  const itineraryCurrency = itinerary?.currency || 'USD';
+  const displayCurrency = useMemo(() => {
+    const result = preferredCurrency || itineraryCurrency;
+    console.log('[BudgetTab] 💱 Display Currency:', {
+      preferredCurrency,
+      itineraryCurrency,
+      displayCurrency: result,
+      usingPreferred: !!preferredCurrency
+    });
+    return result;
+  }, [preferredCurrency, itineraryCurrency]);
   
   // Fetch trip metadata to get user's original budget
   useEffect(() => {
@@ -56,7 +83,39 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
     };
   }, [metadata]);
   
-  // Calculate real budget data from itinerary
+  // Get AI-estimated budget from CityAllocationAgent
+  const aiEstimatedBudget = useMemo(() => {
+    if (!itinerary) {
+      return null;
+    }
+    
+    try {
+      // Access agentData (exists in backend but not in TS interface yet)
+      const agentData = (itinerary as any).agentData;
+      if (!agentData?.cityAllocation) {
+        return null;
+      }
+      
+      const cityAllocationData = agentData.cityAllocation;
+      const cityAllocation = cityAllocationData.data?.cityAllocation || cityAllocationData;
+      
+      if (cityAllocation?.budgetEstimate) {
+        return {
+          currency: cityAllocation.budgetEstimate.currency,
+          minPerDay: cityAllocation.budgetEstimate.minPerPersonPerDay,
+          maxPerDay: cityAllocation.budgetEstimate.maxPerPersonPerDay,
+          rationale: cityAllocation.budgetEstimate.rationale,
+          totalDays: itinerary.days?.length || 0,
+        };
+      }
+    } catch (error) {
+      console.error('Failed to parse AI budget estimate:', error);
+    }
+    
+    return null;
+  }, [itinerary]);
+  
+  // Calculate real budget data from itinerary (in original currency)
   const budgetData = useMemo(() => {
     if (!itinerary) {
       return { 
@@ -64,7 +123,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
         spent: 0, 
         remaining: 0, 
         currency: 'USD',
-        plannedBudget: userBudget.max || 0,
+        plannedBudget: 0,
       };
     }
     
@@ -81,14 +140,54 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
       0
     );
     
+    // IMPORTANT: Planned budget comes from AI estimate, not user input
+    // User only provides tier (budget/medium/luxury), AI determines actual range
+    const plannedBudget = aiEstimatedBudget 
+      ? (aiEstimatedBudget.maxPerDay * aiEstimatedBudget.totalDays)
+      : total;
+    
     return {
       total,
       spent,
       remaining: total - spent,
       currency,
-      plannedBudget: userBudget.max || total,
+      plannedBudget,
     };
-  }, [itinerary, userBudget]);
+  }, [itinerary, aiEstimatedBudget]);
+  
+  // Convert budget data to display currency
+  const convertedBudgetData = useMemo(() => {
+    console.log('[BudgetTab] 🔄 Converting budget data:', {
+      hasBudgetData: !!budgetData,
+      budgetCurrency: budgetData?.currency,
+      displayCurrency,
+      needsConversion: budgetData && displayCurrency !== budgetData.currency,
+      originalTotal: budgetData?.total
+    });
+    
+    if (!budgetData || displayCurrency === budgetData.currency) {
+      console.log('[BudgetTab] ⏭️ Skipping conversion (same currency or no data)');
+      return budgetData;
+    }
+    
+    const converted = {
+      ...budgetData,
+      total: convert(budgetData.total, budgetData.currency, displayCurrency),
+      spent: convert(budgetData.spent, budgetData.currency, displayCurrency),
+      remaining: convert(budgetData.remaining, budgetData.currency, displayCurrency),
+      plannedBudget: convert(budgetData.plannedBudget, budgetData.currency, displayCurrency),
+      currency: displayCurrency,
+    };
+    
+    console.log('[BudgetTab] ✅ Conversion complete:', {
+      originalTotal: budgetData.total,
+      convertedTotal: converted.total,
+      from: budgetData.currency,
+      to: displayCurrency
+    });
+    
+    return converted;
+  }, [budgetData, displayCurrency, convert]);
   
   // Calculate category breakdown
   const categoryData = useMemo(() => {
@@ -169,73 +268,132 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
     return <div className="p-8 text-center text-muted-foreground">{t('components.budgetTab.loading')}</div>;
   }
   
-  const percentageSpent = budgetData.plannedBudget > 0 ? (budgetData.spent / budgetData.plannedBudget) * 100 : 0;
-  const isOverBudget = budgetData.spent > budgetData.plannedBudget;
-  const isOverPlannedBudget = budgetData.total > budgetData.plannedBudget;
+  const percentageSpent = convertedBudgetData.plannedBudget > 0 ? (convertedBudgetData.spent / convertedBudgetData.plannedBudget) * 100 : 0;
+  const isOverBudget = convertedBudgetData.spent > convertedBudgetData.plannedBudget;
+  const isOverPlannedBudget = convertedBudgetData.total > convertedBudgetData.plannedBudget;
 
   return (
     <div className="space-y-3 sm:space-y-4 md:space-y-6">
-      {/* Budget Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+      {/* Currency Selector - Top Right */}
+      <div className="flex justify-end">
+        <CurrencySelector variant="compact" showFlags={true} />
+      </div>
+      
+      {/* Budget Overview - 3 Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+        {/* Card 1: AI Budget Range */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.yourBudget.title')}</CardTitle>
-            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Expected Budget Range
+            </CardTitle>
+            {aiEstimatedBudget?.rationale ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 hover:bg-blue-200 flex items-center justify-center transition-colors">
+                    <Info className="h-3 w-3 text-blue-600" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 sm:w-96" align="end">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">
+                      Budget Insights for {itinerary?.days?.[0]?.location || 'Your Trip'}
+                    </h4>
+                    {userBudget.tier && (
+                      <p className="text-xs text-gray-600">
+                        Based on your <span className="font-semibold capitalize">{userBudget.tier}</span> tier preference
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      {aiEstimatedBudget.rationale}
+                    </p>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+            )}
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold">
-              {budgetData.currency} {budgetData.plannedBudget.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {userBudget.tier ? t('components.budgetTab.cards.yourBudget.tier', { tier: userBudget.tier }) : 'Planned budget'}
-            </p>
+            {aiEstimatedBudget ? (
+              <>
+                <div className="text-base sm:text-lg md:text-xl font-bold text-blue-600 break-words">
+                  {displayCurrency} {Math.round(convert((aiEstimatedBudget.minPerDay * aiEstimatedBudget.totalDays), itineraryCurrency, displayCurrency)).toLocaleString()}-
+                  {Math.round(convert((aiEstimatedBudget.maxPerDay * aiEstimatedBudget.totalDays), itineraryCurrency, displayCurrency)).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                  {displayCurrency} {Math.round(convert(aiEstimatedBudget.minPerDay, itineraryCurrency, displayCurrency))}-{Math.round(convert(aiEstimatedBudget.maxPerDay, itineraryCurrency, displayCurrency))} per day
+                  {userBudget.tier && <span className="ml-1">• <span className="capitalize">{userBudget.tier}</span></span>}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-base sm:text-lg md:text-xl font-bold break-words">
+                  {convertedBudgetData.currency} {Math.round(convertedBudgetData.total).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                  Estimated total
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         
+        {/* Card 2: Actual Calculated Cost */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.estimatedCost.title')}</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Itinerary Cost</CardTitle>
             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-            <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverPlannedBudget ? 'text-warning' : ''}`}>
-              {budgetData.currency} {budgetData.total.toLocaleString()}
+            <div className={`text-base sm:text-lg md:text-xl font-bold break-words ${isOverPlannedBudget ? 'text-orange-600' : 'text-gray-900'}`}>
+              {convertedBudgetData.currency} {Math.round(convertedBudgetData.total).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {isOverPlannedBudget ? t('components.budgetTab.cards.estimatedCost.overBudget') : t('components.budgetTab.cards.estimatedCost.withinBudget')}
+              {convertedBudgetData.total > 0 ? `${convertedBudgetData.currency} ${Math.round(convertedBudgetData.total / (itinerary?.days?.length || 1))} per day` : 'Calculating...'}
+              {isOverPlannedBudget && <span className="text-orange-600 ml-1">• Over range</span>}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.booked.title')}</CardTitle>
-            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-error" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-error">
-              {budgetData.currency} {budgetData.spent.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {t('components.budgetTab.cards.booked.percentage', { percentage: percentageSpent.toFixed(1) })}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">{t('components.budgetTab.cards.remaining.title')}</CardTitle>
-            <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
-            <div className={`text-lg sm:text-xl md:text-2xl font-bold ${isOverBudget ? 'text-error' : 'text-success'}`}>
-              {budgetData.currency} {Math.abs(budgetData.plannedBudget - budgetData.spent).toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {isOverBudget ? t('components.budgetTab.cards.remaining.overBudget') : t('components.budgetTab.cards.remaining.available')}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Card 3: Booked Amount (only show if > 0) */}
+        {convertedBudgetData.spent > 0 ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Booked & Paid</CardTitle>
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-base sm:text-lg md:text-xl font-bold text-green-600 break-words">
+                {convertedBudgetData.currency} {Math.round(convertedBudgetData.spent).toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                {Math.round((convertedBudgetData.spent / convertedBudgetData.total) * 100)}% of itinerary cost
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Budget Status</CardTitle>
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+              <div className="text-base sm:text-lg md:text-xl font-bold text-gray-900 break-words">
+                {isOverPlannedBudget ? (
+                  <span className="text-orange-600">Over Budget</span>
+                ) : (
+                  <span className="text-green-600">Within Range</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                {isOverPlannedBudget 
+                  ? `${convertedBudgetData.currency} ${Math.round(convertedBudgetData.total - convertedBudgetData.plannedBudget).toLocaleString()} over max`
+                  : 'Ready to book'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Budget Alert */}
@@ -284,9 +442,9 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                     <span className="text-xs sm:text-sm font-medium truncate">{category.name}</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                    <span className="text-xs sm:text-sm font-bold">{budgetData.currency} {category.value.toLocaleString()}</span>
+                    <span className="text-xs sm:text-sm font-bold">{displayCurrency} {Math.round(convert(category.value, itineraryCurrency, displayCurrency)).toLocaleString()}</span>
                     <Badge variant="outline" className="text-xs">
-                      {budgetData.total > 0 ? ((category.value / budgetData.total) * 100).toFixed(0) : 0}%
+                      {budgetData.total > 0 ? Math.round((category.value / budgetData.total) * 100) : 0}%
                     </Badge>
                   </div>
                 </div>
@@ -308,14 +466,14 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
-                <Tooltip formatter={(value) => `${budgetData.currency} ${value}`} />
+                <Tooltip formatter={(value) => `${displayCurrency} ${Math.round(convert(Number(value), itineraryCurrency, displayCurrency))}`} />
                 {!isMobile && <Legend />}
                 <Bar dataKey="cost" fill="#002B5B" name={t('components.budgetTab.dailySpending.chartLabel')} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
-            {t('components.budgetTab.dailySpending.average', { amount: `${budgetData.currency} ${(budgetData.total / dailyCosts.length).toFixed(2)}` })}
+            {t('components.budgetTab.dailySpending.average', { amount: `${displayCurrency} ${Math.round(convert((budgetData.total / dailyCosts.length), itineraryCurrency, displayCurrency))}` })}
           </div>
         </CardContent>
       </Card>

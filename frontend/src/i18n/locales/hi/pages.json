@@ -107,6 +107,8 @@
     "languagePreferences": "भाषा प्राथमिकताएं",
     "selectLanguage": "अपनी भाषा चुनें",
     "languageDescription": "परिवर्तन तुरंत सभी पृष्ठों पर लागू हो जाएंगे",
+    "currencyPreferences": "मुद्रा प्राथमिकताएं",
+    "currencyDescription": "लागत और बजट प्रदर्शित करने के लिए अपनी पसंदीदा मुद्रा चुनें",
     "accountDetails": "खाता विवरण",
     "accountDetailsDescription": "आपकी व्यक्तिगत जानकारी और खाता स्थिति",
     "authProvider": "प्रमाणीकरण प्रदाता",
@@ -124,7 +126,7 @@
       "description": "अपने खाते और प्राथमिकताओं का प्रबंधन करें",
       "myTrips": "मेरी यात्राएं",
       "planTrip": "यात्रा की योजना बनाएं",
-      "upgrade": "अपग्रेड करें",
+      "currency": "मुद्रा",
       "language": "भाषा"
     }
   },

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -86,9 +87,37 @@ public class EnrichmentService {
                 }
             }
             
-            // Save the enriched itinerary if there were changes
+            // Save the enriched itinerary if there were changes with optimistic locking and retry
             if (hasChanges) {
-                itineraryJsonService.updateItinerary(itinerary);
+                int maxRetries = 3;
+                int retryCount = 0;
+                boolean saved = false;
+                
+                while (!saved && retryCount < maxRetries) {
+                    try {
+                        itineraryJsonService.updateItineraryWithLock(itinerary);
+                        saved = true;
+                    } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                        retryCount++;
+                        logger.error("Concurrent modification during enrichment (attempt {}/{}): {}", 
+                                   retryCount, maxRetries, e.getMessage());
+                        
+                        if (retryCount < maxRetries) {
+                            logger.info("Reloading itinerary and retrying save...");
+                            Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
+                            if (reloaded.isPresent()) {
+                                itinerary = reloaded.get();
+                                logger.info("Reloaded itinerary for enrichment retry");
+                            } else {
+                                logger.error("Failed to reload itinerary for retry");
+                                throw new RuntimeException("Enrichment conflict", e);
+                            }
+                        } else {
+                            logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                            throw new RuntimeException("Enrichment conflict", e);
+                        }
+                    }
+                }
             }
             
             long duration = System.currentTimeMillis() - startTime;
@@ -158,9 +187,37 @@ public class EnrichmentService {
                 }
             }
             
-            // Save the enriched itinerary if there were changes
+            // Save the enriched itinerary if there were changes with optimistic locking and retry
             if (hasChanges) {
-                itineraryJsonService.updateItinerary(itinerary);
+                int maxRetries = 3;
+                int retryCount = 0;
+                boolean saved = false;
+                
+                while (!saved && retryCount < maxRetries) {
+                    try {
+                        itineraryJsonService.updateItineraryWithLock(itinerary);
+                        saved = true;
+                    } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                        retryCount++;
+                        logger.error("Concurrent modification during enrichment (attempt {}/{}): {}", 
+                                   retryCount, maxRetries, e.getMessage());
+                        
+                        if (retryCount < maxRetries) {
+                            logger.info("Reloading itinerary and retrying save...");
+                            Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
+                            if (reloaded.isPresent()) {
+                                itinerary = reloaded.get();
+                                logger.info("Reloaded itinerary for enrichment retry");
+                            } else {
+                                logger.error("Failed to reload itinerary for retry");
+                                throw new RuntimeException("Enrichment conflict", e);
+                            }
+                        } else {
+                            logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                            throw new RuntimeException("Enrichment conflict", e);
+                        }
+                    }
+                }
             }
             
             long duration = System.currentTimeMillis() - startTime;

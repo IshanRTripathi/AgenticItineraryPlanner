@@ -2,8 +2,8 @@ package com.tripplanner.testing.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.LLMProvider;
-import com.tripplanner.service.LLMService;
+import com.tripplanner.service.llm.LLMProvider;
+import com.tripplanner.service.llm.LLMService;
 import com.tripplanner.testing.BaseServiceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

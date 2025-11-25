@@ -3,7 +3,7 @@ package com.tripplanner.agents;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.AgentEvent;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ai.AiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -96,7 +96,9 @@ public class PlacesAgent extends BaseAgent {
         
         logger.info("=== PLACES AGENT RESPONSE ===");
         logger.info("Response Length: {} chars", response.length());
-        logger.info("Response Preview: {}", response.length() > 200 ? response.substring(0, 200) + "..." : response);
+        logger.info("=== FULL RESPONSE ===");
+        logger.info("{}", response);
+        logger.info("=== END FULL RESPONSE ===");
         logger.info("=============================");
         
         emitProgress(itineraryId, 80, "Processing place information", "processing");

@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStompWebSocket } from '@/hooks/useStompWebSocket';
 import { InteractiveGlobe } from '@/components/homepage/InteractiveGlobe';
@@ -20,6 +20,27 @@ interface DayStatus {
   activities: number;
 }
 
+interface CityAllocationInsights {
+  destinationType: string;
+  primaryDestination: string;
+  rationale: string;
+  cityCount: number;
+  cities: Array<{
+    name: string;
+    days: number;
+    type: string;
+    reason: string;
+    highlights: string[];
+  }>;
+  budget?: {
+    currency: string;
+    minPerDay: number;
+    maxPerDay: number;
+    rationale: string;
+  };
+  travelSegments?: number;
+}
+
 interface ProgressState {
   overallProgress: number;
   currentPhase: string;
@@ -29,6 +50,7 @@ interface ProgressState {
   isComplete: boolean;
   hasError: boolean;
   errorMessage: string;
+  cityInsights?: CityAllocationInsights;
 }
 
 export function AgentProgress() {
@@ -45,18 +67,15 @@ export function AgentProgress() {
     isComplete: false,
     hasError: false,
     errorMessage: '',
+    cityInsights: undefined,
   });
 
   const [canViewPartial, setCanViewPartial] = useState(false);
-  const [debugMessages, setDebugMessages] = useState<any[]>([]);
 
   // Real-time WebSocket connection
   const { isConnected } = useStompWebSocket(itineraryId, {
     onMessage: (message) => {
       console.log('[AgentProgress] Raw WebSocket message:', JSON.stringify(message, null, 2));
-
-      // Add to debug messages (keep last 10)
-      setDebugMessages(prev => [...prev.slice(-9), { time: new Date().toLocaleTimeString(), data: message }]);
 
       // Agent progress updates
       if (message.updateType === 'agent_progress') {
@@ -154,6 +173,30 @@ export function AgentProgress() {
         } else {
           console.warn('[AgentProgress] Day completed event missing dayNumber:', message);
         }
+      }
+
+      // City allocation insights (NEW!)
+      if (message.updateType === 'city_allocation_insights' || message.type === 'city_allocation_insights') {
+        const data = (message as any).data || message;
+        
+        console.log('[AgentProgress] City allocation insights received:', data);
+
+        const insights: CityAllocationInsights = {
+          destinationType: data.destinationType || 'unknown',
+          primaryDestination: data.primaryDestination || 'Unknown',
+          rationale: data.rationale || '',
+          cityCount: data.cityCount || 0,
+          cities: data.cities || [],
+          budget: data.budget,
+          travelSegments: data.travelSegments,
+        };
+
+        setState((prev) => ({
+          ...prev,
+          cityInsights: insights,
+          currentPhase: 'City Planning',
+          message: `Planned ${insights.cityCount} ${insights.cityCount === 1 ? 'city' : 'cities'} for your trip`,
+        }));
       }
 
       // Phase transition
@@ -337,55 +380,109 @@ export function AgentProgress() {
               </div>
             </div>
 
-            {/* Days Generated - Compact Grid */}
+            {/* Days Generated - Readable List */}
             {state.daysCompleted.length > 0 && (
               <div className="mb-4">
                 <p className="text-xs font-semibold text-gray-900 mb-2">Days Ready:</p>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="space-y-1.5 max-h-[150px] overflow-y-auto">
                   {state.daysCompleted.map((day) => (
                     <motion.div
                       key={day.dayNumber}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="aspect-square rounded-lg bg-green-500/10 backdrop-blur-sm border border-green-500/30 flex flex-col items-center justify-center p-1"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="p-2 rounded-lg bg-green-500/10 backdrop-blur-sm border border-green-500/30 flex items-center gap-2"
                     >
-                      <Check className="w-3.5 h-3.5 text-green-600 mb-0.5" />
-                      <span className="text-[10px] font-bold text-green-700">Day {day.dayNumber}</span>
+                      <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-bold text-gray-900">Day {day.dayNumber}</span>
+                        <span className="text-[10px] text-gray-700 ml-2">{day.activities} {day.activities === 1 ? 'activity' : 'activities'}</span>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
               </div>
             )}
 
-            {state.daysCompleted.length === 0 && (
-              <div className="text-center py-4 mb-4">
-                <Sparkles className="w-8 h-8 text-white opacity-70 mx-auto mb-1.5" />
-                <p className="text-xs text-muted-foreground text-white">Waiting for first day...</p>
+            {/* City Allocation Insights - Fully Readable */}
+            {state.cityInsights && (
+              <div className="mb-4 rounded-xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg overflow-hidden">
+                <div className="p-3 bg-blue-500/20 border-b border-blue-500/30">
+                  <p className="text-xs font-bold text-gray-900">📍 Your Trip Plan</p>
+                </div>
+                <div className="p-3 max-h-[200px] overflow-y-auto">
+                  <div className="space-y-2.5">
+                    {state.cityInsights.cities.map((city, idx) => (
+                      <div key={idx} className="p-2 rounded-lg bg-white/60 border border-gray-200">
+                        <div className="flex items-start justify-between mb-1">
+                          <span className="font-semibold text-gray-900 text-xs leading-tight flex-1">{city.name}</span>
+                          <span className="text-xs text-gray-700 font-medium whitespace-nowrap ml-2">{city.days} {city.days === 1 ? 'day' : 'days'}</span>
+                        </div>
+                        {city.reason && (
+                          <p className="text-[10px] text-gray-700 leading-relaxed mt-1">{city.reason}</p>
+                        )}
+                        {city.highlights && city.highlights.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {city.highlights.slice(0, 3).map((highlight, hIdx) => (
+                              <span key={hIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-gray-800">
+                                {highlight}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {state.cityInsights.budget && (
+                      <div className="pt-2 mt-2 border-t border-gray-300">
+                        <p className="text-[10px] font-semibold text-gray-900 mb-1">Estimated Budget</p>
+                        <p className="text-[10px] text-gray-800">
+                          {state.cityInsights.budget.currency} {state.cityInsights.budget.minPerDay}-{state.cityInsights.budget.maxPerDay} per person/day
+                        </p>
+                        {state.cityInsights.budget.rationale && (
+                          <p className="text-[9px] text-gray-700 mt-1 leading-relaxed">{state.cityInsights.budget.rationale}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Action Buttons - Always visible */}
-            <div className="space-y-2">
-              {canViewPartial && !state.isComplete && (
-                <Button
-                  onClick={handleViewPartial}
-                  className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-white shadow-lg font-semibold touch-manipulation active:scale-95 text-sm"
-                >
-                  View Partial Itinerary
-                </Button>
-              )}
+            {state.daysCompleted.length === 0 && !state.cityInsights && (
+              <div className="text-center py-4 mb-4">
+                <Sparkles className="w-8 h-8 text-gray-400 mx-auto mb-1.5" />
+                <p className="text-xs text-gray-700">Analyzing destination...</p>
+              </div>
+            )}
 
-              {state.isComplete && (
+            {/* Complete Button - Always visible in card */}
+            {state.isComplete && (
+              <div className="mt-4">
                 <Button
                   onClick={() => window.location.href = `/trip/${itineraryId}`}
                   className="w-full h-11 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg font-semibold touch-manipulation active:scale-95 text-sm"
                 >
                   View Complete Itinerary
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Floating "View Partial" Button - Overlay style for mobile */}
+        {canViewPartial && !state.isComplete && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="fixed bottom-6 left-4 right-4 z-50"
+          >
+            <Button
+              onClick={handleViewPartial}
+              className="w-full h-14 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-white shadow-2xl font-semibold touch-manipulation active:scale-95 text-base rounded-2xl"
+            >
+              View Partial Itinerary
+            </Button>
+          </motion.div>
+        )}
       </div>
     );
   }
@@ -494,41 +591,87 @@ export function AgentProgress() {
 
           {/* Right Card - Days Generated */}
           <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl h-[700px] flex flex-col">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Days Generated</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Trip Progress</h3>
 
-            {state.daysCompleted.length === 0 ? (
-              <div className="text-center py-12 flex-1 flex flex-col items-center justify-center">
-                <Sparkles className="w-12 h-12 text-white mx-auto mb-3 opacity-70" />
-                <p className="text-sm text-white">Waiting for first day...</p>
-              </div>
-            ) : (
-              <div className="space-y-3 flex-1 overflow-y-auto pr-2">
-                {state.daysCompleted.map((day) => (
-                  <motion.div
-                    key={day.dayNumber}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg hover:shadow-xl hover:bg-white/50 transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
-                          <Check className="w-6 h-6 text-white" />
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+              {/* City Allocation Insights - Fully Readable */}
+              {state.cityInsights && (
+                <div className="rounded-2xl bg-white/50 backdrop-blur-md border border-gray-300 shadow-lg overflow-hidden">
+                  <div className="p-4 bg-blue-500/20 border-b border-blue-500/30">
+                    <h4 className="text-sm font-bold text-gray-900">📍 Your Trip Plan</h4>
+                  </div>
+                  <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
+                    {state.cityInsights.cities.map((city, idx) => (
+                      <div key={idx} className="p-4 rounded-xl bg-white/80 border border-gray-200 shadow-sm">
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="font-semibold text-gray-900 text-base leading-tight flex-1">{city.name}</span>
+                          <span className="text-sm text-gray-800 font-medium whitespace-nowrap ml-3">{city.days} {city.days === 1 ? 'day' : 'days'}</span>
                         </div>
-                        <div>
-                          <p className="text-base font-bold text-gray-900">Day {day.dayNumber}</p>
-                          <p className="text-sm text-gray-600 mt-0.5">{day.activities} activities</p>
+                        {city.reason && (
+                          <p className="text-xs text-gray-800 leading-relaxed mb-2">{city.reason}</p>
+                        )}
+                        {city.highlights && city.highlights.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {city.highlights.map((highlight, hIdx) => (
+                              <span key={hIdx} className="text-xs px-2 py-1 rounded-md bg-blue-100 text-gray-900 font-medium">
+                                {highlight}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {state.cityInsights.budget && (
+                      <div className="pt-3 mt-3 border-t border-gray-300">
+                        <p className="text-sm font-semibold text-gray-900 mb-2">Estimated Budget</p>
+                        <p className="text-sm text-gray-800 font-medium">
+                          {state.cityInsights.budget.currency} {state.cityInsights.budget.minPerDay}-{state.cityInsights.budget.maxPerDay} per person/day
+                        </p>
+                        {state.cityInsights.budget.rationale && (
+                          <p className="text-xs text-gray-700 mt-2 leading-relaxed">{state.cityInsights.budget.rationale}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {state.daysCompleted.length === 0 && !state.cityInsights ? (
+                <div className="text-center py-12 flex flex-col items-center justify-center">
+                  <Sparkles className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-800">Analyzing destination...</p>
+                </div>
+              ) : state.daysCompleted.length > 0 ? (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-gray-900 sticky top-0 bg-white/50 backdrop-blur-xl py-2 -mx-2 px-2 border-b border-gray-300">Days Ready</h4>
+                  {state.daysCompleted.map((day) => (
+                    <motion.div
+                      key={day.dayNumber}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="p-5 rounded-2xl bg-white/80 backdrop-blur-md border border-gray-300 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
+                            <Check className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-base font-bold text-gray-900">Day {day.dayNumber}</p>
+                            <p className="text-sm text-gray-800 mt-0.5">{day.activities} {day.activities === 1 ? 'activity' : 'activities'}</p>
+                          </div>
+                        </div>
+                        <div className="px-4 py-1.5 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/40 shadow-sm">
+                          <span className="text-sm font-semibold text-green-800">Ready</span>
                         </div>
                       </div>
-                      <div className="px-4 py-1.5 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/40 shadow-sm">
-                        <span className="text-sm font-semibold text-green-700">Ready</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+                    </motion.div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
 
             {/* Action Buttons */}
             <div className="mt-6 space-y-3">

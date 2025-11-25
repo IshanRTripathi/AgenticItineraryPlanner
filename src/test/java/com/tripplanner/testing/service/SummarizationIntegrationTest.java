@@ -3,19 +3,18 @@ package com.tripplanner.testing.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.SummarizationService;
-import com.tripplanner.service.AgentEventPublisher;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.SseConnectionManager;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.agents.BaseAgent;
 import com.tripplanner.agents.DayByDayPlannerAgent;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ItineraryJsonService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.ArgumentCaptor;
 
 import java.util.*;
 

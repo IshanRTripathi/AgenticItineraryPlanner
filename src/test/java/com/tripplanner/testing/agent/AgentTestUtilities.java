@@ -1,7 +1,7 @@
 package com.tripplanner.testing.agent;
 
 import com.tripplanner.dto.*;
-import com.tripplanner.service.LLMResponseHandler;
+import com.tripplanner.service.llm.LLMResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

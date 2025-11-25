@@ -1,6 +1,9 @@
 package com.tripplanner.testing;
 
 import com.tripplanner.service.*;
+import com.tripplanner.service.external.BookingComService;
+import com.tripplanner.service.external.ExpediaService;
+import com.tripplanner.service.external.RazorpayService;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

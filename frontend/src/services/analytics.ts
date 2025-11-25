@@ -1,221 +1,199 @@
 /**
- * Analytics Service
- * Tracks user events to Google Analytics 4 and backend
+ * Simplified Analytics Service
+ * Sends events to backend Pub/Sub → BigQuery pipeline
+ * 
+ * This is intentionally minimal - no complex logic, just event tracking.
  */
 
+import { getSessionId } from '../utils/session';
+
 interface AnalyticsEvent {
-  event: string;
+  eventName: string;
+  timestamp: number;
+  userId: string | null;
+  sessionId: string;
+  platform: string;
   properties?: Record<string, any>;
 }
 
-interface UserProperties {
-  userId?: string;
-  email?: string;
-  [key: string]: any;
-}
-
 class AnalyticsService {
-  private isInitialized = false;
   private userId: string | null = null;
+  private sessionId: string;
+  private enabled: boolean;
+  private apiUrl: string;
 
-  /**
-   * Initialize analytics
-   */
-  initialize(trackingId?: string) {
-    if (this.isInitialized) return;
+  constructor() {
+    this.sessionId = getSessionId();
+    this.userId = this.restoreUserId();
+    this.enabled = import.meta.env.VITE_ENABLE_ANALYTICS !== 'false';
+    this.apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
-    // Initialize Google Analytics 4 if tracking ID provided
-    if (trackingId && typeof window !== 'undefined') {
-      // Load gtag script
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${trackingId}`;
-      document.head.appendChild(script);
-
-      // Initialize gtag
-      window.dataLayer = window.dataLayer || [];
-      function gtag(...args: any[]) {
-        window.dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-      gtag('config', trackingId);
-
-      this.isInitialized = true;
-      console.log('[Analytics] Initialized with tracking ID:', trackingId);
+    if (this.enabled) {
+      console.log('[Analytics] Initialized - Session:', this.sessionId, 'User:', this.userId || 'anonymous');
     }
   }
 
   /**
-   * Track an event
+   * Track an analytics event.
+   * This is the main method - all other methods call this.
    */
-  track(event: string, properties?: Record<string, any>) {
-    // Send to Google Analytics
-    if (this.isInitialized && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', event, properties);
-    }
+  track(eventName: string, properties?: Record<string, any>) {
+    if (!this.enabled) return;
 
-    // Send to backend analytics endpoint
-    this.sendToBackend({ event, properties });
+    const event: AnalyticsEvent = {
+      eventName,
+      timestamp: Date.now(),
+      userId: this.userId,
+      sessionId: this.sessionId,
+      platform: 'web',
+      properties: properties || {}
+    };
 
-    console.log('[Analytics] Event tracked:', event, properties);
+    // Send to backend (async, non-blocking)
+    this.sendEvent(event);
   }
 
   /**
-   * Track page view
+   * Track page view.
    */
-  page(path: string, title?: string, referrer?: string) {
+  page(path: string, title?: string) {
     this.track('page_view', {
-      page_path: path,
-      page_title: title || document.title,
-      page_referrer: referrer || document.referrer,
+      path,
+      title: title || document.title,
+      referrer: document.referrer
     });
   }
 
   /**
-   * Identify user
+   * Identify user.
    */
-  identify(userId: string, properties?: UserProperties) {
+  identify(userId: string) {
     this.userId = userId;
-
-    if (this.isInitialized && typeof window !== 'undefined' && window.gtag) {
-      window.gtag('set', 'user_properties', {
-        user_id: userId,
-        ...properties,
-      });
-    }
-
+    localStorage.setItem('analytics_user_id', userId);
     console.log('[Analytics] User identified:', userId);
   }
 
   /**
-   * Track booking events
+   * Clear user identity (on logout).
    */
-  trackBooking(type: 'initiated' | 'iframe_loaded' | 'confirmed', data: {
+  clearIdentity() {
+    this.userId = null;
+    localStorage.removeItem('analytics_user_id');
+    console.log('[Analytics] User identity cleared');
+  }
+
+  /**
+   * Restore userId from localStorage.
+   */
+  private restoreUserId(): string | null {
+    return localStorage.getItem('analytics_user_id');
+  }
+
+  /**
+   * Track booking events.
+   */
+  trackBooking(type: 'initiated' | 'completed' | 'failed', data: {
     provider: string;
-    vertical: string;
+    category: string;
     itineraryId?: string;
     amount?: number;
     currency?: string;
+    error?: string;
   }) {
-    const eventName = `booking_${type}`;
-    this.track(eventName, {
-      provider: data.provider,
-      vertical: data.vertical,
-      itinerary_id: data.itineraryId,
-      amount: data.amount,
-      currency: data.currency,
-      timestamp: new Date().toISOString(),
-    });
+    this.track(`booking_${type}`, data);
   }
 
   /**
-   * Track search events
+   * Track signup events.
    */
-  trackSearch(data: {
-    searchType: string;
-    origin?: string;
+  trackSignup(status: 'started' | 'completed' | 'failed', data?: {
+    method?: string;
+    error?: string;
+  }) {
+    this.track(`user_signup_${status}`, data);
+  }
+
+  /**
+   * Track trip wizard and creation events.
+   */
+  trackTripWizard(action: 'started' | 'initiated' | 'completed' | 'failed', data?: {
     destination?: string;
-    startDate?: string;
-    endDate?: string;
-    travelers?: number;
+    origin?: string;
+    itineraryId?: string;
+    error?: string;
   }) {
-    this.track('search_performed', {
-      search_type: data.searchType,
-      origin: data.origin,
-      destination: data.destination,
-      start_date: data.startDate,
-      end_date: data.endDate,
-      travelers: data.travelers,
-      timestamp: new Date().toISOString(),
-    });
+    const eventName = action === 'started' ? 'trip_wizard_started' : `trip_creation_${action}`;
+    this.track(eventName, data);
   }
 
   /**
-   * Track AI trip creation
+   * Track payment events.
    */
-  trackAITrip(data: {
-    destination: string;
-    duration: number;
-    travelers: number;
-    budget?: string;
-    executionId?: string;
+  trackPayment(status: 'initiated' | 'completed' | 'failed', data: {
+    amount?: number;
+    currency?: string;
+    itineraryId?: string;
+    provider?: string;
+    error?: string;
   }) {
-    this.track('ai_trip_created', {
-      destination: data.destination,
-      duration: data.duration,
-      travelers: data.travelers,
-      budget: data.budget,
-      execution_id: data.executionId,
-      timestamp: new Date().toISOString(),
-    });
+    this.track(`payment_${status}`, data);
   }
 
   /**
-   * Track agent progress
+   * Track user interaction events.
    */
-  trackAgentProgress(data: {
-    executionId: string;
-    progress: number;
-    currentStep?: string;
-    status: string;
+  trackInteraction(action: 'activity_viewed' | 'day_expanded' | 'chat_message_sent' | 'search_initiated', data?: {
+    activityId?: string;
+    activityName?: string;
+    dayNumber?: number;
+    messageLength?: number;
+    query?: string;
+    queryLength?: number;
+    resultCount?: number;
+    itineraryId?: string;
   }) {
-    this.track('agent_progress', {
-      execution_id: data.executionId,
-      progress: data.progress,
-      current_step: data.currentStep,
-      status: data.status,
-      timestamp: new Date().toISOString(),
-    });
+    this.track(action, data);
   }
 
   /**
-   * Track feature usage
+   * Track public link creation.
    */
-  trackFeature(featureName: string, context?: Record<string, any>) {
-    this.track('feature_used', {
-      feature_name: featureName,
-      ...context,
-      timestamp: new Date().toISOString(),
-    });
+  trackPublicLink(itineraryId: string, data?: {
+    linkId?: string;
+    expiresAt?: string;
+  }) {
+    this.track('public_link_created', { itineraryId, ...data });
   }
 
   /**
-   * Send event to backend analytics endpoint
+   * Send event to backend.
+   * Uses keepalive to ensure delivery even if page unloads.
    */
-  private async sendToBackend(event: AnalyticsEvent) {
+  private sendEvent(event: AnalyticsEvent) {
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
-      await fetch(`${apiUrl}/analytics/events`, {
+      fetch(`${this.apiUrl}/analytics/events`, {
         method: 'POST',
+        keepalive: true, // Ensures delivery even if page closes
         headers: {
           'Content-Type': 'application/json',
+          'X-Session-ID': this.sessionId
         },
-        body: JSON.stringify({
-          ...event,
-          userId: this.userId,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        }),
-      });
+        body: JSON.stringify(event)
+      })
+        .then(response => {
+          if (!response.ok) {
+            console.warn(`[Analytics] Event failed: ${event.eventName} (${response.status})`);
+          }
+        })
+        .catch((error) => {
+          console.warn(`[Analytics] Network error for event: ${event.eventName}`, error);
+        });
     } catch (error) {
-      // Silently fail - don't break app if analytics fails
-      console.warn('[Analytics] Failed to send to backend:', error);
+      console.warn(`[Analytics] Failed to send event: ${event.eventName}`, error);
     }
   }
-}
 
-// Extend Window interface for gtag
-declare global {
-  interface Window {
-    dataLayer: any[];
-    gtag: (...args: any[]) => void;
-  }
+
 }
 
 export const analytics = new AnalyticsService();
-
-// Initialize with tracking ID from environment
-if (import.meta.env.VITE_GA_TRACKING_ID) {
-  analytics.initialize(import.meta.env.VITE_GA_TRACKING_ID);
-}

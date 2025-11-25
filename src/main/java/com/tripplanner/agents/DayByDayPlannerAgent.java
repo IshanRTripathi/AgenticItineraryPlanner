@@ -3,10 +3,11 @@ package com.tripplanner.agents;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.SummarizationService;
-import com.tripplanner.service.AgentEventPublisher;
+import com.tripplanner.service.agents.AgentEventPublisher;
+import com.tripplanner.service.CurrencyConversionService;
 import com.tripplanner.service.ai.AiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ public class DayByDayPlannerAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final SummarizationService summarizationService;
     private final AgentEventPublisher agentEventPublisher;
+    private final CurrencyConversionService currencyConversionService;
     
     // Token limits for different models
     private static final int MAX_CONTEXT_TOKENS = 8000; // Conservative limit
@@ -39,13 +41,14 @@ public class DayByDayPlannerAgent extends BaseAgent {
     
     public DayByDayPlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                                ItineraryJsonService itineraryJsonService, SummarizationService summarizationService,
-                               AgentEventPublisher agentEventPublisher) {
+                               AgentEventPublisher agentEventPublisher, CurrencyConversionService currencyConversionService) {
         super(eventBus, AgentEvent.AgentKind.PLANNER);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.summarizationService = summarizationService;
         this.agentEventPublisher = agentEventPublisher;
+        this.currencyConversionService = currencyConversionService;
     }
     
     @Override
@@ -155,9 +158,40 @@ public class DayByDayPlannerAgent extends BaseAgent {
             
             emitProgress(itineraryId, 85, "Finalizing itinerary", "finalization");
             
-            // Finalize and save itinerary
+            // Finalize and save itinerary with optimistic locking and retry
             finalizeItinerary(itinerary, itineraryReq);
-            itineraryJsonService.updateItinerary(itinerary);
+            
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean saved = false;
+            
+            while (!saved && retryCount < maxRetries) {
+                try {
+                    itineraryJsonService.updateItineraryWithLock(itinerary);
+                    saved = true;
+                } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                    retryCount++;
+                    logger.error("Concurrent modification during finalization (attempt {}/{}): {}", 
+                               retryCount, maxRetries, e.getMessage());
+                    
+                    if (retryCount < maxRetries) {
+                        logger.info("Reloading itinerary and retrying finalization save...");
+                        Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
+                        if (reloaded.isPresent()) {
+                            itinerary = reloaded.get();
+                            // Re-apply finalization
+                            finalizeItinerary(itinerary, itineraryReq);
+                            logger.info("Re-applied finalization to reloaded itinerary");
+                        } else {
+                            logger.error("Failed to reload itinerary for retry");
+                            throw new RuntimeException("Finalization conflict", e);
+                        }
+                    } else {
+                        logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                        throw new RuntimeException("Finalization conflict", e);
+                    }
+                }
+            }
             
             emitProgress(itineraryId, 100, "Itinerary completed", "complete");
             
@@ -234,8 +268,50 @@ public class DayByDayPlannerAgent extends BaseAgent {
                             if (!dayExists) {
                                 itinerary.getDays().add(day);
                             }
-                            itinerary.setUpdatedAt(System.currentTimeMillis());
-                            itineraryJsonService.updateItinerary(itinerary);
+                            
+                            // Save with optimistic locking and retry
+                            int maxRetries = 3;
+                            int retryCount = 0;
+                            boolean saved = false;
+                            
+                            while (!saved && retryCount < maxRetries) {
+                                try {
+                                    itinerary.setUpdatedAt(System.currentTimeMillis());
+                                    itineraryJsonService.updateItineraryWithLock(itinerary);
+                                    saved = true;
+                                } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                                    retryCount++;
+                                    logger.error("Concurrent modification during day save (attempt {}/{}): {}", 
+                                               retryCount, maxRetries, e.getMessage());
+                                    
+                                    if (retryCount < maxRetries) {
+                                        logger.info("Reloading itinerary and retrying day save...");
+                                        Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
+                                        if (reloaded.isPresent()) {
+                                            itinerary = reloaded.get();
+                                            // Re-add or update the day
+                                            dayExists = false;
+                                            for (int i = 0; i < itinerary.getDays().size(); i++) {
+                                                if (itinerary.getDays().get(i).getDayNumber() == day.getDayNumber()) {
+                                                    itinerary.getDays().set(i, day);
+                                                    dayExists = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (!dayExists) {
+                                                itinerary.getDays().add(day);
+                                            }
+                                            logger.info("Re-applied day {} to reloaded itinerary", day.getDayNumber());
+                                        } else {
+                                            logger.error("Failed to reload itinerary for retry");
+                                            throw new RuntimeException("Day save conflict", e);
+                                        }
+                                    } else {
+                                        logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                                        throw new RuntimeException("Day save conflict", e);
+                                    }
+                                }
+                            }
                         }
                         
                         // Publish day completed event if there are active connections
@@ -299,7 +375,12 @@ public class DayByDayPlannerAgent extends BaseAgent {
         itinerary.setItineraryId(itineraryId);
         itinerary.setVersion(1);
         itinerary.setSummary("Multi-day trip to " + request.getDestination());
-        itinerary.setCurrency("INR");
+        
+        // Detect destination currency automatically
+        String destinationCurrency = currencyConversionService.detectDestinationCurrency(request.getDestination());
+        itinerary.setCurrency(destinationCurrency);
+        logger.info("Detected currency for {}: {}", request.getDestination(), destinationCurrency);
+        
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
         itinerary.setDays(new ArrayList<>());
         itinerary.setCreatedAt(System.currentTimeMillis());
@@ -468,7 +549,7 @@ public class DayByDayPlannerAgent extends BaseAgent {
                               "type": "object",
                               "properties": {
                                 "amountPerPerson": { "type": "number" },
-                                "currency": { "type": "string", "default": "INR" }
+                                "currency": { "type": "string", "default": "USD" }
                               }
                             },
                             "details": {

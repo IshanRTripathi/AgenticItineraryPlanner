@@ -140,11 +140,11 @@ function convertDay(day: NormalizedDay, index: number, itinerary: NormalizedItin
     theme: day.location,
     location: day.location,
     components: components,
-    totalDistance: day.totals?.distanceKm || 0,
-    totalCost: day.totals?.cost || 0,
-    totalDuration: day.totals?.durationHr || 0,
-    startTime: day.timeWindow?.start || '09:00',
-    endTime: day.timeWindow?.end || '18:00',
+    totalDistance: day.totalDistance || 0,
+    totalCost: day.totalCost || 0,
+    totalDuration: day.totalDuration || 0,
+    startTime: day.timeWindowStart || '09:00',
+    endTime: day.timeWindowEnd || '18:00',
     meals: {
       breakfast: components.find(c => c.type === 'restaurant' && c.name.toLowerCase().includes('breakfast')),
       lunch: components.find(c => c.type === 'restaurant' && c.name.toLowerCase().includes('lunch')),
@@ -198,7 +198,7 @@ function convertNode(node: NormalizedNode): TripComponent {
       suggestedDuration: node.timing?.durationMin || 60
     },
     cost: {
-      pricePerPerson: node.cost?.amount || 0,
+      pricePerPerson: node.cost?.amountPerPerson || 0,
       currency: node.cost?.currency || 'USD',
       priceRange: 'mid-range',
       includesWhat: []

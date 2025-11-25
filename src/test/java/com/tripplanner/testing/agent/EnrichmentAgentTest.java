@@ -4,6 +4,7 @@ import com.tripplanner.agents.BaseAgent;
 import com.tripplanner.agents.EnrichmentAgent;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.*;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.testing.BaseServiceTest;
 import com.tripplanner.testing.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;

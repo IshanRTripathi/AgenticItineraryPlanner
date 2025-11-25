@@ -67,12 +67,13 @@ public class FirebaseAuthConfig {
             
             // Check if this is a guest-accessible endpoint
             if (isGuestAccessibleEndpoint(path)) {
+                String userId = null;
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     // Authenticated user - validate token
                     String idToken = authHeader.substring(7);
                     try {
                         FirebaseToken decodedToken = firebaseAuth.verifyIdToken(idToken);
-                        String userId = decodedToken.getUid();
+                        userId = decodedToken.getUid();
                         request.setAttribute("userId", userId);
                         request.setAttribute("userEmail", decodedToken.getEmail());
                         request.setAttribute("userName", decodedToken.getName());
@@ -81,18 +82,27 @@ public class FirebaseAuthConfig {
                     } catch (Exception e) {
                         logger.warn("Invalid token for guest-accessible endpoint: {}, treating as guest", path);
                         // Invalid token - treat as guest
-                        String guestUserId = GuestUserUtil.generateGuestUserId(request);
-                        request.setAttribute("userId", guestUserId);
+                        userId = GuestUserUtil.generateGuestUserId(request);
+                        request.setAttribute("userId", userId);
                         request.setAttribute("isGuest", true);
                     }
                 } else {
                     // No auth header - guest user
-                    String guestUserId = GuestUserUtil.generateGuestUserId(request);
-                    request.setAttribute("userId", guestUserId);
+                    userId = GuestUserUtil.generateGuestUserId(request);
+                    request.setAttribute("userId", userId);
                     request.setAttribute("isGuest", true);
-                    logger.debug("Guest user accessing endpoint: {} with ID: {}", path, guestUserId);
+                    logger.debug("Guest user accessing endpoint: {} with ID: {}", path, userId);
                 }
-                filterChain.doFilter(request, response);
+                
+                // Set user context for analytics tracking
+                com.tripplanner.util.UserContext.setUserId(userId);
+                
+                try {
+                    filterChain.doFilter(request, response);
+                } finally {
+                    // Clear user context after request
+                    com.tripplanner.util.UserContext.clear();
+                }
                 return;
             }
             
@@ -116,8 +126,16 @@ public class FirebaseAuthConfig {
                 request.setAttribute("userEmail", decodedToken.getEmail());
                 request.setAttribute("userName", decodedToken.getName());
                 
+                // Set user context for analytics tracking
+                com.tripplanner.util.UserContext.setUserId(userId);
+                
                 logger.debug("Authenticated user: {} for path: {}", userId, path);
-                filterChain.doFilter(request, response);
+                try {
+                    filterChain.doFilter(request, response);
+                } finally {
+                    // Clear user context after request to prevent memory leaks
+                    com.tripplanner.util.UserContext.clear();
+                }
                 
             } catch (Exception e) {
                 logger.error("Firebase token verification failed for path: {}", path, e);
@@ -144,6 +162,8 @@ public class FirebaseAuthConfig {
             // Define public endpoints that don't require authentication
             return path.startsWith("/api/v1/health") ||
                    path.startsWith("/api/v1/public") ||
+                   path.startsWith("/api/v1/analytics") ||  // Analytics endpoints are public
+                   path.startsWith("/ws") ||  // WebSocket endpoints
                    path.startsWith("/swagger") ||
                    path.startsWith("/v3/api-docs") ||
                    path.startsWith("/actuator") ||

@@ -107,6 +107,8 @@
     "languagePreferences": "Preferencias de idioma",
     "selectLanguage": "Selecciona tu idioma",
     "languageDescription": "Los cambios se aplicarán inmediatamente en todas las páginas",
+    "currencyPreferences": "Preferencias de moneda",
+    "currencyDescription": "Selecciona tu moneda preferida para mostrar costos y presupuestos",
     "accountDetails": "Detalles de la cuenta",
     "accountDetailsDescription": "Tu información personal y estado de cuenta",
     "authProvider": "Proveedor de autenticación",
@@ -124,7 +126,7 @@
       "description": "Gestiona tu cuenta y preferencias",
       "myTrips": "Mis viajes",
       "planTrip": "Planificar viaje",
-      "upgrade": "Mejorar",
+      "currency": "Moneda",
       "language": "Idioma"
     }
   },

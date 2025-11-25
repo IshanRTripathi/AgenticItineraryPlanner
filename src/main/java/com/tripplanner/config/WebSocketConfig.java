@@ -11,8 +11,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 /**
- * WebSocket configuration for real-time communication.
- * Provides messaging capabilities for itinerary updates and agent coordination.
+ * Simple WebSocket configuration that works for both local development and production.
  */
 @Configuration
 @EnableWebSocketMessageBroker
@@ -40,14 +39,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         logger.info("=== WEBSOCKET CONFIG: REGISTERING STOMP ENDPOINTS ===");
         
-        // Register STOMP endpoint for WebSocket connections
+        // Use wildcard patterns for simplicity - works for any localhost port + production
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // Allow all origins for development
+                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://*.run.app", "https://*.a.run.app")
                 .withSockJS()
-                .setSessionCookieNeeded(false) // Prevent session cookie issues
-                .setClientLibraryUrl("https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"); // Use CDN for consistency
+                .setSessionCookieNeeded(false);
         
-        logger.info("STOMP endpoints registered successfully with session management optimizations");
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "https://*.run.app", "https://*.a.run.app");
+        
+        logger.info("STOMP endpoints registered with wildcard patterns");
     }
     
     /**

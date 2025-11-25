@@ -3,6 +3,10 @@ package com.tripplanner.testing.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.*;
+import com.tripplanner.service.analytics.TraceManager;
+import com.tripplanner.service.utilities.IdempotencyManager;
+import com.tripplanner.service.utilities.LockManager;
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import com.tripplanner.testing.BaseServiceTest;
 import com.tripplanner.testing.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;

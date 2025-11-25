@@ -2,10 +2,16 @@ package com.tripplanner.agents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
-import com.tripplanner.service.AgentEventPublisher;
+import com.tripplanner.enums.ProcessingState;
+import com.tripplanner.exception.ValidationException;
+import com.tripplanner.service.metadata.ActivityMetadataService;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ItineraryJsonService;
-import com.tripplanner.service.NodeIdGenerator;
+import com.tripplanner.service.ItineraryValidator;
+import com.tripplanner.service.ItineraryValidator.ValidationResult;
+import com.tripplanner.service.llm.LLMSchemaValidator;
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import com.tripplanner.service.ai.AiClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -41,16 +47,23 @@ public class ActivityAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final AgentEventPublisher agentEventPublisher;
     private final NodeIdGenerator nodeIdGenerator;
+    private final LLMSchemaValidator schemaValidator;
+    private final ItineraryValidator itineraryValidator;
+    private final ActivityMetadataService activityMetadataService;
     
     public ActivityAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                         ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
-                        NodeIdGenerator nodeIdGenerator) {
+                        NodeIdGenerator nodeIdGenerator, LLMSchemaValidator schemaValidator,
+                        ItineraryValidator itineraryValidator, ActivityMetadataService activityMetadataService) {
         super(eventBus, AgentEvent.AgentKind.ENRICHMENT);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.itineraryJsonService = itineraryJsonService;
         this.agentEventPublisher = agentEventPublisher;
         this.nodeIdGenerator = nodeIdGenerator;
+        this.schemaValidator = schemaValidator;
+        this.itineraryValidator = itineraryValidator;
+        this.activityMetadataService = activityMetadataService;
     }
     
     @Override
@@ -96,10 +109,15 @@ public class ActivityAgent extends BaseAgent {
             List<PopulatedAttraction> populatedAttractions = populateAttractionsWithAI(
                 skeleton, attractionContexts);
             
+            // Validate activity durations
+            emitProgress(itineraryId, 60, "Validating activity durations", "validating");
+            List<PopulatedAttraction> validatedAttractions = validateActivityDurations(
+                populatedAttractions, skeleton);
+            
             emitProgress(itineraryId, 70, "Saving attraction data", "saving");
             
             // Update the itinerary with populated data
-            updateItineraryWithAttractions(itineraryId, skeleton, populatedAttractions);
+            updateItineraryWithAttractions(itineraryId, skeleton, validatedAttractions);
             
             emitProgress(itineraryId, 100, 
                 String.format("Populated %d attractions", populatedAttractions.size()), 
@@ -167,10 +185,22 @@ public class ActivityAgent extends BaseAgent {
         logger.info("=== END ACTIVITY AGENT RESPONSE ===");
         
         try {
-            // Clean response by removing markdown formatting
-            String cleanedResponse = cleanJsonResponse(response);
-            logger.info("Cleaned Response: {}", cleanedResponse);
-            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(cleanedResponse);
+            // IMPROVED: Validate response against schema before parsing
+            LLMSchemaValidator.ValidationResult validationResult = schemaValidator.validateWithLogging(
+                response, schema, "ActivityAgent");
+            
+            if (!validationResult.isValid()) {
+                String errorMsg = schemaValidator.getUserFriendlyError(validationResult);
+                logger.error("Schema validation failed for ActivityAgent: {}", errorMsg);
+                
+                // Return empty list on validation failure (graceful degradation)
+                return new ArrayList<>();
+            }
+            
+            // Use validated data
+            com.fasterxml.jackson.databind.JsonNode root = validationResult.getData();
+            logger.info("Schema validation passed for ActivityAgent");
+            
             List<PopulatedAttraction> attractions = new ArrayList<>();
             
             if (root.has("attractions") && root.get("attractions").isArray()) {
@@ -189,11 +219,142 @@ public class ActivityAgent extends BaseAgent {
     }
     
     /**
-     * Update itinerary with populated attraction data.
+     * Validate activity durations to ensure feasible schedules.
      */
-    private void updateItineraryWithAttractions(String itineraryId, NormalizedItinerary skeleton,
-                                                List<PopulatedAttraction> populatedAttractions) {
+    private List<PopulatedAttraction> validateActivityDurations(
+            List<PopulatedAttraction> attractions,
+            NormalizedItinerary skeleton) {
         
+        try {
+            // Group by day
+            Map<Integer, List<PopulatedAttraction>> byDay = new HashMap<>();
+            for (PopulatedAttraction attraction : attractions) {
+                // Find which day this attraction belongs to
+                int dayNumber = findDayNumberForNode(skeleton, attraction.getNodeId());
+                if (dayNumber > 0) {
+                    byDay.computeIfAbsent(dayNumber, k -> new ArrayList<>()).add(attraction);
+                }
+            }
+            
+            List<PopulatedAttraction> validated = new ArrayList<>();
+            
+            for (Map.Entry<Integer, List<PopulatedAttraction>> entry : byDay.entrySet()) {
+                int dayNumber = entry.getKey();
+                List<PopulatedAttraction> dayAttractions = entry.getValue();
+                
+                // Calculate total duration
+                int totalMinutes = dayAttractions.stream()
+                    .mapToInt(a -> a.getDurationMinutes() != null ? a.getDurationMinutes() : 60)
+                    .sum();
+                
+                // Add travel time between activities (estimate 30 min per transition)
+                int travelTime = Math.max(0, (dayAttractions.size() - 1) * 30);
+                totalMinutes += travelTime;
+                
+                // Available time: 10 hours (600 minutes) for activities
+                int availableMinutes = 600;
+                
+                if (totalMinutes <= availableMinutes) {
+                    // All activities fit
+                    validated.addAll(dayAttractions);
+                    logger.debug("Day {} activities fit: {} minutes (limit: {})", 
+                               dayNumber, totalMinutes, availableMinutes);
+                } else {
+                    // Too many activities, filter by priority
+                    logger.warn("Day {} has {} minutes of activities, max is {}. Filtering...",
+                               dayNumber, totalMinutes, availableMinutes);
+                    
+                    List<PopulatedAttraction> filtered = filterByPriority(
+                        dayAttractions, 
+                        availableMinutes
+                    );
+                    validated.addAll(filtered);
+                    
+                    logger.info("Day {} reduced from {} to {} activities",
+                               dayNumber, dayAttractions.size(), filtered.size());
+                }
+            }
+            
+            return validated;
+            
+        } catch (Exception e) {
+            logger.error("Error in duration validation: {}", e.getMessage());
+            // Fallback: Return all activities (no filtering)
+            logger.warn("Skipping duration validation, returning all activities");
+            return attractions;
+        }
+    }
+    
+    /**
+     * Filter activities by priority to fit within time limit.
+     */
+    private List<PopulatedAttraction> filterByPriority(
+            List<PopulatedAttraction> attractions,
+            int maxMinutes) {
+        
+        // Sort by priority (must-see > recommended > optional)
+        List<PopulatedAttraction> sorted = new ArrayList<>(attractions);
+        sorted.sort((a, b) -> {
+            int priorityA = getPriorityScore(a.getCategory());
+            int priorityB = getPriorityScore(b.getCategory());
+            return Integer.compare(priorityB, priorityA);
+        });
+        
+        List<PopulatedAttraction> filtered = new ArrayList<>();
+        int totalMinutes = 0;
+        
+        for (PopulatedAttraction attraction : sorted) {
+            int duration = attraction.getDurationMinutes() != null ? attraction.getDurationMinutes() : 60;
+            if (totalMinutes + duration <= maxMinutes) {
+                filtered.add(attraction);
+                totalMinutes += duration;
+            } else {
+                logger.info("Skipping {} (would exceed time limit)", attraction.getTitle());
+            }
+        }
+        
+        return filtered;
+    }
+    
+    /**
+     * Get priority score for a category.
+     */
+    private int getPriorityScore(String category) {
+        if (category == null) return 1;
+        
+        return switch (category.toLowerCase()) {
+            case "landmark", "unesco-site", "temple_shrine" -> 3; // Must-see
+            case "museum", "park", "nature" -> 2; // Recommended
+            default -> 1; // Optional
+        };
+    }
+    
+    /**
+     * Find which day a node belongs to.
+     */
+    private int findDayNumberForNode(NormalizedItinerary skeleton, String nodeId) {
+        if (skeleton.getDays() == null || nodeId == null) {
+            return -1;
+        }
+        
+        for (NormalizedDay day : skeleton.getDays()) {
+            if (day.getNodes() == null) continue;
+            
+            for (NormalizedNode node : day.getNodes()) {
+                if (nodeId.equals(node.getId())) {
+                    return day.getDayNumber();
+                }
+            }
+        }
+        
+        return -1;
+    }
+    
+    /**
+     * Apply attraction data to skeleton nodes (extracted for retry logic).
+     */
+    private void applyAttractionsToSkeleton(NormalizedItinerary skeleton,
+                                           List<PopulatedAttraction> populatedAttractions) {
         // Create a map for quick lookup
         Map<String, PopulatedAttraction> attractionMap = populatedAttractions.stream()
             .collect(Collectors.toMap(PopulatedAttraction::getNodeId, a -> a));
@@ -208,6 +369,10 @@ public class ActivityAgent extends BaseAgent {
                 logger.debug("Ensuring node {} has ID for day {}", node.getTitle(), day.getDayNumber());
                 
                 if ("attraction".equals(node.getType())) {
+                    // Mark node as being processed
+                    node.setProcessingState(ProcessingState.ENRICHING);
+                    node.addProcessedBy("ActivityAgent");
+                    
                     PopulatedAttraction populated = attractionMap.get(node.getId());
                     if (populated != null) {
                         // Update node with populated data
@@ -233,18 +398,86 @@ public class ActivityAgent extends BaseAgent {
                             }
                             node.getLocation().setName(locationName);
                         }
+                        
+                        // Mark node as successfully processed
+                        node.setProcessingState(ProcessingState.ENRICHED);
+                    } else {
+                        // Mark node as failed if no populated data found
+                        node.setProcessingState(ProcessingState.FAILED);
+                        node.setLastError("No attraction data found for node");
                     }
                 }
             }
         }
+    }
+    
+    /**
+     * Update itinerary with populated attraction data.
+     */
+    private void updateItineraryWithAttractions(String itineraryId, NormalizedItinerary skeleton,
+                                                List<PopulatedAttraction> populatedAttractions) {
         
-        // Save updated itinerary
-        try {
-            skeleton.setUpdatedAt(System.currentTimeMillis());
-            itineraryJsonService.updateItinerary(skeleton);
-            logger.info("Saved itinerary with populated attractions");
-        } catch (Exception e) {
-            logger.error("Failed to save itinerary with attractions: {}", e.getMessage());
+        // Apply attractions to skeleton
+        applyAttractionsToSkeleton(skeleton, populatedAttractions);
+        
+        // Populate metadata for all attraction nodes
+        for (NormalizedDay day : skeleton.getDays()) {
+            if (day.getNodes() != null) {
+                for (NormalizedNode node : day.getNodes()) {
+                    if ("attraction".equals(node.getType())) {
+                        activityMetadataService.populateNodeMetadata(node);
+                    }
+                }
+            }
+        }
+        logger.info("Populated metadata for all attraction nodes");
+        
+        // Validate before save
+        ValidationResult validationResult = itineraryValidator.validate(skeleton);
+        if (!validationResult.isValid()) {
+            logger.error("Validation failed for itinerary {}: {}", itineraryId, validationResult.getErrors());
+            throw new ValidationException("Itinerary validation failed", String.valueOf(validationResult.getErrors()));
+        }
+        if (!validationResult.getWarnings().isEmpty()) {
+            logger.warn("Validation warnings for itinerary {}: {}", itineraryId, validationResult.getWarnings());
+        }
+        
+        // Save updated itinerary with optimistic locking and retry
+        int maxRetries = 3;
+        int retryCount = 0;
+        boolean saved = false;
+        
+        while (!saved && retryCount < maxRetries) {
+            try {
+                skeleton.setUpdatedAt(System.currentTimeMillis());
+                itineraryJsonService.updateItineraryWithLock(skeleton);
+                logger.info("Saved itinerary with populated attractions (with lock)");
+                saved = true;
+            } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                retryCount++;
+                logger.error("Concurrent modification detected (attempt {}/{}): {}", 
+                           retryCount, maxRetries, e.getMessage());
+                
+                if (retryCount < maxRetries) {
+                    logger.info("Reloading itinerary and retrying save...");
+                    Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(skeleton.getItineraryId());
+                    if (reloaded.isPresent()) {
+                        skeleton = reloaded.get();
+                        // Re-apply attraction changes to reloaded skeleton
+                        applyAttractionsToSkeleton(skeleton, populatedAttractions);
+                        logger.info("Re-applied attraction changes to reloaded itinerary");
+                    } else {
+                        logger.error("Failed to reload itinerary for retry");
+                        throw e;
+                    }
+                } else {
+                    logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                    throw e;
+                }
+            } catch (Exception e) {
+                logger.error("Failed to save itinerary with attractions: {}", e.getMessage());
+                throw new RuntimeException("Failed to save activity data", e);
+            }
         }
     }
     
@@ -261,12 +494,25 @@ public class ActivityAgent extends BaseAgent {
             2. Provide real, specific place names (e.g., "Tokyo National Museum" not "Museum")
             3. Write engaging descriptions (2-3 sentences)
             4. Assign appropriate categories
-            5. Estimate realistic visit durations
+            5. Estimate realistic visit durations (CRITICAL - see duration guidelines below)
             6. Consider the time slot and day context
             7. Ensure variety across the day and trip
             8. IMPORTANT: For locationName, provide the SPECIFIC place name, NOT just the district/area
                - GOOD: "Shibuya Crossing", "Senso-ji Temple", "Tsukiji Outer Market"
                - BAD: "Shibuya", "Asakusa", "Tsukiji"
+            
+            Activity Duration Guidelines (in minutes):
+            - Landmark/Monument: 60-90 minutes
+            - Museum/Gallery: 90-120 minutes
+            - Temple/Shrine: 45-60 minutes
+            - Park/Garden: 60-90 minutes
+            - Safari/Trek: 240-480 minutes (4-8 hours)
+            - Theme Park: 360-480 minutes (6-8 hours)
+            - Shopping District: 90-120 minutes
+            - Cultural Experience: 120-180 minutes
+            
+            CRITICAL: Include durationMinutes for each attraction.
+            If a day has a long-duration activity (>4 hours), other activities should be minimal.
             
             Categories:
             - museum: Museums, galleries, exhibitions
@@ -287,7 +533,13 @@ public class ActivityAgent extends BaseAgent {
                                            List<AttractionContext> contexts) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("Destination: ").append(skeleton.getDays().get(0).getLocation()).append("\n");
+        // IMPROVED: Group contexts by day to show city-specific context
+        Map<Integer, List<AttractionContext>> contextsByDay = new HashMap<>();
+        for (AttractionContext ctx : contexts) {
+            contextsByDay.computeIfAbsent(ctx.dayNumber, k -> new ArrayList<>()).add(ctx);
+        }
+        
+        prompt.append("Trip Overview:\n");
         prompt.append("Total Days: ").append(skeleton.getDays().size()).append("\n");
         
         if (skeleton.getThemes() != null && !skeleton.getThemes().isEmpty()) {
@@ -295,24 +547,44 @@ public class ActivityAgent extends BaseAgent {
         }
         
         // CRITICAL: Include user's custom instructions/constraints
+        // These constraints MUST be respected in all attraction selections
         if (skeleton.getConstraints() != null && !skeleton.getConstraints().isEmpty()) {
-            prompt.append("\nIMPORTANT - User Requirements:\n");
+            prompt.append("\n=== CRITICAL USER REQUIREMENTS (MUST FOLLOW) ===\n");
             for (String constraint : skeleton.getConstraints()) {
                 prompt.append("- ").append(constraint).append("\n");
             }
-            prompt.append("Please ensure all data comply with these requirements.\n");
+            prompt.append("All attractions MUST comply with these requirements.\n");
+            prompt.append("If a requirement cannot be met, skip that attraction slot.\n\n");
         }
         
-        prompt.append("\nAttraction slots to populate:\n");
-        for (AttractionContext ctx : contexts) {
-            prompt.append(String.format("- Day %d, Node ID: %s, Time: %s\n",
-                ctx.dayNumber, ctx.nodeId, 
-                ctx.timing != null ? ctx.timing.getStartTime() : "TBD"));
+        prompt.append("\n=== ATTRACTION SLOTS TO POPULATE (BY DAY) ===\n");
+        
+        // CRITICAL: Show each day's location explicitly to prevent wrong-city attractions
+        for (Map.Entry<Integer, List<AttractionContext>> entry : contextsByDay.entrySet()) {
+            int dayNum = entry.getKey();
+            List<AttractionContext> dayContexts = entry.getValue();
+            
+            // Get the day's location
+            String dayLocation = dayContexts.get(0).dayLocation;
+            
+            prompt.append(String.format("\n** DAY %d - LOCATION: %s **\n", dayNum, dayLocation));
+            prompt.append(String.format("CRITICAL: All attractions for Day %d MUST be in %s, NOT in any other city!\n", 
+                                       dayNum, dayLocation));
+            
+            for (AttractionContext ctx : dayContexts) {
+                prompt.append(String.format("  - Node ID: %s, Time: %s\n",
+                    ctx.nodeId, 
+                    ctx.timing != null ? ctx.timing.getStartTime() : "TBD"));
+            }
         }
         
-        prompt.append("\nCRITICAL: Use the EXACT node IDs listed above. Do NOT generate your own node IDs.");
-        prompt.append("\nProvide specific attraction names, descriptions, and details for each slot.");
-        prompt.append("\nEnsure variety and avoid repetition across days.");
+        prompt.append("\n=== CRITICAL RULES ===\n");
+        prompt.append("1. Use the EXACT node IDs listed above. Do NOT generate your own node IDs.\n");
+        prompt.append("2. Each attraction MUST be in the CORRECT CITY for that day.\n");
+        prompt.append("3. Do NOT suggest attractions from other cities (e.g., no Kuala Lumpur attractions on Penang days).\n");
+        prompt.append("4. Provide specific attraction names that are searchable on Google Maps.\n");
+        prompt.append("5. Ensure variety and avoid repetition across days.\n");
+        prompt.append("6. All selections must respect the user requirements listed above.\n");
         
         return prompt.toString();
     }

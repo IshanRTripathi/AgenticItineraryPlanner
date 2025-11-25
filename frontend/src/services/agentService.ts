@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './apiClient';
+import { getSessionId } from '../utils/session';
 
 export interface AgentExecutionRequest {
   itineraryId: string;
@@ -38,7 +39,7 @@ class AgentService {
         if (lockedNodes.length > 0) {
           // Warn about locked nodes
           console.warn(`Agent execution will skip ${lockedNodes.length} locked nodes:`, lockedNodes);
-          
+
           // Return warning response
           return {
             success: false,
@@ -55,6 +56,7 @@ class AgentService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Session-ID': getSessionId(),
             ...(apiClient['authToken'] ? { Authorization: `Bearer ${apiClient['authToken']}` } : {}),
           },
           body: JSON.stringify(parameters || {}),

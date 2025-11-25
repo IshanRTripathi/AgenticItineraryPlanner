@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { auth } from '@/config/firebase';
+import { getSessionId } from '../utils/session';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -51,7 +52,7 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request interceptor to add auth token or guest mode header
+// Request interceptor to add auth token, guest mode header, and session ID
 apiClient.interceptors.request.use(
   async (config: any) => {
     try {
@@ -69,6 +70,10 @@ apiClient.interceptors.request.use(
           console.log('[API Client] Added anonymous guest header');
         }
       }
+      
+      // Add session ID to all requests for analytics tracking
+      config.headers['X-Session-ID'] = getSessionId();
+      
     } catch (error) {
       console.error('[API Client] Error setting auth headers:', error);
     }

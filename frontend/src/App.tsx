@@ -6,6 +6,7 @@ import { BottomNav } from './components/layout/BottomNav';
 import { FloatingHamburger } from './components/layout/FloatingHamburger';
 import { MobileMenu } from './components/layout/MobileMenu';
 import { HomePage } from './pages/HomePage';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 import { Loader2 } from 'lucide-react';
 import { analytics } from './services/analytics';
 import './index.css';
@@ -50,15 +51,16 @@ function App() {
 
   return (
     <ErrorBoundary>
-      {/* Skip to main content link for accessibility */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-      >
-        Skip to main content
-      </a>
-      
-      <Suspense fallback={<PageLoader />}>
+      <CurrencyProvider>
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        >
+          Skip to main content
+        </a>
+        
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -89,6 +91,7 @@ function App() {
       
       {/* Mobile Bottom Navigation - Hidden when menu is open */}
       {!hideBottomNav && <BottomNav hide={mobileMenuOpen} />}
+      </CurrencyProvider>
     </ErrorBoundary>
   );
 }

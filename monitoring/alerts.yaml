@@ -1,0 +1,138 @@
+# Cloud Monitoring Alert Policies
+# Deploy with: gcloud alpha monitoring policies create --policy-from-file=alerts.yaml
+
+# Alert 1: Daily LLM Cost Exceeds $20
+- displayName: "Daily LLM Cost Warning"
+  conditions:
+    - displayName: "Daily cost > $20"
+      conditionThreshold:
+        filter: |
+          resource.type = "bigquery_dataset"
+          AND metric.type = "custom.googleapis.com/analytics/llm_daily_cost"
+        comparison: COMPARISON_GT
+        thresholdValue: 20
+        duration: 300s
+        aggregations:
+          - alignmentPeriod: 3600s
+            perSeriesAligner: ALIGN_SUM
+  alertStrategy:
+    autoClose: 86400s
+  notificationChannels: []
+  severity: WARNING
+
+# Alert 2: Daily LLM Cost Critical ($50)
+- displayName: "Daily LLM Cost Critical"
+  conditions:
+    - displayName: "Daily cost > $50"
+      conditionThreshold:
+        filter: |
+          resource.type = "bigquery_dataset"
+          AND metric.type = "custom.googleapis.com/analytics/llm_daily_cost"
+        comparison: COMPARISON_GT
+        thresholdValue: 50
+        duration: 300s
+        aggregations:
+          - alignmentPeriod: 3600s
+            perSeriesAligner: ALIGN_SUM
+  alertStrategy:
+    autoClose: 86400s
+  notificationChannels: []
+  severity: CRITICAL
+
+# Alert 3: Monthly Projection Exceeds $300
+- displayName: "Monthly LLM Cost Projection Warning"
+  conditions:
+    - displayName: "Projected monthly cost > $300"
+      conditionThreshold:
+        filter: |
+          resource.type = "bigquery_dataset"
+          AND metric.type = "custom.googleapis.com/analytics/llm_monthly_projection"
+        comparison: COMPARISON_GT
+        thresholdValue: 300
+        duration: 3600s
+        aggregations:
+          - alignmentPeriod: 86400s
+            perSeriesAligner: ALIGN_MEAN
+  alertStrategy:
+    autoClose: 86400s
+  notificationChannels: []
+  severity: WARNING
+
+# Alert 4: Agent Failure Rate > 5%
+- displayName: "Agent Failure Rate High"
+  conditions:
+    - displayName: "Agent failure rate > 5%"
+      conditionThreshold:
+        filter: |
+          resource.type = "cloud_run_revision"
+          AND metric.type = "run.googleapis.com/request_count"
+          AND metric.label.response_code_class = "5xx"
+        comparison: COMPARISON_GT
+        thresholdValue: 0.05
+        duration: 300s
+        aggregations:
+          - alignmentPeriod: 300s
+            perSeriesAligner: ALIGN_RATE
+  alertStrategy:
+    autoClose: 3600s
+  notificationChannels: []
+  severity: WARNING
+
+# Alert 5: Trip Generation Latency P95 > 2s
+- displayName: "Trip Generation Latency High"
+  conditions:
+    - displayName: "P95 latency > 2000ms"
+      conditionThreshold:
+        filter: |
+          resource.type = "cloud_run_revision"
+          AND metric.type = "run.googleapis.com/request_latencies"
+        comparison: COMPARISON_GT
+        thresholdValue: 2000
+        duration: 300s
+        aggregations:
+          - alignmentPeriod: 300s
+            perSeriesAligner: ALIGN_DELTA
+            crossSeriesReducer: REDUCE_PERCENTILE_95
+  alertStrategy:
+    autoClose: 3600s
+  notificationChannels: []
+  severity: WARNING
+
+# Alert 6: Booking Failure Rate > 10%
+- displayName: "Booking Failure Rate High"
+  conditions:
+    - displayName: "Booking failures > 10%"
+      conditionThreshold:
+        filter: |
+          resource.type = "bigquery_dataset"
+          AND metric.type = "custom.googleapis.com/analytics/booking_failure_rate"
+        comparison: COMPARISON_GT
+        thresholdValue: 10
+        duration: 600s
+        aggregations:
+          - alignmentPeriod: 3600s
+            perSeriesAligner: ALIGN_MEAN
+  alertStrategy:
+    autoClose: 3600s
+  notificationChannels: []
+  severity: WARNING
+
+# Alert 7: Pub/Sub Backlog > 5 minutes
+- displayName: "Analytics Pub/Sub Backlog"
+  conditions:
+    - displayName: "Message age > 5 minutes"
+      conditionThreshold:
+        filter: |
+          resource.type = "pubsub_subscription"
+          AND resource.label.subscription_id = "analytics-events-sub"
+          AND metric.type = "pubsub.googleapis.com/subscription/oldest_unacked_message_age"
+        comparison: COMPARISON_GT
+        thresholdValue: 300
+        duration: 300s
+        aggregations:
+          - alignmentPeriod: 60s
+            perSeriesAligner: ALIGN_MAX
+  alertStrategy:
+    autoClose: 1800s
+  notificationChannels: []
+  severity: WARNING

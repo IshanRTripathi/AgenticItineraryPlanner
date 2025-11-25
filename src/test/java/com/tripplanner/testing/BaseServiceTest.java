@@ -1,7 +1,7 @@
 package com.tripplanner.testing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripplanner.service.DatabaseService;
+import com.tripplanner.service.firebase.DatabaseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

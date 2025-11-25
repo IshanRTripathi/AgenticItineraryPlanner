@@ -31,6 +31,9 @@ export function PlanTab({ itinerary }: PlanTabProps) {
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [isRefetching, setIsRefetching] = useState(false);
   
+  // Refs for each day card to enable scrolling
+  const dayRefs = useState(() => new Map<number, HTMLDivElement>())[0];
+  
   // Callback to refetch itinerary after reordering
   const handleRefetchNeeded = async () => {
     console.log('[PlanTab] Refetch requested for itinerary:', itineraryId);
@@ -236,11 +239,53 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                         />
                         
                         {/* Enhanced Day Card */}
-                        <div className="md:ml-16">
+                        <div 
+                          className="md:ml-16"
+                          ref={(el) => {
+                            if (el) dayRefs.set(dayIndex, el);
+                          }}
+                        >
                           <DayCard
                             day={day}
                             isExpanded={expandedDay === dayIndex}
-                            onToggle={() => setExpandedDay(expandedDay === dayIndex ? null : dayIndex)}
+                            onToggle={() => {
+                              const newExpandedDay = expandedDay === dayIndex ? null : dayIndex;
+                              setExpandedDay(newExpandedDay);
+                              
+                              // Scroll to the card when expanding, with offset for sticky headers
+                              if (newExpandedDay !== null) {
+                                setTimeout(() => {
+                                  const element = dayRefs.get(dayIndex);
+                                  if (element) {
+                                    // Find the scrollable container (main element on desktop, window on mobile)
+                                    const scrollContainer = element.closest('main') || window;
+                                    const isWindow = scrollContainer === window;
+                                    
+                                    // Calculate position relative to scroll container
+                                    const elementRect = element.getBoundingClientRect();
+                                    const containerTop = isWindow ? 0 : (scrollContainer as Element).getBoundingClientRect().top;
+                                    const currentScroll = isWindow ? window.pageYOffset : (scrollContainer as Element).scrollTop;
+                                    
+                                    // Responsive offset for sticky headers/tabs
+                                    const offset = window.innerWidth >= 768 ? 100 : 80;
+                                    const targetPosition = currentScroll + (elementRect.top - containerTop) - offset;
+                                    
+                                    // Scroll the appropriate container
+                                    if (isWindow) {
+                                      window.scrollTo({
+                                        top: targetPosition,
+                                        behavior: 'smooth'
+                                      });
+                                    } else {
+                                      (scrollContainer as Element).scrollTo({
+                                        top: targetPosition,
+                                        behavior: 'smooth'
+                                      });
+                                    }
+                                  }
+                                }, 100); // Small delay to let the expansion animation start
+                              }
+                            }}
                             itineraryId={itineraryId}
                             enableDragDrop={true}
                             onRefetchNeeded={handleRefetchNeeded}

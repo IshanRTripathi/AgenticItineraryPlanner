@@ -171,9 +171,9 @@ export function DateRangePicker({
       const earlierDate = date < startDate ? date : startDate;
       const laterDate = date < startDate ? startDate : date;
       
-      // Check if duration exceeds 7 days
+      // Check if duration exceeds 12 days
       const daysDiff = getDaysBetween(earlierDate, laterDate);
-      if (daysDiff > 7) {
+      if (daysDiff > 12) {
         // Show warning banner
         setShowMaxDaysWarning(true);
         setTimeout(() => setShowMaxDaysWarning(false), 3000);
@@ -185,11 +185,11 @@ export function DateRangePicker({
     }
   };
   
-  // Check if a date should be disabled based on 7-day limit
+  // Check if a date should be disabled based on 12-day limit
   const isDateBeyondLimit = (date: Date): boolean => {
     if (!startDate || endDate) return false;
     const daysDiff = Math.abs(getDaysBetween(startDate, date));
-    return daysDiff > 7;
+    return daysDiff > 12;
   };
 
   // Calculate duration only when both dates are selected (not on hover)
@@ -201,7 +201,7 @@ export function DateRangePicker({
   const potentialDuration = startDate && hoveredDate && !endDate
     ? getDaysBetween(startDate, hoveredDate)
     : null;
-  const wouldExceedLimit = potentialDuration !== null && potentialDuration > 7;
+  const wouldExceedLimit = potentialDuration !== null && potentialDuration > 12;
 
   // Suggest best travel dates - randomly select 3-5 days in next 2 months
   const handleSuggestDates = async () => {

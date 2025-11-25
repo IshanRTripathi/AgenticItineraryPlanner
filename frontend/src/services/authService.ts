@@ -14,6 +14,7 @@ import {
   User
 } from 'firebase/auth';
 import { apiClient } from './apiClient';
+import { analytics } from './analytics';
 
 export interface AuthUser {
   uid: string;
@@ -144,6 +145,17 @@ class AuthService {
       const token = await result.user.getIdToken();
       this.updateApiClientToken(token);
       await this.setupTokenRefresh(result.user);
+      
+      // Check if this is a new user (signup) or returning user (login)
+      const isNewUser = result.user.metadata.creationTime === result.user.metadata.lastSignInTime;
+      
+      if (isNewUser) {
+        analytics.identify(result.user.uid);
+        analytics.track('user_signup_completed', { method: 'google' });
+      } else {
+        analytics.identify(result.user.uid);
+      }
+      
       return { success: true, user: result.user };
     } catch (error: any) {
       console.error('[Auth] Google sign in failed:', error);
@@ -191,6 +203,7 @@ class AuthService {
       this.clearTokenRefresh();
       await firebaseSignOut(auth);
       this.updateApiClientToken('');
+      analytics.clearIdentity();
       return { success: true };
     } catch (error: any) {
       console.error('[Auth] Sign out failed:', error);

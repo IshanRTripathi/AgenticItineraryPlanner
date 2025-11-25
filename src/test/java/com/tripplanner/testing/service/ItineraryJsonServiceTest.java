@@ -4,15 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.data.entity.FirestoreItinerary;
 import com.tripplanner.dto.NormalizedItinerary;
-import com.tripplanner.service.DatabaseService;
 import com.tripplanner.service.ItineraryJsonService;
-import com.tripplanner.service.MapBoundsCalculator;
+import com.tripplanner.service.utilities.MapBoundsCalculator;
 import com.tripplanner.testing.BaseServiceTest;
 import com.tripplanner.testing.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.util.Optional;

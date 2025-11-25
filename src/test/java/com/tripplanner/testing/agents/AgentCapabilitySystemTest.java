@@ -2,7 +2,7 @@ package com.tripplanner.testing.agents;
 
 import com.tripplanner.agents.*;
 import com.tripplanner.dto.AgentCapabilities;
-import com.tripplanner.service.AgentRegistry;
+import com.tripplanner.service.agents.AgentRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

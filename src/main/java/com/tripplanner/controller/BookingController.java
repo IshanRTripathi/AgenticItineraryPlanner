@@ -1,7 +1,7 @@
 package com.tripplanner.controller;
 
 import com.tripplanner.dto.*;
-import com.tripplanner.service.BookingService;
+import com.tripplanner.service.external.BookingService;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.service.ItineraryJsonService;
 import jakarta.servlet.http.HttpServletRequest;

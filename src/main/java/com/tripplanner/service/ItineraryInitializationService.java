@@ -97,7 +97,9 @@ public class ItineraryInitializationService {
         itinerary.setCreatedAt(System.currentTimeMillis());
         itinerary.setUpdatedAt(System.currentTimeMillis());
         itinerary.setSummary("Your personalized itinerary for " + request.getDestination());
-        itinerary.setCurrency("INR");
+        // NOTE: Currency will be set by CityAllocationAgent based on destination analysis
+        // Do not set it here to avoid hardcoding assumptions
+        itinerary.setCurrency(null);
         itinerary.setThemes(request.getInterests() != null ? request.getInterests() : new ArrayList<>());
         itinerary.setConstraints(request.getConstraints() != null ? request.getConstraints() : new ArrayList<>());
         itinerary.setDays(new ArrayList<>());

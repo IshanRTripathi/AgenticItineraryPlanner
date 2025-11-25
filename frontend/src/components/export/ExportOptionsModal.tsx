@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 // RadioGroup not available, using custom implementation
 import { Loader2, Download } from 'lucide-react';
+import { analytics } from '@/services/analytics';
 
 export interface ExportOptions {
   includeOverview: boolean;
@@ -56,7 +57,29 @@ export function ExportOptionsModal({
   const [options, setOptions] = useState<ExportOptions>(defaultOptions);
 
   const handleExport = async () => {
-    await onExport(options);
+    try {
+      // Track PDF export initiated
+      analytics.track('pdf_export_initiated', {
+        format: 'pdf',
+        layout: options.layout,
+        pageSize: options.pageSize
+      });
+      
+      await onExport(options);
+      
+      // Track PDF export completed
+      analytics.track('pdf_export_completed', {
+        format: 'pdf',
+        layout: options.layout,
+        pageSize: options.pageSize
+      });
+    } catch (error) {
+      // Track PDF export failed
+      analytics.track('pdf_export_failed', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
   };
 
   const updateOption = <K extends keyof ExportOptions>(

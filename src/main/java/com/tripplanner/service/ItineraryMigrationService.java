@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * Service for migrating itineraries from old node ID patterns to new standardized pattern.
  * Automatically detects and migrates itineraries when they are loaded.
@@ -45,8 +47,38 @@ public class ItineraryMigrationService {
         try {
             NormalizedItinerary migrated = performMigration(itinerary);
             
-            // Save migrated version
-            itineraryJsonService.updateItinerary(migrated);
+            // Save migrated version with optimistic locking and retry
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean saved = false;
+            
+            while (!saved && retryCount < maxRetries) {
+                try {
+                    itineraryJsonService.updateItineraryWithLock(migrated);
+                    saved = true;
+                } catch (com.tripplanner.exception.ConcurrentModificationException e) {
+                    retryCount++;
+                    logger.error("Concurrent modification during migration (attempt {}/{}): {}", 
+                               retryCount, maxRetries, e.getMessage());
+                    
+                    if (retryCount < maxRetries) {
+                        logger.info("Reloading itinerary and retrying migration save...");
+                        Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itinerary.getItineraryId());
+                        if (reloaded.isPresent()) {
+                            migrated = reloaded.get();
+                            // Re-apply migration to reloaded itinerary
+                            migrated = performMigration(migrated);
+                            logger.info("Re-applied migration to reloaded itinerary");
+                        } else {
+                            logger.error("Failed to reload itinerary for retry");
+                            throw new RuntimeException("Migration conflict", e);
+                        }
+                    } else {
+                        logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                        throw new RuntimeException("Migration conflict", e);
+                    }
+                }
+            }
             
             int totalNodes = migrated.getDays().stream()
                     .mapToInt(d -> d.getNodes() != null ? d.getNodes().size() : 0)

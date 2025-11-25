@@ -107,6 +107,8 @@
     "languagePreferences": "ਭਾਸ਼ਾ ਤਰਜੀਹਾਂ",
     "selectLanguage": "ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ",
     "languageDescription": "ਤਬਦੀਲੀਆਂ ਤੁਰੰਤ ਸਾਰੇ ਪੰਨਿਆਂ 'ਤੇ ਲਾਗੂ ਹੋਣਗੀਆਂ",
+    "currencyPreferences": "ਮੁਦਰਾ ਤਰਜੀਹਾਂ",
+    "currencyDescription": "ਲਾਗਤਾਂ ਅਤੇ ਬਜਟ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰਨ ਲਈ ਆਪਣੀ ਪਸੰਦੀਦਾ ਮੁਦਰਾ ਚੁਣੋ",
     "accountDetails": "ਖਾਤਾ ਵੇਰਵੇ",
     "accountDetailsDescription": "ਤੁਹਾਡੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਅਤੇ ਖਾਤਾ ਸਥਿਤੀ",
     "authProvider": "ਪ੍ਰਮਾਣਿਕਤਾ ਪ੍ਰਦਾਤਾ",
@@ -124,7 +126,7 @@
       "description": "ਆਪਣੇ ਖਾਤੇ ਅਤੇ ਤਰਜੀਹਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
       "myTrips": "ਮੇਰੀਆਂ ਯਾਤਰਾਵਾਂ",
       "planTrip": "ਯਾਤਰਾ ਦੀ ਯੋਜਨਾ ਬਣਾਓ",
-      "upgrade": "ਅੱਪਗ੍ਰੇਡ ਕਰੋ",
+      "currency": "ਮੁਦਰਾ",
       "language": "ਭਾਸ਼ਾ"
     }
   },

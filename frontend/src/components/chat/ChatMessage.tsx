@@ -10,6 +10,8 @@ import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { ChatMessage as ChatMessageType } from '@/contexts/UnifiedItineraryTypes';
 import { ItineraryChangesDisplay } from './ItineraryChangesDisplay';
 import type { ItineraryDiff } from '@/types/ItineraryChanges';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -154,13 +156,28 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
           </div>
         ) : (
           <>
-            <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed mb-1.5 sm:mb-2">{m.text}</p>
-
-            {m.intent && !m.applied && (
-              <div className="mt-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1.5 sm:px-3 sm:py-2 border border-gray-200">
-                <span className="font-medium text-gray-700">Intent:</span> {m.intent}
-              </div>
-            )}
+            <div className="prose prose-sm max-w-none text-xs sm:text-sm leading-relaxed mb-1.5 sm:mb-2">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Customize markdown rendering
+                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
+                  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                  strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                  em: ({ children }) => <em className="italic">{children}</em>,
+                  code: ({ children }) => <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+                  h1: ({ children }) => <h1 className="text-base font-bold mb-2 mt-3 first:mt-0">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-sm font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 mt-2 first:mt-0">{children}</h3>,
+                  blockquote: ({ children }) => <blockquote className="border-l-2 border-gray-300 pl-3 italic text-gray-700">{children}</blockquote>,
+                  a: ({ href, children }) => <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>,
+                }}
+              >
+                {m.text}
+              </ReactMarkdown>
+            </div>
           </>
         )}
 

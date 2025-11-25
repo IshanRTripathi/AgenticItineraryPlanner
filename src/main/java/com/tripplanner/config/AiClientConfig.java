@@ -1,9 +1,9 @@
 package com.tripplanner.config;
 
-import com.tripplanner.service.GeminiClient;
+import com.tripplanner.service.client.GeminiClient;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ai.ResilientAiClient;
-import com.tripplanner.service.openrouter.OpenRouterClient;
+import com.tripplanner.service.client.OpenRouterClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

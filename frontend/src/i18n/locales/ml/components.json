@@ -45,8 +45,8 @@
     "wind": "കാറ്റ്"
   },
   "dateRangePicker": {
-    "maxDaysTitle": "പരമാവധി 7 ദിവസം",
-    "maxDaysDescription": "ദയവായി 7 ദിവസമോ അതിൽ കുറവോ യാത്രാ കാലാവധി തിരഞ്ഞെടുക്കുക",
+    "maxDaysTitle": "പരമാവധി 12 ദിവസം",
+    "maxDaysDescription": "ദയവായി 12 ദിവസമോ അതിൽ കുറവോ യാത്രാ കാലാവധി തിരഞ്ഞെടുക്കുക",
     "duration": "{{nights}} രാത്രി, {{days}} ദിവസം",
     "duration_plural": "{{nights}} രാത്രികൾ, {{days}} ദിവസങ്ങൾ",
     "selectDates": "തീയതികൾ തിരഞ്ഞെടുക്കുക",

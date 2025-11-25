@@ -1,0 +1,3745 @@
+client:789 [vite] connecting...
+client:912 [vite] connected.
+chunk-VAMZPUBM.js?v=cae2d5ab:21609 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+GoogleTranslateService.ts:22 [GoogleTranslateService] API key not configured. Dynamic translation will not work.
+GoogleTranslateService @ GoogleTranslateService.ts:22
+DynamicTranslator @ DynamicTranslator.ts:17
+TranslationProvider @ TranslationProvider.tsx:33
+renderWithHooks @ chunk-VAMZPUBM.js?v=cae2d5ab:11596
+mountIndeterminateComponent @ chunk-VAMZPUBM.js?v=cae2d5ab:14974
+beginWork @ chunk-VAMZPUBM.js?v=cae2d5ab:15962
+beginWork$1 @ chunk-VAMZPUBM.js?v=cae2d5ab:19806
+performUnitOfWork @ chunk-VAMZPUBM.js?v=cae2d5ab:19251
+workLoopSync @ chunk-VAMZPUBM.js?v=cae2d5ab:19190
+renderRootSync @ chunk-VAMZPUBM.js?v=cae2d5ab:19169
+performConcurrentWorkOnRoot @ chunk-VAMZPUBM.js?v=cae2d5ab:18728
+workLoop @ chunk-VAMZPUBM.js?v=cae2d5ab:197
+flushWork @ chunk-VAMZPUBM.js?v=cae2d5ab:176
+performWorkUntilDeadline @ chunk-VAMZPUBM.js?v=cae2d5ab:384
+TranslationCache.ts:188 [TranslationCache] Loaded 0 entries from sessionStorage
+TranslationProvider.tsx:281 [TranslationProvider] Context value updated: {language: 'en', renderKey: 0, translationsLoaded: false}
+GoogleTranslateService.ts:22 [GoogleTranslateService] API key not configured. Dynamic translation will not work.
+GoogleTranslateService @ GoogleTranslateService.ts:22
+DynamicTranslator @ DynamicTranslator.ts:17
+TranslationProvider @ TranslationProvider.tsx:33
+renderWithHooks @ chunk-VAMZPUBM.js?v=cae2d5ab:11596
+mountIndeterminateComponent @ chunk-VAMZPUBM.js?v=cae2d5ab:15024
+beginWork @ chunk-VAMZPUBM.js?v=cae2d5ab:15962
+beginWork$1 @ chunk-VAMZPUBM.js?v=cae2d5ab:19806
+performUnitOfWork @ chunk-VAMZPUBM.js?v=cae2d5ab:19251
+workLoopSync @ chunk-VAMZPUBM.js?v=cae2d5ab:19190
+renderRootSync @ chunk-VAMZPUBM.js?v=cae2d5ab:19169
+performConcurrentWorkOnRoot @ chunk-VAMZPUBM.js?v=cae2d5ab:18728
+workLoop @ chunk-VAMZPUBM.js?v=cae2d5ab:197
+flushWork @ chunk-VAMZPUBM.js?v=cae2d5ab:176
+performWorkUntilDeadline @ chunk-VAMZPUBM.js?v=cae2d5ab:384
+TranslationCache.ts:188 [TranslationCache] Loaded 0 entries from sessionStorage
+TranslationProvider.tsx:281 [TranslationProvider] Context value updated: {language: 'en', renderKey: 0, translationsLoaded: false}
+TranslationProvider.tsx:142 [TranslationProvider] Initializing with language: en {saved: 'en', browser: 'en', default: 'en'}
+react-router-dom.js?v=cae2d5ab:4393 ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+warnOnce @ react-router-dom.js?v=cae2d5ab:4393
+logDeprecation @ react-router-dom.js?v=cae2d5ab:4396
+logV6DeprecationWarnings @ react-router-dom.js?v=cae2d5ab:4399
+(anonymous) @ react-router-dom.js?v=cae2d5ab:5271
+commitHookEffectListMount @ chunk-VAMZPUBM.js?v=cae2d5ab:16963
+commitPassiveMountOnFiber @ chunk-VAMZPUBM.js?v=cae2d5ab:18206
+commitPassiveMountEffects_complete @ chunk-VAMZPUBM.js?v=cae2d5ab:18179
+commitPassiveMountEffects_begin @ chunk-VAMZPUBM.js?v=cae2d5ab:18169
+commitPassiveMountEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:18159
+flushPassiveEffectsImpl @ chunk-VAMZPUBM.js?v=cae2d5ab:19543
+flushPassiveEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:19500
+(anonymous) @ chunk-VAMZPUBM.js?v=cae2d5ab:19381
+workLoop @ chunk-VAMZPUBM.js?v=cae2d5ab:197
+flushWork @ chunk-VAMZPUBM.js?v=cae2d5ab:176
+performWorkUntilDeadline @ chunk-VAMZPUBM.js?v=cae2d5ab:384
+react-router-dom.js?v=cae2d5ab:4393 ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+warnOnce @ react-router-dom.js?v=cae2d5ab:4393
+logDeprecation @ react-router-dom.js?v=cae2d5ab:4396
+logV6DeprecationWarnings @ react-router-dom.js?v=cae2d5ab:4402
+(anonymous) @ react-router-dom.js?v=cae2d5ab:5271
+commitHookEffectListMount @ chunk-VAMZPUBM.js?v=cae2d5ab:16963
+commitPassiveMountOnFiber @ chunk-VAMZPUBM.js?v=cae2d5ab:18206
+commitPassiveMountEffects_complete @ chunk-VAMZPUBM.js?v=cae2d5ab:18179
+commitPassiveMountEffects_begin @ chunk-VAMZPUBM.js?v=cae2d5ab:18169
+commitPassiveMountEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:18159
+flushPassiveEffectsImpl @ chunk-VAMZPUBM.js?v=cae2d5ab:19543
+flushPassiveEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:19500
+(anonymous) @ chunk-VAMZPUBM.js?v=cae2d5ab:19381
+workLoop @ chunk-VAMZPUBM.js?v=cae2d5ab:197
+flushWork @ chunk-VAMZPUBM.js?v=cae2d5ab:176
+performWorkUntilDeadline @ chunk-VAMZPUBM.js?v=cae2d5ab:384
+TranslationProvider.tsx:142 [TranslationProvider] Initializing with language: en {saved: 'en', browser: 'en', default: 'en'}
+TranslationProvider.tsx:117 [TranslationProvider] Loaded translations for language: en
+TranslationProvider.tsx:117 [TranslationProvider] Loaded translations for language: en
+TranslationProvider.tsx:281 [TranslationProvider] Context value updated: {language: 'en', renderKey: 0, translationsLoaded: true}
+TranslationProvider.tsx:281 [TranslationProvider] Context value updated: {language: 'en', renderKey: 0, translationsLoaded: true}
+:5173/manifest.json:1 Manifest: Line: 1, column: 1, Syntax error.
+analytics.ts:60 [Analytics] Event tracked: page_view {page_path: '/planner-progress', page_title: 'EasyTrip - AI-Powered Travel Planning', page_referrer: 'http://localhost:5173/planner'}
+analytics.ts:60 [Analytics] Event tracked: page_view {page_path: '/planner-progress', page_title: 'EasyTrip - AI-Powered Travel Planning', page_referrer: 'http://localhost:5173/planner'}
+planner-progress?itineraryId=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340:1 Access to fetch at 'http://localhost:8080/api/v1/analytics/events' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+analytics.ts:203 [Analytics] Failed to send to backend: TypeError: Failed to fetch
+    at AnalyticsService.sendToBackend (analytics.ts:188:13)
+    at AnalyticsService.track (analytics.ts:58:10)
+    at AnalyticsService.page (analytics.ts:67:10)
+    at App.tsx:40:15
+    at commitHookEffectListMount (chunk-VAMZPUBM.js?v=cae2d5ab:16963:34)
+    at commitPassiveMountOnFiber (chunk-VAMZPUBM.js?v=cae2d5ab:18206:19)
+    at commitPassiveMountEffects_complete (chunk-VAMZPUBM.js?v=cae2d5ab:18179:17)
+    at commitPassiveMountEffects_begin (chunk-VAMZPUBM.js?v=cae2d5ab:18169:15)
+    at commitPassiveMountEffects (chunk-VAMZPUBM.js?v=cae2d5ab:18159:11)
+    at flushPassiveEffectsImpl (chunk-VAMZPUBM.js?v=cae2d5ab:19543:11)
+sendToBackend @ analytics.ts:203
+await in sendToBackend
+track @ analytics.ts:58
+page @ analytics.ts:67
+(anonymous) @ App.tsx:40
+commitHookEffectListMount @ chunk-VAMZPUBM.js?v=cae2d5ab:16963
+commitPassiveMountOnFiber @ chunk-VAMZPUBM.js?v=cae2d5ab:18206
+commitPassiveMountEffects_complete @ chunk-VAMZPUBM.js?v=cae2d5ab:18179
+commitPassiveMountEffects_begin @ chunk-VAMZPUBM.js?v=cae2d5ab:18169
+commitPassiveMountEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:18159
+flushPassiveEffectsImpl @ chunk-VAMZPUBM.js?v=cae2d5ab:19543
+flushPassiveEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:19500
+(anonymous) @ chunk-VAMZPUBM.js?v=cae2d5ab:19381
+workLoop @ chunk-VAMZPUBM.js?v=cae2d5ab:197
+flushWork @ chunk-VAMZPUBM.js?v=cae2d5ab:176
+performWorkUntilDeadline @ chunk-VAMZPUBM.js?v=cae2d5ab:384
+planner-progress?itineraryId=it_7bcaebb6-346f-4061-8cdc-f14acfbaf340:1 Access to fetch at 'http://localhost:8080/api/v1/analytics/events' from origin 'http://localhost:5173' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+analytics.ts:203 [Analytics] Failed to send to backend: TypeError: Failed to fetch
+    at AnalyticsService.sendToBackend (analytics.ts:188:13)
+    at AnalyticsService.track (analytics.ts:58:10)
+    at AnalyticsService.page (analytics.ts:67:10)
+    at App.tsx:40:15
+    at commitHookEffectListMount (chunk-VAMZPUBM.js?v=cae2d5ab:16963:34)
+    at invokePassiveEffectMountInDEV (chunk-VAMZPUBM.js?v=cae2d5ab:18374:19)
+    at invokeEffectsInDev (chunk-VAMZPUBM.js?v=cae2d5ab:19754:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-VAMZPUBM.js?v=cae2d5ab:19739:15)
+    at flushPassiveEffectsImpl (chunk-VAMZPUBM.js?v=cae2d5ab:19556:13)
+    at flushPassiveEffects (chunk-VAMZPUBM.js?v=cae2d5ab:19500:22)
+sendToBackend @ analytics.ts:203
+await in sendToBackend
+track @ analytics.ts:58
+page @ analytics.ts:67
+(anonymous) @ App.tsx:40
+commitHookEffectListMount @ chunk-VAMZPUBM.js?v=cae2d5ab:16963
+invokePassiveEffectMountInDEV @ chunk-VAMZPUBM.js?v=cae2d5ab:18374
+invokeEffectsInDev @ chunk-VAMZPUBM.js?v=cae2d5ab:19754
+commitDoubleInvokeEffectsInDEV @ chunk-VAMZPUBM.js?v=cae2d5ab:19739
+flushPassiveEffectsImpl @ chunk-VAMZPUBM.js?v=cae2d5ab:19556
+flushPassiveEffects @ chunk-VAMZPUBM.js?v=cae2d5ab:19500
+(anonymous) @ chunk-VAMZPUBM.js?v=cae2d5ab:19381
+workLoop @ chunk-VAMZPUBM.js?v=cae2d5ab:197
+flushWork @ chunk-VAMZPUBM.js?v=cae2d5ab:176
+performWorkUntilDeadline @ chunk-VAMZPUBM.js?v=cae2d5ab:384
+logger.ts:109 [INFO] AuthContext - Auth state changed
+apiClient.ts:34 [API Client] clearAuthToken called (handled by interceptors)
+logger.ts:109 [INFO] APP - Auth token cleared in ApiService
+logger.ts:109 [INFO] AuthContext - Auth token cleared
+useStompWebSocket.ts:87 [STOMP] Using WebSocket URL: http://localhost:8080/ws
+useStompWebSocket.ts:145 [STOMP] Disconnecting...
+useStompWebSocket.ts:87 [STOMP] Using WebSocket URL: http://localhost:8080/ws
+chunk-VAMZPUBM.js?v=cae2d5ab:377 [Violation] 'message' handler took 241ms
+useStompWebSocket.ts:104 [STOMP Debug] Opening Web Socket...
+useStompWebSocket.ts:94 [STOMP] Creating WebSocket with session: session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878
+useStompWebSocket.ts:104 [STOMP Debug] Opening Web Socket...
+useStompWebSocket.ts:94 [STOMP] Creating WebSocket with session: session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880
+useStompWebSocket.ts:104 [STOMP Debug] Web Socket Opened...
+useStompWebSocket.ts:104 [STOMP Debug] >>> CONNECT
+accept-version:1.2,1.1,1.0
+heart-beat:4000,4000
+
+
+useStompWebSocket.ts:104 [STOMP Debug] Web Socket Opened...
+useStompWebSocket.ts:104 [STOMP Debug] >>> CONNECT
+accept-version:1.2,1.1,1.0
+heart-beat:4000,4000
+
+
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< CONNECTED
+heart-beat:0,0
+version:1.2
+content-length:0
+
+
+useStompWebSocket.ts:104 [STOMP Debug] connected to server undefined
+useStompWebSocket.ts:107 [STOMP] Connected
+AgentProgress.tsx:213 [AgentProgress] WebSocket connected successfully
+useStompWebSocket.ts:104 [STOMP Debug] >>> SUBSCRIBE
+id:sub-0
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+
+
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< CONNECTED
+heart-beat:0,0
+version:1.2
+content-length:0
+
+
+useStompWebSocket.ts:104 [STOMP Debug] connected to server undefined
+useStompWebSocket.ts:107 [STOMP] Connected
+AgentProgress.tsx:213 [AgentProgress] WebSocket connected successfully
+useStompWebSocket.ts:104 [STOMP Debug] >>> SUBSCRIBE
+id:sub-0
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+
+
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:376
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-0
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:376
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 20,
+    "step": "skeleton_generation",
+    "message": "Creating day 1 structure",
+    "status": "running",
+    "timestamp": "2025-11-15T11:42:56.784636700Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:42:56.784636700Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 20, Progress Type: 'number', Step/Phase: 'skeleton_generation', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:376
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-1
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:376
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 20,
+    "step": "skeleton_generation",
+    "message": "Creating day 1 structure",
+    "status": "running",
+    "timestamp": "2025-11-15T11:42:56.784636700Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:42:56.784636700Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 20, Progress Type: 'number', Step/Phase: 'skeleton_generation', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 0
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 20
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 0
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 20
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:4016
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-3
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:4016
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'day_completed', updateType: 'day_completed', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "day_completed",
+  "updateType": "day_completed",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "dayNumber": 1,
+    "message": "Day 1 planning completed with 6 activities",
+    "progress": 30,
+    "type": "day_completed",
+    "day": {
+      "dayNumber": 1,
+      "date": "2025-12-09",
+      "location": "Bali, Indonesia",
+      "warnings": null,
+      "notes": null,
+      "summary": "Arrival and initial exploration of Bali's cultural highlights.",
+      "pace": null,
+      "totalDistance": null,
+      "totalCost": null,
+      "totalDuration": null,
+      "timeWindowStart": null,
+      "timeWindowEnd": null,
+      "timeZone": null,
+      "nodes": [
+        {
+          "id": "day1_node1",
+          "type": "meal",
+          "title": "Morning Hotel Breakfast",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765267200000,
+            "endTime": 1765270800000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node2",
+          "type": "attraction",
+          "title": "Morning Cultural Temple Visit",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765272600000,
+            "endTime": 1765281600000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node3",
+          "type": "meal",
+          "title": "Midday Local Cuisine Lunch",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765283400000,
+            "endTime": 1765287000000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node4",
+          "type": "attraction",
+          "title": "Afternoon Traditional Craft Market Exploration",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765288800000,
+            "endTime": 1765299600000,
+            "durationMin": 180
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node5",
+          "type": "meal",
+          "title": "Evening Restaurant Dinner",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765306800000,
+            "endTime": 1765312200000,
+            "durationMin": 90
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node6",
+          "type": "accommodation",
+          "title": "Overnight Stay at Hotel",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765314000000,
+            "endTime": 1765267200000,
+            "durationMin": 660
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        }
+      ],
+      "edges": null
+    }
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:04.080678300Z",
+  "metadata": null
+}
+AgentProgress.tsx:110 [AgentProgress] Day completed: {dayNumber: 1, activities: 6, progress: 30, rawData: {…}, dayData: {…}}
+AgentProgress.tsx:151 [AgentProgress] Enabling partial view button for day 1
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:376
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-5
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:376
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 40,
+    "step": "skeleton_generation",
+    "message": "Creating day 2 structure",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:04.081678300Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:04.081678300Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 40, Progress Type: 'number', Step/Phase: 'skeleton_generation', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:4016
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-2
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:4016
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'day_completed', updateType: 'day_completed', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "day_completed",
+  "updateType": "day_completed",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "dayNumber": 1,
+    "message": "Day 1 planning completed with 6 activities",
+    "progress": 30,
+    "type": "day_completed",
+    "day": {
+      "dayNumber": 1,
+      "date": "2025-12-09",
+      "location": "Bali, Indonesia",
+      "warnings": null,
+      "notes": null,
+      "summary": "Arrival and initial exploration of Bali's cultural highlights.",
+      "pace": null,
+      "totalDistance": null,
+      "totalCost": null,
+      "totalDuration": null,
+      "timeWindowStart": null,
+      "timeWindowEnd": null,
+      "timeZone": null,
+      "nodes": [
+        {
+          "id": "day1_node1",
+          "type": "meal",
+          "title": "Morning Hotel Breakfast",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765267200000,
+            "endTime": 1765270800000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node2",
+          "type": "attraction",
+          "title": "Morning Cultural Temple Visit",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765272600000,
+            "endTime": 1765281600000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node3",
+          "type": "meal",
+          "title": "Midday Local Cuisine Lunch",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765283400000,
+            "endTime": 1765287000000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node4",
+          "type": "attraction",
+          "title": "Afternoon Traditional Craft Market Exploration",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765288800000,
+            "endTime": 1765299600000,
+            "durationMin": 180
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node5",
+          "type": "meal",
+          "title": "Evening Restaurant Dinner",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765306800000,
+            "endTime": 1765312200000,
+            "durationMin": 90
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        },
+        {
+          "id": "day1_node6",
+          "type": "accommodation",
+          "title": "Overnight Stay at Hotel",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765314000000,
+            "endTime": 1765267200000,
+            "durationMin": 660
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206983653,
+          "agentData": {}
+        }
+      ],
+      "edges": null
+    }
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:04.080678300Z",
+  "metadata": null
+}
+AgentProgress.tsx:110 [AgentProgress] Day completed: {dayNumber: 1, activities: 6, progress: 30, rawData: {…}, dayData: {…}}
+AgentProgress.tsx:151 [AgentProgress] Enabling partial view button for day 1
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:376
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-4
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:376
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 40,
+    "step": "skeleton_generation",
+    "message": "Creating day 2 structure",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:04.081678300Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:04.081678300Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 40, Progress Type: 'number', Step/Phase: 'skeleton_generation', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+globe__gl.js?v=cae2d5ab:869 [Violation] 'requestAnimationFrame' handler took 111ms
+globe__gl.js?v=cae2d5ab:869 [Violation] 'requestAnimationFrame' handler took 97ms
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:4627
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-7
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:4627
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'day_completed', updateType: 'day_completed', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "day_completed",
+  "updateType": "day_completed",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "dayNumber": 2,
+    "message": "Day 2 planning completed with 7 activities",
+    "progress": 40,
+    "type": "day_completed",
+    "day": {
+      "dayNumber": 2,
+      "date": "2025-12-10",
+      "location": "Bali, Indonesia",
+      "warnings": null,
+      "notes": null,
+      "summary": "A day exploring cultural sites and natural beauty, enjoying local cuisine in Bali.",
+      "pace": null,
+      "totalDistance": null,
+      "totalCost": null,
+      "totalDuration": null,
+      "timeWindowStart": null,
+      "timeWindowEnd": null,
+      "timeZone": null,
+      "nodes": [
+        {
+          "id": "day2_node1",
+          "type": "meal",
+          "title": "Morning Hotel Breakfast",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765353600000,
+            "endTime": 1765357200000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node2",
+          "type": "attraction",
+          "title": "Morning Ancient Temple Visit",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765359000000,
+            "endTime": 1765368000000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node3",
+          "type": "meal",
+          "title": "Midday Local Restaurant Lunch",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765369800000,
+            "endTime": 1765373400000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node4",
+          "type": "attraction",
+          "title": "Afternoon Scenic Rice Terrace Exploration",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765375200000,
+            "endTime": 1765384200000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node5",
+          "type": "transport",
+          "title": "Late Afternoon Transfer to Coastal Area",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765385100000,
+            "endTime": 1765387800000,
+            "durationMin": 45
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node6",
+          "type": "meal",
+          "title": "Evening Seafood Dinner by the Beach",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765391400000,
+            "endTime": 1765396800000,
+            "durationMin": 90
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node7",
+          "type": "accommodation",
+          "title": "Overnight Stay at Hotel in Bali",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765398600000,
+            "endTime": 1765353600000,
+            "durationMin": 690
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        }
+      ],
+      "edges": null
+    }
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:13.799023700Z",
+  "metadata": null
+}
+AgentProgress.tsx:110 [AgentProgress] Day completed: {dayNumber: 2, activities: 7, progress: 40, rawData: {…}, dayData: {…}}
+AgentProgress.tsx:151 [AgentProgress] Enabling partial view button for day 2
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:376
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-9
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:376
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 60,
+    "step": "skeleton_generation",
+    "message": "Creating day 3 structure",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:13.800023800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:13.800023800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 60, Progress Type: 'number', Step/Phase: 'skeleton_generation', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:4627
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-6
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:4627
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'day_completed', updateType: 'day_completed', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "day_completed",
+  "updateType": "day_completed",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "dayNumber": 2,
+    "message": "Day 2 planning completed with 7 activities",
+    "progress": 40,
+    "type": "day_completed",
+    "day": {
+      "dayNumber": 2,
+      "date": "2025-12-10",
+      "location": "Bali, Indonesia",
+      "warnings": null,
+      "notes": null,
+      "summary": "A day exploring cultural sites and natural beauty, enjoying local cuisine in Bali.",
+      "pace": null,
+      "totalDistance": null,
+      "totalCost": null,
+      "totalDuration": null,
+      "timeWindowStart": null,
+      "timeWindowEnd": null,
+      "timeZone": null,
+      "nodes": [
+        {
+          "id": "day2_node1",
+          "type": "meal",
+          "title": "Morning Hotel Breakfast",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765353600000,
+            "endTime": 1765357200000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node2",
+          "type": "attraction",
+          "title": "Morning Ancient Temple Visit",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765359000000,
+            "endTime": 1765368000000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node3",
+          "type": "meal",
+          "title": "Midday Local Restaurant Lunch",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765369800000,
+            "endTime": 1765373400000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node4",
+          "type": "attraction",
+          "title": "Afternoon Scenic Rice Terrace Exploration",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765375200000,
+            "endTime": 1765384200000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node5",
+          "type": "transport",
+          "title": "Late Afternoon Transfer to Coastal Area",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765385100000,
+            "endTime": 1765387800000,
+            "durationMin": 45
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node6",
+          "type": "meal",
+          "title": "Evening Seafood Dinner by the Beach",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765391400000,
+            "endTime": 1765396800000,
+            "durationMin": 90
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        },
+        {
+          "id": "day2_node7",
+          "type": "accommodation",
+          "title": "Overnight Stay at Hotel in Bali",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765398600000,
+            "endTime": 1765353600000,
+            "durationMin": 690
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763206993355,
+          "agentData": {}
+        }
+      ],
+      "edges": null
+    }
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:13.799023700Z",
+  "metadata": null
+}
+AgentProgress.tsx:110 [AgentProgress] Day completed: {dayNumber: 2, activities: 7, progress: 40, rawData: {…}, dayData: {…}}
+AgentProgress.tsx:151 [AgentProgress] Enabling partial view button for day 2
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:376
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-8
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:376
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 60,
+    "step": "skeleton_generation",
+    "message": "Creating day 3 structure",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:13.800023800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:13.800023800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 60, Progress Type: 'number', Step/Phase: 'skeleton_generation', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:3489
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-10
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:3489
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'day_completed', updateType: 'day_completed', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "day_completed",
+  "updateType": "day_completed",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "dayNumber": 3,
+    "message": "Day 3 planning completed with 5 activities",
+    "progress": 50,
+    "type": "day_completed",
+    "day": {
+      "dayNumber": 3,
+      "date": "2025-12-11",
+      "location": "Bali, Indonesia",
+      "warnings": null,
+      "notes": null,
+      "summary": "Enjoy a final day in Bali with cultural sights, beach relaxation, and local cuisine before departing.",
+      "pace": null,
+      "totalDistance": null,
+      "totalCost": null,
+      "totalDuration": null,
+      "timeWindowStart": null,
+      "timeWindowEnd": null,
+      "timeZone": null,
+      "nodes": [
+        {
+          "id": "day3_node1",
+          "type": "meal",
+          "title": "Morning Hotel Breakfast",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765440000000,
+            "endTime": 1765443600000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001975,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node2",
+          "type": "attraction",
+          "title": "Morning Coastal Temple Exploration",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765445400000,
+            "endTime": 1765454400000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001975,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node3",
+          "type": "meal",
+          "title": "Midday Local Cuisine Lunch",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765456200000,
+            "endTime": 1765459800000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001975,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node4",
+          "type": "attraction",
+          "title": "Afternoon Beach Relaxation",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765461600000,
+            "endTime": 1765468800000,
+            "durationMin": 120
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001976,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node5",
+          "type": "transport",
+          "title": "Late Afternoon Transfer to Airport",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765470600000,
+            "endTime": 1765474200000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001976,
+          "agentData": {}
+        }
+      ],
+      "edges": null
+    }
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:22.429593200Z",
+  "metadata": null
+}
+AgentProgress.tsx:110 [AgentProgress] Day completed: {dayNumber: 3, activities: 5, progress: 50, rawData: {…}, dayData: {…}}
+AgentProgress.tsx:151 [AgentProgress] Enabling partial view button for day 3
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-13
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 80,
+    "step": "skeleton_complete",
+    "message": "Skeleton complete",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:22.429593200Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:22.430592700Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 80, Progress Type: 'number', Step/Phase: 'skeleton_complete', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:3489
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-11
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:3489
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'day_completed', updateType: 'day_completed', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "day_completed",
+  "updateType": "day_completed",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "dayNumber": 3,
+    "message": "Day 3 planning completed with 5 activities",
+    "progress": 50,
+    "type": "day_completed",
+    "day": {
+      "dayNumber": 3,
+      "date": "2025-12-11",
+      "location": "Bali, Indonesia",
+      "warnings": null,
+      "notes": null,
+      "summary": "Enjoy a final day in Bali with cultural sights, beach relaxation, and local cuisine before departing.",
+      "pace": null,
+      "totalDistance": null,
+      "totalCost": null,
+      "totalDuration": null,
+      "timeWindowStart": null,
+      "timeWindowEnd": null,
+      "timeZone": null,
+      "nodes": [
+        {
+          "id": "day3_node1",
+          "type": "meal",
+          "title": "Morning Hotel Breakfast",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765440000000,
+            "endTime": 1765443600000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001975,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node2",
+          "type": "attraction",
+          "title": "Morning Coastal Temple Exploration",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765445400000,
+            "endTime": 1765454400000,
+            "durationMin": 150
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001975,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node3",
+          "type": "meal",
+          "title": "Midday Local Cuisine Lunch",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765456200000,
+            "endTime": 1765459800000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001975,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node4",
+          "type": "attraction",
+          "title": "Afternoon Beach Relaxation",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765461600000,
+            "endTime": 1765468800000,
+            "durationMin": 120
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001976,
+          "agentData": {}
+        },
+        {
+          "id": "day3_node5",
+          "type": "transport",
+          "title": "Late Afternoon Transfer to Airport",
+          "location": {
+            "name": "Bali, Indonesia",
+            "address": null,
+            "coordinates": null,
+            "placeId": null,
+            "googleMapsUri": null,
+            "rating": null,
+            "openingHours": null,
+            "closingHours": null,
+            "photos": null,
+            "userRatingsTotal": null,
+            "priceLevel": null
+          },
+          "timing": {
+            "startTime": 1765470600000,
+            "endTime": 1765474200000,
+            "durationMin": 60
+          },
+          "cost": null,
+          "details": null,
+          "labels": null,
+          "tips": null,
+          "links": null,
+          "transit": null,
+          "locked": false,
+          "bookingRef": null,
+          "status": "planned",
+          "updatedBy": null,
+          "updatedAt": 1763207001976,
+          "agentData": {}
+        }
+      ],
+      "edges": null
+    }
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:22.429593200Z",
+  "metadata": null
+}
+AgentProgress.tsx:110 [AgentProgress] Day completed: {dayNumber: 3, activities: 5, progress: 50, rawData: {…}, dayData: {…}}
+AgentProgress.tsx:151 [AgentProgress] Enabling partial view button for day 3
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-12
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "PLANNER",
+    "kind": "PLANNER",
+    "progress": 80,
+    "step": "skeleton_complete",
+    "message": "Skeleton complete",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:22.429593200Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:22.430592700Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 80, Progress Type: 'number', Step/Phase: 'skeleton_complete', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 50
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 50
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 50
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 50
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:282
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-14
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:282
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Phase skeleton completed in 28721 ms",
+    "progress": 30,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.773325500Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:282
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-15
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:282
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Phase skeleton completed in 28721 ms",
+    "progress": 30,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.773325500Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:272
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-16
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:272
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Populating node details...",
+    "progress": 40,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.773325500Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 40, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:335
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-18
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:335
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'phase_transition', updateType: 'phase_transition', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "phase_transition",
+  "updateType": "phase_transition",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "message": "Moving from skeleton to population phase",
+    "toPhase": "population",
+    "progress": 40,
+    "type": "phase_transition",
+    "fromPhase": "skeleton"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.774325Z",
+  "metadata": null
+}
+AgentProgress.tsx:168 [AgentProgress] Phase transition: {from: 'skeleton', to: 'population', progress: 40, message: 'Moving from skeleton to population phase'}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:272
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-17
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:272
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Populating node details...",
+    "progress": 40,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.773325500Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 40, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:335
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-19
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:335
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'phase_transition', updateType: 'phase_transition', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "phase_transition",
+  "updateType": "phase_transition",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "message": "Moving from skeleton to population phase",
+    "toPhase": "population",
+    "progress": 40,
+    "type": "phase_transition",
+    "fromPhase": "skeleton"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.774325Z",
+  "metadata": null
+}
+AgentProgress.tsx:168 [AgentProgress] Phase transition: {from: 'skeleton', to: 'population', progress: 40, message: 'Moving from skeleton to population phase'}
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:369
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-20
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:369
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading attraction data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.775324100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.775324100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-22
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading meal data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.775324100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.775324100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:368
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-23
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:368
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading transport data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.775324100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.775324100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:373
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-26
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:373
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 30,
+    "step": "populating",
+    "message": "Populating 6 attractions",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.776323800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.776323800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'populating', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:369
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-21
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:369
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading attraction data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.775324100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.775324100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:368
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-24
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:368
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading transport data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.775324100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.775324100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-25
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading meal data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.775324100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.775324100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:373
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-27
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:373
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 30,
+    "step": "populating",
+    "message": "Populating 6 attractions",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.776323800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.776323800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'populating', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:380
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-30
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:380
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 30,
+    "step": "populating",
+    "message": "Populating 2 transport segments",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.776323800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.777323800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'populating', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:380
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-28
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:380
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 30,
+    "step": "populating",
+    "message": "Populating 2 transport segments",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.776323800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.777323800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'populating', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-29
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 30,
+    "step": "populating",
+    "message": "Populating 8 meals",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.776323800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.777323800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'populating', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-31
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 30,
+    "step": "populating",
+    "message": "Populating 8 meals",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:23.776323800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:23.777323800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 30, Progress Type: 'number', Step/Phase: 'populating', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+AgentProgress.tsx:83 🟢 State updated - new progress: 30 previous: 30
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-32
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 70,
+    "step": "saving",
+    "message": "Saving attraction data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:34.103240900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:34.103240900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'saving', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-33
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 70,
+    "step": "saving",
+    "message": "Saving attraction data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:34.103240900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:34.103240900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'saving', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 30
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:371
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-35
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:371
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 100,
+    "step": "complete",
+    "message": "Populated 6 attractions",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:34.602998800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:34.603998800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 100, Progress Type: 'number', Step/Phase: 'complete', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:371
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-34
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:371
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 100,
+    "step": "complete",
+    "message": "Populated 6 attractions",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:34.602998800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:34.603998800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 100, Progress Type: 'number', Step/Phase: 'complete', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:321
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-36
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:321
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_complete', updateType: 'agent_complete', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_complete",
+  "updateType": "agent_complete",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "type": "agent_complete",
+    "agentName": "ActivityAgent",
+    "message": "ActivityAgent completed: 6 items processed",
+    "itemsProcessed": 6
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:34.603998800Z",
+  "metadata": null
+}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:321
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-37
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:321
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_complete', updateType: 'agent_complete', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_complete",
+  "updateType": "agent_complete",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "type": "agent_complete",
+    "agentName": "ActivityAgent",
+    "message": "ActivityAgent completed: 6 items processed",
+    "itemsProcessed": 6
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:34.603998800Z",
+  "metadata": null
+}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:358
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-38
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:358
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 70,
+    "step": "saving",
+    "message": "Saving meal data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:35.766098400Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:35.767098Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'saving', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:358
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-39
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:358
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 70,
+    "step": "saving",
+    "message": "Saving meal data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:35.766098400Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:35.767098Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'saving', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:365
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-41
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:365
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 100,
+    "step": "complete",
+    "message": "Populated 8 meals",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:36.259872500Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:36.259872500Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 100, Progress Type: 'number', Step/Phase: 'complete', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:365
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-40
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:365
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 100,
+    "step": "complete",
+    "message": "Populated 8 meals",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:36.259872500Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:36.259872500Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 100, Progress Type: 'number', Step/Phase: 'complete', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:313
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-42
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:313
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_complete', updateType: 'agent_complete', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_complete",
+  "updateType": "agent_complete",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "type": "agent_complete",
+    "agentName": "MealAgent",
+    "message": "MealAgent completed: 8 items processed",
+    "itemsProcessed": 8
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:36.259872500Z",
+  "metadata": null
+}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:313
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-43
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:313
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_complete', updateType: 'agent_complete', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_complete",
+  "updateType": "agent_complete",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "type": "agent_complete",
+    "agentName": "MealAgent",
+    "message": "MealAgent completed: 8 items processed",
+    "itemsProcessed": 8
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:36.259872500Z",
+  "metadata": null
+}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:366
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-44
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:366
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 70,
+    "step": "saving",
+    "message": "Saving transport data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:40.938397900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:40.938397900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'saving', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:366
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-45
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:366
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 70,
+    "step": "saving",
+    "message": "Saving transport data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:40.938397900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:40.938397900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'saving', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:378
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-47
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:378
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 100,
+    "step": "complete",
+    "message": "Populated 4 transport segments",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:41.438906300Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.438906300Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 100, Progress Type: 'number', Step/Phase: 'complete', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:378
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-46
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:378
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 100,
+    "step": "complete",
+    "message": "Populated 4 transport segments",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:41.438906300Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.438906300Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 100, Progress Type: 'number', Step/Phase: 'complete', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:323
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-49
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:323
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_complete', updateType: 'agent_complete', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_complete",
+  "updateType": "agent_complete",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "type": "agent_complete",
+    "agentName": "TransportAgent",
+    "message": "TransportAgent completed: 4 items processed",
+    "itemsProcessed": 4
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.438906300Z",
+  "metadata": null
+}
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+AgentProgress.tsx:83 🟢 State updated - new progress: 100 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 100
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:323
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-48
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:323
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_complete', updateType: 'agent_complete', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_complete",
+  "updateType": "agent_complete",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "type": "agent_complete",
+    "agentName": "TransportAgent",
+    "message": "TransportAgent completed: 4 items processed",
+    "itemsProcessed": 4
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.438906300Z",
+  "metadata": null
+}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:284
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-50
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:284
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Phase population completed in 17667 ms",
+    "progress": 60,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.439905800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 60, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:272
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-52
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:272
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Adding location details...",
+    "progress": 70,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.439905800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:342
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-55
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:342
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'phase_transition', updateType: 'phase_transition', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "phase_transition",
+  "updateType": "phase_transition",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "message": "Moving from population to enrichment phase",
+    "toPhase": "enrichment",
+    "progress": 70,
+    "type": "phase_transition",
+    "fromPhase": "population"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.439905800Z",
+  "metadata": null
+}
+AgentProgress.tsx:168 [AgentProgress] Phase transition: {from: 'population', to: 'enrichment', progress: 70, message: 'Moving from population to enrichment phase'}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:284
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-51
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:284
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Phase population completed in 17667 ms",
+    "progress": 60,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.439905800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 60, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:272
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-53
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:272
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "status": "Adding location details...",
+    "progress": 70,
+    "agentId": "orchestrator"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.439905800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 70, Progress Type: 'number', Step/Phase: 'orchestrator', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:342
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-54
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:342
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'phase_transition', updateType: 'phase_transition', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "phase_transition",
+  "updateType": "phase_transition",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "message": "Moving from population to enrichment phase",
+    "toPhase": "enrichment",
+    "progress": 70,
+    "type": "phase_transition",
+    "fromPhase": "population"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.439905800Z",
+  "metadata": null
+}
+AgentProgress.tsx:168 [AgentProgress] Phase transition: {from: 'population', to: 'enrichment', progress: 70, message: 'Moving from population to enrichment phase'}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-57
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 0,
+    "step": "",
+    "message": "Agent queued for execution",
+    "status": "queued",
+    "timestamp": "2025-11-15T11:43:41.440907800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.440907800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 0, Progress Type: 'number', Step/Phase: '', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:352
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-59
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:352
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "",
+    "message": "Agent started",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:41.440907800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.440907800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: '', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 0 previous: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 0
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 100
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 70
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 70 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 0 previous: 70
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 0
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-56
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 0,
+    "step": "",
+    "message": "Agent queued for execution",
+    "status": "queued",
+    "timestamp": "2025-11-15T11:43:41.440907800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.440907800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 0, Progress Type: 'number', Step/Phase: '', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:352
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-58
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:352
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "",
+    "message": "Agent started",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:41.440907800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:41.440907800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: '', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 0 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 0
+AgentProgress.tsx:83 🟢 State updated - new progress: 0 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 0
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-61
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading itinerary",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:42.734850800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:42.734850800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-60
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 10,
+    "step": "loading",
+    "message": "Loading itinerary",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:42.734850800Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:42.734850800Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 10, Progress Type: 'number', Step/Phase: 'loading', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:389
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-63
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:389
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 20,
+    "step": "ENRICHMENT",
+    "message": "Enriching places with Google Places data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:42.735851700Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:42.735851700Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 20, Progress Type: 'number', Step/Phase: 'ENRICHMENT', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 10 previous: 10
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 10
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:389
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-62
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:389
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 20,
+    "step": "ENRICHMENT",
+    "message": "Enriching places with Google Places data",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:42.735851700Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:42.735851700Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 20, Progress Type: 'number', Step/Phase: 'ENRICHMENT', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 20
+AgentProgress.tsx:83 🟢 State updated - new progress: 20 previous: 20
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:373
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-64
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:373
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 40,
+    "step": "validation",
+    "message": "Validating opening hours",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.441551100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.441551100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 40, Progress Type: 'number', Step/Phase: 'validation', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:373
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-65
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:373
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 40,
+    "step": "validation",
+    "message": "Validating opening hours",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.441551100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.441551100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 40, Progress Type: 'number', Step/Phase: 'validation', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-66
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 60,
+    "step": "pacing",
+    "message": "Calculating pacing",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.442550900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.442550900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 60, Progress Type: 'number', Step/Phase: 'pacing', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 20
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 20
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 40 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 40
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 40
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:363
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-67
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:363
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 60,
+    "step": "pacing",
+    "message": "Calculating pacing",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.442550900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.442550900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 60, Progress Type: 'number', Step/Phase: 'pacing', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:373
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-69
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:373
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 80,
+    "step": "transit",
+    "message": "Computing transit durations",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.442550900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.442550900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 80, Progress Type: 'number', Step/Phase: 'transit', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:373
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-68
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:373
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 80,
+    "step": "transit",
+    "message": "Computing transit durations",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.442550900Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.442550900Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 80, Progress Type: 'number', Step/Phase: 'transit', …}
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975880-70
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 90,
+    "step": "applying",
+    "message": "Applying enrichments",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.443551100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.443551100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 90, Progress Type: 'number', Step/Phase: 'applying', …}
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 80
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 90 previous: 80
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 90
+AgentProgress.tsx:83 🟢 State updated - new progress: 60 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 60
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 60
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 80 previous: 80
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 80
+AgentProgress.tsx:83 🟢 State updated - new progress: 90 previous: 80
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 90
+useStompWebSocket.ts:104 [STOMP Debug] Received data
+useStompWebSocket.ts:104 [STOMP Debug] <<< MESSAGE
+content-length:367
+message-id:session_it_7bcaebb6-346f-4061-8cdc-f14acfbaf340_1763206975878-71
+subscription:sub-0
+content-type:application/json
+destination:/topic/itinerary/it_7bcaebb6-346f-4061-8cdc-f14acfbaf340
+content-length:367
+
+
+useStompWebSocket.ts:119 [STOMP] Received message: {type: 'agent_progress', updateType: 'agent_progress', itineraryId: 'it_7bcaebb6-346f-4061-8cdc-f14acfbaf340', data: {…}, userId: null, …}
+AgentProgress.tsx:56 [AgentProgress] Raw WebSocket message: {
+  "type": "agent_progress",
+  "updateType": "agent_progress",
+  "itineraryId": "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340",
+  "data": {
+    "agentId": "ENRICHMENT",
+    "kind": "ENRICHMENT",
+    "progress": 90,
+    "step": "applying",
+    "message": "Applying enrichments",
+    "status": "running",
+    "timestamp": "2025-11-15T11:43:51.443551100Z"
+  },
+  "userId": null,
+  "timestamp": "2025-11-15T11:43:51.443551100Z",
+  "metadata": null
+}
+AgentProgress.tsx:69 🟢 WEBSOCKET RECEIVE - agent_progress: {Raw Message: {…}, Extracted Data: {…}, Progress Value: 90, Progress Type: 'number', Step/Phase: 'applying', …}Extracted Data: agentId: "ENRICHMENT"kind: "ENRICHMENT"message: "Applying enrichments"progress: 90status: "running"step: "applying"timestamp: "2025-11-15T11:43:51.443551100Z"[[Prototype]]: ObjectProgress Type: "number"Progress Value: 90Raw Message: data: {agentId: 'ENRICHMENT', kind: 'ENRICHMENT', progress: 90, step: 'applying', message: 'Applying enrichments', …}itineraryId: "it_7bcaebb6-346f-4061-8cdc-f14acfbaf340"metadata: nulltimestamp: "2025-11-15T11:43:51.443551100Z"type: "agent_progress"updateType: "agent_progress"userId: null[[Prototype]]: ObjectStatus Message: "running"Step/Phase: "applying"Will Update To: 90data.progress: 90message.progress: undefined[[Prototype]]: Object
+AgentProgress.tsx:83 🟢 State updated - new progress: 90 previous: 90
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 90
+AgentProgress.tsx:83 🟢 State updated - new progress: 90 previous: 90
+AgentProgress.tsx:87 [AgentProgress] Enabling partial view button based on progress: 90
