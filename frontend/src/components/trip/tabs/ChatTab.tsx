@@ -29,6 +29,9 @@ export function ChatTab() {
   const [applyingMessageId, setApplyingMessageId] = useState<string>();
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
 
+  // Check if we're waiting for a response (last message is from user)
+  const isWaitingForResponse = chatMessages.length > 0 && chatMessages[chatMessages.length - 1].sender === 'user';
+
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -57,9 +60,8 @@ export function ChatTab() {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isSending) return;
+    if (!text || isWaitingForResponse) return;
 
-    setIsSending(true);
     setInput('');
 
     const startTime = Date.now();
@@ -114,8 +116,6 @@ export function ChatTab() {
       });
 
       console.error('Failed to send message:', error);
-    } finally {
-      setIsSending(false);
     }
   };
 
@@ -181,21 +181,11 @@ export function ChatTab() {
   };
 
   return (
-    <div className="space-y-3 sm:space-y-4 pb-32 relative">
-      {/* Header - Smaller on mobile */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{t('components.chatTab.title')}</h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-            {t('components.chatTab.subtitle')}
-          </p>
-        </div>
-      </div>
-
-      {/* Floating Action Buttons - Positioned to avoid hamburger menu */}
-      <div className="fixed top-3 sm:top-20 right-3 sm:right-6 z-30 flex items-center gap-1.5 sm:gap-2">
+    <div className="relative h-[calc(100vh-12rem)] flex flex-col">
+      {/* Floating Action Buttons - Top right */}
+      <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
         {isConnected && (
-          <Badge variant="outline" className="text-green-600 border-green-600 bg-white shadow-md text-xs px-2 py-0.5">
+          <Badge variant="outline" className="text-green-600 border-green-600 bg-white/90 backdrop-blur-sm shadow-sm text-xs px-2 py-0.5">
             {t('components.chatTab.status.live')}
           </Badge>
         )}
@@ -205,16 +195,16 @@ export function ChatTab() {
             variant="outline"
             onClick={handleExportHistory}
             title="Export chat history"
-            className="bg-white shadow-md hover:shadow-lg h-7 w-7 sm:h-8 sm:w-8 p-0"
+            className="bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md h-8 w-8 p-0"
           >
-            <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+            <Download className="h-4 w-4" />
           </Button>
         )}
       </div>
 
-      {/* Messages Container - Smaller padding on mobile */}
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 min-h-[calc(100vh-18rem)] sm:min-h-[calc(100vh-20rem)]">
-        <div ref={messagesContainerRef} className="overflow-y-auto p-3 sm:p-4 md:p-6 max-h-[calc(100vh-18rem)] sm:max-h-[calc(100vh-20rem)]">
+      {/* Messages Container - Full height, clean design */}
+      <div className="flex-1 overflow-hidden">
+        <div ref={messagesContainerRef} className="h-full overflow-y-auto px-4 py-6">
           {/* Load More Button - Smaller on mobile */}
           {hasMoreMessages && isNearTop && (
             <div className="sticky top-0 z-10 flex justify-center mb-3 sm:mb-4">
@@ -286,38 +276,164 @@ export function ChatTab() {
         </div>
       </div>
 
-      {/* Floating Input - Smaller on mobile */}
-      <div className="fixed bottom-20 md:bottom-6 left-0 right-0 px-2 sm:px-3 md:px-6 z-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg sm:rounded-xl shadow-lg border border-gray-200 p-2 sm:p-3 md:p-4">
-            <div className="flex gap-1.5 sm:gap-2">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={t('components.chatTab.input.placeholder')}
-                disabled={isSending}
-                className="flex-1 min-h-[48px] sm:min-h-[60px] max-h-[150px] sm:max-h-[200px] resize-none border-gray-200 focus:border-primary text-sm"
-                maxLength={1000}
-              />
-              <Button
-                onClick={handleSend}
-                disabled={!input.trim() || isSending}
-                className="self-end min-h-[44px] sm:min-h-[48px] px-3 sm:px-6 text-sm touch-manipulation active:scale-95"
+      {/* Simplified Light Theme Chat Input Bar */}
+      <div className="flex-shrink-0 pb-6 pt-2">
+        <div className="w-full px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Single unified background container - fully rounded pill */}
+            <div
+              className="relative flex items-center gap-3 px-5 py-3 transition-all"
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '9999px',
+                border: '1px solid #E5E5E5',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                width: '100%',
+                minHeight: '56px'
+              }}
+            >
+              {/* Left: Plus icon - overlay style, no background */}
+              <button
+                type="button"
+                className="flex-shrink-0 flex items-center justify-center hover:opacity-60 transition-opacity"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#414141ff',
+                  padding: 0,
+                  width: '24px',
+                  height: '24px'
+                }}
+                title="Add attachment"
+                aria-label="Add files"
               >
-                {isSending ? (
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14m7-7H5" />
+                </svg>
+              </button>
+
+              {/* Center: Text input - no border, seamless */}
+              <div className="flex-1">
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask anything..."
+                  disabled={isSending}
+                  className="w-full resize-none bg-transparent px-0 py-0 text-[15px] leading-[1.5] placeholder:text-[#9ca3af] focus-visible:outline-none"
+                  style={{
+                    color: '#0f1724',
+                    minHeight: '24px',
+                    caretColor: '#0f1724',
+                    border: 'none',
+                    outline: 'none',
+                    boxShadow: 'none'
+                  }}
+                  rows={1}
+                  maxLength={1000}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = Math.min(target.scrollHeight, 200) + 'px';
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.outline = 'none';
+                    e.target.style.border = 'none';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+
+              {/* Right: Action buttons - overlay style */}
+              <div className="flex items-center gap-2">
+                {input.length === 0 && !isWaitingForResponse ? (
                   <>
-                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 animate-spin" />
-                    <span className="hidden sm:inline">{t('components.chatTab.input.sending')}</span>
+                    {/* Mic button - overlay style */}
+                    <button
+                      type="button"
+                      className="flex-shrink-0 flex items-center justify-center hover:opacity-60 transition-opacity"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#414141ff',
+                        padding: 0,
+                        width: '24px',
+                        height: '24px'
+                      }}
+                      title="Voice input"
+                      aria-label="Start dictation"
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+                        <path d="M19 11a7 7 0 0 1-14 0" />
+                        <path d="M12 18v4" />
+                      </svg>
+                    </button>
                   </>
                 ) : (
-                  t('components.chatTab.input.send')
+                  /* Send/Stop button - same overlay style as other icons */
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim() && !isWaitingForResponse}
+                    type="button"
+                    className="flex-shrink-0 flex items-center justify-center hover:opacity-60 transition-opacity"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: isWaitingForResponse || input.trim() ? 'pointer' : 'not-allowed',
+                      color: '#414141ff',
+                      padding: 0,
+                      width: '24px',
+                      height: '24px',
+                      opacity: !input.trim() && !isWaitingForResponse ? 0.5 : 1
+                    }}
+                    title={isWaitingForResponse ? 'Stop' : 'Send'}
+                    aria-label={isWaitingForResponse ? 'Stop' : 'Send'}
+                  >
+                    {isWaitingForResponse ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        width="20"
+                        height="20"
+                      >
+                        <rect x="5" y="5" width="10" height="10" rx="2" />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        width="20"
+                        height="20"
+                      >
+                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
                 )}
-              </Button>
-            </div>
-            <div className="mt-1.5 sm:mt-2 text-xs text-gray-500 flex justify-between">
-              <span>{input.length}/1000</span>
-              <span className="hidden sm:inline">{t('components.chatTab.input.hint')}</span>
+              </div>
             </div>
           </div>
         </div>

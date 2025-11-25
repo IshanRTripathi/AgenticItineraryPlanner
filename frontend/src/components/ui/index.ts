@@ -16,3 +16,4 @@ export * from './dialog';
 export * from './select';
 export * from './toast';
 export * from './spinner';
+export * from './popover';
