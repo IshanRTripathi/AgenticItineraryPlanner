@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.agents.PlacesAgent;
 import com.tripplanner.dto.AgentCapabilities;
 import com.tripplanner.dto.AgentEvent;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.testing.BaseServiceTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,6 @@ import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.lenient;
 
 /**

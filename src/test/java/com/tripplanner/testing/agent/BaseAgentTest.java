@@ -3,7 +3,7 @@ package com.tripplanner.testing.agent;
 import com.tripplanner.agents.BaseAgent;
 import com.tripplanner.dto.AgentCapabilities;
 import com.tripplanner.dto.AgentEvent;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.testing.BaseServiceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

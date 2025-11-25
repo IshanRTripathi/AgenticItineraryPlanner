@@ -2,6 +2,7 @@ package com.tripplanner.testing.service;
 
 import com.tripplanner.dto.*;
 import com.tripplanner.service.*;
+import com.tripplanner.service.utilities.IdempotencyManager;
 import com.tripplanner.testing.BaseServiceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

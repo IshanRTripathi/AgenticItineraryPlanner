@@ -1,7 +1,7 @@
 package com.tripplanner.testing.service;
 
 import com.tripplanner.dto.NormalizedNode;
-import com.tripplanner.service.NodeIdGenerator;
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

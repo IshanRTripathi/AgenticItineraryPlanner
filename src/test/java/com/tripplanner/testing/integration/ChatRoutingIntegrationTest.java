@@ -1,11 +1,9 @@
 package com.tripplanner.testing.integration;
 
 import com.tripplanner.agents.*;
-import com.tripplanner.dto.ChatRequest;
-import com.tripplanner.dto.ChatResponse;
 import com.tripplanner.dto.IntentResult;
-import com.tripplanner.service.AgentRegistry;
-import com.tripplanner.service.LLMService;
+import com.tripplanner.service.agents.AgentRegistry;
+import com.tripplanner.service.llm.LLMService;
 import com.tripplanner.service.OrchestratorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

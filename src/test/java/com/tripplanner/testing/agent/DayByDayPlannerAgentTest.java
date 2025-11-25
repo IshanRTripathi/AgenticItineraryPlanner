@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.agents.BaseAgent;
 import com.tripplanner.agents.DayByDayPlannerAgent;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.SummarizationService;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ai.AiClient;
-import com.tripplanner.testing.MockLLMProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ public class DayByDayPlannerAgentTest {
             objectMapper, 
             mockItineraryJsonService,
             mockSummarizationService,
-            mock(com.tripplanner.service.AgentEventPublisher.class)
+            mock(AgentEventPublisher.class)
         );
     }
     
@@ -273,7 +273,7 @@ public class DayByDayPlannerAgentTest {
         
         DayByDayPlannerAgent failingAgent = new DayByDayPlannerAgent(
             mockEventBus, failingAiClient, objectMapper, mockItineraryJsonService, mockSummarizationService,
-            mock(com.tripplanner.service.AgentEventPublisher.class));
+            mock(AgentEventPublisher.class));
         
         BaseAgent.AgentRequest<NormalizedItinerary> agentRequest = 
             new BaseAgent.AgentRequest<>(request, NormalizedItinerary.class);

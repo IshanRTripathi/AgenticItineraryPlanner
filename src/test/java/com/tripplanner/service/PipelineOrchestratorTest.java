@@ -2,6 +2,7 @@ package com.tripplanner.service;
 
 import com.tripplanner.agents.*;
 import com.tripplanner.dto.*;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -2,11 +2,12 @@ package com.tripplanner.agents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
-import com.tripplanner.service.AgentEventPublisher;
-import com.tripplanner.service.ItineraryJsonService;
-import com.tripplanner.service.NodeIdGenerator;
+import com.tripplanner.service.*;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ai.AiClient;
+import com.tripplanner.service.llm.LLMSchemaValidator;
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,10 @@ class SkeletonPlannerAgentTest {
 
     @Mock
     private NodeIdGenerator nodeIdGenerator;
+    @Mock
+    private LLMSchemaValidator llmSchemaValidator;
+    @Mock
+    private NodeIdValidator nodeIdValidator;
 
     private ObjectMapper objectMapper;
     private SkeletonPlannerAgent agent;
@@ -47,14 +52,16 @@ class SkeletonPlannerAgentTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-        
+
         agent = new SkeletonPlannerAgent(
-            eventBus, 
-            aiClient, 
-            objectMapper, 
-            itineraryJsonService, 
+            eventBus,
+            aiClient,
+            objectMapper,
+            itineraryJsonService,
             agentEventPublisher,
-            nodeIdGenerator
+            nodeIdGenerator,
+            llmSchemaValidator,
+            nodeIdValidator
         );
     }
 
@@ -100,7 +107,7 @@ class SkeletonPlannerAgentTest {
         assertEquals(1, result.getDays().size());
         assertEquals(4, result.getDays().get(0).getNodes().size());
         assertEquals("Tokyo", result.getDays().get(0).getLocation());
-        
+
         // Verify itinerary was saved
         verify(itineraryJsonService, atLeastOnce()).updateItinerary(any(NormalizedItinerary.class));
     }
@@ -169,7 +176,7 @@ class SkeletonPlannerAgentTest {
         assertNotNull(result);
         assertEquals(3, result.getDays().size());
         assertEquals("Paris", result.getDays().get(0).getLocation());
-        
+
         // Verify AI was called 3 times (batch size = 1)
         verify(aiClient, times(3)).generateStructuredContent(anyString(), anyString(), anyString());
     }
@@ -233,7 +240,7 @@ class SkeletonPlannerAgentTest {
         assertNotNull(result.getDays());
         assertNotNull(result.getCreatedAt());
         assertNotNull(result.getUpdatedAt());
-        
+
         NormalizedDay day = result.getDays().get(0);
         assertEquals(1, day.getDayNumber());
         assertEquals("Rome", day.getLocation());

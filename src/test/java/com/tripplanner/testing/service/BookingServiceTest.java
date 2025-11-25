@@ -3,8 +3,8 @@ package com.tripplanner.testing.service;
 import com.tripplanner.controller.BookingController;
 import com.tripplanner.data.entity.Booking;
 import com.tripplanner.data.repo.BookingRepository;
-import com.tripplanner.service.BookingService;
-import com.tripplanner.service.RazorpayService;
+import com.tripplanner.service.external.BookingService;
+import com.tripplanner.service.external.RazorpayService;
 import com.tripplanner.testing.BaseServiceTest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

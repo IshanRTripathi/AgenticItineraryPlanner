@@ -2,7 +2,7 @@ package com.tripplanner.testing.integration;
 
 import com.tripplanner.controller.WebSocketController;
 import com.tripplanner.dto.AgentEvent;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.WebSocketEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.Instant;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.controller.ItinerariesController;
 import com.tripplanner.dto.*;
 import com.tripplanner.service.*;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.agents.BaseAgent;
 import com.tripplanner.agents.DayByDayPlannerAgent;

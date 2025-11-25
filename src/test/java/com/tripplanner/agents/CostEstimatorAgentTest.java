@@ -1,8 +1,11 @@
 package com.tripplanner.agents;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventBus;
+import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.service.BudgetTracker;
 import com.tripplanner.service.ItineraryJsonService;
+import com.tripplanner.service.ai.AiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,12 +29,18 @@ class CostEstimatorAgentTest {
 
     @Mock
     private ItineraryJsonService itineraryJsonService;
+    @Mock
+    private AiClient aiClient;
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private BudgetTracker budgetTracker;
 
     private CostEstimatorAgent agent;
 
     @BeforeEach
     void setUp() {
-        agent = new CostEstimatorAgent(eventBus, itineraryJsonService);
+        agent = new CostEstimatorAgent(eventBus, itineraryJsonService, aiClient, objectMapper, budgetTracker);
     }
 
     @Test

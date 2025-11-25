@@ -1,7 +1,7 @@
 package com.tripplanner.testing.service;
 
 import com.tripplanner.dto.*;
-import com.tripplanner.service.AgentEventPublisher;
+import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.SseConnectionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
