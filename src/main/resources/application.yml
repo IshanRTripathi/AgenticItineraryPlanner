@@ -30,6 +30,7 @@ spring:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.ai.autoconfigure.mcp.server.MpcServerAutoConfiguration
   # Security completely disabled for development
   security:
     user:
@@ -46,6 +47,95 @@ spring:
       pubsub:
         project-id: tripaiplanner
 
+# Feature Flags for Gradual Rollout
+features:
+  weather-tools:
+    enabled: true  # Set to true to enable weather-aware activity planning
+    fallback-on-error: true  # If weather tools fail, fall back to LLM-only approach
+    log-comparisons: true  # Log decisions for A/B testing analysis
+  
+  cost-tools:
+    enabled: true  # Set to true to enable Calculate Cost tool with budget analysis
+    fallback-on-error: true  # If cost tool fails, fall back to BudgetTracker service
+  
+  meal-tools:
+    enabled: true  # Set to true to enable meal tools (Node ID, Constraints, Schema validation)
+    fallback-on-error: true  # If tools fail, fall back to existing services
+  
+  transport-tools:
+    enabled: true  # Set to true to enable transport tools (Node ID, Constraints, Distance, Schema)
+    fallback-on-error: true  # If tools fail, fall back to existing services
+  
+  skeleton-tools:
+    enabled: true  # Set to true to enable skeleton planner tools (Node ID, Constraints, Schema)
+    fallback-on-error: true  # If tools fail, fall back to existing services
+  
+  enrichment-tools:
+    enabled: true  # Set to true to enable enrichment tools (Schema validation for Google Places data)
+    fallback-on-error: true  # If tools fail, fall back to existing behavior
+  
+  explain-tools:
+    enabled: true  # Set to true to enable explain tools (Cost calculation for queries)
+    fallback-on-error: true  # If tools fail, fall back to existing behavior
+  
+  booking-tools:
+    enabled: true  # Set to true to enable booking tools (Schema validation for booking requests)
+    fallback-on-error: true  # If tools fail, fall back to existing behavior
+  
+  city-allocation-tools:
+    enabled: true  # Set to true to enable city allocation tools (Distance, Schema validation)
+    fallback-on-error: true  # If tools fail, fall back to existing behavior
+  
+  day-planner-tools:
+    enabled: true  # Set to true to enable day-by-day planner tools (Node ID, Constraints, Conflicts, Timing, Weather, Schema)
+    fallback-on-error: true  # If tools fail, fall back to existing behavior
+  
+  editor-tools:
+    enabled: true  # Set to true to enable editor tools (Node ID, Conflicts, Cost, Schema validation)
+    fallback-on-error: true  # If tools fail, fall back to existing behavior
+
+# Tool Result Caching Configuration
+cache:
+  tool-results:
+    enabled: true  # Set to true to enable tool result caching (reduces duplicate API calls by 60-80%)
+
+# Memory & Validation System Configuration
+memory:
+  enabled: true  # Enable memory system for learning user preferences
+  async-operations: true  # Use async operations for non-blocking memory storage
+  pattern-learning: false  # Enable pattern learning (experimental - set to true when ready)
+  confidence-decay:
+    enabled: true  # Enable confidence decay over time
+    half-life-months: 6  # Confidence decays to 50% after 6 months
+
+validation:
+  enabled: true  # Enable validation system
+  tools:
+    check-completeness:
+      enabled: true  # Check for missing meals, activities, transport
+      fallback-on-error: true
+    check-budget-health:
+      enabled: true  # Analyze budget health and spending patterns
+      fallback-on-error: true
+    check-timing-feasibility:
+      enabled: true  # Validate timing and schedule feasibility
+      fallback-on-error: true
+    check-dietary-compliance:
+      enabled: true  # Verify meals comply with dietary restrictions
+      fallback-on-error: true
+    check-conflicts:
+      enabled: true  # Check for time overlaps and conflicts
+      fallback-on-error: true
+  advisor:
+    enabled: false  # Enable ValidationAdvisor agent (set to true after testing)
+    skip-group-trips: true  # Skip validation for group trips (memory not supported yet)
+    llm-advice: false  # Use LLM for smarter recommendations (set to true when ready)
+    default-level: STANDARD  # Default validation level: BASIC, STANDARD, or COMPREHENSIVE
+    session:
+      max-entries: 100  # Maximum number of itineraries in session cache
+    cleanup:
+      cron: "0 0 2 * * ?"  # Cleanup schedule (default: 2 AM daily)
+    
 google:
   ai:
     # Single key (backward compatibility)
@@ -63,6 +153,13 @@ google:
       limit: ${GOOGLE_PLACES_DAILY_LIMIT:1000}
     rate-limit:
       enabled: ${GOOGLE_PLACES_RATE_LIMIT_ENABLED:true}
+  maps:
+    api:
+      key: ${GOOGLE_MAPS_API_KEY:}
+
+openweather:
+  api:
+    key: ${OPENWEATHER_API_KEY:}
 
 ai:
   provider: ${AI_PROVIDER:openrouter}
@@ -105,6 +202,13 @@ razorpay:
   rate-limit:
     enabled: ${RAZORPAY_RATE_LIMIT_ENABLED:true}
   timeout: ${RAZORPAY_TIMEOUT:30000}
+
+# ADK (Agent Development Kit) + MCP Configuration - POC
+adk:
+  enabled: ${ADK_ENABLED:true}
+  mcp:
+    enabled: ${ADK_MCP_ENABLED:true}
+    server-url: ${ADK_MCP_SERVER_URL:http://localhost:8080/api/v1/mcp}
 
 expedia:
   api:
@@ -197,14 +301,31 @@ itinerary:
       # Enable parallel execution for population phase (ActivityAgent, MealAgent, TransportAgent)
       parallel: ${PIPELINE_PARALLEL:true}
       
+      # OPTIMIZATION: City-grouped parallel skeleton generation (Phase 2 - NOT YET IMPLEMENTED)
+      # parallel-cities: true = Generate different cities in parallel (skeleton: 49s → 29s)
+      #   - Days in same city remain sequential (preserves context)
+      #   - Different cities run in parallel
+      #   - Uses collect-then-save pattern
+      # parallel-cities: false = Sequential skeleton generation (CURRENT)
+      parallel-cities: ${PIPELINE_PARALLEL_CITIES:false}
+      
       # Enrichment mode configuration
       enrichment:
+        # OPTIMIZATION: Full parallel enrichment (Phase 1)
+        # full-parallel: true = Enrich ALL days simultaneously (FASTEST - 92s → 18s)
+        #   - Uses collect-then-save pattern (no lock contention)
+        #   - Maximum parallelization
+        #   - Recommended for production after testing
+        # full-parallel: false = Use batched or sequential mode (LEGACY)
+        full-parallel: ${PIPELINE_ENRICHMENT_FULL_PARALLEL:false}
+        
         # Enable batched parallel enrichment vs sequential (one-by-one)
         # BATCHED PARALLEL (parallel: true): Enriches N days at a time (balanced approach)
         #   - Example: 8-day trip with batch-size 3 → enriches 3+3+2 days
         #   - Faster than sequential, safer than full parallel
         # SEQUENTIAL (parallel: false): Enriches one day at a time (safest)
         #   - Slowest but completely avoids rate limits
+        # NOTE: Ignored when full-parallel is true
         parallel: ${PIPELINE_ENRICHMENT_PARALLEL:true}
         
         # Batch size for parallel enrichment (how many days to enrich simultaneously)
@@ -212,6 +333,7 @@ itinerary:
         # batch-size: 2-3 = Batched parallel (balanced - RECOMMENDED)
         # batch-size: 4+ = Aggressive parallel (faster but may hit rate limits)
         # Race condition fix implemented via collect-then-save pattern
+        # NOTE: Ignored when full-parallel is true
         batch-size: ${PIPELINE_ENRICHMENT_BATCH_SIZE:3}
         
         # Maximum retry attempts for failed days
