@@ -48,6 +48,9 @@ function App() {
   
   // Hide bottom nav on login/signup/planner-progress pages
   const hideBottomNav = ['/login', '/signup', '/planner-progress'].includes(location.pathname);
+  
+  // Detect if we're on trip detail page
+  const isTripPage = location.pathname.startsWith('/trip/');
 
   return (
     <ErrorBoundary>
@@ -90,7 +93,7 @@ function App() {
       )}
       
       {/* Mobile Bottom Navigation - Hidden when menu is open */}
-      {!hideBottomNav && <BottomNav hide={mobileMenuOpen} />}
+      {!hideBottomNav && <BottomNav hide={mobileMenuOpen} mode={isTripPage ? 'trip' : 'global'} />}
       </CurrencyProvider>
     </ErrorBoundary>
   );

@@ -11,77 +11,119 @@
   /* ========================================
      COLOR SYSTEM (Emirates-inspired)
      ======================================== */
-  
+
   /* Primary Colors - Deep Blue */
-  --primary: 207 100% 18%;              /* #002B5B - Emirates navy */
-  --primary-hover: 207 100% 15%;        /* Darker on hover */
-  --primary-light: 207 100% 85%;        /* Light variant */
-  --primary-foreground: 0 0% 100%;      /* White text on primary */
-  
+  --primary: 207 100% 18%;
+  /* #002B5B - Emirates navy */
+  --primary-hover: 207 100% 15%;
+  /* Darker on hover */
+  --primary-light: 207 100% 85%;
+  /* Light variant */
+  --primary-foreground: 0 0% 100%;
+  /* White text on primary */
+
   /* Secondary Colors - Gold Accent */
-  --secondary: 45 100% 61%;             /* #F5C542 - Premium gold */
-  --secondary-hover: 45 100% 55%;       /* Darker on hover */
-  --secondary-foreground: 207 100% 18%; /* Deep blue text on gold */
-  
+  --secondary: 45 100% 61%;
+  /* #F5C542 - Premium gold */
+  --secondary-hover: 45 100% 55%;
+  /* Darker on hover */
+  --secondary-foreground: 207 100% 18%;
+  /* Deep blue text on gold */
+
   /* Neutral Colors - Warm Gray */
-  --background: 0 0% 100%;              /* Pure white #FFFFFF */
-  --foreground: 0 0% 20%;               /* #333333 - Dark text */
-  --muted: 0 0% 97%;                    /* #F8F8F8 - Light gray background */
-  --muted-foreground: 0 0% 46%;         /* Gray text */
-  --border: 0 0% 88%;                   /* #E0E0E0 - Light borders */
-  --input: 0 0% 88%;                    /* Input borders */
-  --ring: 207 100% 18%;                 /* Focus ring color */
-  
+  --background: 0 0% 100%;
+  /* Pure white #FFFFFF */
+  --foreground: 0 0% 20%;
+  /* #333333 - Dark text */
+  --muted: 0 0% 97%;
+  /* #F8F8F8 - Light gray background */
+  --muted-foreground: 0 0% 46%;
+  /* Gray text */
+  --border: 0 0% 88%;
+  /* #E0E0E0 - Light borders */
+  --input: 0 0% 88%;
+  /* Input borders */
+  --ring: 207 100% 18%;
+  /* Focus ring color */
+
   /* Semantic Colors */
-  --success: 142 76% 36%;               /* #10B981 - Green */
-  --warning: 38 92% 50%;                /* #F59E0B - Orange */
-  --error: 0 84% 60%;                   /* #EF4444 - Red */
-  --info: 221 83% 53%;                  /* #3B82F6 - Blue */
-  
+  --success: 142 76% 36%;
+  /* #10B981 - Green */
+  --warning: 38 92% 50%;
+  /* #F59E0B - Orange */
+  --error: 0 84% 60%;
+  /* #EF4444 - Red */
+  --info: 221 83% 53%;
+  /* #3B82F6 - Blue */
+
   /* Travel Vertical Colors */
-  --flight-color: 207 100% 40%;         /* Blue for flights */
-  --hotel-color: 26 100% 55%;           /* Orange for hotels */
-  --bus-color: 142 76% 36%;             /* Green for bus */
-  --train-color: 271 91% 65%;           /* Purple for trains */
-  --holiday-color: 338 100% 50%;        /* Pink for holidays */
-  
+  --flight-color: 207 100% 40%;
+  /* Blue for flights */
+  --hotel-color: 26 100% 55%;
+  /* Orange for hotels */
+  --bus-color: 142 76% 36%;
+  /* Green for bus */
+  --train-color: 271 91% 65%;
+  /* Purple for trains */
+  --holiday-color: 338 100% 50%;
+  /* Pink for holidays */
+
   /* ========================================
      SPACING SYSTEM (8px base)
      ======================================== */
-  
+
   --space-0: 0;
-  --space-1: 0.5rem;    /* 8px */
-  --space-2: 1rem;      /* 16px */
-  --space-3: 1.5rem;    /* 24px */
-  --space-4: 2rem;      /* 32px */
-  --space-5: 2.5rem;    /* 40px */
-  --space-6: 3rem;      /* 48px */
-  --space-8: 4rem;      /* 64px */
-  --space-10: 5rem;     /* 80px */
-  --space-12: 6rem;     /* 96px */
-  
+  --space-1: 0.5rem;
+  /* 8px */
+  --space-2: 1rem;
+  /* 16px */
+  --space-3: 1.5rem;
+  /* 24px */
+  --space-4: 2rem;
+  /* 32px */
+  --space-5: 2.5rem;
+  /* 40px */
+  --space-6: 3rem;
+  /* 48px */
+  --space-8: 4rem;
+  /* 64px */
+  --space-10: 5rem;
+  /* 80px */
+  --space-12: 6rem;
+  /* 96px */
+
   /* ========================================
      TYPOGRAPHY SYSTEM
      ======================================== */
-  
+
   /* Font Families */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Color Emoji', sans-serif;
-  --font-display: 'Inter', 'Noto Color Emoji', sans-serif;
+  --font-primary: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Color Emoji', sans-serif;
+  --font-display: 'Raleway', 'Noto Color Emoji', sans-serif;
   --font-mono: 'Fira Code', 'Courier New', monospace;
   --font-emoji: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  
+
   /* Font Sizes (8px base scale) */
-  --text-xs: 0.75rem;     /* 12px */
-  --text-sm: 0.875rem;    /* 14px */
-  --text-base: 1rem;      /* 16px */
-  --text-lg: 1.125rem;    /* 18px */
-  --text-xl: 1.25rem;     /* 20px */
-  --text-2xl: 1.5rem;     /* 24px */
-  --text-3xl: 1.875rem;   /* 30px */
-  --text-4xl: 2.25rem;    /* 36px */
-  --text-5xl: 3rem;       /* 48px */
-  --text-6xl: 3.75rem;    /* 60px */
-  
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+  --text-6xl: 3.75rem;
+  /* 60px */
+
   /* Font Weights */
   --font-light: 300;
   --font-normal: 400;
@@ -89,65 +131,70 @@
   --font-semibold: 600;
   --font-bold: 700;
   --font-extrabold: 800;
-  
+
   /* Line Heights */
   --leading-tight: 1.2;
   --leading-normal: 1.5;
   --leading-relaxed: 1.75;
-  
+
   /* Letter Spacing */
   --tracking-tight: -0.02em;
   --tracking-normal: 0;
   --tracking-wide: 0.05em;
-  
+
   /* ========================================
      ELEVATION SYSTEM (3 layers)
      ======================================== */
-  
+
   /* Layer 1 - Background (no shadow) */
   --elevation-1: none;
-  
+
   /* Layer 2 - Sections */
   --elevation-2: 0 4px 12px rgba(0, 43, 91, 0.08);
-  
+
   /* Layer 3 - Cards, Modals */
   --elevation-3: 0 8px 24px rgba(0, 43, 91, 0.15);
-  
+
   /* Additional shadow utilities */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
+
   /* ========================================
      BORDER RADIUS (max 12px)
      ======================================== */
-  
-  --radius-sm: 0.25rem;   /* 4px */
-  --radius-md: 0.5rem;    /* 8px */
-  --radius-lg: 0.75rem;   /* 12px - maximum */
-  --radius-full: 9999px;  /* Fully rounded */
-  
+
+  --radius-sm: 0.25rem;
+  /* 4px */
+  --radius-md: 0.5rem;
+  /* 8px */
+  --radius-lg: 0.75rem;
+  /* 12px - maximum */
+  --radius-full: 9999px;
+  /* Fully rounded */
+
   /* ========================================
      MOTION SYSTEM (Material 3)
      ======================================== */
-  
+
   /* Durations */
   --duration-instant: 100ms;
   --duration-fast: 200ms;
   --duration-normal: 300ms;
   --duration-slow: 500ms;
-  
+
   /* Easing Functions */
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);  /* Material 3 standard */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Material 3 standard */
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* ========================================
      Z-INDEX LAYERS
      ======================================== */
-  
+
   --z-base: 0;
   --z-dropdown: 1000;
   --z-sticky: 1100;
@@ -155,19 +202,19 @@
   --z-modal: 1300;
   --z-toast: 1400;
   --z-tooltip: 1500;
-  
+
   /* ========================================
      COMPONENT STANDARDS
      ======================================== */
-  
+
   /* Touch Targets (Apple HIG) */
   --touch-target-min: 48px;
-  
+
   /* Glass Morphism */
   --glass-bg: rgba(255, 255, 255, 0.15);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: 20px;
-  
+
   /* Container Widths */
   --container-sm: 640px;
   --container-md: 768px;
@@ -284,18 +331,24 @@
 }
 
 @keyframes iconBounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   20% {
     transform: translateY(-0.3em);
   }
+
   40% {
     transform: translateY(0);
   }
+
   60% {
     transform: translateY(-0.1em);
   }
+
   80% {
     transform: translateY(0);
   }
@@ -308,15 +361,15 @@
   left: 50%;
   transform: translateX(-50%) translateY(0);
   z-index: 1100;
-  
+
   width: 92%;
   max-width: 500px;
-  
+
   /* Smooth slide animation with will-change for performance */
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, opacity;
-  
+
   opacity: 1;
 }
 
@@ -332,9 +385,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
+
   padding: 0.75rem 1.25rem;
-  
+
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 9999px;
@@ -354,13 +407,13 @@
   flex-direction: column;
   align-items: center;
   gap: 0.125rem;
-  
+
   flex: 1;
   padding: 0.375rem 0.5rem;
   border: none;
   background: transparent;
   cursor: pointer;
-  
+
   transition: all 0.2s var(--ease-standard);
   touch-action: manipulation;
 }
@@ -378,21 +431,21 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  
+
   width: 3.5rem;
   height: 3.5rem;
   padding: 0;
   border: none;
   cursor: pointer;
-  
+
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(221 83% 53%) 100%);
   border-radius: 9999px;
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
-  
+
   transition: all 0.2s var(--ease-standard);
   touch-action: manipulation;
 }
@@ -461,12 +514,12 @@
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  
+
   width: 0.25rem;
   height: 0.25rem;
   background: var(--component-active-color);
   border-radius: 9999px;
-  
+
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -475,6 +528,7 @@
     opacity: 0;
     transform: translateX(-50%) scale(0);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) scale(1);

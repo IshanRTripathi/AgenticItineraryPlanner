@@ -42,6 +42,7 @@ import { buildHotelUrl, buildActivityUrl, buildBusUrl, buildTrainUrl } from '@/u
 import { BookingModal } from '@/components/booking/BookingModal';
 import { useTranslation } from '@/i18n';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Expandable Description Component
 function ExpandableDescription({ description }: { description: string }) {
@@ -230,12 +231,17 @@ const getPhotoUrl = (photoReference?: string, maxWidth: number = 400): string | 
 const formatTime = (timestamp?: string | number): string => {
     if (!timestamp) return '';
     try {
+        // FIXED: Backend stores epoch ms in destination timezone, not UTC
+        // We need to display the time as-is without timezone conversion
         const date = new Date(timestamp);
-        // Format as "8:00 AM" or "2:30 PM"
+        
+        // Use UTC methods to extract the time components without timezone conversion
+        // This preserves the original time that was stored
         return date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'UTC' // CRITICAL: Interpret as UTC to prevent double timezone conversion
         });
     } catch (e) {
         return typeof timestamp === 'string' ? timestamp : ''; // Return original if parsing fails
@@ -319,6 +325,15 @@ const EnrichmentBadge = ({ status, t }: { status: 'pending' | 'enriching' | 'enr
     }
 };
 
+// Helper to clean location name - remove country if present
+const cleanLocationName = (location?: string): string => {
+    if (!location) return '';
+    // Remove country suffix like ", France" or ", Italy"
+    const parts = location.split(',');
+    // If there are multiple parts, take the first (city name)
+    return parts[0].trim();
+};
+
 export function DayCard({
     day,
     isExpanded,
@@ -330,6 +345,8 @@ export function DayCard({
 }: DayCardProps) {
     const { t } = useTranslation();
     const { trackDayExpansion, trackActivityView } = useAnalyticsTracking();
+    const navigate = useNavigate();
+    const { id } = useParams();
     
     // Photo viewer state - now supports gallery with description
     const [selectedPhoto, setSelectedPhoto] = useState<{ photos: string[]; title: string; description?: string; currentIndex: number } | null>(null);
@@ -428,8 +445,10 @@ export function DayCard({
 
     const dayStatus = dayDate < today ? 'past' : dayDate.getTime() === today.getTime() ? 'current' : 'future';
 
-    // Always use activities from drag & drop hook
-    const displayActivities = activities;
+    // Filter out accommodation nodes (users book separately)
+    const displayActivities = activities.filter((node: any) => 
+        node.type !== 'accommodation' && node.type !== 'hotel'
+    );
     const activityCount = displayActivities.length;
     const totalCost = displayActivities.reduce(
         (sum: number, node: any) => sum + (node.cost?.amountPerPerson || node.cost?.pricePerPerson || node.cost?.amount || 0),
@@ -467,7 +486,7 @@ export function DayCard({
             <div
                 onClick={handleToggle}
                 className={cn(
-                    'w-full text-left p-4',
+                    'w-full text-left p-3 sm:p-4',
                     'cursor-pointer hover:bg-muted/50 active:bg-muted transition-colors'
                 )}
             >
@@ -475,10 +494,10 @@ export function DayCard({
                     {/* Collapsed View - Summary */}
                     <div className="flex items-center justify-between gap-3">
                         {/* Left Section: Day Badge & Title */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <div
                                 className={cn(
-                                    "flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all flex-shrink-0",
+                                    "flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold text-xs sm:text-sm transition-all flex-shrink-0",
                                     dayStatus === 'current' ? 'shadow-lg scale-110 text-white' :
                                         dayStatus === 'past' ? 'bg-muted text-muted-foreground' :
                                             'text-white'
@@ -489,12 +508,14 @@ export function DayCard({
                             >
                                 {day.dayNumber}
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-base sm:text-lg">{t('components.dayCard.day', { number: day.dayNumber })}</h3>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h3 className="font-semibold text-sm sm:text-lg truncate">
+                                        {cleanLocationName(day.location) || t('components.dayCard.day', { number: day.dayNumber })}
+                                    </h3>
                                     {dayStatus === 'current' && (
                                         <span
-                                            className="text-xs px-2 py-0.5 rounded-full font-medium"
+                                            className="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0"
                                             style={{
                                                 backgroundColor: `${dayColor.primary}20`,
                                                 color: dayColor.primary
@@ -504,7 +525,7 @@ export function DayCard({
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-xs sm:text-sm text-muted-foreground">{formatDate(day.date)}</p>
+                                <p className="text-xs text-muted-foreground">{formatDate(day.date)}</p>
                             </div>
                         </div>
 
@@ -539,13 +560,13 @@ export function DayCard({
                                 </div>
                             )}
 
-                            {/* Expand/Collapse Icon */}
+                            {/* Expand/Collapse Icon - Smaller */}
                             <motion.div 
-                                className="w-9 h-9 flex items-center justify-center rounded-md hover:bg-muted/80 transition-colors"
+                                className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md hover:bg-muted/80 transition-colors flex-shrink-0"
                                 animate={{ rotate: isExpanded ? 180 : 0 }}
                                 transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
                             >
-                                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                             </motion.div>
                         </div>
                     </div>
@@ -556,28 +577,22 @@ export function DayCard({
                             className="mt-4 pt-4 border-t space-y-4"
                             onClick={(e) => e.stopPropagation()}
                         >
-                                {/* Location Header */}
-                                {day.location && (
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <MapPin className="w-4 h-4" />
-                                        <span className="text-sm font-medium">{day.location}</span>
-                                    </div>
-                                )}
 
-                                {/* Day Summary Panel */}
+
+                                {/* Day Summary Panel - Horizontal scroll on mobile */}
                                 {hasActivities && !showPlaceholder && (
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 bg-muted/30 rounded-lg">
-                                        <div className="text-center">
+                                    <div className="flex sm:grid sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 overflow-x-auto scrollbar-hide p-2 sm:p-3 bg-muted/30 rounded-lg -mx-1 px-3">
+                                        <div className="text-center flex-shrink-0 min-w-[80px]">
                                             <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.activities')}</div>
-                                            <div className="text-lg font-semibold">{activityCount}</div>
+                                            <div className="text-base sm:text-lg font-semibold">{activityCount}</div>
                                         </div>
-                                        <div className="text-center">
+                                        <div className="text-center flex-shrink-0 min-w-[80px]">
                                             <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.budget')}</div>
-                                            <div className="text-lg font-semibold">{getCurrencySymbol(dayCurrency)}{totalCost.toLocaleString()}</div>
+                                            <div className="text-base sm:text-lg font-semibold">{getCurrencySymbol(dayCurrency)}{totalCost.toLocaleString()}</div>
                                         </div>
-                                        <div className="text-center">
+                                        <div className="text-center flex-shrink-0 min-w-[80px]">
                                             <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.duration')}</div>
-                                            <div className="text-lg font-semibold">
+                                            <div className="text-base sm:text-lg font-semibold">
                                                 {displayActivities.reduce((sum: number, a: any) => {
                                                     const duration = a.timing?.duration || '0h';
                                                     const hours = parseInt(duration) || 0;
@@ -585,9 +600,9 @@ export function DayCard({
                                                 }, 0)}h
                                             </div>
                                         </div>
-                                        <div className="text-center">
+                                        <div className="text-center flex-shrink-0 min-w-[80px]">
                                             <div className="text-xs text-muted-foreground mb-1">{t('components.dayCard.summary.status')}</div>
-                                            <div className="text-lg font-semibold">
+                                            <div className="text-base sm:text-lg font-semibold">
                                                 {displayActivities.filter((a: any) => a.bookingRef).length}/{activityCount}
                                             </div>
                                         </div>
@@ -630,69 +645,63 @@ export function DayCard({
                                             {/* Save/Discard Bar - Floating on Mobile, Inline on Desktop */}
                                             {hasUnsavedChanges && (
                                                 <>
-                                                    {/* Desktop: Inline bar */}
-                                                    <div className="hidden sm:flex items-center justify-between gap-3 p-3 mb-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg transition-all duration-200">
-                                                        <div className="flex items-center gap-2 text-sm text-amber-900 dark:text-amber-100">
+                                                    {/* Desktop: Inline bar - Glassmorphism */}
+                                                    <div className="hidden sm:flex items-center justify-between gap-3 p-3 mb-3 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md rounded-xl transition-all duration-200 shadow-sm">
+                                                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
                                                             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
                                                             <span className="font-medium">{t('components.dayCard.unsavedChanges')}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
+                                                            <button
                                                                 onClick={discardChanges}
                                                                 disabled={isReordering}
-                                                                className="h-8 text-xs"
+                                                                className="h-8 px-3 text-xs font-medium rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                                                             >
-                                                                <X className="w-3 h-3 mr-1" />
+                                                                <X className="w-3 h-3 mr-1 inline" />
                                                                 {t('components.dayCard.discard')}
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
+                                                            </button>
+                                                            <button
                                                                 onClick={saveReorder}
                                                                 disabled={isReordering}
-                                                                className="h-8 text-xs"
+                                                                className="h-8 px-3 text-xs font-medium rounded-lg bg-amber-500/90 hover:bg-amber-500 text-white backdrop-blur-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                                                             >
                                                                 {isReordering ? (
                                                                     <>
-                                                                        <div className="w-3 h-3 mr-1 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                        <div className="w-3 h-3 mr-1 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
                                                                         {t('components.dayCard.saving')}
                                                                     </>
                                                                 ) : (
                                                                     <>
-                                                                        <Save className="w-3 h-3 mr-1" />
+                                                                        <Save className="w-3 h-3 mr-1 inline" />
                                                                         {t('components.dayCard.saveChanges')}
                                                                     </>
                                                                 )}
-                                                            </Button>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     
-                                                    {/* Mobile: Floating icon buttons */}
-                                                    <div className="sm:hidden fixed bottom-24 right-4 z-50 flex flex-col gap-2">
-                                                        <Button
-                                                            size="icon"
-                                                            variant="outline"
+                                                    {/* Mobile: Floating glassmorphism buttons */}
+                                                    <div className="sm:hidden fixed bottom-20 right-3 z-50 flex flex-col gap-2">
+                                                        <button
                                                             onClick={discardChanges}
                                                             disabled={isReordering}
-                                                            className="h-4 w-4 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 shadow-lg hover:shadow-xl active:scale-90 transition-all"
+                                                            className="h-11 w-11 rounded-full bg-white/20 dark:bg-gray-900/20 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 hover:bg-white/30 dark:hover:bg-gray-900/30 shadow-lg hover:shadow-xl active:scale-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                                             title={t('components.dayCard.discard')}
                                                         >
-                                                            <X className="w-3 h-3" />
-                                                        </Button>
-                                                        <Button
-                                                            size="icon"
+                                                            <X className="w-4 h-4 text-gray-700 dark:text-gray-200 -translate-y-px" />
+                                                        </button>
+                                                        <button
                                                             onClick={saveReorder}
                                                             disabled={isReordering}
-                                                            className="h-4 w-4 rounded-full bg-amber-500 hover:bg-amber-600 shadow-lg hover:shadow-xl active:scale-90 transition-all"
+                                                            className="h-11 w-11 rounded-full bg-amber-500/20 backdrop-blur-xl border border-amber-400/30 hover:bg-amber-500/30 shadow-lg hover:shadow-xl active:scale-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                                                             title={t('components.dayCard.saveChanges')}
                                                         >
                                                             {isReordering ? (
-                                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                                <div className="w-4 h-4 border-2 border-amber-600 border-t-transparent rounded-full animate-spin -translate-y-px" />
                                                             ) : (
-                                                                <Save className="w-3 h-3" />
+                                                                <Save className="w-4 h-4 text-amber-600 dark:text-amber-500" />
                                                             )}
-                                                        </Button>
+                                                        </button>
                                                     </div>
                                                 </>
                                             )}
@@ -706,7 +715,7 @@ export function DayCard({
                                                     items={displayActivities.map((a: any) => a.id)}
                                                     strategy={verticalListSortingStrategy}
                                                 >
-                                                    <div className="space-y-3">
+                                                    <div className="space-y-2 sm:space-y-3">
                                                         {displayActivities.map((node: any) => (
                                                             <SortableActivity
                                                                 key={node.id}
@@ -715,7 +724,7 @@ export function DayCard({
                                                             >
                                                                 <div
                                                                     className={cn(
-                                                                        'group relative p-3 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md',
+                                                                        'group relative p-2 sm:p-4 rounded-xl border-l-4 bg-white hover:bg-gray-50 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md',
                                                                         getNodeColor(node.type),
                                                                         isReordering && 'opacity-50 pointer-events-none',
                                                                         // Add shimmer effect for enriching activities
@@ -727,9 +736,9 @@ export function DayCard({
 
                                                                     <div className="relative">
                                                                         {/* Mobile: Vertical layout, Desktop: Horizontal layout */}
-                                                                        <div className="flex sm:flex-row flex-col sm:items-start gap-3">
-                                                                            {/* Photo or Icon */}
-                                                                            <div className="flex sm:flex-col gap-3 items-start">
+                                                                        <div className="flex sm:flex-row flex-col sm:items-start gap-2 sm:gap-3">
+                                                                            {/* Photo or Icon - Smaller on mobile */}
+                                                                            <div className="flex sm:flex-col gap-2 sm:gap-3 items-start">
                                                                                 {node.location?.photos?.[0] ? (
                                                                                     <button
                                                                                         onClick={(e) => {
@@ -747,11 +756,12 @@ export function DayCard({
                                                                                                 currentIndex: 0
                                                                                             });
                                                                                         }}
-                                                                                        className="flex-shrink-0 w-20 h-20 sm:w-16 sm:h-16 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo"
+                                                                                        className="flex-shrink-0 w-16 h-16 sm:w-16 sm:h-16 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer relative group/photo min-w-[64px] min-h-[64px]"
                                                                                     >
                                                                                         <img
                                                                                             src={getPhotoUrl(node.location.photos[0], 200) || ''}
                                                                                             alt={node.title}
+                                                                                            loading="lazy"
                                                                                             className="w-full h-full object-cover group-hover/photo:scale-110 transition-transform duration-300"
                                                                                             onError={(e) => {
                                                                                                 const target = e.target as HTMLImageElement;
@@ -764,19 +774,17 @@ export function DayCard({
                                                                                         </div>
                                                                                     </button>
                                                                                 ) : (
-                                                                                    <div className="flex-shrink-0 w-20 h-20 sm:w-16 sm:h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow">
+                                                                                    <div className="flex-shrink-0 w-16 h-16 sm:w-16 sm:h-16 rounded-lg bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center text-2xl shadow-sm group-hover:shadow-md transition-shadow min-w-[64px] min-h-[64px]">
                                                                                         {getNodeIcon(node.type)}
                                                                                     </div>
                                                                                 )}
                                                                                 
-                                                                                {/* Mobile: Rating & Meta next to image */}
-                                                                                <div className="sm:hidden flex-1 flex flex-col justify-center gap-2.5 min-w-0 py-1">
+                                                                                {/* Mobile: Rating & Meta next to image - Larger icons */}
+                                                                                <div className="sm:hidden flex-1 flex flex-col justify-center gap-1.5 min-w-0">
                                                                                     {/* Rating & Reviews */}
                                                                                     {node.location?.rating && (
-                                                                                        <div className="flex items-center gap-2">
-                                                                                            <div className="w-4 flex justify-center">
-                                                                                                <Star className="w-2 h-2 fill-amber-500 text-amber-500 flex-shrink-0" />
-                                                                                            </div>
+                                                                                        <div className="flex items-center gap-1.5">
+                                                                                            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500 flex-shrink-0" />
                                                                                             <span className="text-xs font-bold text-amber-900 leading-none">{formatRating(node.location.rating)}</span>
                                                                                             {node.location?.userRatingsTotal && (
                                                                                                 <span className="text-xs text-gray-500 leading-none">
@@ -788,20 +796,16 @@ export function DayCard({
                                                                                     
                                                                                     {/* Time */}
                                                                                     {node.timing?.startTime && (
-                                                                                        <div className="flex items-center gap-2">
-                                                                                            <div className="w-4 flex justify-center">
-                                                                                                <Clock className="w-2 h-2 text-blue-500 flex-shrink-0" />
-                                                                                            </div>
+                                                                                        <div className="flex items-center gap-1.5">
+                                                                                            <Clock className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
                                                                                             <span className="text-xs font-semibold text-gray-700 leading-none">{formatTime(node.timing.startTime)}</span>
                                                                                         </div>
                                                                                     )}
                                                                                     
                                                                                     {/* Cost & Price Level */}
                                                                                     {(node.cost?.amount || node.location?.priceLevel) && (
-                                                                                        <div className="flex items-center gap-2">
-                                                                                            <div className="w-4 flex justify-center">
-                                                                                                <CurrencyIcon currency={node.cost?.currency || 'USD'} className="w-2 h-2 text-emerald-600 flex-shrink-0" />
-                                                                                            </div>
+                                                                                        <div className="flex items-center gap-1.5">
+                                                                                            <CurrencyIcon currency={node.cost?.currency || 'USD'} className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                                                                                             {node.cost?.amount ? (
                                                                                                 <span className="text-xs font-bold text-emerald-700 leading-none">
                                                                                                     {getCurrencySymbol(node.cost?.currency || 'USD')}{node.cost.amount.toLocaleString()}
@@ -818,9 +822,9 @@ export function DayCard({
 
                                                                             {/* Content */}
                                                                             <div className="flex-1 min-w-0">
-                                                                                {/* Title */}
-                                                                                <div className="flex items-start justify-between gap-2 mb-2">
-                                                                                    <h4 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">
+                                                                                {/* Title - Smaller on mobile */}
+                                                                                <div className="flex items-start justify-between gap-2 mb-1.5 sm:mb-2">
+                                                                                    <h4 className="font-bold text-sm sm:text-lg text-gray-900 leading-tight flex-1">
                                                                                         {node.title}
                                                                                     </h4>
                                                                                     {node.bookingRef && (
@@ -882,12 +886,12 @@ export function DayCard({
                                                                                     <ExpandableDescription description={node.details.description} />
                                                                                 )}
 
-                                                                                {/* Actions */}
+                                                                                {/* Actions - Better touch targets */}
                                                                                 <div className="flex items-center gap-2">
                                                                                 {!node.bookingRef && shouldShowBookingButton(node.type) && (
                                                                                     <Button
                                                                                         size="sm"
-                                                                                        className="h-9 text-sm px-4 font-semibold shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
+                                                                                        className="h-11 sm:h-9 text-sm px-4 font-semibold shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
                                                                                             setBookingModal({
@@ -904,7 +908,7 @@ export function DayCard({
                                                                                     <Button
                                                                                         size="sm"
                                                                                         variant="outline"
-                                                                                        className="h-9 sm:w-auto w-9 p-0 sm:px-3 shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
+                                                                                        className="h-11 sm:h-9 w-11 sm:w-auto p-0 sm:px-3 shadow-sm hover:shadow-md transition-all touch-manipulation active:scale-95"
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
                                                                                             const url = getGoogleMapsUrl(node.location?.placeId, node.location?.coordinates);
@@ -951,6 +955,40 @@ export function DayCard({
                                                     </div>
                                                 </SortableContext>
                                             </DndContext>
+
+                                            {/* Book Stay Button */}
+                                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                                <button
+                                                    onClick={() => {
+                                                        // Navigate to bookings tab with accommodation expanded
+                                                        navigate(`/trip/${id}?tab=bookings&expand=accommodation`);
+                                                    }}
+                                                    className={cn(
+                                                        'group relative w-full p-4 rounded-xl border-2 border-dashed',
+                                                        'hover:border-solid hover:shadow-md transition-all duration-200',
+                                                        'bg-gradient-to-br from-amber-50/50 to-orange-50/50',
+                                                        'hover:from-amber-50 hover:to-orange-50',
+                                                        'border-amber-200 hover:border-amber-400'
+                                                    )}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                                                                <span className="text-xl">🏨</span>
+                                                            </div>
+                                                            <div className="text-left">
+                                                                <div className="font-semibold text-gray-900 group-hover:text-amber-900 transition-colors">
+                                                                    Book Accommodation
+                                                                </div>
+                                                                <div className="text-xs text-gray-600 group-hover:text-amber-700 transition-colors">
+                                                                    {day.location || 'Find hotels & stays'}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <ChevronDown className="w-5 h-5 text-amber-600 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                                                    </div>
+                                                </button>
+                                            </div>
                                         </>
                                     )}
                                 </div>

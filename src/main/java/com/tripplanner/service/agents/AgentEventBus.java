@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 /**
  * Event bus for distributing agent events via WebSocket.
  * Replaces the old SSE-based implementation.
+ * 
+ * Now includes progress coordination to prevent jittery progress updates
+ * when multiple agents run in parallel.
  */
 @Component
 public class AgentEventBus {
@@ -21,8 +24,12 @@ public class AgentEventBus {
     @Lazy
     private WebSocketEventPublisher webSocketEventPublisher;
     
+    @Autowired
+    private PipelineProgressCoordinator progressCoordinator;
+    
     /**
      * Publish an event to all WebSocket subscribers for an itinerary.
+     * Coordinates progress across multiple agents to prevent jittery updates.
      */
     public void publish(String itineraryId, AgentEvent event) {
         logger.info("=== PUBLISHING AGENT EVENT VIA WEBSOCKET ===");
@@ -30,12 +37,35 @@ public class AgentEventBus {
         logger.info("Agent ID: {}", event.agentId());
         logger.info("Agent Kind: {}", event.kind());
         logger.info("Status: {}", event.status());
-        logger.info("Progress: {}", event.progress());
+        logger.info("Progress (agent): {}", event.progress());
         logger.info("Message: {}", event.message());
         logger.info("Step: {}", event.step());
         logger.info("Timestamp: {}", event.updatedAt());
         
         try {
+            // Coordinate progress across pipeline stages
+            int agentProgress = event.progress() != null ? event.progress() : 0;
+            int overallProgress;
+            
+            // Special handling for final completion
+            if (event.status() == AgentEvent.AgentStatus.completed && 
+                agentProgress == 100 && 
+                "FINALIZATION".equals(event.kind().name())) {
+                // Only finalization agent at 100% triggers true completion
+                progressCoordinator.markComplete(itineraryId);
+                overallProgress = 100;
+                logger.info("🎉 Pipeline complete for {}: 100%", itineraryId);
+            } else {
+                overallProgress = progressCoordinator.calculateOverallProgress(
+                    itineraryId, 
+                    event.kind().name(), 
+                    agentProgress
+                );
+            }
+            
+            logger.info("Progress (overall): {} (mapped from {}% in {})", 
+                overallProgress, agentProgress, event.kind().name());
+            
             // Build complete event data including message and step
             java.util.Map<String, Object> eventData = new java.util.HashMap<>();
             // Use agent kind (e.g., "PLANNER", "ENRICHMENT") as agentId instead of UUID
@@ -43,7 +73,7 @@ public class AgentEventBus {
             eventData.put("agentId", event.kind().name());
             eventData.put("kind", event.kind().name());
             eventData.put("status", event.status().name());
-            eventData.put("progress", event.progress() != null ? event.progress() : 0);
+            eventData.put("progress", overallProgress);  // Use coordinated progress
             eventData.put("message", event.message() != null ? event.message() : "");
             eventData.put("step", event.step() != null ? event.step() : "");
             eventData.put("timestamp", event.updatedAt().toString());
@@ -55,7 +85,7 @@ public class AgentEventBus {
                 eventData
             );
             
-            logger.debug("Agent event published successfully via WebSocket with complete data");
+            logger.debug("Agent event published successfully via WebSocket with coordinated progress");
         } catch (Exception e) {
             logger.error("Failed to publish agent event via WebSocket for itinerary: {}", itineraryId, e);
         }

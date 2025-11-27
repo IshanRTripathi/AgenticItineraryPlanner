@@ -13,7 +13,6 @@ import {
   User, 
   Mail, 
   Calendar, 
-  ArrowLeft,
   Languages,
   CreditCard,
   MapPin,
@@ -21,13 +20,15 @@ import {
   Edit,
   LogOut,
   Award,
-  TrendingUp
+  TrendingUp,
+  Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageSelector } from '@/i18n/components/LanguageSelector';
 import { CurrencySelector } from '@/components/common/CurrencySelector';
 import { useTranslation } from '@/i18n/hooks/useTranslation';
 import { motion } from 'framer-motion';
+import { PreferencesPanel } from '@/components/memory/PreferencesPanel';
 
 export function ProfilePage() {
   const { user, isAuthenticated, signOut } = useAuth();
@@ -35,6 +36,7 @@ export function ProfilePage() {
   const { t } = useTranslation();
   const [languageSheetOpen, setLanguageSheetOpen] = useState(false);
   const [currencySheetOpen, setCurrencySheetOpen] = useState(false);
+  const [preferencesPanelOpen, setPreferencesPanelOpen] = useState(false);
 
   if (!isAuthenticated || !user) {
     return (
@@ -240,6 +242,17 @@ export function ProfilePage() {
 
                 <Button
                   variant="outline"
+                  className="flex-col h-auto py-3 hover:bg-purple-50 hover:border-purple-500 transition-all group"
+                  onClick={() => setPreferencesPanelOpen(true)}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors mb-2">
+                    <Settings className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <p className="font-semibold text-xs">Preferences</p>
+                </Button>
+
+                <Button
+                  variant="outline"
                   className="flex-col h-auto py-3 hover:bg-amber-50 hover:border-amber-500 transition-all group"
                   onClick={() => setCurrencySheetOpen(true)}
                 >
@@ -337,6 +350,13 @@ export function ProfilePage() {
           <CurrencySelector variant="inline" showFlags={true} />
         </div>
       </BottomSheet>
+      
+      {/* Preferences Panel - Note: Requires itineraryId, will show empty state without it */}
+      <PreferencesPanel
+        itineraryId=""
+        isOpen={preferencesPanelOpen}
+        onClose={() => setPreferencesPanelOpen(false)}
+      />
     </div>
   );
 }

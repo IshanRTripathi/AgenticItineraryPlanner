@@ -20,6 +20,9 @@ import java.util.*;
 /**
  * Service for managing normalized JSON itineraries using Firestore database.
  * Provides serialization, deserialization, and storage operations for itineraries.
+ * 
+ * PERFORMANCE: Uses thread-local request-scoped cache to reduce redundant Firebase reads
+ * during pipeline execution where multiple agents access the same itinerary.
  */
 @Service
 public class ItineraryJsonService {
@@ -33,6 +36,11 @@ public class ItineraryJsonService {
     private MapBoundsCalculator mapBoundsCalculator;
     
     private final ObjectMapper objectMapper;
+    
+    // Request-scoped cache: Lives only during a single pipeline execution
+    // Automatically cleared after each request to prevent stale data
+    private static final ThreadLocal<Map<String, NormalizedItinerary>> requestCache = 
+        ThreadLocal.withInitial(java.util.concurrent.ConcurrentHashMap::new);
     
     public ItineraryJsonService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -60,6 +68,10 @@ public class ItineraryJsonService {
             String json = objectMapper.writeValueAsString(itinerary);
             FirestoreItinerary entity = new FirestoreItinerary(itinerary.getItineraryId(), itinerary.getVersion(), json);
             entity.updateTimestamp();
+            
+            // Invalidate cache since we're updating
+            invalidateCache(itinerary.getItineraryId());
+            
             return databaseService.save(entity);
         } catch (JsonProcessingException e) {
             logger.error("Failed to serialize itinerary to JSON", e);
@@ -112,11 +124,47 @@ public class ItineraryJsonService {
     }
     
     /**
-     * Get itinerary by ID.
+     * Get itinerary by ID with request-scoped caching.
+     * Cache is automatically cleared after request completes.
      */
     public Optional<NormalizedItinerary> getItinerary(String id) {
-        return databaseService.findById(id)
+        // Check request-scoped cache first
+        Map<String, NormalizedItinerary> cache = requestCache.get();
+        if (cache.containsKey(id)) {
+            logger.debug("Cache HIT for itinerary: {}", id);
+            return Optional.of(cache.get(id));
+        }
+        
+        logger.debug("Cache MISS for itinerary: {}", id);
+        
+        // Load from database
+        Optional<NormalizedItinerary> result = databaseService.findById(id)
                 .flatMap(this::deserializeItinerary);
+        
+        // Store in cache for this request
+        result.ifPresent(itinerary -> cache.put(id, itinerary));
+        
+        return result;
+    }
+    
+    /**
+     * Clear request-scoped cache. Call this at the end of pipeline execution.
+     */
+    public void clearRequestCache() {
+        Map<String, NormalizedItinerary> cache = requestCache.get();
+        int size = cache.size();
+        cache.clear();
+        if (size > 0) {
+            logger.debug("Cleared request cache ({} entries)", size);
+        }
+    }
+    
+    /**
+     * Invalidate specific itinerary in cache after update.
+     */
+    private void invalidateCache(String itineraryId) {
+        requestCache.get().remove(itineraryId);
+        logger.debug("Invalidated cache for itinerary: {}", itineraryId);
     }
     
     /**

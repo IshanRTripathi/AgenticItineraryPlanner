@@ -329,6 +329,10 @@ public class PipelineOrchestrator {
 
                     metricsTracker.trackItineraryCompleted(itineraryId, totalTime, totalActivities,
                             totalCost, currency, 0, 0, true);
+                    
+                    // CRITICAL: Send generation_complete event to trigger frontend redirect
+                    publishPipelineComplete(itineraryId, executionId, totalTime);
+                    
                 } catch (Exception e) {
                     long finalizationTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime
                             - enrichmentTime - costTime - validationTime;
@@ -342,6 +346,10 @@ public class PipelineOrchestrator {
                     if (itineraryOpt.isPresent()) {
                         finalItinerary = itineraryOpt.get();
                         logger.info("Retrieved itinerary despite finalization failure");
+                        
+                        // Still send completion event even if finalization had issues
+                        long currentTotalTime = System.currentTimeMillis() - startTime;
+                        publishPipelineComplete(itineraryId, executionId, currentTotalTime);
                     } else {
                         throw new RuntimeException("Finalization failed and itinerary not found", e);
                     }
@@ -353,6 +361,11 @@ public class PipelineOrchestrator {
                 logger.error("Pipeline failed for itinerary: {}", itineraryId, e);
                 publishPipelineError(itineraryId, executionId, e);
                 throw new RuntimeException("Pipeline generation failed: " + e.getMessage(), e);
+            } finally {
+                // PERFORMANCE: Clear request-scoped cache after pipeline completes
+                // This prevents memory leaks and ensures fresh data on next request
+                itineraryJsonService.clearRequestCache();
+                logger.debug("Pipeline cleanup complete for itinerary: {}", itineraryId);
             }
         }, pipelineExecutor);
 
@@ -964,7 +977,8 @@ public class PipelineOrchestrator {
             logger.info("Phase {} completed in {} ms", phase, durationMs);
 
             // Calculate progress based on phase completion
-            int progress = calculatePhaseProgress(phase) + 20; // Add 20% for completion
+            // FIXED: Cap at 100% to prevent overflow (finalization at 90% + 20% = 110%)
+            int progress = Math.min(100, calculatePhaseProgress(phase) + 20);
 
             // Publish progress update
             String message = String.format("Phase %s completed in %d ms", phase, durationMs);

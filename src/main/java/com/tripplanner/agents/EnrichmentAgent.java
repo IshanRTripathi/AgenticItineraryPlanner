@@ -4,9 +4,13 @@ import com.tripplanner.dto.*;
 import com.tripplanner.enums.ProcessingState;
 import com.tripplanner.service.*;
 import com.tripplanner.service.agents.AgentEventBus;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalTime;
 import java.util.*;
@@ -38,17 +42,29 @@ public class EnrichmentAgent extends BaseAgent {
     private final ChangeEngine changeEngine;
     private final GooglePlacesService googlePlacesService;
     private final EnrichmentProtocolHandler enrichmentProtocolHandler;
+    private final LocationResolutionService locationResolver;
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.enrichment-tools.enabled:false}")
+    private boolean enrichmentToolsEnabled;
+    
+    @Value("${features.enrichment-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
 
     public EnrichmentAgent(AgentEventBus eventBus,
                            ItineraryJsonService itineraryJsonService,
                            ChangeEngine changeEngine,
                            GooglePlacesService googlePlacesService,
-                           EnrichmentProtocolHandler enrichmentProtocolHandler) {
+                           EnrichmentProtocolHandler enrichmentProtocolHandler,
+                           LocationResolutionService locationResolver) {
         super(eventBus, AgentEvent.AgentKind.ENRICHMENT);
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
         this.googlePlacesService = googlePlacesService;
         this.enrichmentProtocolHandler = enrichmentProtocolHandler;
+        this.locationResolver = locationResolver;
+        this.restTemplate = new RestTemplate();
     }
 
     @Override
@@ -209,13 +225,12 @@ public class EnrichmentAgent extends BaseAgent {
             }
             
             NormalizedItinerary itinerary = currentItinerary.get();
-            String destination = itinerary.getDestination();
             
-            // Read city context for this day
-            String cityContext = getCityForDay(itinerary, day.getDayNumber());
-            if (cityContext != null) {
-                logger.info("Using city context for day {}: {}", day.getDayNumber(), cityContext);
-            }
+            // FIXED: Build proper "City, Country" format using LocationResolutionService
+            String searchLocation = locationResolver.resolveDayLocation(itinerary, day.getDayNumber());
+            
+            logger.info("🎯 Day {} using city-specific location: '{}'", 
+                       day.getDayNumber(), searchLocation);
             
             // Collect enrichment operations for this day
             List<ChangeOperation> dayEnrichmentOps = new ArrayList<>();
@@ -255,9 +270,8 @@ public class EnrichmentAgent extends BaseAgent {
                 // First, search for place if needed
                 if (needsPlaceSearch(node)) {
                     try {
-                        // Use city context if available, otherwise use destination
-                        String searchLocation = cityContext != null ? cityContext : destination;
-                        NormalizedNode searchedNode = searchAndSetPlaceId(node, searchLocation);
+                        // Use city-specific location built from CityAllocationPlan
+                        NormalizedNode searchedNode = searchAndSetPlaceId(node, searchLocation, itineraryId);
                         if (searchedNode != null) {
                             ChangeOperation searchOp = createEnrichmentOperation(searchedNode);
                             dayEnrichmentOps.add(searchOp);
@@ -329,7 +343,12 @@ public class EnrichmentAgent extends BaseAgent {
                 return result;
             }
             
-            String destination = itinerary.getDestination();
+            // FIXED: Build proper "City, Country" format using LocationResolutionService
+            String searchLocation = locationResolver.resolveDayLocation(itinerary, day.getDayNumber());
+            
+            logger.info("🎯 Day {} using city-specific location: '{}'", 
+                       day.getDayNumber(), searchLocation);
+            
             int nodeCount = 0;
             
             for (NormalizedNode node : day.getNodes()) {
@@ -348,8 +367,8 @@ public class EnrichmentAgent extends BaseAgent {
                 logger.debug("  🔄 [Day {}] Processing node {}/{}: {}", 
                             day.getDayNumber(), nodeCount, day.getNodes().size(), node.getTitle());
                 
-                // Enrich this node and collect data
-                EnrichedNodeData enrichedData = enrichNodeAndCollect(node, destination);
+                // Enrich this node and collect data (with caching via itineraryId)
+                EnrichedNodeData enrichedData = enrichNodeAndCollect(node, searchLocation, itinerary.getItineraryId());
                 if (enrichedData != null) {
                     result.addEnrichedNode(enrichedData);
                 }
@@ -370,12 +389,12 @@ public class EnrichmentAgent extends BaseAgent {
     /**
      * Enrich a single node and return the enrichment data (without modifying the node).
      */
-    private EnrichedNodeData enrichNodeAndCollect(NormalizedNode node, String destination) {
+    private EnrichedNodeData enrichNodeAndCollect(NormalizedNode node, String destination, String itineraryId) {
         try {
             // First, search for place if needed
             NormalizedNode workingNode = node;
             if (needsPlaceSearch(node)) {
-                NormalizedNode searchedNode = searchAndSetPlaceId(node, destination);
+                NormalizedNode searchedNode = searchAndSetPlaceId(node, destination, itineraryId);
                 if (searchedNode != null) {
                     workingNode = searchedNode;
                 }
@@ -399,6 +418,45 @@ public class EnrichmentAgent extends BaseAgent {
         
         return null;
     }
+    
+    // ========== ENRICHMENT AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Validate enrichment data schema using the Validate Schema tool.
+     * Used to validate Google Places API responses before applying.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!enrichmentToolsEnabled) {
+            // No existing schema validator in EnrichmentAgent, just return true
+            return true;
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            logger.debug("Calling Validate Schema tool for enrichment data");
+            
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Enrichment schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError; // Return true if fallback enabled
+        }
+    }
+    
+    // ========== END ENRICHMENT AGENT TOOL INTEGRATION ==========
     
     @Override
     protected String getAgentName() {
@@ -432,6 +490,8 @@ public class EnrichmentAgent extends BaseAgent {
         
         return null;
     }
+    
+
 
     /**
      * Map EnrichmentRequest.EnrichmentType to agent task types.
@@ -802,7 +862,7 @@ public class EnrichmentAgent extends BaseAgent {
                 // First, search for place if node doesn't have coordinates or placeId
                 if (needsPlaceSearch(node)) {
                     try {
-                        NormalizedNode searchedNode = searchAndSetPlaceId(node, itinerary.getDestination());
+                        NormalizedNode searchedNode = searchAndSetPlaceId(node, itinerary.getDestination(), itinerary.getItineraryId());
                         if (searchedNode != null) {
                             ChangeOperation searchOp = createEnrichmentOperation(searchedNode);
                             operations.add(searchOp);
@@ -1005,8 +1065,9 @@ public class EnrichmentAgent extends BaseAgent {
     
     /**
      * Search for a place and set its placeId and coordinates.
+     * FIXED: Now uses CityAllocationPlan to build "City, Country" format for accurate geocoding.
      */
-    private NormalizedNode searchAndSetPlaceId(NormalizedNode node, String destination) {
+    private NormalizedNode searchAndSetPlaceId(NormalizedNode node, String destination, String itineraryId) {
         // Build search query combining title and location name for better specificity
         String searchQuery = buildSearchQuery(node);
         
@@ -1020,12 +1081,42 @@ public class EnrichmentAgent extends BaseAgent {
         logger.info("Node title: {}", node.getTitle());
         logger.info("Location name: {}", node.getLocation() != null ? node.getLocation().getName() : "null");
         logger.info("Search query: {}", searchQuery);
-        logger.info("Destination context: {}", destination);
+        logger.info("Original destination context: {}", destination);
+        
+        // CRITICAL FIX: Use CityAllocationPlan to get city-specific location
+        // This prevents "Switzerland, Switzerland" geocoding to center of country
+        String searchLocation = destination; // fallback
         
         try {
-            // Search for place using combined query
+            // Load itinerary to access CityAllocationPlan via LocationResolutionService
+            var itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+            if (itineraryOpt.isPresent()) {
+                NormalizedItinerary itinerary = itineraryOpt.get();
+                
+                // Use LocationResolutionService to get proper "City, Country" format
+                String resolvedLocation = locationResolver.resolveNodeLocation(itinerary, node.getId());
+                
+                if (resolvedLocation != null) {
+                    searchLocation = resolvedLocation;
+                    logger.info("🎯 Using city-specific location: '{}'", searchLocation);
+                } else {
+                    logger.warn("⚠️ Could not resolve location for node {}, using destination: '{}'", 
+                               node.getId(), destination);
+                }
+            } else {
+                logger.warn("⚠️ Could not load itinerary {}, using destination: '{}'", 
+                           itineraryId, destination);
+            }
+        } catch (Exception e) {
+            logger.error("❌ Error building city-specific location, falling back to destination: {}", e.getMessage());
+        }
+        
+        logger.info("Final search location: {}", searchLocation);
+        
+        try {
+            // Search for place using combined query (with caching via itineraryId)
             logger.info("Calling GooglePlacesService.searchPlace()...");
-            PlaceSearchResult searchResult = googlePlacesService.searchPlace(searchQuery, destination);
+            PlaceSearchResult searchResult = googlePlacesService.searchPlace(itineraryId, searchQuery, searchLocation);
             logger.info("GooglePlacesService returned: {}", searchResult != null ? "result found" : "null");
             
             if (searchResult != null && searchResult.getGeometry() != null && 

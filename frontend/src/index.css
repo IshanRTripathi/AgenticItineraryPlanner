@@ -3,8 +3,14 @@
  * Premium Design System - Material 3 + Apple HIG + Atlassian
  */
 
-/* Import Google Noto Color Emoji for consistent emoji rendering */
+/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Cinzel:wght@700&family=Roboto:wght@400;500;600;700&display=swap');
+
+/* Import Roothinkyu Font from 1001fonts */
+@import url('https://fonts.cdnfonts.com/css/roothinkyu');
+@import url('https://fonts.cdnfonts.com/css/summer-vacation');
 
 /* Import design tokens */
 @import './styles/tokens.css';

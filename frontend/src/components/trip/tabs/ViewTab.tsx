@@ -4,11 +4,12 @@
  */
 
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { MobileViewTab } from './MobileViewTab';
+
 import { motion, useInView, useSpring, useTransform } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TripMap } from '@/components/map/TripMap';
 import { WeatherWidget } from '@/components/weather/WeatherWidget';
 import { ExportOptionsModal, ExportOptions } from '@/components/export/ExportOptionsModal';
 import { ShareModal } from '@/components/share/ShareModal';
@@ -18,6 +19,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useTranslation } from '@/i18n';
 import { useCurrency } from '@/hooks/useCurrency';
 import { CurrencySelector } from '@/components/common/CurrencySelector';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Calendar,
   MapPin,
@@ -31,6 +33,7 @@ import {
   CalendarPlus,
   ChevronLeft,
   ChevronRight,
+  DollarSign,
 } from 'lucide-react';
 
 /**
@@ -43,36 +46,42 @@ interface PhotoWithPlace {
   placeType?: string;
 }
 
-function DestinationSlideshow({ days, destination }: { days: any[]; destination: string }) {
+function DestinationSlideshow({ days, destination, onPhotoChange }: { days: any[]; destination: string; onPhotoChange?: (photo: PhotoWithPlace) => void }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [photos, setPhotos] = useState<PhotoWithPlace[]>([]);
 
   useEffect(() => {
     console.log('[DestinationSlideshow] Days received:', days?.length);
     console.log('[DestinationSlideshow] Destination:', destination);
-    
-    // Collect all photos with place names from all days
+
+    // Collect all photos with place names from all days - ONLY ATTRACTIONS
     const allPhotos: PhotoWithPlace[] = [];
     for (const day of days) {
       const nodes = day.nodes || [];
       console.log(`[DestinationSlideshow] Day ${day.dayNumber}: ${nodes.length} nodes`);
-      
+
       for (const node of nodes) {
+        // Filter: Only include attractions, skip hotels/accommodations
+        const isAttraction = node.type === 'attraction' ||
+          node.type === 'activity' ||
+          node.type === 'sightseeing' ||
+          (!node.type?.includes('hotel') && !node.type?.includes('accommodation'));
+
         console.log(`[DestinationSlideshow] Node "${node.title}":`, {
+          type: node.type,
+          isAttraction,
           hasLocation: !!node.location,
           hasPhotos: !!node.location?.photos,
           photoCount: node.location?.photos?.length || 0,
           photos: node.location?.photos
         });
-        
-        if (node.location?.photos && node.location.photos.length > 0) {
-          // Add photos with place name (limit to first 3 per node)
-          node.location.photos.slice(0, 3).forEach((photoRef: string) => {
-            allPhotos.push({
-              photoRef,
-              placeName: node.title || node.location?.name || 'Unknown Place',
-              placeType: node.type
-            });
+
+        if (isAttraction && node.location?.photos && node.location.photos.length > 0) {
+          // Add only first photo per location to show variety
+          allPhotos.push({
+            photoRef: node.location.photos[0],
+            placeName: node.title || node.location?.name || 'Unknown Place',
+            placeType: node.type
           });
         }
       }
@@ -84,7 +93,7 @@ function DestinationSlideshow({ days, destination }: { days: any[]; destination:
     const uniquePhotos = allPhotos.filter((photo, index, self) =>
       index === self.findIndex((p) => p.photoRef === photo.photoRef)
     ).slice(0, 10);
-    
+
     // If no photos, use fallback
     if (uniquePhotos.length === 0) {
       console.log('[DestinationSlideshow] No photos found, using fallback');
@@ -101,39 +110,58 @@ function DestinationSlideshow({ days, destination }: { days: any[]; destination:
   }, [days, destination]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % photos.length);
+    setCurrentIndex((prev) => {
+      const newIndex = (prev + 1) % photos.length;
+      if (onPhotoChange && photos[newIndex]) {
+        onPhotoChange(photos[newIndex]);
+      }
+      return newIndex;
+    });
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+    setCurrentIndex((prev) => {
+      const newIndex = (prev - 1 + photos.length) % photos.length;
+      if (onPhotoChange && photos[newIndex]) {
+        onPhotoChange(photos[newIndex]);
+      }
+      return newIndex;
+    });
   };
+
+  // Notify parent of initial photo
+  useEffect(() => {
+    if (onPhotoChange && photos[currentIndex]) {
+      onPhotoChange(photos[currentIndex]);
+    }
+  }, [photos]);
 
   // Auto-advance slideshow every 5 seconds
   useEffect(() => {
     if (photos.length <= 1) return;
-    
+
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
   }, [photos.length]);
 
   const getPhotoUrl = (photoRef: string): string => {
     console.log('[DestinationSlideshow] Getting photo URL for:', photoRef?.substring(0, 50));
-    
+
     // If it's already a full URL (Unsplash fallback), return as is
     if (photoRef?.startsWith('http')) {
       console.log('[DestinationSlideshow] Using full URL:', photoRef);
       return photoRef;
     }
-    
+
     // Otherwise, it's a Google Maps photo reference
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY;
     console.log('[DestinationSlideshow] API Key available:', !!apiKey);
-    
+
     if (!apiKey) {
       console.log('[DestinationSlideshow] No API key, using fallback');
       return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200';
     }
-    
+
     const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${photoRef}&key=${apiKey}`;
     console.log('[DestinationSlideshow] Generated Google Maps URL:', url.substring(0, 100) + '...');
     return url;
@@ -142,86 +170,66 @@ function DestinationSlideshow({ days, destination }: { days: any[]; destination:
   const currentPhoto = photos[currentIndex];
 
   return (
-    <div className="relative h-[320px] md:h-[500px] rounded-xl md:rounded-2xl overflow-hidden group shadow-xl md:shadow-2xl">
-      {/* Current Image with Ken Burns effect */}
+    <div className="relative h-screen md:h-[400px] -mx-4 md:mx-0 md:rounded-2xl overflow-hidden group shadow-xl md:shadow-2xl">
+      {/* Current Image with premium parallax transition */}
       <motion.img
         key={currentIndex}
         src={getPhotoUrl(currentPhoto?.photoRef)}
         alt={currentPhoto?.placeName || destination}
         className="w-full h-full object-cover object-center"
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
+        initial={{ x: 60, scale: 1.02, opacity: 0 }}
+        animate={{ x: 0, scale: 1, opacity: 1 }}
+        exit={{ x: -60, scale: 0.98, opacity: 0 }}
+        transition={{
+          duration: 0.9,
+          ease: [0.22, 1, 0.36, 1],
+          opacity: { duration: 0.6 }
+        }}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           target.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600';
         }}
       />
-      
-      {/* Enhanced Multi-layer Gradient Overlays for premium depth */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/30" />
-      
-      {/* Place Name with fit-content glass-morphism */}
+
+      {/* Lighter gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+      {/* Place Name - Desktop only */}
       <motion.div
         key={`name-${currentIndex}`}
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute bottom-16 md:bottom-20 left-4 md:left-6 z-20 max-w-[calc(100%-2rem)] md:max-w-[70%]"
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="hidden md:block absolute bottom-4 left-4 z-20 max-w-[calc(100%-6rem)]"
       >
-        <div className="bg-gradient-to-br from-white/25 to-white/10 rounded-2xl px-4 py-3 md:px-6 md:py-4 border border-white/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] inline-block">
-          <h3 className="text-xl md:text-xl font-bold text-white mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            {currentPhoto?.placeName}
+        <div className="bg-white/20 backdrop-blur-md rounded-lg px-4 py-2 border border-white/30 shadow-lg inline-block">
+          <h3 className="text-lg font-bold text-white drop-shadow-lg truncate">
+            {currentPhoto?.placeName?.split(',')[0] || currentPhoto?.placeName}
           </h3>
-          {currentPhoto?.placeType && (
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-lg" />
-              <p className="text-xs md:text-sm text-white/95 font-semibold capitalize tracking-wide drop-shadow-lg">
-                {currentPhoto.placeType.replace('_', ' ')}
-              </p>
-            </div>
-          )}
         </div>
       </motion.div>
 
-      {/* Premium Navigation Buttons */}
+      {/* Premium Navigation Buttons - Desktop only */}
       {photos.length > 1 && (
         <>
           <motion.button
             onClick={prevSlide}
             whileHover={{ scale: 1.1, x: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-9 h-9 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-xl hover:bg-white/35 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border md:border-2 border-white/40 z-30"
+            className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/25 backdrop-blur-xl hover:bg-white/35 transition-all opacity-0 group-hover:opacity-100 items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border-2 border-white/40 z-30"
             aria-label="Previous photo"
           >
-            <ChevronLeft className="w-5 h-5 md:w-7 md:h-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+            <ChevronLeft className="w-7 h-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
           </motion.button>
           <motion.button
             onClick={nextSlide}
             whileHover={{ scale: 1.1, x: 2 }}
             whileTap={{ scale: 0.95 }}
-            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-9 h-9 md:w-14 md:h-14 rounded-full bg-white/25 backdrop-blur-xl hover:bg-white/35 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border md:border-2 border-white/40 z-30"
+            className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/25 backdrop-blur-xl hover:bg-white/35 transition-all opacity-0 group-hover:opacity-100 items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border-2 border-white/40 z-30"
             aria-label="Next photo"
           >
-            <ChevronRight className="w-5 h-5 md:w-7 md:h-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+            <ChevronRight className="w-7 h-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
           </motion.button>
-
-          {/* Premium Photo Counter - Mobile optimized */}
-          <motion.div
-            key={currentIndex}
-            initial={{ scale: 0.8, opacity: 0, y: -10 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-4 md:top-6 right-4 md:right-6 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-black/40 backdrop-blur-xl border border-white/30 md:border-2 text-white text-xs md:text-sm font-bold shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] flex items-center gap-1.5 md:gap-2"
-          >
-            <svg className="w-3 h-3 md:w-4 md:h-4 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span className="drop-shadow-lg whitespace-nowrap">{currentIndex + 1} / {photos.length}</span>
-          </motion.div>
         </>
       )}
     </div>
@@ -260,25 +268,27 @@ const getCurrencySymbol = (currency?: string): string => {
 export function ViewTab({ itinerary }: ViewTabProps) {
   const { t } = useTranslation();
   const { preferredCurrency, convert, getCurrencySymbol } = useCurrency();
-  
+  const { user, isAuthenticated } = useAuth();
+
   console.log('[ViewTab] 🎯 Hook Values:', {
     preferredCurrency,
     hasConvert: !!convert,
     hasGetSymbol: !!getCurrencySymbol
   });
-  
+
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [currentWeather, setCurrentWeather] = useState<{ 
-    high: number; 
-    low: number; 
+  const [currentWeather, setCurrentWeather] = useState<{
+    high: number;
+    low: number;
     condition: string;
     icon: string;
   } | null>(null);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+  const [currentPhoto, setCurrentPhoto] = useState<PhotoWithPlace | null>(null);
   const { toast } = useToast();
-  
+
   const isGenerating = itinerary?.status === 'generating' || itinerary?.status === 'planning';
 
   // Extract just the city name from destination (e.g., "Sydney, New South Wales, Australia" -> "Sydney")
@@ -297,27 +307,27 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     }
     return 'Unknown';
   };
-  
+
   const destination = getDestinationCity();
   // Handle nested structure: itinerary.itinerary.days or itinerary.days
   const days = itinerary?.itinerary?.days || itinerary?.days || [];
   const startDate = days[0]?.date || '';
   const endDate = days[days.length - 1]?.date || '';
   const dayCount = days.length;
-  
+
   // Calculate statistics
   const activityCount = days.reduce((total: number, day: any) => {
     const nodes = day.nodes || [];
     return total + nodes.length;
   }, 0);
-  
+
   // Calculate total budget from all nodes across all days
   const totalBudget = days.reduce((total: number, day: any) => {
     const nodes = day.nodes || [];
     const dayTotal = nodes.reduce((daySum: number, node: any) => {
       // Support both field names for backward compatibility
       const cost = node.cost?.amountPerPerson || node.cost?.pricePerPerson || node.cost?.amount || 0;
-      
+
       console.log('[ViewTab] Node cost:', {
         title: node.title || node.name,
         cost,
@@ -325,18 +335,18 @@ export function ViewTab({ itinerary }: ViewTabProps) {
         estimatedCost: node.estimatedCost,
         price: node.price
       });
-      
+
       return daySum + (typeof cost === 'number' ? cost : 0);
     }, 0);
     return total + dayTotal;
   }, 0);
-  
+
   // Get currency from itinerary or first node with cost
-  const itineraryCurrency = itinerary?.currency || 
+  const itineraryCurrency = itinerary?.currency ||
     days.flatMap((day: any) => day.nodes || [])
-      .find((node: any) => node.cost?.currency)?.cost?.currency || 
+      .find((node: any) => node.cost?.currency)?.cost?.currency ||
     'USD';
-  
+
   // Display currency: use preferred currency or itinerary currency
   const displayCurrency = useMemo(() => {
     const result = preferredCurrency || itineraryCurrency;
@@ -348,7 +358,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     });
     return result;
   }, [preferredCurrency, itineraryCurrency]);
-  
+
   // Convert total budget to display currency
   const convertedTotalBudget = useMemo(() => {
     console.log('[ViewTab] 🔄 CONVERSION STARTING:', {
@@ -358,18 +368,18 @@ export function ViewTab({ itinerary }: ViewTabProps) {
       preferredCurrency,
       areEqual: itineraryCurrency === displayCurrency
     });
-    
+
     const result = convert(totalBudget, itineraryCurrency, displayCurrency);
-    
+
     console.log('[ViewTab] ✅ CONVERSION RESULT:', {
       input: `${totalBudget} ${itineraryCurrency}`,
       output: `${result} ${displayCurrency}`,
       changed: result !== totalBudget
     });
-    
+
     return result;
   }, [totalBudget, itineraryCurrency, displayCurrency, preferredCurrency, convert]);
-  
+
   console.log('[ViewTab] Budget calculation:', {
     daysCount: days.length,
     activityCount,
@@ -381,14 +391,14 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     firstDay: days[0],
     firstDayNodes: days[0]?.nodes || days[0]?.components
   });
-  
+
   const bookingsCount = 0; // TODO: Get from bookings
 
   // Fetch current weather for destination
   useEffect(() => {
     async function loadWeather() {
       if (!destination || destination === 'Unknown') return;
-      
+
       setIsLoadingWeather(true);
       try {
         const forecast = await fetchWeatherForecast(destination, 1);
@@ -410,6 +420,43 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     loadWeather();
   }, [destination]);
 
+  // Fetch photos for background
+  useEffect(() => {
+    if (currentPhoto) return;
+
+    const allPhotos: PhotoWithPlace[] = [];
+    for (const day of days) {
+      const nodes = day.nodes || [];
+      for (const node of nodes) {
+        const isAttraction = node.type === 'attraction' ||
+          node.type === 'activity' ||
+          node.type === 'sightseeing' ||
+          (!node.type?.includes('hotel') && !node.type?.includes('accommodation'));
+
+        if (isAttraction && node.location?.photos && node.location.photos.length > 0) {
+          allPhotos.push({
+            photoRef: node.location.photos[0],
+            placeName: node.title || node.location?.name || 'Unknown Place',
+            placeType: node.type
+          });
+        }
+      }
+    }
+
+    if (allPhotos.length > 0) {
+      // Pick a random photo or the first one
+      setCurrentPhoto(allPhotos[0]);
+    } else {
+      // Fallback
+      const searchQuery = encodeURIComponent(destination);
+      setCurrentPhoto({
+        photoRef: `https://source.unsplash.com/1600x900/?${searchQuery},travel,landmark`,
+        placeName: destination,
+        placeType: 'destination'
+      });
+    }
+  }, [days, destination]);
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -423,7 +470,7 @@ export function ViewTab({ itinerary }: ViewTabProps) {
     const today = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (today < start) return { label: t('common.status.upcoming'), variant: 'default' as const };
     if (today > end) return { label: t('common.status.completed'), variant: 'secondary' as const };
     return { label: t('common.status.ongoing'), variant: 'default' as const };
@@ -472,109 +519,85 @@ export function ViewTab({ itinerary }: ViewTabProps) {
   };
 
   return (
-    <div className="space-y-4 md:space-y-8">
-      {/* Trip Header - Mobile optimized */}
-      <div className="space-y-3 md:space-y-4">
-        <div className="flex items-start justify-between gap-2 md:gap-3">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-4xl font-bold text-foreground mb-1 md:mb-2 truncate">{destination}</h1>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-4 text-muted-foreground text-xs md:text-base">
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <Calendar className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0" />
-                <span className="truncate">{formatDate(startDate)}</span>
-              </div>
-              <span className="hidden sm:inline">→</span>
-              <span className="truncate sm:ml-0 ml-5">{formatDate(endDate)}</span>
+    <div className="md:space-y-8">
+      {/* Mobile: Refined Magazine Layout */}
+      {/* Mobile: Premium View */}
+      <div className="md:hidden">
+        <MobileViewTab itinerary={itinerary} />
+      </div>
+
+      {/* Desktop: Normal layout */}
+      <div className="hidden md:block space-y-8">
+        {/* Trip Header - Centered */}
+        <div className="space-y-4">
+          <div className="text-center space-y-2 pb-4 border-b">
+            <h1 className="text-4xl font-bold text-foreground">{destination}</h1>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground text-base">
+              <Calendar className="w-5 h-5" />
+              <span>{formatDate(startDate)}</span>
+              <span>→</span>
+              <span>{formatDate(endDate)}</span>
             </div>
           </div>
-          <Badge variant={status.variant} className="text-xs px-2 py-0.5 md:px-3 md:py-1 flex-shrink-0">
-            {status.label}
-          </Badge>
+
+          {/* Destination Image Slideshow */}
+          <DestinationSlideshow days={days} destination={destination} />
         </div>
 
-        {/* Destination Image Slideshow */}
-        <DestinationSlideshow days={days} destination={destination} />
-      </div>
+        {/* Currency Selector */}
+        <div className="flex justify-end">
+          <CurrencySelector variant="compact" showFlags={true} />
+        </div>
 
-      {/* Currency Selector */}
-      <div className="flex justify-end">
-        <CurrencySelector variant="compact" showFlags={true} />
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-        <StatCard
-          title={t('components.viewTab.stats.totalDays')}
-          value={dayCount}
-          subtitle={t('components.viewTab.stats.days', { count: dayCount }, { count: dayCount })}
-          icon={Calendar}
-          delay={0}
-        />
-
-        {isGenerating && activityCount === 0 ? (
-          <Card className="shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
-              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                {t('components.viewTab.stats.activities')}
-              </CardTitle>
-              <MapPin className="w-4 h-4 md:w-5 md:h-5 text-primary" />
-            </CardHeader>
-            <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
-              </div>
-              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
-                {t('components.viewTab.stats.generating')}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title={t('components.viewTab.stats.activities')}
-            value={activityCount}
-            subtitle={t('components.viewTab.stats.planned')}
-            icon={MapPin}
-            delay={0.1}
+            title={t('components.viewTab.stats.totalDays')}
+            value={dayCount}
+            subtitle={t('components.viewTab.stats.days', { count: dayCount }, { count: dayCount })}
+            icon={Calendar}
+            delay={0}
           />
-        )}
 
-        <StatCard
-          title={t('components.viewTab.stats.budget')}
-          value={Math.round(convertedTotalBudget)}
-          subtitle={t('components.viewTab.stats.perPerson')}
-          icon={Coins}
-          prefix={getCurrencySymbol(displayCurrency)}
-          delay={0.2}
-        />
+          {isGenerating && activityCount === 0 ? (
+            <Card className="shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
+                  {t('components.viewTab.stats.activities')}
+                </CardTitle>
+                <MapPin className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+                <div className="flex items-center gap-1.5 md:gap-2">
+                  <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
+                </div>
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                  {t('components.viewTab.stats.generating')}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <StatCard
+              title={t('components.viewTab.stats.activities')}
+              value={activityCount}
+              subtitle={t('components.viewTab.stats.planned')}
+              icon={MapPin}
+              delay={0.1}
+            />
+          )}
 
-        {/* Weather Card */}
-        {isLoadingWeather ? (
-          <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
-              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                {t('components.viewTab.stats.weather')}
-              </CardTitle>
-              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
-              </div>
-              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
-                {t('common.actions.loading')}
-              </p>
-            </CardContent>
-          </Card>
-        ) : currentWeather ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
+          <StatCard
+            title={t('components.viewTab.stats.budget')}
+            value={Math.round(convertedTotalBudget)}
+            subtitle={t('components.viewTab.stats.perPerson')}
+            icon={Coins}
+            prefix={getCurrencySymbol(displayCurrency)}
+            delay={0.2}
+          />
+
+          {/* Weather Card */}
+          {isLoadingWeather ? (
             <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
                 <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
@@ -585,124 +608,145 @@ export function ViewTab({ itinerary }: ViewTabProps) {
                 </div>
               </CardHeader>
               <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
-                <div className="flex items-baseline gap-0.5 md:gap-1">
-                  <div className="text-xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    {currentWeather.high}°
-                  </div>
-                  <div className="text-sm md:text-lg text-muted-foreground">
-                    / {currentWeather.low}°
-                  </div>
+                <div className="flex items-center gap-1.5 md:gap-2">
+                  <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="text-xl md:text-2xl font-bold text-muted-foreground">...</div>
                 </div>
-                <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1 capitalize truncate">
-                  {currentWeather.condition}
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                  {t('common.actions.loading')}
                 </p>
               </CardContent>
             </Card>
-          </motion.div>
-        ) : (
-          <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
-              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                {t('components.viewTab.stats.weather')}
-              </CardTitle>
-              <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
+          ) : currentWeather ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+                  <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
+                    {t('components.viewTab.stats.weather')}
+                  </CardTitle>
+                  <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
+                  </div>
+                </CardHeader>
+                <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+                  <div className="flex items-baseline gap-0.5 md:gap-1">
+                    <div className="text-xl md:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                      {currentWeather.high}°
+                    </div>
+                    <div className="text-sm md:text-lg text-muted-foreground">
+                      / {currentWeather.low}°
+                    </div>
+                  </div>
+                  <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1 capitalize truncate">
+                    {currentWeather.condition}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            <Card className="shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 px-3 md:px-6 pt-3 md:pt-6">
+                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
+                  {t('components.viewTab.stats.weather')}
+                </CardTitle>
+                <div className="w-7 h-7 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Cloud className="w-3.5 h-3.5 md:w-5 md:h-5 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
+                <div className="text-xl md:text-2xl font-bold text-muted-foreground">--</div>
+                <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
+                  {t('components.viewTab.stats.unavailable')}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-4 gap-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-6 text-left transition-all hover:shadow-lg border border-blue-200/50 dark:border-blue-800/50"
+          >
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-full bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Edit className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-            </CardHeader>
-            <CardContent className="px-3 md:px-6 pb-3 md:pb-6">
-              <div className="text-xl md:text-2xl font-bold text-muted-foreground">--</div>
-              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
-                {t('components.viewTab.stats.unavailable')}
+              <h3 className="font-semibold text-base text-blue-900 dark:text-blue-100 mb-1">
+                {t('components.viewTab.quickActions.editTrip.title')}
+              </h3>
+              <p className="text-xs text-blue-700/70 dark:text-blue-300/70 line-clamp-2">
+                {t('components.viewTab.quickActions.editTrip.description')}
               </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Trip Map */}
-      <div className="h-[300px] md:h-[calc(100vh-32rem)] md:min-h-[650px] rounded-xl md:rounded-2xl overflow-hidden">
-        <TripMap itinerary={itinerary} />
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-blue-200/50 dark:border-blue-800/50"
-        >
-          <div className="relative z-10">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-              <Edit className="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="font-semibold text-sm md:text-base text-blue-900 dark:text-blue-100 mb-0.5 md:mb-1">
-              {t('components.viewTab.quickActions.editTrip.title')}
-            </h3>
-            <p className="text-[10px] md:text-xs text-blue-700/70 dark:text-blue-300/70 line-clamp-2">
-              {t('components.viewTab.quickActions.editTrip.description')}
-            </p>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </motion.button>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsShareModalOpen(true)}
-          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-purple-200/50 dark:border-purple-800/50"
-        >
-          <div className="relative z-10">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-              <Share2 className="w-4 h-4 md:w-5 md:h-5 text-purple-600 dark:text-purple-400" />
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsShareModalOpen(true)}
+            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/20 p-6 text-left transition-all hover:shadow-lg border border-purple-200/50 dark:border-purple-800/50"
+          >
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-full bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Share2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="font-semibold text-base text-purple-900 dark:text-purple-100 mb-1">
+                {t('components.viewTab.quickActions.shareTrip.title')}
+              </h3>
+              <p className="text-xs text-purple-700/70 dark:text-purple-300/70 line-clamp-2">
+                {t('components.viewTab.quickActions.shareTrip.description')}
+              </p>
             </div>
-            <h3 className="font-semibold text-sm md:text-base text-purple-900 dark:text-purple-100 mb-0.5 md:mb-1">
-              {t('components.viewTab.quickActions.shareTrip.title')}
-            </h3>
-            <p className="text-[10px] md:text-xs text-purple-700/70 dark:text-purple-300/70 line-clamp-2">
-              {t('components.viewTab.quickActions.shareTrip.description')}
-            </p>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </motion.button>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsExportModalOpen(true)}
-          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-green-200/50 dark:border-green-800/50"
-        >
-          <div className="relative z-10">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-500/10 dark:bg-green-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-              <Download className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsExportModalOpen(true)}
+            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 p-6 text-left transition-all hover:shadow-lg border border-green-200/50 dark:border-green-800/50"
+          >
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-full bg-green-500/10 dark:bg-green-400/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Download className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <h3 className="font-semibold text-base text-green-900 dark:text-green-100 mb-1">
+                {t('components.viewTab.quickActions.exportPdf.title')}
+              </h3>
+              <p className="text-xs text-green-700/70 dark:text-green-300/70 line-clamp-2">
+                {t('components.viewTab.quickActions.exportPdf.description')}
+              </p>
             </div>
-            <h3 className="font-semibold text-sm md:text-base text-green-900 dark:text-green-100 mb-0.5 md:mb-1">
-              {t('components.viewTab.quickActions.exportPdf.title')}
-            </h3>
-            <p className="text-[10px] md:text-xs text-green-700/70 dark:text-green-300/70 line-clamp-2">
-              {t('components.viewTab.quickActions.exportPdf.description')}
-            </p>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-green-400/0 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </motion.button>
+            <div className="absolute inset-0 bg-gradient-to-br from-green-400/0 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 p-4 md:p-6 text-left transition-all hover:shadow-lg border border-orange-200/50 dark:border-orange-800/50"
-        >
-          <div className="relative z-10">
-            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center mb-2 md:mb-3 group-hover:scale-110 transition-transform">
-              <CalendarPlus className="w-4 h-4 md:w-5 md:h-5 text-orange-600 dark:text-orange-400" />
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 p-6 text-left transition-all hover:shadow-lg border border-orange-200/50 dark:border-orange-800/50"
+          >
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-full bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <CalendarPlus className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <h3 className="font-semibold text-base text-orange-900 dark:text-orange-100 mb-1">
+                {t('components.viewTab.quickActions.addToCalendar.title')}
+              </h3>
+              <p className="text-xs text-orange-700/70 dark:text-orange-300/70 line-clamp-2">
+                {t('components.viewTab.quickActions.addToCalendar.description')}
+              </p>
             </div>
-            <h3 className="font-semibold text-sm md:text-base text-orange-900 dark:text-orange-100 mb-0.5 md:mb-1">
-              {t('components.viewTab.quickActions.addToCalendar.title')}
-            </h3>
-            <p className="text-[10px] md:text-xs text-orange-700/70 dark:text-orange-300/70 line-clamp-2">
-              {t('components.viewTab.quickActions.addToCalendar.description')}
-            </p>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-400/0 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </motion.button>
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-400/0 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
+        </div>
       </div>
 
       {/* Export Options Modal */}

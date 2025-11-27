@@ -12,8 +12,18 @@ import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.llm.LLMSchemaValidator;
 import com.tripplanner.service.utilities.NodeIdGenerator;
+import com.tripplanner.dto.tools.NodeIdRequest;
+import com.tripplanner.dto.tools.NodeIdResponse;
+import com.tripplanner.dto.tools.ConstraintCheckRequest;
+import com.tripplanner.dto.tools.ConstraintCheckResult;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
+import com.tripplanner.dto.tools.DistanceCalculationRequest;
+import com.tripplanner.dto.tools.DistanceCalculationResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +60,14 @@ public class TransportAgent extends BaseAgent {
     private final GeographyService geographyService;
     private final TransportMetadataService metadataService;
     private final ItineraryValidator itineraryValidator;
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.transport-tools.enabled:false}")
+    private boolean transportToolsEnabled;
+    
+    @Value("${features.transport-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
     
     public TransportAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                           ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
@@ -67,6 +85,7 @@ public class TransportAgent extends BaseAgent {
         this.geographyService = geographyService;
         this.metadataService = metadataService;
         this.itineraryValidator = itineraryValidator;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -941,6 +960,136 @@ public class TransportAgent extends BaseAgent {
             """;
     }
     
+    // ========== TRANSPORT AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Generate node ID using the Generate Node ID tool.
+     */
+    private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
+        if (!transportToolsEnabled) {
+            return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+        }
+        
+        NodeIdRequest request = new NodeIdRequest(itineraryId, dayNumber, nodeType);
+        
+        try {
+            NodeIdResponse response = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/generate-node-id",
+                request,
+                NodeIdResponse.class
+            );
+            
+            if (response != null && response.isSuccess()) {
+                return response.getNodeId();
+            } else if (fallbackOnError) {
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            }
+            return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+        } catch (Exception e) {
+            logger.error("Generate Node ID tool error: {}", e.getMessage());
+            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber) : null;
+        }
+    }
+    
+    /**
+     * Check user constraints (budget focus for transport).
+     */
+    private ConstraintCheckResult checkConstraintsViaTool(String itineraryId) {
+        if (!transportToolsEnabled) {
+            return new ConstraintCheckResult();
+        }
+        
+        ConstraintCheckRequest request = new ConstraintCheckRequest(itineraryId);
+        request.setCheckBudget(true);  // Critical for transport
+        request.setCheckPartySize(true);
+        
+        try {
+            ConstraintCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-user-constraints",
+                request,
+                ConstraintCheckResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.warn("Transport constraint violations:");
+                result.getViolations().forEach(v -> 
+                    logger.warn("  - {}: {}", v.getType(), v.getMessage()));
+            }
+            return result != null ? result : new ConstraintCheckResult();
+        } catch (Exception e) {
+            logger.error("Check Constraints tool error: {}", e.getMessage());
+            return fallbackOnError ? new ConstraintCheckResult() : new ConstraintCheckResult();
+        }
+    }
+    
+    /**
+     * Calculate distance using the Calculate Distance tool.
+     */
+    private DistanceCalculationResult calculateDistanceViaTool(
+            String origin, String destination, String mode) {
+        if (!transportToolsEnabled) {
+            // Use existing service
+            return null; // Will trigger fallback
+        }
+        
+        DistanceCalculationRequest request = new DistanceCalculationRequest();
+        request.setOrigin(origin);
+        request.setDestination(destination);
+        request.setMode(mode);
+        
+        try {
+            DistanceCalculationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/calculate-distance",
+                request,
+                DistanceCalculationResult.class
+            );
+            
+            if (result != null && result.isSuccess()) {
+                logger.info("Distance tool: {} km, {} min", 
+                    result.getDistanceKm(), result.getDurationMinutes());
+                return result;
+            }
+            return null;
+        } catch (Exception e) {
+            logger.error("Calculate Distance tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!transportToolsEnabled) {
+            return schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "TransportAgent").isValid();
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError ? 
+                schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "TransportAgent").isValid() : false;
+        }
+    }
+    
+    // ========== END TRANSPORT AGENT TOOL INTEGRATION ==========
+    
     @Override
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
         NormalizedItinerary skeleton = request.getData(NormalizedItinerary.class);
@@ -1011,8 +1160,9 @@ public class TransportAgent extends BaseAgent {
             if (fromLocation != null && toLocation != null &&
                 fromLocation.getCoordinates() != null && toLocation.getCoordinates() != null) {
                 
+                // Use cached distance calculation with itineraryId
                 GoogleMapsDistanceService.DistanceResult result = 
-                    distanceService.calculateDistance(fromLocation, toLocation, mode);
+                    distanceService.calculateDistance(itinerary.getItineraryId(), fromLocation, toLocation, mode);
                 
                 // Validate result is reasonable
                 if (distanceService.isReasonable(result)) {

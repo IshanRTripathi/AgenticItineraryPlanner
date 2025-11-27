@@ -1,0 +1,37 @@
+.confidence-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confidence-bar {
+  flex: 1;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+.confidence-fill.confidence-green {
+  background-color: #4caf50;
+}
+
+.confidence-fill.confidence-yellow {
+  background-color: #ff9800;
+}
+
+.confidence-fill.confidence-red {
+  background-color: #f44336;
+}
+
+.confidence-text {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}

@@ -146,6 +146,21 @@
     "trips": "Trips",
     "profile": "Profile"
   },
+  "tripNav": {
+    "view": "View",
+    "plan": "Plan",
+    "chat": "Chat",
+    "bookings": "Bookings",
+    "others": "More",
+    "budget": "Budget",
+    "budgetDesc": "Track expenses and costs",
+    "packing": "Packing",
+    "packingDesc": "Manage your packing list",
+    "docs": "Docs",
+    "docsDesc": "Important documents",
+    "more": "More Options",
+    "moreSubtitle": "Additional trip options"
+  },
   "chatTab": {
     "title": "AI Travel Assistant",
     "subtitle": "Chat with AI to modify your itinerary",

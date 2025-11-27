@@ -9,9 +9,13 @@ import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.SummarizationService;
+import com.tripplanner.dto.tools.CostCalculationRequest;
+import com.tripplanner.dto.tools.CostCalculationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +32,14 @@ public class ExplainAgent extends BaseAgent {
     private final AiClient aiClient;
     private final ItineraryJsonService itineraryJsonService;
     private final SummarizationService summarizationService;
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.explain-tools.enabled:false}")
+    private boolean explainToolsEnabled;
+    
+    @Value("${features.explain-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
     
     public ExplainAgent(
             AiClient aiClient,
@@ -38,6 +50,7 @@ public class ExplainAgent extends BaseAgent {
         this.aiClient = aiClient;
         this.itineraryJsonService = itineraryJsonService;
         this.summarizationService = summarizationService;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -89,6 +102,41 @@ public class ExplainAgent extends BaseAgent {
             return createErrorResponse("I encountered an error while processing your question: " + e.getMessage(), request);
         }
     }
+    
+    // ========== EXPLAIN AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Calculate cost using the Calculate Cost tool for cost-related queries.
+     */
+    private CostCalculationResult calculateCostViaTool(String itineraryId, Integer partySize) {
+        if (!explainToolsEnabled) {
+            return null; // Will use summarization service fallback
+        }
+        
+        CostCalculationRequest request = new CostCalculationRequest(itineraryId, partySize);
+        request.setIncludeBudgetAnalysis(true);
+        
+        try {
+            logger.debug("Calling Calculate Cost tool for explanation");
+            
+            CostCalculationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/calculate-cost",
+                request,
+                CostCalculationResult.class
+            );
+            
+            if (result != null && result.isSuccess()) {
+                logger.info("Calculate Cost tool succeeded for explanation");
+                return result;
+            }
+            return null;
+        } catch (Exception e) {
+            logger.error("Calculate Cost tool error: {}", e.getMessage());
+            return fallbackOnError ? null : null;
+        }
+    }
+    
+    // ========== END EXPLAIN AGENT TOOL INTEGRATION ==========
     
     /**
      * Extract the user's question from the AgentRequest.

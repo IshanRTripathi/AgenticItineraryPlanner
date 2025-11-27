@@ -13,8 +13,16 @@ import com.tripplanner.service.ai.ResilientAiClient;
 import com.tripplanner.service.ai.RetryStrategy;
 import com.tripplanner.service.llm.LLMSchemaValidator;
 import com.tripplanner.service.utilities.NodeIdGenerator;
+import com.tripplanner.dto.tools.NodeIdRequest;
+import com.tripplanner.dto.tools.NodeIdResponse;
+import com.tripplanner.dto.tools.ConstraintCheckRequest;
+import com.tripplanner.dto.tools.ConstraintCheckResult;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -47,11 +55,18 @@ public class SkeletonPlannerAgent extends BaseAgent {
     private final NodeIdGenerator nodeIdGenerator;
     private final LLMSchemaValidator schemaValidator;
     private final NodeIdValidator nodeIdValidator;
+    private final ItineraryValidator itineraryValidator;
+    private final RestTemplate restTemplate;
     
     // Configuration
     private static final int DAYS_PER_BATCH = 1; // Generate 1 day at a time for maximum reliability
     
-    private final ItineraryValidator itineraryValidator;
+    // Feature flags for tool integration
+    @Value("${features.skeleton-tools.enabled:false}")
+    private boolean skeletonToolsEnabled;
+    
+    @Value("${features.skeleton-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
     
     public SkeletonPlannerAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                                 ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
@@ -66,6 +81,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
         this.schemaValidator = schemaValidator;
         this.nodeIdValidator = nodeIdValidator;
         this.itineraryValidator = itineraryValidator;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -149,35 +165,40 @@ public class SkeletonPlannerAgent extends BaseAgent {
                 // This allows LLM to see transport/accommodation in context and plan around them
                 List<NormalizedNode> preCreatedNodes = new ArrayList<>();
                 
+                // Create a temporary itinerary for ID generation
+                NormalizedItinerary tempItinerary = new NormalizedItinerary();
+                tempItinerary.setDays(new ArrayList<>(previousDays));
+                
                 // Add arrival travel for Day 1
                 if (dayNumber == 1 && shouldAddArrivalTravel(request, cityForThisDay)) {
                     NormalizedNode arrivalNode = createArrivalTravelNode(dayNumber, request, cityForThisDay);
+                    // CRITICAL FIX: Assign ID immediately using NodeIdGenerator
+                    arrivalNode.setId(nodeIdGenerator.generateNodeId("transport", dayNumber, tempItinerary));
                     preCreatedNodes.add(arrivalNode);
-                    logger.info("Pre-created arrival node for Day 1");
+                    logger.info("Pre-created arrival node for Day 1 with ID: {}", arrivalNode.getId());
                 }
                 
                 // Add inter-city travel
                 if (travelSegment != null) {
                     NormalizedNode travelNode = createTravelNode(dayNumber, travelSegment);
+                    // CRITICAL FIX: Assign ID immediately using NodeIdGenerator
+                    travelNode.setId(nodeIdGenerator.generateNodeId("transport", dayNumber, tempItinerary));
                     preCreatedNodes.add(travelNode);
-                    logger.info("Pre-created travel node for Day {}: {} -> {}", 
-                               dayNumber, travelSegment.getFromCity(), travelSegment.getToCity());
+                    logger.info("Pre-created travel node for Day {} with ID: {} ({} -> {})", 
+                               dayNumber, travelNode.getId(), travelSegment.getFromCity(), travelSegment.getToCity());
                 }
                 
                 // Add departure travel for last day
                 if (dayNumber == totalDays && shouldAddDepartureTravel(request, cityForThisDay)) {
                     NormalizedNode departureNode = createDepartureTravelNode(dayNumber, request, cityForThisDay);
+                    // CRITICAL FIX: Assign ID immediately using NodeIdGenerator
+                    departureNode.setId(nodeIdGenerator.generateNodeId("transport", dayNumber, tempItinerary));
                     preCreatedNodes.add(departureNode);
-                    logger.info("Pre-created departure node for last day");
+                    logger.info("Pre-created departure node for last day with ID: {}", departureNode.getId());
                 }
                 
-                // Add accommodation for the night
-                boolean isLastDayReturningHome = (dayNumber == totalDays && shouldAddDepartureTravel(request, cityForThisDay));
-                if (!isLastDayReturningHome && cityForThisDay != null) {
-                    NormalizedNode accommodationNode = createAccommodationNode(dayNumber, cityForThisDay);
-                    preCreatedNodes.add(accommodationNode);
-                    logger.info("Pre-created accommodation node for Day {}", dayNumber);
-                }
+                // REMOVED: Accommodation nodes no longer created
+                // Users will book accommodation separately via "Book Stay" button in UI
                 
                 // Generate skeleton for this day with pre-created infrastructure nodes
                 // LLM will see these nodes and plan activities around them
@@ -896,9 +917,9 @@ public class SkeletonPlannerAgent extends BaseAgent {
                            dayNumber);
             }
             
-            // Generate IDs for nodes if missing and validate them
+            // Generate IDs for nodes if missing (LLM no longer generates IDs)
             if (day.getNodes() != null) {
-                // Create a temporary itinerary for validation
+                // Create a temporary itinerary for ID generation (includes pre-created nodes)
                 NormalizedItinerary tempItinerary = new NormalizedItinerary();
                 tempItinerary.setDays(new ArrayList<>());
                 tempItinerary.getDays().add(day);
@@ -906,22 +927,10 @@ public class SkeletonPlannerAgent extends BaseAgent {
                 for (int i = 0; i < day.getNodes().size(); i++) {
                     NormalizedNode node = day.getNodes().get(i);
                     if (node.getId() == null || node.getId().isEmpty()) {
-                        String nodeId = nodeIdGenerator.generateSkeletonNodeId(dayNumber, i + 1, node.getType());
+                        // Use generateNodeId which checks for uniqueness and avoids conflicts
+                        String nodeId = nodeIdGenerator.generateNodeId(node.getType(), dayNumber, tempItinerary);
                         node.setId(nodeId);
-                        logger.debug("Assigned ID {} to node: {}", nodeId, node.getTitle());
-                    }
-                    
-                    // IMPROVED: Validate node ID format and uniqueness
-                    try {
-                        nodeIdValidator.validateBeforeAdd(node.getId(), dayNumber, tempItinerary);
-                        logger.debug("Node ID validated: {}", node.getId());
-                    } catch (IllegalArgumentException e) {
-                        logger.error("Invalid node ID generated by LLM: {} - {}", node.getId(), e.getMessage());
-                        // FIXED: Use NodeIdGenerator to create a proper unique ID
-                        // This ensures the ID follows the standard format and is truly unique
-                        String newNodeId = nodeIdGenerator.generateNodeId(node.getType(), dayNumber, tempItinerary);
-                        node.setId(newNodeId);
-                        logger.warn("Regenerated node ID using NodeIdGenerator: {}", newNodeId);
+                        logger.debug("Assigned unique ID {} to node: {}", nodeId, node.getTitle());
                     }
                     
                     // Set placeholder values with more descriptive titles
@@ -1019,11 +1028,12 @@ public class SkeletonPlannerAgent extends BaseAgent {
             3. Ensure timing doesn't conflict with transport 
             4. CRITICAL: Include travel time buffers between activities based on rough time taken to travel (default to 30 mins)
             5. Use DESCRIPTIVE placeholder titles that indicate the type of activity
-            6. CRITICAL: Use consistent node ID format: "day{dayNumber}_node{sequenceNumber}"
-            7. Consider party size when planning activities (group-friendly vs individual)
-            8. Respect budget tier and ensure activities match the budget level
-            9. Use city context to plan appropriate activities for the location
-            10. Avoid repeating activities from previous days
+            6. Consider party size when planning activities (group-friendly vs individual)
+            7. Respect budget tier and ensure activities match the budget level
+            8. Use city context to plan appropriate activities for the location
+            9. Avoid repeating activities from previous days
+            10. CRITICAL: Set the day-level "location" field to the SPECIFIC CITY NAME (e.g., "Zurich", "Interlaken"), NOT the country or destination
+            11. DO NOT generate node IDs - they will be assigned automatically
             
             Title Guidelines:
             - Use DESCRIPTIVE placeholders that indicate activity type
@@ -1095,6 +1105,8 @@ public class SkeletonPlannerAgent extends BaseAgent {
         if (cityForThisDay != null) {
             prompt.append("\n=== CITY CONTEXT FOR THIS DAY ===\n");
             prompt.append("City: ").append(cityForThisDay.getCityName()).append("\n");
+            prompt.append("CRITICAL: Set the 'location' field to EXACTLY: ").append(cityForThisDay.getCityName()).append("\n");
+            prompt.append("DO NOT use country name or destination name - use ONLY the city name above.\n");
             prompt.append("City Type: ").append(cityForThisDay.getDestinationType()).append(" (gateway/nature/cultural/urban)\n");
             prompt.append("Day ").append(dayNumber - cityForThisDay.getStartDay() + 1)
                   .append(" of ").append(cityForThisDay.getTotalDays())
@@ -1168,25 +1180,32 @@ public class SkeletonPlannerAgent extends BaseAgent {
         
         // Enhanced budget information with currency context
         String budgetTier = request.getBudgetTier() != null ? request.getBudgetTier() : "medium";
-        prompt.append("\nBudget tier: ").append(budgetTier).append("\n");
-        prompt.append("IMPORTANT: Determine appropriate budget ranges for ").append(request.getDestination());
-        prompt.append(" in the local currency based on the '").append(budgetTier).append("' tier.\n");
-        prompt.append("All cost estimates should be PER PERSON.\n");
+        prompt.append("\nBudget preference: ").append(budgetTier).append("\n");
+        prompt.append("IMPORTANT: Interpret budget tier relative to ").append(request.getDestination()).append(":\n");
         
-        // Add specific budget amounts if provided
-        if (request.getBudgetMin() != null || request.getBudgetMax() != null) {
-            prompt.append("User's budget range: ");
-            if (request.getBudgetMin() != null) {
-                prompt.append(request.getBudgetMin());
-            }
-            if (request.getBudgetMax() != null) {
-                if (request.getBudgetMin() != null) {
-                    prompt.append(" - ");
-                }
-                prompt.append(request.getBudgetMax());
-            }
-            prompt.append(" per person\n");
+        // Provide context-aware budget guidance
+        switch (budgetTier.toLowerCase()) {
+            case "budget":
+                prompt.append("- 'budget' means cost-conscious choices appropriate for this destination\n");
+                prompt.append("- Select affordable but quality accommodations, local restaurants, public transport\n");
+                prompt.append("- Focus on free/low-cost activities, local experiences\n");
+                break;
+            case "medium":
+                prompt.append("- 'medium' means comfortable mid-range options for this destination\n");
+                prompt.append("- Balance between cost and comfort with good value\n");
+                prompt.append("- Mix of popular attractions, decent restaurants, efficient transport\n");
+                break;
+            case "luxury":
+                prompt.append("- 'luxury' means premium experiences appropriate for this destination\n");
+                prompt.append("- High-end accommodations, fine dining, private transport\n");
+                prompt.append("- Exclusive activities, VIP experiences, premium services\n");
+                break;
+            default:
+                prompt.append("- Select options that provide good value for this destination\n");
         }
+        
+        prompt.append("All cost estimates should be PER PERSON in local currency.\n");
+        prompt.append("Adjust recommendations based on local cost of living and tourism standards.\n");
         
         // Add interests
         if (request.getInterests() != null && !request.getInterests().isEmpty()) {
@@ -1244,7 +1263,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
             prompt.append("NOTE: This is the last day (departure day). Departure travel is handled separately. Plan activities for morning/afternoon only.\n");
         }
         
-        prompt.append("CRITICAL: Use node IDs in format 'day").append(dayNumber).append("_node1', 'day").append(dayNumber).append("_node2', etc.\n");
+        prompt.append("IMPORTANT: Do NOT include 'id' field in nodes - IDs will be assigned automatically.\n");
         
         return prompt.toString();
     }
@@ -1301,7 +1320,6 @@ public class SkeletonPlannerAgent extends BaseAgent {
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": { "type": "string" },
                       "type": { 
                         "type": "string", 
                         "enum": ["attraction", "meal", "accommodation", "transport"] 
@@ -1354,6 +1372,100 @@ public class SkeletonPlannerAgent extends BaseAgent {
         
         return (T) skeleton;
     }
+    
+    // ========== SKELETON PLANNER AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Generate node ID using the Generate Node ID tool.
+     */
+    private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
+        if (!skeletonToolsEnabled) {
+            return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+        }
+        
+        NodeIdRequest request = new NodeIdRequest(itineraryId, dayNumber, nodeType);
+        
+        try {
+            NodeIdResponse response = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/generate-node-id",
+                request,
+                NodeIdResponse.class
+            );
+            
+            if (response != null && response.isSuccess()) {
+                return response.getNodeId();
+            }
+            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber) : null;
+        } catch (Exception e) {
+            logger.error("Generate Node ID tool error: {}", e.getMessage());
+            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber) : null;
+        }
+    }
+    
+    /**
+     * Check user constraints before skeleton generation.
+     */
+    private ConstraintCheckResult checkConstraintsViaTool(String itineraryId) {
+        if (!skeletonToolsEnabled) {
+            return new ConstraintCheckResult();
+        }
+        
+        ConstraintCheckRequest request = new ConstraintCheckRequest(itineraryId);
+        request.setCheckBudget(true);
+        request.setCheckPartySize(true);
+        
+        try {
+            ConstraintCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-user-constraints",
+                request,
+                ConstraintCheckResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.warn("Skeleton constraint violations:");
+                result.getViolations().forEach(v -> 
+                    logger.warn("  - {}: {}", v.getType(), v.getMessage()));
+            }
+            return result != null ? result : new ConstraintCheckResult();
+        } catch (Exception e) {
+            logger.error("Check Constraints tool error: {}", e.getMessage());
+            return new ConstraintCheckResult();
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!skeletonToolsEnabled) {
+            return schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "SkeletonPlannerAgent").isValid();
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError ? 
+                schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "SkeletonPlannerAgent").isValid() : false;
+        }
+    }
+    
+    // ========== END SKELETON PLANNER AGENT TOOL INTEGRATION ==========
     
     @Override
     protected String getAgentName() {

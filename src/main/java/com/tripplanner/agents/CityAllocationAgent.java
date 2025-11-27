@@ -10,8 +10,14 @@ import com.tripplanner.service.ai.AiClient;
 import com.tripplanner.service.ai.ResilientAiClient;
 import com.tripplanner.service.ai.RetryStrategy;
 import com.tripplanner.service.llm.LLMSchemaValidator;
+import com.tripplanner.dto.tools.DistanceCalculationRequest;
+import com.tripplanner.dto.tools.DistanceCalculationResult;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
@@ -45,6 +51,14 @@ public class CityAllocationAgent extends BaseAgent {
     private final ItineraryJsonService itineraryJsonService;
     private final AgentEventPublisher agentEventPublisher;
     private final LLMSchemaValidator schemaValidator;
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.city-allocation-tools.enabled:false}")
+    private boolean cityAllocationToolsEnabled;
+    
+    @Value("${features.city-allocation-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
     
     public CityAllocationAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                                ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
@@ -55,6 +69,7 @@ public class CityAllocationAgent extends BaseAgent {
         this.itineraryJsonService = itineraryJsonService;
         this.agentEventPublisher = agentEventPublisher;
         this.schemaValidator = schemaValidator;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -513,6 +528,73 @@ public class CityAllocationAgent extends BaseAgent {
         
         return (T) plan;
     }
+    
+    // ========== CITY ALLOCATION AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Calculate distance between cities using the Calculate Distance tool.
+     */
+    private DistanceCalculationResult calculateDistanceViaTool(String origin, String destination) {
+        if (!cityAllocationToolsEnabled) {
+            return null; // Will use fallback
+        }
+        
+        DistanceCalculationRequest request = new DistanceCalculationRequest();
+        request.setOrigin(origin);
+        request.setDestination(destination);
+        request.setMode("driving");
+        
+        try {
+            DistanceCalculationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/calculate-distance",
+                request,
+                DistanceCalculationResult.class
+            );
+            
+            if (result != null && result.isSuccess()) {
+                logger.info("Distance tool: {} to {} = {} km", origin, destination, result.getDistanceKm());
+                return result;
+            }
+            return null;
+        } catch (Exception e) {
+            logger.error("Calculate Distance tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!cityAllocationToolsEnabled) {
+            return schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "CityAllocationAgent").isValid();
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError ? 
+                schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "CityAllocationAgent").isValid() : false;
+        }
+    }
+    
+    // ========== END CITY ALLOCATION AGENT TOOL INTEGRATION ==========
     
     @Override
     protected String getAgentName() {

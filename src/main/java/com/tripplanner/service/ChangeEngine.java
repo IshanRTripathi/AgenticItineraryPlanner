@@ -186,31 +186,37 @@ public class ChangeEngine {
                 return new ApplyResult(current.getVersion(), diff);
             }
 
+            // P0-4 FIX: Validate complete result BEFORE committing any changes
+            logger.info("🔒 [P0-4] Validating changes before commit (atomic transaction)");
+            
+            // Increment version for validation
+            updated.setVersion(current.getVersion() + 1);
+            updated.setUpdatedAt(System.currentTimeMillis());
+            
+            // Validate the complete updated itinerary
+            if (itineraryValidator != null) {
+                ItineraryValidator.ValidationResult validationResult = itineraryValidator.validate(updated);
+                if (!validationResult.isValid()) {
+                    logger.error("❌ [P0-4] Validation failed - ROLLING BACK all changes");
+                    logger.error("   Validation errors: {}", validationResult.getErrors());
+                    throw new ValidationException(
+                        "Changes would result in invalid itinerary - rolled back",
+                        String.valueOf(validationResult.getErrors()));
+                }
+                if (!validationResult.getWarnings().isEmpty()) {
+                    logger.warn("⚠️ [P0-4] Validation warnings: {}", validationResult.getWarnings());
+                }
+            }
+            
+            logger.info("✅ [P0-4] Validation passed - proceeding with atomic commit");
+
             // Create revision record before applying changes
             RevisionRecord revisionRecord = createRevisionRecord(current, changeSet);
 
             try {
                 // Save revision using RevisionService
                 revisionService.saveRevision(itineraryId, revisionRecord);
-
-                // Increment version only after successful revision save
-                updated.setVersion(current.getVersion() + 1);
-                updated.setUpdatedAt(System.currentTimeMillis());
-
-                // Validate before save
-                if (itineraryValidator != null) {
-                    ItineraryValidator.ValidationResult validationResult = itineraryValidator.validate(updated);
-                    if (!validationResult.isValid()) {
-                        logger.error("Validation failed for itinerary {}: {}", itineraryId,
-                                validationResult.getErrors());
-                        throw new ValidationException("Itinerary validation failed",
-                                String.valueOf(validationResult.getErrors()));
-                    }
-                    if (!validationResult.getWarnings().isEmpty()) {
-                        logger.warn("Validation warnings for itinerary {}: {}", itineraryId,
-                                validationResult.getWarnings());
-                    }
-                }
+                logger.info("✅ [P0-4] Revision saved successfully");
 
                 // Update main record with optimistic locking and retry
                 int maxRetries = 3;
@@ -221,35 +227,40 @@ public class ChangeEngine {
                     try {
                         itineraryJsonService.updateItineraryWithLock(updated);
                         saved = true;
+                        logger.info("✅ [P0-4] Itinerary saved successfully - transaction complete");
                     } catch (com.tripplanner.exception.ConcurrentModificationException e) {
                         retryCount++;
-                        logger.error("Concurrent modification during apply (attempt {}/{}): {}",
+                        logger.error("⚠️ [P0-4] Concurrent modification (attempt {}/{}): {}",
                                 retryCount, maxRetries, e.getMessage());
 
                         if (retryCount < maxRetries) {
-                            logger.info("Reloading itinerary and retrying apply...");
+                            logger.info("🔄 [P0-4] Reloading itinerary and retrying...");
                             Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
                             if (reloaded.isPresent()) {
-                                updated = reloaded.get();
+                                updated = deepCopy(reloaded.get());
                                 // Re-apply changes to reloaded itinerary
                                 applyChangesToItinerary(updated, changeSet);
-                                logger.info("Re-applied changes to reloaded itinerary");
+                                updated.setVersion(reloaded.get().getVersion() + 1);
+                                updated.setUpdatedAt(System.currentTimeMillis());
+                                logger.info("✅ [P0-4] Re-applied changes to reloaded itinerary");
                             } else {
-                                logger.error("Failed to reload itinerary for retry");
+                                logger.error("❌ [P0-4] Failed to reload itinerary for retry");
                                 throw new RuntimeException(
                                         "Changes conflict with recent updates. Please refresh and try again.", e);
                             }
                         } else {
-                            logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                            logger.error("❌ [P0-4] Max retries ({}) exceeded - ROLLING BACK", maxRetries);
                             throw new RuntimeException(
                                     "Changes conflict with recent updates. Please refresh and try again.", e);
                         }
                     }
                 }
 
-            } catch (Exception revisionError) {
-                logger.error("Failed to save revision, rolling back changes", revisionError);
-                throw new RuntimeException("Failed to save revision: " + revisionError.getMessage(), revisionError);
+            } catch (Exception saveError) {
+                logger.error("❌ [P0-4] CRITICAL: Save failed - ROLLING BACK all changes", saveError);
+                // Rollback is automatic - we never saved the updated itinerary
+                // The 'current' itinerary remains unchanged in the database
+                throw new RuntimeException("Failed to save changes - rolled back: " + saveError.getMessage(), saveError);
             }
 
             ApplyResult result = new ApplyResult(updated.getVersion(), diff);
@@ -339,16 +350,39 @@ public class ChangeEngine {
                 return new ApplyResult(current.getVersion(), diff);
             }
 
+            // P0-4 FIX: Validate complete result BEFORE committing any changes
+            // This ensures atomic transaction - either all changes succeed or none do
+            logger.info("🔒 [P0-4] Validating changes before commit (atomic transaction)");
+            
+            // Increment version for validation
+            updated.setVersion(current.getVersion() + 1);
+            updated.setUpdatedAt(System.currentTimeMillis());
+            
+            // Validate the complete updated itinerary
+            if (itineraryValidator != null) {
+                ItineraryValidator.ValidationResult validationResult = itineraryValidator.validate(updated);
+                if (!validationResult.isValid()) {
+                    logger.error("❌ [P0-4] Validation failed - ROLLING BACK all changes");
+                    logger.error("   Validation errors: {}", validationResult.getErrors());
+                    throw new ValidationException(
+                        "Changes would result in invalid itinerary - rolled back",
+                        String.valueOf(validationResult.getErrors())
+                    );
+                }
+                if (!validationResult.getWarnings().isEmpty()) {
+                    logger.warn("⚠️ [P0-4] Validation warnings: {}", validationResult.getWarnings());
+                }
+            }
+            
+            logger.info("✅ [P0-4] Validation passed - proceeding with atomic commit");
+
             // Create revision record before applying changes
             RevisionRecord revisionRecord = createRevisionRecord(current, changeSet);
 
             try {
                 // Save revision using RevisionService
                 revisionService.saveRevision(itineraryId, revisionRecord);
-
-                // Increment version only after successful revision save
-                updated.setVersion(current.getVersion() + 1);
-                updated.setUpdatedAt(System.currentTimeMillis());
+                logger.info("✅ [P0-4] Revision saved successfully");
 
                 // 🔍 DEBUG: Verify data before saving to database
                 if (updated.getDays() != null && !updated.getDays().isEmpty()) {
@@ -379,33 +413,40 @@ public class ChangeEngine {
                     try {
                         itineraryJsonService.updateItineraryWithLock(updated);
                         saved = true;
+                        logger.info("✅ [P0-4] Itinerary saved successfully - transaction complete");
                     } catch (com.tripplanner.exception.ConcurrentModificationException e) {
                         retryCount++;
-                        logger.error("Concurrent modification during undo (attempt {}/{}): {}",
+                        logger.error("⚠️ [P0-4] Concurrent modification (attempt {}/{}): {}",
                                 retryCount, maxRetries, e.getMessage());
 
                         if (retryCount < maxRetries) {
-                            logger.info("Reloading itinerary and retrying undo...");
+                            logger.info("🔄 [P0-4] Reloading itinerary and retrying...");
                             Optional<NormalizedItinerary> reloaded = itineraryJsonService.getItinerary(itineraryId);
                             if (reloaded.isPresent()) {
-                                updated = reloaded.get();
-                                logger.info("Reloaded itinerary for undo retry");
+                                updated = deepCopy(reloaded.get());
+                                // Re-apply changes to reloaded itinerary
+                                applyChangesToItinerary(updated, changeSet);
+                                updated.setVersion(reloaded.get().getVersion() + 1);
+                                updated.setUpdatedAt(System.currentTimeMillis());
+                                logger.info("✅ [P0-4] Re-applied changes to reloaded itinerary");
                             } else {
-                                logger.error("Failed to reload itinerary for retry");
+                                logger.error("❌ [P0-4] Failed to reload itinerary for retry");
                                 throw new RuntimeException(
-                                        "Undo conflicts with recent updates. Please refresh and try again.", e);
+                                        "Changes conflict with recent updates. Please refresh and try again.", e);
                             }
                         } else {
-                            logger.error("Max retries ({}) exceeded, giving up", maxRetries);
+                            logger.error("❌ [P0-4] Max retries ({}) exceeded - ROLLING BACK", maxRetries);
                             throw new RuntimeException(
-                                    "Undo conflicts with recent updates. Please refresh and try again.", e);
+                                    "Changes conflict with recent updates. Please refresh and try again.", e);
                         }
                     }
                 }
 
-            } catch (Exception revisionError) {
-                logger.error("Failed to save revision, rolling back changes", revisionError);
-                throw new RuntimeException("Failed to save revision: " + revisionError.getMessage(), revisionError);
+            } catch (Exception saveError) {
+                logger.error("❌ [P0-4] CRITICAL: Save failed - ROLLING BACK all changes", saveError);
+                // Rollback is automatic - we never saved the updated itinerary
+                // The 'current' itinerary remains unchanged in the database
+                throw new RuntimeException("Failed to save changes - rolled back: " + saveError.getMessage(), saveError);
             }
 
             // No regular entity sync in Firestore-only mode

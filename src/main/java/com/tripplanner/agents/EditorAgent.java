@@ -8,9 +8,19 @@ import com.tripplanner.service.agents.AgentCoordinator;
 import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.client.GeminiClient;
 import com.tripplanner.service.llm.LLMResponseHandler;
+import com.tripplanner.dto.tools.NodeIdRequest;
+import com.tripplanner.dto.tools.NodeIdResponse;
+import com.tripplanner.dto.tools.ConflictCheckRequest;
+import com.tripplanner.dto.tools.ConflictCheckResult;
+import com.tripplanner.dto.tools.CostCalculationRequest;
+import com.tripplanner.dto.tools.CostCalculationResult;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +46,14 @@ public class EditorAgent extends BaseAgent {
     private final ChatHistoryService chatHistoryService;
     private final NodeIdValidator nodeIdValidator;
     private final AgentCoordinator agentCoordinator; // NEW: Prevents concurrent modifications
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.editor-tools.enabled:false}")
+    private boolean editorToolsEnabled;
+    
+    @Value("${features.editor-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
 
     public EditorAgent(AgentEventBus eventBus,
                        SummarizationService summarizationService,
@@ -63,6 +81,7 @@ public class EditorAgent extends BaseAgent {
         this.chatHistoryService = chatHistoryService;
         this.nodeIdValidator = nodeIdValidator;
         this.agentCoordinator = agentCoordinator;
+        this.restTemplate = new RestTemplate();
     }
 
     @Override
@@ -220,6 +239,129 @@ public class EditorAgent extends BaseAgent {
             throw new RuntimeException("Unexpected error during editing: " + getUserFriendlyErrorMessage(e), e);
         }
     }
+
+    // ========== EDITOR AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Generate node ID for new nodes using the Generate Node ID tool.
+     */
+    private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
+        if (!editorToolsEnabled) {
+            return "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis();
+        }
+        
+        NodeIdRequest request = new NodeIdRequest(itineraryId, dayNumber, nodeType);
+        
+        try {
+            NodeIdResponse response = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/generate-node-id",
+                request,
+                NodeIdResponse.class
+            );
+            
+            if (response != null && response.isSuccess()) {
+                return response.getNodeId();
+            }
+            return fallbackOnError ? "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis() : null;
+        } catch (Exception e) {
+            logger.error("Generate Node ID tool error: {}", e.getMessage());
+            return fallbackOnError ? "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis() : null;
+        }
+    }
+    
+    /**
+     * Check for conflicts before applying changes using the Check Conflicts tool.
+     */
+    private ConflictCheckResult checkConflictsViaTool(String itineraryId, ChangeSet proposedChanges) {
+        if (!editorToolsEnabled) {
+            return new ConflictCheckResult(); // No conflicts by default
+        }
+        
+        ConflictCheckRequest request = new ConflictCheckRequest(itineraryId, proposedChanges);
+        request.setCheckTimeConflicts(true);
+        request.setCheckBudgetConflicts(true);
+        
+        try {
+            ConflictCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-conflicts",
+                request,
+                ConflictCheckResult.class
+            );
+            
+            if (result != null && result.isHasConflicts()) {
+                logger.warn("Conflicts detected in edit:");
+                result.getConflicts().forEach(c -> 
+                    logger.warn("  - {}: {}", c.getType(), c.getMessage()));
+            }
+            return result != null ? result : new ConflictCheckResult();
+        } catch (Exception e) {
+            logger.error("Check Conflicts tool error: {}", e.getMessage());
+            return new ConflictCheckResult();
+        }
+    }
+    
+    /**
+     * Recalculate cost after edits using the Calculate Cost tool.
+     */
+    private CostCalculationResult calculateCostViaTool(String itineraryId, Integer partySize) {
+        if (!editorToolsEnabled) {
+            return null;
+        }
+        
+        CostCalculationRequest request = new CostCalculationRequest(itineraryId, partySize);
+        request.setIncludeBudgetAnalysis(true);
+        
+        try {
+            CostCalculationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/calculate-cost",
+                request,
+                CostCalculationResult.class
+            );
+            
+            if (result != null && result.isSuccess()) {
+                logger.info("Cost recalculated after edit: {} {}", 
+                    result.getTotalCostPerPerson(), result.getCurrency());
+                return result;
+            }
+            return null;
+        } catch (Exception e) {
+            logger.error("Calculate Cost tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!editorToolsEnabled) {
+            return true; // No existing validator
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError;
+        }
+    }
+    
+    // ========== END EDITOR AGENT TOOL INTEGRATION ==========
 
     @Override
     protected String getAgentName() {
@@ -1231,8 +1373,8 @@ public class EditorAgent extends BaseAgent {
             logger.info("🔍 [EditorAgent] Searching for place: '{}' in '{}'", searchQuery, destination);
 
             try {
-                // searchPlace is @Cacheable, so duplicate calls are cached
-                PlaceSearchResult searchResult = googlePlacesService.searchPlace(searchQuery, destination);
+                // Use cached place search with itineraryId
+                PlaceSearchResult searchResult = googlePlacesService.searchPlace(itineraryId, searchQuery, destination);
 
                 if (searchResult != null) {
                     // Update node title with actual place name from Google

@@ -34,7 +34,7 @@ public class CurrencyConversionService {
         EXCHANGE_RATES.put("USD", 1.0);           // US Dollar (base)
         
         // Major currencies
-        EXCHANGE_RATES.put("INR", 0.012);         // Indian Rupee
+        EXCHANGE_RATES.put("INR", 83.0);          // Indian Rupee (1 USD = 83 INR)
         EXCHANGE_RATES.put("EUR", 0.92);          // Euro
         EXCHANGE_RATES.put("GBP", 0.79);          // British Pound
         EXCHANGE_RATES.put("JPY", 154.17);        // Japanese Yen

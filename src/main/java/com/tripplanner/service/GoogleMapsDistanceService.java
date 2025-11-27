@@ -2,7 +2,10 @@ package com.tripplanner.service;
 
 import com.tripplanner.dto.Coordinates;
 import com.tripplanner.dto.NodeLocation;
+import com.tripplanner.enums.ToolType;
 import com.tripplanner.service.analytics.ItineraryMetricsTracker;
+import com.tripplanner.service.cache.ToolCacheService;
+import com.tripplanner.util.ToolCacheKeyGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ import java.util.Map;
  * 2. Actual travel duration with traffic consideration
  * 3. Multiple transport modes (driving, walking, transit)
  * 4. Fallback to straight-line distance if API fails
+ * 
+ * CACHING: Results cached for 30 days (distances are static)
  */
 @Service
 public class GoogleMapsDistanceService {
@@ -38,6 +43,9 @@ public class GoogleMapsDistanceService {
 
     @Autowired(required = false)
     private ItineraryMetricsTracker metricsTracker;
+    
+    @Autowired(required = false)
+    private ToolCacheService toolCacheService;
 
     // Fallback: average speeds for different modes (km/h)
     private static final double WALKING_SPEED_KMH = 5.0;
@@ -87,12 +95,13 @@ public class GoogleMapsDistanceService {
     /**
      * Calculate distance and duration between two locations.
      * 
+     * @param itineraryId Itinerary ID for caching (optional)
      * @param from Starting location
      * @param to   Ending location
      * @param mode Transport mode (driving, walking, transit)
      * @return DistanceResult with distance and duration
      */
-    public DistanceResult calculateDistance(NodeLocation from, NodeLocation to, String mode) {
+    public DistanceResult calculateDistance(String itineraryId, NodeLocation from, NodeLocation to, String mode) {
         // Validate inputs
         if (from == null || to == null ||
                 from.getCoordinates() == null || to.getCoordinates() == null) {
@@ -102,7 +111,40 @@ public class GoogleMapsDistanceService {
 
         Coordinates fromCoords = from.getCoordinates();
         Coordinates toCoords = to.getCoordinates();
-
+        
+        // Try cache first if itineraryId provided
+        if (toolCacheService != null && itineraryId != null && apiKey != null && !apiKey.trim().isEmpty()) {
+            String cacheKey = ToolCacheKeyGenerator.forDistanceCoords(fromCoords, toCoords, mode);
+            
+            return toolCacheService.getOrCompute(
+                itineraryId,
+                ToolType.DISTANCE.getValue(),
+                cacheKey,
+                Map.of(
+                    "from", String.format("%.4f,%.4f", fromCoords.getLat(), fromCoords.getLng()),
+                    "to", String.format("%.4f,%.4f", toCoords.getLat(), toCoords.getLng()),
+                    "mode", mode != null ? mode : "driving"
+                ),
+                () -> calculateDistanceInternal(fromCoords, toCoords, mode),
+                DistanceResult.class
+            );
+        }
+        
+        // Fallback to direct call
+        return calculateDistanceInternal(fromCoords, toCoords, mode);
+    }
+    
+    /**
+     * Overload for backward compatibility (no itineraryId)
+     */
+    public DistanceResult calculateDistance(NodeLocation from, NodeLocation to, String mode) {
+        return calculateDistance(null, from, to, mode);
+    }
+    
+    /**
+     * Internal distance calculation (called by cache or directly)
+     */
+    private DistanceResult calculateDistanceInternal(Coordinates fromCoords, Coordinates toCoords, String mode) {
         // Try Google Maps API first
         if (apiKey != null && !apiKey.trim().isEmpty()) {
             try {
@@ -282,23 +324,18 @@ public class GoogleMapsDistanceService {
 
     /**
      * Validate distance result is reasonable.
+     * Note: Removed distance/duration limits to support multi-country itineraries.
      */
     public boolean isReasonable(DistanceResult result) {
-        // Check for unreasonably long distances (> 500km suggests different cities)
-        if (result.getDistanceKm() > 500) {
-            logger.warn("Unreasonably long distance: {}km", result.getDistanceKm());
-            return false;
-        }
-
-        // Check for unreasonably long durations (> 8 hours)
-        if (result.getDurationMinutes() > 480) {
-            logger.warn("Unreasonably long duration: {}min", result.getDurationMinutes());
-            return false;
-        }
-
-        // Check for zero distance
+        // Check for zero distance (likely an error)
         if (result.getDistanceKm() < 0.01) {
             logger.warn("Zero or near-zero distance: {}km", result.getDistanceKm());
+            return false;
+        }
+
+        // Check for negative values (invalid data)
+        if (result.getDistanceKm() < 0 || result.getDurationMinutes() < 0) {
+            logger.warn("Invalid negative values: {}km, {}min", result.getDistanceKm(), result.getDurationMinutes());
             return false;
         }
 

@@ -6,8 +6,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, MessageSquare, Download, ChevronDown } from 'lucide-react';
+import { MessageSquare, ChevronDown, Settings } from 'lucide-react';
 import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { ChatMessageComponent } from '@/components/chat/ChatMessage';
 import { useScrollDetection } from '@/hooks/useScrollDetection';
@@ -15,6 +14,7 @@ import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { Textarea } from '@/components/ui/textarea';
 import { useTranslation } from '@/i18n';
 import { analytics } from '@/services/analytics';
+import { PreferencesPanel } from '@/components/memory/PreferencesPanel';
 
 const INITIAL_DISPLAY_COUNT = 10;
 const LOAD_MORE_COUNT = 10;
@@ -29,6 +29,8 @@ export function ChatTab() {
   const [detailedViewMessageId, setDetailedViewMessageId] = useState<string>();
   const [applyingMessageId, setApplyingMessageId] = useState<string>();
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
+  const [preferencesPanelOpen, setPreferencesPanelOpen] = useState(false);
+  const [hideBottomNav, setHideBottomNav] = useState(false);
 
   // Voice Input
   const {
@@ -56,6 +58,8 @@ export function ChatTab() {
   const toggleListening = () => {
     if (isListening) {
       stopListening();
+      // After stopping, the transcribed text remains in input
+      // and send button will be shown
     } else {
       startInputRef.current = input;
       startListening();
@@ -74,6 +78,52 @@ export function ChatTab() {
     threshold: 50,
     enabled: chatMessages.length > 0 && !!messagesContainerRef.current
   });
+
+  // Hide bottom navbar on scroll down in chat
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    let lastScrollTop = 0;
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollTop = container.scrollTop;
+
+          // At very top - always show
+          if (scrollTop < 10) {
+            setHideBottomNav(false);
+            document.body.classList.remove('hide-bottom-nav');
+          }
+          // Scrolling down - hide
+          else if (scrollTop > lastScrollTop && scrollTop > 80) {
+            setHideBottomNav(true);
+            document.body.classList.add('hide-bottom-nav');
+          }
+          // Scrolling up - show
+          else if (scrollTop < lastScrollTop) {
+            setHideBottomNav(false);
+            document.body.classList.remove('hide-bottom-nav');
+          }
+
+          lastScrollTop = scrollTop;
+          ticking = false;
+        });
+
+        ticking = true;
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Cleanup: remove class when component unmounts
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      document.body.classList.remove('hide-bottom-nav');
+    };
+  }, []);
 
   // Auto-scroll to bottom for new messages
   useEffect(() => {
@@ -95,7 +145,14 @@ export function ChatTab() {
     const text = input.trim();
     if (!text || isWaitingForResponse) return;
 
+    // Clear input immediately
     setInput('');
+    
+    // Reset textarea height
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      textarea.style.height = 'auto';
+    }
 
     const startTime = Date.now();
     const messageLength = text.length;
@@ -214,30 +271,24 @@ export function ChatTab() {
   };
 
   return (
-    <div className="relative h-[calc(100vh-12rem)] flex flex-col">
-      {/* Floating Action Buttons - Top right */}
-      <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
-        {isConnected && (
-          <Badge variant="outline" className="text-green-600 border-green-600 bg-white/90 backdrop-blur-sm shadow-sm text-xs px-2 py-0.5">
-            {t('components.chatTab.status.live')}
-          </Badge>
-        )}
-        {chatMessages.length > 0 && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleExportHistory}
-            title="Export chat history"
-            className="bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md h-9 w-9 p-0"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        )}
+    <div className="fixed inset-0 md:relative md:h-[calc(100vh-12rem)] flex flex-col bg-white">
+      {/* Floating Action Button - Top right - Memory Preferences */}
+      <div className="absolute top-2 right-2 z-30">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setPreferencesPanelOpen(true)}
+          title="Your Travel Preferences"
+          className="bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md h-9 px-3 gap-2"
+        >
+          <Settings className="h-4 w-4" />
+          <span className="hidden sm:inline text-xs">Preferences</span>
+        </Button>
       </div>
 
-      {/* Messages Container - Full height, clean design */}
+      {/* Messages Container - Full viewport on mobile, constrained on desktop */}
       <div className="flex-1 overflow-hidden">
-        <div ref={messagesContainerRef} className="h-full overflow-y-auto px-3 sm:px-4 py-4 sm:py-6 pb-24 sm:pb-6">
+        <div ref={messagesContainerRef} className="h-full overflow-y-auto px-3 sm:px-4 pt-12 pb-32 sm:pt-4 sm:pb-6">
           {/* Load More Button - Larger on mobile */}
           {hasMoreMessages && isNearTop && (
             <div className="sticky top-0 z-10 flex justify-center mb-4">
@@ -309,53 +360,27 @@ export function ChatTab() {
         </div>
       </div>
 
-      {/* Simplified Light Theme Chat Input Bar - Mobile Optimized */}
-      <div className="flex-shrink-0 pb-[env(safe-area-inset-bottom)] pt-2 bg-gradient-to-t from-white via-white to-transparent">
-        <div className="w-full px-3 sm:px-4 md:px-6 pb-2 sm:pb-4">
+      {/* Fixed Chat Input Bar - Overlays bottom nav on mobile */}
+      <div className="fixed md:relative bottom-20 md:bottom-0 left-0 right-0 z-[60] flex-shrink-0 pb-[env(safe-area-inset-bottom)] pt-2 bg-gradient-to-t from-white via-white to-transparent transition-transform duration-300"
+        style={{
+          transform: hideBottomNav ? 'translateY(80px)' : 'translateY(0)'
+        }}
+      >
+        <div className="w-full px-2 sm:px-4 md:px-6 pb-2">
           <div className="max-w-4xl mx-auto">
             {/* Single unified background container - fully rounded pill */}
             <div
-              className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 transition-all"
+              className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 transition-all"
               style={{
                 backgroundColor: '#FFFFFF',
-                borderRadius: '28px',
+                borderRadius: '24px',
                 border: '1px solid #E5E5E5',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 width: '100%',
-                minHeight: '56px'
+                minHeight: '48px'
               }}
             >
-              {/* Left: Plus icon - Larger touch target */}
-              <button
-                type="button"
-                className="flex-shrink-0 flex items-center justify-center hover:opacity-60 transition-opacity active:scale-95"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#414141ff',
-                  padding: 0,
-                  width: '44px',
-                  height: '44px'
-                }}
-                title="Add attachment"
-                aria-label="Add files"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 5v14m7-7H5" />
-                </svg>
-              </button>
-
-              {/* Center: Text input - no border, seamless, 16px font for mobile */}
+              {/* Center: Text input - no border, seamless, auto-resize */}
               <div className="flex-1 min-w-0">
                 <Textarea
                   value={input}
@@ -363,10 +388,11 @@ export function ChatTab() {
                   onKeyDown={handleKeyDown}
                   placeholder="Ask anything..."
                   disabled={isSending}
-                  className="w-full resize-none bg-transparent px-0 py-2 text-[16px] leading-[1.5] placeholder:text-[#9ca3af] focus-visible:outline-none"
+                  className="w-full resize-none bg-transparent px-0 py-1 text-[15px] sm:text-[16px] leading-[1.4] placeholder:text-[#9ca3af] focus-visible:outline-none"
                   style={{
                     color: '#0f1724',
                     minHeight: '24px',
+                    maxHeight: '120px',
                     caretColor: '#0f1724',
                     border: 'none',
                     outline: 'none',
@@ -377,7 +403,7 @@ export function ChatTab() {
                   onInput={(e) => {
                     const target = e.target as HTMLTextAreaElement;
                     target.style.height = 'auto';
-                    target.style.height = Math.min(target.scrollHeight, 150) + 'px';
+                    target.style.height = Math.min(target.scrollHeight, 120) + 'px';
                   }}
                   onFocus={(e) => {
                     e.target.style.outline = 'none';
@@ -387,95 +413,91 @@ export function ChatTab() {
                 />
               </div>
 
-              {/* Right: Action buttons - overlay style */}
-              <div className="flex items-center">
-                {input.length === 0 && !isWaitingForResponse ? (
-                  <>
-                    {/* Mic button - Larger touch target */}
-                    {isSpeechSupported && (
-                      <button
-                        type="button"
-                        onClick={toggleListening}
-                        className={`flex-shrink-0 flex items-center justify-center transition-all active:scale-95 ${isListening
-                          ? 'text-red-500 hover:text-red-600'
-                          : 'text-[#414141ff] hover:opacity-60'
-                          }`}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          width: '44px',
-                          height: '44px'
-                        }}
-                        title={isListening ? "Stop recording" : "Voice input"}
-                        aria-label={isListening ? "Stop recording" : "Start dictation"}
+              {/* Right: Single action button - clean logic */}
+              <div className="flex items-center flex-shrink-0">
+                {input.trim().length === 0 ? (
+                  /* Mic button when empty */
+                  isSpeechSupported && (
+                    <button
+                      type="button"
+                      onClick={toggleListening}
+                      className="flex items-center justify-center transition-all active:scale-95 text-[#414141ff] hover:opacity-60"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        width: '40px',
+                        height: '40px'
+                      }}
+                      title="Voice input"
+                      aria-label="Start voice input"
+                    >
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        {isListening ? (
-                          <div className="relative flex items-center justify-center w-full h-full">
-                            <span className="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-red-400 opacity-40"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                          </div>
-                        ) : (
-                          <svg
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-                            <path d="M19 11a7 7 0 0 1-14 0" />
-                            <path d="M12 18v4" />
-                          </svg>
-                        )}
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  /* Send/Stop button - Larger touch target */
+                        <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
+                        <path d="M19 11a7 7 0 0 1-14 0" />
+                        <path d="M12 18v4" />
+                      </svg>
+                    </button>
+                  )
+                ) : isListening ? (
+                  /* Stop recording button when recording */
                   <button
-                    onClick={handleSend}
-                    disabled={!input.trim() && !isWaitingForResponse}
                     type="button"
-                    className="flex-shrink-0 flex items-center justify-center hover:opacity-60 transition-opacity active:scale-95"
+                    onClick={toggleListening}
+                    className="flex items-center justify-center transition-all active:scale-95 text-red-500 hover:text-red-600"
                     style={{
                       background: 'transparent',
                       border: 'none',
-                      cursor: isWaitingForResponse || input.trim() ? 'pointer' : 'not-allowed',
-                      color: '#414141ff',
+                      cursor: 'pointer',
                       padding: 0,
-                      width: '44px',
-                      height: '44px',
-                      opacity: !input.trim() && !isWaitingForResponse ? 0.5 : 1
+                      width: '40px',
+                      height: '40px'
                     }}
-                    title={isWaitingForResponse ? 'Stop' : 'Send'}
-                    aria-label={isWaitingForResponse ? 'Stop' : 'Send'}
+                    title="Stop recording"
+                    aria-label="Stop recording"
                   >
-                    {isWaitingForResponse ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        width="24"
-                        height="24"
-                      >
-                        <rect x="5" y="5" width="10" height="10" rx="2" />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        width="24"
-                        height="24"
-                      >
-                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
-                      </svg>
-                    )}
+                    <div className="relative flex items-center justify-center w-full h-full">
+                      <span className="animate-ping absolute inline-flex h-7 w-7 rounded-full bg-red-400 opacity-40"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </div>
+                  </button>
+                ) : (
+                  /* Send button when has text and not recording */
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim()}
+                    type="button"
+                    className="flex items-center justify-center transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-[#414141ff] hover:opacity-60"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: input.trim() ? 'pointer' : 'not-allowed',
+                      padding: 0,
+                      width: '40px',
+                      height: '40px'
+                    }}
+                    title="Send message"
+                    aria-label="Send message"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      width="22"
+                      height="22"
+                    >
+                      <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
+                    </svg>
                   </button>
                 )}
               </div>
@@ -483,6 +505,34 @@ export function ChatTab() {
           </div>
         </div>
       </div>
+      
+      {/* Preferences Panel */}
+      <PreferencesPanel
+        itineraryId={itinerary?.itineraryId || ''}
+        isOpen={preferencesPanelOpen}
+        onClose={() => setPreferencesPanelOpen(false)}
+      />
+      
+      {/* Mobile optimizations for chat tab */}
+      <style>{`
+        @media (max-width: 768px) {
+          /* Hide mobile bottom navigation when scrolling in chat */
+          body.hide-bottom-nav .menu {
+            transform: translateX(-50%) translateY(120px) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        }
+        
+        /* Smooth transitions */
+        textarea {
+          transition: height 0.1s ease-out;
+        }
+        
+        .menu {
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+      `}</style>
     </div>
   );
 }

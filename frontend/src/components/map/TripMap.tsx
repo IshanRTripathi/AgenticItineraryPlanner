@@ -18,6 +18,7 @@ import { DAY_COLORS } from '@/constants/dayColors';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TripMapProps {
   itinerary: NormalizedItinerary;
@@ -445,18 +446,11 @@ export function TripMap({ itinerary }: TripMapProps) {
       });
 
       // Add info window
-      const confidenceLabel = {
-        exact: '📍 Exact location',
-        approximate: '📌 Approximate location',
-        city: '🏙️ City center',
-        fallback: '⚠️ Fallback location',
-      }[node.confidence];
-
       const infoWindow = new api.maps.InfoWindow({
         content: `
           <div style="padding: 12px; max-width: 280px; min-width: 200px; font-family: system-ui, -apple-system, sans-serif;">
             <!-- Header -->
-            <div style="display: flex; align-items: start; gap: 10px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: start; gap: 10px;">
               <div style="
                 width: 32px;
                 height: 32px;
@@ -490,17 +484,6 @@ export function TripMap({ itinerary }: TripMapProps) {
                   <span style="color: #6b7280; font-size: 11px;">${typeInfo.label}</span>
                 </div>
               </div>
-            </div>
-            <!-- Confidence indicator -->
-            <div style="
-              padding: 6px 10px;
-              background: #f9fafb;
-              border-radius: 6px;
-              font-size: 11px;
-              color: #6b7280;
-              border-left: 3px solid ${dayColor.primary};
-            ">
-              ${confidenceLabel}
             </div>
           </div>
         `,
@@ -640,19 +623,10 @@ export function TripMap({ itinerary }: TripMapProps) {
     );
   }
 
-  // Day filter content component (shared between mobile and desktop)
+  // Compact day filter content - similar to TripNavModal
   const DayFiltersContent = () => (
-    <div className="space-y-3">
-      {!isMobile && (
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Filter by Day</h3>
-          <p className="text-xs text-gray-600">
-            {filteredNodes.length} of {nodes.length} locations
-          </p>
-        </div>
-      )}
-
-      {/* All Days button */}
+    <div className="flex flex-col p-2 gap-1">
+      {/* All Days button - compact */}
       <button
         onClick={() => {
           const allDaysSelected = selectedDays.size === days.length;
@@ -664,176 +638,163 @@ export function TripMap({ itinerary }: TripMapProps) {
             setSelectedDays(new Set(days.map((d: any) => d.dayNumber)));
           }
           setHighlightedDay(null);
-          // Don't close modal - let user continue selecting/deselecting
         }}
-        className={cn(
-          "w-full px-3 py-2 sm:px-4 sm:py-3 min-h-[40px] sm:min-h-[48px] rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95",
-          "border-2 flex items-center gap-2 sm:gap-3",
-          selectedDays.size === days.length
-            ? "border-primary bg-primary text-white shadow-md"
-            : "border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 text-gray-700"
-        )}
+        className="menu__item relative flex flex-col items-center gap-0.5 p-1.5 border-none bg-transparent cursor-pointer transition-all"
+        style={{ touchAction: 'manipulation' }}
+        title="All Days"
       >
-        <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500 shadow-sm flex-shrink-0" />
-        <span>All Days</span>
+        <div 
+          className="menu__icon flex items-center justify-center"
+          style={{
+            width: '1.25rem',
+            height: '1.25rem',
+            color: selectedDays.size === days.length ? 'var(--component-active-color, hsl(var(--primary)))' : 'var(--component-inactive-color, hsl(var(--muted-foreground)))',
+          }}
+        >
+          <div className="w-full h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-green-500" />
+        </div>
+        <span 
+          className="menu__text"
+          style={{
+            fontSize: '0.5625rem',
+            fontWeight: 500,
+            color: selectedDays.size === days.length ? 'var(--component-active-color, hsl(var(--primary)))' : 'var(--component-inactive-color, hsl(var(--muted-foreground)))',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          All
+        </span>
       </button>
 
-      {/* Individual Day Buttons - Vertical Stack */}
-      <div className="space-y-2">
-        {days.map((day: any, index: number) => {
-          const dayColor = DAY_COLORS[index % DAY_COLORS.length];
-          const isSelected = selectedDays.has(day.dayNumber);
-          const isHighlighted = highlightedDay === day.dayNumber;
-          const dayNodeCount = nodesByDay.get(day.dayNumber)?.length || 0;
+      {/* Individual Day Buttons - compact vertical stack */}
+      {days.map((day: any, index: number) => {
+        const dayColor = DAY_COLORS[index % DAY_COLORS.length];
+        const isSelected = selectedDays.has(day.dayNumber);
+        const dayNodeCount = nodesByDay.get(day.dayNumber)?.length || 0;
 
-          return (
-            <button
-              key={day.dayNumber}
-              onClick={() => {
-                setShowAllDays(false);
-                setSelectedDays(prev => {
-                  const next = new Set(prev);
-                  if (next.has(day.dayNumber)) {
-                    next.delete(day.dayNumber);
-                    if (highlightedDay === day.dayNumber) {
-                      setHighlightedDay(null);
-                    }
-                  } else {
-                    next.add(day.dayNumber);
+        return (
+          <button
+            key={day.dayNumber}
+            onClick={() => {
+              setShowAllDays(false);
+              setSelectedDays(prev => {
+                const next = new Set(prev);
+                if (next.has(day.dayNumber)) {
+                  next.delete(day.dayNumber);
+                  if (highlightedDay === day.dayNumber) {
+                    setHighlightedDay(null);
                   }
-                  return next;
-                });
-              }}
-              onMouseEnter={() => !isMobile && setHighlightedDay(day.dayNumber)}
-              onMouseLeave={() => !isMobile && setHighlightedDay(null)}
-              className={cn(
-                "w-full px-3 py-2 sm:px-4 sm:py-3 min-h-[40px] sm:min-h-[48px] rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation active:scale-95",
-                "border-2 flex items-center justify-between gap-2 sm:gap-3",
-                isSelected
-                  ? "border-transparent shadow-md"
-                  : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm",
-                isHighlighted && "ring-2 ring-offset-1 scale-[1.02]"
-              )}
+                } else {
+                  next.add(day.dayNumber);
+                }
+                return next;
+              });
+            }}
+            className="menu__item relative flex flex-col items-center gap-0.5 p-1.5 border-none bg-transparent cursor-pointer transition-all"
+            style={{ touchAction: 'manipulation' }}
+            title={`Day ${day.dayNumber} (${dayNodeCount} locations)`}
+          >
+            <div 
+              className="menu__icon flex items-center justify-center"
               style={{
-                backgroundColor: isSelected ? dayColor.light : undefined,
-                color: isSelected ? dayColor.primary : undefined,
-                ...(isHighlighted && { '--tw-ring-color': dayColor.primary } as any),
+                width: '1.25rem',
+                height: '1.25rem',
+                color: isSelected ? dayColor.primary : 'var(--component-inactive-color, hsl(var(--muted-foreground)))',
               }}
             >
-              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                {/* Color indicator */}
-                <div
-                  className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0 shadow-sm"
-                  style={{ backgroundColor: dayColor.primary }}
-                />
-
-                <span className="truncate">Day {day.dayNumber}</span>
-              </div>
-
-              {/* Activity count badge */}
-              {dayNodeCount > 0 && (
-                <span className="text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full bg-white/80 font-semibold flex-shrink-0">
-                  {dayNodeCount}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+              <div 
+                className="w-full h-full rounded-full" 
+                style={{ backgroundColor: isSelected ? dayColor.primary : '#d1d5db' }}
+              />
+            </div>
+            <span 
+              className="menu__text"
+              style={{
+                fontSize: '0.5625rem',
+                fontWeight: 500,
+                color: isSelected ? dayColor.primary : 'var(--component-inactive-color, hsl(var(--muted-foreground)))',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Day {day.dayNumber}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 
   return (
-    <div className="h-full flex flex-col md:flex-row gap-3 md:gap-4">
-      {/* Mobile: Filter Button */}
-      {isMobile && days.length > 1 && (
-        <div className="flex-shrink-0">
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('[TripMap] Opening filters modal');
-              // Use setTimeout to ensure modal opens after current event cycle
-              setTimeout(() => setIsFiltersOpen(true), 0);
-            }}
-            variant="outline"
-            className="w-full h-9 text-xs px-3 touch-manipulation active:scale-95 transition-transform"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" />
-            Day Filters
-            {selectedDays.size < days.length && (
-              <Badge variant="secondary" className="ml-1.5 text-xs px-1.5 py-0.5">
-                {selectedDays.size}/{days.length}
-              </Badge>
-            )}
-          </Button>
+    <div className="h-full flex flex-col">
+      {/* Map Container with Overlay Filters */}
+      <Card className="flex-1 flex flex-col relative">
+        <CardContent className="p-2 sm:p-3 flex-1 flex flex-col relative">
+          {/* Day Filters Overlay - Top Right */}
+          {days.length > 1 && (
+            <div className="absolute top-4 right-4 z-10">
+              {/* Toggle Button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsFiltersOpen(!isFiltersOpen);
+                }}
+                className="h-9 px-3 text-xs touch-manipulation active:scale-95 transition-all bg-white/95 backdrop-blur-sm shadow-lg rounded-lg border border-gray-200 hover:border-primary/50 flex items-center gap-1.5"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span className="font-medium">Days</span>
+                {selectedDays.size < days.length && (
+                  <span className="ml-0.5 px-1.5 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-semibold">
+                    {selectedDays.size}/{days.length}
+                  </span>
+                )}
+              </button>
 
-          <ResponsiveModal
-            open={isFiltersOpen}
-            onOpenChange={(open) => {
-              console.log('[TripMap] Modal onOpenChange:', open);
-              setIsFiltersOpen(open);
-            }}
-            title="Filter by Day"
-            description={`${filteredNodes.length} of ${nodes.length} locations`}
-          >
-            <DayFiltersContent />
-          </ResponsiveModal>
-        </div>
-      )}
+              {/* Compact Popover - appears directly below button */}
+              {isFiltersOpen && (
+                <>
+                  {/* Backdrop to close on click outside */}
+                  <div 
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsFiltersOpen(false)}
+                  />
+                  
+                  {/* Popover content - positioned right below button */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                    className="absolute top-[calc(100%+0.5rem)] right-0 z-50"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(20px)',
+                      borderRadius: '16px',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                      width: '64px',
+                    }}
+                  >
+                    <DayFiltersContent />
+                  </motion.div>
+                </>
+              )}
+            </div>
+          )}
 
-      {/* Desktop: Left Sidebar - Day Filters */}
-      {!isMobile && days.length > 1 && (
-        <div className="w-64 flex-shrink-0">
-          <DayFiltersContent />
-        </div>
-      )}
-
-      {/* Map Container */}
-      <Card className="flex-1 flex flex-col">
-        <CardContent className="p-2 sm:p-3 flex-1 flex flex-col">
           {/* Map */}
           <div
             ref={mapRef}
-            className="w-full flex-1 h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg md:rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200"
+            className="w-full flex-1 min-h-[500px] md:min-h-[600px] lg:min-h-[700px] rounded-lg md:rounded-xl overflow-hidden bg-muted shadow-sm border border-gray-200"
             style={{ touchAction: 'none' }}
             onTouchStart={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
           />
 
-          {/* Resolution statistics */}
+          {/* Failed nodes section - only show if there are failures */}
           {resolutionStats.total > 0 && (
             <div className="mt-3 md:mt-4 space-y-3">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm" />
-                  <span className="text-xs sm:text-sm">{resolutionStats.exact} exact</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
-                  <span className="text-xs sm:text-sm">{resolutionStats.approximate} approx</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
-                  <span className="text-xs sm:text-sm">{resolutionStats.city} city</span>
-                </div>
-                {resolutionStats.fallback > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <AlertCircle className="w-3 h-3 text-gray-500" />
-                    <span className="text-xs sm:text-sm">{resolutionStats.fallback} fallback</span>
-                  </div>
-                )}
-                {resolutionStats.filtered > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-gray-400">•</span>
-                    <span className="text-xs sm:text-sm">{resolutionStats.filtered} filtered</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Failed nodes section */}
               {failedNodes.length > 0 && (
                 <div className="p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg">
                   <div className="flex items-start gap-2">

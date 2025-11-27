@@ -58,6 +58,13 @@ dependencies {
 	// JSON Schema Validation for LLM responses
 	implementation 'com.networknt:json-schema-validator:1.0.87'
 
+	// Google ADK (Agent Development Kit) - Direct tool implementation
+	implementation("com.google.adk:google-adk:0.3.0")
+	
+	// Spring AI MCP Server
+	implementation("org.springframework.ai:spring-ai-mcp-server-webflux-spring-boot-starter:1.0.0-M6")
+	implementation("org.springframework.ai:spring-ai-mcp-annotations:1.1.0")
+	
 	// Lombok for reducing boilerplate code
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

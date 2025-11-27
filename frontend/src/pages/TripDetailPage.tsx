@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { TripSidebar } from '@/components/trip/TripSidebar';
-import { MobileTabs } from '@/components/trip/MobileTabs';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { BudgetTab } from '@/components/trip/tabs/BudgetTab';
 import { PackingTab } from '@/components/trip/tabs/PackingTab';
@@ -21,7 +20,6 @@ import { TripDetailSkeleton } from '@/components/loading/TripDetailSkeleton';
 import { ErrorDisplay } from '@/components/error/ErrorDisplay';
 import { UnifiedItineraryProvider, useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { Eye, Map, CreditCard, DollarSign, Package, FileText, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/i18n';
 
@@ -82,17 +80,6 @@ function TripDetailContent() {
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab });
   };
-
-  // Tab configuration
-  const TABS = [
-    { id: 'view', label: t('pages.tripDetail.tabs.view'), icon: Eye },
-    { id: 'plan', label: t('pages.tripDetail.tabs.plan'), icon: Map },
-    { id: 'chat', label: t('pages.tripDetail.tabs.chat'), icon: MessageSquare },
-    { id: 'bookings', label: t('pages.tripDetail.tabs.bookings'), icon: CreditCard },
-    { id: 'budget', label: t('pages.tripDetail.tabs.budget'), icon: DollarSign },
-    { id: 'packing', label: t('pages.tripDetail.tabs.packing'), icon: Package },
-    { id: 'docs', label: t('pages.tripDetail.tabs.docs'), icon: FileText },
-  ];
 
   // Show loading skeleton only on initial load, not during refetch
   if (loading && !hasLoadedOnce) {
@@ -260,16 +247,9 @@ function TripDetailContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile: Horizontal Tabs - Sticky at top */}
-      <MobileTabs
-        tabs={TABS}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
-
       {/* Desktop: Sidebar + Content Layout */}
       <div className="flex md:h-screen overflow-hidden bg-muted">
-        {/* Sidebar - Hidden on mobile (using tabs instead), fixed on desktop */}
+        {/* Sidebar - Hidden on mobile (using bottom nav instead), fixed on desktop */}
         {!isMobile && (
           <TripSidebar
             tripId={id!}
@@ -288,7 +268,9 @@ function TripDetailContent() {
           "flex-1 overflow-y-auto pb-20 md:pb-0",
           !isMobile && "lg:ml-0"
         )}>
-          <div className="p-3 md:p-4 lg:p-6">
+          <div className={cn(
+            activeTab === 'chat' && isMobile ? '' : 'p-3 md:p-4 lg:p-6'
+          )}>
             {renderTabContent()}
           </div>
         </main>

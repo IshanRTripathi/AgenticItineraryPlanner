@@ -25,14 +25,17 @@ public class EnrichmentService {
     
     private final ItineraryJsonService itineraryJsonService;
     private final GooglePlacesService googlePlacesService;
+    private final LocationResolutionService locationResolver;
     
     @Value("${enrichment.auto-enrich.enabled:true}")
     private boolean autoEnrichEnabled;
     
     public EnrichmentService(ItineraryJsonService itineraryJsonService,
-                           GooglePlacesService googlePlacesService) {
+                           GooglePlacesService googlePlacesService,
+                           LocationResolutionService locationResolver) {
         this.itineraryJsonService = itineraryJsonService;
         this.googlePlacesService = googlePlacesService;
+        this.locationResolver = locationResolver;
     }
     
     /**
@@ -75,10 +78,17 @@ public class EnrichmentService {
                 nodesToEnrich.size(), nodeIds.size());
             
             // Enrich each node directly using GooglePlacesService
+            // FIXED: Now uses LocationResolutionService for accurate city-based searches
             boolean hasChanges = false;
             for (NormalizedNode node : nodesToEnrich) {
                 try {
-                    if (enrichNode(node, destination)) {
+                    // Use LocationResolutionService to get proper "City, Country" format
+                    String dayLocation = locationResolver.resolveNodeLocation(itinerary, node.getId());
+                    Integer nodeDayNumber = locationResolver.findDayNumberForNode(itinerary, node.getId());
+                    logger.info("🔍 [EnrichmentService] Node {} - day {}, dayLocation: '{}'", 
+                               node.getId(), nodeDayNumber, dayLocation);
+                    
+                    if (enrichNode(node, destination, dayLocation, itinerary, nodeDayNumber != null ? nodeDayNumber : 1)) {
                         enrichedCount++;
                         hasChanges = true;
                     }
@@ -178,7 +188,13 @@ public class EnrichmentService {
             boolean hasChanges = false;
             for (NormalizedNode node : nodesToEnrich) {
                 try {
-                    if (enrichNode(node, destination)) {
+                    // FIXED: Use LocationResolutionService for accurate city-based searches
+                    String dayLocation = locationResolver.resolveNodeLocation(itinerary, node.getId());
+                    Integer nodeDayNumber = locationResolver.findDayNumberForNode(itinerary, node.getId());
+                    logger.info("🔍 [EnrichmentService] Node {} - day {}, dayLocation: '{}'", 
+                               node.getId(), nodeDayNumber, dayLocation);
+                    
+                    if (enrichNode(node, destination, dayLocation, itinerary, nodeDayNumber != null ? nodeDayNumber : 1)) {
                         enrichedCount++;
                         hasChanges = true;
                     }
@@ -280,8 +296,18 @@ public class EnrichmentService {
     /**
      * Enrich a single node with Google Places data.
      * Returns true if the node was enriched, false otherwise.
+     * 
+     * FIXED: Now accepts dayLocation parameter to use city-specific search instead of country-level
+     * 
+     * @param node The node to enrich
+     * @param destination The itinerary destination (fallback)
+     * @param dayLocation The day-specific location (should be city name or "City, Country")
+     * @param itinerary The full itinerary (for fallback to CityAllocationPlan if needed)
+     * @param dayNumber The day number (for fallback to CityAllocationPlan if needed)
+     * @return true if enriched successfully
      */
-    private boolean enrichNode(NormalizedNode node, String destination) {
+    private boolean enrichNode(NormalizedNode node, String destination, String dayLocation, 
+                              NormalizedItinerary itinerary, int dayNumber) {
         // Get location name for search
         String locationName = null;
         if (node.getLocation() != null && node.getLocation().getName() != null) {
@@ -295,13 +321,30 @@ public class EnrichmentService {
             return false;
         }
         
+        // Use day-specific location from LocationResolutionService (already in "City, Country" format)
+        // LocationResolutionService handles all the logic for CityAllocationPlan lookup and format building
+        String searchDestination = (dayLocation != null && !dayLocation.trim().isEmpty()) 
+            ? dayLocation 
+            : destination;
+        
+        logger.info("🎯 [enrichNode] Using searchDestination: '{}'", searchDestination);
+        
+        logger.info("========== ENRICHING NODE WITH PLACE SEARCH ==========");
+        logger.info("Node ID: {}", node.getId());
+        logger.info("Node title: {}", node.getTitle());
+        logger.info("Location name: {}", locationName);
+        logger.info("Search query: {}", locationName);
+        logger.info("Destination context: {}", searchDestination);
+        logger.info("Calling GooglePlacesService.searchPlace()...");
+        
         try {
-            // Search for place using Google Places API
-            PlaceSearchResult searchResult = googlePlacesService.searchPlace(locationName, destination);
+            // Search for place using Google Places API with city-specific destination
+            PlaceSearchResult searchResult = googlePlacesService.searchPlace(locationName, searchDestination);
             
             if (searchResult == null || searchResult.getGeometry() == null || 
                 searchResult.getGeometry().getLocation() == null) {
-                logger.warn("No place found for node {} ({})", node.getId(), locationName);
+                logger.warn("No place found for node {} ({}) in {}", node.getId(), locationName, searchDestination);
+                logger.debug("GooglePlacesService returned: null");
                 return false;
             }
             
@@ -333,15 +376,16 @@ public class EnrichmentService {
                 node.getLocation().setRating(searchResult.getRating());
             }
             
-            logger.info("Enriched node {} ({}) with coordinates ({}, {})", 
-                node.getId(), locationName,
+            logger.info("✅ Enriched node {} ({}) in {} with coordinates ({}, {})", 
+                node.getId(), locationName, searchDestination,
                 searchResult.getGeometry().getLocation().getLatitude(),
                 searchResult.getGeometry().getLocation().getLongitude());
             
             return true;
             
         } catch (Exception e) {
-            logger.error("Failed to enrich node {} ({}): {}", node.getId(), locationName, e.getMessage());
+            logger.error("Failed to enrich node {} ({}) in {}: {}", 
+                        node.getId(), locationName, searchDestination, e.getMessage());
             return false;
         }
     }

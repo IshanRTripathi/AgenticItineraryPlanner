@@ -6,9 +6,13 @@ import com.tripplanner.service.agents.AgentEventBus;
 import com.tripplanner.service.external.BookingComService;
 import com.tripplanner.service.external.ExpediaService;
 import com.tripplanner.service.external.RazorpayService;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +32,14 @@ public class BookingAgent extends BaseAgent {
     private final ExpediaService expediaService;
     private final RazorpayService razorpayService;
     private final ItineraryJsonService itineraryJsonService;
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.booking-tools.enabled:false}")
+    private boolean bookingToolsEnabled;
+    
+    @Value("${features.booking-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
     
     public BookingAgent(AgentEventBus eventBus,
                         BookingComService bookingComService,
@@ -39,6 +51,7 @@ public class BookingAgent extends BaseAgent {
         this.expediaService = expediaService;
         this.razorpayService = razorpayService;
         this.itineraryJsonService = itineraryJsonService;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -141,6 +154,43 @@ public class BookingAgent extends BaseAgent {
             return typedResult;
         }
     }
+    
+    // ========== BOOKING AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Validate booking request schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!bookingToolsEnabled) {
+            return true; // No existing validator, just return true
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            logger.debug("Calling Validate Schema tool for booking request");
+            
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Booking schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError; // Return true if fallback enabled
+        }
+    }
+    
+    // ========== END BOOKING AGENT TOOL INTEGRATION ==========
     
     @Override
     protected String getAgentName() {

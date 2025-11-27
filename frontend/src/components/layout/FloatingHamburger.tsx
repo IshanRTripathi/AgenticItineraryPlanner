@@ -29,8 +29,7 @@ export function FloatingHamburger({ isOpen, onClick }: FloatingHamburgerProps) {
         "touch-manipulation active:scale-90",
         "hover:bg-white/90 hover:shadow-xl hover:border-primary/30",
         "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-        // Position below header (64px) + some spacing
-        "top-20",
+        "top-4 safe-top",
         // Add subtle gradient overlay
         "before:absolute before:inset-0 before:rounded-xl",
         "before:bg-gradient-to-br before:from-white/50 before:to-transparent",

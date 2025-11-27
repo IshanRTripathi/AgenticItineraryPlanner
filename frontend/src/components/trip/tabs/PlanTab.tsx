@@ -10,12 +10,15 @@ import { DayCard } from '@/components/trip/DayCard';
 import { TripMap } from '@/components/map/TripMap';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useUnifiedItinerary } from '@/contexts/UnifiedItineraryContext';
-import { Calendar, Plus, MapPin } from 'lucide-react';
+import { Calendar, Plus, MapPin, Hotel, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { staggerChildren, slideUp } from '@/utils/animations';
 import { getDayColor } from '@/constants/dayColors';
 import { useTranslation } from '@/i18n';
+import { useSearchParams } from 'react-router-dom';
+import { ValidationAdvice } from '@/components/validation/ValidationAdvice';
+import { validationApi, ValidationLevel, ValidationAdvice as ValidationAdviceType } from '@/services/validationApi';
 
 interface PlanTabProps {
   itinerary: any; // NormalizedItinerary type
@@ -24,12 +27,15 @@ interface PlanTabProps {
 export function PlanTab({ itinerary }: PlanTabProps) {
   const { t } = useTranslation();
   const { loadItinerary, state } = useUnifiedItinerary();
+  const [searchParams, setSearchParams] = useSearchParams();
   const itineraryId = itinerary?.id || itinerary?.itineraryId;
   const isGenerating = itinerary?.status === 'generating' || itinerary?.status === 'planning';
   
   const [subTab, setSubTab] = useState('day-by-day');
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [isRefetching, setIsRefetching] = useState(false);
+  const [validationAdvice, setValidationAdvice] = useState<ValidationAdviceType | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   
   // Refs for each day card to enable scrolling
   const dayRefs = useState(() => new Map<number, HTMLDivElement>())[0];
@@ -45,6 +51,21 @@ export function PlanTab({ itinerary }: PlanTabProps) {
       } finally {
         setIsRefetching(false);
       }
+    }
+  };
+  
+  // Validate itinerary
+  const handleValidate = async () => {
+    if (!itineraryId) return;
+    
+    setIsValidating(true);
+    try {
+      const advice = await validationApi.validate(itineraryId, ValidationLevel.STANDARD);
+      setValidationAdvice(advice);
+    } catch (error) {
+      console.error('Validation failed:', error);
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -126,8 +147,21 @@ export function PlanTab({ itinerary }: PlanTabProps) {
 
 
   return (
-    <div className="space-y-6">
-      {/* Tab Navigation */}
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Centered Title and Summary - Only for Day by Day view */}
+      {subTab === 'day-by-day' && (
+        <div className="text-center space-y-2 pb-4 border-b">
+          <h2 className="text-xl sm:text-2xl font-bold">{t('components.planTab.yourItinerary')}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {t('components.planTab.summary', { 
+              days: mappedDays.length, 
+              activities: mappedDays.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0) 
+            })}
+          </p>
+        </div>
+      )}
+
+      {/* Tab Navigation - Below Header */}
       <Tabs value={subTab} onValueChange={setSubTab}>
         <div className="flex justify-center mb-4 sm:mb-6">
           <div className="inline-flex gap-2 sm:gap-3">
@@ -163,20 +197,8 @@ export function PlanTab({ itinerary }: PlanTabProps) {
         {/* Day by Day View */}
         <TabsContent value="day-by-day">
           <div className="space-y-4 sm:space-y-6">
-            {/* Timeline Header with Overview */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold">{t('components.planTab.yourItinerary')}</h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  {t('components.planTab.summary', { 
-                    days: mappedDays.length, 
-                    activities: mappedDays.reduce((sum: number, d: any) => sum + (d.nodes?.length || 0), 0) 
-                  })}
-                </p>
-              </div>
-              
-              {/* Quick Actions */}
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Quick Actions */}
+            <div className="flex items-center gap-2 justify-end flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
@@ -188,6 +210,25 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={handleValidate}
+                  disabled={isValidating || isGenerating}
+                  className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95 bg-green-50 hover:bg-green-100 border-green-200"
+                >
+                  <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  {isValidating ? 'Validating...' : 'Validate'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSearchParams({ tab: 'bookings' })}
+                  className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95 bg-primary/5 hover:bg-primary/10 border-primary/20"
+                >
+                  <Hotel className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  Book Hotels
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={isGenerating}
                   className="flex-1 sm:flex-initial min-h-[36px] text-xs sm:text-sm px-2 sm:px-3 touch-manipulation active:scale-95"
                 >
@@ -195,9 +236,11 @@ export function PlanTab({ itinerary }: PlanTabProps) {
                   {t('components.planTab.addDay')}
                 </Button>
               </div>
-            </div>
-
-
+            
+            {/* Validation Advice */}
+            {validationAdvice && (
+              <ValidationAdvice advice={validationAdvice} />
+            )}
 
             {/* Timeline View */}
             <div className="relative">
@@ -312,10 +355,10 @@ export function PlanTab({ itinerary }: PlanTabProps) {
           </div>
         </TabsContent>
 
-        {/* Map View - Full viewport */}
+        {/* Map View - Maximum height */}
         <TabsContent value="map" className="p-0">
           <div 
-            className="h-[calc(100vh-16rem)] min-h-[600px] overflow-hidden"
+            className="h-[calc(100vh-12rem)] overflow-hidden"
             style={{ touchAction: 'none' }}
           >
             <TripMap itinerary={itinerary} />

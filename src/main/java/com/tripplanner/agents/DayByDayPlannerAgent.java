@@ -9,8 +9,10 @@ import com.tripplanner.service.SummarizationService;
 import com.tripplanner.service.agents.AgentEventPublisher;
 import com.tripplanner.service.CurrencyConversionService;
 import com.tripplanner.service.ai.AiClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -427,6 +429,7 @@ public class DayByDayPlannerAgent extends BaseAgent {
             3. INCLUDE ALL NODE TYPES: Each day needs attractions, meals, and transport as appropriate
             4. RESPECT TIMING: Consider opening hours, travel times, and realistic scheduling
             5. BUDGET AWARENESS: Stay within the specified budget tier
+            6. SET CITY-LEVEL LOCATION: The "location" field for each day MUST be the specific city name (e.g., "Zurich", "Interlaken"), NOT the country or region
             
             Node Types:
             - "attraction": Museums, landmarks, experiences, activities
@@ -439,6 +442,13 @@ public class DayByDayPlannerAgent extends BaseAgent {
             - 2-3 meals (breakfast, lunch, dinner)
             - 1-2 transport nodes if moving between areas
             - 1 accommodation node if staying overnight
+            
+            IMPORTANT: For the day-level "location" field, always specify the CITY name where activities take place.
+            Examples:
+            - CORRECT: "location": "Zurich"
+            - CORRECT: "location": "Interlaken"
+            - WRONG: "location": "Switzerland"
+            - WRONG: "location": "Switzerland, Switzerland"
             
             Always provide realistic timing, costs, and practical details.
             """;
@@ -511,7 +521,7 @@ public class DayByDayPlannerAgent extends BaseAgent {
                     "properties": {
                       "dayNumber": { "type": "integer" },
                       "date": { "type": "string", "format": "date" },
-                      "location": { "type": "string" },
+                      "location": { "type": "string", "description": "The specific city name where activities take place (e.g., 'Zurich', 'Interlaken'), NOT the country" },
                       "summary": { "type": "string" },
                       "nodes": {
                         "type": "array",
@@ -519,7 +529,6 @@ public class DayByDayPlannerAgent extends BaseAgent {
                         "items": {
                           "type": "object",
                           "properties": {
-                            "id": { "type": "string" },
                             "type": { "type": "string", "enum": ["attraction", "meal", "accommodation", "transport"] },
                             "title": { "type": "string" },
                             "location": {
@@ -561,7 +570,7 @@ public class DayByDayPlannerAgent extends BaseAgent {
                               }
                             }
                           },
-                          "required": ["id", "type", "title", "location"]
+                          "required": ["type", "title", "location"]
                         }
                       }
                     },
@@ -596,4 +605,208 @@ public class DayByDayPlannerAgent extends BaseAgent {
     protected String getAgentName() {
         return "Day-by-Day Planner Agent";
     }
+    
+    // ========== DAY BY DAY PLANNER AGENT - TOOL INTEGRATION METHODS ==========
+    
+    // Feature flags for tool integration
+    @Value("${features.day-planner-tools.enabled:false}")
+    private boolean dayPlannerToolsEnabled;
+    
+    @Value("${features.day-planner-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
+    
+    private final RestTemplate restTemplate = new RestTemplate();
+    
+    /**
+     * Generate node ID for new nodes using the Generate Node ID tool.
+     */
+    private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
+        if (!dayPlannerToolsEnabled) {
+            return "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis();
+        }
+        
+        com.tripplanner.dto.tools.NodeIdRequest request = 
+            new com.tripplanner.dto.tools.NodeIdRequest(itineraryId, dayNumber, nodeType);
+        
+        try {
+            com.tripplanner.dto.tools.NodeIdResponse response = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/generate-node-id",
+                request,
+                com.tripplanner.dto.tools.NodeIdResponse.class
+            );
+            
+            if (response != null && response.isSuccess()) {
+                logger.debug("Generated node ID via tool: {}", response.getNodeId());
+                return response.getNodeId();
+            }
+            return fallbackOnError ? "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis() : null;
+        } catch (Exception e) {
+            logger.error("Generate Node ID tool error: {}", e.getMessage());
+            return fallbackOnError ? "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis() : null;
+        }
+    }
+    
+    /**
+     * Check user constraints (budget, dietary, party size) using the Check Constraints tool.
+     */
+    private com.tripplanner.dto.tools.ConstraintCheckResult checkConstraintsViaTool(String itineraryId) {
+        if (!dayPlannerToolsEnabled) {
+            return null;
+        }
+        
+        com.tripplanner.dto.tools.ConstraintCheckRequest request = 
+            new com.tripplanner.dto.tools.ConstraintCheckRequest(itineraryId);
+        
+        try {
+            com.tripplanner.dto.tools.ConstraintCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-user-constraints",
+                request,
+                com.tripplanner.dto.tools.ConstraintCheckResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.warn("Constraint violations detected:");
+                result.getViolations().forEach(v -> 
+                    logger.warn("  - {}: {}", v.getType(), v.getMessage()));
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Check Constraints tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Check for conflicts (time, budget) using the Check Conflicts tool.
+     */
+    private com.tripplanner.dto.tools.ConflictCheckResult checkConflictsViaTool(
+            String itineraryId, com.tripplanner.dto.ChangeSet proposedChanges) {
+        if (!dayPlannerToolsEnabled) {
+            return new com.tripplanner.dto.tools.ConflictCheckResult();
+        }
+        
+        com.tripplanner.dto.tools.ConflictCheckRequest request = 
+            new com.tripplanner.dto.tools.ConflictCheckRequest(itineraryId, proposedChanges);
+        request.setCheckTimeConflicts(true);
+        request.setCheckBudgetConflicts(true);
+        
+        try {
+            com.tripplanner.dto.tools.ConflictCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-conflicts",
+                request,
+                com.tripplanner.dto.tools.ConflictCheckResult.class
+            );
+            
+            if (result != null && result.isHasConflicts()) {
+                logger.warn("Conflicts detected in planning:");
+                result.getConflicts().forEach(c -> 
+                    logger.warn("  - {}: {}", c.getType(), c.getMessage()));
+            }
+            return result != null ? result : new com.tripplanner.dto.tools.ConflictCheckResult();
+        } catch (Exception e) {
+            logger.error("Check Conflicts tool error: {}", e.getMessage());
+            return new com.tripplanner.dto.tools.ConflictCheckResult();
+        }
+    }
+    
+    /**
+     * Validate timing feasibility using the Validate Timing tool.
+     */
+    private com.tripplanner.dto.tools.TimingValidationResult validateTimingViaTool(
+            String itineraryId, Integer dayNumber) {
+        if (!dayPlannerToolsEnabled) {
+            return null;
+        }
+        
+        com.tripplanner.dto.tools.TimingValidationRequest request = 
+            new com.tripplanner.dto.tools.TimingValidationRequest(itineraryId, dayNumber);
+        
+        try {
+            com.tripplanner.dto.tools.TimingValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-timing",
+                request,
+                com.tripplanner.dto.tools.TimingValidationResult.class
+            );
+            
+            if (result != null && !result.isFeasible()) {
+                logger.warn("Timing validation failed for day {}:", dayNumber);
+                result.getIssues().forEach(issue -> 
+                    logger.warn("  - {}", issue.getType()));
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Validate Timing tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Get weather-based timing suggestions using the Suggest Best Time tool.
+     */
+    private com.tripplanner.dto.tools.SuggestBestTimeResult suggestBestTimeViaTool(
+            String itineraryId, String activityName, String location, String date, int durationMinutes) {
+        if (!dayPlannerToolsEnabled) {
+            return null;
+        }
+        
+        com.tripplanner.dto.tools.SuggestBestTimeRequest request = 
+            new com.tripplanner.dto.tools.SuggestBestTimeRequest();
+        request.setActivityName(activityName);
+        request.setActivityType("flexible");
+        request.setLocation(location);
+        request.setDate(date);
+        request.setDuration(durationMinutes);
+        request.setItineraryId(itineraryId);
+        
+        try {
+            com.tripplanner.dto.tools.SuggestBestTimeResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/suggest-best-time",
+                request,
+                com.tripplanner.dto.tools.SuggestBestTimeResult.class
+            );
+            
+            if (result != null && result.isSuccess()) {
+                logger.debug("Weather-based timing suggested for {}: {}", 
+                    activityName, result.getRecommendedTimeSlots().get(0).getStartTime());
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Suggest Best Time tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!dayPlannerToolsEnabled) {
+            return true;
+        }
+        
+        com.tripplanner.dto.tools.SchemaValidationRequest request = 
+            new com.tripplanner.dto.tools.SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            com.tripplanner.dto.tools.SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                com.tripplanner.dto.tools.SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError;
+        }
+    }
+    
+    // ========== END DAY BY DAY PLANNER AGENT TOOL INTEGRATION ==========
 }

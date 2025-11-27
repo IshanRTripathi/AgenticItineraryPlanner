@@ -3,6 +3,7 @@ package com.tripplanner.agents;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripplanner.dto.*;
 import com.tripplanner.enums.ProcessingState;
+import com.tripplanner.enums.ToolType;
 import com.tripplanner.exception.ValidationException;
 import com.tripplanner.service.metadata.ActivityMetadataService;
 import com.tripplanner.service.agents.AgentEventBus;
@@ -13,9 +14,27 @@ import com.tripplanner.service.ItineraryValidator.ValidationResult;
 import com.tripplanner.service.llm.LLMSchemaValidator;
 import com.tripplanner.service.utilities.NodeIdGenerator;
 import com.tripplanner.service.ai.AiClient;
+import com.tripplanner.service.WeatherService;
+import com.tripplanner.service.ActivitySuitabilityService;
+import com.tripplanner.service.cache.ToolCacheService;
+import com.tripplanner.util.ToolCacheKeyGenerator;
+import com.tripplanner.dto.tools.SuggestBestTimeRequest;
+import com.tripplanner.dto.tools.SuggestBestTimeResult;
+import com.tripplanner.dto.tools.SuggestBestTimeResult.TimeSlot;
+import com.tripplanner.dto.tools.NodeIdRequest;
+import com.tripplanner.dto.tools.NodeIdResponse;
+import com.tripplanner.dto.tools.ConstraintCheckRequest;
+import com.tripplanner.dto.tools.ConstraintCheckResult;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,11 +69,29 @@ public class ActivityAgent extends BaseAgent {
     private final LLMSchemaValidator schemaValidator;
     private final ItineraryValidator itineraryValidator;
     private final ActivityMetadataService activityMetadataService;
+    private final WeatherService weatherService;
+    private final ActivitySuitabilityService activitySuitabilityService;
+    private final RestTemplate restTemplate;
+    
+    // Optional: Tool cache service (only injected if enabled)
+    @Autowired(required = false)
+    private ToolCacheService toolCacheService;
+    
+    // Feature flags
+    @Value("${features.weather-tools.enabled:false}")
+    private boolean weatherToolsEnabled;
+    
+    @Value("${features.weather-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
+    
+    @Value("${features.weather-tools.log-comparisons:true}")
+    private boolean logComparisons;
     
     public ActivityAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                         ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
                         NodeIdGenerator nodeIdGenerator, LLMSchemaValidator schemaValidator,
-                        ItineraryValidator itineraryValidator, ActivityMetadataService activityMetadataService) {
+                        ItineraryValidator itineraryValidator, ActivityMetadataService activityMetadataService,
+                        WeatherService weatherService, ActivitySuitabilityService activitySuitabilityService) {
         super(eventBus, AgentEvent.AgentKind.ENRICHMENT);
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
@@ -64,6 +101,9 @@ public class ActivityAgent extends BaseAgent {
         this.schemaValidator = schemaValidator;
         this.itineraryValidator = itineraryValidator;
         this.activityMetadataService = activityMetadataService;
+        this.weatherService = weatherService;
+        this.activitySuitabilityService = activitySuitabilityService;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -113,6 +153,13 @@ public class ActivityAgent extends BaseAgent {
             emitProgress(itineraryId, 60, "Validating activity durations", "validating");
             List<PopulatedAttraction> validatedAttractions = validateActivityDurations(
                 populatedAttractions, skeleton);
+            
+            // FEATURE FLAG: Weather-aware scheduling
+            if (weatherToolsEnabled) {
+                emitProgress(itineraryId, 65, "Optimizing activity timing based on weather", "weather-optimization");
+                validatedAttractions = optimizeActivityTimingWithWeather(
+                    itineraryId, validatedAttractions, skeleton);
+            }
             
             emitProgress(itineraryId, 70, "Saving attraction data", "saving");
             
@@ -409,6 +456,353 @@ public class ActivityAgent extends BaseAgent {
                 }
             }
         }
+    }
+    
+    /**
+     * Optimize activity timing based on weather conditions.
+     * Uses weather tools to suggest best times for outdoor activities.
+     */
+    private List<PopulatedAttraction> optimizeActivityTimingWithWeather(
+            String itineraryId,
+            List<PopulatedAttraction> attractions,
+            NormalizedItinerary skeleton) {
+        
+        logger.info("=== WEATHER-AWARE ACTIVITY OPTIMIZATION ===");
+        logger.info("Feature flag enabled: {}", weatherToolsEnabled);
+        logger.info("Processing {} attractions", attractions.size());
+        
+        try {
+            for (PopulatedAttraction attraction : attractions) {
+                // Find the day and node for this attraction
+                int dayNumber = findDayNumberForNode(skeleton, attraction.getNodeId());
+                if (dayNumber <= 0) continue;
+                
+                NormalizedDay day = skeleton.getDays().stream()
+                    .filter(d -> d.getDayNumber() == dayNumber)
+                    .findFirst()
+                    .orElse(null);
+                
+                if (day == null || day.getDate() == null) continue;
+                
+                // Get the node
+                NormalizedNode node = day.getNodes().stream()
+                    .filter(n -> attraction.getNodeId().equals(n.getId()))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (node == null) continue;
+                
+                // Only optimize outdoor activities
+                if (!isOutdoorActivity(attraction.getCategory())) {
+                    logger.debug("Skipping indoor activity: {}", attraction.getTitle());
+                    continue;
+                }
+                
+                // Get weather-based timing suggestions
+                try {
+                    SuggestBestTimeResult timing = getWeatherBasedTiming(
+                        itineraryId,
+                        attraction.getTitle(),
+                        attraction.getCategory(),
+                        day.getLocation(),
+                        day.getDate(),
+                        attraction.getDurationMinutes() != null ? attraction.getDurationMinutes() : 120
+                    );
+                    
+                    if (timing != null && timing.isSuccess() && !timing.getRecommendedTimeSlots().isEmpty()) {
+                        // Use the best recommended time slot
+                        TimeSlot bestSlot = timing.getRecommendedTimeSlots().get(0);
+                        
+                        if (node.getTiming() == null) {
+                            node.setTiming(new NodeTiming());
+                        }
+                        
+                        // Update timing (convert time strings to appropriate format)
+                        String oldTime = node.getTiming().getStartTime() != null ? 
+                            String.valueOf(node.getTiming().getStartTime()) : "unscheduled";
+                        
+                        // Note: Timing update would need proper time format conversion
+                        // For now, log the recommendation
+                        logger.info("Weather tool recommends: {} at {} (score: {})",
+                            attraction.getTitle(), bestSlot.getStartTime(), bestSlot.getSuitabilityScore());
+                        
+                        if (logComparisons) {
+                            logger.info("Weather optimization for {}: recommended time {} (score: {}, reason: {})",
+                                attraction.getTitle(),
+                                bestSlot.getStartTime(),
+                                bestSlot.getSuitabilityScore(),
+                                bestSlot.getReason());
+                        }
+                        
+                        // Add weather warnings to metadata if extreme conditions
+                        if (timing.getExtremeWeatherWarning() != null && timing.getExtremeWeatherWarning().isExtreme()) {
+                            addWeatherWarningToNode(node, timing.getExtremeWeatherWarning());
+                        }
+                        
+                        // Add seasonal context to description
+                        if (timing.getWeatherContext() != null && timing.getWeatherContext().getSeasonalNotes() != null) {
+                            String seasonalNote = timing.getWeatherContext().getSeasonalNotes();
+                            if (node.getDetails() != null && seasonalNote != null && !seasonalNote.isEmpty()) {
+                                String currentDesc = node.getDetails().getDescription();
+                                if (currentDesc != null && !currentDesc.contains(seasonalNote.substring(0, Math.min(20, seasonalNote.length())))) {
+                                    node.getDetails().setDescription(currentDesc + "\n\nWeather Note: " + seasonalNote);
+                                }
+                            }
+                        }
+                    }
+                    
+                } catch (Exception e) {
+                    logger.warn("Failed to get weather timing for {}: {}", attraction.getTitle(), e.getMessage());
+                    if (!fallbackOnError) {
+                        throw e;
+                    }
+                    // Continue with original timing (fallback)
+                }
+            }
+            
+            logger.info("=== WEATHER OPTIMIZATION COMPLETE ===");
+            return attractions;
+            
+        } catch (Exception e) {
+            logger.error("Weather optimization failed: {}", e.getMessage(), e);
+            if (fallbackOnError) {
+                logger.warn("Falling back to original timing (weather tools disabled for this request)");
+                return attractions;
+            }
+            throw new RuntimeException("Weather optimization failed", e);
+        }
+    }
+    
+    /**
+     * Check if activity category is outdoor.
+     */
+    private boolean isOutdoorActivity(String category) {
+        if (category == null) return false;
+        
+        return switch (category.toLowerCase()) {
+            case "park", "nature", "landmark", "temple_shrine", "experience" -> true;
+            case "museum", "shopping", "entertainment" -> false;
+            default -> false; // Conservative: assume indoor if unknown
+        };
+    }
+    
+    /**
+     * Get weather-based timing suggestions for an activity.
+     * Uses cache if available to avoid duplicate API calls.
+     */
+    private SuggestBestTimeResult getWeatherBasedTiming(String itineraryId, String activityName, 
+                                                        String category, String location, 
+                                                        String date, int durationMinutes) {
+        try {
+            // Map category to activity type
+            String activityType = mapCategoryToActivityType(category);
+            
+            SuggestBestTimeRequest request = new SuggestBestTimeRequest();
+            request.setActivityName(activityName);
+            request.setActivityType(activityType);
+            request.setLocation(location);
+            request.setDate(date);
+            request.setDuration(durationMinutes);
+            request.setItineraryId(itineraryId);  // ✅ FIX: Set itineraryId for caching
+            
+            // Use cache if available
+            if (toolCacheService != null) {
+                logger.debug("Using cached weather tool for: {} at {} on {}", activityName, location, date);
+                
+                // Generate cache key
+                String cacheKey = ToolCacheKeyGenerator.forWeatherTiming(
+                    activityName, location, date, durationMinutes);
+                
+                // Get or compute with cache
+                return toolCacheService.getOrCompute(
+                    itineraryId,
+                    ToolType.SUGGEST_BEST_TIME.getValue(),
+                    cacheKey,
+                    request,
+                    () -> callWeatherToolDirect(request),
+                    SuggestBestTimeResult.class
+                );
+            } else {
+                // No cache available, call directly
+                logger.debug("Calling weather tool (no cache) for: {} at {} on {}", 
+                    activityName, location, date);
+                return callWeatherToolDirect(request);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to call weather tool: {}", e.getMessage());
+            if (!fallbackOnError) {
+                throw e;
+            }
+            return null;
+        }
+    }
+    
+    /**
+     * Call weather tool directly via REST API with agent name header.
+     */
+    private SuggestBestTimeResult callWeatherToolDirect(SuggestBestTimeRequest request) {
+        // Create headers with agent name
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("X-Agent-Name", "ActivityAgent");
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        
+        // Create HTTP entity with headers
+        org.springframework.http.HttpEntity<SuggestBestTimeRequest> entity = 
+            new org.springframework.http.HttpEntity<>(request, headers);
+        
+        // Make POST request with headers
+        return restTemplate.postForEntity(
+            "http://localhost:8080/api/v1/tools/suggest-best-time",
+            entity,
+            SuggestBestTimeResult.class
+        ).getBody();
+    }
+    
+    // ========== ACTIVITY AGENT - ADDITIONAL TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Generate node ID for new attraction nodes using the Generate Node ID tool.
+     */
+    private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
+        if (!weatherToolsEnabled) {
+            return nodeIdGenerator.generateNodeId(nodeType, dayNumber, null);
+        }
+        
+        com.tripplanner.dto.tools.NodeIdRequest request = 
+            new com.tripplanner.dto.tools.NodeIdRequest(itineraryId, dayNumber, nodeType);
+        
+        try {
+            com.tripplanner.dto.tools.NodeIdResponse response = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/generate-node-id",
+                request,
+                com.tripplanner.dto.tools.NodeIdResponse.class
+            );
+            
+            if (response != null && response.isSuccess()) {
+                logger.debug("Generated node ID via tool: {}", response.getNodeId());
+                return response.getNodeId();
+            }
+            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber, null) : null;
+        } catch (Exception e) {
+            logger.error("Generate Node ID tool error: {}", e.getMessage());
+            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber, null) : null;
+        }
+    }
+    
+    /**
+     * Check user constraints (budget, party size) using the Check Constraints tool.
+     */
+    private com.tripplanner.dto.tools.ConstraintCheckResult checkConstraintsViaTool(String itineraryId) {
+        if (!weatherToolsEnabled) {
+            return null;
+        }
+        
+        com.tripplanner.dto.tools.ConstraintCheckRequest request = 
+            new com.tripplanner.dto.tools.ConstraintCheckRequest(itineraryId);
+        
+        try {
+            com.tripplanner.dto.tools.ConstraintCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-user-constraints",
+                request,
+                com.tripplanner.dto.tools.ConstraintCheckResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.warn("Constraint violations detected:");
+                result.getViolations().forEach(v -> 
+                    logger.warn("  - {}: {}", v.getType(), v.getMessage()));
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Check Constraints tool error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!weatherToolsEnabled) {
+            return true; // Use existing validator
+        }
+        
+        com.tripplanner.dto.tools.SchemaValidationRequest request = 
+            new com.tripplanner.dto.tools.SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            com.tripplanner.dto.tools.SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                com.tripplanner.dto.tools.SchemaValidationResult.class
+            );
+            
+            if (result != null && !result.isValid()) {
+                logger.error("Schema validation failed:");
+                result.getErrors().forEach(error -> logger.error("  - {}", error));
+            }
+            return result != null && result.isValid();
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            return fallbackOnError;
+        }
+    }
+    
+    // ========== END ACTIVITY AGENT TOOL INTEGRATION ==========
+    
+    /**
+     * Map activity category to activity type for weather tool.
+     */
+    private String mapCategoryToActivityType(String category) {
+        if (category == null) return "flexible";
+        
+        return switch (category.toLowerCase()) {
+            case "park", "nature" -> "outdoor_park";
+            case "landmark" -> "outdoor_monument";
+            case "temple_shrine" -> "outdoor_monument";
+            case "experience" -> "outdoor_adventure";
+            case "museum" -> "indoor_museum";
+            case "shopping" -> "indoor_mall";
+            case "entertainment" -> "indoor_museum";
+            default -> "flexible";
+        };
+    }
+    
+    /**
+     * Add weather warning to node description.
+     */
+    private void addWeatherWarningToNode(NormalizedNode node, SuggestBestTimeResult.ExtremeWeatherWarning warning) {
+        if (node.getDetails() == null) {
+            node.setDetails(new NodeDetails());
+        }
+        
+        // Add weather warning to description
+        StringBuilder warningText = new StringBuilder();
+        warningText.append("\n\n⚠️ WEATHER ALERT (").append(warning.getSeverity().toUpperCase()).append("):\n");
+        
+        for (String w : warning.getWarnings()) {
+            warningText.append("• ").append(w).append("\n");
+        }
+        
+        if (!warning.getGearRequirements().isEmpty()) {
+            warningText.append("\nRequired Gear:\n");
+            for (String gear : warning.getGearRequirements()) {
+                warningText.append("• ").append(gear).append("\n");
+            }
+        }
+        
+        String currentDesc = node.getDetails().getDescription();
+        if (currentDesc != null) {
+            node.getDetails().setDescription(currentDesc + warningText.toString());
+        } else {
+            node.getDetails().setDescription(warningText.toString());
+        }
+        
+        logger.info("Added {} weather warning to {}", warning.getSeverity(), node.getTitle());
     }
     
     /**

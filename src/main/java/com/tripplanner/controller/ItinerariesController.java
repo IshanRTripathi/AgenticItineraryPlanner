@@ -1,6 +1,10 @@
 package com.tripplanner.controller;
 
 import com.tripplanner.dto.*;
+import com.tripplanner.dto.memory.Memory;
+import com.tripplanner.enums.MemoryCategory;
+import com.tripplanner.enums.MemoryType;
+import com.tripplanner.agents.MemoryAgent;
 import com.tripplanner.service.ChangeEngine;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.ItineraryService;
@@ -23,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -46,6 +51,7 @@ public class ItinerariesController {
     private final WebSocketBroadcastService webSocketBroadcastService;
     private final ChatHistoryService chatHistoryService;
     private final ItineraryMetricsTracker metricsTracker;
+    private final MemoryAgent memoryAgent;
 
     // Real-time updates managed by WebSocket
 
@@ -58,7 +64,8 @@ public class ItinerariesController {
             OrchestratorService orchestratorService,
             WebSocketBroadcastService webSocketBroadcastService,
             ChatHistoryService chatHistoryService,
-            ItineraryMetricsTracker metricsTracker) {
+            ItineraryMetricsTracker metricsTracker,
+            MemoryAgent memoryAgent) {
         this.itineraryService = itineraryService;
         this.itineraryJsonService = itineraryJsonService;
         this.changeEngine = changeEngine;
@@ -69,6 +76,7 @@ public class ItinerariesController {
         this.webSocketBroadcastService = webSocketBroadcastService;
         this.chatHistoryService = chatHistoryService;
         this.metricsTracker = metricsTracker;
+        this.memoryAgent = memoryAgent;
     }
 
     /**
@@ -112,6 +120,19 @@ public class ItinerariesController {
 
             // Track creation initiation
             metricsTracker.trackItineraryCreated(initialItinerary.getId(), request);
+
+            // NEW: Create initial memories asynchronously (non-blocking)
+            final String itineraryId = initialItinerary.getId();
+            final String finalUserId = userId;
+            CompletableFuture.runAsync(() -> {
+                try {
+                    createInitialMemories(itineraryId, finalUserId, request);
+                } catch (Exception e) {
+                    logger.error("Failed to create initial memories for itinerary {}: {}", 
+                        itineraryId, e.getMessage());
+                    // Don't fail the request - memory creation is non-critical
+                }
+            });
 
             // Generate unique execution ID for this creation process
             String executionId = "exec_" + UUID.randomUUID().toString();
@@ -212,6 +233,96 @@ public class ItinerariesController {
         ));
 
         return stages;
+    }
+
+    /**
+     * Create initial memories from trip creation form
+     */
+    private void createInitialMemories(String itineraryId, String userId, CreateItineraryReq request) {
+        logger.info("Creating initial memories for itinerary: {}", itineraryId);
+        
+        try {
+            // 1. Budget preference
+            if (request.getBudgetTier() != null || request.getBudgetMax() != null) {
+                Map<String, Object> budgetData = new HashMap<>();
+                budgetData.put("budgetTier", request.getBudgetTier());
+                budgetData.put("budgetMin", request.getBudgetMin());
+                budgetData.put("budgetMax", request.getBudgetMax());
+                
+                Memory budgetMemory = Memory.builder()
+                    .itineraryId(itineraryId)
+                    .userId(userId)
+                    .category(MemoryCategory.BUDGET)
+                    .type(MemoryType.PREFERENCE)
+                    .data(budgetData)
+                    .confidence(0.5) // Low confidence (first trip)
+                    .source("TRIP_CREATION")
+                    .isPersonal(false)
+                    .build();
+                
+                memoryAgent.store(itineraryId, budgetMemory);
+                logger.debug("Created budget memory");
+            }
+            
+            // 2. Activity interests
+            if (request.getInterests() != null && !request.getInterests().isEmpty()) {
+                Map<String, Object> activityData = new HashMap<>();
+                activityData.put("preferredTypes", request.getInterests());
+                
+                Memory activityMemory = Memory.builder()
+                    .itineraryId(itineraryId)
+                    .userId(userId)
+                    .category(MemoryCategory.ACTIVITY)
+                    .type(MemoryType.PREFERENCE)
+                    .data(activityData)
+                    .confidence(0.5)
+                    .source("TRIP_CREATION")
+                    .isPersonal(false)
+                    .build();
+                
+                memoryAgent.store(itineraryId, activityMemory);
+                logger.debug("Created activity memory");
+            }
+            
+            // 3. Dietary restrictions (PERSONAL)
+            if (request.getConstraints() != null && !request.getConstraints().isEmpty()) {
+                List<String> dietaryRestrictions = request.getConstraints().stream()
+                    .filter(c -> c.toLowerCase().contains("vegetarian") || 
+                                c.toLowerCase().contains("vegan") ||
+                                c.toLowerCase().contains("halal") ||
+                                c.toLowerCase().contains("kosher") ||
+                                c.toLowerCase().contains("gluten") ||
+                                c.toLowerCase().contains("dairy"))
+                    .toList();
+                
+                if (!dietaryRestrictions.isEmpty()) {
+                    Map<String, Object> dietaryData = new HashMap<>();
+                    dietaryData.put("restrictions", dietaryRestrictions);
+                    dietaryData.put("strictness", "strict");
+                    
+                    Memory dietaryMemory = Memory.builder()
+                        .itineraryId(itineraryId)
+                        .userId(userId)
+                        .category(MemoryCategory.DIETARY)
+                        .type(MemoryType.RESTRICTION)
+                        .data(dietaryData)
+                        .confidence(1.0) // High confidence (user stated)
+                        .source("TRIP_CREATION")
+                        .isPersonal(true) // PRIVATE
+                        .neverExpires(true)
+                        .build();
+                    
+                    memoryAgent.store(itineraryId, dietaryMemory);
+                    logger.debug("Created dietary memory (personal)");
+                }
+            }
+            
+            logger.info("Initial memories created successfully for itinerary: {}", itineraryId);
+            
+        } catch (Exception e) {
+            logger.error("Failed to create initial memories: {}", e.getMessage(), e);
+            // Don't throw - memory creation is non-critical
+        }
     }
 
     /**

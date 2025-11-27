@@ -214,6 +214,21 @@
     "trips": "Viajes",
     "profile": "Perfil"
   },
+  "tripNav": {
+    "view": "Ver",
+    "plan": "Plan",
+    "chat": "Chat",
+    "bookings": "Reservas",
+    "others": "Más",
+    "budget": "Presupuesto",
+    "budgetDesc": "Seguimiento de gastos y costos",
+    "packing": "Equipaje",
+    "packingDesc": "Gestiona tu lista de equipaje",
+    "docs": "Documentos",
+    "docsDesc": "Documentos importantes",
+    "more": "Más Opciones",
+    "moreSubtitle": "Opciones adicionales del viaje"
+  },
   "mobileMenu": {
     "title": "EasyTrip",
     "user": "Usuario",

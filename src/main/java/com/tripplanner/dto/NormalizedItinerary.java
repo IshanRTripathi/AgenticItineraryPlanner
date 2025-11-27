@@ -116,11 +116,15 @@ public class NormalizedItinerary {
     @JsonProperty("chat")
     private List<ChatRecord> chat;
     
+    @JsonProperty("toolCache")
+    private Map<String, Object> toolCache;  // Cache for tool results
+    
     public NormalizedItinerary() {
         // Initialize collections to prevent null pointer exceptions
         this.agentData = new java.util.HashMap<>();
         this.revisions = new java.util.ArrayList<>();
         this.chat = new java.util.ArrayList<>();
+        this.toolCache = new java.util.HashMap<>();
     }
     
     public NormalizedItinerary(String itineraryId, Integer version) {
@@ -348,6 +352,14 @@ public class NormalizedItinerary {
     
     public void setChat(List<ChatRecord> chat) {
         this.chat = chat;
+    }
+    
+    public Map<String, Object> getToolCache() {
+        return toolCache;
+    }
+    
+    public void setToolCache(Map<String, Object> toolCache) {
+        this.toolCache = toolCache;
     }
 
     /**

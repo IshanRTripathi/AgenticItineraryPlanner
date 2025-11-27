@@ -285,7 +285,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4 md:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">
-              Expected Budget Range
+              Expected Budget (Total Trip)
             </CardTitle>
             {aiEstimatedBudget?.rationale ? (
               <Popover>
@@ -322,7 +322,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
                   {Math.round(convert((aiEstimatedBudget.maxPerDay * aiEstimatedBudget.totalDays), itineraryCurrency, displayCurrency)).toLocaleString()}
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                  {displayCurrency} {Math.round(convert(aiEstimatedBudget.minPerDay, itineraryCurrency, displayCurrency))}-{Math.round(convert(aiEstimatedBudget.maxPerDay, itineraryCurrency, displayCurrency))} per day
+                  {displayCurrency} {Math.round(convert(aiEstimatedBudget.minPerDay, itineraryCurrency, displayCurrency))}-{Math.round(convert(aiEstimatedBudget.maxPerDay, itineraryCurrency, displayCurrency))} per person per day
                   {userBudget.tier && <span className="ml-1">• <span className="capitalize">{userBudget.tier}</span></span>}
                 </p>
               </>
@@ -350,7 +350,7 @@ export function BudgetTab({ tripId }: BudgetTabProps) {
               {convertedBudgetData.currency} {Math.round(convertedBudgetData.total).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
-              {convertedBudgetData.total > 0 ? `${convertedBudgetData.currency} ${Math.round(convertedBudgetData.total / (itinerary?.days?.length || 1))} per day` : 'Calculating...'}
+              {convertedBudgetData.total > 0 ? `${convertedBudgetData.currency} ${Math.round(convertedBudgetData.total / (itinerary?.days?.length || 1))} per person per day` : 'Calculating...'}
               {isOverPlannedBudget && <span className="text-orange-600 ml-1">• Over range</span>}
             </p>
           </CardContent>

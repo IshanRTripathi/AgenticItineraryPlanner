@@ -13,8 +13,16 @@ import com.tripplanner.service.llm.LLMSchemaValidator;
 import com.tripplanner.service.MealMetadataService;
 import com.tripplanner.service.utilities.NodeIdGenerator;
 import com.tripplanner.service.ai.AiClient;
+import com.tripplanner.dto.tools.NodeIdRequest;
+import com.tripplanner.dto.tools.NodeIdResponse;
+import com.tripplanner.dto.tools.ConstraintCheckRequest;
+import com.tripplanner.dto.tools.ConstraintCheckResult;
+import com.tripplanner.dto.tools.SchemaValidationRequest;
+import com.tripplanner.dto.tools.SchemaValidationResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +58,14 @@ public class MealAgent extends BaseAgent {
     private final LLMSchemaValidator schemaValidator;
     private final ItineraryValidator itineraryValidator;
     private final MealMetadataService mealMetadataService;
+    private final RestTemplate restTemplate;
+    
+    // Feature flags for tool integration
+    @Value("${features.meal-tools.enabled:false}")
+    private boolean mealToolsEnabled;
+    
+    @Value("${features.meal-tools.fallback-on-error:true}")
+    private boolean fallbackOnError;
     
     public MealAgent(AgentEventBus eventBus, AiClient aiClient, ObjectMapper objectMapper,
                     ItineraryJsonService itineraryJsonService, AgentEventPublisher agentEventPublisher,
@@ -64,6 +80,7 @@ public class MealAgent extends BaseAgent {
         this.schemaValidator = schemaValidator;
         this.itineraryValidator = itineraryValidator;
         this.mealMetadataService = mealMetadataService;
+        this.restTemplate = new RestTemplate();
     }
     
     @Override
@@ -442,16 +459,25 @@ public class MealAgent extends BaseAgent {
                - BAD: "Tsukiji", "Shibuya", "Nishi-Azabu"
             
             Location Awareness (CRITICAL):
+            - ALWAYS suggest restaurants IN THE SAME CITY as the day's location
+            - NEVER suggest restaurants from other cities (e.g., no Zermatt restaurants on Interlaken days)
             - ALWAYS suggest restaurants near the previous or next activity
             - Minimize travel time between activities and meals
             - If previous activity is in Asakusa, suggest restaurants in Asakusa
             - If next activity is in Shibuya, suggest restaurants in Shibuya or nearby
             - DO NOT suggest restaurants in distant areas (>30 minutes travel)
+            - DO NOT suggest restaurants in different cities (>2 hours travel)
             
-            Example:
+            Example 1 (Same City):
+            Day Location: Tokyo
             Previous activity: Senso-ji Temple (Asakusa)
             Next activity: Tokyo Skytree (Sumida)
             → Suggest: Restaurants in Asakusa or Sumida, NOT in Shibuya or Shinjuku
+            
+            Example 2 (Wrong City - DO NOT DO THIS):
+            Day Location: Interlaken
+            ❌ WRONG: Restaurant Spycher (Zermatt) - This is in a DIFFERENT CITY
+            ✅ CORRECT: Restaurant Goldener Anker (Interlaken) - Same city
             
             If no activity context available, suggest restaurants in the day's main location.
             
@@ -591,6 +617,149 @@ public class MealAgent extends BaseAgent {
             }
             """;
     }
+    
+    // ========== MEAL AGENT - TOOL INTEGRATION METHODS ==========
+    
+    /**
+     * Generate node ID using the Generate Node ID tool.
+     */
+    private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
+        if (!mealToolsEnabled) {
+            return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+        }
+        
+        NodeIdRequest request = new NodeIdRequest(itineraryId, dayNumber, nodeType);
+        
+        try {
+            logger.debug("Calling Generate Node ID tool");
+            
+            NodeIdResponse response = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/generate-node-id",
+                request,
+                NodeIdResponse.class
+            );
+            
+            if (response != null && response.isSuccess()) {
+                logger.debug("Generate Node ID tool succeeded: {}", response.getNodeId());
+                return response.getNodeId();
+            } else if (fallbackOnError) {
+                logger.warn("Generate Node ID tool failed, using fallback");
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            } else {
+                logger.error("Generate Node ID tool failed and fallback disabled");
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Generate Node ID tool error: {}", e.getMessage());
+            if (fallbackOnError) {
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            }
+            throw e;
+        }
+    }
+    
+    /**
+     * Check user constraints using the Check User Constraints tool.
+     * Focus on dietary restrictions and budget for meals.
+     */
+    private ConstraintCheckResult checkConstraintsViaTool(String itineraryId) {
+        if (!mealToolsEnabled) {
+            return new ConstraintCheckResult(); // Skip if disabled
+        }
+        
+        ConstraintCheckRequest request = new ConstraintCheckRequest(itineraryId);
+        request.setCheckDietary(true);  // Critical for meals
+        request.setCheckBudget(true);
+        request.setCheckPartySize(true);
+        
+        try {
+            logger.debug("Calling Check User Constraints tool");
+            
+            ConstraintCheckResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/check-user-constraints",
+                request,
+                ConstraintCheckResult.class
+            );
+            
+            if (result != null) {
+                if (!result.isValid()) {
+                    logger.warn("Constraint violations detected:");
+                    for (var violation : result.getViolations()) {
+                        logger.warn("  - {}: {}", violation.getType(), violation.getMessage());
+                    }
+                }
+                if (!result.getWarnings().isEmpty()) {
+                    logger.info("Constraint warnings:");
+                    for (String warning : result.getWarnings()) {
+                        logger.info("  - {}", warning);
+                    }
+                }
+                return result;
+            } else if (fallbackOnError) {
+                logger.warn("Check User Constraints tool returned null, continuing");
+                return new ConstraintCheckResult();
+            } else {
+                return new ConstraintCheckResult();
+            }
+            
+        } catch (Exception e) {
+            logger.error("Check User Constraints tool error: {}", e.getMessage());
+            if (fallbackOnError) {
+                return new ConstraintCheckResult();
+            }
+            throw e;
+        }
+    }
+    
+    /**
+     * Validate LLM schema using the Validate Schema tool.
+     */
+    private boolean validateSchemaViaTool(String jsonOutput, String jsonSchema) {
+        if (!mealToolsEnabled) {
+            // Use existing validator
+            return schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "MealAgent").isValid();
+        }
+        
+        SchemaValidationRequest request = new SchemaValidationRequest();
+        request.setJsonOutput(jsonOutput);
+        request.setJsonSchema(jsonSchema);
+        request.setCleanBeforeValidation(true);
+        
+        try {
+            logger.debug("Calling Validate Schema tool");
+            
+            SchemaValidationResult result = restTemplate.postForObject(
+                "http://localhost:8080/api/v1/tools/validate-schema",
+                request,
+                SchemaValidationResult.class
+            );
+            
+            if (result != null) {
+                if (!result.isValid()) {
+                    logger.error("Schema validation failed:");
+                    for (String error : result.getErrors()) {
+                        logger.error("  - {}", error);
+                    }
+                }
+                return result.isValid();
+            } else if (fallbackOnError) {
+                logger.warn("Validate Schema tool returned null, using fallback");
+                return schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "MealAgent").isValid();
+            } else {
+                return false;
+            }
+            
+        } catch (Exception e) {
+            logger.error("Validate Schema tool error: {}", e.getMessage());
+            if (fallbackOnError) {
+                return schemaValidator.validateWithLogging(jsonOutput, jsonSchema, "MealAgent").isValid();
+            }
+            return false;
+        }
+    }
+    
+    // ========== END MEAL AGENT TOOL INTEGRATION ==========
     
     @Override
     protected <T> T executeInternal(String itineraryId, AgentRequest<T> request) {
