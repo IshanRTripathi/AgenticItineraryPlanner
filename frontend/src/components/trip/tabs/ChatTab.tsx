@@ -303,14 +303,13 @@ export function ChatTab() {
       {/* Floating Action Button - Top right - Memory Preferences */}
       <div className="absolute top-2 right-2 z-30">
         <Button
-          size="sm"
-          variant="outline"
+          size="icon"
+          variant="ghost"
           onClick={() => setPreferencesPanelOpen(true)}
           title="Your Travel Preferences"
-          className="bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md h-9 px-3 gap-2"
+          className="h-8 w-8 rounded-full bg-white/60 backdrop-blur-md border border-white/40 shadow-sm hover:bg-white/80 hover:shadow-md transition-all"
         >
           <Settings className="h-4 w-4" />
-          <span className="hidden sm:inline text-xs">Preferences</span>
         </Button>
       </div>
 
@@ -410,15 +409,14 @@ export function ChatTab() {
             {/* Single unified background container - fully rounded pill */}
             <div
               className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 transition-all"
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderRadius: '24px',
-                border: '1px solid #E5E5E5',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                width: '100%',
-                minHeight: '48px'
-              }}
-            >
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '24px',
+                  border: '1px solid #E5E5E5',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  minHeight: '48px'
+                }}
+              >
               {/* Center: Text input - no border, seamless, auto-resize */}
               <div className="flex-1 min-w-0">
                 <Textarea

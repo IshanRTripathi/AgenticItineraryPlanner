@@ -34,7 +34,7 @@ export function CostImpactDisplay({ costImpact, compact = false }: CostImpactDis
 
   if (compact) {
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+      <div className={`inline-flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm ${
         exceedsBudget 
           ? 'bg-red-50 text-red-700 border border-red-200' 
           : isIncrease 
@@ -51,19 +51,19 @@ export function CostImpactDisplay({ costImpact, compact = false }: CostImpactDis
   }
 
   return (
-    <div className={`border rounded-lg p-3 sm:p-4 ${
+    <div className={`border rounded-lg p-2.5 md:p-3 sm:p-4 ${
       exceedsBudget 
         ? 'border-red-300 bg-red-50' 
         : 'border-gray-200 bg-white'
     }`}>
       {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <DollarSign className={`h-4 w-4 ${exceedsBudget ? 'text-red-600' : 'text-gray-600'}`} />
-        <span className="font-semibold text-sm">Cost Impact</span>
+      <div className="flex items-center gap-1.5 md:gap-2 mb-2 md:mb-3">
+        <DollarSign className={`h-3.5 w-3.5 md:h-4 md:w-4 ${exceedsBudget ? 'text-red-600' : 'text-gray-600'}`} />
+        <span className="font-semibold text-xs md:text-sm">Cost Impact</span>
       </div>
       
       {/* Cost Comparison */}
-      <div className="space-y-2 text-sm">
+      <div className="space-y-1.5 md:space-y-2 text-xs md:text-sm">
         {/* Current Cost */}
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Current:</span>

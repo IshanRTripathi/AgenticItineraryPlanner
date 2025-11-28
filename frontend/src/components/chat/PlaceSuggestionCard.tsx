@@ -98,8 +98,8 @@ export function PlaceSuggestionCard({ suggestion, onSelect, index }: PlaceSugges
 
         <div className="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
         {(suggestion.estimatedCost !== undefined || suggestion.priceLevel !== undefined) && (
-          <div className="flex items-center gap-1.5 text-sm">
-            <DollarSign className="h-4 w-4 text-green-600" />
+          <div className="flex items-center gap-1.5 text-sm md:text-sm text-xs">
+            <DollarSign className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
             <span className="font-semibold text-gray-900">
               {suggestion.estimatedCost 
                 ? `₹${suggestion.estimatedCost.toFixed(0)}`
@@ -117,10 +117,11 @@ export function PlaceSuggestionCard({ suggestion, onSelect, index }: PlaceSugges
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedPhotoIndex(0)}
-                className="text-xs h-7 px-2"
+                className="text-xs h-7 px-2 md:px-2 md:h-7"
+                title="View Photos"
               >
-                <ImageIcon className="h-3 w-3 mr-1" />
-                Photos
+                <ImageIcon className="h-3 w-3" />
+                <span className="hidden md:inline ml-1">Photos</span>
               </Button>
             )}
             
@@ -129,22 +130,24 @@ export function PlaceSuggestionCard({ suggestion, onSelect, index }: PlaceSugges
                 variant="outline"
                 size="sm"
                 onClick={() => window.open(suggestion.googleMapsUrl, '_blank')}
-                className="text-xs h-7 px-2"
+                className="text-xs h-7 px-2 md:px-2 md:h-7"
+                title="Open in Google Maps"
               >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Maps
+                <ExternalLink className="h-3 w-3" />
+                <span className="hidden md:inline ml-1">Maps</span>
               </Button>
             )}
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-3 md:p-4">
           <Button
             onClick={() => onSelect(suggestion)}
-            className="w-full"
+            className="w-full h-9 md:h-10 text-sm md:text-base"
             size="md"
           >
-            Select This Place
+            <span className="md:hidden">Select</span>
+            <span className="hidden md:inline">Select This Place</span>
           </Button>
         </div>
       </div>
@@ -154,12 +157,12 @@ export function PlaceSuggestionCard({ suggestion, onSelect, index }: PlaceSugges
         <Dialog open={true} onOpenChange={() => setSelectedPhotoIndex(null)}>
           <DialogContent className="max-w-4xl p-0 overflow-hidden max-h-[90vh]">
             <div className="relative bg-black flex flex-col">
-              {/* Close Button */}
+              {/* Close Button - Smaller on mobile */}
               <button
                 onClick={() => setSelectedPhotoIndex(null)}
-                className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+                className="absolute top-2 right-2 md:top-4 md:right-4 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 md:p-2 transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 md:h-5 md:w-5" />
               </button>
 
               {/* Main Photo */}
@@ -173,27 +176,27 @@ export function PlaceSuggestionCard({ suggestion, onSelect, index }: PlaceSugges
                   }}
                 />
 
-                {/* Navigation Arrows */}
+                {/* Navigation Arrows - Smaller on mobile */}
                 {suggestion.photos!.length > 1 && (
                   <>
                     <button
                       onClick={() => setSelectedPhotoIndex((selectedPhotoIndex - 1 + suggestion.photos!.length) % suggestion.photos!.length)}
-                      className="absolute left-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-colors"
+                      className="absolute left-2 md:left-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-colors"
                     >
-                      <ChevronLeft className="h-6 w-6" />
+                      <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                     </button>
                     <button
                       onClick={() => setSelectedPhotoIndex((selectedPhotoIndex + 1) % suggestion.photos!.length)}
-                      className="absolute right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-colors"
+                      className="absolute right-2 md:right-4 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 md:p-3 transition-colors"
                     >
-                      <ChevronRight className="h-6 w-6" />
+                      <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
                     </button>
                   </>
                 )}
               </div>
 
-              {/* Photo Counter */}
-              <div className="bg-black/80 text-white px-4 py-3 text-center text-sm">
+              {/* Photo Counter - Smaller on mobile */}
+              <div className="bg-black/80 text-white px-3 py-2 md:px-4 md:py-3 text-center text-xs md:text-sm">
                 Photo {selectedPhotoIndex + 1} of {suggestion.photos!.length}
               </div>
             </div>

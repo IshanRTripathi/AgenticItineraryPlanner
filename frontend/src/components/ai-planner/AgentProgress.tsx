@@ -290,7 +290,7 @@ export function AgentProgress() {
   // Mobile View - Ultra compact, everything visible without scrolling
   if (isMobile) {
     return (
-      <div className="h-screen relative overflow-hidden flex flex-col p-4 pb-safe">
+      <div className="min-h-screen relative overflow-hidden flex flex-col p-4 pb-24">
         {/* Globe Background */}
         <div className="absolute z-0 opacity-10 flex items-center justify-center">
             <InteractiveGlobe />
@@ -300,12 +300,12 @@ export function AgentProgress() {
           {/* Single Unified Card with Glassmorphism */}
           <div className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl p-5 shadow-2xl">
             
-            {/* Header with Progress */}
-            <div className="text-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 mb-1">
+            {/* Header with Progress - Fixed height to prevent jumping */}
+            <div className="text-center mb-4 min-h-[60px]">
+              <h2 className="text-xl font-bold text-gray-900 mb-1 line-clamp-1">
                 {state.isComplete ? '🎉 Complete!' : 'Creating Your Trip'}
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground line-clamp-1">
                 {state.isComplete ? 'Redirecting...' : 'Typically takes 45-60 seconds'}
               </p>
             </div>
@@ -363,8 +363,8 @@ export function AgentProgress() {
               </div>
             </div>
 
-            {/* Current Phase - Inline */}
-            <div className="p-3 rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20 mb-4">
+            {/* Current Phase - Fixed height to prevent jumping */}
+            <div className="p-3 rounded-xl bg-primary/10 backdrop-blur-md border border-primary/20 mb-4 min-h-[68px]">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
                   {state.isComplete ? (
@@ -374,28 +374,28 @@ export function AgentProgress() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-gray-900 truncate">{state.currentPhase}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{state.message}</p>
+                  <p className="text-xs font-bold text-gray-900 line-clamp-1">{state.currentPhase}</p>
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed">{state.message}</p>
                 </div>
               </div>
             </div>
 
-            {/* Days Generated - Readable List */}
+            {/* Days Generated - Scrollable with better spacing */}
             {state.daysCompleted.length > 0 && (
               <div className="mb-4">
                 <p className="text-xs font-semibold text-gray-900 mb-2">Days Ready:</p>
-                <div className="space-y-1.5 max-h-[150px] overflow-y-auto">
+                <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                   {state.daysCompleted.map((day) => (
                     <motion.div
                       key={day.dayNumber}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="p-2 rounded-lg bg-green-500/10 backdrop-blur-sm border border-green-500/30 flex items-center gap-2"
+                      className="p-2 rounded-lg bg-green-500/10 backdrop-blur-sm border border-green-500/30 flex items-center gap-2 min-h-[36px]"
                     >
                       <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold text-gray-900">Day {day.dayNumber}</span>
-                        <span className="text-[10px] text-gray-700 ml-2">{day.activities} {day.activities === 1 ? 'activity' : 'activities'}</span>
+                      <div className="flex-1 min-w-0 flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-900 whitespace-nowrap">Day {day.dayNumber}</span>
+                        <span className="text-[10px] text-gray-700 truncate">{day.activities} {day.activities === 1 ? 'activity' : 'activities'}</span>
                       </div>
                     </motion.div>
                   ))}
@@ -403,27 +403,27 @@ export function AgentProgress() {
               </div>
             )}
 
-            {/* City Allocation Insights - Fully Readable */}
+            {/* City Allocation Insights - Better overflow handling */}
             {state.cityInsights && (
               <div className="mb-4 rounded-xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg overflow-hidden">
                 <div className="p-3 bg-blue-500/20 border-b border-blue-500/30">
-                  <p className="text-xs font-bold text-gray-900">📍 Your Trip Plan</p>
+                  <p className="text-xs font-bold text-gray-900 line-clamp-1">📍 Your Trip Plan</p>
                 </div>
-                <div className="p-3 max-h-[200px] overflow-y-auto">
+                <div className="p-3 max-h-[180px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                   <div className="space-y-2.5">
                     {state.cityInsights.cities.map((city, idx) => (
                       <div key={idx} className="p-2 rounded-lg bg-white/60 border border-gray-200">
-                        <div className="flex items-start justify-between mb-1">
-                          <span className="font-semibold text-gray-900 text-xs leading-tight flex-1">{city.name}</span>
-                          <span className="text-xs text-gray-700 font-medium whitespace-nowrap ml-2">{city.days} {city.days === 1 ? 'day' : 'days'}</span>
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <span className="font-semibold text-gray-900 text-xs leading-tight flex-1 line-clamp-1">{city.name}</span>
+                          <span className="text-xs text-gray-700 font-medium whitespace-nowrap">{city.days} {city.days === 1 ? 'day' : 'days'}</span>
                         </div>
                         {city.reason && (
-                          <p className="text-[10px] text-gray-700 leading-relaxed mt-1">{city.reason}</p>
+                          <p className="text-[10px] text-gray-700 leading-relaxed mt-1 line-clamp-2">{city.reason}</p>
                         )}
                         {city.highlights && city.highlights.length > 0 && (
                           <div className="mt-1.5 flex flex-wrap gap-1">
                             {city.highlights.slice(0, 3).map((highlight, hIdx) => (
-                              <span key={hIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-gray-800">
+                              <span key={hIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-gray-800 line-clamp-1">
                                 {highlight}
                               </span>
                             ))}
@@ -434,11 +434,11 @@ export function AgentProgress() {
                     {state.cityInsights.budget && (
                       <div className="pt-2 mt-2 border-t border-gray-300">
                         <p className="text-[10px] font-semibold text-gray-900 mb-1">Estimated Budget</p>
-                        <p className="text-[10px] text-gray-800">
+                        <p className="text-[10px] text-gray-800 line-clamp-1">
                           {state.cityInsights.budget.currency} {state.cityInsights.budget.minPerDay}-{state.cityInsights.budget.maxPerDay} per person/day
                         </p>
                         {state.cityInsights.budget.rationale && (
-                          <p className="text-[9px] text-gray-700 mt-1 leading-relaxed">{state.cityInsights.budget.rationale}</p>
+                          <p className="text-[9px] text-gray-700 mt-1 leading-relaxed line-clamp-2">{state.cityInsights.budget.rationale}</p>
                         )}
                       </div>
                     )}
@@ -468,16 +468,16 @@ export function AgentProgress() {
           </div>
         </div>
 
-        {/* Floating "View Partial" Button - Overlay style for mobile */}
+        {/* Floating "View Partial" Button - Better positioning */}
         {canViewPartial && !state.isComplete && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="fixed bottom-6 left-4 right-4 z-50"
+            className="fixed bottom-4 left-4 right-4 z-50 safe-bottom"
           >
             <Button
               onClick={handleViewPartial}
-              className="w-full h-14 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-white shadow-2xl font-semibold touch-manipulation active:scale-95 text-base rounded-2xl"
+              className="w-full h-12 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-white shadow-2xl font-semibold touch-manipulation active:scale-95 text-sm rounded-xl"
             >
               View Partial Itinerary
             </Button>
@@ -500,12 +500,12 @@ export function AgentProgress() {
       <div className="flex-1 flex items-center justify-center p-4 lg:p-8 relative z-10">
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Card - Agent Status & Progress */}
-          <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl h-[700px] flex flex-col">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl min-h-[600px] max-h-[700px] flex flex-col">
+            <div className="text-center mb-6 min-h-[80px]">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 line-clamp-1">
                 {state.isComplete ? '🎉 Complete!' : 'Generating...'}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 line-clamp-2">
                 {state.message}
               </p>
             </div>
@@ -563,8 +563,8 @@ export function AgentProgress() {
               </div>
             </div>
 
-            {/* Current Phase */}
-            <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg">
+            {/* Current Phase - Fixed height */}
+            <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/50 shadow-lg min-h-[88px]">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
                   {state.isComplete ? (
@@ -574,14 +574,14 @@ export function AgentProgress() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-gray-900 truncate">{state.currentPhase}</p>
-                  <p className="text-sm text-gray-600 truncate mt-0.5">{state.message}</p>
+                  <p className="text-base font-bold text-gray-900 line-clamp-1">{state.currentPhase}</p>
+                  <p className="text-sm text-gray-600 line-clamp-1 mt-0.5">{state.message}</p>
                 </div>
               </div>
             </div>
 
-            {/* Info Text */}
-            <p className="text-xs text-center text-gray-600 mt-4">
+            {/* Info Text - Fixed height */}
+            <p className="text-xs text-center text-gray-600 mt-4 min-h-[16px] line-clamp-1">
               {state.isComplete
                 ? 'Redirecting automatically...'
                 : 'Generation typically takes 45-60 seconds'
@@ -590,31 +590,31 @@ export function AgentProgress() {
           </div>
 
           {/* Right Card - Days Generated */}
-          <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl h-[700px] flex flex-col">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Trip Progress</h3>
+          <div className="p-8 rounded-3xl bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl min-h-[600px] max-h-[700px] flex flex-col">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 line-clamp-1">Trip Progress</h3>
 
             {/* Scrollable Content Area */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-              {/* City Allocation Insights - Fully Readable */}
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+              {/* City Allocation Insights - Better overflow */}
               {state.cityInsights && (
                 <div className="rounded-2xl bg-white/50 backdrop-blur-md border border-gray-300 shadow-lg overflow-hidden">
                   <div className="p-4 bg-blue-500/20 border-b border-blue-500/30">
-                    <h4 className="text-sm font-bold text-gray-900">📍 Your Trip Plan</h4>
+                    <h4 className="text-sm font-bold text-gray-900 line-clamp-1">📍 Your Trip Plan</h4>
                   </div>
-                  <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
+                  <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                     {state.cityInsights.cities.map((city, idx) => (
                       <div key={idx} className="p-4 rounded-xl bg-white/80 border border-gray-200 shadow-sm">
-                        <div className="flex items-start justify-between mb-2">
-                          <span className="font-semibold text-gray-900 text-base leading-tight flex-1">{city.name}</span>
-                          <span className="text-sm text-gray-800 font-medium whitespace-nowrap ml-3">{city.days} {city.days === 1 ? 'day' : 'days'}</span>
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <span className="font-semibold text-gray-900 text-base leading-tight flex-1 line-clamp-2">{city.name}</span>
+                          <span className="text-sm text-gray-800 font-medium whitespace-nowrap">{city.days} {city.days === 1 ? 'day' : 'days'}</span>
                         </div>
                         {city.reason && (
-                          <p className="text-xs text-gray-800 leading-relaxed mb-2">{city.reason}</p>
+                          <p className="text-xs text-gray-800 leading-relaxed mb-2 line-clamp-3">{city.reason}</p>
                         )}
                         {city.highlights && city.highlights.length > 0 && (
                           <div className="flex flex-wrap gap-1.5">
                             {city.highlights.map((highlight, hIdx) => (
-                              <span key={hIdx} className="text-xs px-2 py-1 rounded-md bg-blue-100 text-gray-900 font-medium">
+                              <span key={hIdx} className="text-xs px-2 py-1 rounded-md bg-blue-100 text-gray-900 font-medium line-clamp-1">
                                 {highlight}
                               </span>
                             ))}
@@ -625,11 +625,11 @@ export function AgentProgress() {
                     {state.cityInsights.budget && (
                       <div className="pt-3 mt-3 border-t border-gray-300">
                         <p className="text-sm font-semibold text-gray-900 mb-2">Estimated Budget</p>
-                        <p className="text-sm text-gray-800 font-medium">
+                        <p className="text-sm text-gray-800 font-medium line-clamp-1">
                           {state.cityInsights.budget.currency} {state.cityInsights.budget.minPerDay}-{state.cityInsights.budget.maxPerDay} per person/day
                         </p>
                         {state.cityInsights.budget.rationale && (
-                          <p className="text-xs text-gray-700 mt-2 leading-relaxed">{state.cityInsights.budget.rationale}</p>
+                          <p className="text-xs text-gray-700 mt-2 leading-relaxed line-clamp-2">{state.cityInsights.budget.rationale}</p>
                         )}
                       </div>
                     )}
@@ -638,33 +638,33 @@ export function AgentProgress() {
               )}
 
               {state.daysCompleted.length === 0 && !state.cityInsights ? (
-                <div className="text-center py-12 flex flex-col items-center justify-center">
+                <div className="text-center py-12 flex flex-col items-center justify-center min-h-[200px]">
                   <Sparkles className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-sm text-gray-800">Analyzing destination...</p>
                 </div>
               ) : state.daysCompleted.length > 0 ? (
                 <div className="space-y-3">
-                  <h4 className="text-sm font-bold text-gray-900 sticky top-0 bg-white/50 backdrop-blur-xl py-2 -mx-2 px-2 border-b border-gray-300">Days Ready</h4>
+                  <h4 className="text-sm font-bold text-gray-900 sticky top-0 bg-white/50 backdrop-blur-xl py-2 -mx-2 px-2 border-b border-gray-300 line-clamp-1">Days Ready</h4>
                   {state.daysCompleted.map((day) => (
                     <motion.div
                       key={day.dayNumber}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="p-5 rounded-2xl bg-white/80 backdrop-blur-md border border-gray-300 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all"
+                      className="p-5 rounded-2xl bg-white/80 backdrop-blur-md border border-gray-300 shadow-lg hover:shadow-xl hover:bg-white/90 transition-all min-h-[88px]"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md flex-shrink-0">
                             <Check className="w-6 h-6 text-white" />
                           </div>
-                          <div>
-                            <p className="text-base font-bold text-gray-900">Day {day.dayNumber}</p>
-                            <p className="text-sm text-gray-800 mt-0.5">{day.activities} {day.activities === 1 ? 'activity' : 'activities'}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-base font-bold text-gray-900 line-clamp-1">Day {day.dayNumber}</p>
+                            <p className="text-sm text-gray-800 mt-0.5 line-clamp-1">{day.activities} {day.activities === 1 ? 'activity' : 'activities'}</p>
                           </div>
                         </div>
-                        <div className="px-4 py-1.5 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/40 shadow-sm">
-                          <span className="text-sm font-semibold text-green-800">Ready</span>
+                        <div className="px-4 py-1.5 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/40 shadow-sm flex-shrink-0">
+                          <span className="text-sm font-semibold text-green-800 whitespace-nowrap">Ready</span>
                         </div>
                       </div>
                     </motion.div>
@@ -697,11 +697,38 @@ export function AgentProgress() {
         </div>
       </div>
 
-      {/* Add shimmer keyframes */}
+      {/* Add shimmer keyframes and scrollbar styles */}
       <style>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
+        }
+        
+        /* Custom thin scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: rgba(156, 163, 175, 0.5);
+          border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.7);
+        }
+        
+        .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+          background: rgba(209, 213, 219, 0.6);
+        }
+        
+        .scrollbar-track-transparent::-webkit-scrollbar-track {
+          background: transparent;
         }
       `}</style>
     </div>

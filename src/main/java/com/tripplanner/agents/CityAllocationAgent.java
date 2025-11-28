@@ -316,6 +316,8 @@ public class CityAllocationAgent extends BaseAgent {
                - Accessibility
                - User interests
             6. Plan logical travel order (minimize backtracking)
+            7. INTERNATIONAL TRAVEL RULE: If the trip involves international travel (origin country ≠ destination country),
+               ensure the FIRST and LAST cities have international airports. This is critical for arrival/departure logistics.
             
             CRITICAL DAY ALLOCATION RULES:
             - Each day belongs to EXACTLY ONE city
@@ -369,6 +371,13 @@ public class CityAllocationAgent extends BaseAgent {
         StringBuilder prompt = new StringBuilder();
         
         prompt.append("ANALYZE THIS DESTINATION:\n");
+        
+        // Include origin/start location if provided
+        if (request.getStartLocation() != null && !request.getStartLocation().trim().isEmpty()) {
+            prompt.append("Origin/Starting Location: ").append(request.getStartLocation()).append("\n");
+            prompt.append("IMPORTANT: This is an international trip. Ensure first and last cities have international airports.\n");
+        }
+        
         prompt.append("Destination: ").append(request.getDestination()).append("\n");
         prompt.append("Total Days: ").append(request.getDurationDays()).append("\n");
         

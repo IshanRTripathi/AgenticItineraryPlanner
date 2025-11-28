@@ -3,9 +3,9 @@
  * Premium Design System - Material 3 + Apple HIG + Atlassian
  */
 
-/* Import Google Fonts */
+/* Import Google Fonts - Optimized weights for better performance */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Cinzel:wght@700&family=Roboto:wght@400;500;600;700&display=swap');
 
 /* Import Roothinkyu Font from 1001fonts */
@@ -166,6 +166,7 @@
     @apply bg-background text-foreground;
     font-family: var(--font-primary);
     font-size: var(--text-base);
+    font-weight: var(--font-medium);
     line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -186,18 +187,22 @@
   
   h2 {
     font-size: var(--text-4xl);
+    font-weight: var(--font-semibold);
   }
   
   h3 {
     font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
   }
   
   h4 {
     font-size: var(--text-2xl);
+    font-weight: var(--font-medium);
   }
   
   h5 {
     font-size: var(--text-xl);
+    font-weight: var(--font-medium);
   }
   
   h6 {

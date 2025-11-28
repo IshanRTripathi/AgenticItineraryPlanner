@@ -168,57 +168,57 @@ public class PipelineOrchestrator {
             try {
                 // Phase 0: City Allocation (NEW)
                 logger.info("=== PHASE 0: CITY ALLOCATION ===");
-                publishPhaseStart(itineraryId, executionId, "city_allocation", "Planning cities...");
+                publishPhaseStart(itineraryId, executionId, "City Planning", "Planning your cities...");
 
                 NormalizedItinerary itinerary = executeCityAllocationPhase(itineraryId, request, executionId);
 
                 long cityAllocationTime = System.currentTimeMillis() - startTime;
                 logger.info("Phase 0 complete: City plan created ({} ms)", cityAllocationTime);
-                publishPhaseComplete(itineraryId, executionId, "city_allocation", cityAllocationTime);
+                publishPhaseComplete(itineraryId, executionId, "City Planning", cityAllocationTime);
                 metricsTracker.trackPhaseCompleted(itineraryId, "city_allocation", cityAllocationTime, true, null);
 
                 // Phase 1: Skeleton Generation (Enhanced)
                 logger.info("=== PHASE 1: SKELETON GENERATION ===");
-                publishPhaseStart(itineraryId, executionId, "skeleton", "Creating day structure...");
+                publishPhaseStart(itineraryId, executionId, "Day Planning", "Creating your day structure...");
 
                 NormalizedItinerary skeleton = executeSkeletonPhase(itineraryId, request, executionId);
 
                 long skeletonTime = System.currentTimeMillis() - startTime;
                 logger.info("Phase 1 complete: {} days created ({} ms)",
                         skeleton.getDays().size(), skeletonTime);
-                publishPhaseComplete(itineraryId, executionId, "skeleton", skeletonTime);
+                publishPhaseComplete(itineraryId, executionId, "Day Planning", skeletonTime);
                 metricsTracker.trackPhaseCompleted(itineraryId, "skeleton", skeletonTime, true, null);
 
                 // Phase 2: Node Population (Parallel)
                 logger.info("=== PHASE 2: POPULATION ===");
-                publishPhaseStart(itineraryId, executionId, "population", "Populating node details...");
+                publishPhaseStart(itineraryId, executionId, "Adding Activities", "Finding activities and places...");
 
                 long populationTime = 0;
                 try {
                     executePopulationPhase(itineraryId, skeleton, executionId);
                     populationTime = System.currentTimeMillis() - startTime - skeletonTime;
                     logger.info("Phase 2 complete ({} ms)", populationTime);
-                    publishPhaseComplete(itineraryId, executionId, "population", populationTime);
+                    publishPhaseComplete(itineraryId, executionId, "Adding Activities", populationTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "population", populationTime, true, null);
                 } catch (Exception e) {
                     populationTime = System.currentTimeMillis() - startTime - skeletonTime;
                     logger.error("Phase 2 failed after {} ms, continuing to enrichment: {}", populationTime,
                             e.getMessage(), e);
-                    publishPhaseComplete(itineraryId, executionId, "population", populationTime);
+                    publishPhaseComplete(itineraryId, executionId, "Adding Activities", populationTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "population", populationTime, false,
                             e.getMessage());
                 }
 
                 // Phase 3: Enrichment (CRITICAL - Always run this to add Google Places data)
                 logger.info("=== PHASE 3: ENRICHMENT ===");
-                publishPhaseStart(itineraryId, executionId, "enrichment", "Adding location details...");
+                publishPhaseStart(itineraryId, executionId, "Enriching Places", "Adding photos and reviews...");
 
                 long enrichmentTime = 0;
                 try {
                     executeEnrichmentPhase(itineraryId, skeleton, executionId);
                     enrichmentTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime;
                     logger.info("Phase 3 complete ({} ms)", enrichmentTime);
-                    publishPhaseComplete(itineraryId, executionId, "enrichment", enrichmentTime);
+                    publishPhaseComplete(itineraryId, executionId, "Enriching Places", enrichmentTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "enrichment", enrichmentTime, true, null);
 
                     // CRITICAL FIX: Reload itinerary after enrichment to get the enriched data
@@ -235,14 +235,14 @@ public class PipelineOrchestrator {
                     enrichmentTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime;
                     logger.error("Phase 3 failed after {} ms, continuing to cost estimation: {}", enrichmentTime,
                             e.getMessage(), e);
-                    publishPhaseComplete(itineraryId, executionId, "enrichment", enrichmentTime);
+                    publishPhaseComplete(itineraryId, executionId, "Enriching Places", enrichmentTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "enrichment", enrichmentTime, false,
                             e.getMessage());
                 }
 
                 // Phase 4: Cost Estimation
                 logger.info("=== PHASE 4: COST ESTIMATION ===");
-                publishPhaseStart(itineraryId, executionId, "cost_estimation", "Estimating costs...");
+                publishPhaseStart(itineraryId, executionId, "Budget Planning", "Calculating costs...");
 
                 long costTime = 0;
                 try {
@@ -264,13 +264,13 @@ public class PipelineOrchestrator {
                     logger.info("[CostEstimatorAgent] Complete");
                     costTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime;
                     logger.info("Phase 4 complete ({} ms)", costTime);
-                    publishPhaseComplete(itineraryId, executionId, "cost_estimation", costTime);
+                    publishPhaseComplete(itineraryId, executionId, "Budget Planning", costTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "cost_estimation", costTime, true, null);
                 } catch (Exception e) {
                     costTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime - enrichmentTime;
                     logger.error("Phase 4 failed after {} ms, continuing to validation: {}", costTime, e.getMessage(),
                             e);
-                    publishPhaseComplete(itineraryId, executionId, "cost_estimation", costTime);
+                    publishPhaseComplete(itineraryId, executionId, "Budget Planning", costTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "cost_estimation", costTime, false, e.getMessage());
                 }
 
@@ -307,7 +307,7 @@ public class PipelineOrchestrator {
 
                 // Phase 5: Finalization
                 logger.info("=== PHASE 5: FINALIZATION ===");
-                publishPhaseStart(itineraryId, executionId, "finalization", "Finalizing itinerary...");
+                publishPhaseStart(itineraryId, executionId, "Finishing Up", "Finalizing your itinerary...");
 
                 NormalizedItinerary finalItinerary = null;
                 try {
@@ -324,7 +324,7 @@ public class PipelineOrchestrator {
 
                     long finalizationTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime
                             - enrichmentTime - costTime - validationTime;
-                    publishPhaseComplete(itineraryId, executionId, "finalization", finalizationTime);
+                    publishPhaseComplete(itineraryId, executionId, "Finishing Up", finalizationTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "finalization", finalizationTime, true, null);
 
                     // Track itinerary completion with all metrics
@@ -356,7 +356,7 @@ public class PipelineOrchestrator {
                     long finalizationTime = System.currentTimeMillis() - startTime - skeletonTime - populationTime
                             - enrichmentTime - costTime - validationTime;
                     logger.error("Phase 5 failed after {} ms: {}", finalizationTime, e.getMessage(), e);
-                    publishPhaseComplete(itineraryId, executionId, "finalization", finalizationTime);
+                    publishPhaseComplete(itineraryId, executionId, "Finishing Up", finalizationTime);
                     metricsTracker.trackPhaseCompleted(itineraryId, "finalization", finalizationTime, false,
                             e.getMessage());
 
@@ -784,9 +784,9 @@ public class PipelineOrchestrator {
             int currentProgress = baseProgress + enrichmentProgress;
 
             // Publish progress update
-            String progressMessage = String.format("Enriching Days %d-%d of %d (Batch %d/%d)...",
-                    startIdx + 1, endIdx, totalDays, batchNumber, totalBatches);
-            publishPhaseProgress(itineraryId, executionId, "enrichment", currentProgress, progressMessage);
+            String progressMessage = String.format("Adding photos for Days %d-%d of %d...",
+                    startIdx + 1, endIdx, totalDays);
+            publishPhaseProgress(itineraryId, executionId, "Enriching Places", currentProgress, progressMessage);
 
             try {
                 // Enrich this batch of days using BatchEnrichmentService
@@ -851,8 +851,8 @@ public class PipelineOrchestrator {
             int currentProgress = baseProgress + enrichmentProgress;
 
             // Publish progress update
-            String progressMessage = String.format("Enriching Day %d of %d...", dayIndex + 1, totalDays);
-            publishPhaseProgress(itineraryId, executionId, "enrichment", currentProgress, progressMessage);
+            String progressMessage = String.format("Adding photos for Day %d of %d...", dayIndex + 1, totalDays);
+            publishPhaseProgress(itineraryId, executionId, "Enriching Places", currentProgress, progressMessage);
 
             try {
                 // Enrich this specific day
@@ -1070,7 +1070,7 @@ public class PipelineOrchestrator {
             agentEventPublisher.publishProgress(itineraryId, executionId, progress, message, "orchestrator");
 
             // Publish phase transition if not the first phase
-            if (!"skeleton".equals(phase)) {
+            if (!"Day Planning".equals(phase)) {
                 agentEventPublisher.publishPhaseTransition(itineraryId, executionId, getPreviousPhase(phase), phase,
                         progress);
             }
@@ -1173,18 +1173,24 @@ public class PipelineOrchestrator {
      */
     private int calculatePhaseProgress(String phase) {
         switch (phase) {
+            case "City Planning":
             case "city_allocation":
                 return 5; // 5% - city allocation starts
+            case "Day Planning":
             case "skeleton":
                 return 15; // 15% - skeleton generation starts
+            case "Adding Activities":
             case "population":
                 return 45; // 45% - population phase starts
+            case "Enriching Places":
             case "enrichment":
                 return 70; // 70% - enrichment phase starts
+            case "Budget Planning":
             case "cost_estimation":
                 return 85; // 85% - cost estimation starts
             case "validation":
                 return 88; // 88% - validation starts (optional)
+            case "Finishing Up":
             case "finalization":
                 return 90; // 90% - finalization phase starts
             default:
@@ -1197,18 +1203,23 @@ public class PipelineOrchestrator {
      */
     private String getPreviousPhase(String currentPhase) {
         switch (currentPhase) {
+            case "Day Planning":
             case "skeleton":
-                return "city_allocation";
+                return "City Planning";
+            case "Adding Activities":
             case "population":
-                return "skeleton";
+                return "Day Planning";
+            case "Enriching Places":
             case "enrichment":
-                return "population";
+                return "Adding Activities";
+            case "Budget Planning":
             case "cost_estimation":
-                return "enrichment";
+                return "Enriching Places";
             case "validation":
-                return "cost_estimation";
+                return "Budget Planning";
+            case "Finishing Up":
             case "finalization":
-                return validationEnabled ? "validation" : "cost_estimation";
+                return validationEnabled ? "validation" : "Budget Planning";
             default:
                 return "unknown";
         }
@@ -1260,8 +1271,8 @@ public class PipelineOrchestrator {
         logger.info("   Strategy: Collect-then-save (no lock contention)");
 
         // Publish progress update
-        publishPhaseProgress(itineraryId, executionId, "enrichment", 70, 
-            String.format("Enriching all %d days in parallel...", totalDays));
+        publishPhaseProgress(itineraryId, executionId, "Enriching Places", 70, 
+            String.format("Adding photos and details for all %d days...", totalDays));
 
         try {
             logger.info("🔄 Calling BatchEnrichmentService.enrichBatch()...");
@@ -1287,8 +1298,8 @@ public class PipelineOrchestrator {
             logger.info("═══════════════════════════════════════════════════════════════");
 
             // Publish completion
-            publishPhaseProgress(itineraryId, executionId, "enrichment", 90,
-                String.format("Enriched %d/%d days", successfulDays, totalDays));
+            publishPhaseProgress(itineraryId, executionId, "Enriching Places", 90,
+                String.format("Added details for %d/%d days", successfulDays, totalDays));
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;

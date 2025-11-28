@@ -62,6 +62,9 @@ features:
     enabled: true  # Set to true to enable Calculate Cost tool with budget analysis
     fallback-on-error: true  # If cost tool fails, fall back to BudgetTracker service
   
+  cost-estimation:
+    rule-based: true  # Set to true to use fast rule-based cost estimation (< 1s vs 46s with LLM)
+  
   meal-tools:
     enabled: true  # Set to true to enable meal tools (Node ID, Constraints, Schema validation)
     fallback-on-error: true  # If tools fail, fall back to existing services
@@ -143,27 +146,27 @@ validation:
 google:
   ai:
     # Single key (backward compatibility)
-    api-key: ${GEMINI_API_KEY:}
+    api-key: ${GEMINI_API_KEY:AIzaSyDyqGAyMztQpfZtBpXORymVO4uM3aDsTQ4}
     # Multiple keys (JSON array format: ["key1","key2","key3"])
-    api-keys: ${GEMINI_API_KEYS:[]}
+    api-keys: ${GEMINI_API_KEYS:["AIzaSyC_t4xL6-ZbHhz9tfuryOcL5pple9aM0DY","AIzaSyD12L1K9T-TUOpMLK61dUr1p_-tTsJoiOE", "AIzaSyDyqGAyMztQpfZtBpXORymVO4uM3aDsTQ4", "AIzaSyB0TtykrEta06Ohjh201WRbl8KEDI2jibE"]}
     model: ${GEMINI_MODEL:gemini-2.5-flash}
     temperature: ${GEMINI_TEMPERATURE:0.7}
     max-tokens: ${GEMINI_MAX_TOKENS:65535}
     mock-mode: ${GEMINI_MOCK_MODE:false}
   places:
     api:
-      key: ${GOOGLE_PLACES_API_KEY:}
+      key: ${GOOGLE_PLACES_API_KEY:AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss}
     daily:
       limit: ${GOOGLE_PLACES_DAILY_LIMIT:1000}
     rate-limit:
       enabled: ${GOOGLE_PLACES_RATE_LIMIT_ENABLED:true}
   maps:
     api:
-      key: ${GOOGLE_MAPS_API_KEY:}
+      key: ${GOOGLE_MAPS_API_KEY:AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss}
 
 openweather:
   api:
-    key: ${OPENWEATHER_API_KEY:}
+    key: ${OPENWEATHER_API_KEY:3137bbe29a531376f3582aec1095f0e3}
 
 ai:
   provider: ${AI_PROVIDER:openrouter}
@@ -177,7 +180,7 @@ openrouter:
   # Single key (backward compatibility)
   api-key: ${OPENROUTER_API_KEY:}
   # Multiple keys (JSON array format: ["key1","key2","key3"])
-  api-keys: ${OPENROUTER_API_KEYS:[]}
+  api-keys: ${OPENROUTER_API_KEYS:["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"]}
   base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
   timeout-seconds: ${OPENROUTER_TIMEOUT_SECONDS:150}
 
@@ -305,15 +308,17 @@ itinerary:
   generation:
     pipeline:
       # Enable parallel execution for population phase (ActivityAgent, MealAgent, TransportAgent)
+      # NOTE: Currently runs sequentially with locks to prevent concurrent modifications
+      # TODO: Implement true parallel execution with CompletableFuture.allOf()
       parallel: ${PIPELINE_PARALLEL:true}
       
-      # OPTIMIZATION: City-grouped parallel skeleton generation (Phase 2 - NOT YET IMPLEMENTED)
-      # parallel-cities: true = Generate different cities in parallel (skeleton: 49s → 29s)
+      # OPTIMIZATION: City-grouped parallel skeleton generation (IMPLEMENTED & ENABLED)
+      # parallel-cities: true = Generate different cities in parallel (skeleton: 74s → ~29s)
       #   - Days in same city remain sequential (preserves context)
       #   - Different cities run in parallel
       #   - Uses collect-then-save pattern
-      # parallel-cities: false = Sequential skeleton generation (CURRENT)
-      parallel-cities: ${PIPELINE_PARALLEL_CITIES:false}
+      # parallel-cities: false = Sequential skeleton generation (LEGACY)
+      parallel-cities: ${PIPELINE_PARALLEL_CITIES:true}
       
       # Enrichment mode configuration
       enrichment:
@@ -323,7 +328,7 @@ itinerary:
         #   - Maximum parallelization
         #   - Recommended for production after testing
         # full-parallel: false = Use batched or sequential mode (LEGACY)
-        full-parallel: ${PIPELINE_ENRICHMENT_FULL_PARALLEL:false}
+        full-parallel: ${PIPELINE_ENRICHMENT_FULL_PARALLEL:true}
         
         # Enable batched parallel enrichment vs sequential (one-by-one)
         # BATCHED PARALLEL (parallel: true): Enriches N days at a time (balanced approach)
@@ -360,6 +365,11 @@ itinerary:
       skeleton:
         timeout-ms: ${PIPELINE_SKELETON_TIMEOUT_MS:120000}
         batch-size: ${ITINERARY_SKELETON_BATCH_SIZE:1}
+        # City-grouped parallel skeleton generation (ENABLED)
+        parallel-cities: ${PIPELINE_SKELETON_PARALLEL_CITIES:true}  # Enable city-grouped parallel generation
+        batch-size-per-city: ${PIPELINE_SKELETON_BATCH_SIZE_PER_CITY:1}  # Days per LLM call within same city
+        max-parallel-cities: ${PIPELINE_SKELETON_MAX_PARALLEL_CITIES:2}  # Max city groups in parallel (2 for free tier)
+        fallback-sequential: ${PIPELINE_SKELETON_FALLBACK_SEQUENTIAL:true}  # Fallback to sequential on error
       
       population:
         timeout-ms: ${PIPELINE_POPULATION_TIMEOUT_MS:180000}

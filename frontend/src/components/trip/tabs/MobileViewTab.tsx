@@ -282,8 +282,8 @@ export function MobileViewTab({ itinerary }: MobileViewTabProps) {
                         className="h-1 bg-emerald-500 mb-4 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"
                     />
                     <h1
-                        className="font-bold text-white leading-[0.9] mb-3 tracking-tight drop-shadow-lg"
-                        style={{ fontFamily: "'Roothinkyu', 'Playfair Display', serif", fontSize: '3.9rem' }}
+                        className="font-normal text-white leading-[0.9] mb-3 drop-shadow-lg"
+                        style={{ fontFamily: "'Roothinkyu', 'Playfair Display', serif", fontSize: '6.75rem', letterSpacing: '0.08em' }}
                     >
                         {destination}
                     </h1>
