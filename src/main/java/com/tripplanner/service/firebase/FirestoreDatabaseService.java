@@ -4,6 +4,10 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import com.tripplanner.data.entity.FirestoreItinerary;
+import com.tripplanner.service.OrchestratorService;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -12,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class FirestoreDatabaseService implements DatabaseService {
+    private static final Logger logger = LoggerFactory.getLogger(FirestoreDatabaseService.class);
 
     private static final String COLLECTION_ITINERARIES = "itineraries";
     private static final String SUBCOLLECTION_REVISIONS = "revisions";
@@ -27,10 +32,22 @@ public class FirestoreDatabaseService implements DatabaseService {
         itinerary.updateTimestamp();
         Map<String, Object> data = toMap(itinerary);
         DocumentReference docRef = firestore.collection(COLLECTION_ITINERARIES).document(itinerary.getId());
+        
+        // DIAGNOSTIC: Log what we're about to save
+        logger.info("💾 [FIRESTORE SAVE] Starting save for itinerary: {}", itinerary.getId());
+        logger.info("  Version: {}", itinerary.getVersion());
+        logger.info("  Thread: {}", Thread.currentThread().getName());
+        logger.info("  JSON length: {} chars", itinerary.getJson() != null ? itinerary.getJson().length() : 0);
+        
         try {
+            long startTime = System.currentTimeMillis();
             docRef.set(data).get();
+            long duration = System.currentTimeMillis() - startTime;
+            
+            logger.info("✅ [FIRESTORE SAVE] Successfully saved itinerary {} in {}ms", itinerary.getId(), duration);
             return itinerary;
         } catch (InterruptedException | ExecutionException e) {
+            logger.error("❌ [FIRESTORE SAVE] Failed to save itinerary {}: {}", itinerary.getId(), e.getMessage(), e);
             Thread.currentThread().interrupt();
             throw new RuntimeException("Failed to save itinerary", e);
         }
@@ -38,11 +55,27 @@ public class FirestoreDatabaseService implements DatabaseService {
 
     @Override
     public Optional<FirestoreItinerary> findById(String id) {
+        logger.info("📖 [FIRESTORE LOAD] Loading itinerary: {}", id);
+        logger.info("  Thread: {}", Thread.currentThread().getName());
+        
         try {
+            long startTime = System.currentTimeMillis();
             DocumentSnapshot snapshot = firestore.collection(COLLECTION_ITINERARIES).document(id).get().get();
-            if (!snapshot.exists()) return Optional.empty();
-            return Optional.of(fromSnapshot(snapshot));
+            long duration = System.currentTimeMillis() - startTime;
+            
+            if (!snapshot.exists()) {
+                logger.warn("❌ [FIRESTORE LOAD] Itinerary {} not found in Firestore", id);
+                return Optional.empty();
+            }
+            
+            FirestoreItinerary itinerary = fromSnapshot(snapshot);
+            logger.info("✅ [FIRESTORE LOAD] Loaded itinerary {} in {}ms", id, duration);
+            logger.info("  Version: {}", itinerary.getVersion());
+            logger.info("  JSON length: {} chars", itinerary.getJson() != null ? itinerary.getJson().length() : 0);
+            
+            return Optional.of(itinerary);
         } catch (InterruptedException | ExecutionException e) {
+            logger.error("❌ [FIRESTORE LOAD] Failed to load itinerary {}: {}", id, e.getMessage(), e);
             Thread.currentThread().interrupt();
             throw new RuntimeException("Failed to find itinerary", e);
         }

@@ -107,8 +107,16 @@ public class TransportAgent extends BaseAgent {
      * Populate transport nodes with detailed information.
      */
     public void populateTransport(String itineraryId, NormalizedItinerary skeleton) {
+        populateTransport(itineraryId, skeleton, false);
+    }
+    
+    /**
+     * Populate transport nodes with detailed information.
+     * @param skipSave if true, modifies skeleton in-place without saving (for parallel execution)
+     */
+    public void populateTransport(String itineraryId, NormalizedItinerary skeleton, boolean skipSave) {
         logger.info("=== TRANSPORT AGENT ===");
-        logger.info("Populating transport nodes for itinerary: {}", itineraryId);
+        logger.info("Populating transport nodes for itinerary: {} (skipSave={})", itineraryId, skipSave);
         
         try {
             emitProgress(itineraryId, 10, "Loading transport data", "loading");
@@ -162,14 +170,29 @@ public class TransportAgent extends BaseAgent {
             List<PopulatedTransport> populatedTransport = populateTransportWithAI(
                 skeleton, transportContexts);
             
-            emitProgress(itineraryId, 70, "Saving transport data", "saving");
-            
-            // Update the itinerary with populated data
-            updateItineraryWithTransport(itineraryId, skeleton, populatedTransport);
-            
-            emitProgress(itineraryId, 100, 
-                String.format("Populated %d transport segments", populatedTransport.size()), 
-                "complete");
+            if (skipSave) {
+                // Collect-only mode: Apply data to skeleton without saving
+                logger.info("Applying transport data to skeleton (skipSave=true, no database write)");
+                emitProgress(itineraryId, 70, "Applying transport data", "applying");
+                
+                // Apply transport data inline (same logic as updateItineraryWithTransport but without save)
+                applyTransportDataToSkeleton(skeleton, populatedTransport);
+                
+                // Metadata already populated earlier in the method
+                logger.info("Transport data applied to skeleton (in-memory only)");
+                
+                emitProgress(itineraryId, 100, 
+                    String.format("Collected %d transport segments (not saved)", populatedTransport.size()), 
+                    "collected");
+            } else {
+                // Normal mode: Apply and save
+                emitProgress(itineraryId, 70, "Saving transport data", "saving");
+                updateItineraryWithTransport(itineraryId, skeleton, populatedTransport);
+                
+                emitProgress(itineraryId, 100, 
+                    String.format("Populated %d transport segments", populatedTransport.size()), 
+                    "complete");
+            }
             
             logger.info("=== TRANSPORT AGENT COMPLETE ===");
             logger.info("Populated {} transport segments", populatedTransport.size());
@@ -594,11 +617,10 @@ public class TransportAgent extends BaseAgent {
     }
     
     /**
-     * Update itinerary with populated transport data.
+     * Apply transport data to skeleton without saving (for parallel execution).
      */
-    private void updateItineraryWithTransport(String itineraryId, NormalizedItinerary skeleton,
+    private void applyTransportDataToSkeleton(NormalizedItinerary skeleton,
                                               List<PopulatedTransport> populatedTransport) {
-        
         // Filter out any null nodeIds and handle duplicates gracefully
         Map<String, PopulatedTransport> transportMap = populatedTransport.stream()
             .filter(t -> t.getNodeId() != null)
@@ -615,11 +637,10 @@ public class TransportAgent extends BaseAgent {
             if (day.getNodes() == null) continue;
             
             for (NormalizedNode node : day.getNodes()) {
-                // Node IDs are already ensured at the start of populateTransport
                 if ("transport".equals(node.getType())) {
                     PopulatedTransport populated = transportMap.get(node.getId());
                     if (populated != null) {
-                        // CRITICAL: Validate that LLM didn't reverse the direction
+                        // Validate that LLM didn't reverse the direction
                         String originalTitle = node.getTitle();
                         String llmTitle = populated.getTitle();
                         
@@ -627,7 +648,6 @@ public class TransportAgent extends BaseAgent {
                             logger.error("LLM REVERSED DIRECTION! Original: '{}', LLM: '{}'", 
                                         originalTitle, llmTitle);
                             logger.error("Keeping original title to prevent confusion");
-                            // Keep original title, only update description and mode
                         } else {
                             node.setTitle(populated.getTitle());
                         }
@@ -638,21 +658,17 @@ public class TransportAgent extends BaseAgent {
                         node.getDetails().setDescription(populated.getDescription());
                         node.getDetails().setCategory(populated.getMode());
                         
-                        // IMPROVED: Validate mode is feasible for geography (old method)
                         validateTransportMode(node, populated.getMode(), originalTitle);
                         
-                        // NEW: Validate using metadata-based validation
                         try {
                             validateTransportNode(node);
                             logger.info("Transport node {} passed validation", node.getId());
                         } catch (ValidationException e) {
                             logger.error("Transport node {} failed validation: {}", node.getId(), e.getMessage());
-                            // Mark as failed but continue processing
                             node.setProcessingState(ProcessingState.FAILED);
                             node.setLastError(e.getMessage());
                         }
                         
-                        // IMPROVED: Validate and correct duration using real distance calculation
                         if (node.getTiming() != null) {
                             Integer aiDuration = populated.getDurationMinutes();
                             Integer validatedDuration = validateAndCorrectDuration(
@@ -661,13 +677,11 @@ public class TransportAgent extends BaseAgent {
                             if (validatedDuration != null) {
                                 node.getTiming().setDurationMin(validatedDuration);
                                 
-                                // Log if AI duration was significantly different
                                 if (aiDuration != null && Math.abs(aiDuration - validatedDuration) > 15) {
                                     logger.info("Corrected transport duration for {}: AI={}min, Actual={}min", 
                                                node.getTitle(), aiDuration, validatedDuration);
                                 }
                             } else if (aiDuration != null) {
-                                // Fallback to AI duration if validation fails
                                 node.getTiming().setDurationMin(aiDuration);
                             }
                         }
@@ -675,6 +689,16 @@ public class TransportAgent extends BaseAgent {
                 }
             }
         }
+    }
+    
+    /**
+     * Update itinerary with populated transport data.
+     */
+    private void updateItineraryWithTransport(String itineraryId, NormalizedItinerary skeleton,
+                                              List<PopulatedTransport> populatedTransport) {
+        
+        // Apply transport data to skeleton
+        applyTransportDataToSkeleton(skeleton, populatedTransport);
         
         // Validate before save
         ItineraryValidator.ValidationResult validationResult = itineraryValidator.validate(skeleton);

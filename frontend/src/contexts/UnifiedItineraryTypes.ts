@@ -20,6 +20,9 @@ export interface ChatMessage {
   errors?: string[];
   applied?: boolean;
   candidates?: any[];
+  needsDisambiguation?: boolean;
+  costImpact?: any;
+  placeSuggestions?: any[];
 }
 
 export interface WorkflowNode {
@@ -188,7 +191,7 @@ export interface UnifiedItineraryContextType {
   moveNode: (fromDay: number, fromIndex: number, toDay: number, toIndex: number) => void;
   
   // Chat actions
-  sendChatMessage: (message: string, selectedNodeId?: string) => Promise<void>;
+  sendChatMessage: (message: string, selectedNodeId?: string, sessionId?: string) => Promise<void>;
   clearChatMessages: () => void;
   clearChatHistory: () => Promise<void>;
   

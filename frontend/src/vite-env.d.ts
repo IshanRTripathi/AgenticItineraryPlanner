@@ -12,6 +12,10 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET: string;
   readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string;
   readonly VITE_FIREBASE_APP_ID: string;
+  readonly VITE_GOOGLE_MAPS_BROWSER_KEY: string;
+  readonly VITE_OPENWEATHER_API_KEY: string;
+  readonly VITE_LOG_LEVEL: string;
+  readonly VITE_ENABLE_ANALYTICS: string;
 }
 
 interface ImportMeta {

@@ -3769,4 +3769,90 @@ public class ToolsController {
                         "description", "Strictness level for checking (default: STRICT)")),
                 "required", new String[] { "itineraryId" })));
     }
+    
+    // ========== Place Search Tool ==========
+    
+    /**
+     * Search for places with photos, ratings, and details.
+     * Returns multiple suggestions (up to 3) for user to choose from.
+     * 
+     * This tool uses smart caching to avoid repeated API calls:
+     * - Cache key: query + location + coordinates
+     * - Only validated results (within 30km) are cached
+     * - TTL: 7 days
+     */
+    @PostMapping("/search-places")
+    public ResponseEntity<PlaceSearchToolResult> searchPlaces(
+            @RequestBody PlaceSearchToolRequest request,
+            @RequestHeader(value = "X-Agent-Name", required = false) String agentName) {
+        try {
+            logToolUsage("search-places", agentName, request.getItineraryId());
+            logger.info("Searching places: query='{}', location='{}', type='{}'",
+                    request.getQuery(), request.getLocation(), request.getType());
+
+            // Validate request
+            if (request.getQuery() == null || request.getQuery().isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                        PlaceSearchToolResult.error("query is required"));
+            }
+
+            // Get location context from itinerary if not provided
+            String location = request.getLocation();
+            if ((location == null || location.isEmpty()) && request.getItineraryId() != null) {
+                Optional<NormalizedItinerary> itinerary = itineraryJsonService.getItinerary(request.getItineraryId());
+                if (itinerary.isPresent()) {
+                    location = itinerary.get().getDestination();
+                    logger.info("Using itinerary destination: {}", location);
+                }
+            }
+
+            if (location == null || location.isEmpty()) {
+                return ResponseEntity.badRequest().body(
+                        PlaceSearchToolResult.error("location is required (provide location or itineraryId)"));
+            }
+
+            // Search places (always return 3 suggestions for chat UI)
+            int maxResults = request.getMaxResults() != null ? request.getMaxResults() : 3;
+            List<PlaceSuggestion> suggestions = placesService.searchPlaces(
+                    request.getItineraryId(),
+                    request.getQuery(),
+                    location,
+                    request.getType(),
+                    maxResults);
+
+            logger.info("✅ Found {} place suggestions", suggestions.size());
+            return ResponseEntity.ok(PlaceSearchToolResult.success(suggestions));
+
+        } catch (Exception e) {
+            logger.error("Place search failed", e);
+            return ResponseEntity.status(500).body(
+                    PlaceSearchToolResult.error("Failed to search places: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/schema/search-places")
+    public ResponseEntity<Map<String, Object>> getSearchPlacesSchema() {
+        return ResponseEntity.ok(Map.of(
+                "name", "search_places",
+                "description", "Search for places with photos, ratings, and details. Returns up to 3 suggestions with rich data.",
+                "parameters", Map.of(
+                        "type", "object",
+                        "properties", Map.of(
+                                "itineraryId", Map.of(
+                                        "type", "string",
+                                        "description", "ID of the itinerary (for location context and caching)"),
+                                "query", Map.of(
+                                        "type", "string",
+                                        "description", "Place name or type to search for (e.g., 'museum', 'Louvre', 'restaurant')"),
+                                "location", Map.of(
+                                        "type", "string",
+                                        "description", "Location to search in (e.g., 'Paris, France', 'Interlaken, Switzerland'). Optional if itineraryId provided."),
+                                "type", Map.of(
+                                        "type", "string",
+                                        "description", "Optional place type filter (e.g., 'museum', 'restaurant', 'tourist_attraction', 'park')"),
+                                "maxResults", Map.of(
+                                        "type", "integer",
+                                        "description", "Maximum number of results to return (default: 3, max: 10)")),
+                        "required", new String[] { "query" })));
+    }
 }

@@ -1,24 +1,37 @@
 package com.tripplanner.service;
 
 import com.tripplanner.dto.IntentResult;
+import com.tripplanner.service.cache.ToolCacheService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
  * Service for classifying user intents from natural language text.
  * Uses deterministic pre-router with regex patterns for common intents,
  * with fallback to LLM classification for ambiguous cases.
+ * 
+ * OPTIMIZATION: Caches intent classification results to avoid repeated LLM calls.
  */
 @Service
 public class IntentClassificationService {
     
     private static final Logger logger = LoggerFactory.getLogger(IntentClassificationService.class);
+    
+    @Autowired(required = false)
+    private ToolCacheService toolCacheService;
+    
+    @Value("${features.editor-tools.enabled:false}")
+    private boolean cachingEnabled;
     
     // Regex patterns for intent classification
     private static final Pattern REPLAN_TODAY_PATTERN = Pattern.compile(
@@ -57,7 +70,12 @@ public class IntentClassificationService {
     );
     
     private static final Pattern EXPLAIN_PATTERN = Pattern.compile(
-        "(?i).*\\b(what|how|why|explain|tell me|describe|show me)\\b.*", 
+        "(?i).*\\b(what|how|why|explain|tell me|describe)\\b.*", 
+        Pattern.CASE_INSENSITIVE
+    );
+    
+    private static final Pattern SEARCH_PLACE_PATTERN = Pattern.compile(
+        "(?i).*\\b(show me more|find|suggest|search for|discover|what other|more options|more places|other attractions|other museums|other restaurants)\\b.*\\b(places?|museums?|restaurants?|attractions?|activities?|things to do|options?)\\b.*", 
         Pattern.CASE_INSENSITIVE
     );
     
@@ -76,21 +94,59 @@ public class IntentClassificationService {
     /**
      * Classify the intent from user text using deterministic pre-router.
      * Falls back to LLM classification if no clear intent is detected.
+     * 
+     * OPTIMIZATION: Caches intent results to avoid repeated classification.
      */
     public IntentResult classifyIntent(String text, String selectedNodeId, Integer day) {
         logger.debug("Classifying intent for text: '{}', selectedNodeId: {}, day: {}", text, selectedNodeId, day);
+        
+        // ========== TOOL INTEGRATION: Check intent cache first ==========
+        if (cachingEnabled && toolCacheService != null) {
+            String textHash = Integer.toHexString(text.hashCode());
+            String contextHash = Integer.toHexString((selectedNodeId + "_" + day).hashCode());
+            String cacheKey = "intent:" + textHash + ":" + contextHash;
+            
+            Optional<IntentResult> cached = toolCacheService.get(cacheKey, IntentResult.class);
+            if (cached.isPresent()) {
+                logger.info("📊 CACHE HIT: Intent classification (saved ~1s)");
+                return cached.get();
+            }
+            
+            logger.debug("📊 CACHE MISS: Intent classification");
+        }
         
         // Try pre-router classification first
         IntentResult result = preRouterClassification(text, selectedNodeId, day);
         
         if (result != null) {
             logger.debug("Pre-router classified intent as: {}", result.getIntent());
+            
+            // Cache the result
+            if (cachingEnabled && toolCacheService != null) {
+                String textHash = Integer.toHexString(text.hashCode());
+                String contextHash = Integer.toHexString((selectedNodeId + "_" + day).hashCode());
+                String cacheKey = "intent:" + textHash + ":" + contextHash;
+                toolCacheService.put(cacheKey, result, Duration.ofHours(1));
+                logger.debug("✅ Cached intent result for: {}", text);
+            }
+            
             return result;
         }
         
         // Fallback to LLM classification for ambiguous cases
         logger.debug("Pre-router could not classify, falling back to LLM");
-        return llmClassification(text, selectedNodeId, day);
+        IntentResult llmResult = llmClassification(text, selectedNodeId, day);
+        
+        // Cache LLM result as well
+        if (cachingEnabled && toolCacheService != null && llmResult != null) {
+            String textHash = Integer.toHexString(text.hashCode());
+            String contextHash = Integer.toHexString((selectedNodeId + "_" + day).hashCode());
+            String cacheKey = "intent:" + textHash + ":" + contextHash;
+            toolCacheService.put(cacheKey, llmResult, Duration.ofHours(1));
+            logger.debug("✅ Cached LLM intent result for: {}", text);
+        }
+        
+        return llmResult;
     }
     
     /**
@@ -99,6 +155,13 @@ public class IntentClassificationService {
     private IntentResult preRouterClassification(String text, String selectedNodeId, Integer day) {
         
         // Check for explicit intents in order of specificity
+        // IMPORTANT: Check search BEFORE explain, as "show me more" should be search, not explain
+        if (isSearchPlace(text)) {
+            Map<String, Object> entities = extractEntities(text);
+            entities.put("query", text); // Store full query for context
+            return IntentResult.searchPlace(day, entities);
+        }
+        
         if (isReplanToday(text)) {
             Map<String, Object> entities = extractEntities(text);
             return IntentResult.replanToday(day, entities);
@@ -221,6 +284,13 @@ public class IntentClassificationService {
     }
     
     /**
+     * Check if text indicates searching for new places.
+     */
+    private boolean isSearchPlace(String text) {
+        return SEARCH_PLACE_PATTERN.matcher(text).matches();
+    }
+    
+    /**
      * Extract entities (time, location, etc.) from text.
      */
     private Map<String, Object> extractEntities(String text) {
@@ -244,12 +314,27 @@ public class IntentClassificationService {
         if (text.toLowerCase().contains("restaurant") || text.toLowerCase().contains("eat") || 
             text.toLowerCase().contains("lunch") || text.toLowerCase().contains("dinner")) {
             entities.put("category", "meal");
-        } else if (text.toLowerCase().contains("museum") || text.toLowerCase().contains("attraction") || 
+            entities.put("placeType", "restaurant");
+        } else if (text.toLowerCase().contains("museum")) {
+            entities.put("category", "attraction");
+            entities.put("placeType", "museum");
+        } else if (text.toLowerCase().contains("attraction") || text.toLowerCase().contains("tourist") ||
                    text.toLowerCase().contains("sight") || text.toLowerCase().contains("visit")) {
             entities.put("category", "attraction");
+            entities.put("placeType", "tourist_attraction");
         } else if (text.toLowerCase().contains("hotel") || text.toLowerCase().contains("stay") || 
                    text.toLowerCase().contains("accommodation")) {
             entities.put("category", "accommodation");
+            entities.put("placeType", "lodging");
+        } else if (text.toLowerCase().contains("cafe") || text.toLowerCase().contains("coffee")) {
+            entities.put("category", "meal");
+            entities.put("placeType", "cafe");
+        } else if (text.toLowerCase().contains("bar") || text.toLowerCase().contains("pub")) {
+            entities.put("category", "meal");
+            entities.put("placeType", "bar");
+        } else if (text.toLowerCase().contains("park") || text.toLowerCase().contains("garden")) {
+            entities.put("category", "attraction");
+            entities.put("placeType", "park");
         }
         
         return entities;

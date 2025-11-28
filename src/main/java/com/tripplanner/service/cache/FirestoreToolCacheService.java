@@ -474,4 +474,78 @@ public class FirestoreToolCacheService implements ToolCacheService {
         
         return totalRemoved;
     }
+    
+    /**
+     * Simple get method for retrieving cached values.
+     * Returns Optional.empty() if not found or expired.
+     */
+    @Override
+    public <T> java.util.Optional<T> get(String cacheKey, Class<T> resultType) {
+        try {
+            // Extract itinerary ID from cache key (format: "intent:hash:hash" or similar)
+            // For intent cache, we'll use a default itinerary ID
+            String itineraryId = "global"; // Use global cache for intent classification
+            
+            ItineraryCacheData cacheData = ensureCacheLoaded(itineraryId);
+            CachedToolResult cached = cacheData.getToolResult(cacheKey);
+            
+            if (cached != null && cached.isValid()) {
+                try {
+                    T result = objectMapper.readValue(cached.getResultJson(), resultType);
+                    logger.debug("Cache hit for key: {}", cacheKey);
+                    return java.util.Optional.of(result);
+                } catch (Exception e) {
+                    logger.warn("Failed to deserialize cached value for key {}: {}", 
+                        cacheKey, e.getMessage());
+                    return java.util.Optional.empty();
+                }
+            }
+            
+            logger.debug("Cache miss for key: {}", cacheKey);
+            return java.util.Optional.empty();
+            
+        } catch (Exception e) {
+            logger.error("Error retrieving from cache: {}", e.getMessage());
+            return java.util.Optional.empty();
+        }
+    }
+    
+    /**
+     * Simple put method for storing values in cache.
+     */
+    @Override
+    public <T> void put(String cacheKey, T value, java.time.Duration ttl) {
+        try {
+            // Extract itinerary ID from cache key or use global
+            String itineraryId = "global"; // Use global cache for intent classification
+            
+            // Create cached result
+            CachedToolResult cached = new CachedToolResult();
+            cached.setToolType("intent-classification"); // Default tool type
+            cached.setCacheKey(cacheKey);
+            
+            // Serialize value to JSON
+            String resultJson = objectMapper.writeValueAsString(value);
+            cached.setResultJson(resultJson);
+            cached.setResultClass(value.getClass().getName());
+            
+            // Set timestamps
+            long now = System.currentTimeMillis();
+            cached.setCachedAt(now);
+            cached.setExpiresAt(now + ttl.toMillis());
+            cached.setTtlSeconds((int) ttl.getSeconds());
+            
+            // Store in session cache
+            ItineraryCacheData cacheData = ensureCacheLoaded(itineraryId);
+            cacheData.putToolResult(cacheKey, cached);
+            
+            // Save to Firestore asynchronously
+            saveToFirestoreAsync(itineraryId, cacheKey, cached);
+            
+            logger.debug("Cached value for key: {} with TTL: {}s", cacheKey, ttl.getSeconds());
+            
+        } catch (Exception e) {
+            logger.error("Error storing in cache: {}", e.getMessage());
+        }
+    }
 }

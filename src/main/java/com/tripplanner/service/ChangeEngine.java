@@ -228,6 +228,28 @@ public class ChangeEngine {
                         itineraryJsonService.updateItineraryWithLock(updated);
                         saved = true;
                         logger.info("✅ [P0-4] Itinerary saved successfully - transaction complete");
+                        
+                        // DIAGNOSTIC: Verify the save by reading back from database
+                        Optional<NormalizedItinerary> verification = itineraryJsonService.getItinerary(itineraryId);
+                        if (verification.isPresent()) {
+                            NormalizedItinerary verified = verification.get();
+                            logger.info("🔍 [VERIFICATION] Reading back from database after save:");
+                            logger.info("  Version: {}, Days: {}", verified.getVersion(), verified.getDays().size());
+                            for (NormalizedDay day : verified.getDays()) {
+                                logger.info("    Day {}: {} nodes - IDs: {}",
+                                    day.getDayNumber(),
+                                    day.getNodes() != null ? day.getNodes().size() : 0,
+                                    day.getNodes() != null
+                                        ? day.getNodes().stream().map(n -> n.getId()).collect(java.util.stream.Collectors.toList())
+                                        : "null");
+                            }
+                        } else {
+                            logger.error("❌ [VERIFICATION] Failed to read back itinerary after save!");
+                        }
+                        
+                        // Force clear cache to ensure fresh reads
+                        itineraryJsonService.clearRequestCache();
+                        logger.info("🗑️ Cleared request cache after save");
                     } catch (com.tripplanner.exception.ConcurrentModificationException e) {
                         retryCount++;
                         logger.error("⚠️ [P0-4] Concurrent modification (attempt {}/{}): {}",

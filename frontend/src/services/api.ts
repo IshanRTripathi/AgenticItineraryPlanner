@@ -532,7 +532,8 @@ class ApiService {
 
   // Chat endpoints
   async sendChatMessage(itineraryId: string, request: ChatRequest): Promise<ChatResponse> {
-    return this.request<ChatResponse>(`/itineraries/${itineraryId}/chat`, {
+    // Use the new /chat/route endpoint that supports SSE progress updates
+    return this.request<ChatResponse>(`/chat/route`, {
       method: 'POST',
       body: JSON.stringify(request),
     });

@@ -16,6 +16,7 @@ import com.tripplanner.dto.tools.CostCalculationRequest;
 import com.tripplanner.dto.tools.CostCalculationResult;
 import com.tripplanner.dto.tools.SchemaValidationRequest;
 import com.tripplanner.dto.tools.SchemaValidationResult;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -183,6 +184,60 @@ public class EditorAgent extends BaseAgent {
                 return result;
             }
 
+            // ========== TOOL INTEGRATION: Calculate cost impact BEFORE applying ==========
+            CostImpact costImpact = null;
+            if (editorToolsEnabled) {
+                emitProgress(itineraryId, 70, "Calculating cost impact", "cost-preview");
+                logger.info("🔧 TOOL CALL: calculate-cost-impact for itinerary {}", itineraryId);
+                
+                costImpact = calculateCostImpactViaTool(itineraryId, changeSet, itinerary);
+                
+                if (costImpact != null) {
+                    logger.info("💰 Cost Impact: {} {} → {} {} ({}{})", 
+                        costImpact.getCurrentCost(), costImpact.getCurrency(),
+                        costImpact.getNewCost(), costImpact.getCurrency(),
+                        costImpact.getDifference() >= 0 ? "+" : "",
+                        costImpact.getDifference());
+                    
+                    if (costImpact.isExceedsBudget()) {
+                        logger.warn("⚠️ Budget exceeded by {} {}", 
+                            Math.abs(costImpact.getNewCost() - costImpact.getBudgetLimit()),
+                            costImpact.getCurrency());
+                    }
+                }
+            }
+            
+            // ========== TOOL INTEGRATION: Check conflicts before applying ==========
+            if (editorToolsEnabled) {
+                emitProgress(itineraryId, 75, "Checking for conflicts", "validate");
+                logger.info("🔧 TOOL CALL: check-conflicts for itinerary {}", itineraryId);
+                
+                ConflictCheckResult conflicts = checkConflictsViaTool(itineraryId, changeSet);
+                
+                if (conflicts != null && conflicts.isHasConflicts()) {
+                    logger.warn("⚠️ Conflicts detected: {} conflicts", conflicts.getConflicts().size());
+                    
+                    // Log each conflict
+                    conflicts.getConflicts().forEach(c -> 
+                        logger.warn("  - {}: {}", c.getType(), c.getMessage())
+                    );
+                    
+                    // Add conflict information to the reason field
+                    String conflictSummary = conflicts.getConflicts().stream()
+                        .map(c -> c.getType() + ": " + c.getMessage())
+                        .collect(Collectors.joining("; "));
+                    
+                    String currentReason = changeSet.getReason();
+                    if (currentReason != null && !currentReason.isEmpty()) {
+                        changeSet.setReason(currentReason + " [Conflicts: " + conflictSummary + "]");
+                    } else {
+                        changeSet.setReason("Conflicts detected: " + conflictSummary);
+                    }
+                } else {
+                    logger.info("✅ No conflicts detected");
+                }
+            }
+            
             emitProgress(itineraryId, 80, "Applying changes", "apply");
 
             // Generate descriptive response message BEFORE applying (so we can use it)
@@ -200,6 +255,25 @@ public class EditorAgent extends BaseAgent {
             // Apply changes using changeEngine with the itinerary object to ensure
             // consistency
             ChangeEngine.ApplyResult applyResult = changeEngine.apply(itinerary, changeSet);
+            
+            // ========== TOOL INTEGRATION: Recalculate cost after applying ==========
+            if (editorToolsEnabled && applyResult.getDiff() != null) {
+                emitProgress(itineraryId, 85, "Recalculating costs", "cost");
+                logger.info("🔧 TOOL CALL: calculate-cost for itinerary {}", itineraryId);
+                
+                CostCalculationResult costResult = calculateCostViaTool(
+                    itineraryId,
+                    itinerary.getPartySize()
+                );
+                
+                if (costResult != null && costResult.isSuccess()) {
+                    logger.info("✅ Cost recalculated: {} {} per person", 
+                        costResult.getTotalCostPerPerson(), 
+                        costResult.getCurrency());
+                } else {
+                    logger.warn("⚠️ Cost recalculation failed or returned null");
+                }
+            }
 
             // Enrich newly added/replaced nodes with Google Places data
             emitProgress(itineraryId, 90, "Enriching new nodes", "enrichment");
@@ -207,7 +281,16 @@ public class EditorAgent extends BaseAgent {
 
             emitProgress(itineraryId, 100, responseMessage, "complete");
 
-            // Return ApplyResult cast to generic type T
+            // Wrap result with cost impact if available
+            if (costImpact != null) {
+                logger.info("💰 Cost impact calculated and included in response");
+                EditorAgentResult wrappedResult = new EditorAgentResult(applyResult, costImpact);
+                @SuppressWarnings("unchecked")
+                T result = (T) wrappedResult;
+                return result;
+            }
+
+            // Return ApplyResult cast to generic type T (without cost impact)
             @SuppressWarnings("unchecked")
             T result = (T) applyResult;
             return result;
@@ -301,6 +384,87 @@ public class EditorAgent extends BaseAgent {
     }
     
     /**
+     * Calculate cost impact BEFORE applying changes.
+     * This creates a preview of how costs will change.
+     */
+    private CostImpact calculateCostImpactViaTool(String itineraryId, ChangeSet changeSet, NormalizedItinerary itinerary) {
+        if (!editorToolsEnabled) {
+            return null;
+        }
+        
+        try {
+            // 1. Get current cost
+            CostCalculationResult currentCost = calculateCostViaTool(itineraryId, itinerary.getPartySize());
+            if (currentCost == null || !currentCost.isSuccess()) {
+                logger.warn("Failed to get current cost for impact calculation");
+                return null;
+            }
+            
+            // 2. Apply changes to a COPY of the itinerary (in-memory only)
+            NormalizedItinerary copy = deepCopyItinerary(itinerary);
+            try {
+                applyChangesToCopy(copy, changeSet);
+            } catch (Exception e) {
+                logger.warn("Failed to apply changes to copy for cost preview: {}", e.getMessage());
+                return null;
+            }
+            
+            // 3. Save the copy temporarily to calculate cost
+            // (We need to save it because the cost tool reads from database)
+            String tempId = itineraryId + "_temp_" + System.currentTimeMillis();
+            try {
+                itineraryJsonService.saveMasterItinerary(tempId, copy);
+                
+                // 4. Calculate new cost on the temporary itinerary
+                CostCalculationResult newCost = calculateCostViaTool(tempId, copy.getPartySize());
+                
+                // 5. Delete temporary itinerary
+                itineraryJsonService.deleteItinerary(tempId);
+                
+                if (newCost == null || !newCost.isSuccess()) {
+                    logger.warn("Failed to get new cost for impact calculation");
+                    return null;
+                }
+                
+                // 6. Build CostImpact
+                double difference = newCost.getTotalCostPerPerson() - currentCost.getTotalCostPerPerson();
+                
+                // Get budget limit if available
+                Double budgetLimit = null;
+                boolean exceedsBudget = false;
+                if (itinerary.getBudgetMax() != null) {
+                    budgetLimit = itinerary.getBudgetMax();
+                    exceedsBudget = newCost.getTotalCostPerPerson() > budgetLimit;
+                }
+                
+                return CostImpact.builder()
+                    .currentCost(currentCost.getTotalCostPerPerson())
+                    .newCost(newCost.getTotalCostPerPerson())
+                    .difference(difference)
+                    .currency(currentCost.getCurrency())
+                    .exceedsBudget(exceedsBudget)
+                    .budgetLimit(budgetLimit)
+                    .breakdown(calculateBreakdownDifference(currentCost, newCost))
+                    .build();
+                    
+            } catch (Exception e) {
+                logger.error("Error during cost impact calculation: {}", e.getMessage());
+                // Clean up temp itinerary if it exists
+                try {
+                    itineraryJsonService.deleteItinerary(tempId);
+                } catch (Exception cleanupError) {
+                    // Ignore cleanup errors
+                }
+                return null;
+            }
+            
+        } catch (Exception e) {
+            logger.error("Calculate Cost Impact error: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
      * Recalculate cost after edits using the Calculate Cost tool.
      */
     private CostCalculationResult calculateCostViaTool(String itineraryId, Integer partySize) {
@@ -328,6 +492,88 @@ public class EditorAgent extends BaseAgent {
             logger.error("Calculate Cost tool error: {}", e.getMessage());
             return null;
         }
+    }
+    
+    /**
+     * Deep copy an itinerary for cost preview calculations.
+     */
+    private NormalizedItinerary deepCopyItinerary(NormalizedItinerary original) {
+        try {
+            // Use ObjectMapper for deep copy
+            String json = objectMapper.writeValueAsString(original);
+            return objectMapper.readValue(json, NormalizedItinerary.class);
+        } catch (Exception e) {
+            logger.error("Failed to deep copy itinerary: {}", e.getMessage());
+            throw new RuntimeException("Failed to create itinerary copy", e);
+        }
+    }
+    
+    /**
+     * Apply changes to a copy of the itinerary (in-memory only).
+     */
+    private void applyChangesToCopy(NormalizedItinerary copy, ChangeSet changeSet) {
+        // Use ChangeEngine to apply changes to the copy
+        // This is a simplified version - the actual ChangeEngine.apply() does more
+        for (ChangeOperation op : changeSet.getOps()) {
+            if ("insert".equals(op.getOp())) {
+                // Add node to appropriate day
+                NormalizedDay day = copy.getDays().stream()
+                    .filter(d -> d.getDayNumber() == changeSet.getDay())
+                    .findFirst()
+                    .orElse(null);
+                if (day != null && op.getNode() != null) {
+                    if (day.getNodes() == null) {
+                        day.setNodes(new ArrayList<>());
+                    }
+                    day.getNodes().add(op.getNode());
+                }
+            } else if ("delete".equals(op.getOp())) {
+                // Remove node from appropriate day
+                for (NormalizedDay day : copy.getDays()) {
+                    if (day.getNodes() != null) {
+                        day.getNodes().removeIf(n -> n.getId().equals(op.getId()));
+                    }
+                }
+            } else if ("update".equals(op.getOp()) || "move".equals(op.getOp())) {
+                // Update node properties
+                for (NormalizedDay day : copy.getDays()) {
+                    if (day.getNodes() != null) {
+                        for (NormalizedNode node : day.getNodes()) {
+                            if (node.getId().equals(op.getId())) {
+                                // Update timing if provided
+                                if (op.getStartTime() != null && node.getTiming() != null) {
+                                    node.getTiming().setStartTime(op.getStartTime());
+                                }
+                                if (op.getEndTime() != null && node.getTiming() != null) {
+                                    node.getTiming().setEndTime(op.getEndTime());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Calculate breakdown difference between current and new costs.
+     */
+    private java.util.Map<String, Double> calculateBreakdownDifference(
+            CostCalculationResult current, CostCalculationResult newCost) {
+        java.util.Map<String, Double> breakdown = new java.util.HashMap<>();
+        
+        if (current.getBreakdown() != null && newCost.getBreakdown() != null) {
+            for (String category : newCost.getBreakdown().keySet()) {
+                double currentValue = current.getBreakdown().getOrDefault(category, 0.0);
+                double newValue = newCost.getBreakdown().get(category);
+                double difference = newValue - currentValue;
+                if (Math.abs(difference) > 0.01) { // Only include if there's a meaningful difference
+                    breakdown.put(category, difference);
+                }
+            }
+        }
+        
+        return breakdown;
     }
     
     /**
@@ -445,6 +691,29 @@ public class EditorAgent extends BaseAgent {
 
                 // Parse response to ChangeSet with robust handling
                 ChangeSet changeSet = parseChangeSetFromResponseWithRetry(response, prompt, jsonSchema);
+
+                // ========== TOOL INTEGRATION: Generate node IDs for INSERT operations ==========
+                if (editorToolsEnabled && changeSet.getOps() != null) {
+                    logger.info("🔧 TOOL CALL: Generating node IDs for INSERT operations");
+                    
+                    for (ChangeOperation op : changeSet.getOps()) {
+                        if ("insert".equals(op.getOp()) && op.getNode() != null) {
+                            if (op.getNode().getId() == null || op.getNode().getId().isEmpty()) {
+                                String nodeId = generateNodeIdViaTool(
+                                    chatRequest.getItineraryId(),
+                                    changeSet.getDay(),
+                                    op.getNode().getType()
+                                );
+                                if (nodeId != null) {
+                                    op.getNode().setId(nodeId);
+                                    logger.debug("✅ Generated node ID via tool: {}", nodeId);
+                                } else {
+                                    logger.warn("⚠️ Node ID generation returned null, using fallback");
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Validate ChangeSet before returning
                 validateChangeSet(changeSet);
@@ -620,6 +889,20 @@ public class EditorAgent extends BaseAgent {
      */
     private ChangeSet parseChangeSetFromResponse(String response) {
         try {
+            // ========== TOOL INTEGRATION: Validate schema before parsing ==========
+            if (editorToolsEnabled) {
+                logger.info("🔧 TOOL CALL: validate-schema");
+                String jsonSchema = buildChangeSetJsonSchema();
+                boolean isValid = validateSchemaViaTool(response, jsonSchema);
+                
+                if (!isValid) {
+                    logger.error("❌ Schema validation failed for LLM response");
+                    throw new RuntimeException("Invalid ChangeSet schema from LLM");
+                }
+                
+                logger.debug("✅ Schema validation passed");
+            }
+            
             // Create expected schema for ChangeSet validation
             JsonNode expectedSchema = createChangeSetSchema();
 

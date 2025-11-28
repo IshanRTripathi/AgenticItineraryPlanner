@@ -8,7 +8,10 @@ import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { ChatMessage as ChatMessageType } from '@/contexts/UnifiedItineraryTypes';
+import { PlaceSuggestion } from '@/types/ChatTypes';
 import { ItineraryChangesDisplay } from './ItineraryChangesDisplay';
+import { CostImpactDisplay, type CostImpact } from './CostImpactDisplay';
+import PlaceSuggestionCard from './PlaceSuggestionCard';
 import type { ItineraryDiff } from '@/types/ItineraryChanges';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -21,6 +24,7 @@ interface ChatMessageProps {
   onToggleDetail: (messageId: string) => void;
   onApplyChanges: (messageId: string, changeSet: any) => void;
   onSelectCandidate: (text: string) => void;
+  progress?: { message: string; progress: number } | null;
 }
 
 /**
@@ -83,9 +87,13 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
   onToggleDetail,
   onApplyChanges,
   onSelectCandidate,
+  progress,
 }) => {
   const isUser = m.sender === 'user';
   const showPreview = !!m.changeSet && !m.applied;
+  
+  // Get cost impact from message
+  const costImpact = (m as any).costImpact as CostImpact | undefined;
 
   // Convert changeSet/diff to ItineraryDiff format with comprehensive null safety
   const getItineraryDiff = (): ItineraryDiff | null => {
@@ -178,6 +186,21 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
                 {m.text}
               </ReactMarkdown>
             </div>
+            
+            {/* Progress Indicator (for AI messages being processed) */}
+            {!isUser && progress && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>{progress.message}</span>
+                <div className="flex-1 bg-gray-200 rounded-full h-1.5 ml-2">
+                  <div 
+                    className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${progress.progress}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium">{progress.progress}%</span>
+              </div>
+            )}
           </>
         )}
 
@@ -231,10 +254,70 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
             </div>
           </div>
         )}
+        
+        {/* Place Suggestions - Always show 3 vertically stacked */}
+        {!isUser && (m as any).placeSuggestions && Array.isArray((m as any).placeSuggestions) && (m as any).placeSuggestions.length > 0 && (
+          <div className="mt-4 space-y-3">
+            <div className="text-sm font-medium text-gray-700 mb-2">
+              {(m as any).placeSuggestions.length === 1 
+                ? '1 suggestion found:' 
+                : `${(m as any).placeSuggestions.length} suggestions found:`}
+            </div>
+            
+            {/* Render exactly 3 suggestions (or less if not available) */}
+            {(m as any).placeSuggestions.slice(0, 3).map((suggestion: any, idx: number) => (
+              <PlaceSuggestionCard
+                key={suggestion.placeId}
+                suggestion={suggestion}
+                index={idx + 1}
+                onSelect={(selected) => {
+                  // Build detailed selection message with place info
+                  const parts: string[] = [];
+                  parts.push(`Add "${selected.name}"`);
+                  
+                  // Add location context if available
+                  if (selected.address) {
+                    const shortAddress = selected.address.split(',')[0];
+                    parts.push(`(${shortAddress})`);
+                  }
+                  
+                  // Use day from suggestion object (already 1-indexed from backend)
+                  // Fallback to parsing from message text if not available
+                  const dayNumber = selected.day || (() => {
+                    const dayMatch = m.text.match(/day\s+(\d+)/i);
+                    return dayMatch ? parseInt(dayMatch[1]) : null;
+                  })();
+                  
+                  if (dayNumber) {
+                    parts.push(`to day ${dayNumber}`);
+                  } else {
+                    parts.push(`to the itinerary`);
+                  }
+                  
+                  // Add distance context if available
+                  if (selected.distanceKm !== undefined) {
+                    const distText = selected.distanceKm < 1 
+                      ? `${(selected.distanceKm * 1000).toFixed(0)}m away`
+                      : `${selected.distanceKm.toFixed(1)}km away`;
+                    parts.push(`[${distText}]`);
+                  }
+                  
+                  onSelectCandidate(parts.join(' '));
+                }}
+              />
+            ))}
+            
+            {(m as any).placeSuggestions.length === 0 && (
+              <div className="text-sm text-gray-500 italic">
+                No suggestions found. Try a different search.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Proposed Changes - Use Premium Display with Apply Action */}
         {showPreview && hasChanges && (
-          <div className="mt-2 sm:mt-3">
+          <div className="mt-2 sm:mt-3 space-y-2">
             <ItineraryChangesDisplay
               diff={diff!}
               message="Proposed changes to your itinerary"
@@ -242,6 +325,11 @@ export const ChatMessageComponent = memo<ChatMessageProps>(({
               onUndo={undefined} // No undo for proposed changes
               onViewItinerary={undefined}
             />
+            
+            {/* Cost Impact Preview */}
+            {costImpact && (
+              <CostImpactDisplay costImpact={costImpact} />
+            )}
             
             {/* Apply Actions */}
             <div className="mt-2 flex justify-end gap-1.5 sm:gap-2">

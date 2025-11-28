@@ -147,6 +147,9 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
           warnings: h.warnings,
           applied: h.applied,
           candidates: h.candidates,
+          costImpact: h.costImpact,
+          placeSuggestions: h.placeSuggestions,
+          needsDisambiguation: h.needsDisambiguation,
         } as ChatMessage));
         
         mapped.forEach(m => loggedDispatch({ type: 'ADD_CHAT_MESSAGE', payload: m }));
@@ -298,7 +301,17 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
             text: message.data.text,
             sender: message.data.sender || 'assistant',
             timestamp: new Date(message.data.timestamp || Date.now()),
-            data: message.data.data
+            data: message.data.data,
+            // Include all response fields for proper rendering
+            intent: message.data.data?.intent,
+            changeSet: message.data.data?.changeSet,
+            diff: message.data.data?.diff,
+            warnings: message.data.data?.warnings,
+            applied: message.data.data?.applied,
+            candidates: message.data.data?.candidates,
+            costImpact: message.data.data?.costImpact,
+            placeSuggestions: message.data.data?.placeSuggestions,
+            needsDisambiguation: message.data.data?.needsDisambiguation
           };
 
           loggedDispatch({ type: 'ADD_CHAT_MESSAGE', payload: chatMessage });
@@ -314,6 +327,7 @@ export function UnifiedItineraryProvider({ children, itineraryId }: UnifiedItine
             warnings: message.data.data?.warnings,
             applied: message.data.data?.applied,
             candidates: message.data.data?.candidates,
+            placeSuggestions: message.data.data?.placeSuggestions,
           }).catch((persistErr) => {
             logWarn('Failed to persist assistant chat message (WebSocket)', { component: 'UnifiedItineraryProvider', action: 'chat_history_persist_assistant_ws', itineraryId }, persistErr as any);
           });

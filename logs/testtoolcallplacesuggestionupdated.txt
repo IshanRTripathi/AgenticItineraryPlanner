@@ -1,0 +1,354 @@
+2025-11-29 00:00:54.656 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/analytics/events
+2025-11-29 00:00:54.657 [http-nio-8080-exec-10] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/analytics/events
+2025-11-29 00:00:54.657 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/analytics/events", parameters={}
+2025-11-29 00:00:54.657 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AnalyticsIngestController#trackEvent(Map)
+2025-11-29 00:00:54.657 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_92f8d7c0-8e25-4650-9cca-a2814168920d/chat/history
+2025-11-29 00:00:54.658 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_92f8d7c0-8e25-4650-9cca-a2814168920d/chat/history
+2025-11-29 00:00:54.658 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_92f8d7c0-8e25-4650-9cca-a2814168920d/chat/history", parameters={}
+2025-11-29 00:00:54.658 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{eventName=chat_message_sent, timestamp=1764354654655, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, sessionI (truncated)...]
+2025-11-29 00:00:54.658 [http-nio-8080-exec-10] INFO  c.tripplanner.controller.AnalyticsIngestController - === ANALYTICS EVENT RECEIVED ===
+2025-11-29 00:00:54.658 [http-nio-8080-exec-10] INFO  c.tripplanner.controller.AnalyticsIngestController - Event: {eventName=chat_message_sent, timestamp=1764354654655, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, sessionId=3a15ac72-dd5a-49a4-b0df-513a1eb80199, platform=web, properties={messageLength=45, wordCount=9, itineraryId=it_92f8d7c0-8e25-4650-9cca-a2814168920d, timestamp=1764354654655}}
+2025-11-29 00:00:54.658 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#saveChatMessage(String, Map, HttpServletRequest)
+2025-11-29 00:00:54.659 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-29 00:00:54.659 [http-nio-8080-exec-10] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{success=true}]
+2025-11-29 00:00:54.659 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{message=show me more options for sightseeing on day 2, sender=user, timestamp=1764354654656, day=0}]
+2025-11-29 00:00:54.659 [http-nio-8080-exec-10] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-11-29 00:00:54.659 [http-nio-8080-exec-10] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-29 00:00:56.647 [http-nio-8080-exec-4] INFO  com.tripplanner.service.ChatHistoryService - Saved chat message for itinerary it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:00:56.648 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-29 00:00:56.648 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{id=dtljWI53Xiy9AnanddRt, message=show me more options for sightseeing on day 2, sender=user, day=0, (truncated)...]
+2025-11-29 00:00:56.649 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 201 CREATED
+2025-11-29 00:00:56.649 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-29 00:00:56.651 [clientInboundChannel-13] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - Searching methods to handle SEND /app/chat session=session_it_92f8d7c0-8e25-4650-9cca-a2814168920d_1764354643803, lookupDestination='/chat'
+2025-11-29 00:00:56.654 [clientInboundChannel-13] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - Invoking WebSocketController#handleChatMessage[1 args]
+2025-11-29 00:00:56.655 [clientInboundChannel-13] INFO  com.tripplanner.controller.WebSocketController - Received chat message: {itineraryId=it_92f8d7c0-8e25-4650-9cca-a2814168920d, message=show me more options for sightseeing on day 2, context={selectedDay=0, scope=day, autoApply=false}, timestamp=2025-11-28T18:30:56.651Z}
+2025-11-29 00:00:56.655 [clientInboundChannel-13] INFO  com.tripplanner.service.OrchestratorService - Routing chat request: ChatRequest{itineraryId='it_92f8d7c0-8e25-4650-9cca-a2814168920d', scope='day', day=0, selectedNodeId='null', text='show me more options for sightseeing on day 2', autoApply=false, userId='websocket-user', sessionId='null', conversationId='null'}
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 5 chat messages for itinerary it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating content with strategy: RETRY_WITH_BACKOFF (2 providers available)
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting content generation with provider 1 (GeminiClient) using strategy RETRY_WITH_BACKOFF
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.ai.ApiKeyRotationService - Using key for gemini: AIza...UNAc (state: IN_USE, success rate: {:.1f}%)
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Trying Gemini key attempt 1/5
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-29 00:00:59.546 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3129
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === FULL USER PROMPT ===
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - You are an AI assistant that classifies user intents for travel itinerary management.
+
+Context:
+Itinerary: 5-day trip to Zurich with 23 activities (estimated ₹970 per person)
+Days: 5
+Currency: CHF
+Day 1 (Zurich): 5 activities
+Day 2 (Zurich): 4 activities
+Day 3 (Interlaken): 5 activities
+Day 4 (Interlaken): 5 activities
+Day 5 (Interlaken): 4 activities
+
+
+Recent conversation (last 5 messages):
+User: show me more options for sightseeing on day 1
+Assistant: Operation completed.
+User: show me more options for sightseeing on day 2
+Assistant: Operation completed.
+User: show me more options for sightseeing on day 2
+
+
+User request: "show me more options for sightseeing on day 2"
+
+=== SUPPORTED TASK TYPES ===
+You MUST respond with EXACTLY ONE of these task types:
+
+1. TASK TYPE: edit
+   Use for: Modifying itinerary, changing times, adding/removing/replacing activities
+   Examples:
+   - "Move lunch to 2pm" → edit
+   - "Add a museum" → edit
+   - "Remove the beach activity" → edit
+   - "Change the restaurant" → edit
+   - "Replace dinner with something else" → edit
+
+2. TASK TYPE: plan
+   Use for: Creating NEW itineraries from scratch
+   Examples:
+   - "Create a 3-day trip to Paris" → plan
+   - "Plan my vacation" → plan
+   - "Generate an itinerary" → plan
+
+3. TASK TYPE: explain
+   Use for: Answering questions, providing information, or explaining existing itinerary
+   Examples:
+   - "What's my plan for today?" → explain
+   - "Tell me about day 2" → explain
+   - "Summarize my trip" → explain
+   - "What am I doing tomorrow?" → explain
+   - "Why this restaurant?" → explain
+   - "Explain the itinerary" → explain
+
+4. TASK TYPE: book
+   Use for: Making reservations or bookings
+   Examples:
+   - "Book this hotel" → book
+   - "Reserve a flight" → book
+   - "Purchase tickets" → book
+
+5. TASK TYPE: enrich
+   Use for: Adding photos, reviews, or additional details
+   Examples:
+   - "Add photos to this place" → enrich
+   - "Show me reviews" → enrich
+   - "Get more details about this hotel" → enrich
+
+6. TASK TYPE: search
+   Use for: Finding NEW places, activities, or options to discover and add
+   Examples:
+   - "Show me more tourist places" → search
+   - "Find museums for day 2" → search
+   - "Suggest restaurants in Lucerne" → search
+   - "What other attractions are nearby?" → search
+   - "I want to visit a museum" → search
+   - "Show me more options" → search
+
+=== CRITICAL RULES ===
+1. Questions/explanations about EXISTING itinerary → USE 'explain'
+2. Creating NEW itinerary from scratch → USE 'plan'
+3. Modifying itinerary (add/remove/change) → USE 'edit'
+4. Booking/reservations → USE 'book'
+5. Photos/reviews/details → USE 'enrich'
+6. Finding NEW places to discover → USE 'search'
+7. IMPORTANT: 'show me more' usually means search for NEW options, not explain existing
+8. You MUST choose from: edit, plan, explain, book, enrich, search
+
+Respond in JSON format:
+{
+  "intent": "DESCRIPTIVE_INTENT_NAME",
+  "taskType": "edit OR plan OR explain OR book OR enrich OR search",
+  "entities": {
+    "placeType": "museum|restaurant|attraction|etc",
+    "day": 1,
+    "query": "search query"
+  },
+  "confidence": 0.95
+}
+
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === END PROMPTS ===
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3451
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === FULL REQUEST BODY ===
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - {
+  "contents": [{
+    "parts": [{
+      "text": "You are an AI assistant that classifies user intents for travel itinerary management.\n\nContext:\nItinerary: 5-day trip to Zurich with 23 activities (estimated ₹970 per person)\nDays: 5\nCurrency: CHF\nDay 1 (Zurich): 5 activities\nDay 2 (Zurich): 4 activities\nDay 3 (Interlaken): 5 activities\nDay 4 (Interlaken): 5 activities\nDay 5 (Interlaken): 4 activities\n\n\nRecent conversation (last 5 messages):\nUser: show me more options for sightseeing on day 1\nAssistant: Operation completed.\nUser: show me more options for sightseeing on day 2\nAssistant: Operation completed.\nUser: show me more options for sightseeing on day 2\n\n\nUser request: \"show me more options for sightseeing on day 2\"\n\n=== SUPPORTED TASK TYPES ===\nYou MUST respond with EXACTLY ONE of these task types:\n\n1. TASK TYPE: edit\n   Use for: Modifying itinerary, changing times, adding/removing/replacing activities\n   Examples:\n   - \"Move lunch to 2pm\" → edit\n   - \"Add a museum\" → edit\n   - \"Remove the beach activity\" → edit\n   - \"Change the restaurant\" → edit\n   - \"Replace dinner with something else\" → edit\n\n2. TASK TYPE: plan\n   Use for: Creating NEW itineraries from scratch\n   Examples:\n   - \"Create a 3-day trip to Paris\" → plan\n   - \"Plan my vacation\" → plan\n   - \"Generate an itinerary\" → plan\n\n3. TASK TYPE: explain\n   Use for: Answering questions, providing information, or explaining existing itinerary\n   Examples:\n   - \"What's my plan for today?\" → explain\n   - \"Tell me about day 2\" → explain\n   - \"Summarize my trip\" → explain\n   - \"What am I doing tomorrow?\" → explain\n   - \"Why this restaurant?\" → explain\n   - \"Explain the itinerary\" → explain\n\n4. TASK TYPE: book\n   Use for: Making reservations or bookings\n   Examples:\n   - \"Book this hotel\" → book\n   - \"Reserve a flight\" → book\n   - \"Purchase tickets\" → book\n\n5. TASK TYPE: enrich\n   Use for: Adding photos, reviews, or additional details\n   Examples:\n   - \"Add photos to this place\" → enrich\n   - \"Show me reviews\" → enrich\n   - \"Get more details about this hotel\" → enrich\n\n6. TASK TYPE: search\n   Use for: Finding NEW places, activities, or options to discover and add\n   Examples:\n   - \"Show me more tourist places\" → search\n   - \"Find museums for day 2\" → search\n   - \"Suggest restaurants in Lucerne\" → search\n   - \"What other attractions are nearby?\" → search\n   - \"I want to visit a museum\" → search\n   - \"Show me more options\" → search\n\n=== CRITICAL RULES ===\n1. Questions/explanations about EXISTING itinerary → USE 'explain'\n2. Creating NEW itinerary from scratch → USE 'plan'\n3. Modifying itinerary (add/remove/change) → USE 'edit'\n4. Booking/reservations → USE 'book'\n5. Photos/reviews/details → USE 'enrich'\n6. Finding NEW places to discover → USE 'search'\n7. IMPORTANT: 'show me more' usually means search for NEW options, not explain existing\n8. You MUST choose from: edit, plan, explain, book, enrich, search\n\nRespond in JSON format:\n{\n  \"intent\": \"DESCRIPTIVE_INTENT_NAME\",\n  \"taskType\": \"edit OR plan OR explain OR book OR enrich OR search\",\n  \"entities\": {\n    \"placeType\": \"museum|restaurant|attraction|etc\",\n    \"day\": 1,\n    \"query\": \"search query\"\n  },\n  \"confidence\": 0.95\n}\n"
+    }]
+  }],
+  "generationConfig": {
+    "temperature": 0.70,
+    "maxOutputTokens": 65535
+  }
+}
+
+2025-11-29 00:00:59.547 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === END REQUEST BODY ===
+2025-11-29 00:00:59.550 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API with 45s timeout...
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Received response from Gemini API in 2712ms
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 786
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === FULL RESPONSE BODY ===
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"intent\": \"find_more_sightseeing_options\",\n  \"taskType\": \"search\",\n  \"entities\": {\n    \"placeType\": \"attraction\",\n    \"day\": 2,\n    \"query\": \"sightseeing options\"\n  },\n  \"confidence\": 0.98\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 881,
+    "candidatesTokenCount": 79,
+    "totalTokenCount": 1262,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 881
+      }
+    ],
+    "thoughtsTokenCount": 302
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "ZeopaerjO5zKjuMP9dnU-Ag"
+}
+
+2025-11-29 00:01:02.262 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === END RESPONSE BODY ===
+2025-11-29 00:01:02.268 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_1056392885_20251129_000102.json
+2025-11-29 00:01:02.268 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-29 00:01:02.268 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 206
+2025-11-29 00:01:02.268 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === FULL GENERATED CONTENT ===
+2025-11-29 00:01:02.268 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - ```json
+{
+  "intent": "find_more_sightseeing_options",
+  "taskType": "search",
+  "entities": {
+    "placeType": "attraction",
+    "day": 2,
+    "query": "sightseeing options"
+  },
+  "confidence": 0.98
+}
+```
+2025-11-29 00:01:02.268 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - === END GENERATED CONTENT ===
+2025-11-29 00:01:02.269 [clientInboundChannel-13] INFO  com.tripplanner.service.client.GeminiClient - =========================================
+2025-11-29 00:01:02.270 [clientInboundChannel-13] INFO  com.tripplanner.service.ai.ApiKeyRotationService - ✅ Key success for gemini: AIza...UNAc (now preferred, success rate: 100.0%)
+2025-11-29 00:01:02.270 [clientInboundChannel-13] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentRegistry - Created execution plan for 'search': 1 agents, primary: PlaceSearchAgent
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.OrchestratorService - Executing agent plan: Task: search, Agents: 1, Fallback: false, MaxRetries: 2, Timeout: 30000ms
+2025-11-29 00:01:03.954 [clientInboundChannel-13] WARN  com.tripplanner.service.OrchestratorService - Unknown agent type for request conversion: PlaceSearchAgent
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - === AGENT EXECUTION START ===
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Agent Kind: EXPLAINER
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Agent ID: 90735573-6d89-42ea-bb19-6ceda8dd1479
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Itinerary ID: it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Request Type: Map
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Request Data: {chatRequest=ChatRequest{itineraryId='it_92f8d7c0-8e25-4650-9cca-a2814168920d', scope='day', day=0, selectedNodeId='null', text='show me more options for sightseeing on day 2', autoApply=false, userId='websocket-user', sessionId='null', conversationId='null'}, taskType=search, autoApply=false, itineraryId=it_92f8d7c0-8e25-4650-9cca-a2814168920d, scope=day, text=show me more options for sightseeing on day 2, selectedNodeId=null, userId=websocket-user, day=0}
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Request Details: {chatRequest=ChatRequest{itineraryId='it_92f8d7c0-8e25-4650-9cca-a2814168920d', scope='day', day=0, selectedNodeId='null', text='show me more options for sightseeing on day 2', autoApply=false, userId='websocket-user', sessionId='null', conversationId='null'}, taskType=search, autoApply=false, itineraryId=it_92f8d7c0-8e25-4650-9cca-a2814168920d, scope=day, text=show me more options for sightseeing on day 2, selectedNodeId=null, userId=websocket-user, day=0}
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - =============================
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 90735573-6d89-42ea-bb19-6ceda8dd1479
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: EXPLAINER
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Status: queued
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (agent): 0
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent queued for execution
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-28T18:31:03.954010Z
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  c.t.service.agents.PipelineProgressCoordinator - Initial progress for it_92f8d7c0-8e25-4650-9cca-a2814168920d: 10% (encouraging user to wait)
+2025-11-29 00:01:03.954 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (overall): 10 (mapped from 0% in EXPLAINER)
+2025-11-29 00:01:03.970 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_92f8d7c0-8e25-4650-9cca-a2814168920d session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_92f8d7c...(truncated)
+2025-11-29 00:01:03.970 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 90735573-6d89-42ea-bb19-6ceda8dd1479
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: EXPLAINER
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (agent): 10
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent started
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-28T18:31:03.971514300Z
+2025-11-29 00:01:03.971 [clientInboundChannel-13] WARN  c.t.service.agents.PipelineProgressCoordinator - Unknown agent kind for progress: EXPLAINER
+2025-11-29 00:01:03.971 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (overall): 10 (mapped from 10% in EXPLAINER)
+2025-11-29 00:01:03.972 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_92f8d7c0-8e25-4650-9cca-a2814168920d session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_92f8d7c...(truncated)
+2025-11-29 00:01:03.972 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-29 00:01:03.972 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-29 00:01:03.972 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Executing agent-specific logic for: EXPLAINER
+2025-11-29 00:01:03.972 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - === PLACE SEARCH AGENT PROCESSING ===
+2025-11-29 00:01:03.972 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Search parameters: query='null', location='null', type='null', day=0
+2025-11-29 00:01:05.638 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 🔍 [GooglePlacesService] Searching places: query='tourist attraction', location='Switzerland, Switzerland', type='null', maxResults=3
+2025-11-29 00:01:05.638 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 🔍 [GooglePlacesService] Geocoding location: 'Switzerland, Switzerland'
+2025-11-29 00:01:05.643 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - HTTP GET https://maps.googleapis.com/maps/api/geocode/json?address=Switzerland,%20Switzerland&key=AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss
+2025-11-29 00:01:05.645 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Accept=[text/plain, application/json, application/yaml, application/*+json, */*]
+2025-11-29 00:01:05.872 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Response 200 OK
+2025-11-29 00:01:05.872 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Reading to [java.lang.String] as "application/json;charset=UTF-8"
+2025-11-29 00:01:05.873 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - ✅ [GooglePlacesService] Geocoded 'Switzerland, Switzerland' to: 'Switzerland' at (46.818188, 8.227511999999999)
+2025-11-29 00:01:05.873 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 📦 [GooglePlacesService] Checking cache with key: place-search:tourist attraction:switzerland, switzerland:46.8182,8.2275:any
+2025-11-29 00:01:05.875 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 🔍 [GooglePlacesService] Executing place search (cache miss or no cache)
+2025-11-29 00:01:05.875 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 📝 [GooglePlacesService] Combined search query: 'tourist attraction in Switzerland, Switzerland'
+2025-11-29 00:01:05.875 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 🌍 [GooglePlacesService] Added region filter: ch
+2025-11-29 00:01:05.876 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - HTTP GET https://maps.googleapis.com/maps/api/place/textsearch/json?query=tourist%20attraction%20in%20Switzerland,%20Switzerland&location=46.818188,8.227511999999999&radius=20000&key=AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss&region=ch
+2025-11-29 00:01:05.876 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Accept=[text/plain, application/json, application/yaml, application/*+json, */*]
+2025-11-29 00:01:06.746 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Response 200 OK
+2025-11-29 00:01:06.746 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Reading to [java.lang.String] as "application/json;charset=UTF-8"
+2025-11-29 00:01:06.834 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - 📊 [GooglePlacesService] Found 20 results from Google Places API
+2025-11-29 00:01:06.835 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - HTTP GET https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJ5cLMMJ_7j0cRNw7SwdMQsCA&fields=photos,reviews,opening_hours,price_level,rating,user_ratings_total,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number&key=AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss
+2025-11-29 00:01:06.835 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Accept=[text/plain, application/json, application/yaml, application/*+json, */*]
+2025-11-29 00:01:07.005 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Response 200 OK
+2025-11-29 00:01:07.006 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Reading to [java.lang.String] as "application/json;charset=UTF-8"
+2025-11-29 00:01:07.018 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - ✅ [GooglePlacesService] Successfully retrieved place details for placeId: ChIJ5cLMMJ_7j0cRNw7SwdMQsCA
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📍 Name: Chapel Bridge
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    ⭐ Rating: 4.7
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    👥 User Ratings Total: 34961
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    💰 Price Level: null
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📸 Photos: 10 photos
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    💬 Reviews: 5 reviews
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📸 First photo reference: AWn5SU5b0QjrihRbifZ2rqG7TMx601...
+2025-11-29 00:01:07.019 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    ✅ [1] 'Chapel Bridge' - 26.7km away
+2025-11-29 00:01:07.019 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - HTTP GET https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJyfCpRkeSj0cRBu4bpeKhDLI&fields=photos,reviews,opening_hours,price_level,rating,user_ratings_total,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number&key=AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss
+2025-11-29 00:01:07.020 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Accept=[text/plain, application/json, application/yaml, application/*+json, */*]
+2025-11-29 00:01:07.284 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Response 200 OK
+2025-11-29 00:01:07.284 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Reading to [java.lang.String] as "application/json;charset=UTF-8"
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - ✅ [GooglePlacesService] Successfully retrieved place details for placeId: ChIJyfCpRkeSj0cRBu4bpeKhDLI
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📍 Name: Dundelbachfall
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    ⭐ Rating: 4.7
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    👥 User Ratings Total: 81
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    💰 Price Level: null
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📸 Photos: 10 photos
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    💬 Reviews: 5 reviews
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📸 First photo reference: AWn5SU62LqhOwgmSlIkm6FM9bM9BpG...
+2025-11-29 00:01:07.294 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    ✅ [2] 'Dundelbachfall' - 6.9km away
+2025-11-29 00:01:07.295 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - HTTP GET https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJy628MXP7j0cRf-qsdf2lxBo&fields=photos,reviews,opening_hours,price_level,rating,user_ratings_total,name,formatted_address,geometry,types,website,formatted_phone_number,international_phone_number&key=AIzaSyC8eWSQBxSax7YuGTQi4G9MgDZ5Jl6ffss
+2025-11-29 00:01:07.295 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Accept=[text/plain, application/json, application/yaml, application/*+json, */*]
+2025-11-29 00:01:07.486 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Response 200 OK
+2025-11-29 00:01:07.486 [clientInboundChannel-13] DEBUG org.springframework.web.client.RestTemplate - Reading to [java.lang.String] as "application/json;charset=UTF-8"
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - ✅ [GooglePlacesService] Successfully retrieved place details for placeId: ChIJy628MXP7j0cRf-qsdf2lxBo
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📍 Name: Grand Tour of Switzerland - Photo Spot Lucerne
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    ⭐ Rating: 4.2
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    👥 User Ratings Total: 45
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    💰 Price Level: null
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📸 Photos: 10 photos
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    💬 Reviews: 5 reviews
+2025-11-29 00:01:07.495 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    📸 First photo reference: AWn5SU7aaSH9Oa1BTNMtvwPV6bxhQA...
+2025-11-29 00:01:07.496 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService -    ✅ [3] 'Grand Tour of Switzerland - Photo Spot Lucerne' - 26.5km away
+2025-11-29 00:01:07.496 [clientInboundChannel-13] INFO  com.tripplanner.service.GooglePlacesService - ✅ [GooglePlacesService] Returning 3 validated place suggestions (out of 20 total results)
+2025-11-29 00:01:07.496 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Found 3 place suggestions
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 90735573-6d89-42ea-bb19-6ceda8dd1479
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: EXPLAINER
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Status: completed
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (agent): 100
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent completed successfully
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-28T18:31:07.497099400Z
+2025-11-29 00:01:07.497 [clientInboundChannel-13] WARN  c.t.service.agents.PipelineProgressCoordinator - Unknown agent kind for progress: EXPLAINER
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (overall): 10 (mapped from 100% in EXPLAINER)
+2025-11-29 00:01:07.497 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_92f8d7c0-8e25-4650-9cca-a2814168920d session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_92f8d7c...(truncated)
+2025-11-29 00:01:07.497 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - === AGENT EXECUTION COMPLETED ===
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Agent Kind: EXPLAINER
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Itinerary ID: it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:01:07.497 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Result Type: ChatResponse
+2025-11-29 00:01:07.499 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - Result: ChatResponse{intent='SEARCH_PLACE', message='Here are 3 place suggestions for Day 0:', changeSet=null, diff=null, applied=false, toVersion=null, warnings=null, needsDisambiguation=true, candidates=null, errors=null, actionButton=null}
+2025-11-29 00:01:07.499 [clientInboundChannel-13] INFO  com.tripplanner.agents.PlaceSearchAgent - =================================
+2025-11-29 00:01:07.500 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/chat/it_92f8d7c0-8e25-4650-9cca-a2814168920d session=null payload={"type":"chat_response","updateType":"chat_response","itineraryId":"it_92f8d7c0-...(truncated)
+2025-11-29 00:01:07.500 [clientInboundChannel-13] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-29 00:01:07.505 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_92f8d7c0-8e25-4650-9cca-a2814168920d/chat/history
+2025-11-29 00:01:07.506 [http-nio-8080-exec-5] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_92f8d7c0-8e25-4650-9cca-a2814168920d/chat/history
+2025-11-29 00:01:07.506 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_92f8d7c0-8e25-4650-9cca-a2814168920d/chat/history", parameters={}
+2025-11-29 00:01:07.506 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#saveChatMessage(String, Map, HttpServletRequest)
+2025-11-29 00:01:07.507 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{message=Operation completed., sender=assistant, timestamp=1764354667502, intent=Request processed s (truncated)...]
+2025-11-29 00:01:09.486 [http-nio-8080-exec-5] INFO  com.tripplanner.service.ChatHistoryService - Saved chat message for itinerary it_92f8d7c0-8e25-4650-9cca-a2814168920d
+2025-11-29 00:01:09.486 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-29 00:01:09.486 [http-nio-8080-exec-5] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{sender=assistant, applied=false, id=7oAxzwBMznpKTODhiY8A, message=Operation completed., intent=Requ (truncated)...]
+2025-11-29 00:01:09.487 [http-nio-8080-exec-5] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 201 CREATED
+2025-11-29 00:01:09.487 [http-nio-8080-exec-5] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-29 00:01:11.965 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/analytics/events
+2025-11-29 00:01:11.965 [http-nio-8080-exec-3] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/analytics/events
+2025-11-29 00:01:11.965 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/analytics/events", parameters={}
+2025-11-29 00:01:11.966 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AnalyticsIngestController#trackEvent(Map)
+2025-11-29 00:01:11.966 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{eventName=chat_response_received, timestamp=1764354671964, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, ses (truncated)...]
+2025-11-29 00:01:11.966 [http-nio-8080-exec-3] INFO  c.tripplanner.controller.AnalyticsIngestController - === ANALYTICS EVENT RECEIVED ===
+2025-11-29 00:01:11.966 [http-nio-8080-exec-3] INFO  c.tripplanner.controller.AnalyticsIngestController - Event: {eventName=chat_response_received, timestamp=1764354671964, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, sessionId=3a15ac72-dd5a-49a4-b0df-513a1eb80199, platform=web, properties={messageLength=45, wordCount=9, duration=13509, itineraryId=it_92f8d7c0-8e25-4650-9cca-a2814168920d}}
+2025-11-29 00:01:11.966 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-29 00:01:11.966 [http-nio-8080-exec-3] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{success=true}]
+2025-11-29 00:01:11.967 [http-nio-8080-exec-3] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-11-29 00:01:11.967 [http-nio-8080-exec-3] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-29 00:01:27.688 [MessageBroker-1] INFO  o.s.web.socket.config.WebSocketMessageBrokerStats - WebSocketSession[1 current WS(1)-HttpStream(0)-HttpPoll(0), 1 total, 0 closed abnormally (0 connect failure, 0 send limit, 0 transport error)], stompSubProtocol[processed CONNECT(1)-CONNECTED(1)-DISCONNECT(0)], stompBrokerRelay[null], inboundChannel[pool size = 15, active threads = 0, queued tasks = 0, completed tasks = 15], outboundChannel[pool size = 5, active threads = 0, queued tasks = 0, completed tasks = 5], sockJsScheduler[pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]

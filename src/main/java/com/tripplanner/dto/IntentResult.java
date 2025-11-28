@@ -67,6 +67,10 @@ public class IntentResult {
         return new IntentResult("EXPLAIN", null, List.of(), Map.of(), Map.of());
     }
     
+    public static IntentResult searchPlace(Integer day, Map<String, Object> entities) {
+        return new IntentResult("SEARCH_PLACE", day, List.of(), entities, Map.of());
+    }
+    
     // Getters and Setters
     public String getIntent() {
         return intent;
@@ -161,6 +165,9 @@ public class IntentResult {
                 return "ENRICHMENT";
             case "EXPLAIN":
                 return "explanation";
+            case "SEARCH_PLACE":
+            case "SEARCH":
+                return "search";
             default:
                 return "general";
         }

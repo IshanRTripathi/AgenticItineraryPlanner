@@ -22,7 +22,7 @@ const LOAD_MORE_COUNT = 10;
 export function ChatTab() {
   const { t } = useTranslation();
   const { state, sendChatMessage, clearChatHistory } = useUnifiedItinerary();
-  const { chatMessages, isConnected, itinerary } = state;
+  const { chatMessages, isConnected, itinerary, chatLoading } = state;
 
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -31,6 +31,7 @@ export function ChatTab() {
   const [displayCount, setDisplayCount] = useState(INITIAL_DISPLAY_COUNT);
   const [preferencesPanelOpen, setPreferencesPanelOpen] = useState(false);
   const [hideBottomNav, setHideBottomNav] = useState(false);
+  const [fakeProgress, setFakeProgress] = useState<{ message: string; progress: number } | null>(null);
 
   // Voice Input
   const {
@@ -143,7 +144,7 @@ export function ChatTab() {
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || isWaitingForResponse) return;
+    if (!text || chatLoading) return;
 
     // Clear input immediately
     setInput('');
@@ -166,10 +167,34 @@ export function ChatTab() {
       timestamp: startTime
     });
 
+    // Simple synchronous progress - show each status for 2 seconds
+    const showProgress = async () => {
+      // Step 1: Understanding (2 seconds)
+      setFakeProgress({ message: '🤔 Understanding your request...', progress: 10 });
+      await new Promise(resolve => setTimeout(resolve, 4500));
+      
+      // Step 2: Analyzing (2 seconds)
+      setFakeProgress({ message: '🔍 Analyzing intent...', progress: 30 });
+      await new Promise(resolve => setTimeout(resolve, 4000));
+      
+      // Step 3: Generating (2 seconds)
+      setFakeProgress({ message: '✨ Generating response...', progress: 60 });
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    };
+
     try {
-      await sendChatMessage(text);
+      // Start showing progress and send message in parallel
+      const [_, response] = await Promise.all([
+        showProgress(),
+        sendChatMessage(text, undefined, undefined)
+      ]);
 
       const duration = Date.now() - startTime;
+
+      // Step 4: Ready (show briefly then clear)
+      setFakeProgress({ message: '✅ Ready!', progress: 100 });
+      await new Promise(resolve => setTimeout(resolve, 3800));
+      setFakeProgress(null);
 
       // Track successful response
       analytics.track('chat_response_received', {
@@ -179,6 +204,9 @@ export function ChatTab() {
         itineraryId: itinerary?.itineraryId
       });
     } catch (error) {
+      // Clear progress on error
+      setFakeProgress(null);
+      
       const duration = Date.now() - startTime;
 
       // Classify error for better tracking
@@ -343,6 +371,7 @@ export function ChatTab() {
             const messageId = message.id || `msg-${index}`;
             // Create unique key combining id, timestamp, and index to prevent duplicates
             const uniqueKey = `${messageId}-${message.timestamp?.getTime() || index}-${index}`;
+            
             return (
               <ChatMessageComponent
                 key={uniqueKey}
@@ -367,7 +396,17 @@ export function ChatTab() {
         }}
       >
         <div className="w-full px-2 sm:px-4 md:px-6 pb-2">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto relative">
+            {/* Progress Indicator - Positioned above input */}
+            {fakeProgress && (
+              <div className="absolute bottom-full left-0 right-0 flex justify-center pb-3 animate-in fade-in duration-300">
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50/95 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
+                  <div className="h-1.5 w-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="text-sm text-gray-700">{fakeProgress.message}</span>
+                </div>
+              </div>
+            )}
+            
             {/* Single unified background container - fully rounded pill */}
             <div
               className="relative flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 transition-all"

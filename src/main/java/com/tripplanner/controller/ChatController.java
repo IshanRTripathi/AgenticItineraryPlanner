@@ -3,12 +3,14 @@ package com.tripplanner.controller;
 import com.tripplanner.dto.ChatRequest;
 import com.tripplanner.dto.ChatResponse;
 import com.tripplanner.service.OrchestratorService;
+import com.tripplanner.service.ChatProgressService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -23,9 +25,11 @@ public class ChatController {
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
     
     private final OrchestratorService orchestratorService;
+    private final ChatProgressService chatProgressService;
 
-    public ChatController(OrchestratorService orchestratorService) {
+    public ChatController(OrchestratorService orchestratorService, ChatProgressService chatProgressService) {
         this.orchestratorService = orchestratorService;
+        this.chatProgressService = chatProgressService;
     }
     
     /**
@@ -76,6 +80,30 @@ public class ChatController {
                 List.of(e.getMessage())
             );
             return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+    
+    /**
+     * SSE endpoint for real-time progress updates.
+     * Frontend connects to this to receive progress as chat request is processed.
+     * 
+     * GET /api/v1/chat/progress/{sessionId}
+     */
+    @GetMapping("/progress/{sessionId}")
+    public SseEmitter streamProgress(@PathVariable String sessionId) {
+        logger.info("=== SSE CONNECTION REQUEST ===");
+        logger.info("Session ID: {}", sessionId);
+        
+        try {
+            SseEmitter emitter = chatProgressService.createEmitter(sessionId);
+            logger.info("SSE emitter created successfully for session: {}", sessionId);
+            return emitter;
+            
+        } catch (Exception e) {
+            logger.error("Failed to create SSE emitter for session: {}", sessionId, e);
+            SseEmitter emitter = new SseEmitter();
+            emitter.completeWithError(e);
+            return emitter;
         }
     }
     

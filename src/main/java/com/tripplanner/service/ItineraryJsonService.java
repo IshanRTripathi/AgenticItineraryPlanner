@@ -65,7 +65,19 @@ public class ItineraryJsonService {
      */
     public FirestoreItinerary updateItinerary(NormalizedItinerary itinerary) {
         try {
+            logger.info("📝 [UPDATE ITINERARY] Serializing itinerary: {}", itinerary.getItineraryId());
+            logger.info("  Version: {}", itinerary.getVersion());
+            logger.info("  Days: {}", itinerary.getDays().size());
+            
+            // Log node counts per day
+            for (int i = 0; i < itinerary.getDays().size(); i++) {
+                NormalizedDay day = itinerary.getDays().get(i);
+                logger.info("    Day {}: {} nodes", i + 1, day.getNodes() != null ? day.getNodes().size() : 0);
+            }
+            
             String json = objectMapper.writeValueAsString(itinerary);
+            logger.info("  Serialized JSON length: {} chars", json.length());
+            
             FirestoreItinerary entity = new FirestoreItinerary(itinerary.getItineraryId(), itinerary.getVersion(), json);
             entity.updateTimestamp();
             
@@ -131,18 +143,29 @@ public class ItineraryJsonService {
         // Check request-scoped cache first
         Map<String, NormalizedItinerary> cache = requestCache.get();
         if (cache.containsKey(id)) {
-            logger.debug("Cache HIT for itinerary: {}", id);
-            return Optional.of(cache.get(id));
+            NormalizedItinerary cached = cache.get(id);
+            logger.info("🎯 [CACHE HIT] Itinerary: {}, Version: {}, Thread: {}", 
+                id, cached.getVersion(), Thread.currentThread().getName());
+            return Optional.of(cached);
         }
         
-        logger.debug("Cache MISS for itinerary: {}", id);
+        logger.info("🔍 [CACHE MISS] Loading from database: {}, Thread: {}", 
+            id, Thread.currentThread().getName());
         
         // Load from database
         Optional<NormalizedItinerary> result = databaseService.findById(id)
                 .flatMap(this::deserializeItinerary);
         
-        // Store in cache for this request
-        result.ifPresent(itinerary -> cache.put(id, itinerary));
+        // Log what we loaded and store in cache
+        result.ifPresent(itinerary -> {
+            logger.info("📦 [DESERIALIZED] Itinerary: {}, Version: {}, Days: {}", 
+                id, itinerary.getVersion(), itinerary.getDays().size());
+            for (int i = 0; i < itinerary.getDays().size(); i++) {
+                NormalizedDay day = itinerary.getDays().get(i);
+                logger.info("    Day {}: {} nodes", i + 1, day.getNodes() != null ? day.getNodes().size() : 0);
+            }
+            cache.put(id, itinerary);
+        });
         
         return result;
     }
@@ -163,8 +186,9 @@ public class ItineraryJsonService {
      * Invalidate specific itinerary in cache after update.
      */
     private void invalidateCache(String itineraryId) {
+        boolean wasPresent = requestCache.get().containsKey(itineraryId);
         requestCache.get().remove(itineraryId);
-        logger.debug("Invalidated cache for itinerary: {}", itineraryId);
+        logger.info("🗑️ Invalidated cache for itinerary: {} (was cached: {})", itineraryId, wasPresent);
     }
     
     /**

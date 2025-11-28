@@ -125,8 +125,16 @@ public class ActivityAgent extends BaseAgent {
      * Populate attraction nodes with detailed information.
      */
     public void populateAttractions(String itineraryId, NormalizedItinerary skeleton) {
+        populateAttractions(itineraryId, skeleton, false);
+    }
+    
+    /**
+     * Populate attraction nodes with detailed information.
+     * @param skipSave if true, modifies skeleton in-place without saving (for parallel execution)
+     */
+    public void populateAttractions(String itineraryId, NormalizedItinerary skeleton, boolean skipSave) {
         logger.info("=== ACTIVITY AGENT ===");
-        logger.info("Populating attraction nodes for itinerary: {}", itineraryId);
+        logger.info("Populating attraction nodes for itinerary: {} (skipSave={})", itineraryId, skipSave);
         
         try {
             emitProgress(itineraryId, 10, "Loading attraction data", "loading");
@@ -161,14 +169,28 @@ public class ActivityAgent extends BaseAgent {
                     itineraryId, validatedAttractions, skeleton);
             }
             
-            emitProgress(itineraryId, 70, "Saving attraction data", "saving");
-            
-            // Update the itinerary with populated data
-            updateItineraryWithAttractions(itineraryId, skeleton, validatedAttractions);
-            
-            emitProgress(itineraryId, 100, 
-                String.format("Populated %d attractions", populatedAttractions.size()), 
-                "complete");
+            if (skipSave) {
+                // Collect-only mode: Apply data to skeleton without saving
+                logger.info("Applying attraction data to skeleton (skipSave=true, no database write)");
+                emitProgress(itineraryId, 70, "Applying attraction data", "applying");
+                
+                // Apply attractions and metadata (same logic as updateItineraryWithAttractions but without save)
+                applyAttractionsWithMetadata(skeleton, validatedAttractions);
+                
+                logger.info("Applied {} attractions with metadata to skeleton (in-memory only)", validatedAttractions.size());
+                
+                emitProgress(itineraryId, 100, 
+                    String.format("Collected %d attractions", validatedAttractions.size()), 
+                    "collected");
+            } else {
+                // Normal mode: Apply and save
+                emitProgress(itineraryId, 70, "Saving attraction data", "saving");
+                updateItineraryWithAttractions(itineraryId, skeleton, validatedAttractions);
+                
+                emitProgress(itineraryId, 100, 
+                    String.format("Populated %d attractions", validatedAttractions.size()), 
+                    "complete");
+            }
             
             logger.info("=== ACTIVITY AGENT COMPLETE ===");
             logger.info("Populated {} attractions", populatedAttractions.size());
@@ -806,11 +828,9 @@ public class ActivityAgent extends BaseAgent {
     }
     
     /**
-     * Update itinerary with populated attraction data.
+     * Apply attractions with metadata to skeleton (for parallel execution without save).
      */
-    private void updateItineraryWithAttractions(String itineraryId, NormalizedItinerary skeleton,
-                                                List<PopulatedAttraction> populatedAttractions) {
-        
+    private void applyAttractionsWithMetadata(NormalizedItinerary skeleton, List<PopulatedAttraction> populatedAttractions) {
         // Apply attractions to skeleton
         applyAttractionsToSkeleton(skeleton, populatedAttractions);
         
@@ -825,6 +845,16 @@ public class ActivityAgent extends BaseAgent {
             }
         }
         logger.info("Populated metadata for all attraction nodes");
+    }
+    
+    /**
+     * Update itinerary with populated attraction data.
+     */
+    private void updateItineraryWithAttractions(String itineraryId, NormalizedItinerary skeleton,
+                                                List<PopulatedAttraction> populatedAttractions) {
+        
+        // Apply attractions and metadata
+        applyAttractionsWithMetadata(skeleton, populatedAttractions);
         
         // Validate before save
         ValidationResult validationResult = itineraryValidator.validate(skeleton);

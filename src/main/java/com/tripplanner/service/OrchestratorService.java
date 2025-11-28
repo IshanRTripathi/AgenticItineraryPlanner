@@ -29,6 +29,7 @@ public class OrchestratorService {
     private final LLMService llmService;
     private final AgentRegistry agentRegistry;
     private final ChatHistoryService chatHistoryService;
+    private final ChatProgressService chatProgressService;
     
     public OrchestratorService(IntentClassificationService intentClassificationService,
                               NodeResolutionService nodeResolutionService,
@@ -36,7 +37,8 @@ public class OrchestratorService {
                               ItineraryJsonService itineraryJsonService,
                               LLMService llmService,
                               AgentRegistry agentRegistry,
-                              ChatHistoryService chatHistoryService) {
+                              ChatHistoryService chatHistoryService,
+                              ChatProgressService chatProgressService) {
         this.intentClassificationService = intentClassificationService;
         this.nodeResolutionService = nodeResolutionService;
         this.changeEngine = changeEngine;
@@ -44,6 +46,7 @@ public class OrchestratorService {
         this.llmService = llmService;
         this.agentRegistry = agentRegistry;
         this.chatHistoryService = chatHistoryService;
+        this.chatProgressService = chatProgressService;
     }
     
     /**
@@ -52,11 +55,22 @@ public class OrchestratorService {
     public ChatResponse route(ChatRequest request) {
         logger.info("Routing chat request: {}", request);
         
+        String sessionId = request.getSessionId();
+        
         try {
+            // Send initial progress
+            if (sessionId != null) {
+                chatProgressService.sendProgress(sessionId, "intent", "🤔 Understanding your request...", 10);
+            }
+            
             // Step 1: Get itinerary context + chat history for LLM classification
             String context = buildContextForLLM(request.getItineraryId());
             
             // Step 2: Classify intent using LLM
+            if (sessionId != null) {
+                chatProgressService.sendProgress(sessionId, "intent", "🔍 Analyzing intent...", 20);
+            }
+            
             IntentResult intent = classifyIntentWithLLM(request.getText(), context);
             logger.debug("LLM classified intent: {}", intent);
             
@@ -92,10 +106,28 @@ public class OrchestratorService {
             }
             
             // Step 6: Execute agent plan
-            return executeAgentPlan(plan, request, intent);
+            if (sessionId != null) {
+                chatProgressService.sendProgress(sessionId, "generation", "✨ Generating suggestions...", 50);
+            }
+            
+            ChatResponse response = executeAgentPlan(plan, request, intent);
+            
+            // Send completion
+            if (sessionId != null) {
+                chatProgressService.sendComplete(sessionId, "✅ Ready!");
+            }
+            
+            return response;
             
         } catch (Exception e) {
             logger.error("Error routing chat request", e);
+            
+            // Send error to SSE if connected
+            sessionId = request.getSessionId();
+            if (sessionId != null) {
+                chatProgressService.sendError(sessionId, "Error: " + e.getMessage());
+            }
+            
             return ChatResponse.error("An error occurred while processing your request", List.of(e.getMessage()));
         }
     }
@@ -497,6 +529,48 @@ public class OrchestratorService {
             } else {
                 return ChatResponse.error("Booking failed: " + bookingResult.getErrorMessage(), errors);
             }
+        } else if (result instanceof EditorAgentResult) {
+            // NEW: Handle EditorAgentResult with cost impact
+            EditorAgentResult editorResult = (EditorAgentResult) result;
+            ChangeEngine.ApplyResult applyResult = editorResult.getApplyResult();
+            CostImpact costImpact = editorResult.getCostImpact();
+            
+            // Check if no changes were actually made
+            if (applyResult.getDiff() == null) {
+                ChatResponse response = ChatResponse.success(
+                    "No changes made",
+                    "Your request was processed, but no changes were made to your itinerary. This may be because the requested item is locked or the modification is not possible.",
+                    null, null, false, applyResult.getToVersion()
+                );
+                // Add cost impact even if no changes (shows current cost)
+                if (costImpact != null) {
+                    response.setCostImpact(costImpact);
+                }
+                return response;
+            } else {
+                String responseMessage = generateDescriptiveMessage(applyResult.getDiff());
+                
+                ChatResponse response = ChatResponse.success(
+                    "Changes applied successfully",
+                    responseMessage,
+                    null, applyResult.getDiff(), true, applyResult.getToVersion()
+                );
+                
+                // Add cost impact to response
+                if (costImpact != null) {
+                    response.setCostImpact(costImpact);
+                    logger.info("💰 Cost impact added to chat response");
+                }
+                
+                // Add action button to view the changes
+                response.setActionButton(new ChatResponse.ActionButton(
+                    "View Changes",
+                    "VIEW_PLAN",
+                    "plan"
+                ));
+                
+                return response;
+            }
         } else if (result instanceof ChangeEngine.ApplyResult) {
             ChangeEngine.ApplyResult applyResult = (ChangeEngine.ApplyResult) result;
             
@@ -527,6 +601,9 @@ public class OrchestratorService {
                 
                 return response;
             }
+        } else if (result instanceof ChatResponse) {
+            // Agent already returned a ChatResponse, use it directly
+            return (ChatResponse) result;
         } else if (result instanceof String) {
             return ChatResponse.success("Request processed", (String) result, null, null, false, null);
         } else {

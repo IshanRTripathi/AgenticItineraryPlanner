@@ -268,9 +268,9 @@ export function MobileViewTab({ itinerary }: MobileViewTabProps) {
                 {/* Spacer to push content down */}
                 <div className="flex-grow" />
 
-                {/* Hero Section - Clean, direct on background */}
+                {/* Hero Section - Clean, left-aligned */}
                 <motion.div
-                    className="mb-8"
+                    className="mb-8 flex flex-col items-start"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
@@ -298,7 +298,7 @@ export function MobileViewTab({ itinerary }: MobileViewTabProps) {
                     </div>
                 </motion.div>
 
-                {/* Unified Glass Stats Bar */}
+                {/* Unified Glass Stats Bar - Left-aligned */}
                 <motion.div
                     className="mb-24 bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden shadow-lg"
                     initial={{ opacity: 0, y: 40 }}
@@ -306,19 +306,19 @@ export function MobileViewTab({ itinerary }: MobileViewTabProps) {
                     transition={{ delay: 0.6 }}
                 >
                     <div className="grid grid-cols-3 divide-x divide-white/10">
-                        <div className="p-4 flex flex-col items-center justify-center gap-1">
+                        <div className="p-4 flex flex-col items-start gap-1">
                             <MapPin className="w-4 h-4 text-emerald-400 mb-0.5" />
                             <span className="text-base font-bold text-white">{activityCount}</span>
                             <span className="text-[9px] text-slate-400 uppercase tracking-wider font-medium">Places</span>
                         </div>
 
-                        <div className="p-4 flex flex-col items-center justify-center gap-1">
+                        <div className="p-4 flex flex-col items-start gap-1">
                             <Coins className="w-4 h-4 text-amber-400 mb-0.5" />
                             <span className="text-base font-bold text-white">{getCurrencySymbol(displayCurrency)}{formatCost(Math.round(convertedTotalBudget))}</span>
                             <span className="text-[9px] text-slate-400 uppercase tracking-wider font-medium">Budget</span>
                         </div>
 
-                        <div className="p-4 flex flex-col items-center justify-center gap-1">
+                        <div className="p-4 flex flex-col items-start gap-1">
                             <Cloud className="w-4 h-4 text-blue-400 mb-0.5" />
                             <span className="text-base font-bold text-white">{currentWeather ? `${Math.round(currentWeather.high)}°` : '--'}</span>
                             <span className="text-[9px] text-slate-400 uppercase tracking-wider font-medium">Weather</span>

@@ -56,6 +56,7 @@ public class CostEstimatorAgent extends BaseAgent {
     private final ItineraryValidator itineraryValidator;
     private final ItineraryMetricsTracker metricsTracker;
     private final RestTemplate restTemplate;
+    private final com.tripplanner.service.CostEstimationRules costEstimationRules;
     
     // Feature flags for tool integration
     @Value("${features.cost-tools.enabled:false}")
@@ -63,6 +64,9 @@ public class CostEstimatorAgent extends BaseAgent {
     
     @Value("${features.cost-tools.fallback-on-error:true}")
     private boolean fallbackOnError;
+    
+    @Value("${features.cost-estimation.rule-based:false}")
+    private boolean useRuleBasedEstimation;
 
     public CostEstimatorAgent(AgentEventBus eventBus,
             ItineraryJsonService itineraryJsonService,
@@ -71,13 +75,15 @@ public class CostEstimatorAgent extends BaseAgent {
             BudgetTracker budgetTracker,
             CurrencyConversionService currencyConversionService,
             ItineraryValidator itineraryValidator,
-            ItineraryMetricsTracker metricsTracker) {
+            ItineraryMetricsTracker metricsTracker,
+            com.tripplanner.service.CostEstimationRules costEstimationRules) {
         super(eventBus, AgentEvent.AgentKind.ENRICHMENT);
         this.itineraryJsonService = itineraryJsonService;
         this.aiClient = aiClient;
         this.objectMapper = objectMapper;
         this.budgetTracker = budgetTracker;
         this.currencyConversionService = currencyConversionService;
+        this.costEstimationRules = costEstimationRules;
         this.itineraryValidator = itineraryValidator;
         this.metricsTracker = metricsTracker;
         this.restTemplate = new RestTemplate();
@@ -204,22 +210,32 @@ public class CostEstimatorAgent extends BaseAgent {
                     }
                 }
 
-                // Estimate costs for nodes without priceLevel using AI (slower but accurate)
+                // Estimate costs for nodes without priceLevel
                 if (!nodesNeedingAI.isEmpty()) {
                     try {
-                        estimateCostsWithAI(nodesNeedingAI, destination, budgetTier, currency,
-                                budgetMin, budgetMax, userCurrency, itineraryId, dayNumber);
-                        // Mark all AI-estimated nodes as successfully processed
+                        if (useRuleBasedEstimation) {
+                            // OPTIMIZED: Use rule-based estimation (fast, < 10ms per node)
+                            logger.info("Using rule-based cost estimation for {} nodes (feature flag enabled)", 
+                                       nodesNeedingAI.size());
+                            estimateCostsWithRules(nodesNeedingAI, destination, budgetTier, currency);
+                        } else {
+                            // LEGACY: Use AI estimation (slower but accurate)
+                            logger.info("Using AI cost estimation for {} nodes", nodesNeedingAI.size());
+                            estimateCostsWithAI(nodesNeedingAI, destination, budgetTier, currency,
+                                    budgetMin, budgetMax, userCurrency, itineraryId, dayNumber);
+                        }
+                        
+                        // Mark all estimated nodes as successfully processed
                         for (NormalizedNode node : nodesNeedingAI) {
                             if (node.getCost() != null && node.getCost().getAmountPerPerson() != null) {
                                 node.setProcessingState(ProcessingState.ENRICHED);
                             } else {
                                 node.setProcessingState(ProcessingState.FAILED);
-                                node.setLastError("AI cost estimation returned no cost");
+                                node.setLastError("Cost estimation returned no cost");
                             }
                         }
                     } catch (Exception e) {
-                        logger.error("Failed to estimate costs with AI: {}", e.getMessage());
+                        logger.error("Failed to estimate costs: {}", e.getMessage());
                         for (NormalizedNode node : nodesNeedingAI) {
                             node.setProcessingState(ProcessingState.FAILED);
                             node.setLastError("AI cost estimation failed: " + e.getMessage());
@@ -975,6 +991,111 @@ public class CostEstimatorAgent extends BaseAgent {
         }
 
         return cleaned.trim();
+    }
+
+    /**
+     * Estimate costs using rule-based logic (FAST - < 10ms per node).
+     * No LLM calls needed.
+     */
+    private void estimateCostsWithRules(List<NormalizedNode> nodes, String destination, 
+                                       String budgetTier, String currency) {
+        logger.info("═══════════════════════════════════════════════════════");
+        logger.info("🚀 [RULE-BASED COST ESTIMATION] Starting for {} nodes", nodes.size());
+        logger.info("   Destination: {}", destination);
+        logger.info("   Budget Tier: {}", budgetTier);
+        logger.info("   Currency: {}", currency);
+        logger.info("═══════════════════════════════════════════════════════");
+        
+        long startTime = System.currentTimeMillis();
+        int successCount = 0;
+        int failureCount = 0;
+        
+        for (int i = 0; i < nodes.size(); i++) {
+            NormalizedNode node = nodes.get(i);
+            try {
+                logger.info("📍 [Node {}/{}] Processing: {}", i + 1, nodes.size(), node.getId());
+                
+                // Get node details
+                String nodeType = node.getType() != null ? node.getType() : "attraction";
+                String category = extractCategory(node);
+                String title = node.getTitle() != null ? node.getTitle() : "";
+                
+                logger.info("   Title: '{}'", title);
+                logger.info("   Type: {}, Category: {}", nodeType, category);
+                
+                // Estimate cost using rules
+                double estimatedCost = costEstimationRules.estimateCostWithTitle(
+                    nodeType, category, title, budgetTier, currency, destination);
+                
+                // Set cost on node
+                if (node.getCost() == null) {
+                    node.setCost(new NodeCost());
+                }
+                node.getCost().setAmountPerPerson(estimatedCost);
+                node.getCost().setCurrency(currency);
+                
+                logger.info("✅ [Node {}/{}] Cost estimated: {} {}", 
+                           i + 1, nodes.size(), Math.round(estimatedCost), currency);
+                successCount++;
+                
+            } catch (Exception e) {
+                logger.error("❌ [Node {}/{}] Failed to estimate cost for node {}: {}", 
+                           i + 1, nodes.size(), node.getId(), e.getMessage(), e);
+                // Set fallback cost
+                if (node.getCost() == null) {
+                    node.setCost(new NodeCost());
+                }
+                node.getCost().setAmountPerPerson(0.0);
+                node.getCost().setCurrency(currency);
+                failureCount++;
+            }
+        }
+        
+        long duration = System.currentTimeMillis() - startTime;
+        
+        logger.info("═══════════════════════════════════════════════════════");
+        logger.info("✅ [RULE-BASED COST ESTIMATION] Complete");
+        logger.info("   Total nodes: {}", nodes.size());
+        logger.info("   Successful: {}", successCount);
+        logger.info("   Failed: {}", failureCount);
+        logger.info("   Duration: {} ms", duration);
+        logger.info("   Avg per node: {} ms", nodes.size() > 0 ? duration / nodes.size() : 0);
+        logger.info("═══════════════════════════════════════════════════════");
+    }
+    
+    /**
+     * Extract category from node for cost estimation.
+     */
+    private String extractCategory(NormalizedNode node) {
+        logger.debug("   [extractCategory] Extracting category for node: {}", node.getId());
+        
+        // Try to get category from node.details
+        if (node.getDetails() != null && node.getDetails().getCategory() != null && 
+            !node.getDetails().getCategory().isEmpty()) {
+            logger.debug("   [extractCategory] Found in node.details.category: {}", node.getDetails().getCategory());
+            return node.getDetails().getCategory();
+        }
+        
+        // Try from labels
+        if (node.getLabels() != null && !node.getLabels().isEmpty()) {
+            String label = node.getLabels().get(0);
+            logger.debug("   [extractCategory] Found in labels: {}", label);
+            return label;
+        }
+        
+        // Try from agent data
+        if (node.getAgentData() != null) {
+            Object categoryObj = node.getAgentData().get("category");
+            if (categoryObj != null) {
+                logger.debug("   [extractCategory] Found in agentData: {}", categoryObj);
+                return categoryObj.toString();
+            }
+        }
+        
+        // Fallback to type
+        String fallback = node.getType() != null ? node.getType() : "general";
+        logger.debug("   [extractCategory] Using fallback: {}", fallback);
+        return fallback;
     }
 
     @Override

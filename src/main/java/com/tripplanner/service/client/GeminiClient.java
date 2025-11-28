@@ -153,25 +153,45 @@ public class GeminiClient implements AiClient {
             }
 
             try {
-                return attemptRequestWithKey(apiKey, userPrompt, systemPrompt, attemptNumber);
+                String result = attemptRequestWithKey(apiKey, userPrompt, systemPrompt, attemptNumber);
+                // Success! Report it and return
+                apiKeyRotationService.reportSuccess("gemini", apiKey);
+                circuitBreaker.recordSuccess();
+                return result;
             } catch (TransientAiException e) {
-                // Key failed with transient error - try next key
+                // Key failed with transient error - DON'T report failure yet, just try next key
                 lastException = e;
-                logger.warn("Gemini key attempt {} failed with transient error, trying next key if available",
-                        keyAttempt);
+                logger.warn("Gemini key attempt {} failed with transient error ({}), trying next key if available",
+                        keyAttempt, e.getStatusCode());
+                // Don't call reportFailure here - we want to try all keys first
                 continue;
             } catch (PermanentAiException e) {
-                // Permanent error - don't try other keys
-                throw e;
+                // Permanent error - might be key-specific, try next key
+                lastException = e;
+                logger.warn("Gemini key attempt {} failed with permanent error ({}), trying next key if available",
+                        keyAttempt, e.getStatusCode());
+                // Don't throw immediately - try other keys first
+                continue;
             }
         }
 
-        // Exhausted all attempts
-        throw new TransientAiException(
-                "Exhausted all Gemini key attempts",
-                "GeminiClient",
-                503,
-                lastException);
+        // Exhausted all attempts - NOW report the failure
+        logger.error("All {} Gemini key attempts exhausted", keyAttempt);
+        circuitBreaker.recordFailure();
+        
+        // If the last exception was permanent, throw it as permanent
+        // Otherwise throw as transient
+        if (lastException instanceof PermanentAiException) {
+            logger.error("All keys failed with permanent errors, throwing PermanentAiException");
+            throw (PermanentAiException) lastException;
+        } else {
+            logger.error("All keys failed with transient errors, throwing TransientAiException");
+            throw new TransientAiException(
+                    "Exhausted all Gemini key attempts",
+                    "GeminiClient",
+                    503,
+                    lastException);
+        }
     }
 
     /**
@@ -213,8 +233,7 @@ public class GeminiClient implements AiClient {
                 logger.info("=== MOCK MODE: Returning cached response ===");
                 generatedText = getMockResponse(userPrompt, systemPrompt);
                 logger.info("Mock response length: {}", generatedText.length());
-                circuitBreaker.recordSuccess();
-                apiKeyRotationService.reportSuccess("gemini", apiKey);
+                // Success will be reported by caller
             } else {
                 // Make HTTP request to Gemini API with 45 second timeout (reduced for faster
                 // failover)
@@ -249,8 +268,7 @@ public class GeminiClient implements AiClient {
 
                 // Classify errors and throw typed exceptions
                 if (isTransientError(response.statusCode())) {
-                    circuitBreaker.recordFailure();
-                    apiKeyRotationService.reportFailure("gemini", apiKey);
+                    // Don't report failure here - let the retry loop handle it
                     logger.error("Gemini API transient error: {} - {}", response.statusCode(), response.body());
                     throw new TransientAiException(
                             "Gemini API returned transient error: " + response.statusCode(),
@@ -268,8 +286,7 @@ public class GeminiClient implements AiClient {
                 }
 
                 if (response.statusCode() != 200) {
-                    circuitBreaker.recordFailure();
-                    apiKeyRotationService.reportFailure("gemini", apiKey);
+                    // Don't report failure here - let the retry loop handle it
                     logger.error("Gemini API unexpected error: {} - {}", response.statusCode(), response.body());
                     throw new TransientAiException(
                             "Gemini API returned unexpected status: " + response.statusCode(),
@@ -302,17 +319,16 @@ public class GeminiClient implements AiClient {
                         // Track token usage
                         trackTokenUsage(responseJson, System.currentTimeMillis() - startTime);
 
-                        circuitBreaker.recordSuccess();
-                        apiKeyRotationService.reportSuccess("gemini", apiKey);
+                        // Success will be reported by caller
                     } else {
                         logger.warn("No parts found in response");
                         generatedText = "";
-                        circuitBreaker.recordSuccess(); // Empty response is still a success
+                        // Empty response is still a success - will be reported by caller
                     }
                 } else {
                     logger.warn("No content found in response");
                     generatedText = "";
-                    circuitBreaker.recordSuccess(); // Empty response is still a success
+                    // Empty response is still a success - will be reported by caller
                 }
             }
 
@@ -322,13 +338,7 @@ public class GeminiClient implements AiClient {
             // Re-throw typed exceptions as-is (key failure already reported above)
             throw e;
         } catch (IOException | InterruptedException e) {
-            // Network errors are transient - report key failure
-            circuitBreaker.recordFailure();
-            try {
-                apiKeyRotationService.reportFailure("gemini", apiKey);
-            } catch (Exception ex) {
-                logger.warn("Failed to report key failure: {}", ex.getMessage());
-            }
+            // Network errors are transient - don't report failure here, let retry loop handle it
             logger.error("=== GEMINI NETWORK ERROR ===");
             logger.error("Error: {}", e.getMessage(), e);
             logger.error("============================");
@@ -338,13 +348,7 @@ public class GeminiClient implements AiClient {
                     0,
                     e);
         } catch (Exception e) {
-            // Unknown errors are treated as transient - report key failure
-            circuitBreaker.recordFailure();
-            try {
-                apiKeyRotationService.reportFailure("gemini", apiKey);
-            } catch (Exception ex) {
-                logger.warn("Failed to report key failure: {}", ex.getMessage());
-            }
+            // Unknown errors are treated as transient - don't report failure here, let retry loop handle it
             logger.error("=== GEMINI CONTENT GENERATION FAILED ===");
             logger.error("=== FULL USER PROMPT ===");
             logger.error("{}", userPrompt);

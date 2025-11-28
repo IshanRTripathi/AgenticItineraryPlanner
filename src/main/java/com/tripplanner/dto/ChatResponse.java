@@ -18,6 +18,8 @@ public class ChatResponse {
     private List<NodeCandidate> candidates;
     private List<String> errors; // List of error messages
     private ActionButton actionButton; // Optional action button for the response
+    private CostImpact costImpact; // Cost impact preview (before applying changes)
+    private List<PlaceSuggestion> placeSuggestions; // Place search suggestions with photos and ratings
     
     // Constructors
     public ChatResponse() {}
@@ -145,6 +147,22 @@ public class ChatResponse {
     
     public void setActionButton(ActionButton actionButton) {
         this.actionButton = actionButton;
+    }
+    
+    public CostImpact getCostImpact() {
+        return costImpact;
+    }
+    
+    public void setCostImpact(CostImpact costImpact) {
+        this.costImpact = costImpact;
+    }
+    
+    public List<PlaceSuggestion> getPlaceSuggestions() {
+        return placeSuggestions;
+    }
+    
+    public void setPlaceSuggestions(List<PlaceSuggestion> placeSuggestions) {
+        this.placeSuggestions = placeSuggestions;
     }
     
     /**

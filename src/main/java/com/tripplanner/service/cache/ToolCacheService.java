@@ -138,4 +138,25 @@ public interface ToolCacheService {
      * @return Total number of entries removed
      */
     int cleanupAllExpired();
+    
+    /**
+     * Simple get method for retrieving cached values.
+     * Returns Optional.empty() if not found or expired.
+     * 
+     * @param cacheKey The cache key
+     * @param resultType The expected result type
+     * @param <T> The result type
+     * @return Optional containing the cached value, or empty if not found
+     */
+    <T> java.util.Optional<T> get(String cacheKey, Class<T> resultType);
+    
+    /**
+     * Simple put method for storing values in cache.
+     * 
+     * @param cacheKey The cache key
+     * @param value The value to cache
+     * @param ttl The time-to-live duration
+     * @param <T> The value type
+     */
+    <T> void put(String cacheKey, T value, java.time.Duration ttl);
 }

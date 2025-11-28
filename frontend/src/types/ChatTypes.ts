@@ -12,6 +12,10 @@ export interface ChatRequest {
   autoApply: boolean;
   // Optional; backend can derive from auth
   userId?: string;
+  // Session ID for SSE progress updates
+  sessionId?: string;
+  // Conversation ID for multi-turn conversations
+  conversationId?: string;
 }
 
 export interface ChatResponse {
@@ -26,6 +30,8 @@ export interface ChatResponse {
   candidates: NodeCandidate[];
   // Align with backend ChatResponse.errors
   errors?: string[];
+  // Place search suggestions with photos and ratings
+  placeSuggestions?: PlaceSuggestion[];
 }
 
 export interface ChangeSet {
@@ -146,6 +152,49 @@ export interface TransitInfo {
   cost?: number;
 }
 
+// Cost Impact types
+export interface CostImpact {
+  currentCost: number;
+  newCost: number;
+  difference: number;
+  currency: string;
+  exceedsBudget: boolean;
+  budgetLimit?: number;
+  breakdown?: Record<string, number>;
+}
+
+// Place Suggestion types (for place search feature)
+export interface PlaceSuggestion {
+  placeId: string;
+  name: string;
+  address: string;
+  rating?: number;
+  userRatingsTotal?: number;
+  priceLevel?: number;
+  photos?: Array<{
+    photoReference?: string;
+    photo_reference?: string; // Backend uses snake_case
+    height?: number;
+    width?: number;
+  }>;
+  types?: string[];
+  geometry?: {
+    location: {
+      latitude?: number;
+      longitude?: number;
+      lat?: number; // Backend might use lat/lng
+      lng?: number;
+    };
+  };
+  openingHours?: string;
+  estimatedCost?: number;
+  estimatedDuration?: number;
+  distanceKm?: number;
+  website?: string;
+  googleMapsUrl?: string;
+  day?: number; // Day number this suggestion is for (1-indexed)
+}
+
 // Chat UI specific types
 export interface ChatMessage {
   id: string;
@@ -160,6 +209,8 @@ export interface ChatMessage {
   warnings?: string[];
   needsDisambiguation?: boolean;
   candidates?: NodeCandidate[];
+  costImpact?: CostImpact;
+  placeSuggestions?: PlaceSuggestion[]; // Place search suggestions
 }
 
 export interface ChatState {

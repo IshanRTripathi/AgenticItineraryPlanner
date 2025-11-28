@@ -447,6 +447,15 @@ public class ItinerariesController {
                 normalizedItinerary.setStatus(status);
 
                 logger.info("Normalized itinerary found: {}, status: {}", id, status);
+                
+                // DIAGNOSTIC: Log what we're returning
+                logger.info("📖 [GET] Loaded itinerary {} version {} with {} days",
+                    id, normalizedItinerary.getVersion(), normalizedItinerary.getDays().size());
+                for (NormalizedDay day : normalizedItinerary.getDays()) {
+                    logger.info("  Day {}: {} nodes", 
+                        day.getDayNumber(),
+                        day.getNodes() != null ? day.getNodes().size() : 0);
+                }
 
                 // 🔍 DEBUG: Log first activity's location data to verify API response
                 if (normalizedItinerary.getDays() != null && !normalizedItinerary.getDays().isEmpty()) {

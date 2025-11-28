@@ -266,7 +266,7 @@ export const createSendChatMessage = (
   itineraryId: string,
   loadItinerary: (id: string) => Promise<void>
 ) => {
-  return async (message: string, selectedNodeId?: string) => {
+  return async (message: string, selectedNodeId?: string, sessionId?: string) => {
     if (!state.itinerary) {
       logError('Cannot send chat message: no itinerary loaded', {
         component: 'UnifiedItineraryProvider',
@@ -308,7 +308,7 @@ export const createSendChatMessage = (
         sender: 'user',
         timestamp: Date.now(),
         selectedNodeId,
-        day: state.selectedDay ?? undefined,
+        day: state.selectedDay !== null ? state.selectedDay + 1 : undefined, // Convert 0-indexed to 1-indexed
       });
     } catch (persistErr) {
       logWarn('Failed to persist user chat message', { component: 'UnifiedItineraryProvider', action: 'chat_history_persist_user', itineraryId }, persistErr as any);
@@ -318,13 +318,17 @@ export const createSendChatMessage = (
     
     try {
       // Create ChatRequest for the backend
+      // Generate sessionId if not provided (for SSE progress tracking)
+      const effectiveSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       const chatRequest: ChatRequest = {
         itineraryId: state.itinerary.itineraryId,
         scope: state.selectedDay !== null ? 'day' : 'trip',
-        day: state.selectedDay || undefined,
-        selectedNodeId,
+        day: state.selectedDay !== null ? state.selectedDay + 1 : undefined, // Convert 0-indexed to 1-indexed
+        selectedNodeId: selectedNodeId || undefined, // Ensure undefined instead of null
         text: message,
-        autoApply: false
+        autoApply: false,
+        sessionId: effectiveSessionId
       };
 
       // Send via WebSocket for real-time response if connected, otherwise use REST API
@@ -337,7 +341,7 @@ export const createSendChatMessage = (
         
         webSocketService.sendChatMessage(message, {
           selectedNodeId,
-          selectedDay: state.selectedDay,
+          selectedDay: state.selectedDay !== null ? state.selectedDay + 1 : null, // Convert 0-indexed to 1-indexed
           scope: chatRequest.scope,
           autoApply: false
         });
@@ -368,7 +372,17 @@ export const createSendChatMessage = (
           changeSet: response.changeSet,
           diff: response.diff,
           applied: response.applied
-        }
+        },
+        // Include all response fields for proper rendering
+        intent: response.intent,
+        changeSet: response.changeSet,
+        diff: response.diff,
+        warnings: response.warnings,
+        applied: response.applied,
+        candidates: response.candidates,
+        costImpact: (response as any).costImpact,
+        placeSuggestions: (response as any).placeSuggestions,
+        needsDisambiguation: response.needsDisambiguation
       };
       
       dispatch({ type: 'ADD_CHAT_MESSAGE', payload: assistantMessage });

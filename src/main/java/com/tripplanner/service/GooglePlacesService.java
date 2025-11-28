@@ -931,4 +931,331 @@ public class GooglePlacesService {
         
         return null; // Unknown country
     }
+    
+    /**
+     * Search for multiple places by query and location with smart caching.
+     * Returns exactly 3 suggestions (or less if not available).
+     * 
+     * CACHING STRATEGY:
+     * - Cache key: query + location + coordinates (normalized)
+     * - Only cache results that pass distance validation (within 30km)
+     * - TTL: 7 days (place data doesn't change often)
+     * - Reusable: Same query in same location returns cached results
+     * 
+     * @param itineraryId Itinerary ID for caching context
+     * @param query Place type or name (e.g., "museum", "restaurant")
+     * @param location Location context (e.g., "Interlaken, Switzerland")
+     * @param type Optional place type filter (e.g., "museum", "restaurant")
+     * @param maxResults Maximum number of results to return (default: 3, always 3 for chat)
+     * @return List of exactly 3 place suggestions (or less if not available)
+     */
+    public List<PlaceSuggestion> searchPlaces(String itineraryId, String query, String location, String type, int maxResults) {
+        logger.info("🔍 [GooglePlacesService] Searching places: query='{}', location='{}', type='{}', maxResults={}",
+                query, location, type, maxResults);
+
+        if (query == null || query.trim().isEmpty()) {
+            logger.warn("⚠️ [GooglePlacesService] Empty query provided to searchPlaces");
+            return List.of();
+        }
+
+        // Geocode destination first (needed for cache key and validation)
+        final com.tripplanner.dto.Coordinates destCoords;
+        if (location != null && !location.trim().isEmpty()) {
+            destCoords = geocodeLocation(location);
+            if (destCoords == null) {
+                logger.error("❌ [GooglePlacesService] Cannot search without valid destination coordinates");
+                return List.of();
+            }
+        } else {
+            logger.error("❌ [GooglePlacesService] Location is required for place search");
+            return List.of();
+        }
+
+        // Try cache first if itineraryId and toolCacheService available
+        if (toolCacheService != null && itineraryId != null) {
+            // Generate cache key: query + location + coordinates (normalized)
+            // This ensures same query in same location returns cached results
+            String normalizedQuery = query.toLowerCase().trim();
+            String normalizedLocation = location.toLowerCase().trim();
+            String coordsKey = String.format("%.4f,%.4f", destCoords.getLat(), destCoords.getLng());
+            String cacheKey = String.format("place-search:%s:%s:%s:%s", 
+                normalizedQuery, normalizedLocation, coordsKey, type != null ? type : "any");
+            
+            logger.info("📦 [GooglePlacesService] Checking cache with key: {}", cacheKey);
+            
+            try {
+                return toolCacheService.getOrCompute(
+                    itineraryId,
+                    "place-search",
+                    cacheKey,
+                    Map.of(
+                        "query", query,
+                        "location", location,
+                        "type", type != null ? type : "",
+                        "coordinates", coordsKey
+                    ),
+                    () -> searchPlacesInternal(query, location, type, maxResults, destCoords),
+                    (Class<List<PlaceSuggestion>>) (Class<?>) List.class
+                );
+            } catch (Exception e) {
+                logger.warn("⚠️ [GooglePlacesService] Cache error, falling back to direct call: {}", e.getMessage());
+                // Fallback to direct call if cache fails
+            }
+        }
+
+        // Fallback to direct call (no caching)
+        return searchPlacesInternal(query, location, type, maxResults, destCoords);
+    }
+    
+    /**
+     * Internal implementation of place search (called by cache or directly).
+     * This method does the actual Google Places API call and validation.
+     */
+    private List<PlaceSuggestion> searchPlacesInternal(String query, String location, String type, 
+                                                        int maxResults, com.tripplanner.dto.Coordinates destCoords) {
+        logger.info("🔍 [GooglePlacesService] Executing place search (cache miss or no cache)");
+
+        // Check rate limits and circuit breaker
+        checkRateLimit();
+        checkCircuitBreaker();
+
+        try {
+            // Build search query
+            String searchQuery = query;
+            if (location != null && !location.trim().isEmpty()) {
+                // Check if query already contains the location to avoid duplication
+                String queryLower = query.toLowerCase();
+                String locationLower = location.toLowerCase();
+
+                if (!queryLower.contains(locationLower)) {
+                    searchQuery = query + " in " + location;
+                    logger.info("📝 [GooglePlacesService] Combined search query: '{}'", searchQuery);
+                } else {
+                    logger.info("📝 [GooglePlacesService] Query already contains location, using as-is: '{}'", searchQuery);
+                }
+            }
+
+            // Build URL with location filter
+            UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpUrl(BASE_URL + "/textsearch/json")
+                    .queryParam("query", searchQuery)
+                    .queryParam("location", destCoords.getLat() + "," + destCoords.getLng())
+                    .queryParam("radius", "20000") // 20km radius
+                    .queryParam("key", apiKey);
+
+            // Add type filter if specified
+            if (type != null && !type.trim().isEmpty()) {
+                urlBuilder.queryParam("type", type);
+            }
+
+            // Add country region bias for additional filtering
+            String countryCode = extractCountryCode(location);
+            if (countryCode != null) {
+                urlBuilder.queryParam("region", countryCode);
+                logger.info("🌍 [GooglePlacesService] Added region filter: {}", countryCode);
+            }
+
+            String url = urlBuilder.build(false).toUriString();
+
+            logger.debug("Requesting Google Places API: {}", url.replace(apiKey, "***KEY_HIDDEN***"));
+
+            // Make GET request with retry logic
+            PlaceSearchResponse response = makeRequestWithRetry(url, PlaceSearchResponse.class);
+
+            // Increment request count
+            incrementRequestCount();
+
+            // Handle API response
+            if (response != null && "OK".equals(response.getStatus()) &&
+                    response.getResults() != null && !response.getResults().isEmpty()) {
+
+                logger.info("📊 [GooglePlacesService] Found {} results from Google Places API",
+                        response.getResults().size());
+
+                // Validate results against distance filter (only cache valid results)
+                List<PlaceSuggestion> validatedResults = new ArrayList<>();
+                
+                for (PlaceSearchResult result : response.getResults()) {
+                    // Calculate distance from destination
+                    double distance = calculateDistance(
+                        destCoords.getLat(), destCoords.getLng(),
+                        result.getGeometry().getLocation().getLatitude(),
+                        result.getGeometry().getLocation().getLongitude()
+                    );
+                    
+                    // Only include results within 30km (validated results)
+                    if (distance <= 30.0) {
+                        PlaceSuggestion suggestion = toPlaceSuggestion(result, location, distance);
+                        if (suggestion != null) {
+                            validatedResults.add(suggestion);
+                            logger.info("   ✅ [{}] '{}' - {}km away", 
+                                validatedResults.size(), suggestion.getName(), String.format("%.1f", distance));
+                        }
+                    }
+                    
+                    // Stop when we have enough results
+                    if (validatedResults.size() >= maxResults) {
+                        break;
+                    }
+                }
+
+                logger.info("✅ [GooglePlacesService] Returning {} validated place suggestions (out of {} total results)", 
+                    validatedResults.size(), response.getResults().size());
+                recordSuccess();
+                
+                // IMPORTANT: Always return exactly 3 suggestions for chat UI
+                // If we have less, that's fine - UI will handle it
+                return validatedResults;
+
+            } else if (response != null && "ZERO_RESULTS".equals(response.getStatus())) {
+                logger.warn("⚠️ [GooglePlacesService] No results found for query: '{}'", searchQuery);
+                return List.of();
+            } else {
+                String status = response != null ? response.getStatus() : "null";
+                logger.error("Google Places API error - Status: {}", status);
+                recordFailure();
+                return List.of();
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed to search places for query '{}': {}", query, e.getMessage(), e);
+            recordFailure();
+            return List.of();
+        }
+    }
+    
+    /**
+     * Convert PlaceSearchResult to PlaceSuggestion with enriched data.
+     * 
+     * @param result The place search result from Google API
+     * @param location The search location context
+     * @param distance Distance from destination in km
+     */
+    private PlaceSuggestion toPlaceSuggestion(PlaceSearchResult result, String location, double distance) {
+        try {
+            PlaceSuggestion suggestion = PlaceSuggestion.builder()
+                    .placeId(result.getPlaceId())
+                    .name(result.getName())
+                    .address(result.getFormattedAddress())
+                    .rating(result.getRating())
+                    .userRatingsTotal(result.getUserRatingsTotal())
+                    .priceLevel(result.getPriceLevel())
+                    .types(result.getTypes())
+                    .geometry(result.getGeometry())
+                    .build();
+
+            // Add distance from destination
+            suggestion.setDistanceKm(distance);
+            
+            // Add Google Maps URL
+            suggestion.setGoogleMapsUrl("https://www.google.com/maps/place/?q=place_id:" + result.getPlaceId());
+
+            // Get detailed information (photos, opening hours, website)
+            try {
+                PlaceDetails details = getPlaceDetails(result.getPlaceId());
+                if (details != null) {
+                    // Limit photos to 5 for performance
+                    if (details.getPhotos() != null && !details.getPhotos().isEmpty()) {
+                        List<Photo> limitedPhotos = details.getPhotos().stream()
+                                .limit(5)
+                                .collect(java.util.stream.Collectors.toList());
+                        suggestion.setPhotos(limitedPhotos);
+                    }
+                    
+                    // Format opening hours
+                    if (details.getOpeningHours() != null) {
+                        suggestion.setOpeningHours(formatOpeningHours(details.getOpeningHours()));
+                    }
+                    
+                    // Add website if available
+                    if (details.getWebsite() != null && !details.getWebsite().isEmpty()) {
+                        suggestion.setWebsite(details.getWebsite());
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to get details for place {}: {}", result.getPlaceId(), e.getMessage());
+                // Continue without details
+            }
+
+            // Estimate cost based on price level
+            if (result.getPriceLevel() != null) {
+                suggestion.setEstimatedCost(estimateCostFromPriceLevel(result.getPriceLevel()));
+            }
+
+            // Estimate duration based on place type
+            suggestion.setEstimatedDuration(estimateDuration(result.getTypes()));
+
+            return suggestion;
+
+        } catch (Exception e) {
+            logger.error("Failed to convert place result to suggestion: {}", e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Format opening hours for display.
+     */
+    private String formatOpeningHours(PlaceDetails.OpeningHours openingHours) {
+        if (openingHours == null) {
+            return null;
+        }
+        
+        // If we have weekday text, use the current day
+        if (openingHours.getWeekdayText() != null && !openingHours.getWeekdayText().isEmpty()) {
+            int today = java.time.LocalDate.now().getDayOfWeek().getValue() % 7; // 0=Sunday
+            if (today < openingHours.getWeekdayText().size()) {
+                return openingHours.getWeekdayText().get(today);
+            }
+        }
+        
+        // Fallback to open now status
+        Boolean openNow = openingHours.getOpenNow();
+        if (openNow != null) {
+            return openNow ? "Open now" : "Closed now";
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Estimate cost per person based on Google's price level (0-4).
+     */
+    private Double estimateCostFromPriceLevel(Integer priceLevel) {
+        if (priceLevel == null) {
+            return null;
+        }
+        
+        // Rough estimates in USD
+        switch (priceLevel) {
+            case 0: return 0.0;      // Free
+            case 1: return 10.0;     // $
+            case 2: return 25.0;     // $$
+            case 3: return 50.0;     // $$$
+            case 4: return 100.0;    // $$$$
+            default: return null;
+        }
+    }
+    
+    /**
+     * Estimate duration based on place types.
+     */
+    private Integer estimateDuration(List<String> types) {
+        if (types == null || types.isEmpty()) {
+            return 120; // Default 2 hours
+        }
+        
+        // Check for specific types
+        for (String type : types) {
+            if (type.contains("museum")) return 180;        // 3 hours
+            if (type.contains("park")) return 120;          // 2 hours
+            if (type.contains("restaurant")) return 90;     // 1.5 hours
+            if (type.contains("cafe")) return 60;           // 1 hour
+            if (type.contains("bar")) return 120;           // 2 hours
+            if (type.contains("shopping")) return 120;      // 2 hours
+            if (type.contains("church")) return 60;         // 1 hour
+            if (type.contains("tourist_attraction")) return 120; // 2 hours
+        }
+        
+        return 120; // Default 2 hours
+    }
 }

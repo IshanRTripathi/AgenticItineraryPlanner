@@ -1,0 +1,458 @@
+2025-11-28 23:30:22.156 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/analytics/events
+2025-11-28 23:30:22.156 [http-nio-8080-exec-8] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/analytics/events
+2025-11-28 23:30:22.156 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/analytics/events", parameters={}
+2025-11-28 23:30:22.156 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AnalyticsIngestController#trackEvent(Map)
+2025-11-28 23:30:22.156 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{eventName=chat_message_sent, timestamp=1764352822155, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, sessionI (truncated)...]
+2025-11-28 23:30:22.157 [http-nio-8080-exec-8] INFO  c.tripplanner.controller.AnalyticsIngestController - === ANALYTICS EVENT RECEIVED ===
+2025-11-28 23:30:22.157 [http-nio-8080-exec-8] INFO  c.tripplanner.controller.AnalyticsIngestController - Event: {eventName=chat_message_sent, timestamp=1764352822155, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, sessionId=3a15ac72-dd5a-49a4-b0df-513a1eb80199, platform=web, properties={messageLength=37, wordCount=8, itineraryId=it_e08d2e26-38d5-4122-86e3-8e823a2a45b8, timestamp=1764352822155}}
+2025-11-28 23:30:22.157 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-28 23:30:22.157 [http-nio-8080-exec-8] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{success=true}]
+2025-11-28 23:30:22.157 [http-nio-8080-exec-8] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-11-28 23:30:22.157 [http-nio-8080-exec-8] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-28 23:30:22.158 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8/chat/history
+2025-11-28 23:30:22.158 [http-nio-8080-exec-1] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8/chat/history
+2025-11-28 23:30:22.158 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8/chat/history", parameters={}
+2025-11-28 23:30:22.158 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#saveChatMessage(String, Map, HttpServletRequest)
+2025-11-28 23:30:22.158 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{message=show me more tourist places for day 3, sender=user, timestamp=1764352822156, day=0}]
+2025-11-28 23:30:24.140 [http-nio-8080-exec-1] INFO  com.tripplanner.service.ChatHistoryService - Saved chat message for itinerary it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:24.140 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-28 23:30:24.140 [http-nio-8080-exec-1] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{id=ZnlJatXv03Sxz8gfjgWu, message=show me more tourist places for day 3, sender=user, day=0, userId= (truncated)...]
+2025-11-28 23:30:24.141 [http-nio-8080-exec-1] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 201 CREATED
+2025-11-28 23:30:24.141 [http-nio-8080-exec-1] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-28 23:30:24.143 [clientInboundChannel-34] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - Searching methods to handle SEND /app/chat session=session_it_e08d2e26-38d5-4122-86e3-8e823a2a45b8_1764352798337, lookupDestination='/chat'
+2025-11-28 23:30:24.144 [clientInboundChannel-34] DEBUG o.s.w.s.m.WebSocketAnnotationMethodMessageHandler - Invoking WebSocketController#handleChatMessage[1 args]
+2025-11-28 23:30:24.144 [clientInboundChannel-34] INFO  com.tripplanner.controller.WebSocketController - Received chat message: {itineraryId=it_e08d2e26-38d5-4122-86e3-8e823a2a45b8, message=show me more tourist places for day 3, context={selectedDay=0, scope=day, autoApply=false}, timestamp=2025-11-28T18:00:24.143Z}
+2025-11-28 23:30:24.144 [clientInboundChannel-34] INFO  com.tripplanner.service.OrchestratorService - Routing chat request: ChatRequest{itineraryId='it_e08d2e26-38d5-4122-86e3-8e823a2a45b8', scope='day', day=0, selectedNodeId='null', text='show me more tourist places for day 3', autoApply=false, userId='websocket-user', sessionId='null', conversationId='null'}
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.ChatHistoryService - Retrieved 5 chat messages for itinerary it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating content with strategy: RETRY_WITH_BACKOFF (2 providers available)
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting content generation with provider 1 (GeminiClient) using strategy RETRY_WITH_BACKOFF
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Trying Gemini key attempt 1/5
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 3097
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 0
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL USER PROMPT ===
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - You are an AI assistant that classifies user intents for travel itinerary management.
+
+Context:
+Itinerary: 5-day trip to Zurich with 21 activities (estimated ₹773 per person)
+Days: 5
+Currency: CHF
+Day 1 (Zurich): 4 activities
+Day 2 (Zurich): 4 activities
+Day 3 (Lucerne): 5 activities
+Day 4 (Lucerne): 4 activities
+Day 5 (Lucerne): 4 activities
+
+
+Recent conversation (last 5 messages):
+User: show me museums for day 2
+Assistant: Certainly! For Day 2 in Zurich, your itinerary includes one museum visit:
+
+*   **Swiss National Museum (Landesmuseum Zürich)**
+    *   **Location:** Museumstrasse 2, 8001 Zürich
+    *   **Cost:** CHF 41.00
+
+Enjoy your visit!
+User: Show me museums in Interlaken
+Assistant: It looks like your itinerary focuses on Zurich and Lucerne, and Interlaken is not included in your planned trip. Therefore, there are no museums listed for Interlaken in your itinerary.
+
+However, your itinerary does include some fantastic museums in Zurich and Lucerne! Would you like to know more about:
+
+*   The **Swiss National Museum (Landesmuseum Zürich)** in Zurich on Day 2?
+*   The **Swiss Museum of Transport (Verkehrshaus der Schweiz)** in Lucerne on Day 5?
+User: show me more tourist places for day 3
+
+
+User request: "show me more tourist places for day 3"
+
+=== SUPPORTED TASK TYPES ===
+You MUST respond with EXACTLY ONE of these task types:
+
+1. TASK TYPE: edit
+   Use for: Modifying itinerary, changing times, adding/removing/replacing activities
+   Examples:
+   - "Move lunch to 2pm" → edit
+   - "Add a museum" → edit
+   - "Remove the beach activity" → edit
+   - "Change the restaurant" → edit
+   - "Replace dinner with something else" → edit
+
+2. TASK TYPE: plan
+   Use for: Creating NEW itineraries from scratch
+   Examples:
+   - "Create a 3-day trip to Paris" → plan
+   - "Plan my vacation" → plan
+   - "Generate an itinerary" → plan
+
+3. TASK TYPE: explain
+   Use for: Answering questions, providing information, or explaining existing itinerary
+   Examples:
+   - "What's my plan for today?" → explain
+   - "Tell me about day 2" → explain
+   - "Summarize my trip" → explain
+   - "What am I doing tomorrow?" → explain
+   - "Why this restaurant?" → explain
+   - "Explain the itinerary" → explain
+
+4. TASK TYPE: book
+   Use for: Making reservations or bookings
+   Examples:
+   - "Book this hotel" → book
+   - "Reserve a flight" → book
+   - "Purchase tickets" → book
+
+5. TASK TYPE: enrich
+   Use for: Adding photos, reviews, or additional details
+   Examples:
+   - "Add photos to this place" → enrich
+   - "Show me reviews" → enrich
+   - "Get more details about this hotel" → enrich
+
+=== CRITICAL RULES ===
+1. Questions/explanations about EXISTING itinerary → USE 'explain'
+2. Creating NEW itinerary from scratch → USE 'plan'
+3. Modifying itinerary (add/remove/change) → USE 'edit'
+4. Booking/reservations → USE 'book'
+5. Photos/reviews/details → USE 'enrich'
+6. You MUST choose from: edit, plan, explain, book, enrich
+
+Respond in JSON format:
+{
+  "intent": "DESCRIPTIVE_INTENT_NAME",
+  "taskType": "edit OR plan OR explain OR book OR enrich",
+  "entities": {},
+  "confidence": 0.95
+}
+
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END PROMPTS ===
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3392
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL REQUEST BODY ===
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - {
+  "contents": [{
+    "parts": [{
+      "text": "You are an AI assistant that classifies user intents for travel itinerary management.\n\nContext:\nItinerary: 5-day trip to Zurich with 21 activities (estimated ₹773 per person)\nDays: 5\nCurrency: CHF\nDay 1 (Zurich): 4 activities\nDay 2 (Zurich): 4 activities\nDay 3 (Lucerne): 5 activities\nDay 4 (Lucerne): 4 activities\nDay 5 (Lucerne): 4 activities\n\n\nRecent conversation (last 5 messages):\nUser: show me museums for day 2\nAssistant: Certainly! For Day 2 in Zurich, your itinerary includes one museum visit:\n\n*   **Swiss National Museum (Landesmuseum Zürich)**\n    *   **Location:** Museumstrasse 2, 8001 Zürich\n    *   **Cost:** CHF 41.00\n\nEnjoy your visit!\nUser: Show me museums in Interlaken\nAssistant: It looks like your itinerary focuses on Zurich and Lucerne, and Interlaken is not included in your planned trip. Therefore, there are no museums listed for Interlaken in your itinerary.\n\nHowever, your itinerary does include some fantastic museums in Zurich and Lucerne! Would you like to know more about:\n\n*   The **Swiss National Museum (Landesmuseum Zürich)** in Zurich on Day 2?\n*   The **Swiss Museum of Transport (Verkehrshaus der Schweiz)** in Lucerne on Day 5?\nUser: show me more tourist places for day 3\n\n\nUser request: \"show me more tourist places for day 3\"\n\n=== SUPPORTED TASK TYPES ===\nYou MUST respond with EXACTLY ONE of these task types:\n\n1. TASK TYPE: edit\n   Use for: Modifying itinerary, changing times, adding/removing/replacing activities\n   Examples:\n   - \"Move lunch to 2pm\" → edit\n   - \"Add a museum\" → edit\n   - \"Remove the beach activity\" → edit\n   - \"Change the restaurant\" → edit\n   - \"Replace dinner with something else\" → edit\n\n2. TASK TYPE: plan\n   Use for: Creating NEW itineraries from scratch\n   Examples:\n   - \"Create a 3-day trip to Paris\" → plan\n   - \"Plan my vacation\" → plan\n   - \"Generate an itinerary\" → plan\n\n3. TASK TYPE: explain\n   Use for: Answering questions, providing information, or explaining existing itinerary\n   Examples:\n   - \"What's my plan for today?\" → explain\n   - \"Tell me about day 2\" → explain\n   - \"Summarize my trip\" → explain\n   - \"What am I doing tomorrow?\" → explain\n   - \"Why this restaurant?\" → explain\n   - \"Explain the itinerary\" → explain\n\n4. TASK TYPE: book\n   Use for: Making reservations or bookings\n   Examples:\n   - \"Book this hotel\" → book\n   - \"Reserve a flight\" → book\n   - \"Purchase tickets\" → book\n\n5. TASK TYPE: enrich\n   Use for: Adding photos, reviews, or additional details\n   Examples:\n   - \"Add photos to this place\" → enrich\n   - \"Show me reviews\" → enrich\n   - \"Get more details about this hotel\" → enrich\n\n=== CRITICAL RULES ===\n1. Questions/explanations about EXISTING itinerary → USE 'explain'\n2. Creating NEW itinerary from scratch → USE 'plan'\n3. Modifying itinerary (add/remove/change) → USE 'edit'\n4. Booking/reservations → USE 'book'\n5. Photos/reviews/details → USE 'enrich'\n6. You MUST choose from: edit, plan, explain, book, enrich\n\nRespond in JSON format:\n{\n  \"intent\": \"DESCRIPTIVE_INTENT_NAME\",\n  \"taskType\": \"edit OR plan OR explain OR book OR enrich\",\n  \"entities\": {},\n  \"confidence\": 0.95\n}\n"
+    }]
+  }],
+  "generationConfig": {
+    "temperature": 0.70,
+    "maxOutputTokens": 65535
+  }
+}
+
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END REQUEST BODY ===
+2025-11-28 23:30:26.993 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API with 45s timeout...
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Received response from Gemini API in 4622ms
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 747
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL RESPONSE BODY ===
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"intent\": \"QueryDayActivities\",\n  \"taskType\": \"explain\",\n  \"entities\": {\n    \"day\": \"3\",\n    \"activity_type\": \"tourist places\"\n  },\n  \"confidence\": 0.95\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 864,
+    "candidatesTokenCount": 66,
+    "totalTokenCount": 1530,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 864
+      }
+    ],
+    "thoughtsTokenCount": 600
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "P-MpaeGsFLD84-EPlIyn0Qg"
+}
+
+2025-11-28 23:30:31.615 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END RESPONSE BODY ===
+2025-11-28 23:30:31.616 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_352009412_20251128_233031.json
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 170
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL GENERATED CONTENT ===
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - ```json
+{
+  "intent": "QueryDayActivities",
+  "taskType": "explain",
+  "entities": {
+    "day": "3",
+    "activity_type": "tourist places"
+  },
+  "confidence": 0.95
+}
+```
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END GENERATED CONTENT ===
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - =========================================
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ApiKeyRotationService - ✅ Key success for gemini: AIza...UNAc (now preferred, success rate: 100.0%)
+2025-11-28 23:30:31.617 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-11-28 23:30:33.252 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentRegistry - Created execution plan for 'explain': 1 agents, primary: ExplainAgent
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.OrchestratorService - Executing agent plan: Task: explain, Agents: 1, Fallback: true, MaxRetries: 2, Timeout: 45000ms
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - === AGENT EXECUTION START ===
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Agent Kind: EXPLAINER
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Agent ID: 38965232-6eba-4581-b321-290f0251b084
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Itinerary ID: it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Request Type: Map
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Request Data: {chatRequest=ChatRequest{itineraryId='it_e08d2e26-38d5-4122-86e3-8e823a2a45b8', scope='day', day=0, selectedNodeId='null', text='show me more tourist places for day 3', autoApply=false, userId='websocket-user', sessionId='null', conversationId='null'}, taskType=explain, autoApply=false, itineraryId=it_e08d2e26-38d5-4122-86e3-8e823a2a45b8, scope=day, text=show me more tourist places for day 3, selectedNodeId=null, userId=websocket-user, day=0}
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Request Details: {chatRequest=ChatRequest{itineraryId='it_e08d2e26-38d5-4122-86e3-8e823a2a45b8', scope='day', day=0, selectedNodeId='null', text='show me more tourist places for day 3', autoApply=false, userId='websocket-user', sessionId='null', conversationId='null'}, taskType=explain, autoApply=false, itineraryId=it_e08d2e26-38d5-4122-86e3-8e823a2a45b8, scope=day, text=show me more tourist places for day 3, selectedNodeId=null, userId=websocket-user, day=0}
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - =============================
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 38965232-6eba-4581-b321-290f0251b084
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: EXPLAINER
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Status: queued
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (agent): 0
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent queued for execution
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-28T18:00:33.253963600Z
+2025-11-28 23:30:33.253 [clientInboundChannel-34] WARN  c.t.service.agents.PipelineProgressCoordinator - Unknown agent kind for progress: EXPLAINER
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (overall): 14 (mapped from 0% in EXPLAINER)
+2025-11-28 23:30:33.253 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_e08d2e2...(truncated)
+2025-11-28 23:30:33.253 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 38965232-6eba-4581-b321-290f0251b084
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: EXPLAINER
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Status: running
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (agent): 10
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent started
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-28T18:00:33.253963600Z
+2025-11-28 23:30:33.253 [clientInboundChannel-34] WARN  c.t.service.agents.PipelineProgressCoordinator - Unknown agent kind for progress: EXPLAINER
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (overall): 14 (mapped from 10% in EXPLAINER)
+2025-11-28 23:30:33.253 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_e08d2e2...(truncated)
+2025-11-28 23:30:33.253 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Executing agent-specific logic for: EXPLAINER
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - === EXPLAIN AGENT PROCESSING ===
+2025-11-28 23:30:33.253 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - User question: show me more tourist places for day 3
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764495000000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764495000
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764505800000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764505800
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764513000000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764513000
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764531000000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764531000
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764581400000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764581400
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764590400000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764590400
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764599400000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764599400
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764615600000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764615600
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764671400000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764671400
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764680400000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764680400
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764687600000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764687600
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764703800000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764703800
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764752400000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764752400
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764772200000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764772200
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764778500000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764778500
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764790200000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764790200
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764838800000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764838800
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764855000000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764855000
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764862200000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764862200
+2025-11-28 23:30:34.898 [clientInboundChannel-34] WARN  com.tripplanner.util.TimeFormatter - Failed to format time-of-day 1764873000000 ms: Invalid value for SecondOfDay (valid values 0 - 86399): 1764873000
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ResilientAiClient - Generating content with strategy: RETRY_WITH_BACKOFF (2 providers available)
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ResilientAiClient - Attempting content generation with provider 1 (GeminiClient) using strategy RETRY_WITH_BACKOFF
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Trying Gemini key attempt 1/5
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION REQUEST ===
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Model: gemini-2.5-flash
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Temperature: 0.7
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Max Tokens: 65535
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Mock Mode: false
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Circuit Breaker State: CLOSED
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - User Prompt Length: 2405
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - System Prompt Length: 828
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL USER PROMPT ===
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - ITINERARY DATA:
+TRIP OVERVIEW:
+Destination: 5-day trip to Zurich with 21 activities (estimated ₹773 per person)
+Duration: 5 days
+Currency: CHF
+
+DAY-BY-DAY ITINERARY:
+
+Day 1 - Zurich:
+  • Grossmünster Church (attraction) at N/A - Zwinglipl. 7, 8001 Zürich (CHF 28.00)
+  • Hearty Swiss Feast at Zeughauskeller (meal) at N/A - Bahnhofstrasse 28A, 8001 Zürich (CHF 27.60)
+  • Bahnhofstrasse (attraction) at N/A - Bahnhofstrasse, 8001 Zürich (CHF 28.00)
+  • Traditional Fondue Experience at Swiss Chuchi (meal) at N/A - Rosengasse 10, 8001 Zürich (CHF 27.60)
+
+Day 2 - Zurich:
+  • Swiss National Museum (Landesmuseum Zürich) (attraction) at N/A - Museumstrasse 2, 8001 Zürich (CHF 41.00)
+  • Lindenhof Hill (attraction) at N/A - Lindenhof, 8001 Zürich (CHF 14.00)
+  • Historic Swiss Charm at Oepfelchammer (meal) at N/A - Rindermarkt 12, 8001 Zürich (CHF 27.60)
+  • Grand Alpine Dining at Bierhalle Kropf (meal) at N/A - In Gassen 16, 8001 Zürich (CHF 27.60)
+
+Day 3 - Lucerne:
+  • Train from Zurich to Lucerne (transport) at 9:00 am (CHF 83.00)
+  • Chapel Bridge (Kapellbrücke) (attraction) at N/A - Kapellbrücke, 6002 Luzern (CHF 28.00)
+  • Riverside Swiss Delights at Pfistern (meal) at N/A - Kornmarkt 4, 6004 Luzern (CHF 55.20)
+  • Old Town Lucerne (Altstadt) Exploration (attraction) at N/A - Weinmarkt, 6004 Luzern (CHF 28.00)
+  • Craft Beer & Cuisine at Rathaus Brauerei (meal) at N/A - Unter der Egg 2, 6004 Luzern (CHF 27.60)
+
+Day 4 - Lucerne:
+  • Mount Pilatus Golden Round Trip (attraction) at N/A - Mount Pilatus, 6010 Alpnach (CHF 55.00)
+  • Lakeside Elegance at Restaurant Schiff (meal) at N/A - Unter der Egg 8, 6004 Luzern (CHF 27.60)
+  • Lion Monument (Löwendenkmal) (attraction) at N/A - Denkmalstrasse 4, 6002 Luzern (CHF 28.00)
+  • Authentic Lucerne at Wirtshaus Galliker (meal) at N/A - Schützenstrasse 1, 6003 Luzern (CHF 27.60)
+
+Day 5 - Lucerne:
+  • Swiss Museum of Transport (Verkehrshaus der Schweiz) (attraction) at N/A - Haldenstrasse 44, 6006 Luzern (CHF 41.00)
+  • Sophisticated Italian at Olivo (meal) at N/A - Pilatusstrasse 29, 6003 Luzern (CHF 55.00)
+  • Lake Lucerne Panoramic Cruise (attraction) at N/A - Bahnhofpl. 4, 6003 Luzern (CHF 55.00)
+  • Classic Swiss Fare at Restaurant Lapin (meal) at N/A - Museggstrasse 2, 6004 Luzern (CHF 41.00)
+
+
+
+USER QUESTION:
+show me more tourist places for day 3
+
+Please provide a helpful, accurate answer based on the itinerary data above.
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL SYSTEM PROMPT ===
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - You are a helpful travel assistant AI that answers questions about the user's itinerary.
+
+Your role is to:
+1. Provide accurate, detailed information based on the itinerary data
+2. Answer questions naturally and conversationally
+3. Highlight key details like timing, locations, costs when relevant
+4. Be concise but informative
+5. If asked about a specific day, focus on that day's activities
+6. If asked about the whole trip, provide a comprehensive overview
+
+IMPORTANT:
+- Use ONLY the information provided in the itinerary context
+- If information is not available but relevant to travel, find most accurate general advice
+- Do NOT make up details about the itinerary
+- Format your response in a friendly, readable way
+- Use bullet points or short paragraphs for clarity
+- Include relevant details like times, costs, locations
+
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END PROMPTS ===
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Request Body Length: 3447
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL REQUEST BODY ===
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - {
+  "contents": [{
+    "parts": [{
+      "text": "You are a helpful travel assistant AI that answers questions about the user's itinerary.\n\nYour role is to:\n1. Provide accurate, detailed information based on the itinerary data\n2. Answer questions naturally and conversationally\n3. Highlight key details like timing, locations, costs when relevant\n4. Be concise but informative\n5. If asked about a specific day, focus on that day's activities\n6. If asked about the whole trip, provide a comprehensive overview\n\nIMPORTANT:\n- Use ONLY the information provided in the itinerary context\n- If information is not available but relevant to travel, find most accurate general advice\n- Do NOT make up details about the itinerary\n- Format your response in a friendly, readable way\n- Use bullet points or short paragraphs for clarity\n- Include relevant details like times, costs, locations\n\n\nITINERARY DATA:\nTRIP OVERVIEW:\nDestination: 5-day trip to Zurich with 21 activities (estimated ₹773 per person)\nDuration: 5 days\nCurrency: CHF\n\nDAY-BY-DAY ITINERARY:\n\nDay 1 - Zurich:\n  • Grossmünster Church (attraction) at N/A - Zwinglipl. 7, 8001 Zürich (CHF 28.00)\n  • Hearty Swiss Feast at Zeughauskeller (meal) at N/A - Bahnhofstrasse 28A, 8001 Zürich (CHF 27.60)\n  • Bahnhofstrasse (attraction) at N/A - Bahnhofstrasse, 8001 Zürich (CHF 28.00)\n  • Traditional Fondue Experience at Swiss Chuchi (meal) at N/A - Rosengasse 10, 8001 Zürich (CHF 27.60)\n\nDay 2 - Zurich:\n  • Swiss National Museum (Landesmuseum Zürich) (attraction) at N/A - Museumstrasse 2, 8001 Zürich (CHF 41.00)\n  • Lindenhof Hill (attraction) at N/A - Lindenhof, 8001 Zürich (CHF 14.00)\n  • Historic Swiss Charm at Oepfelchammer (meal) at N/A - Rindermarkt 12, 8001 Zürich (CHF 27.60)\n  • Grand Alpine Dining at Bierhalle Kropf (meal) at N/A - In Gassen 16, 8001 Zürich (CHF 27.60)\n\nDay 3 - Lucerne:\n  • Train from Zurich to Lucerne (transport) at 9:00 am (CHF 83.00)\n  • Chapel Bridge (Kapellbrücke) (attraction) at N/A - Kapellbrücke, 6002 Luzern (CHF 28.00)\n  • Riverside Swiss Delights at Pfistern (meal) at N/A - Kornmarkt 4, 6004 Luzern (CHF 55.20)\n  • Old Town Lucerne (Altstadt) Exploration (attraction) at N/A - Weinmarkt, 6004 Luzern (CHF 28.00)\n  • Craft Beer & Cuisine at Rathaus Brauerei (meal) at N/A - Unter der Egg 2, 6004 Luzern (CHF 27.60)\n\nDay 4 - Lucerne:\n  • Mount Pilatus Golden Round Trip (attraction) at N/A - Mount Pilatus, 6010 Alpnach (CHF 55.00)\n  • Lakeside Elegance at Restaurant Schiff (meal) at N/A - Unter der Egg 8, 6004 Luzern (CHF 27.60)\n  • Lion Monument (Löwendenkmal) (attraction) at N/A - Denkmalstrasse 4, 6002 Luzern (CHF 28.00)\n  • Authentic Lucerne at Wirtshaus Galliker (meal) at N/A - Schützenstrasse 1, 6003 Luzern (CHF 27.60)\n\nDay 5 - Lucerne:\n  • Swiss Museum of Transport (Verkehrshaus der Schweiz) (attraction) at N/A - Haldenstrasse 44, 6006 Luzern (CHF 41.00)\n  • Sophisticated Italian at Olivo (meal) at N/A - Pilatusstrasse 29, 6003 Luzern (CHF 55.00)\n  • Lake Lucerne Panoramic Cruise (attraction) at N/A - Bahnhofpl. 4, 6003 Luzern (CHF 55.00)\n  • Classic Swiss Fare at Restaurant Lapin (meal) at N/A - Museggstrasse 2, 6004 Luzern (CHF 41.00)\n\n\n\nUSER QUESTION:\nshow me more tourist places for day 3\n\nPlease provide a helpful, accurate answer based on the itinerary data above."
+    }]
+  }],
+  "generationConfig": {
+    "temperature": 0.70,
+    "maxOutputTokens": 65535
+  }
+}
+
+2025-11-28 23:30:34.898 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END REQUEST BODY ===
+2025-11-28 23:30:34.900 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Sending request to Gemini API with 45s timeout...
+2025-11-28 23:30:39.240 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Received response from Gemini API in 4340ms
+2025-11-28 23:30:39.241 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI API RESPONSE ===
+2025-11-28 23:30:39.241 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Status Code: 200
+2025-11-28 23:30:39.241 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Response Length: 1237
+2025-11-28 23:30:39.241 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL RESPONSE BODY ===
+2025-11-28 23:30:39.241 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - {
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Certainly! On Day 3, your itinerary includes a couple of wonderful tourist places in Lucerne:\n\n*   **Chapel Bridge (Kapellbrücke)**: This iconic bridge is located at Kapellbrücke, 6002 Luzern. The estimated cost for this attraction is CHF 28.00.\n*   **Old Town Lucerne (Altstadt) Exploration**: You'll have time to explore the charming Old Town, located around Weinmarkt, 6004 Luzern. The estimated cost for this exploration is CHF 28.00.\n\nRemember, Day 3 also involves a train journey from Zurich to Lucerne at 9:00 am (CHF 83.00), and you have two meal experiences planned: Riverside Swiss Delights at Pfistern (CHF 55.20) and Craft Beer & Cuisine at Rathaus Brauerei (CHF 27.60)."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1127,
+    "candidatesTokenCount": 198,
+    "totalTokenCount": 1502,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 1127
+      }
+    ],
+    "thoughtsTokenCount": 177
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "RuMpabXkN_vFjuMP5oKOiQ8"
+}
+
+2025-11-28 23:30:39.241 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END RESPONSE BODY ===
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Saved Gemini response to: responses\gemini_response_1011824828_20251128_233039.json
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === GEMINI CONTENT GENERATION RESPONSE ===
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Generated content length: 682
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === FULL GENERATED CONTENT ===
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - Certainly! On Day 3, your itinerary includes a couple of wonderful tourist places in Lucerne:
+
+*   **Chapel Bridge (Kapellbrücke)**: This iconic bridge is located at Kapellbrücke, 6002 Luzern. The estimated cost for this attraction is CHF 28.00.
+*   **Old Town Lucerne (Altstadt) Exploration**: You'll have time to explore the charming Old Town, located around Weinmarkt, 6004 Luzern. The estimated cost for this exploration is CHF 28.00.
+
+Remember, Day 3 also involves a train journey from Zurich to Lucerne at 9:00 am (CHF 83.00), and you have two meal experiences planned: Riverside Swiss Delights at Pfistern (CHF 55.20) and Craft Beer & Cuisine at Rathaus Brauerei (CHF 27.60).
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - === END GENERATED CONTENT ===
+2025-11-28 23:30:39.242 [clientInboundChannel-34] INFO  com.tripplanner.service.client.GeminiClient - =========================================
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ApiKeyRotationService - ✅ Key success for gemini: AIza...UNAc (now preferred, success rate: 100.0%)
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.ai.ResilientAiClient - ✅ Provider 1 (GeminiClient) succeeded
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Generated explanation (length: 682)
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - === PUBLISHING AGENT EVENT VIA WEBSOCKET ===
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Itinerary ID: it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Agent ID: 38965232-6eba-4581-b321-290f0251b084
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Agent Kind: EXPLAINER
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Status: completed
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (agent): 100
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Message: Agent completed successfully
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Step: null
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Timestamp: 2025-11-28T18:00:39.243010500Z
+2025-11-28 23:30:39.243 [clientInboundChannel-34] WARN  c.t.service.agents.PipelineProgressCoordinator - Unknown agent kind for progress: EXPLAINER
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - Progress (overall): 14 (mapped from 100% in EXPLAINER)
+2025-11-28 23:30:39.243 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/itinerary/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8 session=null payload={"type":"agent_progress","updateType":"agent_progress","itineraryId":"it_e08d2e2...(truncated)
+2025-11-28 23:30:39.243 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.service.agents.AgentEventBus - ==========================================
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - === AGENT EXECUTION COMPLETED ===
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Agent Kind: EXPLAINER
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Itinerary ID: it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Result Type: String
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - Result: Certainly! On Day 3, your itinerary includes a couple of wonderful tourist places in Lucerne:
+
+*   **Chapel Bridge (Kapellbrücke)**: This iconic bridge is located at Kapellbrücke, 6002 Luzern. The estimated cost for this attraction is CHF 28.00.
+*   **Old Town Lucerne (Altstadt) Exploration**: You'll have time to explore the charming Old Town, located around Weinmarkt, 6004 Luzern. The estimated cost for this exploration is CHF 28.00.
+
+Remember, Day 3 also involves a train journey from Zurich to Lucerne at 9:00 am (CHF 83.00), and you have two meal experiences planned: Riverside Swiss Delights at Pfistern (CHF 55.20) and Craft Beer & Cuisine at Rathaus Brauerei (CHF 27.60).
+2025-11-28 23:30:39.243 [clientInboundChannel-34] INFO  com.tripplanner.agents.ExplainAgent - =================================
+2025-11-28 23:30:39.243 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Processing MESSAGE destination=/topic/chat/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8 session=null payload={"type":"chat_response","updateType":"chat_response","itineraryId":"it_e08d2e26-...(truncated)
+2025-11-28 23:30:39.243 [clientInboundChannel-34] DEBUG org.springframework.web.SimpLogging - Broadcasting to 1 sessions.
+2025-11-28 23:30:39.251 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/itineraries/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8/chat/history
+2025-11-28 23:30:39.252 [http-nio-8080-exec-6] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/itineraries/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8/chat/history
+2025-11-28 23:30:39.252 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/itineraries/it_e08d2e26-38d5-4122-86e3-8e823a2a45b8/chat/history", parameters={}
+2025-11-28 23:30:39.252 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.ItinerariesController#saveChatMessage(String, Map, HttpServletRequest)
+2025-11-28 23:30:39.253 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{message=Certainly! On Day 3, your itinerary includes a couple of wonderful tourist places in Lucern (truncated)...]
+2025-11-28 23:30:39.472 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Securing POST /api/v1/analytics/events
+2025-11-28 23:30:39.473 [http-nio-8080-exec-4] DEBUG org.springframework.security.web.FilterChainProxy - Secured POST /api/v1/analytics/events
+2025-11-28 23:30:39.473 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - POST "/api/v1/analytics/events", parameters={}
+2025-11-28 23:30:39.473 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestMappingHandlerMapping - Mapped to com.tripplanner.controller.AnalyticsIngestController#trackEvent(Map)
+2025-11-28 23:30:39.473 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.a.RequestResponseBodyMethodProcessor - Read "application/json;charset=UTF-8" to [{eventName=chat_response_received, timestamp=1764352839471, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, ses (truncated)...]
+2025-11-28 23:30:39.473 [http-nio-8080-exec-4] INFO  c.tripplanner.controller.AnalyticsIngestController - === ANALYTICS EVENT RECEIVED ===
+2025-11-28 23:30:39.473 [http-nio-8080-exec-4] INFO  c.tripplanner.controller.AnalyticsIngestController - Event: {eventName=chat_response_received, timestamp=1764352839471, userId=vYqbJhWhJhdeMyvIRYaSFxvobYn2, sessionId=3a15ac72-dd5a-49a4-b0df-513a1eb80199, platform=web, properties={messageLength=37, wordCount=8, duration=13516, itineraryId=it_e08d2e26-38d5-4122-86e3-8e823a2a45b8}}
+2025-11-28 23:30:39.474 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-28 23:30:39.474 [http-nio-8080-exec-4] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{success=true}]
+2025-11-28 23:30:39.474 [http-nio-8080-exec-4] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 200 OK
+2025-11-28 23:30:39.474 [http-nio-8080-exec-4] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2025-11-28 23:30:39.586 [http-nio-8080-exec-6] INFO  com.tripplanner.service.ChatHistoryService - Saved chat message for itinerary it_e08d2e26-38d5-4122-86e3-8e823a2a45b8
+2025-11-28 23:30:39.586 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2025-11-28 23:30:39.587 [http-nio-8080-exec-6] DEBUG o.s.w.s.m.m.annotation.HttpEntityMethodProcessor - Writing [{sender=assistant, applied=false, id=uCoZ1Zkfdda47d7G8b7Z, message=Certainly! On Day 3, your itinera (truncated)...]
+2025-11-28 23:30:39.587 [http-nio-8080-exec-6] DEBUG org.springframework.web.servlet.DispatcherServlet - Completed 201 CREATED
+2025-11-28 23:30:39.587 [http-nio-8080-exec-6] DEBUG o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext

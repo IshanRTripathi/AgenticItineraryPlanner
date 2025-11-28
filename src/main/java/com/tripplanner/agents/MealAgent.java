@@ -102,8 +102,16 @@ public class MealAgent extends BaseAgent {
      * Populate meal nodes with detailed information.
      */
     public void populateMeals(String itineraryId, NormalizedItinerary skeleton) {
+        populateMeals(itineraryId, skeleton, false);
+    }
+    
+    /**
+     * Populate meal nodes with detailed information.
+     * @param skipSave if true, modifies skeleton in-place without saving (for parallel execution)
+     */
+    public void populateMeals(String itineraryId, NormalizedItinerary skeleton, boolean skipSave) {
         logger.info("=== MEAL AGENT ===");
-        logger.info("Populating meal nodes for itinerary: {}", itineraryId);
+        logger.info("Populating meal nodes for itinerary: {} (skipSave={})", itineraryId, skipSave);
         
         try {
             emitProgress(itineraryId, 10, "Loading meal data", "loading");
@@ -125,14 +133,28 @@ public class MealAgent extends BaseAgent {
             // Populate meals with AI
             List<PopulatedMeal> populatedMeals = populateMealsWithAI(skeleton, mealContexts);
             
-            emitProgress(itineraryId, 70, "Saving meal data", "saving");
-            
-            // Update the itinerary with populated data
-            updateItineraryWithMeals(itineraryId, skeleton, populatedMeals);
-            
-            emitProgress(itineraryId, 100, 
-                String.format("Populated %d meals", populatedMeals.size()), 
-                "complete");
+            if (skipSave) {
+                // Collect-only mode: Apply data to skeleton without saving
+                logger.info("Applying meal data to skeleton (skipSave=true, no database write)");
+                emitProgress(itineraryId, 70, "Applying meal data", "applying");
+                
+                // Apply meals and metadata (same logic as updateItineraryWithMeals but without save)
+                applyMealsWithMetadata(skeleton, populatedMeals);
+                
+                logger.info("Applied {} meals with metadata to skeleton (in-memory only)", populatedMeals.size());
+                
+                emitProgress(itineraryId, 100, 
+                    String.format("Collected %d meals", populatedMeals.size()), 
+                    "collected");
+            } else {
+                // Normal mode: Apply and save
+                emitProgress(itineraryId, 70, "Saving meal data", "saving");
+                updateItineraryWithMeals(itineraryId, skeleton, populatedMeals);
+                
+                emitProgress(itineraryId, 100, 
+                    String.format("Populated %d meals", populatedMeals.size()), 
+                    "complete");
+            }
             
             logger.info("=== MEAL AGENT COMPLETE ===");
             logger.info("Populated {} meals", populatedMeals.size());
@@ -356,11 +378,9 @@ public class MealAgent extends BaseAgent {
     }
     
     /**
-     * Update itinerary with populated meal data.
+     * Apply meals with metadata to skeleton (for parallel execution without save).
      */
-    private void updateItineraryWithMeals(String itineraryId, NormalizedItinerary skeleton,
-                                          List<PopulatedMeal> populatedMeals) {
-        
+    private void applyMealsWithMetadata(NormalizedItinerary skeleton, List<PopulatedMeal> populatedMeals) {
         // Apply meals to skeleton
         applyMealsToSkeleton(skeleton, populatedMeals);
         
@@ -385,6 +405,16 @@ public class MealAgent extends BaseAgent {
             }
         }
         logger.info("Populated metadata for all meal nodes");
+    }
+    
+    /**
+     * Update itinerary with populated meal data.
+     */
+    private void updateItineraryWithMeals(String itineraryId, NormalizedItinerary skeleton,
+                                          List<PopulatedMeal> populatedMeals) {
+        
+        // Apply meals and metadata
+        applyMealsWithMetadata(skeleton, populatedMeals);
         
         // Validate before save
         ValidationResult validationResult = itineraryValidator.validate(skeleton);

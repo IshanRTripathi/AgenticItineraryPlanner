@@ -6,6 +6,8 @@ export interface ChatRequest {
   text: string;
   autoApply: boolean;
   userId?: string;
+  sessionId?: string; // For SSE progress updates
+  conversationId?: string; // For multi-turn conversations
 }
 
 export interface ChatMessageDTO {
@@ -84,7 +86,9 @@ export const chatApi = {
   async send(itineraryId: string, req: ChatRequest): Promise<ChatMessageDTO> {
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/itineraries/${itineraryId}/chat`, {
+      
+      // Use the new /chat/route endpoint that supports SSE progress
+      const res = await fetch(`${API_BASE_URL}/chat/route`, {
         method: 'POST',
         headers,
         credentials: 'include',

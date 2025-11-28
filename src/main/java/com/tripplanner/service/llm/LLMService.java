@@ -285,19 +285,35 @@ public class LLMService {
         prompt.append("   - \"Show me reviews\" → enrich\n");
         prompt.append("   - \"Get more details about this hotel\" → enrich\n\n");
         
+        prompt.append("6. TASK TYPE: search\n");
+        prompt.append("   Use for: Finding NEW places, activities, or options to discover and add\n");
+        prompt.append("   Examples:\n");
+        prompt.append("   - \"Show me more tourist places\" → search\n");
+        prompt.append("   - \"Find museums for day 2\" → search\n");
+        prompt.append("   - \"Suggest restaurants in Lucerne\" → search\n");
+        prompt.append("   - \"What other attractions are nearby?\" → search\n");
+        prompt.append("   - \"I want to visit a museum\" → search\n");
+        prompt.append("   - \"Show me more options\" → search\n\n");
+        
         prompt.append("=== CRITICAL RULES ===\n");
         prompt.append("1. Questions/explanations about EXISTING itinerary → USE 'explain'\n");
         prompt.append("2. Creating NEW itinerary from scratch → USE 'plan'\n");
         prompt.append("3. Modifying itinerary (add/remove/change) → USE 'edit'\n");
         prompt.append("4. Booking/reservations → USE 'book'\n");
         prompt.append("5. Photos/reviews/details → USE 'enrich'\n");
-        prompt.append("6. You MUST choose from: edit, plan, explain, book, enrich\n\n");
+        prompt.append("6. Finding NEW places to discover → USE 'search'\n");
+        prompt.append("7. IMPORTANT: 'show me more' usually means search for NEW options, not explain existing\n");
+        prompt.append("8. You MUST choose from: edit, plan, explain, book, enrich, search\n\n");
         
         prompt.append("Respond in JSON format:\n");
         prompt.append("{\n");
         prompt.append("  \"intent\": \"DESCRIPTIVE_INTENT_NAME\",\n");
-        prompt.append("  \"taskType\": \"edit OR plan OR explain OR book OR enrich\",\n");
-        prompt.append("  \"entities\": {},\n");
+        prompt.append("  \"taskType\": \"edit OR plan OR explain OR book OR enrich OR search\",\n");
+        prompt.append("  \"entities\": {\n");
+        prompt.append("    \"placeType\": \"museum|restaurant|attraction|etc\",\n");
+        prompt.append("    \"day\": 1,\n");
+        prompt.append("    \"query\": \"search query\"\n");
+        prompt.append("  },\n");
         prompt.append("  \"confidence\": 0.95\n");
         prompt.append("}\n");
         

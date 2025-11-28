@@ -4,6 +4,7 @@ import com.tripplanner.dto.ItineraryUpdateMessage;
 import com.tripplanner.service.ItineraryJsonService;
 import com.tripplanner.service.RevisionService;
 import com.tripplanner.service.OrchestratorService;
+import com.tripplanner.service.EnrichmentService;
 import com.tripplanner.dto.ChatRequest;
 import com.tripplanner.dto.ChatResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +49,9 @@ public class WebSocketController {
 
     @Autowired
     private OrchestratorService orchestratorService;
+
+    @Autowired
+    private EnrichmentService enrichmentService;
 
     // Track connected clients per itinerary
     private final Map<String, Set<String>> itinerarySubscriptions = new ConcurrentHashMap<>();
@@ -162,6 +166,13 @@ public class WebSocketController {
             if (chatResponse.getCandidates() != null && !chatResponse.getCandidates().isEmpty()) {
                 innerData.put("candidates", chatResponse.getCandidates());
             }
+            if (chatResponse.getPlaceSuggestions() != null && !chatResponse.getPlaceSuggestions().isEmpty()) {
+                innerData.put("placeSuggestions", chatResponse.getPlaceSuggestions());
+            }
+            if (chatResponse.getCostImpact() != null) {
+                innerData.put("costImpact", chatResponse.getCostImpact());
+            }
+            innerData.put("needsDisambiguation", chatResponse.isNeedsDisambiguation());
             
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("id", "msg_" + System.currentTimeMillis() + "_ws");
@@ -182,7 +193,8 @@ public class WebSocketController {
             messagingTemplate.convertAndSend("/topic/chat/" + itineraryId, response);
             
             // If changes were applied, also broadcast itinerary update with the updated itinerary
-            if (chatResponse.getChangeSet() != null && chatResponse.isApplied()) {
+            // Check for either changeSet OR diff (EditorAgent returns diff without changeSet)
+            if (chatResponse.isApplied() && (chatResponse.getChangeSet() != null || chatResponse.getDiff() != null)) {
                 try {
                     // Fetch the updated itinerary from the database
                     var updatedItinerary = itineraryJsonService.getItinerary(itineraryId);
@@ -195,6 +207,10 @@ public class WebSocketController {
                     if (updatedItinerary.isPresent()) {
                         updateData.put("itinerary", updatedItinerary.get());
                         logger.info("Broadcasting updated itinerary via WebSocket after chat changes");
+                        
+                        // NOTE: EditorAgent already enriches newly added/modified nodes
+                        // No need to trigger full itinerary enrichment here as it can cause race conditions
+                        // and potentially overwrite recent changes
                     } else {
                         logger.warn("Could not fetch updated itinerary {} after chat changes", itineraryId);
                     }

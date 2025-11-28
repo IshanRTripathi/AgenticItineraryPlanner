@@ -26,6 +26,10 @@ public class ChatRequest {
     
     private String userId; // User ID for the request
     
+    private String sessionId; // Session ID for SSE progress updates
+    
+    private String conversationId; // Conversation ID for multi-turn conversations
+    
     // Constructors
     public ChatRequest() {}
     
@@ -95,6 +99,22 @@ public class ChatRequest {
         this.userId = userId;
     }
     
+    public String getSessionId() {
+        return sessionId;
+    }
+    
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+    
+    public String getConversationId() {
+        return conversationId;
+    }
+    
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+    
     @Override
     public String toString() {
         return "ChatRequest{" +
@@ -105,6 +125,8 @@ public class ChatRequest {
                 ", text='" + text + '\'' +
                 ", autoApply=" + autoApply +
                 ", userId='" + userId + '\'' +
+                ", sessionId='" + sessionId + '\'' +
+                ", conversationId='" + conversationId + '\'' +
                 '}';
     }
 }
