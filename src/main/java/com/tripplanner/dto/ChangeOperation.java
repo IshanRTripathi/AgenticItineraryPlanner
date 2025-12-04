@@ -37,6 +37,9 @@ public class ChangeOperation {
     @JsonProperty("nodeIds")
     private java.util.List<String> nodeIds; // List of node IDs for reorder operations
     
+    @JsonProperty("dayNumber")
+    private Integer dayNumber; // Day number for remove_day operation
+    
     public ChangeOperation() {}
     
     public ChangeOperation(String op, String id) {
@@ -140,6 +143,14 @@ public class ChangeOperation {
         this.nodeIds = nodeIds;
     }
     
+    public Integer getDayNumber() {
+        return dayNumber;
+    }
+    
+    public void setDayNumber(Integer dayNumber) {
+        this.dayNumber = dayNumber;
+    }
+    
     @Override
     public String toString() {
         return "ChangeOperation{" +
@@ -151,6 +162,7 @@ public class ChangeOperation {
                 ", node=" + node +
                 ", position=" + position +
                 ", nodeIds=" + nodeIds +
+                ", dayNumber=" + dayNumber +
                 '}';
     }
 }

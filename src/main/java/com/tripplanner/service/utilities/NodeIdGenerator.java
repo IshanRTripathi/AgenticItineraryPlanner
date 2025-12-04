@@ -25,21 +25,27 @@ public class NodeIdGenerator {
      * Primary ID generation method for general use.
      * Generates IDs in format: day{N}_node{M} where N is day number and M is sequential node number.
      * 
+     * THREAD-SAFE: Uses synchronized block on itinerary to prevent race conditions in parallel execution.
+     * 
      * @param nodeType The type of the node (e.g., "attraction", "meal", "transport")
      * @param dayNumber The day number
      * @param itinerary The itinerary context to find next available node number
      * @return A unique sequential node ID
      */
-    public synchronized String generateNodeId(String nodeType, Integer dayNumber, NormalizedItinerary itinerary) {
+    public String generateNodeId(String nodeType, Integer dayNumber, NormalizedItinerary itinerary) {
         if (dayNumber == null) {
             dayNumber = 1; // Default to day 1
         }
         
-        int nextNodeNumber = findNextNodeNumber(itinerary, dayNumber);
-        String nodeId = String.format("day%d_node%d", dayNumber, nextNodeNumber);
-        
-        logger.debug("Generated ID for node type '{}' on day {}: {}", nodeType, dayNumber, nodeId);
-        return nodeId;
+        // CRITICAL FIX: Synchronize on itinerary to prevent race conditions in parallel execution
+        // This ensures that multiple threads don't read the same max node number simultaneously
+        synchronized (itinerary) {
+            int nextNodeNumber = findNextNodeNumber(itinerary, dayNumber);
+            String nodeId = String.format("day%d_node%d", dayNumber, nextNodeNumber);
+            
+            logger.debug("Generated ID for node type '{}' on day {}: {}", nodeType, dayNumber, nodeId);
+            return nodeId;
+        }
     }
     
     /**
@@ -98,18 +104,24 @@ public class NodeIdGenerator {
      * Legacy method for backward compatibility.
      * 
      * @deprecated Use ensureNodeHasId(NormalizedNode, Integer, NormalizedItinerary) instead
+     * WARNING: This method is deprecated and should not be used. It generates timestamp-based IDs
+     * which are inconsistent with the new format and can cause validation failures.
      */
     @Deprecated
     public void ensureNodeHasId(NormalizedNode node, Integer dayNumber) {
+        logger.error("DEPRECATED METHOD CALLED: ensureNodeHasId(node, dayNumber) - Use ensureNodeHasId(node, dayNumber, itinerary) instead!");
+        logger.error("Stack trace:", new Exception("Deprecated method call"));
+        
         if (node == null) {
             logger.warn("Cannot ensure ID for null node");
             return;
         }
         
         if (node.getId() == null || node.getId().trim().isEmpty()) {
+            // Use deprecated method but log warning
             String generatedId = generateNodeId(node.getType(), dayNumber);
             node.setId(generatedId);
-            logger.debug("Generated ID for node: {} -> {}", node.getTitle(), generatedId);
+            logger.warn("Generated LEGACY ID format for node: {} -> {} (THIS SHOULD BE FIXED!)", node.getTitle(), generatedId);
         }
     }
     
@@ -144,8 +156,11 @@ public class NodeIdGenerator {
      * Extract node number from a node ID.
      * Supports both new format (day{N}_node{M}) and old formats.
      * 
+     * IMPROVED: For legacy formats without sequential numbers, returns a hash-based number
+     * to avoid collisions when generating new IDs.
+     * 
      * @param nodeId The node ID to parse
-     * @return The node number, or 0 if not found
+     * @return The node number, or hash-based number for legacy formats
      */
     private int extractNodeNumber(String nodeId) {
         if (nodeId == null || nodeId.trim().isEmpty()) {
@@ -166,7 +181,18 @@ public class NodeIdGenerator {
             return Integer.parseInt(oldSkeletonMatcher.group(1));
         }
         
-        // Old format doesn't have sequential numbers, return 0
+        // IMPROVED: For legacy formats (node_{type}_day{N}_{timestamp}_{uuid}),
+        // return a large hash-based number to avoid collisions with new sequential IDs
+        if (nodeId.startsWith("node_")) {
+            // Use hash to generate a number in range 10000-19999
+            // This ensures it won't collide with typical sequential IDs (1-100)
+            int hash = Math.abs(nodeId.hashCode() % 10000);
+            logger.debug("Legacy ID format detected: {} -> using hash-based number: {}", nodeId, 10000 + hash);
+            return 10000 + hash;
+        }
+        
+        // Unknown format, return 0
+        logger.warn("Unknown node ID format: {}", nodeId);
         return 0;
     }
     

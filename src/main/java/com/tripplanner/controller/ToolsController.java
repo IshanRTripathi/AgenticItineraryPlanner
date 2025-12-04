@@ -3778,7 +3778,7 @@ public class ToolsController {
      * 
      * This tool uses smart caching to avoid repeated API calls:
      * - Cache key: query + location + coordinates
-     * - Only validated results (within 30km) are cached
+     * - Only validated results are cached (30km for restaurants, 60km for attractions)
      * - TTL: 7 days
      */
     @PostMapping("/search-places")

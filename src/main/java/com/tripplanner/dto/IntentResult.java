@@ -71,6 +71,14 @@ public class IntentResult {
         return new IntentResult("SEARCH_PLACE", day, List.of(), entities, Map.of());
     }
     
+    public static IntentResult addDay(Map<String, Object> entities) {
+        return new IntentResult("ADD_DAY", null, List.of(), entities, Map.of());
+    }
+    
+    public static IntentResult removeDay(Map<String, Object> entities) {
+        return new IntentResult("REMOVE_DAY", null, List.of(), entities, Map.of());
+    }
+    
     // Getters and Setters
     public String getIntent() {
         return intent;
@@ -168,6 +176,9 @@ public class IntentResult {
             case "SEARCH_PLACE":
             case "SEARCH":
                 return "search";
+            case "ADD_DAY":
+            case "REMOVE_DAY":
+                return "day_management";
             default:
                 return "general";
         }

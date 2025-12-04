@@ -17,6 +17,8 @@ import com.tripplanner.dto.tools.CostCalculationResult;
 import com.tripplanner.dto.tools.SchemaValidationRequest;
 import com.tripplanner.dto.tools.SchemaValidationResult;
 import java.util.ArrayList;
+
+import com.tripplanner.service.utilities.NodeIdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +45,7 @@ public class EditorAgent extends BaseAgent {
     private final LLMResponseHandler llmResponseHandler;
     private final ItineraryMigrationService migrationService;
     private final EnrichmentAgent enrichmentAgent;
+    private final NodeIdGenerator nodeIdGenerator;
     private final GooglePlacesService googlePlacesService;
     private final ChatHistoryService chatHistoryService;
     private final NodeIdValidator nodeIdValidator;
@@ -64,7 +67,7 @@ public class EditorAgent extends BaseAgent {
                        ObjectMapper objectMapper,
                        LLMResponseHandler llmResponseHandler,
                        ItineraryMigrationService migrationService,
-                       EnrichmentAgent enrichmentAgent,
+                       EnrichmentAgent enrichmentAgent, NodeIdGenerator nodeIdGenerator,
                        GooglePlacesService googlePlacesService,
                        ChatHistoryService chatHistoryService,
                        NodeIdValidator nodeIdValidator,
@@ -78,6 +81,7 @@ public class EditorAgent extends BaseAgent {
         this.llmResponseHandler = llmResponseHandler;
         this.migrationService = migrationService;
         this.enrichmentAgent = enrichmentAgent;
+        this.nodeIdGenerator = nodeIdGenerator;
         this.googlePlacesService = googlePlacesService;
         this.chatHistoryService = chatHistoryService;
         this.nodeIdValidator = nodeIdValidator;
@@ -327,10 +331,18 @@ public class EditorAgent extends BaseAgent {
     
     /**
      * Generate node ID for new nodes using the Generate Node ID tool.
+     * IMPROVED: Uses NodeIdGenerator for fallback instead of timestamp-based IDs.
      */
     private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
         if (!editorToolsEnabled) {
-            return "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis();
+            // Load itinerary for proper ID generation
+            Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+            if (itineraryOpt.isPresent()) {
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+            }
+            // Fallback if itinerary not found
+            logger.warn("Itinerary not found for ID generation, using simple format");
+            return "day" + dayNumber + "_node_temp_" + System.currentTimeMillis();
         }
         
         NodeIdRequest request = new NodeIdRequest(itineraryId, dayNumber, nodeType);
@@ -345,10 +357,26 @@ public class EditorAgent extends BaseAgent {
             if (response != null && response.isSuccess()) {
                 return response.getNodeId();
             }
-            return fallbackOnError ? "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis() : null;
+            
+            // IMPROVED: Use NodeIdGenerator for fallback instead of timestamp
+            if (fallbackOnError) {
+                logger.warn("Tool call failed, using NodeIdGenerator fallback");
+                Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                if (itineraryOpt.isPresent()) {
+                    return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+                }
+            }
+            return null;
         } catch (Exception e) {
             logger.error("Generate Node ID tool error: {}", e.getMessage());
-            return fallbackOnError ? "day" + dayNumber + "_" + nodeType + "_" + System.currentTimeMillis() : null;
+            if (fallbackOnError) {
+                logger.warn("Using NodeIdGenerator fallback due to tool error");
+                Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                if (itineraryOpt.isPresent()) {
+                    return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+                }
+            }
+            return null;
         }
     }
     
@@ -696,6 +724,10 @@ public class EditorAgent extends BaseAgent {
                 if (editorToolsEnabled && changeSet.getOps() != null) {
                     logger.info("🔧 TOOL CALL: Generating node IDs for INSERT operations");
                     
+                    // Load itinerary for validation
+                    Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(chatRequest.getItineraryId());
+                    NormalizedItinerary validationItinerary = itineraryOpt.orElse(null);
+                    
                     for (ChangeOperation op : changeSet.getOps()) {
                         if ("insert".equals(op.getOp()) && op.getNode() != null) {
                             if (op.getNode().getId() == null || op.getNode().getId().isEmpty()) {
@@ -705,10 +737,24 @@ public class EditorAgent extends BaseAgent {
                                     op.getNode().getType()
                                 );
                                 if (nodeId != null) {
-                                    op.getNode().setId(nodeId);
-                                    logger.debug("✅ Generated node ID via tool: {}", nodeId);
+                                    // CRITICAL FIX: Validate generated ID before assigning
+                                    if (validationItinerary != null) {
+                                        try {
+                                            nodeIdValidator.validateBeforeAdd(nodeId, changeSet.getDay(), validationItinerary);
+                                            op.getNode().setId(nodeId);
+                                            logger.debug("✅ Generated and validated node ID via tool: {}", nodeId);
+                                        } catch (IllegalArgumentException e) {
+                                            logger.error("❌ Generated node ID failed validation: {} - {}", nodeId, e.getMessage());
+                                            throw new RuntimeException("Invalid node ID generated: " + e.getMessage(), e);
+                                        }
+                                    } else {
+                                        // Fallback: assign without validation if itinerary not available
+                                        op.getNode().setId(nodeId);
+                                        logger.warn("⚠️ Assigned node ID without validation (itinerary not available): {}", nodeId);
+                                    }
                                 } else {
-                                    logger.warn("⚠️ Node ID generation returned null, using fallback");
+                                    logger.error("❌ Node ID generation returned null");
+                                    throw new RuntimeException("Failed to generate node ID for insert operation");
                                 }
                             }
                         }
@@ -827,10 +873,12 @@ public class EditorAgent extends BaseAgent {
         prompt.append(
                 "8. For 'delete'/'remove' requests: Choose 'delete' operation with the exact node ID from context\n");
         prompt.append("9. For 'move'/'reschedule' requests: Choose 'move' operation with new startTime/endTime\n");
-        prompt.append("10. For timing: Use 24-hour format (e.g., \"14:30\") for startTime and endTime\n");
-        prompt.append("11. Set 'day' to the specific day number (e.g., 1, 2, 3)\n");
-        prompt.append("12. Always set agent to 'EditorAgent'\n");
-        prompt.append("13. In the 'reason' field, clearly state what you're doing and why\n\n");
+        prompt.append("10. For 'add day' requests: Choose 'add_day' operation (no day number needed)\n");
+        prompt.append("11. For 'remove day' requests: Choose 'remove_day' operation with dayNumber to remove\n");
+        prompt.append("12. For timing: Use 24-hour format (e.g., \"14:30\") for startTime and endTime\n");
+        prompt.append("13. Set 'day' to the specific day number (e.g., 1, 2, 3) for node operations\n");
+        prompt.append("14. Always set agent to 'EditorAgent'\n");
+        prompt.append("15. In the 'reason' field, clearly state what you're doing and why\n\n");
 
         prompt.append("=== EXAMPLES OF CORRECT INTENT HANDLING ===\n\n");
 
@@ -1140,8 +1188,12 @@ public class EditorAgent extends BaseAgent {
                         "properties": {
                           "op": {
                             "type": "string",
-                            "enum": ["insert", "delete", "move", "replace"],
-                            "description": "Operation type: insert (add new), delete (remove), move (reorder), replace (modify)"
+                            "enum": ["insert", "delete", "move", "replace", "add_day", "remove_day"],
+                            "description": "Operation type: insert (add new node), delete (remove node), move (reorder node), replace (modify node), add_day (add new day), remove_day (remove day)"
+                          },
+                          "dayNumber": {
+                            "type": "integer",
+                            "description": "Day number for remove_day operation"
                           },
                           "id": {
                             "type": "string",

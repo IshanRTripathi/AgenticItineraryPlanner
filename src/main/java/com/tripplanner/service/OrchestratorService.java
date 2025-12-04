@@ -387,6 +387,9 @@ public class OrchestratorService {
     private BaseAgent.AgentRequest<?> convertToAgentRequest(ChatRequest chatRequest, AgentExecutionPlan plan, BaseAgent agent) {
         String agentType = agent.getClass().getSimpleName();
         
+        // Get IntentResult to extract additional parameters
+        IntentResult intent = plan.getParameter("intentResult", IntentResult.class);
+        
         // Create a map that includes the taskType for proper agent validation
         java.util.Map<String, Object> requestData = new java.util.HashMap<>();
         requestData.put("chatRequest", chatRequest);
@@ -395,9 +398,22 @@ public class OrchestratorService {
         requestData.put("userId", chatRequest.getUserId());
         requestData.put("text", chatRequest.getText());
         requestData.put("scope", chatRequest.getScope());
-        requestData.put("day", chatRequest.getDay());
         requestData.put("selectedNodeId", chatRequest.getSelectedNodeId());
         requestData.put("autoApply", chatRequest.isAutoApply());
+        
+        // IMPORTANT: Use day from IntentResult if available (takes precedence over chatRequest.getDay())
+        // This ensures day extracted from user query like "for day 3" is properly passed
+        Integer day = chatRequest.getDay();
+        if (intent != null && intent.getDay() != null) {
+            day = intent.getDay();
+            logger.debug("Using day from IntentResult: {}", day);
+        }
+        requestData.put("day", day);
+        
+        // Add intent entities if available (contains extracted parameters like placeType, location, etc.)
+        if (intent != null && intent.getEntities() != null) {
+            requestData.putAll(intent.getEntities());
+        }
         
         switch (agentType) {
             case "EditorAgent":

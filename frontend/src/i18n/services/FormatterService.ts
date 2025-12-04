@@ -124,7 +124,7 @@ export class FormatterService {
   /**
    * Format currency
    */
-  formatCurrency(amount: number, currency: string = 'INR'): string {
+  formatCurrency(amount: number, currency: string = 'USD'): string {
     try {
       return new Intl.NumberFormat(this.locale, {
         style: 'currency',

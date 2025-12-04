@@ -51,6 +51,7 @@ public class ChangeEngine {
     private final NodeIdGenerator nodeIdGenerator;
     private final EnrichmentService enrichmentService;
     private final ItineraryValidator itineraryValidator;
+    private final NodeIdValidator nodeIdValidator;
 
     @Autowired(required = false)
     private WebSocketEventPublisher webSocketEventPublisher;
@@ -58,16 +59,16 @@ public class ChangeEngine {
     // Primary constructor with enrichment service
     @Autowired
     public ChangeEngine(ItineraryJsonService itineraryJsonService,
-            UserDataService userDataService,
-            ObjectMapper objectMapper,
-            RevisionService revisionService,
-            ConflictResolver conflictResolver,
-            LockManager lockManager,
-            IdempotencyManager idempotencyManager,
-            TraceManager traceManager,
-            NodeIdGenerator nodeIdGenerator,
-            EnrichmentService enrichmentService,
-            ItineraryValidator itineraryValidator) {
+                        UserDataService userDataService,
+                        ObjectMapper objectMapper,
+                        RevisionService revisionService,
+                        ConflictResolver conflictResolver,
+                        LockManager lockManager,
+                        IdempotencyManager idempotencyManager,
+                        TraceManager traceManager,
+                        NodeIdGenerator nodeIdGenerator,
+                        EnrichmentService enrichmentService,
+                        ItineraryValidator itineraryValidator, NodeIdValidator nodeIdValidator) {
         this.itineraryJsonService = itineraryJsonService;
         this.userDataService = userDataService;
         this.objectMapper = objectMapper;
@@ -79,21 +80,22 @@ public class ChangeEngine {
         this.nodeIdGenerator = nodeIdGenerator;
         this.enrichmentService = enrichmentService;
         this.itineraryValidator = itineraryValidator;
+        this.nodeIdValidator = nodeIdValidator;
     }
 
     // Backward compatibility constructor (for tests)
     public ChangeEngine(ItineraryJsonService itineraryJsonService,
-            UserDataService userDataService,
-            ObjectMapper objectMapper,
-            RevisionService revisionService,
-            ConflictResolver conflictResolver,
-            LockManager lockManager,
-            IdempotencyManager idempotencyManager,
-            TraceManager traceManager,
-            NodeIdGenerator nodeIdGenerator) {
+                        UserDataService userDataService,
+                        ObjectMapper objectMapper,
+                        RevisionService revisionService,
+                        ConflictResolver conflictResolver,
+                        LockManager lockManager,
+                        IdempotencyManager idempotencyManager,
+                        TraceManager traceManager,
+                        NodeIdGenerator nodeIdGenerator, NodeIdValidator nodeIdValidator) {
         this(itineraryJsonService, userDataService, objectMapper, revisionService,
                 conflictResolver, lockManager, idempotencyManager, traceManager,
-                nodeIdGenerator, null, null);
+                nodeIdGenerator, null, null, nodeIdValidator);
     }
 
     /**
@@ -192,6 +194,20 @@ public class ChangeEngine {
             // Increment version for validation
             updated.setVersion(current.getVersion() + 1);
             updated.setUpdatedAt(System.currentTimeMillis());
+            
+            // CRITICAL FIX: Validate all node IDs in the updated itinerary
+            if (nodeIdValidator != null) {
+                logger.debug("🔍 Validating all node IDs in updated itinerary");
+                Set<String> validationErrors = nodeIdValidator.validateItinerary(updated);
+                if (!validationErrors.isEmpty()) {
+                    logger.error("❌ Node ID validation failed - ROLLING BACK all changes");
+                    logger.error("   Node ID errors: {}", validationErrors);
+                    throw new ValidationException(
+                        "Updated itinerary has invalid node IDs - rolled back",
+                        String.join(", ", validationErrors));
+                }
+                logger.info("✅ All node IDs validated successfully");
+            }
             
             // Validate the complete updated itinerary
             if (itineraryValidator != null) {
@@ -571,6 +587,7 @@ public class ChangeEngine {
 
     /**
      * Apply changes to an itinerary and return the diff.
+     * IMPROVED: Now validates node IDs before applying operations.
      */
     private ItineraryDiff applyChangesToItinerary(NormalizedItinerary itinerary, ChangeSet changeSet) {
         List<DiffItem> added = new ArrayList<>();
@@ -581,6 +598,46 @@ public class ChangeEngine {
         if (changeSet.getOps() == null || changeSet.getOps().isEmpty()) {
             logger.info("No operations to apply");
             return new ItineraryDiff(added, removed, updated);
+        }
+
+        // CRITICAL FIX: Validate node IDs before applying any operations
+        if (nodeIdValidator != null) {
+            logger.debug("🔍 Validating node IDs before applying {} operations", changeSet.getOps().size());
+            
+            for (ChangeOperation op : changeSet.getOps()) {
+                if (op == null || op.getOp() == null) continue;
+                
+                try {
+                    // Validate INSERT operations - new nodes must have valid, unique IDs
+                    if ("insert".equals(op.getOp()) && op.getNode() != null) {
+                        String nodeId = op.getNode().getId();
+                        if (nodeId != null && !nodeId.trim().isEmpty()) {
+                            nodeIdValidator.validateBeforeAdd(nodeId, changeSet.getDay(), itinerary);
+                            logger.debug("✅ Validated INSERT node ID: {}", nodeId);
+                        } else {
+                            throw new IllegalArgumentException("INSERT operation has node with null or empty ID");
+                        }
+                    }
+                    
+                    // Validate DELETE, MOVE, REPLACE operations - referenced nodes must exist
+                    else if (Arrays.asList("delete", "move", "replace").contains(op.getOp())) {
+                        String nodeId = op.getId();
+                        if (nodeId != null && !nodeId.trim().isEmpty()) {
+                            nodeIdValidator.validateBeforeEdit(nodeId, itinerary);
+                            logger.debug("✅ Validated {} node ID: {}", op.getOp().toUpperCase(), nodeId);
+                        } else {
+                            throw new IllegalArgumentException(op.getOp().toUpperCase() + " operation has null or empty node ID");
+                        }
+                    }
+                } catch (IllegalArgumentException e) {
+                    logger.error("❌ Node ID validation failed for {} operation: {}", op.getOp(), e.getMessage());
+                    throw new ValidationException("Invalid node ID in change operation", e.getMessage());
+                }
+            }
+            
+            logger.info("✅ All node IDs validated successfully");
+        } else {
+            logger.warn("⚠️ NodeIdValidator not available - skipping node ID validation");
         }
 
         for (ChangeOperation op : changeSet.getOps()) {
@@ -683,6 +740,17 @@ public class ChangeEngine {
                 case "update_edge":
                     if (updateEdge(itinerary, op, changeSet.getDay(), changeSet.getPreferences())) {
                         updated.add(new DiffItem(op.getId(), changeSet.getDay(), Arrays.asList("edge")));
+                    }
+                    break;
+                case "add_day":
+                    if (addDay(itinerary, op)) {
+                        int newDayNumber = itinerary.getDays().size();
+                        added.add(new DiffItem("day_" + newDayNumber, newDayNumber, null, "Day " + newDayNumber));
+                    }
+                    break;
+                case "remove_day":
+                    if (removeDay(itinerary, op)) {
+                        removed.add(new DiffItem("day_" + op.getDayNumber(), op.getDayNumber(), null, "Day " + op.getDayNumber()));
                     }
                     break;
                 default:
@@ -2088,5 +2156,159 @@ public class ChangeEngine {
         }
 
         return "Your itinerary has been updated: " + String.join(", ", parts);
+    }
+    
+    /**
+     * Add a new day to the itinerary.
+     * Creates a minimal day structure with placeholder nodes.
+     * OPTIMIZED: No LLM calls, instant response (~2 seconds).
+     */
+    private boolean addDay(NormalizedItinerary itinerary, ChangeOperation op) {
+        try {
+            int newDayNumber = itinerary.getDays().size() + 1;
+            
+            // Validate max days
+            if (newDayNumber > 30) {
+                logger.warn("Cannot add day: maximum 30 days allowed");
+                return false;
+            }
+            
+            logger.info("Adding Day {} to itinerary", newDayNumber);
+            
+            // Create new day
+            NormalizedDay newDay = new NormalizedDay();
+            newDay.setDayNumber(newDayNumber);
+            newDay.setLocation(itinerary.getDestination());
+            
+            // Calculate date
+            if (itinerary.getDays() != null && !itinerary.getDays().isEmpty()) {
+                NormalizedDay lastDay = itinerary.getDays().get(itinerary.getDays().size() - 1);
+                if (lastDay.getDate() != null) {
+                    java.time.LocalDate lastDate = java.time.LocalDate.parse(lastDay.getDate());
+                    java.time.LocalDate newDate = lastDate.plusDays(1);
+                    newDay.setDate(newDate.toString());
+                }
+            }
+            
+            // Create placeholder nodes
+            List<NormalizedNode> nodes = new ArrayList<>();
+            nodes.add(createPlaceholderNode("Morning Activity", "attraction", newDayNumber, 1, itinerary));
+            nodes.add(createPlaceholderNode("Lunch", "meal", newDayNumber, 2, itinerary));
+            nodes.add(createPlaceholderNode("Afternoon Activity", "attraction", newDayNumber, 3, itinerary));
+            nodes.add(createPlaceholderNode("Dinner", "meal", newDayNumber, 4, itinerary));
+            newDay.setNodes(nodes);
+            
+            // Add to itinerary
+            itinerary.getDays().add(newDay);
+            
+            // Update end date
+            if (newDay.getDate() != null) {
+                itinerary.setEndDate(newDay.getDate());
+            }
+            
+            logger.info("✅ Added Day {} with {} placeholder nodes", newDayNumber, nodes.size());
+            return true;
+            
+        } catch (Exception e) {
+            logger.error("Failed to add day: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * Remove a day from the itinerary.
+     * Handles renumbering of subsequent days and node IDs.
+     */
+    private boolean removeDay(NormalizedItinerary itinerary, ChangeOperation op) {
+        try {
+            Integer dayToRemove = op.getDayNumber();
+            if (dayToRemove == null) {
+                logger.warn("Cannot remove day: day number not specified");
+                return false;
+            }
+            
+            // Validate minimum days
+            if (itinerary.getDays().size() <= 1) {
+                logger.warn("Cannot remove day: at least 1 day required");
+                return false;
+            }
+            
+            // Validate day exists
+            if (dayToRemove < 1 || dayToRemove > itinerary.getDays().size()) {
+                logger.warn("Cannot remove day: day {} does not exist", dayToRemove);
+                return false;
+            }
+            
+            logger.info("Removing Day {} from itinerary", dayToRemove);
+            
+            // Remove the day
+            itinerary.getDays().removeIf(d -> d.getDayNumber().equals(dayToRemove));
+            
+            // Renumber remaining days and update node IDs
+            for (int i = 0; i < itinerary.getDays().size(); i++) {
+                NormalizedDay day = itinerary.getDays().get(i);
+                int oldDayNumber = day.getDayNumber();
+                int newDayNumber = i + 1;
+                
+                if (oldDayNumber != newDayNumber) {
+                    logger.debug("Renumbering day {} -> {}", oldDayNumber, newDayNumber);
+                    day.setDayNumber(newDayNumber);
+                    
+                    // Update node IDs to reflect new day number
+                    if (day.getNodes() != null) {
+                        for (NormalizedNode node : day.getNodes()) {
+                            if (node.getId() != null && node.getId().startsWith("day" + oldDayNumber + "_")) {
+                                String newId = node.getId().replace("day" + oldDayNumber + "_", "day" + newDayNumber + "_");
+                                node.setId(newId);
+                                logger.debug("Updated node ID: {} -> {}", node.getId(), newId);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Update end date
+            if (!itinerary.getDays().isEmpty()) {
+                NormalizedDay lastDay = itinerary.getDays().get(itinerary.getDays().size() - 1);
+                if (lastDay.getDate() != null) {
+                    itinerary.setEndDate(lastDay.getDate());
+                }
+            }
+            
+            logger.info("✅ Removed Day {}, renumbered {} remaining days", dayToRemove, itinerary.getDays().size());
+            return true;
+            
+        } catch (Exception e) {
+            logger.error("Failed to remove day: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * Create a placeholder node with proper ID generation.
+     */
+    private NormalizedNode createPlaceholderNode(String title, String type, int dayNumber, int nodeIndex, NormalizedItinerary itinerary) {
+        NormalizedNode node = new NormalizedNode();
+        node.setTitle(title);
+        node.setType(type);
+        
+        // Generate proper node ID
+        String nodeId = nodeIdGenerator.generateNodeId(type, dayNumber, itinerary);
+        node.setId(nodeId);
+        
+        // Set basic location
+        NodeLocation location = new NodeLocation();
+        location.setName(itinerary.getDestination());
+        node.setLocation(location);
+        
+        // Set basic timing (placeholder)
+        NodeTiming timing = new NodeTiming();
+        long baseTime = (9 + (nodeIndex - 1) * 3) * 60 * 60 * 1000L; // 9am, 12pm, 3pm, 6pm
+        timing.setStartTime(baseTime);
+        timing.setEndTime(baseTime + 2 * 60 * 60 * 1000L); // 2 hours duration
+        timing.setDurationMin(120);
+        node.setTiming(timing);
+        
+        return node;
     }
 }

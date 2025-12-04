@@ -991,6 +991,12 @@ public class TransportAgent extends BaseAgent {
      */
     private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
         if (!transportToolsEnabled) {
+            // FIXED: Use proper method with itinerary context
+            Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+            if (itineraryOpt.isPresent()) {
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+            }
+            logger.warn("Itinerary not found for ID generation, using deprecated method");
             return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
         }
         
@@ -1006,12 +1012,24 @@ public class TransportAgent extends BaseAgent {
             if (response != null && response.isSuccess()) {
                 return response.getNodeId();
             } else if (fallbackOnError) {
+                // FIXED: Use proper method with itinerary context
+                Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                if (itineraryOpt.isPresent()) {
+                    return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+                }
                 return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
             }
-            return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            return null;
         } catch (Exception e) {
             logger.error("Generate Node ID tool error: {}", e.getMessage());
-            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber) : null;
+            if (fallbackOnError) {
+                Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                if (itineraryOpt.isPresent()) {
+                    return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+                }
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            }
+            return null;
         }
     }
     

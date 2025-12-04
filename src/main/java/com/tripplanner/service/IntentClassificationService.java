@@ -79,6 +79,16 @@ public class IntentClassificationService {
         Pattern.CASE_INSENSITIVE
     );
     
+    private static final Pattern ADD_DAY_PATTERN = Pattern.compile(
+        "(?i).*\\b(add|extend|extra|more|another|one more)\\b.*\\b(day|days)\\b.*", 
+        Pattern.CASE_INSENSITIVE
+    );
+    
+    private static final Pattern REMOVE_DAY_PATTERN = Pattern.compile(
+        "(?i).*\\b(remove|delete|shorten|less|fewer|drop)\\b.*\\b(day|days)\\b.*", 
+        Pattern.CASE_INSENSITIVE
+    );
+    
     // Time extraction patterns
     private static final Pattern TIME_PATTERN = Pattern.compile(
         "\\b(\\d{1,2}):?(\\d{0,2})\\s*(am|pm|a\\.m\\.|p\\.m\\.)?\\b", 
@@ -174,6 +184,16 @@ public class IntentClassificationService {
         
         if (isUndo(text)) {
             return IntentResult.undo(null); // Version will be determined later
+        }
+        
+        if (isAddDay(text)) {
+            Map<String, Object> entities = extractEntities(text);
+            return IntentResult.addDay(entities);
+        }
+        
+        if (isRemoveDay(text)) {
+            Map<String, Object> entities = extractEntities(text);
+            return IntentResult.removeDay(entities);
         }
         
         if (isDeleteNode(text)) {
@@ -288,6 +308,20 @@ public class IntentClassificationService {
      */
     private boolean isSearchPlace(String text) {
         return SEARCH_PLACE_PATTERN.matcher(text).matches();
+    }
+    
+    /**
+     * Check if text indicates adding a day.
+     */
+    private boolean isAddDay(String text) {
+        return ADD_DAY_PATTERN.matcher(text).matches();
+    }
+    
+    /**
+     * Check if text indicates removing a day.
+     */
+    private boolean isRemoveDay(String text) {
+        return REMOVE_DAY_PATTERN.matcher(text).matches();
     }
     
     /**

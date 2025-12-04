@@ -71,6 +71,7 @@ public class NodeIdValidator {
     
     /**
      * Validate that the day number in the node ID matches the actual day.
+     * IMPROVED: Now supports legacy ID formats.
      */
     public boolean isDayConsistent(String nodeId, int dayNumber) {
         if (nodeId == null) {
@@ -78,7 +79,7 @@ public class NodeIdValidator {
         }
         
         try {
-            // Extract day number from ID
+            // New format: day{N}_node{M} or day{N}_{type}_{M}
             if (nodeId.startsWith("day")) {
                 int underscoreIndex = nodeId.indexOf('_');
                 if (underscoreIndex > 3) {
@@ -87,10 +88,21 @@ public class NodeIdValidator {
                     return idDayNumber == dayNumber;
                 }
             }
+            
+            // Legacy format: node_{type}_day{N}_{timestamp}_{uuid}
+            if (nodeId.startsWith("node_")) {
+                Pattern legacyPattern = Pattern.compile("node_\\w+_day(\\d+)_\\d+_[a-f0-9]{8}");
+                java.util.regex.Matcher matcher = legacyPattern.matcher(nodeId);
+                if (matcher.matches()) {
+                    int idDayNumber = Integer.parseInt(matcher.group(1));
+                    return idDayNumber == dayNumber;
+                }
+            }
         } catch (Exception e) {
             logger.warn("Failed to extract day number from node ID: {}", nodeId);
         }
         
+        // Unknown format - can't validate, return false
         return false;
     }
     
@@ -119,10 +131,12 @@ public class NodeIdValidator {
     
     /**
      * Find duplicate node IDs in an itinerary.
+     * IMPROVED: Now detects multiple null IDs as duplicates.
      */
     public Set<String> findDuplicates(NormalizedItinerary itinerary) {
         Set<String> seen = new HashSet<>();
         Set<String> duplicates = new HashSet<>();
+        int nullIdCount = 0;
         
         if (itinerary == null || itinerary.getDays() == null) {
             return duplicates;
@@ -132,12 +146,23 @@ public class NodeIdValidator {
             if (day.getNodes() == null) continue;
             
             for (NormalizedNode node : day.getNodes()) {
-                if (node.getId() != null && !node.getId().trim().isEmpty()) {
-                    if (!seen.add(node.getId())) {
-                        duplicates.add(node.getId());
-                    }
+                if (node.getId() == null || node.getId().trim().isEmpty()) {
+                    nullIdCount++;
+                    continue;
+                }
+                
+                if (!seen.add(node.getId())) {
+                    duplicates.add(node.getId());
                 }
             }
+        }
+        
+        // IMPROVED: If multiple nodes have null IDs, report as duplicate
+        if (nullIdCount > 1) {
+            duplicates.add("<NULL_ID>");
+            logger.warn("Found {} nodes with null IDs - this indicates a bug in ID generation", nullIdCount);
+        } else if (nullIdCount == 1) {
+            logger.warn("Found 1 node with null ID - this should be fixed");
         }
         
         return duplicates;

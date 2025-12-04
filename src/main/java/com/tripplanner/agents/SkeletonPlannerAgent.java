@@ -580,6 +580,7 @@ public class SkeletonPlannerAgent extends BaseAgent {
 
     /**
      * DEPRECATED: Old method that added node directly to day.
+     * This method is no longer used in the main flow.
      */
     @Deprecated
     private void addTravelNodePlaceholder(NormalizedDay day, TravelSegment travelSegment) {
@@ -601,7 +602,12 @@ public class SkeletonPlannerAgent extends BaseAgent {
 
             // Add accommodation placeholder if overnight travel or late arrival
             if (shouldAddAccommodationPlaceholder(travelSegment)) {
-                addAccommodationPlaceholder(day, travelSegment);
+                // Create temp itinerary for ID generation
+                NormalizedItinerary tempItinerary = new NormalizedItinerary();
+                tempItinerary.setDays(new ArrayList<>());
+                tempItinerary.getDays().add(day);
+                
+                addAccommodationPlaceholder(day, travelSegment, tempItinerary);
             }
 
         } catch (Exception e) {
@@ -623,16 +629,31 @@ public class SkeletonPlannerAgent extends BaseAgent {
     /**
      * Add accommodation placeholder for overnight stays.
      * CRITICAL: Multi-city trips need hotel bookings.
-     * FIXED: Use NodeIdGenerator for consistent ID format.
+     * CRITICAL FIX: Now accepts tempItinerary parameter to generate ID immediately.
+     * 
+     * NOTE: This method is only called from deprecated addTravelNodePlaceholder.
+     * In the main flow, IDs are assigned in the post-processing step (line ~930).
      */
-    private void addAccommodationPlaceholder(NormalizedDay day, TravelSegment travelSegment) {
+    private void addAccommodationPlaceholder(NormalizedDay day, TravelSegment travelSegment, 
+                                            NormalizedItinerary tempItinerary) {
         try {
             NormalizedNode accommodationNode = new NormalizedNode();
             accommodationNode.setType("accommodation");
             // Mark node as created by SkeletonPlannerAgent
             accommodationNode.setProcessingState(ProcessingState.CREATED);
             accommodationNode.addProcessedBy("SkeletonPlannerAgent");
-            // FIXED: Don't set ID here - let it be generated later by NodeIdGenerator
+            
+            // CRITICAL FIX: Generate ID immediately if tempItinerary is provided
+            if (tempItinerary != null) {
+                accommodationNode.setId(nodeIdGenerator.generateNodeId("accommodation", 
+                                                                       day.getDayNumber(), 
+                                                                       tempItinerary));
+                logger.debug("Generated ID for accommodation node: {}", accommodationNode.getId());
+            } else {
+                // Fallback: ID will be generated in post-processing step
+                logger.debug("Accommodation node created without ID (will be assigned in post-processing)");
+            }
+            
             accommodationNode.setTitle(String.format("Hotel in %s", travelSegment.getToCity()));
 
             // Set evening timing
@@ -649,8 +670,9 @@ public class SkeletonPlannerAgent extends BaseAgent {
 
             day.getNodes().add(accommodationNode);
 
-            logger.info("Added accommodation placeholder for day {} in {}",
-                    day.getDayNumber(), travelSegment.getToCity());
+            logger.info("Added accommodation placeholder for day {} in {} (ID: {})",
+                    day.getDayNumber(), travelSegment.getToCity(), 
+                    accommodationNode.getId() != null ? accommodationNode.getId() : "pending");
 
         } catch (Exception e) {
             logger.warn("Failed to add accommodation placeholder: {}", e.getMessage());
@@ -1380,6 +1402,12 @@ public class SkeletonPlannerAgent extends BaseAgent {
      */
     private String generateNodeIdViaTool(String itineraryId, Integer dayNumber, String nodeType) {
         if (!skeletonToolsEnabled) {
+            // FIXED: Use proper method with itinerary context
+            Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+            if (itineraryOpt.isPresent()) {
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+            }
+            logger.warn("Itinerary not found for ID generation, using deprecated method");
             return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
         }
 
@@ -1395,10 +1423,24 @@ public class SkeletonPlannerAgent extends BaseAgent {
             if (response != null && response.isSuccess()) {
                 return response.getNodeId();
             }
-            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber) : null;
+            if (fallbackOnError) {
+                Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                if (itineraryOpt.isPresent()) {
+                    return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+                }
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            }
+            return null;
         } catch (Exception e) {
             logger.error("Generate Node ID tool error: {}", e.getMessage());
-            return fallbackOnError ? nodeIdGenerator.generateNodeId(nodeType, dayNumber) : null;
+            if (fallbackOnError) {
+                Optional<NormalizedItinerary> itineraryOpt = itineraryJsonService.getItinerary(itineraryId);
+                if (itineraryOpt.isPresent()) {
+                    return nodeIdGenerator.generateNodeId(nodeType, dayNumber, itineraryOpt.get());
+                }
+                return nodeIdGenerator.generateNodeId(nodeType, dayNumber);
+            }
+            return null;
         }
     }
 

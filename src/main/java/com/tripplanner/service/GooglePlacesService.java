@@ -791,9 +791,12 @@ public class GooglePlacesService {
                        i + 1, result.getName(), String.format("%.1f", distance), 
                        result.getFormattedAddress());
             
-            // Validate: Must be within 30km (even with 50km API radius, we validate tighter)
-            if (distance > 30.0) {
-                logger.warn("      ❌ Rejected: Too far (>30km)");
+            // Validate: Distance threshold depends on place type
+            // Attractions: 60km (can be outside city for day trips)
+            // Restaurants/Meals: 30km (should be within reasonable dining distance)
+            double maxDistance = 60.0; // Default for attractions
+            if (distance > maxDistance) {
+                logger.warn("      ❌ Rejected: Too far (>{}km)", maxDistance);
                 continue;
             }
             
@@ -938,7 +941,7 @@ public class GooglePlacesService {
      * 
      * CACHING STRATEGY:
      * - Cache key: query + location + coordinates (normalized)
-     * - Only cache results that pass distance validation (within 30km)
+     * - Only cache results that pass distance validation (30km for restaurants, 60km for attractions)
      * - TTL: 7 days (place data doesn't change often)
      * - Reusable: Same query in same location returns cached results
      * 
@@ -952,6 +955,12 @@ public class GooglePlacesService {
     public List<PlaceSuggestion> searchPlaces(String itineraryId, String query, String location, String type, int maxResults) {
         logger.info("🔍 [GooglePlacesService] Searching places: query='{}', location='{}', type='{}', maxResults={}",
                 query, location, type, maxResults);
+        
+        // Determine distance threshold based on type
+        // Restaurants/meals: 30km (within city)
+        // Attractions/activities: 60km (can be day trips outside city)
+        double maxDistanceKm = isRestaurantType(type) ? 30.0 : 60.0;
+        logger.info("📏 [GooglePlacesService] Using distance threshold: {}km for type '{}'", maxDistanceKm, type);
 
         if (query == null || query.trim().isEmpty()) {
             logger.warn("⚠️ [GooglePlacesService] Empty query provided to searchPlaces");
@@ -994,7 +1003,7 @@ public class GooglePlacesService {
                         "type", type != null ? type : "",
                         "coordinates", coordsKey
                     ),
-                    () -> searchPlacesInternal(query, location, type, maxResults, destCoords),
+                    () -> searchPlacesInternal(query, location, type, maxResults, destCoords, maxDistanceKm),
                     (Class<List<PlaceSuggestion>>) (Class<?>) List.class
                 );
             } catch (Exception e) {
@@ -1004,7 +1013,20 @@ public class GooglePlacesService {
         }
 
         // Fallback to direct call (no caching)
-        return searchPlacesInternal(query, location, type, maxResults, destCoords);
+        return searchPlacesInternal(query, location, type, maxResults, destCoords, maxDistanceKm);
+    }
+    
+    /**
+     * Helper method to determine if a type is restaurant/meal related.
+     */
+    private boolean isRestaurantType(String type) {
+        if (type == null) return false;
+        String typeLower = type.toLowerCase();
+        return typeLower.contains("restaurant") || 
+               typeLower.contains("meal") || 
+               typeLower.contains("food") || 
+               typeLower.contains("cafe") || 
+               typeLower.contains("dining");
     }
     
     /**
@@ -1012,8 +1034,9 @@ public class GooglePlacesService {
      * This method does the actual Google Places API call and validation.
      */
     private List<PlaceSuggestion> searchPlacesInternal(String query, String location, String type, 
-                                                        int maxResults, com.tripplanner.dto.Coordinates destCoords) {
-        logger.info("🔍 [GooglePlacesService] Executing place search (cache miss or no cache)");
+                                                        int maxResults, com.tripplanner.dto.Coordinates destCoords,
+                                                        double maxDistanceKm) {
+        logger.info("🔍 [GooglePlacesService] Executing place search (cache miss or no cache) with {}km threshold", maxDistanceKm);
 
         // Check rate limits and circuit breaker
         checkRateLimit();
@@ -1082,14 +1105,17 @@ public class GooglePlacesService {
                         result.getGeometry().getLocation().getLongitude()
                     );
                     
-                    // Only include results within 30km (validated results)
-                    if (distance <= 30.0) {
+                    // Validate distance based on type-specific threshold
+                    if (distance <= maxDistanceKm) {
                         PlaceSuggestion suggestion = toPlaceSuggestion(result, location, distance);
                         if (suggestion != null) {
                             validatedResults.add(suggestion);
-                            logger.info("   ✅ [{}] '{}' - {}km away", 
-                                validatedResults.size(), suggestion.getName(), String.format("%.1f", distance));
+                            logger.info("   ✅ [{}] '{}' - {}km away (threshold: {}km)", 
+                                validatedResults.size(), suggestion.getName(), String.format("%.1f", distance), maxDistanceKm);
                         }
+                    } else {
+                        logger.debug("   ❌ Rejected: '{}' - {}km away (exceeds {}km threshold)", 
+                            result.getName(), String.format("%.1f", distance), maxDistanceKm);
                     }
                     
                     // Stop when we have enough results

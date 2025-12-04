@@ -55,7 +55,7 @@ public class PipelineOrchestrator {
     private final AgentCoordinator agentCoordinator; // NEW: Prevents concurrent modifications
     private final ItineraryValidator itineraryValidator;
     private final ItineraryMetricsTracker metricsTracker; // NEW: Metrics tracking
-
+    private final CurrencyConversionService currencyConversionService;
     @Value("${itinerary.generation.pipeline.parallel:true}")
     private boolean enableParallel;
 
@@ -110,20 +110,20 @@ public class PipelineOrchestrator {
     private boolean validationEnabled;
 
     public PipelineOrchestrator(CityAllocationAgent cityAllocationAgent,
-            SkeletonPlannerAgent skeletonPlannerAgent,
-            ActivityAgent activityAgent,
-            MealAgent mealAgent,
-            TransportAgent transportAgent,
-            CostEstimatorAgent costEstimatorAgent,
-            EnrichmentAgent enrichmentAgent,
-            BatchEnrichmentService batchEnrichmentService,
-            ItineraryJsonService itineraryJsonService,
-            AgentEventPublisher agentEventPublisher,
-            UserDataService userDataService,
-            AgentTracker agentTracker,
-            AgentCoordinator agentCoordinator,
-            ItineraryValidator itineraryValidator,
-            ItineraryMetricsTracker metricsTracker) {
+                                SkeletonPlannerAgent skeletonPlannerAgent,
+                                ActivityAgent activityAgent,
+                                MealAgent mealAgent,
+                                TransportAgent transportAgent,
+                                CostEstimatorAgent costEstimatorAgent,
+                                EnrichmentAgent enrichmentAgent,
+                                BatchEnrichmentService batchEnrichmentService,
+                                ItineraryJsonService itineraryJsonService,
+                                AgentEventPublisher agentEventPublisher,
+                                UserDataService userDataService,
+                                AgentTracker agentTracker,
+                                AgentCoordinator agentCoordinator,
+                                ItineraryValidator itineraryValidator,
+                                ItineraryMetricsTracker metricsTracker, CurrencyConversionService currencyConversionService) {
         this.cityAllocationAgent = cityAllocationAgent;
         this.skeletonPlannerAgent = skeletonPlannerAgent;
         this.activityAgent = activityAgent;
@@ -138,6 +138,7 @@ public class PipelineOrchestrator {
         this.agentCoordinator = agentCoordinator;
         this.itineraryValidator = itineraryValidator;
         this.metricsTracker = metricsTracker;
+        this.currencyConversionService = currencyConversionService;
 
         // Create dedicated thread pool for pipeline execution
         this.pipelineExecutor = Executors.newFixedThreadPool(4, r -> {
@@ -955,11 +956,15 @@ public class PipelineOrchestrator {
                 }
             }
 
-            // Update summary
+
+            String currency = itinerary.getCurrency() != null ? itinerary.getCurrency() : "USD";
+            String currencySymbol = currencyConversionService.getCurrencySymbol(currency);
             itinerary.setSummary(String.format(
-                    "%d-day trip to %s with %d activities (estimated ₹%.0f per person)",
+                    "%d-day trip to %s with %d activities (estimated %s%.0f per person)",
                     itinerary.getDays().size(),
                     itinerary.getDays().isEmpty() ? "destination" : itinerary.getDays().get(0).getLocation(),
+                    totalNodes,
+                    currencySymbol,
                     totalNodes,
                     totalCost));
 
@@ -1031,11 +1036,12 @@ public class PipelineOrchestrator {
                                 }
                             }
                             itinerary.setSummary(String.format(
-                                    "%d-day trip to %s with %d activities (estimated ₹%.0f per person)",
+                                    "%d-day trip to %s with %d activities (estimated %s%.0f per person)",
                                     itinerary.getDays().size(),
                                     itinerary.getDays().isEmpty() ? "destination"
                                             : itinerary.getDays().get(0).getLocation(),
                                     totalNodes,
+                                    currencySymbol,
                                     totalCost));
                             logger.info("Re-applied finalization to reloaded itinerary");
                         } else {
