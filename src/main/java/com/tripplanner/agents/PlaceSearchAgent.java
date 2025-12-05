@@ -372,12 +372,14 @@ public class PlaceSearchAgent extends BaseAgent {
      */
     private static class PlaceIdentifier {
         String placeId;
-        Coordinates coordinates;
+        Double lat;
+        Double lng;
         String name;
         
-        PlaceIdentifier(String placeId, Coordinates coordinates, String name) {
+        PlaceIdentifier(String placeId, Double lat, Double lng, String name) {
             this.placeId = placeId;
-            this.coordinates = coordinates;
+            this.lat = lat;
+            this.lng = lng;
             this.name = name;
         }
     }
@@ -418,14 +420,18 @@ public class PlaceSearchAgent extends BaseAgent {
                     
                     // Extract place identification data
                     String placeId = null;
-                    Coordinates coords = null;
+                    Double lat = null;
+                    Double lng = null;
                     
                     if (node.getLocation() != null) {
                         placeId = node.getLocation().getPlaceId();
-                        coords = node.getLocation().getCoordinates();
+                        if (node.getLocation().getCoordinates() != null) {
+                            lat = node.getLocation().getCoordinates().getLat();
+                            lng = node.getLocation().getCoordinates().getLng();
+                        }
                     }
                     
-                    identifiers.add(new PlaceIdentifier(placeId, coords, node.getTitle()));
+                    identifiers.add(new PlaceIdentifier(placeId, lat, lng, node.getTitle()));
                 }
             }
         } catch (Exception e) {
@@ -445,9 +451,13 @@ public class PlaceSearchAgent extends BaseAgent {
         }
         
         String suggestionPlaceId = suggestion.getPlaceId();
-        Coordinates suggestionCoords = null;
+        Double suggestionLat = null;
+        Double suggestionLng = null;
+        
         if (suggestion.getGeometry() != null && suggestion.getGeometry().getLocation() != null) {
-            suggestionCoords = suggestion.getGeometry().getLocation();
+            Geometry.Location location = suggestion.getGeometry().getLocation();
+            suggestionLat = location.getLatitude();
+            suggestionLng = location.getLongitude();
         }
         
         for (PlaceIdentifier existing : existingPlaces) {
@@ -461,8 +471,9 @@ public class PlaceSearchAgent extends BaseAgent {
             }
             
             // Priority 2: Check coordinates (within 100 meters = same place)
-            if (suggestionCoords != null && existing.coordinates != null) {
-                double distance = calculateDistance(suggestionCoords, existing.coordinates);
+            if (suggestionLat != null && suggestionLng != null && 
+                existing.lat != null && existing.lng != null) {
+                double distance = calculateDistance(suggestionLat, suggestionLng, existing.lat, existing.lng);
                 if (distance < 0.1) { // Less than 100 meters
                     logger.debug("🚫 Filtering duplicate (coordinate match): {} ≈ {} ({}m apart)", 
                         suggestion.getName(), existing.name, Math.round(distance * 1000));
@@ -477,20 +488,15 @@ public class PlaceSearchAgent extends BaseAgent {
     /**
      * Calculate distance between two coordinates in kilometers using Haversine formula.
      */
-    private double calculateDistance(Coordinates coord1, Coordinates coord2) {
-        if (coord1 == null || coord2 == null) {
+    private double calculateDistance(Double lat1, Double lng1, Double lat2, Double lng2) {
+        if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) {
             return Double.MAX_VALUE;
         }
-        
-        double lat1 = coord1.getLat();
-        double lon1 = coord1.getLng();
-        double lat2 = coord2.getLat();
-        double lon2 = coord2.getLng();
         
         final int R = 6371; // Radius of the earth in km
         
         double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
+        double lonDistance = Math.toRadians(lng2 - lng1);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
