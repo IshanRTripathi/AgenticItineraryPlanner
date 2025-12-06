@@ -56,6 +56,10 @@ public class PipelineOrchestrator {
     private final ItineraryValidator itineraryValidator;
     private final ItineraryMetricsTracker metricsTracker; // NEW: Metrics tracking
     private final CurrencyConversionService currencyConversionService;
+    
+    // Idempotency guard: Track active generations to prevent duplicates
+    private final java.util.concurrent.ConcurrentHashMap<String, CompletableFuture<NormalizedItinerary>> activeGenerations = new java.util.concurrent.ConcurrentHashMap<>();
+    
     @Value("${itinerary.generation.pipeline.parallel:true}")
     private boolean enableParallel;
 
@@ -103,7 +107,7 @@ public class PipelineOrchestrator {
     @Value("${itinerary.generation.pipeline.finalization.timeout-ms:30000}") // 30 seconds default
     private long finalizationTimeoutMs;
 
-    @Value("${itinerary.generation.pipeline.city-allocation.timeout-ms:30000}") // 30 seconds default
+    @Value("${itinerary.generation.pipeline.city-allocation.timeout-ms:60000}") // 60 seconds default (increased from 30s)
     private long cityAllocationTimeoutMs;
 
     @Value("${itinerary.generation.pipeline.validation.enabled:false}")
@@ -152,6 +156,9 @@ public class PipelineOrchestrator {
 
     /**
      * Generate itinerary using the pipeline architecture.
+     * 
+     * IDEMPOTENCY: Prevents duplicate pipeline executions for the same itinerary.
+     * If a generation is already in progress, returns the existing future.
      */
     @Async
     public CompletableFuture<NormalizedItinerary> generateItinerary(
@@ -162,10 +169,18 @@ public class PipelineOrchestrator {
         logger.info("Destination: {}, Duration: {} days", request.getDestination(), request.getDurationDays());
         logger.info("Parallel: {}", enableParallel);
 
+        // IDEMPOTENCY CHECK: Prevent duplicate pipeline executions
+        CompletableFuture<NormalizedItinerary> existingFuture = activeGenerations.get(itineraryId);
+        if (existingFuture != null && !existingFuture.isDone()) {
+            logger.warn("⚠️ Generation already in progress for itinerary: {}, returning existing future", itineraryId);
+            logger.warn("This prevents race conditions and duplicate LLM calls");
+            return existingFuture;
+        }
+
         long startTime = System.currentTimeMillis();
         String executionId = "exec_" + System.currentTimeMillis();
 
-        return CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<NormalizedItinerary> future = CompletableFuture.supplyAsync(() -> {
             try {
                 // Phase 0: City Allocation (NEW)
                 logger.info("=== PHASE 0: CITY ALLOCATION ===");
@@ -385,10 +400,18 @@ public class PipelineOrchestrator {
                 // PERFORMANCE: Clear request-scoped cache after pipeline completes
                 // This prevents memory leaks and ensures fresh data on next request
                 itineraryJsonService.clearRequestCache();
-                logger.debug("Pipeline cleanup complete for itinerary: {}", itineraryId);
+                
+                // IDEMPOTENCY: Remove from active generations map
+                activeGenerations.remove(itineraryId);
+                logger.debug("Pipeline cleanup complete for itinerary: {} (removed from active generations)", itineraryId);
             }
         }, pipelineExecutor);
-
+        
+        // IDEMPOTENCY: Register this future to prevent duplicate executions
+        activeGenerations.put(itineraryId, future);
+        logger.info("✅ Registered generation future for itinerary: {}", itineraryId);
+        
+        return future;
     }
 
     /**

@@ -360,7 +360,7 @@ itinerary:
       
       # Phase timeouts
       city-allocation:
-        timeout-ms: ${PIPELINE_CITY_ALLOCATION_TIMEOUT_MS:30000}
+        timeout-ms: ${PIPELINE_CITY_ALLOCATION_TIMEOUT_MS:60000}  # Increased from 30s to 60s (LLM can take 25-30s)
       
       skeleton:
         timeout-ms: ${PIPELINE_SKELETON_TIMEOUT_MS:120000}

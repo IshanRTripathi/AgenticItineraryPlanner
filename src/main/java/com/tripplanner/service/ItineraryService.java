@@ -92,6 +92,25 @@ public class ItineraryService {
         try {
             String itineraryId = "it_" + java.util.UUID.randomUUID();
             
+            // IDEMPOTENCY CHECK: Prevent duplicate creation if itinerary already exists and is generating
+            // This can happen with double-clicks or network retries
+            Optional<NormalizedItinerary> existingItinerary = itineraryJsonService.getItinerary(itineraryId);
+            if (existingItinerary.isPresent()) {
+                NormalizedItinerary existing = existingItinerary.get();
+                if ("generating".equals(existing.getStatus()) || "completed".equals(existing.getStatus())) {
+                    logger.warn("⚠️ Itinerary {} already exists with status: {}, skipping duplicate creation", 
+                        itineraryId, existing.getStatus());
+                    
+                    // Return existing itinerary as DTO
+                    return ItineraryDto.builder()
+                            .id(itineraryId)
+                            .destination(existing.getDestination())
+                            .status(existing.getStatus())
+                            .summary(existing.getSummary())
+                            .build();
+                }
+            }
+            
             // SYNCHRONOUSLY create initial itinerary and establish ownership
             // This ensures the user can immediately access the itinerary endpoint
             logger.info("Creating initial itinerary and establishing ownership synchronously");
